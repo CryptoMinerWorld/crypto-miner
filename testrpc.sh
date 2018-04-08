@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+testrpc \
+	--port=8545 \
+	--account="0x333ca93648fd82febbae37e95cbcbda72dce58e6bbf9d9f615d7203e5028f4c6,10000000000000000000" \
+	--account="0x3ab016ecee85c16552a5af6e668093a42ce479b8baee46682e0eb19f082e4674,1000000000000000000"
+
+#Available Accounts
+#==================
+#(0) 0x2f4fe9f655ff9316335d7200169cd07d598ff7bc
+#(1) 0x611437c0702a34b80be87580df653b057f5c394c
+#
+#Private Keys
+#==================
+#(0) 333ca93648fd82febbae37e95cbcbda72dce58e6bbf9d9f615d7203e5028f4c6
+#(1) 3ab016ecee85c16552a5af6e668093a42ce479b8baee46682e0eb19f082e4674
