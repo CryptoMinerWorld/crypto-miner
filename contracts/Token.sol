@@ -36,7 +36,7 @@ contract Token {
 	uint32 public constant PERM_MINT = 0x00000008;
 	uint32 public constant PERM_BURN = 0x00000010;
 	uint32 public constant PERM_UPDATE_FEATURES = 0x00000020;
-	uint32 public constant FEATURE_TRANSFER = 0x00000040;
+	uint32 public constant PERM_TRANSFER = 0x00000040;
 	uint32 public constant PERM_UPDATE_ENERGY = 0x00000080;
 	uint32 public constant PERM_UPDATE_STATE = 0x00000100;
 	uint32 public constant PERM_UPDATE_LOCK = 0x00000200;
@@ -229,7 +229,9 @@ contract Token {
 	}
 
 	/**
-	 * @dev Allows external operator to lock/unlock the Gem
+	 * @dev Allows external operator to lock/unlock the Gem.
+	 * @dev Requires sender to have `PERM_UPDATE_LOCK` permission.
+	 * @dev Requires `PERM_UPDATE_LOCK` global feature to be enabled.
 	 * @param tokenId specifies a token to lock/unlock
 	 * @param lock specifies an operation, true - lock, false - unlock
 	 */
@@ -256,6 +258,12 @@ contract Token {
 										| uint256(lock? 1: 0) << 255;
 	}
 
+	/**
+	 * @dev Updates set of the globally enabled features (`f`),
+	 * taking into account sender's permissions.
+	 * @dev Requires sender to have `PERM_UPDATE_FEATURES` permission.
+	 * @param mask a set of features (bitmask) to enable/disable
+	 */
 	function updateFeatures(uint32 mask) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
@@ -272,6 +280,19 @@ contract Token {
 		f &= PERM_FULL ^ (p & (PERM_FULL ^ mask));
 	}
 
+	/**
+	 * @dev Creates the global `operator` - an address which has
+	 * some extended privileges over the token smart contract, for example
+	 * token minting, burning, transferring on behalf, etc.
+	 * @dev Note that a newly added operator cannot have any permissions
+	 * which caller doesn't have.
+	 * @dev Requires sender to have `PERM_OP_CREATE` permission.
+	 * @dev Requires `PERM_OP_CREATE` global feature to be enabled.
+	 * @dev Cannot update existing operator. Throws if `operator` already exists.
+	 * @param operator specifies an address of the operator to add
+	 * @param permissions specifies a set of permissions (bitmask) which
+	 * newly created operator will have
+	 */
 	function createOperator(address operator, uint32 permissions) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
@@ -290,6 +311,18 @@ contract Token {
 		operators[operator] = permissions;
 	}
 
+	/**
+	 * @dev Updates an existing global operator.
+	 * Creates a new one if it doesn't exist.
+	 * @dev Note that updatable (`operator`) cannot receive permission which
+	 * updater (sender) doesn't have.
+	 * @dev Requires sender to have `PERM_OP_UPDATE` permission.
+	 * @dev Requires `PERM_OP_UPDATE` global feature to be enabled.
+	 * @dev Can create a new operator. Doesn't throw if `operator` doesn't exist.
+	 * @param operator specifies an address of the operator to update
+	 * @param permissions specifies a set of permissions (bitmask) which
+	 * `operator` will have
+	 */
 	function updateOperator(address operator, uint32 permissions) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
@@ -308,6 +341,12 @@ contract Token {
 		operators[operator] = e | permissions;
 	}
 
+	/**
+	 * @dev Deletes an existing global operator.
+	 * @dev Requires sender to have `PERM_OP_DELETE` permission.
+	 * @dev Requires `PERM_OP_DELETE` global feature to be enabled.
+	 * @param operator specifies an address of the operator to delete
+	 */
 	function deleteOperator(address operator) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
@@ -322,6 +361,14 @@ contract Token {
 		delete operators[operator];
 	}
 
+	/**
+	 * @dev Creates new token with `tokenId` ID specified and assigns
+	 * address `to` an ownership of that token.
+	 * @dev Requires sender to have `PERM_MINT` permission.
+	 * @dev Requires `PERM_MINT` global feature to be enabled.
+	 * @param tokenId specifies a token ID to create
+	 * @param specifies owner address of the newly created token
+	 */
 	function mint(uint256 tokenId, address to) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
@@ -347,6 +394,12 @@ contract Token {
 		Minted(tokenId, to);
 	}
 
+	/**
+	 * @dev Destroys a token with `tokenId` ID specified.
+	 * @dev Requires sender to have `PERM_BURN` permission.
+	 * @dev Requires `PERM_BURN` global feature to be enabled.
+	 * @param tokenId specifies a token ID to destroy
+	 */
 	function burn(uint256 tokenId) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
@@ -382,14 +435,15 @@ contract Token {
 	 * @notice Transfers a token specified to the address specified.
 	 * If transferring to a smart contract be VERY CAREFUL to ensure
 	 * that it is aware of ERC-721 or your Token may be lost forever.
-	 * @dev Transfers the ownership of a given token ID to another address
-	 * @dev Requires the msg sender to be the owner of a token
+	 * @dev Transfers the ownership of a given token ID to another address.
+	 * @dev Requires transaction sender to be the owner of a token.
+	 * @dev Requires `PERM_TRANSFER` global feature to be enabled.
 	 * @param to address to receive the ownership of the given token ID
 	 * @param tokenId uint256 ID of the token to be transferred
 	 */
 	function transfer(address to, uint256 tokenId) public {
 		// feature must be enabled globally
-		require(f & FEATURE_TRANSFER == FEATURE_TRANSFER);
+		require(f & PERM_TRANSFER == PERM_TRANSFER);
 
 		// call sender nicely - caller
 		address caller = msg.sender;
