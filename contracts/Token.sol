@@ -37,16 +37,18 @@ contract Token {
 	uint32 public constant PERM_BURN = 0x00000010;
 	uint32 public constant PERM_UPDATE_FEATURES = 0x00000020;
 	uint32 public constant FEATURE_TRANSFER = 0x00000040;
-	uint32 public constant PERM_UPDATE_STATE = 0x00000080;
+	uint32 public constant PERM_UPDATE_ENERGY = 0x00000080;
+	uint32 public constant PERM_UPDATE_STATE = 0x00000100;
+	uint32 public constant PERM_UPDATE_LOCK = 0x00000200;
 	uint32 public constant PERM_FULL = 0xFFFFFFFF;
 
 	/**
 	 * @dev event names are self-explanatory
 	 */
 	/// @dev fired in mint()
-	event Minted(uint256 indexed id, address indexed to);
+	event Minted(uint256 indexed tokenId, address indexed to);
 	/// @dev fired in burn()
-	event Burnt(uint256 indexed id, address indexed from);
+	event Burnt(uint256 indexed tokenId, address indexed from);
 	/// @dev fired in transfer()
 	event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
@@ -115,18 +117,6 @@ contract Token {
 	}
 
 	/**
-	 * @dev extracts 32 bit integer Gem mining state,
-	 * which may be used by external operators
-	 */
-	function getMiningState(uint256 tokenId) public constant returns (uint32) {
-		// get token state
-		uint96 state = getState(tokenId);
-
-		// extract 32 bits of the mining state and return
-		return uint32(state >> 64);
-	}
-
-	/**
 	 * @dev extracts 32 bit integer block ID of the last token transfer
 	 */
 	function getLastTransferredBlock(uint256 tokenId) public constant returns (uint32) {
@@ -146,6 +136,124 @@ contract Token {
 
 		// extract 32 bits of token creation block ID and return
 		return uint32(state >> 32);
+	}
+
+	/**
+	 * @dev extracts 32 bit integer Gem mining state,
+	 * which may be used by external operators
+	 */
+	function getMiningState(uint256 tokenId) public constant returns (uint32) {
+		// get token state
+		uint96 state = getState(tokenId);
+
+		// extract 32 bits of the mining state and return
+		return uint32(state >> 64);
+	}
+
+	/**
+	 * @dev extracts 31 bit integer block ID when token lock has changed
+	 */
+	function getLastLockingBlock(uint256 tokenId) public constant returns (uint32) {
+		// get mining state
+		uint32 lockingBlock = getMiningState(tokenId);
+
+		// overwrite first bit with zero (it contains lock) and return
+		return uint32(lockingBlock & 0x7FFFFFFF);
+	}
+
+	/**
+	 * @dev checks if the Gem is locked state (mining);
+	 * locked gem cannot be transferred (change ownership) or
+	 * destroyed (burnt)
+	 */
+	function isLocked(uint256 tokenId) public constant returns (bool) {
+		// get token state
+		uint96 state = getState(tokenId);
+
+		// extract the locked bit, check and return
+		return state >> 95 > 0;
+	}
+
+	/**
+	 * @dev Allows external operator to update Gem's state
+	 * @param tokenId specifies a token to update state for
+	 * @param state specifies a 96 bits state to set
+	 */
+	function updateState(uint256 tokenId, uint96 state) public {
+		// call sender nicely - caller
+		address caller = msg.sender;
+		// read caller's permissions
+		uint32 p = operators[caller];
+
+		// feature must be enabled globally and
+		// caller should have a permission to update state
+		require(f & p & PERM_UPDATE_STATE == PERM_UPDATE_STATE);
+
+		// get the token from storage
+		uint256 token = tokens[tokenId];
+
+		// check if this token exists
+		require(token > 0);
+
+		// update token state
+		tokens[tokenId] = token
+										& 0x000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+										| uint256(state) << 160;
+	}
+
+	/**
+	 * @dev Allows external operator to update Gem's mining state
+	 * @param tokenId specifies a token to update state for
+	 * @param state specifies a 32 bits mining state to set
+	 */
+	function updateMiningState(uint256 tokenId, uint32 state) public {
+		// call sender nicely - caller
+		address caller = msg.sender;
+		// read caller's permissions
+		uint32 p = operators[caller];
+
+		// feature must be enabled globally and
+		// caller should have a permission to update mining state
+		require(f & p & PERM_UPDATE_ENERGY == PERM_UPDATE_ENERGY);
+
+		// get the token from storage
+		uint256 token = tokens[tokenId];
+
+		// check if this token exists
+		require(token > 0);
+
+		// update token state
+		tokens[tokenId] = token
+										& 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+										| uint256(state) << 224;
+	}
+
+	/**
+	 * @dev Allows external operator to lock/unlock the Gem
+	 * @param tokenId specifies a token to lock/unlock
+	 * @param lock specifies an operation, true - lock, false - unlock
+	 */
+	function setLocked(uint256 tokenId, bool lock) public {
+		// call sender nicely - caller
+		address caller = msg.sender;
+		// read caller's permissions
+		uint32 p = operators[caller];
+
+		// feature must be enabled globally and
+		// caller should have a permission to update mining state
+		require(f & p & PERM_UPDATE_LOCK == PERM_UPDATE_LOCK);
+
+		// get the token from storage
+		uint256 token = tokens[tokenId];
+
+		// check if this token exists
+		require(token > 0);
+
+		// update token state
+		tokens[tokenId] = token
+										& 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+										| uint256(0x7FFFFFFF & block.number) << 224
+										| uint256(lock? 1: 0) << 255;
 	}
 
 	function updateFeatures(uint32 mask) public {
@@ -214,7 +322,7 @@ contract Token {
 		delete operators[operator];
 	}
 
-	function mint(uint256 id, address to) public {
+	function mint(uint256 tokenId, address to) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
 		// read caller's permissions
@@ -224,22 +332,22 @@ contract Token {
 		// caller should have a permission to mint a token
 		require(f & p & PERM_MINT == PERM_MINT);
 		// the token specified should not already exist
-		require(tokens[id] == 0);
+		require(tokens[tokenId] == 0);
 
 		// init token value with current date and new owner address
-		uint256 token = (0xFFFFFFFF & block.number) << 192 | uint160(to);
+		uint256 token = uint256(0xFFFFFFFF & block.number) << 192 | uint160(to);
 		// persist newly created token
-		tokens[id] = token;
+		tokens[tokenId] = token;
 		// update token owner balance
 		balances[to]++;
 		// update total tokens number
 		totalSupply++;
 
 		// fire an event
-		Minted(id, to);
+		Minted(tokenId, to);
 	}
 
-	function burn(uint256 id) public {
+	function burn(uint256 tokenId) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
 		// read caller's permissions
@@ -249,11 +357,11 @@ contract Token {
 		// caller should have a permission to burn a token
 		require(f & p & PERM_BURN == PERM_BURN);
 
-		// get the token from storage
-		uint256 token = tokens[id];
+		// token state should not be locked (gem should not be mining)
+		require(!isLocked(tokenId));
 
-		// a token to burn should exist
-		require(token > 0);
+		// get the token from storage
+		uint256 token = tokens[tokenId];
 
 		// extract token owner address
 		address from = address(token);
@@ -264,10 +372,10 @@ contract Token {
 		totalSupply--;
 
 		// delete token
-		delete tokens[id];
+		delete tokens[tokenId];
 
 		// fire an event
-		Burnt(id, from);
+		Burnt(tokenId, from);
 	}
 
 	/**
@@ -293,6 +401,9 @@ contract Token {
 		// caller must be an owner of the token
 		require(ownerOf(tokenId) == caller);
 
+		// token state should not be locked (gem should not be mining)
+		require(!isLocked(tokenId));
+
 		// update balances
 		balances[caller]--;
 		balances[to]++;
@@ -303,8 +414,11 @@ contract Token {
 		// update token transfer date and owner
 		tokens[tokenId] = token
 										& 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000
-										| (0xFFFFFFFF & block.number) << 160
+										| uint256(0xFFFFFFFF & block.number) << 160
 										| uint160(to);
+
+		// emit en event
+		Transfer(caller, to, tokenId);
 	}
 
 }
