@@ -1,6 +1,6 @@
 pragma solidity 0.4.18;
 
-contract Gem {
+contract Token {
 	/**
 	 * @dev operators perform actions on the token
 	 *  with the restricted access, like enabling/disabling
@@ -37,6 +37,7 @@ contract Gem {
 	uint32 public constant PERM_BURN = 0x00000010;
 	uint32 public constant PERM_UPDATE_FEATURES = 0x00000020;
 	uint32 public constant FEATURE_TRANSFER = 0x00000040;
+	uint32 public constant PERM_UPDATE_STATE = 0x00000080;
 	uint32 public constant PERM_FULL = 0xFFFFFFFF;
 
 	/**
@@ -49,7 +50,7 @@ contract Gem {
 	/// @dev fired in transfer()
 	event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
-	function Gem() public {
+	function Token() public {
 		address creator = msg.sender;
 
 		// grant the contract creator full permissions
@@ -73,7 +74,6 @@ contract Gem {
 		return address(token);
 	}
 
-
 	/**
 	 * @notice Gets an amount of tokens owned by the give address
 	 * @dev Gets the balance of the specified address
@@ -96,6 +96,56 @@ contract Gem {
 		uint256 token = tokens[tokenId];
 		// check if this token exists
 		return token > 0;
+	}
+
+	/**
+	 * @dev extracts 96 bit integer token state,
+	 * 64 lower bits of which are managed and updated by the token itself,
+	 * while higher 32 bits may be used by external operators
+	 */
+	function getState(uint256 tokenId) public constant returns (uint96) {
+		// get the token from storage
+		uint256 token = tokens[tokenId];
+
+		// check if this token exists
+		require(token > 0);
+
+		// extract 96 bits of state and return
+		return uint96(token >> 160);
+	}
+
+	/**
+	 * @dev extracts 32 bit integer Gem mining state,
+	 * which may be used by external operators
+	 */
+	function getMiningState(uint256 tokenId) public constant returns (uint32) {
+		// get token state
+		uint96 state = getState(tokenId);
+
+		// extract 32 bits of the mining state and return
+		return uint32(state >> 64);
+	}
+
+	/**
+	 * @dev extracts 32 bit integer block ID of the last token transfer
+	 */
+	function getLastTransferredBlock(uint256 tokenId) public constant returns (uint32) {
+		// get token state
+		uint96 state = getState(tokenId);
+
+		// extract 32 bits of last transfer block ID and return
+		return uint32(state);
+	}
+
+	/**
+	 * @dev extracts 32 bit integer block ID of the token creation
+	 */
+	function getTokenCreationBlock(uint256 tokenId) public constant returns (uint32) {
+		// get token state
+		uint96 state = getState(tokenId);
+
+		// extract 32 bits of token creation block ID and return
+		return uint32(state >> 32);
 	}
 
 	function updateFeatures(uint32 mask) public {
