@@ -35,7 +35,7 @@ contract Gem {
 	uint32 public constant PERM_OP_DELETE = 0x00000004;
 	uint32 public constant PERM_MINT = 0x00000008;
 	uint32 public constant PERM_BURN = 0x00000010;
-	uint32 public constant PERM_UPDATE_F = 0x00000020;
+	uint32 public constant PERM_UPDATE_FEATURES = 0x00000020;
 	uint32 public constant PERM_FULL = 0xFFFFFFFF;
 
 	event Minted(uint256 id, address to);
@@ -78,7 +78,7 @@ contract Gem {
 		uint32 p = operators[caller];
 
 		// caller should have a permission to update features
-		require(p & PERM_UPDATE_F == PERM_UPDATE_F);
+		require(p & PERM_UPDATE_FEATURES == PERM_UPDATE_FEATURES);
 
 		// taking into account caller's permissions,
 		// 1) enable features requested
