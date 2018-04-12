@@ -36,10 +36,18 @@ contract Gem {
 	uint32 public constant PERM_MINT = 0x00000008;
 	uint32 public constant PERM_BURN = 0x00000010;
 	uint32 public constant PERM_UPDATE_FEATURES = 0x00000020;
+	uint32 public constant FEATURE_TRANSFER = 0x00000040;
 	uint32 public constant PERM_FULL = 0xFFFFFFFF;
 
-	event Minted(uint256 id, address to);
-	event Burnt(uint256 id, address from);
+	/**
+	 * @dev event names are self-explanatory
+	 */
+	/// @dev fired in mint()
+	event Minted(uint256 indexed id, address indexed to);
+	/// @dev fired in burn()
+	event Burnt(uint256 indexed id, address indexed from);
+	/// @dev fired in transfer()
+	event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
 	function Gem() public {
 		address creator = msg.sender;
@@ -47,7 +55,13 @@ contract Gem {
 		// grant the contract creator full permissions
 		operators[creator] = PERM_FULL;
 	}
-	
+
+	/**
+	 * @notice finds an owner address for a token specified
+	 * @dev Gets the owner of the specified token ID
+	 * @param tokenId uint256 ID of the token to query the owner of
+	 * @return owner address currently marked as the owner of the given token ID
+	 */
 	function ownerOf(uint256 tokenId) public constant returns (address) {
 		// get the token from storage
 		uint256 token = tokens[tokenId];
@@ -59,11 +73,24 @@ contract Gem {
 		return address(token);
 	}
 
+
+	/**
+	 * @notice Gets an amount of tokens owned by the give address
+	 * @dev Gets the balance of the specified address
+	 * @param who address to query the balance for
+	 * @return uint256 representing the amount owned by the passed address
+	 */
 	function balanceOf(address who) public constant returns (uint256) {
 		// simply read the balance from balances
 		return balances[who];
 	}
 
+	/**
+	 * @notice Checks if specified token exists
+	 * @dev Returns whether the specified token ID exists
+	 * @param tokenId uint256 ID of the token to query the existence of
+	 * @return whether the token exists
+	 */
 	function exists(uint256 tokenId) public constant returns (bool) {
 		// get the token from storage
 		uint256 token = tokens[tokenId];
@@ -149,8 +176,8 @@ contract Gem {
 		// the token specified should not already exist
 		require(tokens[id] == 0);
 
-		// init token value with new owner address
-		uint256 token = uint256(to);
+		// init token value with current date and new owner address
+		uint256 token = (0xFFFFFFFF & block.number) << 192 | uint160(to);
 		// persist newly created token
 		tokens[id] = token;
 		// update token owner balance
@@ -192,4 +219,42 @@ contract Gem {
 		// fire an event
 		Burnt(id, from);
 	}
+
+	/**
+	 * @notice Transfers a token specified to the address specified.
+	 * If transferring to a smart contract be VERY CAREFUL to ensure
+	 * that it is aware of ERC-721 or your Token may be lost forever.
+	 * @dev Transfers the ownership of a given token ID to another address
+	 * @dev Requires the msg sender to be the owner of a token
+	 * @param to address to receive the ownership of the given token ID
+	 * @param tokenId uint256 ID of the token to be transferred
+	 */
+	function transfer(address to, uint256 tokenId) public {
+		// feature must be enabled globally
+		require(f & FEATURE_TRANSFER == FEATURE_TRANSFER);
+
+		// call sender nicely - caller
+		address caller = msg.sender;
+
+		// validate destination address
+		require(to != address(0));
+		require(to != caller);
+
+		// caller must be an owner of the token
+		require(ownerOf(tokenId) == caller);
+
+		// update balances
+		balances[caller]--;
+		balances[to]++;
+
+		// get the token from storage
+		uint256 token = tokens[tokenId];
+
+		// update token transfer date and owner
+		tokens[tokenId] = token
+										& 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000
+										| (0xFFFFFFFF & block.number) << 160
+										| uint160(to);
+	}
+
 }
