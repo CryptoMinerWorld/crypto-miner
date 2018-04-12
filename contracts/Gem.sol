@@ -87,6 +87,56 @@ contract Gem {
 		f &= PERM_FULL ^ (p & (PERM_FULL ^ mask));
 	}
 
+	function createOperator(address operator, uint32 permissions) public {
+		// call sender nicely - caller
+		address caller = msg.sender;
+		// read caller's permissions
+		uint32 p = operators[caller];
+
+		// feature must be enabled globally and
+		// caller should have a permission to add new operator
+		require(f & p & PERM_OP_CREATE == PERM_OP_CREATE);
+		// caller cannot grant a permission which he doesn't have himself
+		require(p | permissions == p);
+		// create is not allowed to overwrite existing operator
+		require(operators[operator] == 0);
+
+		// add an operator with the permissions specified
+		operators[operator] = permissions;
+	}
+
+	function updateOperator(address operator, uint32 permissions) public {
+		// call sender nicely - caller
+		address caller = msg.sender;
+		// read caller's permissions
+		uint32 p = operators[caller];
+
+		// feature must be enabled globally and
+		// caller should have a permission to update operator
+		require(f & p & PERM_OP_UPDATE == PERM_OP_UPDATE);
+		// caller cannot grant a permission which he doesn't have himself
+		require(p | permissions == p);
+
+		// update may extend existing operator's permissions
+		uint32 e = operators[operator];
+		// update an operator with the permissions specified
+		operators[operator] = e | permissions;
+	}
+
+	function deleteOperator(address operator) public {
+		// call sender nicely - caller
+		address caller = msg.sender;
+		// read caller's permissions
+		uint32 p = operators[caller];
+
+		// feature must be enabled globally and
+		// caller should have a permission to remove operator
+		require(f & p & PERM_OP_DELETE == PERM_OP_DELETE);
+
+		// remove an operator
+		delete operators[operator];
+	}
+
 	function mint(uint256 id, address to) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
