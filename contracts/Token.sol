@@ -15,10 +15,13 @@ contract Token {
 	 *  uint256 packed struct containing current gem state
 	 *  and owner address
 	 */
-	mapping(uint256 => uint256) public tokens;
+	mapping(uint80 => uint256) public tokens;
+
+	// @dev Mapping from token ID to approved address
+	mapping(uint80 => address) private approvals;
 
 	/// @notice total number of tokens owned by each each account
-	mapping(address => uint256) public balances;
+	mapping(address => uint256) private balances;
 
 	/// @notice total number of tokens which exist in the system
 	uint256 public totalSupply;
@@ -40,17 +43,21 @@ contract Token {
 	uint32 public constant PERM_UPDATE_ENERGY = 0x00000080;
 	uint32 public constant PERM_UPDATE_STATE = 0x00000100;
 	uint32 public constant PERM_UPDATE_LOCK = 0x00000200;
+	uint32 public constant PERM_APPROVE_TRANSFER = 0x00000400;
+	uint32 public constant PERM_TRANSFER_FROM = 0x00000800;
 	uint32 public constant PERM_FULL = 0xFFFFFFFF;
 
 	/**
 	 * @dev event names are self-explanatory
 	 */
 	/// @dev fired in mint()
-	event Minted(uint256 indexed tokenId, address indexed to);
+	event Minted(uint80 indexed tokenId, address indexed to);
 	/// @dev fired in burn()
-	event Burnt(uint256 indexed tokenId, address indexed from);
+	event Burnt(uint80 indexed tokenId, address indexed from);
 	/// @dev fired in transfer()
-	event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+	event Transfer(address indexed from, address indexed to, uint80 indexed tokenId);
+	/// @dev fired in approve()
+	event Approval(address indexed owner, address indexed approved, uint80 indexed tokenId);
 
 	function Token() public {
 		address creator = msg.sender;
@@ -65,7 +72,7 @@ contract Token {
 	 * @param tokenId uint256 ID of the token to query the owner of
 	 * @return owner address currently marked as the owner of the given token ID
 	 */
-	function ownerOf(uint256 tokenId) public constant returns (address) {
+	function ownerOf(uint80 tokenId) public constant returns (address) {
 		// get the token from storage
 		uint256 token = tokens[tokenId];
 
@@ -93,7 +100,7 @@ contract Token {
 	 * @param tokenId uint256 ID of the token to query the existence of
 	 * @return whether the token exists
 	 */
-	function exists(uint256 tokenId) public constant returns (bool) {
+	function exists(uint80 tokenId) public constant returns (bool) {
 		// get the token from storage
 		uint256 token = tokens[tokenId];
 		// check if this token exists
@@ -105,7 +112,7 @@ contract Token {
 	 * 64 lower bits of which are managed and updated by the token itself,
 	 * while higher 32 bits may be used by external operators
 	 */
-	function getState(uint256 tokenId) public constant returns (uint96) {
+	function getState(uint80 tokenId) public constant returns (uint96) {
 		// get the token from storage
 		uint256 token = tokens[tokenId];
 
@@ -119,7 +126,7 @@ contract Token {
 	/**
 	 * @dev extracts 32 bit integer block ID of the last token transfer
 	 */
-	function getLastTransferredBlock(uint256 tokenId) public constant returns (uint32) {
+	function getLastTransferredBlock(uint80 tokenId) public constant returns (uint32) {
 		// get token state
 		uint96 state = getState(tokenId);
 
@@ -130,7 +137,7 @@ contract Token {
 	/**
 	 * @dev extracts 32 bit integer block ID of the token creation
 	 */
-	function getTokenCreationBlock(uint256 tokenId) public constant returns (uint32) {
+	function getTokenCreationBlock(uint80 tokenId) public constant returns (uint32) {
 		// get token state
 		uint96 state = getState(tokenId);
 
@@ -142,7 +149,7 @@ contract Token {
 	 * @dev extracts 32 bit integer Gem mining state,
 	 * which may be used by external operators
 	 */
-	function getMiningState(uint256 tokenId) public constant returns (uint32) {
+	function getMiningState(uint80 tokenId) public constant returns (uint32) {
 		// get token state
 		uint96 state = getState(tokenId);
 
@@ -153,7 +160,7 @@ contract Token {
 	/**
 	 * @dev extracts 31 bit integer block ID when token lock has changed
 	 */
-	function getLastLockingBlock(uint256 tokenId) public constant returns (uint32) {
+	function getLastLockingBlock(uint80 tokenId) public constant returns (uint32) {
 		// get mining state
 		uint32 lockingBlock = getMiningState(tokenId);
 
@@ -162,11 +169,13 @@ contract Token {
 	}
 
 	/**
-	 * @dev checks if the Gem is locked state (mining);
+	 * @dev checks if the token is in locked state (mining);
 	 * locked gem cannot be transferred (change ownership) or
 	 * destroyed (burnt)
+	 * @param tokenId ID of the token to check locked status for
+	 * @return whether the token is locked
 	 */
-	function isLocked(uint256 tokenId) public constant returns (bool) {
+	function isLocked(uint80 tokenId) public constant returns (bool) {
 		// get token state
 		uint96 state = getState(tokenId);
 
@@ -176,10 +185,10 @@ contract Token {
 
 	/**
 	 * @dev Allows external operator to update Gem's state
-	 * @param tokenId specifies a token to update state for
-	 * @param state specifies a 96 bits state to set
+	 * @param tokenId ID of the token to update state for
+	 * @param state a state to set
 	 */
-	function updateState(uint256 tokenId, uint96 state) public {
+	function updateState(uint80 tokenId, uint96 state) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
 		// read caller's permissions
@@ -203,10 +212,10 @@ contract Token {
 
 	/**
 	 * @dev Allows external operator to update Gem's mining state
-	 * @param tokenId specifies a token to update state for
-	 * @param state specifies a 32 bits mining state to set
+	 * @param tokenId ID of the token to update state for
+	 * @param state mining state to set
 	 */
-	function updateMiningState(uint256 tokenId, uint32 state) public {
+	function updateMiningState(uint80 tokenId, uint32 state) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
 		// read caller's permissions
@@ -232,10 +241,10 @@ contract Token {
 	 * @dev Allows external operator to lock/unlock the Gem.
 	 * @dev Requires sender to have `PERM_UPDATE_LOCK` permission.
 	 * @dev Requires `PERM_UPDATE_LOCK` global feature to be enabled.
-	 * @param tokenId specifies a token to lock/unlock
-	 * @param lock specifies an operation, true - lock, false - unlock
+	 * @param tokenId ID of the token to lock/unlock
+	 * @param lock an operation to perform, true - lock, false - unlock
 	 */
-	function setLocked(uint256 tokenId, bool lock) public {
+	function setLocked(uint80 tokenId, bool lock) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
 		// read caller's permissions
@@ -262,7 +271,7 @@ contract Token {
 	 * @dev Updates set of the globally enabled features (`f`),
 	 * taking into account sender's permissions.
 	 * @dev Requires sender to have `PERM_UPDATE_FEATURES` permission.
-	 * @param mask a set of features (bitmask) to enable/disable
+	 * @param mask bitmask representing a set of features to enable/disable
 	 */
 	function updateFeatures(uint32 mask) public {
 		// call sender nicely - caller
@@ -289,8 +298,8 @@ contract Token {
 	 * @dev Requires sender to have `PERM_OP_CREATE` permission.
 	 * @dev Requires `PERM_OP_CREATE` global feature to be enabled.
 	 * @dev Cannot update existing operator. Throws if `operator` already exists.
-	 * @param operator specifies an address of the operator to add
-	 * @param permissions specifies a set of permissions (bitmask) which
+	 * @param operator address of the operator to add
+	 * @param permissions bitmask representing a set of permissions which
 	 * newly created operator will have
 	 */
 	function createOperator(address operator, uint32 permissions) public {
@@ -319,8 +328,8 @@ contract Token {
 	 * @dev Requires sender to have `PERM_OP_UPDATE` permission.
 	 * @dev Requires `PERM_OP_UPDATE` global feature to be enabled.
 	 * @dev Can create a new operator. Doesn't throw if `operator` doesn't exist.
-	 * @param operator specifies an address of the operator to update
-	 * @param permissions specifies a set of permissions (bitmask) which
+	 * @param operator address of the operator to update
+	 * @param permissions bitmask representing a set of permissions which
 	 * `operator` will have
 	 */
 	function updateOperator(address operator, uint32 permissions) public {
@@ -345,7 +354,7 @@ contract Token {
 	 * @dev Deletes an existing global operator.
 	 * @dev Requires sender to have `PERM_OP_DELETE` permission.
 	 * @dev Requires `PERM_OP_DELETE` global feature to be enabled.
-	 * @param operator specifies an address of the operator to delete
+	 * @param operator address of the operator to delete
 	 */
 	function deleteOperator(address operator) public {
 		// call sender nicely - caller
@@ -366,10 +375,10 @@ contract Token {
 	 * address `to` an ownership of that token.
 	 * @dev Requires sender to have `PERM_MINT` permission.
 	 * @dev Requires `PERM_MINT` global feature to be enabled.
-	 * @param tokenId specifies a token ID to create
-	 * @param specifies owner address of the newly created token
+	 * @param tokenId ID of the token to create
+	 * @param to owner address of the newly created token
 	 */
-	function mint(uint256 tokenId, address to) public {
+	function mint(uint80 tokenId, address to) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
 		// read caller's permissions
@@ -398,9 +407,10 @@ contract Token {
 	 * @dev Destroys a token with `tokenId` ID specified.
 	 * @dev Requires sender to have `PERM_BURN` permission.
 	 * @dev Requires `PERM_BURN` global feature to be enabled.
-	 * @param tokenId specifies a token ID to destroy
+	 * @dev Requires the gem not to be locked.
+	 * @param tokenId ID of the token to destroy
 	 */
-	function burn(uint256 tokenId) public {
+	function burn(uint80 tokenId) public {
 		// call sender nicely - caller
 		address caller = msg.sender;
 		// read caller's permissions
@@ -438,10 +448,11 @@ contract Token {
 	 * @dev Transfers the ownership of a given token ID to another address.
 	 * @dev Requires transaction sender to be the owner of a token.
 	 * @dev Requires `PERM_TRANSFER` global feature to be enabled.
+	 * @dev Requires the gem not to be locked.
 	 * @param to address to receive the ownership of the given token ID
-	 * @param tokenId uint256 ID of the token to be transferred
+	 * @param tokenId ID of the token to be transferred
 	 */
-	function transfer(address to, uint256 tokenId) public {
+	function transfer(address to, uint80 tokenId) public {
 		// feature must be enabled globally
 		require(f & PERM_TRANSFER == PERM_TRANSFER);
 
@@ -453,7 +464,7 @@ contract Token {
 		require(to != caller);
 
 		// caller must be an owner of the token
-		require(ownerOf(tokenId) == caller);
+		require(caller == ownerOf(tokenId));
 
 		// token state should not be locked (gem should not be mining)
 		require(!isLocked(tokenId));
@@ -475,4 +486,81 @@ contract Token {
 		Transfer(caller, to, tokenId);
 	}
 
+	/**
+	* @dev Approves another address to transfer the given token ID.
+	* @dev The zero address indicates there is no approved address.
+	* @dev There can only be one approved address per token at a given time.
+	* @dev Can only be called by the token owner or an approved operator.
+	* @param to address to be approved for the given token ID
+	* @param tokenId ID of the token to be approved
+	*/
+	function approve(address to, uint80 tokenId) public {
+		// feature must be enabled globally
+		require(f & PERM_APPROVE_TRANSFER == PERM_APPROVE_TRANSFER);
+
+		// call sender nicely - caller
+		address caller = msg.sender;
+		// get token owner address
+		address owner = ownerOf(tokenId);
+
+		// caller must own this token
+		require(caller == owner);
+		// approval for owner himself is pointless, do not allow
+		require(to != owner);
+		// either we're removing approval, or setting it
+		require(approvals[tokenId] != 0 || to != address(0));
+
+		// set an approval
+		approvals[tokenId] = to;
+
+		// emit en event
+		Approval(caller, to, tokenId);
+	}
+
+	/**
+	* @dev Transfers the ownership of a given token ID to another address
+	* @dev Requires the msg sender to be the owner, approved, or operator
+	* @param from current owner of the token
+	* @param to address to receive the ownership of the given token ID
+	* @param tokenId ID of the token to be transferred
+	*/
+	function transferFrom(address from, address to, uint80 tokenId) public {
+		// feature must be enabled globally
+		require(f & PERM_TRANSFER_FROM == PERM_TRANSFER_FROM);
+
+		// call sender nicely - caller
+		address caller = msg.sender;
+
+		// validate source and destination addresses
+		require(from != address(0));
+		require(to != address(0));
+		require(to != from);
+
+		// caller must have an approval to transfer
+		require(caller == approvals[tokenId]);
+
+		// token state should not be locked (gem should not be mining)
+		require(!isLocked(tokenId));
+
+		// clear approval
+		approvals[tokenId] = address(0);
+		// emit en event
+		Approval(from, address(0), tokenId);
+
+		// update balances
+		balances[from]--;
+		balances[to]++;
+
+		// get the token from storage
+		uint256 token = tokens[tokenId];
+
+		// update token transfer date and owner
+		tokens[tokenId] = token
+											& 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000
+											| uint256(0xFFFFFFFF & block.number) << 160
+											| uint160(to);
+
+		// emit en event
+		Transfer(from, to, tokenId);
+	}
 }
