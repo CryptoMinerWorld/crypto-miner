@@ -10,6 +10,7 @@ const PERM_UPDATE_STATE = 0x00000100;
 const PERM_UPDATE_LOCK = 0x00000200;
 const PERM_APPROVE_TRANSFER = 0x00000400;
 const PERM_TRANSFER_FROM = 0x00000800;
+const PERM_APPROVE_ALL = 0x00001000;
 const PERM_ALL = 0xFFFFFFFF;
 
 const Token = artifacts.require("./Token");
@@ -194,7 +195,7 @@ contract('Token', function(accounts) {
 		assert(!await token.isLocked(0x1), "locked token is locked");
 	});
 
-	it("approval: approve and transfer from", async function() {
+	it("approvals: approve and transfer from", async function() {
 		const token = await Token.new();
 		await token.updateFeatures(PERM_MINT);
 		await token.mint(0x1, accounts[0]);
@@ -205,6 +206,50 @@ contract('Token', function(accounts) {
 		assert.equal(await token.balanceOf(accounts[0]), 0, "wrong balance after token has left");
 		assert.equal(await token.balanceOf(accounts[1]), 1, "wrong balance after token was received");
 		assert.equal(await token.ownerOf(0x1), accounts[1], "wrong token owner after the transfer");
+	});
+	it("approvals: approve for all and transfer from", async function() {
+		const token = await Token.new();
+		await token.updateFeatures(PERM_MINT);
+		await token.mint(0x1, accounts[0]);
+		await token.updateFeatures(PERM_APPROVE_ALL);
+		await token.approveForAll(accounts[1], 1);
+		await token.updateFeatures(PERM_TRANSFER_FROM);
+		await token.transferFrom.sendTransaction(accounts[0], accounts[1], 0x1, {from: accounts[1]});
+		assert.equal(await token.balanceOf(accounts[0]), 0, "wrong balance after token has left");
+		assert.equal(await token.balanceOf(accounts[1]), 1, "wrong balance after token was received");
+		assert.equal(await token.ownerOf(0x1), accounts[1], "wrong token owner after the transfer");
+	});
+	it("approvals: approve for all and transfer 2 tokens", async function() {
+		const token = await Token.new();
+		await token.updateFeatures(PERM_MINT);
+		await token.mint(0x1, accounts[0]);
+		await token.mint(0x2, accounts[0]);
+		await token.updateFeatures(PERM_APPROVE_ALL);
+		await token.approveForAll(accounts[1], 2);
+		await token.updateFeatures(PERM_TRANSFER_FROM);
+		await token.transferFrom.sendTransaction(accounts[0], accounts[1], 0x1, {from: accounts[1]});
+		await token.transferFrom.sendTransaction(accounts[0], accounts[1], 0x2, {from: accounts[1]});
+		assert.equal(await token.balanceOf(accounts[0]), 0, "wrong balance after token has left");
+		assert.equal(await token.balanceOf(accounts[1]), 2, "wrong balance after token was received");
+		assert.equal(await token.ownerOf(0x1), accounts[1], "wrong token 0x1 owner after the transfer");
+		assert.equal(await token.ownerOf(0x2), accounts[1], "wrong token 0x2 owner before the transfer");
+	});
+	it("approvals: approve for all with transfer limit", async function() {
+		const token = await Token.new();
+		await token.updateFeatures(PERM_MINT);
+		await token.mint(0x1, accounts[0]);
+		await token.mint(0x2, accounts[0]);
+		await token.updateFeatures(PERM_APPROVE_ALL);
+		await token.approveForAll(accounts[1], 1);
+		await token.updateFeatures(PERM_TRANSFER_FROM);
+		await token.transferFrom.sendTransaction(accounts[0], accounts[1], 0x1, {from: accounts[1]});
+		assert.equal(await token.balanceOf(accounts[0]), 1, "wrong balance after token has left");
+		assert.equal(await token.balanceOf(accounts[1]), 1, "wrong balance after token was received");
+		assert.equal(await token.ownerOf(0x1), accounts[1], "wrong token 0x1 owner after the transfer");
+		assert.equal(await token.ownerOf(0x2), accounts[0], "wrong token 0x2 owner before the transfer");
+		assertThrowsAsync(async function() {
+			await token.transferFrom.sendTransaction(accounts[0], accounts[1], 0x2, {from: accounts[1]});
+		});
 	});
 });
 
