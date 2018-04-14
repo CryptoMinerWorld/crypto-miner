@@ -53,6 +53,11 @@ contract Token {
   uint32 public constant PERM_TRANSFER_FROM = 0x00000800;
   uint32 public constant PERM_FULL = 0xFFFFFFFF;
 
+  uint256 public constant MASK_CLEAR_STATE    = 0x000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+  uint256 public constant MASK_CLEAR_MINING   = 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+  uint256 public constant MASK_CLEAR_TRANSFER = 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000;
+  uint256 public constant MASK_RIGHT_31BITS   = 0x000000000000000000000000000000000000000000000000000000007FFFFFFF;
+
   /**
    * @dev event names are self-explanatory
    */
@@ -210,10 +215,8 @@ contract Token {
     // check if this token exists
     require(token > 0);
 
-    // update token state
-    tokens[tokenId] = token
-    & 0x000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-    | uint256(state) << 160;
+    // update token state  // 0x000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+    tokens[tokenId] = token & MASK_CLEAR_STATE | uint256(state) << 160;
   }
 
   /**
@@ -237,10 +240,8 @@ contract Token {
     // check if this token exists
     require(token > 0);
 
-    // update token state
-    tokens[tokenId] = token
-    & 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-    | uint256(state) << 224;
+    // update token state  // 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+    tokens[tokenId] = token & MASK_CLEAR_MINING | uint256(state) << 224;
   }
 
   /**
@@ -266,11 +267,8 @@ contract Token {
     // check if this token exists
     require(token > 0);
 
-    // update token state
-    tokens[tokenId] = token
-    & 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-    | uint256(0x7FFFFFFF & block.number) << 224
-    | uint256(lock ? 1 : 0) << 255;
+    // update token state  // 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+    tokens[tokenId] = token & MASK_CLEAR_MINING | __blockNum() << 224 | uint256(lock ? 1 : 0) << 255;
   }
 
   /**
@@ -402,7 +400,7 @@ contract Token {
     totalSupply++;
 
     // init token value with current date and new owner address
-    uint256 token = uint256(0xFFFFFFFF & block.number) << 192 | uint160(to);
+    uint256 token = __blockNum() << 192 | uint160(to);
     // persist newly created token
     tokens[tokenId] = token;
 
@@ -566,13 +564,16 @@ contract Token {
     // check if this token exists
     require(token > 0);
 
-    // update token transfer date and owner
-    tokens[tokenId] = token
-                    & 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000
-                    | uint256(0xFFFFFFFF & block.number) << 160
-                    | uint160(to);
+    // update token transfer date and owner // 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000
+    tokens[tokenId] = token & MASK_CLEAR_TRANSFER | __blockNum() << 160 | uint160(to);
 
     // emit en event
     Transfer(from, to, tokenId);
+  }
+
+  // returns block.number, guaranteed to fit into 31 bit integer
+  function __blockNum() private constant returns (uint256) {
+    // erase everything except right 31 bits
+    return uint256(0x7FFFFFFF & block.number);
   }
 }
