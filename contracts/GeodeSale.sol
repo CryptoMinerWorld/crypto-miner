@@ -38,7 +38,7 @@ contract GeodeSale {
    * @notice Calculates number of geodes to sell and sells them by
    * minting correspondent number of gems to the sender
    */
-  function buyGeodes() public payable {
+  function getGeodes() public payable {
     // check if there are still geodes to sell
     require(geodesSold < GEODES_TO_SELL);
 
@@ -81,6 +81,8 @@ contract GeodeSale {
     }
 
     // send change back to player
-    player.transfer(change);
+    if(change > 0) {
+      player.transfer(change);
+    }
   }
 }
