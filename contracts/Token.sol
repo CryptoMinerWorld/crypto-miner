@@ -23,20 +23,24 @@ contract Token {
    */
   mapping(uint80 => uint256) public tokens;
 
-  // @dev Mapping from token ID to approved address
+  /// @dev Mapping from token ID to approved address
   mapping(uint80 => address) private approvals;
 
-  /// @notice total number of tokens owned by each each account
+  /// @dev Mapping from owner to operator approvals
+  /// token owner => approved token operator => approvals left (zero means no approval)
+  mapping(address => mapping(address => uint256)) private tokenOperators;
+
+  /// @notice Total number of tokens owned by each account
   mapping(address => uint256) private balances;
 
-  /// @notice total number of tokens which exist in the system
+  /// @notice Total number of tokens which exist in the system
   uint256 public totalSupply;
 
-  /// @dev a bitmask of globally enabled features, see below
+  /// @dev A bitmask of globally enabled features, see below
   uint32 public f;
 
   /**
-   * @dev globally enabled features, permissions:
+   * @dev Globally enabled features, permissions:
    *
    */
   uint32 public constant PERM_OP_CREATE = 0x00000001;
@@ -51,12 +55,15 @@ contract Token {
   uint32 public constant PERM_UPDATE_LOCK = 0x00000200;
   uint32 public constant PERM_APPROVE_TRANSFER = 0x00000400;
   uint32 public constant PERM_TRANSFER_FROM = 0x00000800;
+  uint32 public constant PERM_APPROVE_ALL = 0x00001000;
   uint32 public constant PERM_FULL = 0xFFFFFFFF;
 
+                                              //  F8F0E8E0D8D0C8C0B8B0A8A09890888078706860585048403830282018100800
   uint256 public constant MASK_CLEAR_STATE    = 0x000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
   uint256 public constant MASK_CLEAR_MINING   = 0x00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
   uint256 public constant MASK_CLEAR_TRANSFER = 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000;
   uint256 public constant MASK_RIGHT_31BITS   = 0x000000000000000000000000000000000000000000000000000000007FFFFFFF;
+  uint256 public constant MAXIMUM_APPROVALS   = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 
   /**
    * @dev event names are self-explanatory
@@ -69,6 +76,8 @@ contract Token {
   event Transfer(address indexed from, address indexed to, uint80 indexed tokenId);
   /// @dev fired in approve()
   event Approval(address indexed owner, address indexed approved, uint80 indexed tokenId);
+  /// @dev fired in approveForAll()
+  event ApprovalForAll(address indexed owner, address indexed operator, uint256 indexed approved);
 
   function Token() public {
     address creator = msg.sender;
@@ -439,6 +448,9 @@ contract Token {
     // update total tokens number
     totalSupply--;
 
+    // delete approval if any
+    __approve(from, address(0), tokenId);
+
     // delete token
     delete tokens[tokenId];
 
@@ -478,7 +490,7 @@ contract Token {
     balances[caller]--;
     balances[to]++;
 
-    // update token transfer date and owner
+    // update token transfer date and owner + emit event
     __transfer(caller, to, tokenId);
   }
 
@@ -511,6 +523,37 @@ contract Token {
   }
 
   /**
+   * @dev Sets or unsets the approval of a given operator
+   * @dev An operator is allowed to transfer *all* tokens of the sender on their behalf
+   * @param to operator address to set the approval
+   * @param approved representing the status of the approval to be set
+   */
+  function approveForAll(address to, bool approved) public {
+    // set maximum possible approval, 2^256 – 1, unlimited de facto
+    approveForAll(to, approved ? MAXIMUM_APPROVALS : 0);
+  }
+
+  /**
+   * @dev Sets or unsets the approval of a given operator
+   * @dev An operator is allowed to transfer *all* tokens of the sender on their behalf
+   * @param to operator address to set the approval
+   * @param approved representing the number of the approval left to be set
+   */
+  function approveForAll(address to, uint256 approved) public {
+    // feature must be enabled globally
+    require(f & PERM_APPROVE_ALL == PERM_APPROVE_ALL);
+
+    // call sender nicely - caller
+    address caller = msg.sender;
+
+    // check for input mistakes
+    require(to != caller);
+
+    // update an approval + emit an event
+    __approveAll(caller, to, approved);
+  }
+
+  /**
   * @dev Transfers the ownership of a given token ID to another address
   * @dev Requires the msg sender to be the owner, approved, or operator
   * @param from current owner of the token
@@ -524,25 +567,38 @@ contract Token {
     // call sender nicely - caller
     address caller = msg.sender;
 
+    // find the owner of a token
+    address owner = ownerOf(tokenId);
+
     // validate source and destination addresses
-    require(from != address(0));
+    require(from == owner);
     require(to != address(0));
     require(to != from);
-
-    // caller must have an approval to transfer
-    require(caller == approvals[tokenId]);
 
     // token state should not be locked (gem should not be mining)
     require(!isLocked(tokenId));
 
-    // clear approval + emit event
-    __approve(from, address(0), tokenId);
+    // fetch how much approvals left for a caller
+    uint256 approved = tokenOperators[owner][caller];
+
+    // caller must have an approval to transfer this particular token
+    // or caller must be approved to transfer all the tokens
+    require(caller == approvals[tokenId] || approved > 0);
+
+    if(caller == approvals[tokenId]) {
+      // clear approval + emit event
+      __approve(from, address(0), tokenId);
+    }
+    else if (approved > 0) {
+      // update an approval + emit an event
+      __approveAll(from, to, approved - 1);
+    }
 
     // update balances
     balances[from]--;
     balances[to]++;
 
-    // update token transfer date and owner
+    // update token transfer date and owner + emit event
     __transfer(from, to, tokenId);
   }
 
@@ -554,6 +610,15 @@ contract Token {
 
     // emit en event
     Approval(from, to, tokenId);
+  }
+
+  // perform an token operator approval, unsafe, private use only
+  function __approveAll(address from, address to, uint256 approved) private {
+    // set an approval
+    tokenOperators[from][to] = approved;
+
+    // emit an event
+    ApprovalForAll(from, to, approved);
   }
 
   // perform the transfer, unsafe, private use only
