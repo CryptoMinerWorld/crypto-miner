@@ -43,20 +43,24 @@ contract Token {
    * @dev Globally enabled features, permissions:
    *
    */
-  uint32 public constant PERM_OP_CREATE = 0x00000001;
-  uint32 public constant PERM_OP_UPDATE = 0x00000002;
-  uint32 public constant PERM_OP_DELETE = 0x00000004;
-  uint32 public constant PERM_MINT = 0x00000008;
-  uint32 public constant PERM_BURN = 0x00000010;
-  uint32 public constant PERM_UPDATE_FEATURES = 0x00000020;
-  uint32 public constant PERM_TRANSFER = 0x00000040;
+  uint32 public constant PERM_TRANSFER      = 0x00000001;
+  uint32 public constant PERM_APPROVE       = 0x00000002;
+  uint32 public constant PERM_APPROVE_ALL   = 0x00000004;
+  uint32 public constant PERM_TRANSFER_FROM = 0x00000008;
+
+  uint32 public constant PERM_MINT          = 0x00000010;
+  uint32 public constant PERM_BURN          = 0x00000020;
+
+  uint32 public constant PERM_UPDATE_LOCK   = 0x00000040;
   uint32 public constant PERM_UPDATE_ENERGY = 0x00000080;
-  uint32 public constant PERM_UPDATE_STATE = 0x00000100;
-  uint32 public constant PERM_UPDATE_LOCK = 0x00000200;
-  uint32 public constant PERM_APPROVE_TRANSFER = 0x00000400;
-  uint32 public constant PERM_TRANSFER_FROM = 0x00000800;
-  uint32 public constant PERM_APPROVE_ALL = 0x00001000;
-  uint32 public constant PERM_FULL = 0xFFFFFFFF;
+  uint32 public constant PERM_UPDATE_STATE  = 0x00000100;
+
+  uint32 public constant PERM_OP_CREATE     = 0x01000000;
+  uint32 public constant PERM_OP_UPDATE     = 0x02000000;
+  uint32 public constant PERM_OP_DELETE     = 0x04000000;
+  uint32 public constant PERM_UPDATE_GLOBAL = 0x08000000;
+
+  uint32 public constant PERM_FULL          = 0xFFFFFFFF;
 
                                               //  F8F0E8E0D8D0C8C0B8B0A8A09890888078706860585048403830282018100800
   uint256 public constant MASK_CLEAR_STATE    = 0x000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
@@ -79,7 +83,9 @@ contract Token {
   /// @dev fired in approveForAll()
   event ApprovalForAll(address indexed owner, address indexed operator, uint256 indexed approved);
 
+  /// @dev Creates a token
   function Token() public {
+    // call sender nicely - caller
     address creator = msg.sender;
 
     // grant the contract creator full permissions
@@ -283,7 +289,7 @@ contract Token {
   /**
    * @dev Updates set of the globally enabled features (`f`),
    * taking into account sender's permissions.
-   * @dev Requires sender to have `PERM_UPDATE_FEATURES` permission.
+   * @dev Requires sender to have `PERM_UPDATE_GLOBAL` permission.
    * @param mask bitmask representing a set of features to enable/disable
    */
   function updateFeatures(uint32 mask) public {
@@ -292,8 +298,8 @@ contract Token {
     // read caller's permissions
     uint32 p = operators[caller];
 
-    // caller should have a permission to update features
-    require(p & PERM_UPDATE_FEATURES == PERM_UPDATE_FEATURES);
+    // caller should have a permission to update global features
+    require(p & PERM_UPDATE_GLOBAL == PERM_UPDATE_GLOBAL);
 
     // taking into account caller's permissions,
     // 1) enable features requested
@@ -504,7 +510,7 @@ contract Token {
   */
   function approve(address to, uint80 tokenId) public {
     // feature must be enabled globally
-    require(f & PERM_APPROVE_TRANSFER == PERM_APPROVE_TRANSFER);
+    require(f & PERM_APPROVE == PERM_APPROVE);
 
     // call sender nicely - caller
     address caller = msg.sender;
