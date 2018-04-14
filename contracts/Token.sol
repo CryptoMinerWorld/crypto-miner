@@ -396,14 +396,15 @@ contract Token {
     // the token specified should not already exist
     require(tokens[tokenId] == 0);
 
-    // init token value with current date and new owner address
-    uint256 token = uint256(0xFFFFFFFF & block.number) << 192 | uint160(to);
-    // persist newly created token
-    tokens[tokenId] = token;
     // update token owner balance
     balances[to]++;
     // update total tokens number
     totalSupply++;
+
+    // init token value with current date and new owner address
+    uint256 token = uint256(0xFFFFFFFF & block.number) << 192 | uint160(to);
+    // persist newly created token
+    tokens[tokenId] = token;
 
     // fire an event
     Minted(tokenId, to);
@@ -479,17 +480,8 @@ contract Token {
     balances[caller]--;
     balances[to]++;
 
-    // get the token from storage
-    uint256 token = tokens[tokenId];
-
     // update token transfer date and owner
-    tokens[tokenId] = token
-    & 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000
-    | uint256(0xFFFFFFFF & block.number) << 160
-    | uint160(to);
-
-    // emit en event
-    Transfer(caller, to, tokenId);
+    __transfer(caller, to, tokenId);
   }
 
   /**
@@ -516,11 +508,8 @@ contract Token {
     // either we're removing approval, or setting it
     require(approvals[tokenId] != 0 || to != address(0));
 
-    // set an approval
-    approvals[tokenId] = to;
-
-    // emit en event
-    Approval(caller, to, tokenId);
+    // perform an approval + emit event
+    __approve(caller, to, tokenId);
   }
 
   /**
@@ -548,23 +537,40 @@ contract Token {
     // token state should not be locked (gem should not be mining)
     require(!isLocked(tokenId));
 
-    // clear approval
-    approvals[tokenId] = address(0);
-    // emit en event
-    Approval(from, address(0), tokenId);
+    // clear approval + emit event
+    __approve(from, address(0), tokenId);
 
     // update balances
     balances[from]--;
     balances[to]++;
 
+    // update token transfer date and owner
+    __transfer(from, to, tokenId);
+  }
+
+
+  // perform an approval, unsafe, private use only
+  function __approve(address from, address to, uint80 tokenId) private {
+    // set an approval
+    approvals[tokenId] = to;
+
+    // emit en event
+    Approval(from, to, tokenId);
+  }
+
+  // perform the transfer, unsafe, private use only
+  function __transfer(address from, address to, uint80 tokenId) private {
     // get the token from storage
     uint256 token = tokens[tokenId];
 
+    // check if this token exists
+    require(token > 0);
+
     // update token transfer date and owner
     tokens[tokenId] = token
-    & 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000
-    | uint256(0xFFFFFFFF & block.number) << 160
-    | uint160(to);
+                    & 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000
+                    | uint256(0xFFFFFFFF & block.number) << 160
+                    | uint160(to);
 
     // emit en event
     Transfer(from, to, tokenId);
