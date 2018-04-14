@@ -85,7 +85,7 @@ contract Token {
 
   /// @dev Creates a token
   function Token() public {
-    // call sender nicely - caller
+    // call sender nicely - creator
     address creator = msg.sender;
 
     // grant the contract creator full permissions
