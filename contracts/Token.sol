@@ -95,7 +95,7 @@ contract Token {
   /**
    * @notice finds an owner address for a token specified
    * @dev Gets the owner of the specified token ID
-   * @param tokenId uint256 ID of the token to query the owner of
+   * @param tokenId ID of the token to query the owner of
    * @return owner address currently marked as the owner of the given token ID
    */
   function ownerOf(uint80 tokenId) public constant returns (address) {
@@ -110,7 +110,7 @@ contract Token {
   }
 
   /**
-   * @notice Gets an amount of tokens owned by the give address
+   * @notice Gets an amount of tokens owned by the given address
    * @dev Gets the balance of the specified address
    * @param who address to query the balance for
    * @return uint256 representing the amount owned by the passed address
@@ -123,7 +123,7 @@ contract Token {
   /**
    * @notice Checks if specified token exists
    * @dev Returns whether the specified token ID exists
-   * @param tokenId uint256 ID of the token to query the existence of
+   * @param tokenId ID of the token to query the existence of
    * @return whether the token exists
    */
   function exists(uint80 tokenId) public constant returns (bool) {
