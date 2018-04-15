@@ -17,19 +17,53 @@ const Token = artifacts.require("./Token");
 const Sale = artifacts.require("./GeodeSale");
 
 contract('GeodeSale', function(accounts) {
-	it("geode sale basics: it is possible to buy geode", async function() {
+	it("geode sale: it is possible to buy geode", async function() {
 		const token = await Token.new();
 		const sale = await Sale.new(token.address);
 
-		assert.equal(await token.balanceOf(accounts[0]), 0, "initial token balance is not zero");
-		assert.equal(await token.totalSupply(), 0, "initial token total supply is not zero");
+		assert.equal(0, await token.balanceOf(accounts[0]), "initial token balance is not zero");
+		assert.equal(0, await token.totalSupply(), "initial token total supply is not zero");
 
 		await token.updateFeatures(PERM_OP_CREATE | PERM_MINT);
 		await token.createOperator(sale.address, PERM_MINT);
-		await sale.getGeodes.sendTransaction({value: 100000000000000000});
+		await sale.getGeodes.sendTransaction({value: await sale.GEODE_PRICE()});
 
 		assert(await token.balanceOf(accounts[0]) > 0, "wrong token balance after selling geode");
 		assert(await token.totalSupply() > 0, "wrong token total supply after selling geode");
+	});
+	it("geode sale: gems created from the geode have correct amount and owner", async function() {
+		const token = await Token.new();
+		const sale = await Sale.new(token.address);
+
+		await token.updateFeatures(PERM_OP_CREATE | PERM_MINT);
+		await token.createOperator(sale.address, PERM_MINT);
+		await sale.getGeodes.sendTransaction({from: accounts[1], value: await sale.GEODE_PRICE()});
+
+		const gemsInGeode = (await sale.GEMS_IN_GEODE()).toNumber();
+
+		assert.equal(gemsInGeode, await token.totalSupply(), "wrong number of gems in geode");
+		assert.equal(gemsInGeode, await token.balanceOf(accounts[1]), "wrong number of gems on account");
+
+		const gemNumber15 = await sale.createdGems(1, 15);
+
+		assert(await token.exists(gemNumber15), "gem #15 doesn't exist!");
+		assert.equal(accounts[1], await token.ownerOf(gemNumber15), "gem #15 has wrong owner");
+	});
+	it("geode sale: gems created from the geode have correct coordinates", async function() {
+		const token = await Token.new();
+		const sale = await Sale.new(token.address);
+
+		await token.updateFeatures(PERM_OP_CREATE | PERM_MINT);
+		await token.createOperator(sale.address, PERM_MINT);
+		await sale.getGeodes.sendTransaction({from: accounts[1], value: await sale.GEODE_PRICE()});
+
+		const gemNumber10 = await sale.createdGems(1, 10);
+		const gemId = gemNumber10.modulo(256);
+		const blockId = gemNumber10.dividedToIntegerBy(256).modulo(256 * 256);
+		const plotId = gemNumber10.dividedToIntegerBy(256 * 256 * 256).modulo(256 * 256 * 256);
+		assert.equal(0xA, gemId, "gemId coordinate is wrong");
+		assert.equal(0, blockId, "blockId coordinate is wrong");
+		assert.equal(1, plotId, "blockId coordinate is wrong");
 	});
 });
 
