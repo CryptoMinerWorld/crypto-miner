@@ -145,7 +145,10 @@ contract GeodeSale {
       gems[i - 1] = gemUid;
     }
 
-    // TODO: enforce 5 gems of the same color and at least 1 A grade
+    // enforce 5 gems of the same color
+    __enforceColorConstraint(gems, 5, uint32(randomness >> 64));
+    // enforce 1 gem of the grade A
+    __enforceGradeConstraint(gems, 1, 4, uint16(randomness >> 96));
 
     // return created gems array back
     return gems;
@@ -165,7 +168,7 @@ contract GeodeSale {
 
   // determines grade type randomly
   function __gradeType(uint32 randomness) private pure returns (uint8) {
-    // use only first 24 bits of randomness
+    // use only low 24 bits of randomness
     randomness &= 0xFFFFFFFF;
 
     // Grade D: 20% probability of 16777216 total values
@@ -192,12 +195,6 @@ contract GeodeSale {
     else {
       return 6;
     }
-  }
-
-  // gives a random value, normalizing the given one (randomness)
-  function __randomValue(uint256 randomness, uint256 offset, uint256 length, uint256 n) private pure returns (uint256) {
-    // return random in range [offset, offset + length)
-    return offset + randomness * length / n;
   }
 
   // assembles a gem UID from its attributes
@@ -235,4 +232,48 @@ contract GeodeSale {
     // pack the grade ID and return
     return uint16(gradeType) << 8 | gradeValue;
   }
+
+  // enforce `n` gems to be the same (random) color
+  function __enforceColorConstraint(uint80[] gems, uint8 n, uint32 randomness) private pure {
+    // n must not be greater then number of gems in the array
+    require(gems.length >= n);
+    
+    // generate a random index in range [0, length - n) to rewrite color
+    uint8 index = uint8(__randomValue(0xFFFF & randomness, 0, gems.length - n, 0x10000)); // use low 16 bits
+
+    // generate random color value
+    uint8 colorId = uint8(__randomValue(randomness >> 16, 1, COLORS, 0x10000));
+
+    // rewrite the color in the gems array
+    for(uint8 i = index; i < index + n; i++) {
+      // clear the color
+      gems[i] &= 0xFF00FFFFFFFFFFFFFFFF;
+      // set the new color
+      gems[i] |= uint72(colorId) << 64;
+    }
+  }
+
+  // enforce at least `n` gem(s) of grade type `gradeType`
+  function __enforceGradeConstraint(uint80[] gems, uint8 n, uint8 gradeType, uint16 randomness) private pure {
+    // n must not be greater then number of gems in the array
+    require(gems.length >= n);
+
+    // generate a random index in range [0, length - n) to rewrite grade type
+    uint8 index = uint8(__randomValue(randomness, 0, gems.length - n, 0x10000)); // use low 16 bits
+
+    // rewrite the grade type in the gems array
+    for(uint8 i = index; i < index + n; i++) {
+      // clear the grade type
+      gems[i] &= 0xFFFF00FFFFFFFFFFFFFF;
+      // set the new grade type
+      gems[i] |= uint64(gradeType) << 56;
+    }
+  }
+
+  // gives a random value, normalizing the given one (randomness)
+  function __randomValue(uint256 randomness, uint256 offset, uint256 length, uint256 n) private pure returns (uint256) {
+    // return random in range [offset, offset + length)
+    return offset + randomness * length / n;
+  }
+
 }
