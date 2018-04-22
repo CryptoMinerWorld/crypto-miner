@@ -42,7 +42,7 @@ contract('Token', function(accounts) {
 		await token.mint(0x1, accounts[0]);
 		await assertThrowsAsync(async function() {await token.transfer(accounts[1], 0x1);});
 	});
-	it("initial state: last token transfer block is zero", async function() {
+	it("initial state: token ownership modified is zero", async function() {
 		const token = await Token.new();
 		await token.updateFeatures(ROLE_TOKEN_MANAGER);
 		await token.mint(0x1, accounts[0]);
@@ -54,7 +54,7 @@ contract('Token', function(accounts) {
 		await token.mint(0x1, accounts[0]);
 		assert.equal(await token.getState(0x1), 0, "initial state is not zero");
 	});
-	it("initial state: token creation block is greater then zero", async function() {
+	it("initial state: token creation time is greater then zero", async function() {
 		const token = await Token.new();
 		await token.updateFeatures(ROLE_TOKEN_MANAGER);
 		await token.mint(0x1, accounts[0]);
@@ -137,7 +137,7 @@ contract('Token', function(accounts) {
 		await token.transfer(accounts[1], 0x1);
 		await assertThrowsAsync(async function() {await token.transfer(accounts[2], 0x1);});
 	});
-	it("token transfers: token transfer block is greater then zero after transfer", async function() {
+	it("token transfers: token ownership modified is greater then zero after transfer", async function() {
 		const token = await Token.new();
 		await token.updateFeatures(ROLE_TOKEN_MANAGER);
 		await token.mint(0x1, accounts[0]);
@@ -145,10 +145,10 @@ contract('Token', function(accounts) {
 		await token.transfer(accounts[1], 0x1);
 		assert(
 			await token.getOwnershipModified(0x1) > 0,
-			"transferred token's last token transfer block is not greater then zero"
+			"transferred token's ownership modified is not greater then zero"
 		);
 	});
-	it("token transfers: token transfer block is greater then token creation block after transfer", async function() {
+	it("token transfers: token ownership modified is greater then token creation block after transfer", async function() {
 		const token = await Token.new();
 		await token.updateFeatures(ROLE_TOKEN_MANAGER);
 		await token.mint(0x1, accounts[0]);
@@ -156,11 +156,45 @@ contract('Token', function(accounts) {
 		await token.transfer(accounts[1], 0x1);
 		assert(
 			await token.getOwnershipModified(0x1) > await token.getCreationTime(0x1),
-			"transferred token's last token transfer block is not greater then token creation block"
+			"transferred token's ownership modified is not greater then token creation block"
 		);
 	});
+	it("token transfers: indexes check after transferring a token", async function() {
+		const token = await Token.new();
+		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.mint(0x1, accounts[0]);
+		await token.mint(0x2, accounts[0]);
+		await token.mint(0x3, accounts[0]);
+		await token.mint(0x4, accounts[0]);
+		await token.mint(0x5, accounts[0]);
+		await token.updateFeatures(FEATURE_TRANSFERS);
+		await token.transfer(accounts[1], 0x2); // [1, 2, 3, 4, 5], [] -> [1, 5, 3, 4], [2]
+		assert.equal(4, await token.balanceOf(accounts[0]), accounts[0] + "has wrong balance after token transfer");
+		assert.equal(0x5, await token.collections(accounts[0], 1), "wrong token ID in the collection idx 1 after transfer");
+		assert.equal(1, await token.indexes(0x5), "shifted token 0x5 has wrong index in the collection");
+		assert.equal(0, await token.indexes(0x2), "transferred token 0x2 has wrong index in the collection");
+		await token.transfer(accounts[1], 0x1); // [1, 5, 3, 4], [2] -> [4, 5, 3], [2, 1]
+		assert.equal(3, await token.balanceOf(accounts[0]), accounts[0] + "has wrong balance after 2 token transfers");
+		assert.equal(0x4, await token.collections(accounts[0], 0), "wrong token ID in the collection idx 0 after second transfer");
+		assert.equal(0, await token.indexes(0x4), "shifted token 0x4 has wrong index in the collection");
+		assert.equal(1, await token.indexes(0x1), "second transferred token 0x1 has wrong index in the collection");
+		await token.transfer(accounts[1], 0x3); // [4, 5, 3], [2, 1] -> [4, 5], [2, 1, 3]
+		await token.transfer(accounts[1], 0x5); // [4, 5], [2, 1, 3] -> [4], [2, 1, 3, 5]
+		await token.transfer(accounts[1], 0x4); // [4], [2, 1, 3, 5] -> [], [2, 1, 3, 5, 4]
+		assert.equal(0, await token.balanceOf(accounts[0]), accounts[0] + "has wrong balance after all token transfers");
+		assert.equal(0x2, await token.collections(accounts[1], 0), "wrong token ID in the collection idx 0 after all transfers");
+		assert.equal(0x1, await token.collections(accounts[1], 1), "wrong token ID in the collection idx 1 after all transfers");
+		assert.equal(0x3, await token.collections(accounts[1], 2), "wrong token ID in the collection idx 2 after all transfers");
+		assert.equal(0x5, await token.collections(accounts[1], 3), "wrong token ID in the collection idx 3 after all transfers");
+		assert.equal(0x4, await token.collections(accounts[1], 4), "wrong token ID in the collection idx 4 after all transfers");
+		assert.equal(1, await token.indexes(0x1), "token 0x1 has wrong index after all transfers");
+		assert.equal(0, await token.indexes(0x2), "token 0x2 has wrong index after all transfers");
+		assert.equal(2, await token.indexes(0x3), "token 0x3 has wrong index after all transfers");
+		assert.equal(4, await token.indexes(0x4), "token 0x4 has wrong index after all transfers");
+		assert.equal(3, await token.indexes(0x5), "token 0x5 has wrong index after all transfers");
+	});
 
-	it("approvals: approve and transfer from", async function() {
+	it("approvals: approve and transfer on behalf", async function() {
 		const token = await Token.new();
 		await token.updateFeatures(ROLE_TOKEN_MANAGER);
 		await token.mint(0x1, accounts[0]);

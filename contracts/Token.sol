@@ -28,9 +28,17 @@ contract Token {
   ///      represents a permissions; bitmask 0xFFFFFFFF represents all possible permissions
   mapping(address => uint32) public userRoles;
 
-  // TODO: add token list
-  /// @notice Total number of tokens owned by each account
-  mapping(address => uint256) private balances;
+  /// @notice Storage for a collections of tokens
+  /// @notice A collection of tokens is an ordered list of tokens,
+  ///      owned by a particular address (owner)
+  /// @dev A mapping from owner to a collection of his tokens (IDs)
+  /// @dev ERC20 compatible structure for balances can be derived
+  ///      as a length of each collection in the mapping
+  /// @dev ERC20 balances[owner] is equal to collections[owner].length
+  mapping(address => uint80[]) public collections;
+
+  /// @dev token index withing a particular collection
+  mapping(uint80 => uint80) public indexes;
 
   /// @notice Total number of tokens which exist in the system
   uint80 public totalSupply;
@@ -109,11 +117,11 @@ contract Token {
    * @notice Gets an amount of tokens owned by the given address
    * @dev Gets the balance of the specified address
    * @param who address to query the balance for
-   * @return uint256 representing the amount owned by the passed address
+   * @return uint80 representing the amount owned by the passed address
    */
-  function balanceOf(address who) public constant returns (uint256) {
-    // simply read the balance from balances
-    return balances[who];
+  function balanceOf(address who) public constant returns (uint80) {
+    // read the length of the `who`s collection of tokens
+    return uint80(collections[who].length);
   }
 
   /**
@@ -376,15 +384,24 @@ contract Token {
     // the token specified should not already exist
     require(tokens[tokenId] == 0);
 
-    // update token owner balance
-    balances[to]++;
-    // update total tokens number
-    totalSupply++;
+    // validate token ID is not zero
+    require(tokenId != 0);
 
     // init token value with current date and new owner address
     uint256 token = __blockNum() << 192 | uint160(to);
+
+    // token index within the owner's collection of tokens
+    // points to the place where the token will be placed to
+    indexes[tokenId] = uint80(collections[to].length);
+
+    // push newly created token ID to the owner's collection of tokens
+    collections[to].push(tokenId);
+
     // persist newly created token
     tokens[tokenId] = token;
+
+    // update total tokens number
+    totalSupply++;
 
     // fire an event
     Minted(tokenId, to);
@@ -416,8 +433,9 @@ contract Token {
     // extract token owner address
     address from = address(token);
 
-    // update token owner balance
-    balances[from]--;
+    // remove token from the owner's collection
+    __remove(from, tokenId);
+
     // update total tokens number
     totalSupply--;
 
@@ -446,25 +464,11 @@ contract Token {
     // feature must be enabled globally
     require(f & FEATURE_TRANSFERS == FEATURE_TRANSFERS);
 
-    // call sender nicely - caller
-    address caller = msg.sender;
+    // call sender nicely - `from`
+    address from = msg.sender;
 
-    // validate destination address
-    require(to != address(0));
-    require(to != caller);
-
-    // caller must be an owner of the token
-    require(caller == ownerOf(tokenId));
-
-    // token state should not be locked (gem should not be mining)
-    require(!isLocked(tokenId));
-
-    // update balances
-    balances[caller]--;
-    balances[to]++;
-
-    // update token transfer date and owner + emit event
-    __transfer(caller, to, tokenId);
+    // delegate call to unsafe `__transfer`
+    __transfer(from, to, tokenId);
   }
 
   /**
@@ -541,41 +545,31 @@ contract Token {
     // feature must be enabled globally
     require(f & FEATURE_TRANSFERS_ON_BEHALF == FEATURE_TRANSFERS_ON_BEHALF);
 
-    // call sender nicely - caller
-    address caller = msg.sender;
+    // call sender nicely - `operator`
+    address operator = msg.sender;
+    // find if an approved address exists for this token
+    address approved = approvals[tokenId];
 
-    // find the owner of a token
+    // find an owner of a token
     address owner = ownerOf(tokenId);
 
-    // validate source and destination addresses
-    require(from == owner);
-    require(to != address(0));
-    require(to != from);
-
-    // token state should not be locked (gem should not be mining)
-    require(!isLocked(tokenId));
-
     // fetch how much approvals left for a caller
-    uint256 approved = operators[owner][caller];
+    uint256 approvalsLeft = operators[owner][operator];
 
     // caller must have an approval to transfer this particular token
     // or caller must be approved to transfer all the tokens
-    require(caller == approvals[tokenId] || approved > 0);
+    require(operator == from || operator == approved || approvalsLeft > 0);
 
-    if(caller == approvals[tokenId]) {
+    if(operator == approved) {
       // clear approval + emit event
       __approve(from, address(0), tokenId);
     }
-    else if (approved > 0) {
+    if (approvalsLeft > 0) {
       // update an approval + emit an event
-      __approveAll(from, to, approved - 1);
+      __approveAll(from, to, approvalsLeft - 1);
     }
 
-    // update balances
-    balances[from]--;
-    balances[to]++;
-
-    // update token transfer date and owner + emit event
+    // delegate call to unsafe `__transfer`
     __transfer(from, to, tokenId);
   }
 
@@ -600,17 +594,80 @@ contract Token {
 
   // perform the transfer, unsafe, private use only
   function __transfer(address from, address to, uint80 tokenId) private {
+    // validate source and destination address
+    require(from != address(0));
+    require(to != address(0));
+    require(to != from);
+
     // get the token from storage
     uint256 token = tokens[tokenId];
 
-    // check if this token exists
-    require(token > 0);
+    // validate token ownership and existence
+    require(from == ownerOf(tokenId));
+
+    // token state should not be locked (gem should not be mining)
+    require(!isLocked(tokenId));
+
+    // delegate call to `__move` to update collections
+    __move(from, to, tokenId);
 
     // update token transfer date and owner // 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000
     tokens[tokenId] = token & MASK_CLEAR_TRANSFER | __blockNum() << 160 | uint160(to);
 
     // emit en event
     Transfer(from, to, tokenId);
+  }
+
+  /// @dev Move a token `tokenId` from owner `from` to a new owner `to`
+  /// @dev Unsafe, doesn't check for consistence
+  /// @dev Must be kept private at all times
+  function __move(address from, address to, uint80 tokenId) private {
+    // delegate call to `__remove` to remove token from `from`
+    __remove(from, tokenId);
+
+    // delegate call to `__add` to add token to `to`
+    __add(to, tokenId);
+  }
+
+  /// @dev Remove a token `tokenId` from owner `from`
+  /// @dev Unsafe, doesn't check for consistence
+  /// @dev Must be kept private at all times
+  function __remove(address from, uint80 tokenId) private {
+    // get a reference to the collection where token is
+    uint80[] storage fCol = collections[from];
+
+    // collection `fCol` cannot be empty, if it is - it's a bug
+    assert(fCol.length != 0);
+
+    // index of the token within collection `f`
+    uint80 i = indexes[tokenId];
+
+    // we put the last token in the collection `f` to the position released
+    // get an ID of the last token in `f`
+    uint80 id = fCol[fCol.length - 1];
+
+    // update token index to point to proper place in the collection `f`
+    indexes[id] = i;
+
+    // put it into the position i within `f`
+    fCol[i] = id;
+
+    // trim the collection `f` by removing last element
+    fCol.length--;
+  }
+
+  /// @dev Add a token `tokenId` to a new owner `to`
+  /// @dev Unsafe, doesn't check for consistence
+  /// @dev Must be kept private at all times
+  function __add(address to, uint80 tokenId) private {
+    // get a reference to the collection where token goes to
+    uint80[] storage tCol = collections[to];
+
+    // update token index according to position in new collection `t`
+    indexes[tokenId] = uint80(tCol.length);
+
+    // push token into collection
+    tCol.push(tokenId);
   }
 
   // returns block.number, guaranteed to fit into 31 bit integer

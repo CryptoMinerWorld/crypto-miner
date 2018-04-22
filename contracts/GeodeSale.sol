@@ -188,7 +188,7 @@ contract GeodeSale {
     else if(randomness < 16768828) {
       return 5;
     }
-    // Grade AA: 0.05% probability
+    // Grade AAA: 0.05% probability
     else {
       return 6;
     }
