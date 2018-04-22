@@ -60,7 +60,7 @@ contract Token {
   uint32 public constant FEATURE_TRANSFERS = 0x00000001;
   uint32 public constant FEATURE_TRANSFERS_ON_BEHALF = 0x00000008;
 
-  uint32 public constant ROLE_TOKEN_MANAGER = 0x00000010;
+  uint32 public constant ROLE_TOKEN_CREATOR = 0x00000010;
   uint32 public constant ROLE_STATE_PROVIDER = 0x00000080;
   uint32 public constant ROLE_ROLE_MANAGER = 0x01000000;
   uint32 public constant ROLE_FEATURE_MANAGER = 0x08000000;
@@ -380,7 +380,7 @@ contract Token {
 
     // feature must be enabled globally and
     // caller should have a permission to mint a token
-    require(f & p & ROLE_TOKEN_MANAGER == ROLE_TOKEN_MANAGER);
+    require(f & p & ROLE_TOKEN_CREATOR == ROLE_TOKEN_CREATOR);
     // the token specified should not already exist
     require(tokens[tokenId] == 0);
 
@@ -422,7 +422,7 @@ contract Token {
 
     // feature must be enabled globally and
     // caller should have a permission to burn a token
-    require(f & p & ROLE_TOKEN_MANAGER == ROLE_TOKEN_MANAGER);
+    require(f & p & ROLE_TOKEN_CREATOR == ROLE_TOKEN_CREATOR);
 
     // token state should not be locked (gem should not be mining)
     require(!isLocked(tokenId));

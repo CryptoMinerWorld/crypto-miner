@@ -1,7 +1,7 @@
 const FEATURE_TRANSFERS = 0x00000001;
 const FEATURE_TRANSFERS_ON_BEHALF = 0x00000008;
 
-const ROLE_TOKEN_MANAGER = 0x00000010;
+const ROLE_TOKEN_CREATOR = 0x00000010;
 const ROLE_STATE_PROVIDER = 0x00000080;
 const ROLE_ROLE_MANAGER = 0x01000000;
 const ROLE_FEATURE_MANAGER = 0x08000000;
@@ -38,32 +38,32 @@ contract('Token', function(accounts) {
 	});
 	it("initial state: it is impossible to transfer token initially", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await assertThrowsAsync(async function() {await token.transfer(accounts[1], 0x1);});
 	});
 	it("initial state: token ownership modified is zero", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		assert.equal(await token.getOwnershipModified(0x1), 0, "initial last token transfer block is not zero");
 	});
 	it("initial state: token state is undefined (zero)", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		assert.equal(await token.getState(0x1), 0, "initial state is not zero");
 	});
 	it("initial state: token creation time is greater then zero", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		assert(await token.getCreationTime(0x1) > 0, "initial token creation block is not greater then zero");
 	});
 
 	it("token creation routine: it is possible to mint a token", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		assert.equal(await token.exists(0x1), true, "newly created token doesn't exist");
 		assert.equal(await token.totalSupply(), 1, "wrong total supply after creating first token");
@@ -72,7 +72,7 @@ contract('Token', function(accounts) {
 	});
 	it("token destruction routine: it is possible to burn existing token", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.burn(0x1);
 		assert.equal(await token.exists(0x1), false, "newly created and destroyed token still exists");
@@ -81,18 +81,18 @@ contract('Token', function(accounts) {
 	});
 	it("token destruction routine: it is impossible to burn non-existing token", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await assertThrowsAsync(async function() {await token.burn(0x1);});
 	});
 
 	it("permissions: arbitrary user doesn't have any permissions", async function() {
 		const token = await Token.new();
-		await assertThrowsAsync(async function() {await token.updateFeatures.sendTransaction(ROLE_TOKEN_MANAGER, {from: accounts[1]});});
+		await assertThrowsAsync(async function() {await token.updateFeatures.sendTransaction(ROLE_TOKEN_CREATOR, {from: accounts[1]});});
 		await assertThrowsAsync(async function() {await token.mint.sendTransaction(0x1, accounts[1], {from: accounts[1]});});
 	});
 	it("permissions: locked token cannot be burnt", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.updateFeatures(ROLE_STATE_PROVIDER);
 		await token.setState(0x1, 0x8000);
@@ -102,7 +102,7 @@ contract('Token', function(accounts) {
 	});
 	it("permissions: locked token cannot be transferred", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.updateFeatures(ROLE_STATE_PROVIDER);
 		await token.setState(0x1, 0x8000);
@@ -114,7 +114,7 @@ contract('Token', function(accounts) {
 
 	it("token transfers: token can be transferred", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.updateFeatures(FEATURE_TRANSFERS);
 		await token.transfer(accounts[1], 0x1);
@@ -131,7 +131,7 @@ contract('Token', function(accounts) {
 	});
 	it("token transfers: it is impossible to transfer another's owner token", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.updateFeatures(FEATURE_TRANSFERS);
 		await token.transfer(accounts[1], 0x1);
@@ -139,7 +139,7 @@ contract('Token', function(accounts) {
 	});
 	it("token transfers: token ownership modified is greater then zero after transfer", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.updateFeatures(FEATURE_TRANSFERS);
 		await token.transfer(accounts[1], 0x1);
@@ -150,7 +150,7 @@ contract('Token', function(accounts) {
 	});
 	it("token transfers: token ownership modified is greater then token creation block after transfer", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.updateFeatures(FEATURE_TRANSFERS);
 		await token.transfer(accounts[1], 0x1);
@@ -161,7 +161,7 @@ contract('Token', function(accounts) {
 	});
 	it("token transfers: indexes check after transferring a token", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.mint(0x2, accounts[0]);
 		await token.mint(0x3, accounts[0]);
@@ -196,7 +196,7 @@ contract('Token', function(accounts) {
 
 	it("approvals: approve and transfer on behalf", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
 		await token.approve(accounts[1], 0x1);
@@ -207,7 +207,7 @@ contract('Token', function(accounts) {
 	});
 	it("approvals: approve for all and transfer from", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
 		await token.approveForAll(accounts[1], 1);
@@ -218,7 +218,7 @@ contract('Token', function(accounts) {
 	});
 	it("approvals: approve for all and transfer 2 tokens", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.mint(0x2, accounts[0]);
 		await token.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
@@ -232,7 +232,7 @@ contract('Token', function(accounts) {
 	});
 	it("approvals: approve for all with transfer limit", async function() {
 		const token = await Token.new();
-		await token.updateFeatures(ROLE_TOKEN_MANAGER);
+		await token.updateFeatures(ROLE_TOKEN_CREATOR);
 		await token.mint(0x1, accounts[0]);
 		await token.mint(0x2, accounts[0]);
 		await token.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
