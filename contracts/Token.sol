@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.23;
 
 /**
  * @notice This smart contract represents a tradable non-fungible entity.
@@ -77,9 +77,9 @@ contract Token {
    * @dev event names are self-explanatory
    */
   /// @dev fired in mint()
-  event Minted(uint80 indexed tokenId, address indexed to);
+  event Minted(uint80 indexed tokenId, address indexed to, address by);
   /// @dev fired in burn()
-  event Burnt(uint80 indexed tokenId, address indexed from);
+  event Burnt(uint80 indexed tokenId, address indexed from, address by);
   /// @dev fired in transfer()
   event Transfer(address indexed from, address indexed to, uint80 indexed tokenId);
   /// @dev fired in approve()
@@ -88,7 +88,7 @@ contract Token {
   event ApprovalForAll(address indexed owner, address indexed operator, uint256 indexed approved);
 
   /// @dev Creates a token
-  function Token() public {
+  constructor() public {
     // call sender nicely - creator
     address creator = msg.sender;
 
@@ -403,8 +403,10 @@ contract Token {
     // update total tokens number
     totalSupply++;
 
-    // fire an event
-    Minted(tokenId, to);
+    // fire a Mint event
+    emit Minted(tokenId, to, caller);
+    // fire Transfer event (ERC20 compatibility)
+    emit Transfer(address(0), to, tokenId);
   }
 
   /**
@@ -445,8 +447,10 @@ contract Token {
     // delete token
     delete tokens[tokenId];
 
-    // fire an event
-    Burnt(tokenId, from);
+    // fire a Burnt event
+    emit Burnt(tokenId, from, caller);
+    // fire Transfer event (ERC20 compatibility)
+    emit Transfer(from, address(0), tokenId);
   }
 
   /**
@@ -580,7 +584,7 @@ contract Token {
     approvals[tokenId] = to;
 
     // emit en event
-    Approval(from, to, tokenId);
+    emit Approval(from, to, tokenId);
   }
 
   // perform an token operator approval, unsafe, private use only
@@ -589,7 +593,7 @@ contract Token {
     operators[from][to] = approved;
 
     // emit an event
-    ApprovalForAll(from, to, approved);
+    emit ApprovalForAll(from, to, approved);
   }
 
   // perform the transfer, unsafe, private use only
@@ -615,7 +619,7 @@ contract Token {
     tokens[tokenId] = token & MASK_CLEAR_TRANSFER | __blockNum() << 160 | uint160(to);
 
     // emit en event
-    Transfer(from, to, tokenId);
+    emit Transfer(from, to, tokenId);
   }
 
   /// @dev Move a token `tokenId` from owner `from` to a new owner `to`

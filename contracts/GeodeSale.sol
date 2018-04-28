@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.23;
 
 import "./Gem.sol";
 
@@ -34,6 +34,8 @@ contract GeodeSale {
   /// @dev A gem to sell, should be set in constructor
   Gem public gemContract;
 
+  /// @dev Address to send all the incoming funds
+  address public beneficiary;
 
   /**
    * @dev event names are self-explanatory
@@ -42,9 +44,17 @@ contract GeodeSale {
   event GeodeCreated(uint16 indexed plotId);
 
   /// @dev Creates a GeodeSale attached to an already deployed Gem smart contract
-  function GeodeSale(address gemAddress) public {
+  constructor(address gemAddress, address _beneficiary) public {
+    // validate inputs
+    require(gemAddress != address(0));
+    require(_beneficiary != address(0));
+    require(gemAddress != _beneficiary);
+
     // bind the Gem smart contract
     gemContract = Gem(gemAddress);
+
+    // set the beneficiary
+    beneficiary = _beneficiary;
   }
 
   /**
@@ -93,6 +103,9 @@ contract GeodeSale {
     // update next geode to sell pointer
     nextGeode += uint16(geodesToSell);
 
+    // send the value to the beneficiary
+//    beneficiary.transfer(value);
+
     // send change back to player
     if(change > 0) {
       player.transfer(change);
@@ -115,7 +128,7 @@ contract GeodeSale {
     }
 
     // emit an event
-    GeodeCreated(geodeId);
+    emit GeodeCreated(geodeId);
   }
 
   // generates 15 gems for a given geode ID randomly
@@ -127,7 +140,7 @@ contract GeodeSale {
     for(uint8 i = 1; i <= GEMS_IN_GEODE; i++) {
       // get some randomness to work with – 256 bits should be more then enough
       // and.. yeah! – this is heavily influenceable by miners!
-      uint256 randomness = uint256(keccak256(block.number, msg.gas, msg.sender, tx.origin, geodeId, i));
+      uint256 randomness = uint256(keccak256(block.number, gasleft(), msg.sender, tx.origin, geodeId, i));
 
       // use lower 16 bits to determine gem color
       uint8 colorId = __colorId(uint16(randomness));
