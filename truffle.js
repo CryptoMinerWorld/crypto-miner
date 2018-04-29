@@ -1,11 +1,24 @@
+// npm install truffle-hdwallet-provider
+const HDWalletProvider = require("truffle-hdwallet-provider");
+
 module.exports = {
 	networks: {
 		development: {
-			host: "localhost",
-			port: 8545,
-			network_id: "*",
+			provider: new HDWalletProvider(
+				"12 mnemonic words",
+				"https://rinkeby.infura.io/***key***"
+			),
+			network_id: "*", // Match any network (determined by provider)
 			gas: 4700000,
-			gasPrice: 20
+			gasPrice: 20000000000 // 20 GWei
+		},
+	},
+	/*
+		solc: {
+			optimizer: {
+				enabled: true,
+				runs: 200 // default is 200, however for function execution the effect is noticeable up to 20000
+			}
 		}
-	}
+	*/
 };
