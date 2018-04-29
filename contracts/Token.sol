@@ -58,12 +58,12 @@ contract Token {
    *
    */
   uint32 public constant FEATURE_TRANSFERS = 0x00000001;
-  uint32 public constant FEATURE_TRANSFERS_ON_BEHALF = 0x00000008;
+  uint32 public constant FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
 
-  uint32 public constant ROLE_TOKEN_CREATOR = 0x00000010;
-  uint32 public constant ROLE_STATE_PROVIDER = 0x00000080;
-  uint32 public constant ROLE_ROLE_MANAGER = 0x01000000;
-  uint32 public constant ROLE_FEATURE_MANAGER = 0x08000000;
+  uint32 public constant ROLE_TOKEN_CREATOR = 0x00010000;
+  uint32 public constant ROLE_STATE_PROVIDER = 0x00020000;
+  uint32 public constant ROLE_ROLE_MANAGER = 0x00040000;
+  uint32 public constant ROLE_FEATURE_MANAGER = 0x00080000;
 
   uint32 public constant FULL_PRIVILEGES_MASK = 0xFFFFFFFF;
 
@@ -81,11 +81,11 @@ contract Token {
   /// @dev fired in burn()
   event Burnt(uint80 indexed tokenId, address indexed from, address by);
   /// @dev fired in transfer()
-  event Transfer(address indexed from, address indexed to, uint80 indexed tokenId);
+  event Transfer(address indexed from, address indexed to, uint80 tokenId);
   /// @dev fired in approve()
-  event Approval(address indexed owner, address indexed approved, uint80 indexed tokenId);
+  event Approval(address indexed owner, address indexed approved, uint80 tokenId);
   /// @dev fired in approveForAll()
-  event ApprovalForAll(address indexed owner, address indexed operator, uint256 indexed approved);
+  event ApprovalForAll(address indexed owner, address indexed operator, uint256 approved);
 
   /// @dev Creates a token
   constructor() public {
@@ -223,12 +223,10 @@ contract Token {
   function setLockedBitmask(uint32 bitmask) public {
     // call sender nicely - caller
     address caller = msg.sender;
-    // read caller's permissions
-    uint32 p = userRoles[caller];
 
     // feature must be enabled globally and
     // caller should have a permission to update state
-    require(f & p & ROLE_STATE_PROVIDER == ROLE_STATE_PROVIDER);
+    require(isFeatureEnabledAndUserInRole(caller, ROLE_STATE_PROVIDER));
 
     // update the locked bitmask
     lockedBitmask = bitmask;
@@ -244,12 +242,10 @@ contract Token {
   function setState(uint80 tokenId, uint32 state) public {
     // call sender nicely - caller
     address caller = msg.sender;
-    // read caller's permissions
-    uint32 p = userRoles[caller];
 
     // feature must be enabled globally and
     // caller should have a permission to update state
-    require(f & p & ROLE_STATE_PROVIDER == ROLE_STATE_PROVIDER);
+    require(isFeatureEnabledAndUserInRole(caller, ROLE_STATE_PROVIDER));
 
     // get the token from storage
     uint256 token = tokens[tokenId];
@@ -274,7 +270,7 @@ contract Token {
     uint32 p = userRoles[caller];
 
     // caller should have a permission to update global features
-    require(p & ROLE_FEATURE_MANAGER == ROLE_FEATURE_MANAGER);
+    require(hasRole(p, ROLE_FEATURE_MANAGER));
 
     // taking into account caller's permissions,
     // 1) enable features requested
@@ -304,7 +300,7 @@ contract Token {
 
     // feature must be enabled globally and
     // caller should have a permission to add new operator
-    require(f & p & ROLE_ROLE_MANAGER == ROLE_ROLE_MANAGER);
+    require(isFeatureEnabledAndHasRole(p, ROLE_ROLE_MANAGER));
     // caller cannot grant a permission which he doesn't have himself
     require(p | permissions == p);
     // create is not allowed to overwrite existing operator
@@ -334,7 +330,7 @@ contract Token {
 
     // feature must be enabled globally and
     // caller should have a permission to update operator
-    require(f & p & ROLE_ROLE_MANAGER == ROLE_ROLE_MANAGER);
+    require(isFeatureEnabledAndHasRole(p, ROLE_ROLE_MANAGER));
     // caller cannot grant a permission which he doesn't have himself
     require(p | permissions == p);
 
@@ -353,12 +349,10 @@ contract Token {
   function deleteOperator(address operator) public {
     // call sender nicely - caller
     address caller = msg.sender;
-    // read caller's permissions
-    uint32 p = userRoles[caller];
 
     // feature must be enabled globally and
     // caller should have a permission to remove operator
-    require(f & p & ROLE_ROLE_MANAGER == ROLE_ROLE_MANAGER);
+    require(isFeatureEnabledAndUserInRole(caller, ROLE_ROLE_MANAGER));
 
     // remove an operator
     delete userRoles[operator];
@@ -375,12 +369,10 @@ contract Token {
   function mint(uint80 tokenId, address to) public {
     // call sender nicely - caller
     address caller = msg.sender;
-    // read caller's permissions
-    uint32 p = userRoles[caller];
 
     // feature must be enabled globally and
     // caller should have a permission to mint a token
-    require(f & p & ROLE_TOKEN_CREATOR == ROLE_TOKEN_CREATOR);
+    require(isFeatureEnabledAndUserInRole(caller, ROLE_TOKEN_CREATOR));
     // the token specified should not already exist
     require(tokens[tokenId] == 0);
 
@@ -419,12 +411,10 @@ contract Token {
   function burn(uint80 tokenId) public {
     // call sender nicely - caller
     address caller = msg.sender;
-    // read caller's permissions
-    uint32 p = userRoles[caller];
 
     // feature must be enabled globally and
     // caller should have a permission to burn a token
-    require(f & p & ROLE_TOKEN_CREATOR == ROLE_TOKEN_CREATOR);
+    require(isFeatureEnabledAndUserInRole(caller, ROLE_TOKEN_CREATOR));
 
     // token state should not be locked (gem should not be mining)
     require(!isLocked(tokenId));
@@ -466,7 +456,7 @@ contract Token {
    */
   function transfer(address to, uint80 tokenId) public {
     // feature must be enabled globally
-    require(f & FEATURE_TRANSFERS == FEATURE_TRANSFERS);
+    require(isFeatureEnabled(FEATURE_TRANSFERS));
 
     // call sender nicely - `from`
     address from = msg.sender;
@@ -486,7 +476,7 @@ contract Token {
    */
   function approve(address to, uint80 tokenId) public {
     // feature must be enabled globally
-    require(f & FEATURE_TRANSFERS_ON_BEHALF == FEATURE_TRANSFERS_ON_BEHALF);
+    require(isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
 
     // call sender nicely - caller
     address caller = msg.sender;
@@ -525,7 +515,7 @@ contract Token {
    */
   function approveForAll(address to, uint256 approved) public {
     // feature must be enabled globally
-    require(f & FEATURE_TRANSFERS_ON_BEHALF == FEATURE_TRANSFERS_ON_BEHALF);
+    require(isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
 
     // call sender nicely - caller
     address caller = msg.sender;
@@ -547,7 +537,7 @@ contract Token {
    */
   function transferFrom(address from, address to, uint80 tokenId) public {
     // feature must be enabled globally
-    require(f & FEATURE_TRANSFERS_ON_BEHALF == FEATURE_TRANSFERS_ON_BEHALF);
+    require(isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
 
     // call sender nicely - `operator`
     address operator = msg.sender;
@@ -575,6 +565,33 @@ contract Token {
 
     // delegate call to unsafe `__transfer`
     __transfer(from, to, tokenId);
+  }
+
+  /// @notice Checks if all the specified features (bitmask) are enabled
+  function isFeatureEnabled(uint32 feature) public constant returns (bool) {
+    // evaluate if feature is enabled and return
+    return hasRole(f, feature);
+  }
+
+  /// @notice Checks if all the specified features (bitmask) are enabled
+  function isFeatureEnabledAndUserInRole(address user, uint32 roleRequired) public constant returns (bool) {
+    // read user's permissions (role)
+    uint32 actualRole = userRoles[user];
+
+    // evaluate the feature and user role
+    return isFeatureEnabledAndHasRole(actualRole, roleRequired);
+  }
+
+  /// @notice Checks if all the specified features (bitmask) are enabled
+  function isFeatureEnabledAndHasRole(uint32 actualRole, uint32 roleRequired) public constant returns (bool) {
+    // evaluate the feature and user role
+    return hasRole(f & actualRole, roleRequired);
+  }
+
+  /// @notice Checks if user role `userRole` contain all the permissions required `roleRequired`
+  function hasRole(uint32 actualRole, uint32 roleRequired) public pure returns(bool) {
+    // check the bitmask for the role required and return the result
+    return actualRole & roleRequired == roleRequired;
   }
 
 
