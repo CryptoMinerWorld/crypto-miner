@@ -118,14 +118,15 @@ contract GeodeSale {
     // generate the gems (geode content)
     uint80[] memory gems = __randomGeode(geodeId);
 
-    // mint the gems generated
+    // store gem pointers
+    // TODO: do we need this? can we optimize this?
     for(uint8 i = 0; i < gems.length; i++) {
-      // mint gems[i] to a  player
-      gemContract.mint(gems[i], player);
-
-      // store a gem pointer
+      // store gem pointer
       createdGems[geodeId][i + 1] = gems[i];
     }
+
+    // mint the gems generated
+    gemContract.mintTokens(player, gems);
 
     // emit an event
     emit GeodeCreated(geodeId);

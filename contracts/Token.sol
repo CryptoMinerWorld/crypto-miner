@@ -221,12 +221,9 @@ contract Token {
    *      from the `lockedBitmask` in its `state` set
    */
   function setLockedBitmask(uint32 bitmask) public {
-    // call sender nicely - caller
-    address caller = msg.sender;
-
     // feature must be enabled globally and
     // caller should have a permission to update state
-    require(isFeatureEnabledAndUserInRole(caller, ROLE_STATE_PROVIDER));
+    require(isFeatureEnabledAndSenderInRole(ROLE_STATE_PROVIDER));
 
     // update the locked bitmask
     lockedBitmask = bitmask;
@@ -240,12 +237,9 @@ contract Token {
    * @param state mining state to set
    */
   function setState(uint80 tokenId, uint32 state) public {
-    // call sender nicely - caller
-    address caller = msg.sender;
-
     // feature must be enabled globally and
     // caller should have a permission to update state
-    require(isFeatureEnabledAndUserInRole(caller, ROLE_STATE_PROVIDER));
+    require(isFeatureEnabledAndSenderInRole(ROLE_STATE_PROVIDER));
 
     // get the token from storage
     uint256 token = tokens[tokenId];
@@ -347,12 +341,9 @@ contract Token {
    * @param operator address of the operator to delete
    */
   function deleteOperator(address operator) public {
-    // call sender nicely - caller
-    address caller = msg.sender;
-
     // feature must be enabled globally and
     // caller should have a permission to remove operator
-    require(isFeatureEnabledAndUserInRole(caller, ROLE_ROLE_MANAGER));
+    require(isFeatureEnabledAndSenderInRole(ROLE_ROLE_MANAGER));
 
     // remove an operator
     delete userRoles[operator];
@@ -363,42 +354,44 @@ contract Token {
    * address `to` an ownership of that token.
    * @dev Requires sender to have `ROLE_TOKEN_MANAGER` permission.
    * @dev Requires `ROLE_TOKEN_MANAGER` global feature to be enabled.
-   * @param tokenId ID of the token to create
    * @param to owner address of the newly created token
+   * @param tokenId ID of the token to create
    */
-  function mint(uint80 tokenId, address to) public {
-    // call sender nicely - caller
-    address caller = msg.sender;
+  function mint(address to, uint80 tokenId) public {
+    // validate destination address
+    require(to != address(0));
+    require(to != address(this));
 
     // feature must be enabled globally and
     // caller should have a permission to mint a token
-    require(isFeatureEnabledAndUserInRole(caller, ROLE_TOKEN_CREATOR));
-    // the token specified should not already exist
-    require(tokens[tokenId] == 0);
+    require(isFeatureEnabledAndSenderInRole(ROLE_TOKEN_CREATOR));
 
-    // validate token ID is not zero
-    require(tokenId != 0);
+    // delegate call to `__mint`
+    __mint(to, tokenId);
+  }
 
-    // init token value with current date and new owner address
-    uint256 token = __blockNum() << 192 | uint160(to);
+  /**
+   * @dev Creates several tokens in a single transaction and
+   * assigns an ownership `to` for these tokens
+   * @dev Requires sender to have `ROLE_TOKEN_MANAGER` permission.
+   * @dev Requires `ROLE_TOKEN_MANAGER` global feature to be enabled.
+   * @param to an address to assign created cards ownership to
+   * @param ids IDs ow the tokens to create
+   */
+  function mintTokens(address to, uint80[] ids) public {
+    // validate destination address
+    require(to != address(0));
+    require(to != address(this));
 
-    // token index within the owner's collection of tokens
-    // points to the place where the token will be placed to
-    indexes[tokenId] = uint80(collections[to].length);
+    // feature must be enabled globally and
+    // caller should have a permission to mint tokens
+    require(isFeatureEnabledAndSenderInRole(ROLE_TOKEN_CREATOR));
 
-    // push newly created token ID to the owner's collection of tokens
-    collections[to].push(tokenId);
-
-    // persist newly created token
-    tokens[tokenId] = token;
-
-    // update total tokens number
-    totalSupply++;
-
-    // fire a Mint event
-    emit Minted(tokenId, to, caller);
-    // fire Transfer event (ERC20 compatibility)
-    emit Transfer(address(0), to, tokenId);
+    // iterate over `ids` array and mint each token specified
+    for(uint256 i = 0; i < ids.length; i++) {
+      // delegate call to `__mint`
+      __mint(to, ids[i]);
+    }
   }
 
   /**
@@ -409,12 +402,9 @@ contract Token {
    * @param tokenId ID of the token to destroy
    */
   function burn(uint80 tokenId) public {
-    // call sender nicely - caller
-    address caller = msg.sender;
-
     // feature must be enabled globally and
     // caller should have a permission to burn a token
-    require(isFeatureEnabledAndUserInRole(caller, ROLE_TOKEN_CREATOR));
+    require(isFeatureEnabledAndSenderInRole(ROLE_TOKEN_CREATOR));
 
     // token state should not be locked (gem should not be mining)
     require(!isLocked(tokenId));
@@ -438,7 +428,7 @@ contract Token {
     delete tokens[tokenId];
 
     // fire a Burnt event
-    emit Burnt(tokenId, from, caller);
+    emit Burnt(tokenId, from, msg.sender);
     // fire Transfer event (ERC20 compatibility)
     emit Transfer(from, address(0), tokenId);
   }
@@ -573,8 +563,11 @@ contract Token {
     return hasRole(f, feature);
   }
 
-  /// @notice Checks if all the specified features (bitmask) are enabled
-  function isFeatureEnabledAndUserInRole(address user, uint32 roleRequired) public constant returns (bool) {
+  /// @notice Checks if all the specified features (bitmask) are enabled and if sender is allowed to execute them
+  function isFeatureEnabledAndSenderInRole(uint32 roleRequired) public constant returns (bool) {
+    // call sender gracefully - `user`
+    address user = msg.sender;
+
     // read user's permissions (role)
     uint32 actualRole = userRoles[user];
 
@@ -594,6 +587,36 @@ contract Token {
     return actualRole & roleRequired == roleRequired;
   }
 
+
+  // perform a mint operation, unsafe, private use only
+  function __mint(address to, uint80 tokenId) private {
+    // validate token ID is not zero
+    require(tokenId != 0);
+
+    // the token specified should not already exist
+    require(tokens[tokenId] == 0);
+
+    // init token value with current date and new owner address
+    uint256 token = __blockNum() << 192 | uint160(to);
+
+    // token index within the owner's collection of tokens
+    // points to the place where the token will be placed to
+    indexes[tokenId] = uint80(collections[to].length);
+
+    // push newly created token ID to the owner's collection of tokens
+    collections[to].push(tokenId);
+
+    // persist newly created token
+    tokens[tokenId] = token;
+
+    // update total tokens number
+    totalSupply++;
+
+    // fire a Mint event
+    emit Minted(tokenId, to, msg.sender);
+    // fire Transfer event (ERC20 compatibility)
+    emit Transfer(address(0), to, tokenId);
+  }
 
   // perform an approval, unsafe, private use only
   function __approve(address from, address to, uint80 tokenId) private {
