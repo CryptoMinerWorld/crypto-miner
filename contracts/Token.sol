@@ -8,9 +8,9 @@ pragma solidity 0.4.23;
  */
 contract Token {
   /// @dev Core of the Gem as ERC721 token is mapping
-  ///      gem id => state + owner
-  ///      which maps a Gem ID (ERC721 tokenId) to a
-  ///      uint256 packed struct containing current gem state
+  ///      token id => state + owner
+  ///      which maps a Token ID (ERC721 tokenId) to a
+  ///      uint256 packed struct containing current token state
   ///      and owner address
   mapping(uint80 => uint256) public tokens;
 
@@ -176,14 +176,14 @@ contract Token {
   }
 
   /**
-   * @dev extracts 32 bit integer Gem mining state,
+   * @dev extracts 32 bit integer token state,
    *      which may be used by external operators
    */
   function getState(uint80 tokenId) public constant returns (uint32) {
     // get token state
     uint96 state = getToken(tokenId);
 
-    // extract 32 bits of the mining state and return
+    // extract 32 bits of the token state and return
     return uint32(state >> 64);
   }
 
@@ -191,7 +191,7 @@ contract Token {
    * @dev extracts 31 bit integer block ID when token lock has changed
    */
   function getLastLockingBlock(uint80 tokenId) public constant returns (uint32) {
-    // get mining state
+    // get token state
     uint32 lockingBlock = getState(tokenId);
 
     // overwrite first bit with zero (it contains lock) and return
@@ -199,8 +199,8 @@ contract Token {
   }
 
   /**
-   * @dev checks if the token is in locked state (mining);
-   * locked gem cannot be transferred (change ownership) or
+   * @dev checks if the token is in locked state;
+   * locked token cannot be transferred (change ownership) or
    * destroyed (burnt)
    * @param tokenId ID of the token to check locked status for
    * @return whether the token is locked
@@ -230,11 +230,11 @@ contract Token {
   }
 
   /**
-   * @dev Allows external operator to update Gem's mining state
+   * @dev Allows external operator to update token's state
    * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission.
    * @dev Requires `ROLE_STATE_PROVIDER` global feature to be enabled.
    * @param tokenId ID of the token to update state for
-   * @param state mining state to set
+   * @param state token state to set
    */
   function setState(uint80 tokenId, uint32 state) public {
     // feature must be enabled globally and
@@ -398,7 +398,7 @@ contract Token {
    * @dev Destroys a token with `tokenId` ID specified.
    * @dev Requires sender to have `ROLE_TOKEN_MANAGER` permission.
    * @dev Requires `ROLE_TOKEN_MANAGER` global feature to be enabled.
-   * @dev Requires the gem not to be locked.
+   * @dev Requires the token not to be locked.
    * @param tokenId ID of the token to destroy
    */
   function burn(uint80 tokenId) public {
@@ -406,31 +406,26 @@ contract Token {
     // caller should have a permission to burn a token
     require(isFeatureEnabledAndSenderInRole(ROLE_TOKEN_CREATOR));
 
-    // token state should not be locked (gem should not be mining)
-    require(!isLocked(tokenId));
+    // delegate call to `__burn`
+    __burn(tokenId);
+  }
 
-    // get the token from storage
-    uint256 token = tokens[tokenId];
+  /**
+   * @dev Destroys several tokens in a single transaction
+   * @dev Requires sender to have `ROLE_TOKEN_MANAGER` permission.
+   * @dev Requires `ROLE_TOKEN_MANAGER` global feature to be enabled.
+   * @param ids IDs ow the tokens to destroy
+   */
+  function burnTokens(uint80[] ids) public {
+    // feature must be enabled globally and
+    // caller should have a permission to burn a token
+    require(isFeatureEnabledAndSenderInRole(ROLE_TOKEN_CREATOR));
 
-    // extract token owner address
-    address from = address(token);
-
-    // remove token from the owner's collection
-    __remove(from, tokenId);
-
-    // update total tokens number
-    totalSupply--;
-
-    // delete approval if any
-    __approve(from, address(0), tokenId);
-
-    // delete token
-    delete tokens[tokenId];
-
-    // fire a Burnt event
-    emit Burnt(tokenId, from, msg.sender);
-    // fire Transfer event (ERC20 compatibility)
-    emit Transfer(from, address(0), tokenId);
+    // iterate over `ids` array and burn each token specified
+    for(uint256 i = 0; i < ids.length; i++) {
+      // delegate call to `__burn`
+      __burn(ids[i]);
+    }
   }
 
   /**
@@ -440,7 +435,7 @@ contract Token {
    * @dev Transfers the ownership of a given token ID to another address.
    * @dev Requires transaction sender to be the owner of a token.
    * @dev Requires `FEATURE_TRANSFERS` global feature to be enabled.
-   * @dev Requires the gem not to be locked.
+   * @dev Requires the token not to be locked.
    * @param to address to receive the ownership of the given token ID
    * @param tokenId ID of the token to be transferred
    */
@@ -618,6 +613,36 @@ contract Token {
     emit Transfer(address(0), to, tokenId);
   }
 
+  // perform a burn operation, unsafe, private use only
+  function __burn(uint80 tokenId) private {
+    // token state should not be locked
+    // this check also checks if token exists
+    require(!isLocked(tokenId));
+
+    // get the token from storage
+    uint256 token = tokens[tokenId];
+
+    // extract token owner address
+    address from = address(token);
+
+    // remove token from the owner's collection
+    __remove(from, tokenId);
+
+    // update total tokens number
+    totalSupply--;
+
+    // delete approval if any
+    __approve(from, address(0), tokenId);
+
+    // delete token
+    delete tokens[tokenId];
+
+    // fire a Burnt event
+    emit Burnt(tokenId, from, msg.sender);
+    // fire Transfer event (ERC20 compatibility)
+    emit Transfer(from, address(0), tokenId);
+  }
+
   // perform an approval, unsafe, private use only
   function __approve(address from, address to, uint80 tokenId) private {
     // set an approval
@@ -649,7 +674,7 @@ contract Token {
     // validate token ownership and existence
     require(from == ownerOf(tokenId));
 
-    // token state should not be locked (gem should not be mining)
+    // token state should not be locked
     require(!isLocked(tokenId));
 
     // delegate call to `__move` to update collections
