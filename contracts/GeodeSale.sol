@@ -27,9 +27,8 @@ contract GeodeSale {
   /// @dev Pointer to a next geode to be sold
   uint16 public nextGeode = 1;
 
-  /// @dev All the created gems storage
-  /// @dev Geode ID => Gem ID => Gem UID
-  mapping(uint16 => mapping(uint8 => uint80)) public createdGems;
+  /// @dev Mapping for the geode owners, will be used to issue land plots
+  mapping(uint16 => address) public geodeOwners;
 
   /// @dev A gem to sell, should be set in constructor
   Gem public gemContract;
@@ -41,7 +40,7 @@ contract GeodeSale {
    * @dev event names are self-explanatory
    */
   /// @dev fired in buyGeodes()
-  event GeodeCreated(uint16 indexed plotId);
+  event GeodeSold(uint16 indexed plotId, address indexed owner);
 
   /// @dev Creates a GeodeSale attached to an already deployed Gem smart contract
   constructor(address gemAddress, address _beneficiary) public {
@@ -118,18 +117,14 @@ contract GeodeSale {
     // generate the gems (geode content)
     uint80[] memory gems = __randomGeode(geodeId);
 
-    // store gem pointers
-    // TODO: do we need this? can we optimize this?
-    for(uint8 i = 0; i < gems.length; i++) {
-      // store gem pointer
-      createdGems[geodeId][i + 1] = gems[i];
-    }
+    // store geode owner
+    geodeOwners[geodeId] = player;
 
     // mint the gems generated
     gemContract.mintTokens(player, gems);
 
     // emit an event
-    emit GeodeCreated(geodeId);
+    emit GeodeSold(geodeId, player);
   }
 
   // generates 5 gems for a given geode ID randomly

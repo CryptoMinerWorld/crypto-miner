@@ -16,19 +16,21 @@
 			box-shadow: none;
 		}
 	</style>
+	<link rel="stylesheet" type="text/css" href="bootstrap-alert.css"/>
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://github.com/mouse0270/bootstrap-notify/releases/download/3.1.3/bootstrap-notify.js"></script>
 </head>
 <body>
 <fieldset><legend>Connection Settings</legend>
 	<table>
 		<tr>
 			<td><label for="TokenAddress" title="Deployed Instance Address">Gem (ERC721 Token) Instance Address:</label></td>
-			<td><input id="TokenAddress" type="text" value="0xb9fd306efe737736a05a9d558543ec848b8a245c" size="42"/></td>
+			<td><input id="TokenAddress" type="text" value="0xc169f76e51b0ea410a4e376a5335efbed5e198c2" size="42"/></td>
 		</tr>
 		<tr>
 			<td><label for="SaleAddress" title="Geode Sale Instance Address">Geode Sale Instance Address:</label></td>
 			<td>
-				<input id="SaleAddress" type="text" value="0x9042ef6d8e62ac84d45558c2de0aacae07efbf18" size="42" readonly/>
+				<input id="SaleAddress" type="text" value="0xed2ca6f1bedd4f1e9ffef66a4845d496b7009221" size="42" readonly/>
 				<input type="button" value="Buy Geode" onclick="buy()"/>
 			</td>
 		</tr>
@@ -36,6 +38,19 @@
 			<td></td>
 			<td><input type="button" value="Connect" onclick="connect_gem()"/></td>
 		</tr>
+	</table>
+</fieldset>
+<fieldset><legend>Transfer a Gem</legend>
+	<table>
+		<tr>
+			<td><label for="transfer_gem_id">Gem UID:</label></td>
+			<td><input id="transfer_gem_id" type="text" size="21"/></td>
+		</tr>
+		<tr>
+			<td><label for="transfer_to">Transfer To Address:</label></td>
+			<td><input id="transfer_to" type="text" size="42" value="0x2f4Fe9f655FF9316335D7200169Cd07d598ff7BC"/></td>
+		</tr>
+		<tr><td></td><td><input type="button" value="Transfer" onclick="transfer()"/></td></tr>
 	</table>
 </fieldset>
 <fieldset><legend>Mint a Gem</legend>
@@ -58,19 +73,6 @@
 			<td><input id="burn_gem_id" type="text" size="21"/></td>
 		</tr>
 		<tr><td></td><td><input type="button" value="Burn" onclick="burn()"/></td></tr>
-	</table>
-</fieldset>
-<fieldset><legend>Transfer a Gem</legend>
-	<table>
-		<tr>
-			<td><label for="transfer_gem_id">Gem UID:</label></td>
-			<td><input id="transfer_gem_id" type="text" size="21"/></td>
-		</tr>
-		<tr>
-			<td><label for="transfer_to">Transfer To Address:</label></td>
-			<td><input id="transfer_to" type="text" size="42" value="0x2f4Fe9f655FF9316335D7200169Cd07d598ff7BC"/></td>
-		</tr>
-		<tr><td></td><td><input type="button" value="Transfer" onclick="transfer()"/></td></tr>
 	</table>
 </fieldset>
 <fieldset><legend>Console <input type="button" value="Clear Console" onclick="document.getElementById('console').innerHTML = '';"/></legend>
@@ -105,7 +107,7 @@ function mint() {
 				printError("Mint transaction failed: " + err.toString().split("\n")[0]);
 				return;
 			}
-			printLog("Mint transaction sent: " + txHash);
+			printInfo("Mint transaction sent: " + txHash);
 		});
 	});
 }
@@ -130,7 +132,7 @@ function burn() {
 				printError("Burn transaction failed: " + err.toString().split("\n")[0]);
 				return;
 			}
-			printLog("Burn transaction sent: " + txHash);
+			printInfo("Burn transaction sent: " + txHash);
 		});
 	});
 }
@@ -169,7 +171,7 @@ function transfer() {
 					printError("Transfer transaction failed: " + err.toString().split("\n")[0]);
 					return;
 				}
-				printLog("Transfer transaction sent: " + txHash);
+				printInfo("Transfer transaction sent: " + txHash);
 			});
 		});
 	});

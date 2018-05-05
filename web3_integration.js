@@ -3,8 +3,8 @@ const jQuery3 = jQuery.noConflict();
 const con = document.getElementById("console");
 const tok = document.getElementById("TokenAddress");
 const sale = document.getElementById("SaleAddress");
-const tokAddr = "0xb9fd306efe737736a05a9d558543ec848b8a245c";
-const saleAddr = "0x9042ef6d8e62ac84d45558c2de0aacae07efbf18";
+const tokAddr = "0xc169f76e51b0ea410a4e376a5335efbed5e198c2";
+const saleAddr = "0xed2ca6f1bedd4f1e9ffef66a4845d496b7009221";
 
 let myWeb3;
 let myAccount;
@@ -27,15 +27,14 @@ function init() {
 			printError("Cannot access default account. Is MetaMask locked?");
 			return;
 		}
-		printLog("Web3 integration loaded.");
-		printLog("Your account is " + myAccount);
+		printInfo("Web3 integration loaded. Your account is " + myAccount);
 		myWeb3.eth.getBalance(myAccount, function(err, balance) {
 			if(err) {
 				printError("getBalance() error: " + err);
 				return;
 			}
 			if(balance > 0) {
-				printLog("Your balance is " + myWeb3.fromWei(balance, 'ether'));
+				printInfo("Your balance is " + myWeb3.fromWei(balance, 'ether'));
 			}
 			else {
 				printError("Your balance is zero. You won't be able to send any transaction.");
@@ -46,7 +45,7 @@ function init() {
 				url: "https://rawgit.com/vgorin/crypto-miner/master/build/contracts/Gem.json",
 				dataType: "json",
 				success: function(data, textStatus, jqXHR) {
-					printLog("Gem ABI loaded successfully");
+					printInfo("Gem ABI loaded successfully");
 					gemABI = myWeb3.eth.contract(data.abi);
 					connect_gem();
 				},
@@ -60,7 +59,7 @@ function init() {
 				url: "https://rawgit.com/vgorin/crypto-miner/master/build/contracts/GeodeSale.json",
 				dataType: "json",
 				success: function(data, textStatus, jqXHR) {
-					printLog("GeodeSale ABI loaded successfully");
+					printInfo("GeodeSale ABI loaded successfully");
 					saleABI = myWeb3.eth.contract(data.abi);
 					connect_sale();
 				},
@@ -96,7 +95,7 @@ function connect_gem() {
 				gemInstance = null;
 				return;
 			}
-			printLog("Successfully connected to Gem (ERC721 Token) Instance at " + tokenAddress);
+			printInfo("Successfully connected to Gem (ERC721 Token) Instance at " + tokenAddress);
 			const mintEvent = gemInstance.Minted();
 			mintEvent.watch(function(err, receipt) {
 				if(err) {
@@ -110,9 +109,9 @@ function connect_gem() {
 				const tokenId = receipt.args.tokenId.toString(16);
 				const to = receipt.args.to;
 				const by = receipt.args.by;
-				printLog("Minted(0x" + tokenId + ", " + to + ", " + by + ")");
+				printSuccess("Minted(0x" + tokenId + ", " + to + ", " + by + ")");
 			});
-			printLog("Successfully registered Minted(uint80, address, address) event listener");
+			printInfo("Successfully registered Minted(uint80, address, address) event listener");
 			const burnEvent = gemInstance.Burnt();
 			burnEvent.watch(function(err, receipt) {
 				if(err) {
@@ -126,9 +125,9 @@ function connect_gem() {
 				const tokenId = receipt.args.tokenId.toString(16);
 				const from = receipt.args.from;
 				const by = receipt.args.by;
-				printLog("Burnt(0x" + tokenId + ", " + from + ", " + by + ")");
+				printSuccess("Burnt(0x" + tokenId + ", " + from + ", " + by + ")");
 			});
-			printLog("Successfully registered Burnt(uint80, address, address) event listener");
+			printInfo("Successfully registered Burnt(uint80, address, address) event listener");
 			const transferEvent = gemInstance.Transfer();
 			transferEvent.watch(function(err, receipt) {
 				if(err) {
@@ -142,9 +141,9 @@ function connect_gem() {
 				const from = receipt.args.from;
 				const to = receipt.args.to;
 				const gemId = receipt.args.tokenId.toString(16);
-				printLog("Transfer(" + from + ", " + to + ", 0x" + gemId + ")");
+				printSuccess("Transfer(" + from + ", " + to + ", 0x" + gemId + ")");
 			});
-			printLog("Successfully registered Transfer(address, address, uint80) event listener");
+			printInfo("Successfully registered Transfer(address, address, uint80) event listener");
 			gemInstance.balanceOf(myAccount, function(err, balance) {
 				if(err) {
 					printError("Unable to read gem balance: " + err);
@@ -152,19 +151,19 @@ function connect_gem() {
 					return;
 				}
 				if(balance > 0) {
-					printLog("You own " + balance + " gem(s):");
+					printInfo("You own " + balance + " gem(s):");
 					for(let i = 0; i < balance; i++) {
 						gemInstance.collections(myAccount, i, function(err, gemId) {
 							if(err) {
 								printError("Cannot load list of the gems");
 								return;
 							}
-							printLog("0x" + gemId.toString(16));
+							printInfo("0x" + gemId.toString(16));
 						});
 					}
 				}
 				else {
-					printLog("You don't own any gems");
+					printInfo("You don't own any gems");
 				}
 			});
 		});
@@ -187,6 +186,21 @@ function connect_sale() {
 	}
 	const saleAddress = sale ? sale.value : saleAddr;
 	saleInstance = saleABI.at(saleAddress);
+	const saleEvent = gemInstance.GeodeSold();
+	saleEvent.watch(function(err, receipt) {
+		if(err) {
+			printError("Error receiving GeodeSold event: " + err);
+			return;
+		}
+		if(!(receipt && receipt.args && receipt.args.plotId && receipt.args.owner)) {
+			printError("GeodeSold event received in wrong format: wrong arguments");
+			return;
+		}
+		const plotId = receipt.args.plotId;
+		const owner = receipt.args.owner;
+		printSuccess("GeodeSold(" + plotId + ", " + owner + ")");
+	});
+	printInfo("Successfully registered GeodeSold(uint16, address) event listener");
 	saleInstance.GEODE_PRICE(function(err, price) {
 		if(err) {
 			printError("Unable to read geode price value");
@@ -194,7 +208,6 @@ function connect_sale() {
 			return;
 		}
 		const priceETH = myWeb3.fromWei(price, "ether");
-		printLog("Geode price is " + price + " wei (" + priceETH + " ETH)");
 		geodePriceETH = priceETH.toString(10);
 		saleInstance.geodesSold(function(err, sold) {
 			if(err) {
@@ -202,7 +215,6 @@ function connect_sale() {
 				saleInstance = null;
 				return;
 			}
-			printLog(sold + " geodes sold");
 			geodesSold = sold.toString(10);
 		});
 	});
@@ -222,7 +234,7 @@ function buy() {
 				printError("Transaction failed: " + err.toString().split("\n")[0]);
 				return;
 			}
-			printLog("Transaction sent: " + txHash);
+			printInfo("Transaction sent: " + txHash);
 		});
 	}
 	catch(err) {
@@ -230,12 +242,27 @@ function buy() {
 	}
 }
 
-function printLog(msg) {
+function printInfo(msg) {
 	console.log(msg);
 	if(con) {
 		con.innerHTML += msg;
 		con.innerHTML += "\n";
 	}
+}
+
+function printSuccess(msg) {
+	console.log(msg);
+	if(con) {
+		con.innerHTML += '<span style="color: darkgreen;">' + msg + '</span>';
+		con.innerHTML += "\n";
+	}
+	jQuery3.notify(msg, {
+		type: "success",
+		placement: {
+			from: "bottom",
+			align: "right"
+		}
+	});
 }
 
 function printError(msg) {
@@ -244,6 +271,13 @@ function printError(msg) {
 		con.innerHTML += '<span style="color: red;">' + msg + '</span>';
 		con.innerHTML += "\n";
 	}
+	jQuery3.notify(msg, {
+		type: "danger",
+		placement: {
+			from: "bottom",
+			align: "right"
+		}
+	});
 }
 
 jQuery3(document).ready(function() {
@@ -252,7 +286,7 @@ jQuery3(document).ready(function() {
 	setInterval(function() {
 		if(myWeb3 && myWeb3.eth.accounts[0] !== myAccount) {
 			myAccount = myWeb3.eth.accounts[0];
-			printLog("Your account is switched to " + myAccount);
+			printInfo("Your account is switched to " + myAccount);
 		}
 		if(geodesSold) {
 			jQuery3("span.counter").html(geodesSold);
