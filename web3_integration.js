@@ -39,7 +39,7 @@ function init() {
 			jQuery3.ajax({
 				async: false,
 				global: false,
-				url: "https://cdn.rawgit.com/vgorin/crypto-miner/master/build/contracts/Gem.json",
+				url: "https://rawgit.com/vgorin/crypto-miner/master/build/contracts/Gem.json",
 				dataType: "json",
 				success: function(data, textStatus, jqXHR) {
 					printLog("Gem ABI loaded successfully");
@@ -52,7 +52,7 @@ function init() {
 			jQuery3.ajax({
 				async: false,
 				global: false,
-				url: "https://cdn.rawgit.com/vgorin/crypto-miner/master/build/contracts/GeodeSale.json",
+				url: "https://rawgit.com/vgorin/crypto-miner/master/build/contracts/GeodeSale.json",
 				dataType: "json",
 				success: function(data, textStatus, jqXHR) {
 					printLog("GeodeSale ABI loaded successfully");
