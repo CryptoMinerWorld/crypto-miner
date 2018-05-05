@@ -68,10 +68,10 @@ contract('GeodeSale', function(accounts) {
 		assert.equal(gemsInGeode, await token.totalSupply(), "wrong number of gems in geode");
 		assert.equal(gemsInGeode, await token.balanceOf(accounts[1]), "wrong number of gems on account");
 
-		const gemNumber15 = await sale.createdGems(1, 15);
+		const gemNumber5 = await sale.createdGems(1, 5);
 
-		assert(await token.exists(gemNumber15), "gem #15 doesn't exist!");
-		assert.equal(accounts[1], await token.ownerOf(gemNumber15), "gem #15 has wrong owner");
+		assert(await token.exists(gemNumber5), "gem #5 doesn't exist!");
+		assert.equal(accounts[1], await token.ownerOf(gemNumber5), "gem #5 has wrong owner");
 	});
 	it("geode sale: gems created from the geode have correct coordinates", async function() {
 		const token = await Token.new();
@@ -81,11 +81,11 @@ contract('GeodeSale', function(accounts) {
 		await token.createOperator(sale.address, ROLE_TOKEN_CREATOR);
 		await sale.getGeodes.sendTransaction({from: accounts[1], value: await sale.GEODE_PRICE()});
 
-		const gemNumber10 = await sale.createdGems(1, 10);
+		const gemNumber10 = await sale.createdGems(1, 4);
 		const gemId = gemNumber10.modulo(256);
 		const blockId = gemNumber10.dividedToIntegerBy(256).modulo(256 * 256);
 		const plotId = gemNumber10.dividedToIntegerBy(16777216).modulo(16777216);
-		assert.equal(0xA, gemId, "gemId coordinate is wrong");
+		assert.equal(0x4, gemId, "gemId coordinate is wrong");
 		assert.equal(0, blockId, "blockId coordinate is wrong");
 		assert.equal(1, plotId, "plotId coordinate is wrong");
 	});
@@ -111,6 +111,7 @@ contract('GeodeSale', function(accounts) {
 			assert.equal(1 + Math.floor(i / GEMS_IN_GEODE), plotId, "plotId coordinate is wrong");
 		}
 	});
+/*
 	it("geode sale: gems created from the geode contain 5 gems of the same color", async function() {
 		const token = await Token.new();
 		const sale = await Sale.new(token.address, accounts[9]);
@@ -135,6 +136,28 @@ contract('GeodeSale', function(accounts) {
 			}
 		}
 		assert(maxColors >= 5, "there are no 5 gems of the same color");
+	});
+*/
+	it("geode sale: gems created from the geode contain 1 gem of the level 2", async function() {
+		const token = await Token.new();
+		const sale = await Sale.new(token.address, accounts[9]);
+
+		await token.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
+		await token.createOperator(sale.address, ROLE_TOKEN_CREATOR);
+		const GEMS_IN_GEODE = await sale.GEMS_IN_GEODE();
+		const GEODE_PRICE = await sale.GEODE_PRICE();
+		await sale.getGeodes.sendTransaction({from: accounts[1], value: GEODE_PRICE});
+
+		let level2Found = false;
+		for(let i = 0; i < GEMS_IN_GEODE; i++) {
+			const gemUid = await token.collections(accounts[1], i);
+			const levelId = gemUid.dividedToIntegerBy(4294967296).dividedToIntegerBy(4294967296).dividedToIntegerBy(256).modulo(256);
+			if(levelId == 2) {
+				level2Found = true;
+			}
+		}
+
+		assert(level2Found, "there is no level 2 gem in the collection");
 	});
 	it("geode sale: gems created from the geode contain 1 gem of the grade A", async function() {
 		const token = await Token.new();
