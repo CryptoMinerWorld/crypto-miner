@@ -96,7 +96,7 @@ function connect_gem() {
 				return;
 			}
 			printInfo("Successfully connected to Gem (ERC721 Token) Instance at " + tokenAddress);
-			const mintEvent = gemInstance.Minted();
+			const mintEvent = gemInstance.Minted({}, {fromBlock: "latest", toBlock: "latest"});
 			mintEvent.watch(function(err, receipt) {
 				if(err) {
 					printError("Error receiving Minted event: " + err);
@@ -112,7 +112,7 @@ function connect_gem() {
 				printInfo("Minted(0x" + tokenId + ", " + to + ", " + by + ")");
 			});
 			printInfo("Successfully registered Minted(uint80, address, address) event listener");
-			const burnEvent = gemInstance.Burnt();
+			const burnEvent = gemInstance.Burnt({}, {fromBlock: "latest", toBlock: "latest"});
 			burnEvent.watch(function(err, receipt) {
 				if(err) {
 					printError("Error receiving Burnt event: " + err);
@@ -128,7 +128,7 @@ function connect_gem() {
 				printInfo("Burnt(0x" + tokenId + ", " + from + ", " + by + ")");
 			});
 			printInfo("Successfully registered Burnt(uint80, address, address) event listener");
-			const transferEvent = gemInstance.Transfer();
+			const transferEvent = gemInstance.Transfer({}, {fromBlock: "latest", toBlock: "latest"});
 			transferEvent.watch(function(err, receipt) {
 				if(err) {
 					printError("Error receiving Transfer event: " + err);
@@ -187,7 +187,7 @@ function connect_sale() {
 	const saleAddress = sale ? sale.value : saleAddr;
 	saleInstance = saleABI.at(saleAddress);
 	try {
-		const saleEvent = saleInstance.GeodeSold();
+		const saleEvent = saleInstance.GeodeSold({}, {fromBlock: "latest", toBlock: "latest"});
 		saleEvent.watch(function(err, receipt) {
 			if(err) {
 				printError("Error receiving GeodeSold event: " + err);
