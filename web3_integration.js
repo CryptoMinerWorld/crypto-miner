@@ -193,7 +193,7 @@ function connect_sale() {
 			return;
 		}
 		printLog(sold + " geodes sold");
-		geodesSold = sold;
+		geodesSold = sold.toString(10);
 	});
 }
 
@@ -248,5 +248,7 @@ jQuery3(document).ready(function() {
 		}
 	}, 988);
 
-	jQuery3("#GetGeodeButton").bind("click", buy);
+	const getGeodeButton = jQuery3("#GetGeodeButton");
+	getGeodeButton.bind("click", buy);
+	getGeodeButton.css("cursor", "pointer");
 });
