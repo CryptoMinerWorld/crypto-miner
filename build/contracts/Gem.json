@@ -1013,7 +1013,7 @@
         "id": 2,
         "nodeType": "ImportDirective",
         "scope": 15,
-        "sourceUnit": 2031,
+        "sourceUnit": 2037,
         "src": "25:21:0",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1027,10 +1027,10 @@
               "id": 3,
               "name": "Token",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2030,
+              "referencedDeclaration": 2036,
               "src": "145:5:0",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Token_$2030",
+                "typeIdentifier": "t_contract$_Token_$2036",
                 "typeString": "contract Token"
               }
             },
@@ -1040,7 +1040,7 @@
           }
         ],
         "contractDependencies": [
-          2030
+          2036
         ],
         "contractKind": "contract",
         "documentation": "@dev extends Token by adding ERC20 compliant token symbol, name and decimals",
@@ -1048,7 +1048,7 @@
         "id": 14,
         "linearizedBaseContracts": [
           14,
-          2030
+          2036
         ],
         "name": "Gem",
         "nodeType": "ContractDefinition",
@@ -1215,7 +1215,7 @@
         "id": 2,
         "nodeType": "ImportDirective",
         "scope": 15,
-        "sourceUnit": 2031,
+        "sourceUnit": 2037,
         "src": "25:21:0",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1229,10 +1229,10 @@
               "id": 3,
               "name": "Token",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2030,
+              "referencedDeclaration": 2036,
               "src": "145:5:0",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Token_$2030",
+                "typeIdentifier": "t_contract$_Token_$2036",
                 "typeString": "contract Token"
               }
             },
@@ -1242,7 +1242,7 @@
           }
         ],
         "contractDependencies": [
-          2030
+          2036
         ],
         "contractKind": "contract",
         "documentation": "@dev extends Token by adding ERC20 compliant token symbol, name and decimals",
@@ -1250,7 +1250,7 @@
         "id": 14,
         "linearizedBaseContracts": [
           14,
-          2030
+          2036
         ],
         "name": "Gem",
         "nodeType": "ContractDefinition",
@@ -1399,8 +1399,8 @@
     "4": {
       "events": {},
       "links": {},
-      "address": "0xc169f76e51b0ea410a4e376a5335efbed5e198c2",
-      "transactionHash": "0x922132e89c92e698b01c07d2a07b4ae3ff527dffd566478e9dc20653dca9e78a"
+      "address": "0x25fa9ad79b9c0da7baac2c1e2b56c12096a77126",
+      "transactionHash": "0x4a3154fae95e2920637b6e9008c19274f75ca3b7c4423ae3f30dd9bb8992c394"
     },
     "1523175947627": {
       "events": {},
@@ -1409,5 +1409,5 @@
     }
   },
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-05T17:59:05.933Z"
+  "updatedAt": "2018-05-05T19:26:20.219Z"
 }

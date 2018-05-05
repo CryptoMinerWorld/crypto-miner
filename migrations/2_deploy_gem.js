@@ -1,4 +1,13 @@
 module.exports = async function(deployer, network, accounts) {
+	if(network === "test") {
+		console.log("[deploy gem] test network - skipping the migration script");
+		return;
+	}
+	if(network === "coverage") {
+		console.log("[deploy gem] coverage network - skipping the migration script");
+		return;
+	}
+
 	const Gem = artifacts.require("./Gem");
 	const Sale = artifacts.require("./GeodeSale");
 
