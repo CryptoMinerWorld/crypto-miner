@@ -75,7 +75,7 @@ let gemInstance;
 
 function connect_gem() {
 	if(!(myWeb3 && gemABI && myAccount)) {
-		printError("Page is not properly initialized. Reload the page.");
+		printError("Web3 is not properly initialized. Reload the page.");
 		gemInstance = null;
 		return;
 	}
@@ -109,7 +109,7 @@ function connect_gem() {
 				const tokenId = receipt.args.tokenId.toString(16);
 				const to = receipt.args.to;
 				const by = receipt.args.by;
-				printSuccess("Minted(0x" + tokenId + ", " + to + ", " + by + ")");
+				printInfo("Minted(0x" + tokenId + ", " + to + ", " + by + ")");
 			});
 			printInfo("Successfully registered Minted(uint80, address, address) event listener");
 			const burnEvent = gemInstance.Burnt();
@@ -125,7 +125,7 @@ function connect_gem() {
 				const tokenId = receipt.args.tokenId.toString(16);
 				const from = receipt.args.from;
 				const by = receipt.args.by;
-				printSuccess("Burnt(0x" + tokenId + ", " + from + ", " + by + ")");
+				printInfo("Burnt(0x" + tokenId + ", " + from + ", " + by + ")");
 			});
 			printInfo("Successfully registered Burnt(uint80, address, address) event listener");
 			const transferEvent = gemInstance.Transfer();
@@ -141,7 +141,7 @@ function connect_gem() {
 				const from = receipt.args.from;
 				const to = receipt.args.to;
 				const gemId = receipt.args.tokenId.toString(16);
-				printSuccess("Transfer(" + from + ", " + to + ", 0x" + gemId + ")");
+				printInfo("Transfer(" + from + ", " + to + ", 0x" + gemId + ")");
 			});
 			printInfo("Successfully registered Transfer(address, address, uint80) event listener");
 			gemInstance.balanceOf(myAccount, function(err, balance) {
@@ -180,7 +180,7 @@ let geodePriceETH;
 
 function connect_sale() {
 	if(!(myWeb3 && saleABI && myAccount)) {
-		printError("Page is not properly initialized. Reload the page.");
+		printError("Web3 is not properly initialized. Reload the page.");
 		gemInstance = null;
 		return;
 	}
@@ -199,7 +199,8 @@ function connect_sale() {
 			}
 			const plotId = receipt.args.plotId;
 			const owner = receipt.args.owner;
-			printSuccess("GeodeSold(" + plotId + ", " + owner + ")");
+			printInfo("GeodeSold(" + plotId + ", " + owner + ")");
+			notifySuccess("Successfully bought geode #" + plotId);
 		});
 		printInfo("Successfully registered GeodeSold(uint16, address) event listener");
 		saleInstance.GEODE_PRICE(function(err, price) {
@@ -230,7 +231,7 @@ function buy() {
 	connect_sale();
 
 	if(!(myWeb3 && saleInstance && myAccount)) {
-		printError("Page is not properly initialized. Reload the page.");
+		printError("Web3 is not properly initialized. Reload the page.");
 		saleInstance = null;
 		return;
 	}
@@ -245,6 +246,7 @@ function buy() {
 	}
 	catch(err) {
 		printError("Cannot access GeodeSale Instance: " + err);
+		saleInstance = null;
 	}
 }
 
@@ -262,6 +264,16 @@ function printSuccess(msg) {
 		con.innerHTML += '<span style="color: darkgreen;">' + msg + '</span>';
 		con.innerHTML += "\n";
 	}
+	jQuery3.notify(msg, {
+		type: "success",
+		placement: {
+			from: "bottom",
+			align: "right"
+		}
+	});
+}
+
+function notifySuccess(msg) {
 	jQuery3.notify(msg, {
 		type: "success",
 		placement: {
