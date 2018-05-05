@@ -103,7 +103,7 @@ contract GeodeSale {
     nextGeode += uint16(geodesToSell);
 
     // send the value to the beneficiary
-//    beneficiary.transfer(value);
+    beneficiary.transfer(value);
 
     // send change back to player
     if(change > 0) {
