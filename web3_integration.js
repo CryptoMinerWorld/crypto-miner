@@ -3,8 +3,8 @@ const jQuery3 = jQuery.noConflict();
 const con = document.getElementById("console");
 const tok = document.getElementById("TokenAddress");
 const sale = document.getElementById("SaleAddress");
-const tokAddr = "0x433c6907702fcd91738d2641e0e37394586e5251";
-const saleAddr = "0x1a84e8c635250b7ee1695f80c9545d376cd5a2ac";
+const tokAddr = "0xb9fd306efe737736a05a9d558543ec848b8a245c";
+const saleAddr = "0x9042ef6d8e62ac84d45558c2de0aacae07efbf18";
 
 let myWeb3;
 let myAccount;
