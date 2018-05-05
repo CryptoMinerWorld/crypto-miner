@@ -176,6 +176,7 @@ function connect_gem() {
 }
 
 let saleInstance;
+let geodesSold;
 
 function connect_sale() {
 	if(!(myWeb3 && saleABI && myAccount)) {
@@ -192,6 +193,7 @@ function connect_sale() {
 			return;
 		}
 		printLog(sold + " geodes sold");
+		geodesSold = sold;
 	});
 }
 
@@ -233,12 +235,17 @@ function printError(msg) {
 	}
 }
 
-init();
+jQuery3(document).load(function() {
+	init();
 
-setInterval(function() {
-	if(myWeb3 && myWeb3.eth.accounts[0] !== myAccount) {
-		myAccount = myWeb3.eth.accounts[0];
-		printLog("Your account is switched to " + myAccount);
-	}
-}, 988);
+	setInterval(function() {
+		if(myWeb3 && myWeb3.eth.accounts[0] !== myAccount) {
+			myAccount = myWeb3.eth.accounts[0];
+			printLog("Your account is switched to " + myAccount);
+		}
+		if(geodesSold) {
+			jQuery3("span.counter").val(geodesSold);
+		}
+	}, 988);
 
+});
