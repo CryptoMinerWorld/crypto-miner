@@ -235,7 +235,7 @@ function printError(msg) {
 	}
 }
 
-jQuery3(document).load(function() {
+jQuery3(document).ready(function() {
 	init();
 
 	setInterval(function() {
