@@ -2,7 +2,9 @@ const jQuery3 = jQuery.noConflict();
 
 const con = document.getElementById("console");
 const tok = document.getElementById("TokenAddress");
+const sale = document.getElementById("SaleAddress");
 const tokAddr = "0x433c6907702fcd91738d2641e0e37394586e5251";
+const saleAddr = "0x1a84e8c635250b7ee1695f80c9545d376cd5a2ac";
 
 let myWeb3;
 let myAccount;
@@ -46,6 +48,7 @@ function init() {
 				success: function(data, textStatus, jqXHR) {
 					printLog("Gem ABI loaded successfully");
 					gemABI = myWeb3.eth.contract(data.abi);
+					connect_gem();
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
 					printError("Cannot load Gem ABI: " + errorThrown);
@@ -59,7 +62,7 @@ function init() {
 				success: function(data, textStatus, jqXHR) {
 					printLog("GeodeSale ABI loaded successfully");
 					saleABI = myWeb3.eth.contract(data.abi);
-					connect();
+					connect_sale();
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
 					printError("Cannot load GeodeSale ABI: " + errorThrown);
@@ -71,7 +74,7 @@ function init() {
 
 let gemInstance;
 
-function connect() {
+function connect_gem() {
 	if(!(myWeb3 && gemABI && myAccount)) {
 		printError("Page is not properly initialized. Reload the page.");
 		gemInstance = null;
@@ -169,6 +172,48 @@ function connect() {
 	catch(err) {
 		printError("Cannot access Gem (ERC721 Token) Instance: " + err);
 		gemInstance = null;
+	}
+}
+
+let saleInstance;
+
+function connect_sale() {
+	if(!(myWeb3 && saleABI && myAccount)) {
+		printError("Page is not properly initialized. Reload the page.");
+		gemInstance = null;
+		return;
+	}
+	const saleAddress = sale ? sale.value : saleAddr;
+	saleInstance = saleABI.at(saleAddress);
+	saleInstance.geodesSold(function(err, sold) {
+		if(err) {
+			printError("Unable to read geodes sold value: " + err);
+			saleInstance = null;
+			return;
+		}
+		printLog(sold + " geodes sold");
+	});
+}
+
+function buy() {
+	connect_sale();
+
+	if(!(myWeb3 && saleInstance && myAccount)) {
+		printError("Page is not properly initialized. Reload the page.");
+		saleInstance = null;
+		return;
+	}
+	try {
+		saleInstance.getGeodes.sendTransaction({value: 100000000000000000}, function(err, txHash) {
+			if(err) {
+				printError("Transaction failed: " + err.toString().split("\n")[0]);
+				return;
+			}
+			printLog("Transaction sent: " + txHash);
+		});
+	}
+	catch(err) {
+		printError("Cannot access GeodeSale Instance: " + err);
 	}
 }
 

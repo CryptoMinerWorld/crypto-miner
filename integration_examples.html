@@ -34,7 +34,7 @@
 		</tr>
 		<tr>
 			<td></td>
-			<td><input type="button" value="Connect" onclick="connect()"/></td>
+			<td><input type="button" value="Connect" onclick="connect_gem()"/></td>
 		</tr>
 	</table>
 </fieldset>
@@ -175,26 +175,6 @@ function transfer() {
 	});
 }
 
-function buy() {
-	if(!(myWeb3 && saleABI && myAccount)) {
-		printError("Page is not properly initialized. Reload the page.");
-		gemInstance = null;
-		return;
-	}
-	const saleAddress = document.getElementById("SaleAddress").value;
-	const saleInstance = saleABI.at(saleAddress);
-	try {
-		saleInstance.getGeodes.sendTransaction({value: 100000000000000000}, function(err, txHash) {
-			if(err) {
-				printError("Transaction failed: " + err.toString().split("\n")[0]);
-				return;
-			}
-			printLog("Transaction sent: " + txHash);
-		});
-	}
-	catch(err) {
-		printError("Cannot access GeodeSale Instance: " + err);
-	}
-}
+
 </script>
 </html>
