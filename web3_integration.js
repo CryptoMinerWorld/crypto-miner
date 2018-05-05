@@ -248,4 +248,5 @@ jQuery3(document).ready(function() {
 		}
 	}, 988);
 
+	jQuery3("#GetGeodeButton").bind("click", buy);
 });
