@@ -68,9 +68,8 @@ contract('GeodeSale', function(accounts) {
 		assert.equal(gemsInGeode, await token.totalSupply(), "wrong number of gems in geode");
 		assert.equal(gemsInGeode, await token.balanceOf(accounts[1]), "wrong number of gems on account");
 
-		const gemNumber5 = await sale.createdGems(1, 5);
+		const gemNumber5 = await token.collections(accounts[1], 4);
 
-		assert(await token.exists(gemNumber5), "gem #5 doesn't exist!");
 		assert.equal(accounts[1], await token.ownerOf(gemNumber5), "gem #5 has wrong owner");
 	});
 	it("geode sale: gems created from the geode have correct coordinates", async function() {
@@ -81,10 +80,10 @@ contract('GeodeSale', function(accounts) {
 		await token.createOperator(sale.address, ROLE_TOKEN_CREATOR);
 		await sale.getGeodes.sendTransaction({from: accounts[1], value: await sale.GEODE_PRICE()});
 
-		const gemNumber10 = await sale.createdGems(1, 4);
-		const gemId = gemNumber10.modulo(256);
-		const blockId = gemNumber10.dividedToIntegerBy(256).modulo(256 * 256);
-		const plotId = gemNumber10.dividedToIntegerBy(16777216).modulo(16777216);
+		const gemNumber4 = await token.collections(accounts[1], 3);
+		const gemId = gemNumber4.modulo(256);
+		const blockId = gemNumber4.dividedToIntegerBy(256).modulo(256 * 256);
+		const plotId = gemNumber4.dividedToIntegerBy(16777216).modulo(16777216);
 		assert.equal(0x4, gemId, "gemId coordinate is wrong");
 		assert.equal(0, blockId, "blockId coordinate is wrong");
 		assert.equal(1, plotId, "plotId coordinate is wrong");
