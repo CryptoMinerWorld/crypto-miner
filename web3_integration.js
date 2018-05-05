@@ -186,38 +186,44 @@ function connect_sale() {
 	}
 	const saleAddress = sale ? sale.value : saleAddr;
 	saleInstance = saleABI.at(saleAddress);
-	const saleEvent = gemInstance.GeodeSold();
-	saleEvent.watch(function(err, receipt) {
-		if(err) {
-			printError("Error receiving GeodeSold event: " + err);
-			return;
-		}
-		if(!(receipt && receipt.args && receipt.args.plotId && receipt.args.owner)) {
-			printError("GeodeSold event received in wrong format: wrong arguments");
-			return;
-		}
-		const plotId = receipt.args.plotId;
-		const owner = receipt.args.owner;
-		printSuccess("GeodeSold(" + plotId + ", " + owner + ")");
-	});
-	printInfo("Successfully registered GeodeSold(uint16, address) event listener");
-	saleInstance.GEODE_PRICE(function(err, price) {
-		if(err) {
-			printError("Unable to read geode price value");
-			saleInstance = null;
-			return;
-		}
-		const priceETH = myWeb3.fromWei(price, "ether");
-		geodePriceETH = priceETH.toString(10);
-		saleInstance.geodesSold(function(err, sold) {
+	try {
+		const saleEvent = gemInstance.GeodeSold();
+		saleEvent.watch(function(err, receipt) {
 			if(err) {
-				printError("Unable to read geodes sold value: " + err);
+				printError("Error receiving GeodeSold event: " + err);
+				return;
+			}
+			if(!(receipt && receipt.args && receipt.args.plotId && receipt.args.owner)) {
+				printError("GeodeSold event received in wrong format: wrong arguments");
+				return;
+			}
+			const plotId = receipt.args.plotId;
+			const owner = receipt.args.owner;
+			printSuccess("GeodeSold(" + plotId + ", " + owner + ")");
+		});
+		printInfo("Successfully registered GeodeSold(uint16, address) event listener");
+		saleInstance.GEODE_PRICE(function(err, price) {
+			if(err) {
+				printError("Unable to read geode price value");
 				saleInstance = null;
 				return;
 			}
-			geodesSold = sold.toString(10);
+			const priceETH = myWeb3.fromWei(price, "ether");
+			geodePriceETH = priceETH.toString(10);
+			saleInstance.geodesSold(function(err, sold) {
+				if(err) {
+					printError("Unable to read geodes sold value: " + err);
+					saleInstance = null;
+					return;
+				}
+				geodesSold = sold.toString(10);
+			});
 		});
-	});
+	}
+	catch(e) {
+		printError("Cannot access GeodeSale Instance: " + err);
+		saleInstance = null;
+	}
 }
 
 function buy() {
