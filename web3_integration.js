@@ -187,7 +187,7 @@ function connect_sale() {
 	const saleAddress = sale ? sale.value : saleAddr;
 	saleInstance = saleABI.at(saleAddress);
 	try {
-		const saleEvent = gemInstance.GeodeSold();
+		const saleEvent = saleInstance.GeodeSold();
 		saleEvent.watch(function(err, receipt) {
 			if(err) {
 				printError("Error receiving GeodeSold event: " + err);
