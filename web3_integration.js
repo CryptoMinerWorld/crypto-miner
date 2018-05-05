@@ -244,7 +244,7 @@ jQuery3(document).ready(function() {
 			printLog("Your account is switched to " + myAccount);
 		}
 		if(geodesSold) {
-			jQuery3("span.counter").val(geodesSold);
+			jQuery3("span.counter").html(geodesSold);
 		}
 	}, 988);
 
