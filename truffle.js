@@ -12,6 +12,13 @@ module.exports = {
 			gas: 4700000,
 			gasPrice: 20000000000 // 20 GWei
 		},
+		coverage: {
+			host: "localhost",
+			network_id: "*",
+			port: 8555,
+			gas: 0xfffffffffff,
+			gasPrice: 0x01
+		}
 	},
 	/*
 		solc: {
