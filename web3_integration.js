@@ -193,7 +193,9 @@ function connect_sale() {
 			saleInstance = null;
 			return;
 		}
-		geodePriceETH = myWeb3.fromWei(price, "ether");
+		const priceETH = myWeb3.fromWei(price, "ether");
+		printLog("Geode price is " + price + " wei (" + priceETH + " ETH)");
+		geodePriceETH = priceETH.toString(10);
 		saleInstance.geodesSold(function(err, sold) {
 			if(err) {
 				printError("Unable to read geodes sold value: " + err);
