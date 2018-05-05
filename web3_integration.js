@@ -240,7 +240,7 @@ function buy() {
 				printError("Transaction failed: " + err.toString().split("\n")[0]);
 				return;
 			}
-			printInfo("Transaction sent: " + txHash);
+			printSuccess("Transaction sent: " + txHash);
 		});
 	}
 	catch(err) {
