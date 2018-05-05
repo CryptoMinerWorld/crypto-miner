@@ -177,6 +177,7 @@ function connect_gem() {
 
 let saleInstance;
 let geodesSold;
+let geodePriceETH;
 
 function connect_sale() {
 	if(!(myWeb3 && saleABI && myAccount)) {
@@ -186,14 +187,22 @@ function connect_sale() {
 	}
 	const saleAddress = sale ? sale.value : saleAddr;
 	saleInstance = saleABI.at(saleAddress);
-	saleInstance.geodesSold(function(err, sold) {
+	saleInstance.GEODE_PRICE(function(err, price) {
 		if(err) {
-			printError("Unable to read geodes sold value: " + err);
+			printError("Unable to read geode price value");
 			saleInstance = null;
 			return;
 		}
-		printLog(sold + " geodes sold");
-		geodesSold = sold.toString(10);
+		geodePriceETH = myWeb3.fromWei(price, "ether");
+		saleInstance.geodesSold(function(err, sold) {
+			if(err) {
+				printError("Unable to read geodes sold value: " + err);
+				saleInstance = null;
+				return;
+			}
+			printLog(sold + " geodes sold");
+			geodesSold = sold.toString(10);
+		});
 	});
 }
 
@@ -245,6 +254,9 @@ jQuery3(document).ready(function() {
 		}
 		if(geodesSold) {
 			jQuery3("span.counter").html(geodesSold);
+		}
+		if(geodePriceETH) {
+			jQuery3("#geodePriceETH").html(geodePriceETH);
 		}
 	}, 988);
 
