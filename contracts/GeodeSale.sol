@@ -13,7 +13,7 @@ contract GeodeSale {
   uint256 public constant GEODE_PRICE = 100 finney;
 
   /// @notice Amount of gems in a geode
-  uint8 public constant GEMS_IN_GEODE = 15;
+  uint8 public constant GEMS_IN_GEODE = 5;
 
   /// @notice Number of different colors defined for a gem
   uint8 public constant COLORS = 12;
@@ -132,7 +132,7 @@ contract GeodeSale {
     emit GeodeCreated(geodeId);
   }
 
-  // generates 15 gems for a given geode ID randomly
+  // generates 5 gems for a given geode ID randomly
   function __randomGeode(uint16 geodeId) private constant returns(uint80[]) {
     // define an array of gems to return as a result of opening the geode specified
     uint80[] memory gems = new uint80[](GEMS_IN_GEODE);
@@ -147,10 +147,10 @@ contract GeodeSale {
       uint8 colorId = __colorId(uint16(randomness));
 
       // use next 16 bits to determine grade value
-      uint8 gradeValue = __gradeValue(uint16(randomness >> 16));
+      uint8 gradeValue = __gradeValue(uint16(randomness >> 32));
 
       // use next 32 bits to determine grade type
-      uint8 gradeType = __gradeType(uint32(randomness >> 32));
+      uint8 gradeType = __gradeType(uint32(randomness >> 64));
 
       // construct the gem UID based on the already calculated attributes
       uint80 gemUid = __createGem(1, colorId, gradeType, gradeValue, geodeId, 0, i);
@@ -159,10 +159,10 @@ contract GeodeSale {
       gems[i - 1] = gemUid;
     }
 
-    // enforce 5 gems of the same color
-    __enforceColorConstraint(gems, 5, uint32(randomness >> 64));
+    // enforce 1 level 2 gem
+    __enforceLevelConstraint(gems, 1, 2, uint16(randomness >> 96));
     // enforce 1 gem of the grade A
-    __enforceGradeConstraint(gems, 1, 4, uint16(randomness >> 96));
+    __enforceGradeConstraint(gems, 1, 4, uint16(randomness >> 128));
 
     // return created gems array back
     return gems;
@@ -247,6 +247,7 @@ contract GeodeSale {
     return uint16(gradeType) << 8 | gradeValue;
   }
 
+/*
   // enforce `n` gems to be the same (random) color
   function __enforceColorConstraint(uint80[] gems, uint8 n, uint32 randomness) private pure {
     // n must not be greater then number of gems in the array
@@ -264,6 +265,24 @@ contract GeodeSale {
       gems[i] &= 0xFF00FFFFFFFFFFFFFFFF;
       // set the new color
       gems[i] |= uint72(colorId) << 64;
+    }
+  }
+*/
+
+  // enforce at least `n` gem(s) of level `levelId`
+  function __enforceLevelConstraint(uint80[] gems, uint8 n, uint8 levelId, uint16 randomness) private pure {
+    // n must not be greater then number of gems in the array
+    require(gems.length >= n);
+
+    // generate a random index in range [0, length - n) to rewrite color
+    uint8 index = uint8(__randomValue(randomness, 0, gems.length - n, 0x10000)); // use low 16 bits
+
+    // rewrite the color in the gems array
+    for(uint8 i = index; i < index + n; i++) {
+      // clear the level
+      gems[i] &= 0x00FFFFFFFFFFFFFFFFFF;
+      // set the new color
+      gems[i] |= uint80(levelId) << 72;
     }
   }
 
