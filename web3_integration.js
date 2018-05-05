@@ -200,7 +200,7 @@ function connect_sale() {
 			const plotId = receipt.args.plotId;
 			const owner = receipt.args.owner;
 			printInfo("GeodeSold(" + plotId + ", " + owner + ")");
-			notifySuccess("Successfully bought geode #" + plotId);
+			notify("Successfully bought geode #" + plotId, "success");
 		});
 		printInfo("Successfully registered GeodeSold(uint16, address) event listener");
 		saleInstance.GEODE_PRICE(function(err, price) {
@@ -264,23 +264,7 @@ function printSuccess(msg) {
 		con.innerHTML += '<span style="color: darkgreen;">' + msg + '</span>';
 		con.innerHTML += "\n";
 	}
-	jQuery3.notify(msg, {
-		type: "success",
-		placement: {
-			from: "bottom",
-			align: "right"
-		}
-	});
-}
-
-function notifySuccess(msg) {
-	jQuery3.notify(msg, {
-		type: "success",
-		placement: {
-			from: "bottom",
-			align: "right"
-		}
-	});
+	notify(msg, "success");
 }
 
 function printError(msg) {
@@ -289,12 +273,30 @@ function printError(msg) {
 		con.innerHTML += '<span style="color: red;">' + msg + '</span>';
 		con.innerHTML += "\n";
 	}
+	notify(msg, "danger");
+}
+
+let lastNotify;
+function notify(msg, type) {
+	if(msg == lastNotify) {
+		return;
+	}
+	lastNotify = msg;
 	jQuery3.notify(msg, {
-		type: "danger",
+		type: type,
 		placement: {
 			from: "bottom",
 			align: "right"
-		}
+		},
+		template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
+		'<span data-notify="icon"></span> ' +
+		'<span data-notify="title">{1}</span> ' +
+		'<span data-notify="message">{2}</span>' +
+		'<div class="progress" data-notify="progressbar">' +
+		'<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0;"></div>' +
+		'</div>' +
+		'<a href="{3}" target="{4}" data-notify="url"></a>' +
+		'</div>'
 	});
 }
 
