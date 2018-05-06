@@ -219,6 +219,8 @@ function buy() {
 					return;
 				}
 				printSuccess("Transaction sent: " + txHash);
+				// close modal window
+				location.href = "#";
 			});
 		});
 	}
