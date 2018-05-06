@@ -61,6 +61,24 @@ contract('Token', function(accounts) {
 		assert(await token.getCreationTime(0x1) > 0, "initial token creation block is not greater then zero");
 	});
 
+	it("operators: create, update, delete operator", async function() {
+		const token = await Token.new();
+		await token.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
+		await assertThrowsAsync(async function() {await token.updateOperator(accounts[1], ROLE_STATE_PROVIDER);});
+		await token.createOperator(accounts[1], ROLE_TOKEN_CREATOR);
+		await token.mint.sendTransaction(accounts[0], 0x1, {from: accounts[1]});
+		await token.updateOperator(accounts[1], ROLE_STATE_PROVIDER);
+		await assertThrowsAsync(async function() {await token.createOperator(accounts[1], ROLE_TOKEN_CREATOR);});
+		await assertThrowsAsync(async function () {await token.mint.sendTransaction(accounts[0], 0x2, {from: accounts[1]});});
+		await token.updateOperator(accounts[1], ROLE_TOKEN_CREATOR);
+		await token.mint.sendTransaction(accounts[0], 0x2, {from: accounts[1]});
+		await token.deleteOperator(accounts[1]);
+		await assertThrowsAsync(async function () {await token.mint.sendTransaction(accounts[0], 0x3, {from: accounts[1]});});
+		await token.mint(accounts[0], 0x3);
+		assert.equal(3, await token.balanceOf(accounts[0]), "wrong balance of " + accounts[1]);
+		assert.equal(3, await token.totalSupply(), "wrong total supply");
+	});
+
 	it("token creation routine: it is possible to mint a token", async function() {
 		const token = await Token.new();
 		await token.updateFeatures(ROLE_TOKEN_CREATOR);
@@ -246,6 +264,62 @@ contract('Token', function(accounts) {
 			await token.transferFrom.sendTransaction(accounts[0], accounts[1], 0x2, {from: accounts[1]});
 		});
 	});
+	it("approvals: create an operator with unlimited approvals", async function() {
+		// used only for overloaded shadowed functions
+		// more info: https://beresnev.pro/test-overloaded-solidity-functions-via-truffle/
+		const web3Abi = require('web3-eth-abi');
+
+		/*
+		 * approveForAll(address, bool) is an overloaded function and is shadowed by
+		 * approveForAll(address, uint256)
+		 *
+		 * to call approveForAll(address, bool) which sets approval left to maximum possible uint256
+		 * value, we use a trick described here:
+		 * https://beresnev.pro/test-overloaded-solidity-functions-via-truffle/
+		 */
+		// create and prepare a token instance
+		const tokenInstance = await Token.new();
+		await tokenInstance.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
+
+		// ABI of approveForAll(address to, bool approved)
+		const overloadedApproveForAllAbi = {
+			"constant": false,
+			"inputs": [
+				{"name": "to", "type": "address"},
+				{"name": "approved", "type": "bool"}
+			],
+			"name": "approveForAll",
+			"outputs": [],
+			"payable": false,
+			"stateMutability": "nonpayable",
+			"type": "function"
+		};
+		// encode the real data to the call, like
+		// approveForAll(accounts[1], true)
+		const approveForAllMethodTransactionData = web3Abi.encodeFunctionCall(
+			overloadedApproveForAllAbi,
+			[accounts[1], true]
+		);
+
+		// send raw transaction data
+		await Token.web3.eth.sendTransaction({
+			from: accounts[0],
+			to: tokenInstance.address,
+			data: approveForAllMethodTransactionData,
+			value: 0
+		});
+
+		// read the approvals left value
+		const approvalsLeft = await tokenInstance.operators(accounts[0], accounts[1]);
+
+		// check the result is greater then zero
+		assert(approvalsLeft > 0, "approvals left must be greater then zero");
+
+		// check the value set is indeed maximum possible uint256
+		const maxUint256 = web3.toBigNumber("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+		assert(maxUint256.eq(approvalsLeft), "approvals left must be set to maximum uint256");
+	});
+
 });
 
 async function assertThrowsAsync(fn) {

@@ -12,6 +12,12 @@ contract GeodeSale {
   /// @notice Price of a single geode
   uint256 public constant GEODE_PRICE = 100 finney;
 
+  /// @notice Price of a single geode when buying 5 or more (4% discount
+  uint256 public constant GEODE_PRICE_5 = 96 finney;
+
+  /// @notice Price of a single geode when buying 10 or more (10% discount)
+  uint256 public constant GEODE_PRICE_10 = 90 finney;
+
   /// @notice Amount of gems in a geode
   uint8 public constant GEMS_IN_GEODE = 5;
 
@@ -74,7 +80,7 @@ contract GeodeSale {
     require(value >= GEODE_PRICE);
 
     // calculate number of geodes to sell
-    uint256 geodesToSell = value / GEODE_PRICE;
+    uint256 geodesToSell = calculateGeodesToSell(value);
 
     // we cannot sell more then GEODES_TO_SELL
     if(geodesSold + geodesToSell > GEODES_TO_SELL) {
@@ -82,7 +88,7 @@ contract GeodeSale {
     }
 
     // recalculate how much value we have to take from player
-    value = geodesToSell * GEODE_PRICE;
+    value = calculateGeodesPrice(geodesToSell);
 
     // overflow check
     require(value <= msg.value);
@@ -108,6 +114,46 @@ contract GeodeSale {
     // send change back to player
     if(change > 0) {
       player.transfer(change);
+    }
+  }
+
+  /// @dev calculates a price to buy several geodes
+  function calculateGeodesPrice(uint256 geodesToSell) public pure returns (uint256) {
+    // minimum amount of geodes to buy is one, return price of one on zero input
+    if(geodesToSell == 0) {
+      return GEODE_PRICE;
+    }
+    // up to 5 geodes (exclusive) - no discount
+    else if(geodesToSell < 5) {
+      return geodesToSell * GEODE_PRICE;
+    }
+    // up to 10 geodes (exclusive) - discount 4%
+    else if(geodesToSell < 10) {
+      return geodesToSell * GEODE_PRICE_5;
+    }
+    // 10 geodes or more - discount 10%
+    else {
+      return geodesToSell * GEODE_PRICE_10;
+    }
+  }
+
+  /// @dev calculates number of geodes to sell by the value sent
+  function calculateGeodesToSell(uint256 value) public pure returns (uint256) {
+    // not enough value to buy even one geode
+    if(value < GEODE_PRICE) {
+      return 0;
+    }
+    // no discount
+    else if(value < 5 * GEODE_PRICE_5) {
+      return value / GEODE_PRICE;
+    }
+    // 4% discount
+    else if(value < 10 * GEODE_PRICE_10) {
+      return value / GEODE_PRICE_5;
+    }
+    // 10% discount
+    else {
+      return value / GEODE_PRICE_10;
     }
   }
 
@@ -217,17 +263,17 @@ contract GeodeSale {
     uint8 gemId
   ) private constant returns (uint80) {
     // enforce valid levels: in pre-sale we have only level 1
-    require(levelId == 1);
+    assert(levelId == 1);
     // enforce valid colors: 1..12
-    require(colorId >= 1 && colorId <= COLORS);
+    assert(colorId >= 1 && colorId <= COLORS);
     // create gradeId performing internal validations
     uint16 gradeId = __createGradeId(gradeType, gradeValue);
     // validate plotId, 1..5000 (GEODES_TO_SELL)
-    require(plotId >= nextGeode && plotId <= GEODES_TO_SELL);
+    assert(plotId >= nextGeode && plotId <= GEODES_TO_SELL);
     // blockId for geode is zero
-    require(blockId == 0);
+    assert(blockId == 0);
     // gemId cannot be greater then GEMS_IN_GEODE
-    require(gemId >= 1 && gemId <= GEMS_IN_GEODE);
+    assert(gemId >= 1 && gemId <= GEMS_IN_GEODE);
 
     // pack the Gem UID and return
     return uint80(levelId) << 72 | uint72(colorId) << 64 | uint64(gradeId) << 48 | uint48(plotId) << 24 | gemId;
@@ -236,7 +282,7 @@ contract GeodeSale {
   // assembled the gradeId from type and value
   function __createGradeId(uint8 gradeType, uint8 gradeValue) private pure returns (uint16) {
     // enforce valid grades: D, C, B, A, AA, AAA – 1, 2, 3, 4, 5, 6 accordingly
-    require(gradeType >= 1 && gradeType <= 6);
+    assert(gradeType >= 1 && gradeType <= 6);
 
     // pack the grade ID and return
     return uint16(gradeType) << 8 | gradeValue;

@@ -23,10 +23,11 @@ contract('GeodeSale', function(accounts) {
 		await token.createOperator(sale.address, ROLE_TOKEN_CREATOR);
 		await sale.getGeodes.sendTransaction({value: await sale.GEODE_PRICE()});
 
-		assert(await token.balanceOf(accounts[0]) > 0, "wrong token balance after selling geode");
-		assert(await token.totalSupply() > 0, "wrong token total supply after selling geode");
+		const gemsInGeode = await sale.GEMS_IN_GEODE();
+		assert(gemsInGeode.eq(await token.balanceOf(accounts[0])), "wrong token balance after buying geode");
+		assert(gemsInGeode.eq(await token.totalSupply()), "wrong token total supply after buying geode");
 	});
-	it("geode sale: it is possible to buy 4 geodes", async function() {
+	it("geode sale: it is possible to buy 5 geodes with the 4% discount", async function() {
 		const token = await Token.new();
 		const sale = await Sale.new(token.address, accounts[9]);
 
@@ -35,10 +36,26 @@ contract('GeodeSale', function(accounts) {
 
 		await token.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await token.createOperator(sale.address, ROLE_TOKEN_CREATOR);
-		await sale.getGeodes.sendTransaction({value: 4 * (await sale.GEODE_PRICE())});
+		await sale.getGeodes.sendTransaction({value: (await sale.GEODE_PRICE_5()).times(5)});
 
-		assert(await token.balanceOf(accounts[0]) > 0, "wrong token balance after selling geode");
-		assert(await token.totalSupply() > 0, "wrong token total supply after selling geode");
+		const gemsInGeode = await sale.GEMS_IN_GEODE();
+		assert(gemsInGeode.times(5).eq(await token.balanceOf(accounts[0])), "wrong token balance after buying 5 geodes");
+		assert(gemsInGeode.times(5).eq(await token.totalSupply()), "wrong token total supply after buying 5 geodes");
+	});
+	it("geode sale: it is possible to buy 10 geodes with the 10% discount", async function() {
+		const token = await Token.new();
+		const sale = await Sale.new(token.address, accounts[9]);
+
+		assert.equal(0, await token.balanceOf(accounts[0]), "initial token balance is not zero");
+		assert.equal(0, await token.totalSupply(), "initial token total supply is not zero");
+
+		await token.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
+		await token.createOperator(sale.address, ROLE_TOKEN_CREATOR);
+		await sale.getGeodes.sendTransaction({value: (await sale.GEODE_PRICE_10()).times(10)});
+
+		const gemsInGeode = await sale.GEMS_IN_GEODE();
+		assert(gemsInGeode.times(10).eq(await token.balanceOf(accounts[0])), "wrong token balance after buying 10 geodes");
+		assert(gemsInGeode.times(10).eq(await token.totalSupply()), "wrong token total supply after buying 10 geodes");
 	});
 	it("geode sale: it is possible to buy few geodes and get a change", async function() {
 		const token = await Token.new();
