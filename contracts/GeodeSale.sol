@@ -22,7 +22,7 @@ contract GeodeSale {
   uint8 public constant GEMS_IN_GEODE = 5;
 
   /// @notice Number of different colors defined for a gem
-  uint8 public constant COLORS = 12;
+  uint8 public constant COLORS = 6;
 
   /// @notice Number of different grade values defined for a gem
   uint8 public constant GRADE_VALUES = 100;
@@ -264,7 +264,7 @@ contract GeodeSale {
   ) private constant returns (uint80) {
     // enforce valid levels: in pre-sale we have only level 1
     assert(levelId == 1);
-    // enforce valid colors: 1..12
+    // enforce valid colors: 1..6
     assert(colorId >= 1 && colorId <= COLORS);
     // create gradeId performing internal validations
     uint16 gradeId = __createGradeId(gradeType, gradeValue);
