@@ -12,7 +12,7 @@ const Token = artifacts.require("./Token");
 const Sale = artifacts.require("./GeodeSale");
 
 contract('GeodeSale: Gas Usage', function(accounts) {
-	it("geode sale: buying a geode requires 418743 gas", async function() {
+	it("geode sale: buying a geode requires 419051 gas", async function() {
 		const token = await Token.new();
 		const sale = await Sale.new(token.address, accounts[9]);
 
@@ -22,6 +22,6 @@ contract('GeodeSale: Gas Usage', function(accounts) {
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assert.equal(418743, gasUsed, "buying a geode gas usage mismatch: " + gasUsed);
+		assert.equal(419051, gasUsed, "buying a geode gas usage mismatch: " + gasUsed);
 	});
 });

@@ -311,7 +311,7 @@ contract Token {
    * updater (sender) doesn't have.
    * @dev Requires sender to have `ROLE_ROLE_MANAGER` permission.
    * @dev Requires `ROLE_ROLE_MANAGER` global feature to be enabled.
-   * @dev Can create a new operator. Doesn't throw if `operator` doesn't exist.
+   * @dev Cannot create a new operator. Throws if `operator` doesn't exist.
    * @param operator address of the operator to update
    * @param permissions bitmask representing a set of permissions which
    * `operator` will have
@@ -327,11 +327,20 @@ contract Token {
     require(isFeatureEnabledAndHasRole(p, ROLE_ROLE_MANAGER));
     // caller cannot grant a permission which he doesn't have himself
     require(p | permissions == p);
+    // update is not allowed to create operator
+    require(userRoles[operator] != 0);
 
     // update may extend existing operator's permissions
     uint32 e = userRoles[operator];
-    // update an operator with the permissions specified
-    userRoles[operator] = e | permissions;
+
+    // taking into account caller's permissions,
+    // 1) enable permission requested
+    e |= p & permissions;
+    // 2) disable permissions requested
+    e &= FULL_PRIVILEGES_MASK ^ (p & (FULL_PRIVILEGES_MASK ^ permissions));
+
+    // persist operator back
+    userRoles[operator] = e;
   }
 
   /**
