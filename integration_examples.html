@@ -17,6 +17,7 @@
 		}
 	</style>
 	<link rel="stylesheet" type="text/css" href="bootstrap-alert.css"/>
+	<link rel="stylesheet" type="text/css" href="modal.css"/>
 	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 	<script src="https://github.com/mouse0270/bootstrap-notify/releases/download/3.1.3/bootstrap-notify.js"></script>
 </head>
@@ -25,12 +26,12 @@
 	<table>
 		<tr>
 			<td><label for="TokenAddress" title="Deployed Instance Address">Gem (ERC721 Token) Instance Address:</label></td>
-			<td><input id="TokenAddress" type="text" value="0x25fa9ad79b9c0da7baac2c1e2b56c12096a77126" size="42"/></td>
+			<td><input id="TokenAddress" type="text" value="0x022698205db38497753afed4a6f095db341c94ae" size="42"/></td>
 		</tr>
 		<tr>
 			<td><label for="SaleAddress" title="Geode Sale Instance Address">Geode Sale Instance Address:</label></td>
 			<td>
-				<input id="SaleAddress" type="text" value="0xf3eb4d5b95fb46dbd3131018f129ffa88c71d821" size="42" readonly/>
+				<input id="SaleAddress" type="text" value="0xf6982cce79eea5b6ad987ce630a12c7423bb20f1" size="42" readonly/>
 				<input type="button" value="Buy Geode" onclick="buy()"/>
 			</td>
 		</tr>
@@ -78,6 +79,28 @@
 <fieldset><legend>Console <input type="button" value="Clear Console" onclick="document.getElementById('console').innerHTML = '';"/></legend>
 	<pre id="console"></pre>
 </fieldset>
+
+<div id="modal1" class="overlay">
+	<a class="cancel" href="#"></a>
+	<div class="modal">
+		<h3>Buying Geodes</h3>
+		<div class="content">
+			<select id="NumberOfGeodes" name="NumberOfGeodes" title="Number of Geodes">
+				<option value="1">1 for ~$50</option>
+				<option value="2">2 for ~$100</option>
+				<option value="3">3 for ~$150</option>
+				<option value="4">4 for ~$200</option>
+				<option value="5">5 for ~$240 (4% discount)</option>
+				<option value="6">6 for ~$288 (4% discount)</option>
+				<option value="7">7 for ~$336 (4% discount)</option>
+				<option value="8">8 for ~$384 (4% discount)</option>
+				<option value="9">9 for ~$432 (4% discount)</option>
+				<option value="10">10 for ~$450 (10% discount)</option>
+			</select>
+			<input type="button" value="Buy" onclick="buy()"/>
+		</div>
+	</div>
+</div>
 </body>
 <script type="text/javascript" src="web3_integration.js"></script>
 <script type="text/javascript">
