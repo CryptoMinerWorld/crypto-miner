@@ -3,8 +3,9 @@ const jQuery3 = jQuery.noConflict();
 const con = document.getElementById("console");
 const tok = document.getElementById("TokenAddress");
 const sale = document.getElementById("SaleAddress");
-const tokAddr = "0x25fa9ad79b9c0da7baac2c1e2b56c12096a77126";
-const saleAddr = "0xf3eb4d5b95fb46dbd3131018f129ffa88c71d821";
+const geodesNum = document.getElementById("NumberOfGeodes");
+const tokAddr = "0x022698205db38497753afed4a6f095db341c94ae";
+const saleAddr = "0xf6982cce79eea5b6ad987ce630a12c7423bb20f1";
 
 let myWeb3;
 let myAccount;
@@ -191,7 +192,7 @@ function connect_sale() {
 		updateGeodePrice();
 		updateGeodesSold();
 	}
-	catch(e) {
+	catch(err) {
 		printError("Cannot access GeodeSale Instance: " + err);
 		saleInstance = null;
 	}
@@ -204,12 +205,21 @@ function buy() {
 		return;
 	}
 	try {
-		saleInstance.getGeodes.sendTransaction({value: 100000000000000000}, function(err, txHash) {
+		const n = geodesNum ? geodesNum.value: 1;
+		saleInstance.calculateGeodesPrice(n, function(err, price) {
 			if(err) {
-				printError("Transaction failed: " + err.toString().split("\n")[0]);
+				printError("Cannot get total price of the " + n + " geodes");
 				return;
 			}
-			printSuccess("Transaction sent: " + txHash);
+			const priceETH = myWeb3.fromWei(price, "ether");
+			printInfo("Got total price of the " + n + " geodes: " + priceETH);
+			saleInstance.getGeodes.sendTransaction({value: price}, function(err, txHash) {
+				if(err) {
+					printError("Transaction failed: " + err.toString().split("\n")[0]);
+					return;
+				}
+				printSuccess("Transaction sent: " + txHash);
+			});
 		});
 	}
 	catch(err) {
@@ -244,7 +254,7 @@ function registerGeodeSaleEvent() {
 		});
 		printInfo("Successfully registered GeodeSold(uint16, address) event listener");
 	}
-	catch(e) {
+	catch(err) {
 		printError("Cannot access GeodeSale Instance: " + err);
 		saleInstance = null;
 	}
@@ -268,7 +278,7 @@ function updateGeodePrice() {
 			printInfo("call to GEODE_PRICE returned " + geodePriceETH + " ETH");
 		});
 	}
-	catch(e) {
+	catch(err) {
 		printError("Cannot access GeodeSale Instance: " + err);
 		saleInstance = null;
 	}
@@ -291,7 +301,7 @@ function updateGeodesSold() {
 			printInfo("call to geodesSold returned " + geodesSold);
 		});
 	}
-	catch(e) {
+	catch(err) {
 		printError("Cannot access GeodeSale Instance: " + err);
 		saleInstance = null;
 	}
