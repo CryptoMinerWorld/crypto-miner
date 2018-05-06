@@ -66,11 +66,13 @@ contract('GeodeSale', function(accounts) {
 
 		await token.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await token.createOperator(sale.address, ROLE_TOKEN_CREATOR);
-		await sale.getGeodes.sendTransaction({value: 2.34 * (await sale.GEODE_PRICE())});
-
-		assert(await token.balanceOf(accounts[0]) > 0, "wrong token balance after selling geode");
-		assert(await token.totalSupply() > 0, "wrong token total supply after selling geode");
-		// TODO: check that the change was returned back
+		const geodePrice = await sale.GEODE_PRICE();
+		const valueToSend = geodePrice.times(2.34);
+		const initialBalance = await web3.eth.getBalance(accounts[0]);
+		const txHash = await sale.getGeodes.sendTransaction({value: valueToSend, gasPrice: 1});
+		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
+		const balanceDelta = initialBalance.minus(await web3.eth.getBalance(accounts[0]));
+		assert(balanceDelta.minus(txReceipt.gasUsed).eq(geodePrice.times(2)), "wrong buyer balances after buying 2 geodes");
 	});
 	it("geode sale: gems created from the geode have correct amount and owner", async function() {
 		const token = await Token.new();
@@ -115,7 +117,7 @@ contract('GeodeSale', function(accounts) {
 		const n = 4;
 		const GEMS_IN_GEODE = await sale.GEMS_IN_GEODE();
 		const GEODE_PRICE = await sale.GEODE_PRICE();
-		await sale.getGeodes.sendTransaction({from: accounts[1], value: n * GEODE_PRICE});
+		await sale.getGeodes.sendTransaction({from: accounts[1], value: GEODE_PRICE.times(n)});
 
 		for(let i = 0; i < n * GEMS_IN_GEODE; i++) {
 			const gemUid = await token.collections(accounts[1], i);
