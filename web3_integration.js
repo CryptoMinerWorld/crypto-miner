@@ -379,6 +379,9 @@ jQuery3(document).ready(function() {
 		}
 	}, 1988);
 
+	// TODO: get rid of this ugly solution to update geodes sold counter
+	setTimeout(updateGeodesSold, 988);
+
 	const getGeodeButton = jQuery3("#GetGeodeButton");
 	getGeodeButton.bind("click", selectAndBuy);
 	getGeodeButton.css("cursor", "pointer");
