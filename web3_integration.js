@@ -187,39 +187,9 @@ function connect_sale() {
 	const saleAddress = sale ? sale.value : saleAddr;
 	saleInstance = saleABI.at(saleAddress);
 	try {
-		const saleEvent = saleInstance.GeodeSold({}, {fromBlock: "latest", toBlock: "latest"});
-		saleEvent.watch(function(err, receipt) {
-			if(err) {
-				printError("Error receiving GeodeSold event: " + err);
-				return;
-			}
-			if(!(receipt && receipt.args && receipt.args.plotId && receipt.args.owner)) {
-				printError("GeodeSold event received in wrong format: wrong arguments");
-				return;
-			}
-			const plotId = receipt.args.plotId;
-			const owner = receipt.args.owner;
-			printInfo("GeodeSold(" + plotId + ", " + owner + ")");
-			notify("Successfully bought geode #" + plotId, "success");
-		});
-		printInfo("Successfully registered GeodeSold(uint16, address) event listener");
-		saleInstance.GEODE_PRICE(function(err, price) {
-			if(err) {
-				printError("Unable to read geode price value");
-				saleInstance = null;
-				return;
-			}
-			const priceETH = myWeb3.fromWei(price, "ether");
-			geodePriceETH = priceETH.toString(10);
-			saleInstance.geodesSold(function(err, sold) {
-				if(err) {
-					printError("Unable to read geodes sold value: " + err);
-					saleInstance = null;
-					return;
-				}
-				geodesSold = sold.toString(10);
-			});
-		});
+		registerGeodeSaleEvent();
+		updateGeodePrice();
+		updateGeodesSold();
 	}
 	catch(e) {
 		printError("Cannot access GeodeSale Instance: " + err);
@@ -228,8 +198,6 @@ function connect_sale() {
 }
 
 function buy() {
-	connect_sale();
-
 	if(!(myWeb3 && saleInstance && myAccount)) {
 		printError("Web3 is not properly initialized. Reload the page.");
 		saleInstance = null;
@@ -245,6 +213,85 @@ function buy() {
 		});
 	}
 	catch(err) {
+		printError("Cannot access GeodeSale Instance: " + err);
+		saleInstance = null;
+	}
+}
+
+function registerGeodeSaleEvent() {
+	if(!(myWeb3 && saleABI && myAccount && saleInstance)) {
+		printError("Web3 is not properly initialized. Reload the page.");
+		saleInstance = null;
+		return;
+	}
+	try {
+		const saleEvent = saleInstance.GeodeSold({}, {fromBlock: "latest", toBlock: "latest"});
+		saleEvent.watch(function(err, receipt) {
+			if(err) {
+				printError("Error receiving GeodeSold event: " + err);
+				return;
+			}
+			if(!(receipt && receipt.args && receipt.args.plotId && receipt.args.owner)) {
+				printError("GeodeSold event received in wrong format: wrong arguments");
+				return;
+			}
+			const plotId = receipt.args.plotId;
+			const owner = receipt.args.owner;
+			printInfo("GeodeSold(" + plotId + ", " + owner + ")");
+			notify("Successfully bought geode #" + plotId, "success");
+
+			updateGeodesSold();
+		});
+		printInfo("Successfully registered GeodeSold(uint16, address) event listener");
+	}
+	catch(e) {
+		printError("Cannot access GeodeSale Instance: " + err);
+		saleInstance = null;
+	}
+}
+
+function updateGeodePrice() {
+	if(!(myWeb3 && saleABI && myAccount && saleInstance)) {
+		printError("Web3 is not properly initialized. Reload the page.");
+		saleInstance = null;
+		return;
+	}
+	try {
+		saleInstance.GEODE_PRICE(function(err, price) {
+			if(err) {
+				printError("Unable to read geode price value");
+				saleInstance = null;
+				return;
+			}
+			const priceETH = myWeb3.fromWei(price, "ether");
+			geodePriceETH = priceETH.toString(10);
+			printInfo("call to GEODE_PRICE returned " + geodePriceETH + " ETH");
+		});
+	}
+	catch(e) {
+		printError("Cannot access GeodeSale Instance: " + err);
+		saleInstance = null;
+	}
+}
+
+function updateGeodesSold() {
+	if(!(myWeb3 && saleABI && myAccount && saleInstance)) {
+		printError("Web3 is not properly initialized. Reload the page.");
+		saleInstance = null;
+		return;
+	}
+	try {
+		saleInstance.geodesSold(function(err, sold) {
+			if(err) {
+				printError("Unable to read geodes sold value: " + err);
+				saleInstance = null;
+				return;
+			}
+			geodesSold = sold.toString(10);
+			printInfo("call to geodesSold returned " + geodesSold);
+		});
+	}
+	catch(e) {
 		printError("Cannot access GeodeSale Instance: " + err);
 		saleInstance = null;
 	}
