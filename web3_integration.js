@@ -176,8 +176,6 @@ function connect_gem() {
 }
 
 let saleInstance;
-let geodesSold;
-let geodePriceETH;
 
 function connect_sale() {
 	if(!(myWeb3 && saleABI && myAccount)) {
@@ -276,8 +274,9 @@ function updateGeodePrice() {
 				return;
 			}
 			const priceETH = myWeb3.fromWei(price, "ether");
-			geodePriceETH = priceETH.toString(10);
+			const geodePriceETH = priceETH.toString(10);
 			printInfo("call to GEODE_PRICE returned " + geodePriceETH + " ETH");
+			jQuery3("#geodePriceETH").html(geodePriceETH);
 		});
 	}
 	catch(err) {
@@ -299,13 +298,24 @@ function updateGeodesSold() {
 				saleInstance = null;
 				return;
 			}
-			geodesSold = sold.toString(10);
+			const geodesSold = sold.toString(10);
 			printInfo("call to geodesSold returned " + geodesSold);
+			jQuery3("span.counter").html(geodesSold);
 		});
 	}
 	catch(err) {
 		printError("Cannot access GeodeSale Instance: " + err);
 		saleInstance = null;
+	}
+}
+
+function selectAndBuy() {
+	const getGeodeModal = document.getElementById("geode_qty_modal");
+	if(getGeodeModal) {
+		location.href = "#geode_qty_modal";
+	}
+	else {
+		buy();
 	}
 }
 
@@ -367,15 +377,10 @@ jQuery3(document).ready(function() {
 			myAccount = myWeb3.eth.accounts[0];
 			printInfo("Your account is switched to " + myAccount);
 		}
-		if(geodesSold) {
-			jQuery3("span.counter").html(geodesSold);
-		}
-		if(geodePriceETH) {
-			jQuery3("#geodePriceETH").html(geodePriceETH);
-		}
-	}, 988);
+	}, 1988);
 
 	const getGeodeButton = jQuery3("#GetGeodeButton");
-	getGeodeButton.bind("click", buy);
+	getGeodeButton.bind("click", selectAndBuy);
 	getGeodeButton.css("cursor", "pointer");
+
 });
