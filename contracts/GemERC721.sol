@@ -24,17 +24,29 @@ contract GemERC721 {
   /// @dev A gem data structure
   /// @dev Occupies 64 bytes of storage (512 bits)
   struct Gem {
-    uint32 id;
+    // TODO: document all the fields
+    /// High 256 bits
     uint32 creationTime;
-    uint32 plotId;
-    uint16 blockId;
+    uint32 plot;
+    uint16 depth; // Land Block
     uint16 gemId;
-    uint16 levelId;
-    uint16 colorId;
-    uint16 gradeType;
-    uint16 gradeValue;
-    uint32 state;
-    uint32 stateModified;
+    uint16 color;
+
+    /// @dev Low 16 bits store level value
+    /// @dev High 32 bits store level modified time
+    uint48 level;
+
+    /// @dev Low 16 bits store the grade:
+    ///      8 bits grade type and 8 bits grade value
+    /// @dev High 32 bits store grade modified time
+    uint48 grade;
+
+    /// @dev Low 16 bits store state value
+    /// @dev High 32 bits store state modified time
+    uint48 state;
+
+    /// Low 256 bits
+    uint32 id;
     uint32 index;
     uint32 ownershipModified;
     address owner;
@@ -80,7 +92,7 @@ contract GemERC721 {
   /// @dev A locked gem cannot be transferred or upgraded
   /// @dev The gem is locked if it contains any bits
   ///      from the `lockedBitmask` in its `state` set
-  uint32 public lockedBitmask = DEFAULT_MINING_BIT;
+  uint16 public lockedBitmask = DEFAULT_MINING_BIT;
 
   /// @dev A bitmask of globally enabled features, see below
   uint32 public f;
@@ -91,11 +103,21 @@ contract GemERC721 {
   /// @dev Enables ERC721 transfers on behalf
   uint32 public constant FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
 
-  /// @dev Enables ERC20 transfers of the gems
-  uint32 public constant ERC20_TRANSFERS = 0x00000004;
+  /// @dev Enables partial support of ERC20 transfers of the gems,
+  ///      allowing to transfer only all owned gems at once
+  uint32 public constant ERC20_LIMITED_TRANSFERS = 0x00000004;
 
-  /// @dev Enables ERC20 transfers on behalf
-  uint32 public constant ERC20_TRANSFERS_ON_BEHALF = 0x00000008;
+  /// @dev Enables partial support of ERC20 transfers on behalf
+  ///      allowing to transfer only all owned gems at once
+  uint32 public constant ERC20_LIMITED_TRANSFERS_ON_BEHALF = 0x00000008;
+
+  /// @dev Enables full support of ERC20 transfers of the gems,
+  ///      allowing to transfer arbitrary amount of the gems at once
+  uint32 public constant ERC20_TRANSFERS = 0x00000010;
+
+  /// @dev Enables full support of ERC20 transfers on behalf
+  ///      allowing to transfer arbitrary amount of the gems at once
+  uint32 public constant ERC20_TRANSFERS_ON_BEHALF = 0x00000020;
 
   /// @dev Default bitmask indicating that the gem is `mining`
   /// @dev Consists of a single bit at position 1 – binary 1
@@ -103,7 +125,7 @@ contract GemERC721 {
   /// @dev The bit meaning in gem's `state` is as follows:
   ///      0: not mining
   ///      1: mining
-  uint32 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
+  uint16 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
   
   /// @notice Exchange is responsible for trading gems on behalf of gem holders
   /// @dev Role ROLE_EXCHANGE allows executing transfer on behalf of gem holders
@@ -157,7 +179,7 @@ contract GemERC721 {
   /// @dev ERC20 compliant event
   event Approval(address indexed _owner, address indexed _spender, uint256 _value);
   /// @dev Fired in miningComplete()
-  event MiningComplete(uint32 indexed _tokenId);
+  event MiningComplete(uint32 indexed _tokenId, uint16 state);
 
   /**
    * @dev Creates a gem as a ERC721 token
@@ -326,14 +348,84 @@ contract GemERC721 {
    * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission.
    * @param bitmask a value to set `lockedBitmask` to
    */
-  function setLockedBitmask(uint32 bitmask) public {
+  function setLockedBitmask(uint16 bitmask) public {
     // check that the call is made by a combat provider
     require(__isSenderInRole(ROLE_STATE_PROVIDER));
 
     // update the locked bitmask
     lockedBitmask = bitmask;
   }
-  
+
+  /**
+   * @dev Gets the state of a gem
+   * @param gemId ID of the gem to get state for
+   * @return a gem state
+   */
+  // TODO: do we need to return whole 48 bits with date?
+  function getState(uint32 gemId) public constant returns(uint16) {
+    // get the gem from storage
+    Gem memory gem = gems[gemId];
+
+    // validate card existence
+    require(gem.owner != address(0));
+
+    // obtain gems's state and return
+    return uint16(gem.state);
+  }
+
+  /**
+   * @dev Sets the state of a gem
+   * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
+   * @param gemId ID of the gem to set state for
+   * @param state new state to set for the gem
+   */
+  // TODO: do we need to return old state value?
+  function setState(uint32 gemId, uint16 state) public {
+    // check that the call is made by a state provider
+    require(__isSenderInRole(ROLE_STATE_PROVIDER));
+
+    // get the gem pointer
+    Gem storage gem = gems[gemId];
+
+    // check that gem to set state for exists
+    require(gem.owner != address(0));
+
+    // set the state required
+    gem.state = uint48(block.number << 16) | state;
+
+    // persist gem back into the storage
+    // this may be required only if gems structure is loaded into memory, like
+    // `Gem memory gem = gems[gemId];`
+    //gems[gemId] = gem; // uncomment if gem is in memory (will increase gas usage!)
+  }
+
+  /**
+   * @dev A mechanism to pick the gem out of the plot of land
+   * @param gemId gem's ID engaged in mining
+   */
+  function miningComplete(uint32 gemId) public {
+    // check that the call is made by a state provider
+    require(__isSenderInRole(ROLE_STATE_PROVIDER));
+
+    // get the gem pointer
+    Gem storage gem = gems[gemId];
+
+    // check that gem to set mining complete for exists
+    require(gem.owner != address(0));
+
+    // TODO: do we need to check if gem is really mining?
+
+    // clear the default mining bit
+    gem.state = uint48(block.number << 16) | (gem.state & (0xFFFF ^ DEFAULT_MINING_BIT));
+
+    // persist gem back into the storage
+    // this may be required only if gems structure is loaded into memory, like
+    // `Gem memory gem = gems[gemId];`
+    //gems[gemId] = gem; // uncomment if gem is in memory (will increase gas usage!)
+
+    // fire an event
+    emit MiningComplete(gemId, uint16(gem.state));
+  }
 
   /// @dev Checks if transaction sender `msg.sender` has all the required permissions `roleRequired`
   function __isSenderInRole(uint32 roleRequired) private constant returns(bool) {
