@@ -1,6 +1,6 @@
 pragma solidity 0.4.23;
 
-import "./Gem.sol";
+import "./Token.sol";
 
 /**
  * @notice GeodeSale sells the Gems (as Geodes)
@@ -37,7 +37,7 @@ contract GeodeSale {
   mapping(uint16 => address) public geodeOwners;
 
   /// @dev A gem to sell, should be set in constructor
-  Gem public gemContract;
+  Token public gemContract;
 
   /// @dev Address to send all the incoming funds
   address public beneficiary;
@@ -56,7 +56,7 @@ contract GeodeSale {
     require(gemAddress != _beneficiary);
 
     // bind the Gem smart contract
-    gemContract = Gem(gemAddress);
+    gemContract = Token(gemAddress);
 
     // set the beneficiary
     beneficiary = _beneficiary;
