@@ -32,29 +32,52 @@ contract GemERC721 {
   struct Gem {
     // TODO: document all the fields
     /// High 256 bits
+    /// @dev Gem creation time, immutable, cannot be zero
+    /// @dev Stored as Ethereum Block Number of the transaction
+    ///      when the gem was created
     uint32 creationTime;
+
+    /// @dev Land plot ID where gem was found, immutable
     uint32 plotId;
+
+    /// @dev Land block within a plot, immutable
     uint16 depth; // Land Block
+
+    /// @dev Gem number (id) within a block of land, immutable
     uint16 gemNum;
+
+    /// @dev Gem color, one of 12 values, immutable
     uint16 color;
 
-    /// @dev Low 16 bits store level value
+    /// @dev Low 16 bits store level value (mutable),
+    ///      level is one of 1, 2, 3, 4, 5
     /// @dev High 32 bits store level modified time
     uint48 level;
 
-    /// @dev Low 16 bits store the grade:
+    /// @dev Low 16 bits store the grade (mutable):
     ///      8 bits grade type and 8 bits grade value
+    /// @dev Grade type is one of D (1), C (2), B (3), A (4), AA (5) and AAA (6)
     /// @dev High 32 bits store grade modified time
     uint48 grade;
 
-    /// @dev Low 16 bits store state value
+    /// @dev Low 16 bits store state value, mutable
     /// @dev High 32 bits store state modified time
     uint48 state;
 
+
     /// Low 256 bits
+    /// @dev Gem ID, immutable, cannot be zero
     uint32 id;
+
+    /// @dev Gem index within an owner's collection of gems, mutable
     uint32 index;
+
+    /// @dev Initially zero, changes when ownership is transferred
+    /// @dev Stored as Ethereum Block Number of the transaction
+    ///      when the gem's ownership was changed, mutable
     uint32 ownershipModified;
+
+    /// @dev Gem's owner, initialized upon gem creation, mutable
     address owner;
   }
 
@@ -339,6 +362,57 @@ contract GemERC721 {
 
     // update operator's permissions (roles) in the storage
     userRoles[operator] &= FULL_PRIVILEGES_MASK ^ r;
+  }
+
+  /**
+   * @dev Gets a gem by ID, representing it as two integers.
+   *      The two integers are tightly packed with a gem data:
+   *      First integer (high bits) contains (from higher to lower bits order):
+   *          creationTime,
+   *          rarity,
+   *          attributesModified,
+   *          attributes,
+   *          lastGamePlayed,
+   *          gamesPlayed,
+   *          wins,
+   *          losses,
+   *      Second integer (low bits) contains (from higher to lower bits order):
+   *          id,
+   *          index,
+   *          state
+   *          ownershipModified,
+   *          owner
+   * @dev Throws if gem doesn't exist
+   * @param tokenId ID of the gem to fetch
+   */
+  function getGem(uint32 tokenId) public constant returns(uint256, uint256) {
+    // load the gem from storage
+    Gem memory gem = gems[tokenId];
+
+    // get the gem's owner address
+    address owner = gem.owner;
+
+    // validate gem existence
+    require(owner != address(0));
+
+    // pack high 256 bits of the result
+    uint256 hi = uint256(gem.creationTime) << 224
+               | uint224(gem.plotId) << 192
+               | uint192(gem.depth) << 176
+               | uint176(gem.gemNum) << 160
+               | uint160(gem.color) << 144
+               | uint144(gem.level) << 96
+               | uint96(gem.grade) << 48
+               | uint48(gem.state);
+
+    // pack low 256 bits of the result
+    uint256 lo = uint256(gem.id) << 224
+               | uint224(gem.index) << 192
+               | uint192(gem.ownershipModified) << 160
+               | uint160(gem.owner);
+
+    // return the whole 512 bits of result
+    return (hi, lo);
   }
 
   /**
