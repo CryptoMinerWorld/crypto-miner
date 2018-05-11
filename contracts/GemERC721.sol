@@ -566,7 +566,7 @@ contract GemERC721 {
    * @param to new owner address
    * @param tokenId ID of the token to transfer ownership rights for
    */
-  function transferToken(address to, uint16 tokenId) public {
+  function transferToken(address to, uint32 tokenId) public {
     // call sender gracefully - `from`
     address from = msg.sender;
 
@@ -586,7 +586,7 @@ contract GemERC721 {
    * @param to address to receive the ownership of the token
    * @param tokenId ID of the token to be transferred
    */
-  function transferTokenFrom(address from, address to, uint16 tokenId) public {
+  function transferTokenFrom(address from, address to, uint32 tokenId) public {
     // call sender gracefully - `operator`
     address operator = msg.sender;
     // find if an approved address exists for this token
@@ -627,7 +627,7 @@ contract GemERC721 {
    * @param to address to be approved to transfer the token on behalf of its owner
    * @param tokenId ID of the token to be approved for transfer on behalf
    */
-  function approveToken(address to, uint16 tokenId) public {
+  function approveToken(address to, uint32 tokenId) public {
     // call sender nicely - `from`
     address from = msg.sender;
     // get token owner address (also ensures that token exists)
@@ -653,7 +653,7 @@ contract GemERC721 {
    * @dev Same as calling approve(0, tokenId)
    * @param tokenId ID of the token to remove approved address for
    */
-  function revokeApproval(uint16 tokenId) public {
+  function revokeApproval(uint32 tokenId) public {
     // delegate call to `approve`
     approveToken(address(0), tokenId);
   }
