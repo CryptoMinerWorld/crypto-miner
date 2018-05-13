@@ -1,5 +1,7 @@
 pragma solidity 0.4.23;
 
+import "./AccessControl.sol";
+
 /**
  * @notice Gem is unique tradable entity. Non-fungible.
  * @dev A gem is an ERC721 non-fungible token, which maps Token ID,
@@ -7,7 +9,7 @@ pragma solidity 0.4.23;
  *      attributes (mostly immutable by their nature) and state variables (mutable)
  * @dev A gem token supports both minting and burning, can be created and destroyed
  */
-contract GemERC721 {
+contract GemERC721 is AccessControl {
   /// @dev Smart contract version
   /// @dev Should be incremented manually in this source code
   ///      each time smart contact source code is changed
@@ -30,44 +32,46 @@ contract GemERC721 {
   /// @dev A gem data structure
   /// @dev Occupies 64 bytes of storage (512 bits)
   struct Gem {
-    // TODO: document all the fields
     /// High 256 bits
+    /// @dev Where gem was found: land plot ID,
+    ///      land block within a plot,
+    ///      gem number (id) within a block of land, immutable
+    uint64 coordinates;
+
+    /// @dev Gem color, one of 12 values, immutable
+    uint8 color;
+
+    /// @dev Level modified time
+    /// @dev Stored as Ethereum Block Number of the transaction
+    ///      when the gem was created
+    uint32 levelModified;
+
+    /// @dev Level value (mutable), one of 1, 2, 3, 4, 5
+    uint8 level;
+
+    /// @dev Grade modified time
+    /// @dev Stored as Ethereum Block Number of the transaction
+    ///      when the gem was created
+    uint32 gradeModified;
+
+    /// @dev High 8 bits store grade type and low 8 bits grade value
+    /// @dev Grade type is one of D (1), C (2), B (3), A (4), AA (5) and AAA (6)
+    uint16 grade;
+
+    /// @dev Store state modified time
+    /// @dev Stored as Ethereum Block Number of the transaction
+    ///      when the gem was created
+    uint32 stateModified;
+
+    /// @dev State value, mutable
+    uint64 state;
+
+
+    /// Low 256 bits
     /// @dev Gem creation time, immutable, cannot be zero
     /// @dev Stored as Ethereum Block Number of the transaction
     ///      when the gem was created
     uint32 creationTime;
-
-    /// @dev Land plot ID where gem was found, immutable
-    uint32 plotId;
-
-    /// @dev Land block within a plot, immutable
-    uint16 depth; // Land Block
-
-    /// @dev Gem number (id) within a block of land, immutable
-    uint16 gemNum;
-
-    /// @dev Gem color, one of 12 values, immutable
-    uint16 color;
-
-    /// @dev Low 16 bits store level value (mutable),
-    ///      level is one of 1, 2, 3, 4, 5
-    /// @dev High 32 bits store level modified time
-    uint48 level;
-
-    /// @dev Low 16 bits store the grade (mutable):
-    ///      8 bits grade type and 8 bits grade value
-    /// @dev Grade type is one of D (1), C (2), B (3), A (4), AA (5) and AAA (6)
-    /// @dev High 32 bits store grade modified time
-    uint48 grade;
-
-    /// @dev Low 16 bits store state value, mutable
-    /// @dev High 32 bits store state modified time
-    uint48 state;
-
-
-    /// Low 256 bits
-    /// @dev Gem ID, immutable, cannot be zero
-    uint32 id;
 
     /// @dev Gem index within an owner's collection of gems, mutable
     uint32 index;
@@ -105,13 +109,6 @@ contract GemERC721 {
   /// @dev ERC20 balances[owner] is equal to collections[owner].length
   mapping(address => uint32[]) public collections;
 
-  /// @notice Defines a privileged addresses with additional
-  ///      permissions on the smart contract, like minting/burning tokens,
-  ///      transferring on behalf and so on
-  /// @dev Maps an address to the permissions bitmask (role), where each bit
-  ///      represents a permissions; bitmask 0xFFFFFFFF represents all possible permissions
-  mapping(address => uint32) public userRoles;
-
   /// @notice Total number of existing tokens
   /// @dev ERC20 compliant field for totalSupply()
   uint32 public totalSupply;
@@ -122,9 +119,6 @@ contract GemERC721 {
   /// @dev The token is locked if it contains any bits
   ///      from the `lockedBitmask` in its `state` set
   uint16 public lockedBitmask = DEFAULT_MINING_BIT;
-
-  /// @dev A bitmask of globally enabled features, see below
-  uint32 public f;
 
   /// @dev Enables ERC721 transfers of the tokens
   uint32 public constant FEATURE_TRANSFERS = 0x00000001;
@@ -157,9 +151,17 @@ contract GemERC721 {
   /// @dev Not used
   //uint32 public constant ROLE_EXCHANGE = 0x00010000;
 
+  /// @notice Level provider is responsible for enabling the workshop
+  /// @dev Role ROLE_LEVEL_PROVIDER allows leveling up the gem
+  uint32 public constant ROLE_LEVEL_PROVIDER = 0x00100000;
+
+  /// @notice Grade provider is responsible for enabling the workshop
+  /// @dev Role ROLE_GRADE_PROVIDER allows modifying gem's grade
+  uint32 public constant ROLE_GRADE_PROVIDER = 0x00200000;
+
   /// @notice Token state provider is responsible for enabling the mining protocol
-  /// @dev Role ROLE_STATE_PROVIDER allows modifying token's state,
-  uint32 public constant ROLE_STATE_PROVIDER = 0x00020000;
+  /// @dev Role ROLE_STATE_PROVIDER allows modifying token's state
+  uint32 public constant ROLE_STATE_PROVIDER = 0x00400000;
 
   /// @notice Token creator is responsible for creating tokens
   /// @dev Role ROLE_TOKEN_CREATOR allows minting tokens
@@ -168,18 +170,6 @@ contract GemERC721 {
   /// @notice Token destroyer is responsible for destroying tokens
   /// @dev Role ROLE_TOKEN_DESTROYER allows burning tokens
   uint32 public constant ROLE_TOKEN_DESTROYER = 0x00080000;
-
-  /// @notice Role manager is responsible for assigning the roles
-  /// @dev Role ROLE_ROLE_MANAGER allows executing addOperator/removeOperator
-  uint32 public constant ROLE_ROLE_MANAGER = 0x00100000;
-
-  /// @notice Feature manager is responsible for enabling/disabling
-  ///      global features of the smart contract
-  /// @dev Role ROLE_FEATURE_MANAGER allows enabling/disabling global features
-  uint32 public constant ROLE_FEATURE_MANAGER = 0x00200000;
-
-  /// @dev Bitmask represents all the possible permissions (super admin role)
-  uint32 public constant FULL_PRIVILEGES_MASK = 0xFFFFFFFF;
 
   /// @dev The number is used as unlimited approvals number
   uint256 public constant UNLIMITED_APPROVALS = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
@@ -207,164 +197,6 @@ contract GemERC721 {
   event MiningComplete(uint32 indexed _tokenId, uint16 state);
 
   /**
-   * @dev Creates a gem as a ERC721 token
-   */
-  constructor() public {
-    // call sender gracefully - contract `creator`
-    address creator = msg.sender;
-
-    // creator has full privileges
-    userRoles[creator] = FULL_PRIVILEGES_MASK;
-  }
-
-  /**
-   * @dev Updates set of the globally enabled features (`f`),
-   *      taking into account sender's permissions.
-   * @dev Requires sender to have `ROLE_FEATURE_MANAGER` permission.
-   * @param mask bitmask representing a set of features to enable/disable
-   */
-  function updateFeatures(uint32 mask) public {
-    // call sender nicely - caller
-    address caller = msg.sender;
-    // read caller's permissions
-    uint32 p = userRoles[caller];
-
-    // caller should have a permission to update global features
-    require(__hasRole(p, ROLE_FEATURE_MANAGER));
-
-    // taking into account caller's permissions,
-    // 1) enable features requested
-    f |= p & mask;
-    // 2) disable features requested
-    f &= FULL_PRIVILEGES_MASK ^ (p & (FULL_PRIVILEGES_MASK ^ mask));
-  }
-
-  /**
-   * @dev Adds a new `operator` - an address which has
-   *      some extended privileges over the token smart contract,
-   *      for example token minting, burning, transferring on behalf, etc.
-   * @dev Newly added `operator` cannot have any permissions which
-   *      transaction sender doesn't have.
-   * @dev Requires transaction sender to have `ROLE_ROLE_MANAGER` permission.
-   * @dev Cannot update existing operator. Throws if `operator` already exists.
-   * @param operator address of the operator to add
-   * @param role bitmask representing a set of permissions which
-   *      newly created operator will have
-   */
-  function addOperator(address operator, uint32 role) public {
-    // call sender gracefully - `manager`
-    address manager = msg.sender;
-
-    // read manager's permissions (role)
-    uint32 p = userRoles[manager];
-
-    // check that `operator` doesn't exist
-    require(userRoles[operator] == 0);
-
-    // manager must have a ROLE_ROLE_MANAGER role
-    require(__hasRole(p, ROLE_ROLE_MANAGER));
-
-    // recalculate permissions (role) to set:
-    // we cannot create an operator more powerful then calling `manager`
-    uint32 r = role & p;
-
-    // check if we still have some permissions (role) to set
-    require(r != 0);
-
-    // create an operator by persisting his permissions (roles) to storage
-    userRoles[operator] = r;
-  }
-
-  /**
-   * @dev Deletes an existing `operator`.
-   * @dev Requires sender to have `ROLE_ROLE_MANAGER` permission.
-   * @param operator address of the operator to delete
-   */
-  function removeOperator(address operator) public {
-    // check if an `operator` exists
-    require(userRoles[operator] != 0);
-
-    // do not allow transaction sender to remove himself
-    // protects from an accidental removal of all the operators
-    require(operator != msg.sender);
-
-    // check if caller has ROLE_ROLE_MANAGER
-    require(__isSenderInRole(ROLE_ROLE_MANAGER));
-
-    // perform operator deletion
-    delete userRoles[operator];
-  }
-
-  /**
-   * @dev Updates an existing `operator`, adding a specified role to it.
-   * @dev Note that `operator` cannot receive permission which
-   *      transaction sender doesn't have.
-   * @dev Requires transaction sender to have `ROLE_ROLE_MANAGER` permission.
-   * @dev Cannot create a new operator. Throws if `operator` doesn't exist.
-   * @dev Existing permissions of the `operator` are preserved
-   * @param operator address of the operator to update
-   * @param role bitmask representing a set of permissions which
-   *      `operator` will have
-   */
-  function addRole(address operator, uint32 role) public {
-    // call sender gracefully - `manager`
-    address manager = msg.sender;
-
-    // read manager's permissions (role)
-    uint32 p = userRoles[manager];
-
-    // check that `operator` exists
-    require(userRoles[operator] != 0);
-
-    // manager must have a ROLE_ROLE_MANAGER role
-    require(__hasRole(p, ROLE_ROLE_MANAGER));
-
-    // recalculate permissions (role) to add:
-    // we cannot make an operator more powerful then calling `manager`
-    uint32 r = role & p;
-
-    // check if we still have some permissions (role) to add
-    require(r != 0);
-
-    // update operator's permissions (roles) in the storage
-    userRoles[operator] |= r;
-  }
-
-  /**
-   * @dev Updates an existing `operator`, removing a specified role from it.
-   * @dev Note that  permissions which transaction sender doesn't have
-   *      cannot be removed.
-   * @dev Requires transaction sender to have `ROLE_ROLE_MANAGER` permission.
-   * @dev Cannot remove all permissions. Throws on such an attempt.
-   * @param operator address of the operator to update
-   * @param role bitmask representing a set of permissions which
-   *      will be removed from the `operator`
-   */
-  function removeRole(address operator, uint32 role) public {
-    // call sender gracefully - `manager`
-    address manager = msg.sender;
-
-    // read manager's permissions (role)
-    uint32 p = userRoles[manager];
-
-    // check that we're not removing all the `operator`s permissions
-    require(userRoles[operator] ^ role != 0);
-
-    // manager must have a ROLE_ROLE_MANAGER role
-    require(__hasRole(p, ROLE_ROLE_MANAGER));
-
-    // recalculate permissions (role) to remove:
-    // we cannot revoke permissions which calling `manager` doesn't have
-    uint32 r = role & p;
-
-    // check if we still have some permissions (role) to revoke
-    require(r != 0);
-
-    // update operator's permissions (roles) in the storage
-    userRoles[operator] &= FULL_PRIVILEGES_MASK ^ r;
-  }
-
-  /**
    * @dev Gets a gem by ID, representing it as two integers.
    *      The two integers are tightly packed with a gem data:
    *      First integer (high bits) contains (from higher to lower bits order):
@@ -385,34 +217,31 @@ contract GemERC721 {
    * @dev Throws if gem doesn't exist
    * @param tokenId ID of the gem to fetch
    */
-  function getGem(uint32 tokenId) public constant returns(uint256, uint256) {
+  function getPacked(uint32 tokenId) public constant returns(uint256, uint256) {
+    // validate gem existence
+    require(exists(tokenId));
+
     // load the gem from storage
     Gem memory gem = gems[tokenId];
 
-    // get the gem's owner address
-    address owner = gem.owner;
-
-    // validate gem existence
-    require(owner != address(0));
-
     // pack high 256 bits of the result
-    uint256 hi = uint256(gem.creationTime) << 224
-               | uint224(gem.plotId) << 192
-               | uint192(gem.depth) << 176
-               | uint176(gem.gemNum) << 160
-               | uint160(gem.color) << 144
-               | uint144(gem.level) << 96
-               | uint96(gem.grade) << 48
-               | uint48(gem.state);
+    uint256 high = uint256(gem.coordinates) << 192
+                 | uint192(gem.color) << 184
+                 | uint184(gem.levelModified) << 152
+                 | uint152(gem.level) << 144
+                 | uint144(gem.gradeModified) << 112
+                 | uint112(gem.grade) << 96
+                 | uint96(gem.stateModified) << 64
+                 | uint64(gem.state);
 
     // pack low 256 bits of the result
-    uint256 lo = uint256(gem.id) << 224
-               | uint224(gem.index) << 192
-               | uint192(gem.ownershipModified) << 160
-               | uint160(gem.owner);
+    uint256 low  = uint256(gem.creationTime) << 224
+                 | uint224(gem.index) << 192
+                 | uint192(gem.ownershipModified) << 160
+                 | uint160(gem.owner);
 
     // return the whole 512 bits of result
-    return (hi, lo);
+    return (high, low);
   }
 
   /**
@@ -433,20 +262,105 @@ contract GemERC721 {
   }
 
   /**
+   * @dev Gets the level of a token
+   * @param tokenId ID of the token to get level for
+   * @return a token level
+   */
+  function getLevel(uint32 tokenId) public constant returns(uint8) {
+    // validate token existence
+    require(exists(tokenId));
+
+    // obtain token's level from storage and return
+    return gems[tokenId].level;
+  }
+
+  /**
+   * @dev Levels up a gem
+   * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
+   * @param tokenId ID of the gem to level up
+   */
+  function levelUp(uint32 tokenId) public {
+    // check that the call is made by a level provider
+    require(__isSenderInRole(ROLE_LEVEL_PROVIDER));
+
+    // check that token to set state for exists
+    require(exists(tokenId));
+
+    // update the level modified date
+    gems[tokenId].levelModified = uint32(block.number);
+
+    // increment the level required
+    gems[tokenId].level++;
+  }
+
+  /**
+   * @dev Gets the grade of a gem
+   * @param tokenId ID of the gem to get grade for
+   * @return a token grade
+   */
+  function getGrade(uint32 tokenId) public constant returns(uint16) {
+    // validate token existence
+    require(exists(tokenId));
+
+    // obtain token's grade from storage and return
+    return gems[tokenId].grade;
+  }
+
+  /**
+   * @dev Gets the grade type of a gem
+   * @param tokenId ID of the gem to get grade type for
+   * @return a token grade type
+   */
+  function getGradeType(uint32 tokenId) public constant returns(uint8) {
+    // extract high 8 bits of the grade and return
+    return uint8(getGrade(tokenId) >> 8);
+  }
+
+  /**
+   * @dev Gets the grade value of a gem
+   * @param tokenId ID of the gem to get grade value for
+   * @return a token grade value
+   */
+  function getGradeValue(uint32 tokenId) public constant returns(uint8) {
+    // extract low 8 bits of the grade and return
+    return uint8(getGrade(tokenId));
+  }
+
+  /**
+   * @dev Upgrades the grade of the gem
+   * @dev Requires new grade to be higher than an old one
+   * @dev Requires sender to have `ROLE_GRADE_PROVIDER` permission
+   * @param tokenId ID of the gem to modify the grade for
+   * @param grade new grade to set for the token, should be higher then current state
+   */
+  function upgradeGrade(uint32 tokenId, uint16 grade) public {
+    // check that the call is made by a grade provider
+    require(__isSenderInRole(ROLE_GRADE_PROVIDER));
+
+    // check that token to set grade for exists
+    require(exists(tokenId));
+
+    // update the grade modified date
+    gems[tokenId].gradeModified = uint32(block.number);
+
+    // check if we're not downgrading the gem
+    require(gems[tokenId].grade < grade);
+
+    // set the grade required
+    gems[tokenId].grade = grade;
+  }
+
+  /**
    * @dev Gets the state of a token
    * @param tokenId ID of the token to get state for
    * @return a token state
    */
-  // TODO: do we need to return whole 48 bits with date?
-  function getState(uint32 tokenId) public constant returns(uint16) {
-    // get the token from storage
-    Gem memory gem = gems[tokenId];
-
+  function getState(uint32 tokenId) public constant returns(uint64) {
     // validate token existence
-    require(gem.owner != address(0));
+    require(exists(tokenId));
 
-    // obtain token's state and return
-    return uint16(gem.state);
+    // obtain token's state from storage and return
+    return gems[tokenId].state;
   }
 
   /**
@@ -455,52 +369,18 @@ contract GemERC721 {
    * @param tokenId ID of the token to set state for
    * @param state new state to set for the token
    */
-  // TODO: do we need to return old state value?
-  function setState(uint32 tokenId, uint16 state) public {
+  function setState(uint32 tokenId, uint64 state) public {
     // check that the call is made by a state provider
     require(__isSenderInRole(ROLE_STATE_PROVIDER));
-
-    // get the token pointer
-    Gem storage gem = gems[tokenId];
 
     // check that token to set state for exists
-    require(gem.owner != address(0));
+    require(exists(tokenId));
+
+    // update the state modified date
+    gems[tokenId].stateModified = uint32(block.number);
 
     // set the state required
-    gem.state = uint48(block.number << 16) | state;
-
-    // persist token back into the storage
-    // this may be required only if tokens structure is loaded into memory, like
-    // `Gem memory gem = gems[tokenId];`
-    //gems[tokenId] = gem; // uncomment if token is in memory (will increase gas usage!)
-  }
-
-  /**
-   * @dev A mechanism to pick the token out of the plot of land
-   * @param tokenId token's ID engaged in mining
-   */
-  function miningComplete(uint32 tokenId) public {
-    // check that the call is made by a state provider
-    require(__isSenderInRole(ROLE_STATE_PROVIDER));
-
-    // get the token pointer
-    Gem storage gem = gems[tokenId];
-
-    // check that token to set mining complete for exists
-    require(gem.owner != address(0));
-
-    // TODO: do we need to check if gem is really mining?
-
-    // clear the default mining bit
-    gem.state = uint48(block.number << 16) | (gem.state & (0xFFFF ^ DEFAULT_MINING_BIT));
-
-    // persist token back into the storage
-    // this may be required only if token structure is loaded into memory, like
-    // `Gem memory gem = gems[tokenId];`
-    //gems[tokenId] = gem; // uncomment if token is in memory (will increase gas usage!)
-
-    // fire an event
-    emit MiningComplete(tokenId, uint16(gem.state));
+    gems[tokenId].state = state;
   }
 
   /**
@@ -521,11 +401,8 @@ contract GemERC721 {
    * @return whether the token exists (true - exists)
    */
   function exists(uint32 tokenId) public constant returns (bool) {
-    // get the token's owner address from storage
-    address owner = gems[tokenId].owner;
-
     // check if this token exists (owner is not zero)
-    return owner != address(0);
+    return gems[tokenId].owner != address(0);
   }
 
   /**
@@ -536,14 +413,11 @@ contract GemERC721 {
    * @return owner address currently marked as the owner of the given token
    */
   function ownerOf(uint32 tokenId) public constant returns (address) {
-    // get the token's owner address from storage
-    address owner = gems[tokenId].owner;
-
-    // check if this token exists (owner is not zero)
-    require(owner != address(0));
+    // check if this token exists
+    require(exists(tokenId));
 
     // return owner's address
-    return owner;
+    return gems[tokenId].owner;
   }
 
   /**
@@ -559,8 +433,8 @@ contract GemERC721 {
     uint32 plotId,
     uint16 depth,
     uint16 gemNum,
-    uint16 color,
-    uint16 level,
+    uint8 color,
+    uint8 level,
     uint16 grade
   ) public {
     // validate destination address
@@ -588,8 +462,8 @@ contract GemERC721 {
     uint32 plotId,
     uint16 depth,
     uint16 gemNum,
-    uint16 color,
-    uint16 level,
+    uint8 color,
+    uint8 level,
     uint16 grade
   ) private {
     // check that token ID is not in the reserved space
@@ -600,16 +474,16 @@ contract GemERC721 {
 
     // create new gem in memory
     Gem memory gem = Gem({
-      creationTime: uint32(block.number),
-      plotId: plotId,
-      depth: depth,
-      gemNum: gemNum,
+      coordinates: uint64(plotId) << 32 | uint32(depth) << 16 | gemNum,
       color: color,
+      levelModified: 0,
       level: level,
+      gradeModified: 0,
       grade: grade,
+      stateModified: 0,
       state: 0,
 
-      id: tokenId,
+      creationTime: uint32(block.number),
       // token index within the owner's collection of token
       // points to the place where the token will be placed to
       index: uint32(collections[to].length),
@@ -718,7 +592,7 @@ contract GemERC721 {
     approvals[tokenId] = to;
 
     // emit an ERC721 event
-    emit TokenApproval(msg.sender, to, tokenId);
+    emit TokenApproval(from, to, tokenId);
   }
 
   /**
@@ -767,30 +641,6 @@ contract GemERC721 {
     emit Approval(from, to, approved);
   }
 
-  /// @dev Checks if requested feature is enabled globally on the contract
-  function __isFeatureEnabled(uint32 featureRequired) private constant returns(bool) {
-    // delegate call to `__hasRole`
-    return __hasRole(f, featureRequired);
-  }
-
-  /// @dev Checks if transaction sender `msg.sender` has all the required permissions `roleRequired`
-  function __isSenderInRole(uint32 roleRequired) private constant returns(bool) {
-    // call sender gracefully - `user`
-    address user = msg.sender;
-
-    // read user's permissions (role)
-    uint32 userRole = userRoles[user];
-
-    // delegate call to `__hasRole`
-    return __hasRole(userRole, roleRequired);
-  }
-
-  /// @dev Checks if user role `userRole` contain all the permissions required `roleRequired`
-  function __hasRole(uint32 userRole, uint32 roleRequired) private pure returns(bool) {
-    // check the bitmask for the role required and return the result
-    return userRole & roleRequired == roleRequired;
-  }
-
   /// @dev Performs a transfer of a token `tokenId` from address `from` to address `to`
   /// @dev Unsafe: doesn't check if caller has enough permissions to execute the call;
   ///      checks only for token existence and that ownership belongs to `from`
@@ -811,7 +661,8 @@ contract GemERC721 {
     address owner = gem.owner;
 
     // validate token existence
-    require(owner != address(0));
+    require(exists(tokenId));
+
     // validate token ownership
     require(owner == from);
 
@@ -824,7 +675,7 @@ contract GemERC721 {
 
     // move gem ownership,
     // update old and new owner's gem collections accordingly
-    __moveGem(from, to, gem);
+    __moveGem(from, to, tokenId, gem);
 
     // persist gem back into the storage
     // this may be required only if gems structure is loaded into memory, like
@@ -872,7 +723,7 @@ contract GemERC721 {
   /// @dev Move a `gem` from owner `from` to a new owner `to`
   /// @dev Unsafe, doesn't check for consistence
   /// @dev Must be kept private at all times
-  function __moveGem(address from, address to, Gem storage gem) private {
+  function __moveGem(address from, address to, uint32 gemId, Gem storage gem) private {
     // get a reference to the collection where gem is now
     uint32[] storage source = collections[from];
 
@@ -908,7 +759,7 @@ contract GemERC721 {
     gem.ownershipModified = uint32(block.number);
 
     // push gem into collection
-    destination.push(gem.id);
+    destination.push(gemId);
   }
 
 }
