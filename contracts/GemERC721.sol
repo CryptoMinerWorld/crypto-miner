@@ -590,7 +590,7 @@ contract GemERC721 is AccessControl {
 
     // check if caller has sufficient permissions to mint a token
     // and if feature is enabled globally
-    require(__isFeatureEnabledAndSenderInRole(ROLE_TOKEN_CREATOR));
+    require(__isSenderInRole(ROLE_TOKEN_CREATOR));
 
     // delegate call to `__mint`
     __mint(to, tokenId, plotId, depth, gemNum, color, level, gradeType, gradeValue);
@@ -660,6 +660,9 @@ contract GemERC721 is AccessControl {
       // a regular transfer:
       // check `from` to be `operator` (transaction sender):
       require(from == operator);
+
+      // additionally check if token transfers feature is enabled
+      require(__isFeatureEnabled(FEATURE_TRANSFERS));
     }
 
     // delegate call to unsafe `__transferToken`
