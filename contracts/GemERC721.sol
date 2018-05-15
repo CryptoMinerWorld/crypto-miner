@@ -577,7 +577,8 @@ contract GemERC721 is AccessControl {
     uint16 gemNum,
     uint8 color,
     uint8 level,
-    uint16 grade
+    uint8 gradeType,
+    uint8 gradeValue
   ) public {
     // validate destination address
     require(to != address(0));
@@ -588,7 +589,7 @@ contract GemERC721 is AccessControl {
     require(__isFeatureEnabledAndSenderInRole(ROLE_TOKEN_CREATOR));
 
     // delegate call to `__mint`
-    __mint(to, tokenId, plotId, depth, gemNum, color, level, grade);
+    __mint(to, tokenId, plotId, depth, gemNum, color, level, gradeType, gradeValue);
 
     // fire ERC20 transfer event
     emit Transfer(address(0), to, 1);
@@ -750,7 +751,8 @@ contract GemERC721 is AccessControl {
     uint16 gemNum,
     uint8 color,
     uint8 level,
-    uint16 grade
+    uint8 gradeType,
+    uint8 gradeValue
   ) private {
     // check that token ID is not in the reserved space
     require(tokenId > RESERVED_TOKEN_ID_SPACE);
@@ -765,7 +767,7 @@ contract GemERC721 is AccessControl {
       levelModified: 0,
       level: level,
       gradeModified: 0,
-      grade: grade,
+      grade: uint16(gradeType) << 8 | gradeValue,
       stateModified: 0,
       state: 0,
 
@@ -870,7 +872,7 @@ contract GemERC721 is AccessControl {
   /// @dev Must be kept private at all times
   function __move(address from, address to, uint32 gemId) private {
     // get the gem pointer to the storage
-    Gem storage gem = gems[tokenId];
+    Gem storage gem = gems[gemId];
 
     // get a reference to the collection where gem is now
     uint32[] storage source = collections[from];
