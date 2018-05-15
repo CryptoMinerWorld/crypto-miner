@@ -163,6 +163,10 @@ contract GemERC721 is AccessControl {
   /// @dev Role ROLE_STATE_PROVIDER allows modifying token's state
   uint32 public constant ROLE_STATE_PROVIDER = 0x00400000;
 
+  /// @notice Token state provider is responsible for enabling the mining protocol
+  /// @dev Role ROLE_STATE_LOCK_PROVIDER allows modifying token's locked bitmask
+  uint32 public constant ROLE_STATE_LOCK_PROVIDER = 0x00800000;
+
   /// @notice Token creator is responsible for creating tokens
   /// @dev Role ROLE_TOKEN_CREATOR allows minting tokens
   uint32 public constant ROLE_TOKEN_CREATOR = 0x00040000;
@@ -266,8 +270,8 @@ contract GemERC721 is AccessControl {
    * @param bitmask a value to set `lockedBitmask` to
    */
   function setLockedBitmask(uint64 bitmask) public {
-    // check that the call is made by a combat provider
-    require(__isSenderInRole(ROLE_STATE_PROVIDER));
+    // check that the call is made by a state lock provider
+    require(__isSenderInRole(ROLE_STATE_LOCK_PROVIDER));
 
     // update the locked bitmask
     lockedBitmask = bitmask;
