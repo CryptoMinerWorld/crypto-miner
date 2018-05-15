@@ -31,6 +31,12 @@ contract AccessControl {
   ///      represents all possible permissions
   mapping(address => uint256) public userRoles;
 
+  /// @dev Fired in updateFeatures()
+  event FeaturesUpdated(address indexed _by, uint256 _requested, uint256 _actual);
+
+  /// @dev Fired in addOperator(), removeOperator(), addRole(), removeRole()
+  event RoleUpdated(address indexed _by, address indexed _to, uint256 _role);
+
   /**
    * @dev Creates an access controlled instance
    */
@@ -59,6 +65,9 @@ contract AccessControl {
     features |= p & mask;
     // 2) disable features requested
     features &= FULL_PRIVILEGES_MASK ^ (p & (FULL_PRIVILEGES_MASK ^ mask));
+
+    // fire an event
+    emit FeaturesUpdated(caller, mask, features);
   }
 
   /**
@@ -95,6 +104,9 @@ contract AccessControl {
 
     // create an operator by persisting his permissions (roles) to storage
     userRoles[operator] = r;
+
+    // fire an event
+    emit RoleUpdated(manager, operator, userRoles[operator]);
   }
 
   /**
@@ -103,18 +115,25 @@ contract AccessControl {
    * @param operator address of the operator to delete
    */
   function removeOperator(address operator) public {
+    // call sender gracefully - `manager`
+    address manager = msg.sender;
+
     // check if an `operator` exists
     require(userRoles[operator] != 0);
 
     // do not allow transaction sender to remove himself
     // protects from an accidental removal of all the operators
-    require(operator != msg.sender);
+    require(operator != manager);
 
-    // check if caller has ROLE_ROLE_MANAGER
-    require(__isSenderInRole(ROLE_ROLE_MANAGER));
+    // manager must have a ROLE_ROLE_MANAGER role
+    // and he must have all the permissions operator has
+    require(__hasRole(userRoles[manager], ROLE_ROLE_MANAGER | userRoles[operator]));
 
     // perform operator deletion
     delete userRoles[operator];
+
+    // fire an event
+    emit RoleUpdated(manager, operator, 0);
   }
 
   /**
@@ -150,6 +169,9 @@ contract AccessControl {
 
     // update operator's permissions (roles) in the storage
     userRoles[operator] |= r;
+
+    // fire an event
+    emit RoleUpdated(manager, operator, userRoles[operator]);
   }
 
   /**
@@ -170,7 +192,8 @@ contract AccessControl {
     uint256 permissions = userRoles[manager];
 
     // check that we're not removing all the `operator`s permissions
-    require(userRoles[operator] ^ role != 0);
+    // this is not really required and just causes inconveniences is function use
+    //require(userRoles[operator] ^ role != 0);
 
     // manager must have a ROLE_ROLE_MANAGER role
     require(__hasRole(permissions, ROLE_ROLE_MANAGER));
@@ -184,6 +207,9 @@ contract AccessControl {
 
     // update operator's permissions (roles) in the storage
     userRoles[operator] &= FULL_PRIVILEGES_MASK ^ r;
+
+    // fire an event
+    emit RoleUpdated(manager, operator, userRoles[operator]);
   }
 
   /// @dev Checks if requested feature `required` is enabled globally
