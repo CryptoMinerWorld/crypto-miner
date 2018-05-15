@@ -1,6 +1,6 @@
 pragma solidity 0.4.23;
 
-import "./Token.sol";
+import "./GemERC721.sol";
 
 /**
  * @notice GeodeSale sells the Gems (as Geodes)
@@ -14,6 +14,17 @@ contract GeodeSale {
   /// @dev Version of the Gem smart contract to work with
   /// @dev See `Gem.TOKEN_VERSION`
   uint32 public constant GEM_VERSION_REQUIRED = 0x1;
+
+  /// @dev Structure used as temporary storage for gem data
+  struct Gem {
+    uint16 plotId;
+    uint8 depth;
+    uint8 gemNum;
+    uint8 color;
+    uint8 level;
+    uint8 gradeType;
+    uint8 gradeValue;
+  }
 
   /// @notice Number of geodes to sell
   uint16 public constant GEODES_TO_SELL = 5000;
@@ -46,7 +57,7 @@ contract GeodeSale {
   mapping(uint16 => address) public geodeOwners;
 
   /// @dev A gem to sell, should be set in constructor
-  Token public gemContract;
+  GemERC721 public gemContract;
 
   /// @dev Address to send all the incoming funds
   address public beneficiary;
@@ -65,7 +76,7 @@ contract GeodeSale {
     require(gemAddress != _beneficiary);
 
     // bind the Gem smart contract
-    gemContract = Token(gemAddress);
+    gemContract = GemERC721(gemAddress);
 
     // validate if character card instance is valid
     // by validating smart contract version
@@ -174,22 +185,34 @@ contract GeodeSale {
   // the gems inside it to a player
   function __openGeode(uint16 geodeId, address player) private {
     // generate the gems (geode content)
-    uint80[] memory gems = __randomGeode(geodeId);
+    Gem[] memory gems = __randomGeode(geodeId);
 
     // store geode owner
     geodeOwners[geodeId] = player;
 
-    // mint the gems generated
-    gemContract.mintTokens(player, gems);
+    // iterate and mint gems required
+    for(uint32 i = 0; i < gems.length; i++) {
+      gemContract.mint(
+        player,
+        0x401 + uint32(geodeId) * GEMS_IN_GEODE + i,
+        gems[i].plotId,
+        gems[i].depth,
+        gems[i].gemNum,
+        gems[i].color,
+        gems[i].level,
+        gems[i].gradeType,
+        gems[i].gradeValue
+      );
+    }
 
     // emit an event
     emit GeodeSold(geodeId, player);
   }
 
   // generates 5 gems for a given geode ID randomly
-  function __randomGeode(uint16 geodeId) private constant returns(uint80[]) {
+  function __randomGeode(uint16 geodeId) private constant returns (Gem[]) {
     // define an array of gems to return as a result of opening the geode specified
-    uint80[] memory gems = new uint80[](GEMS_IN_GEODE);
+    Gem[] memory gems = new Gem[](GEMS_IN_GEODE);
 
     // create the gems
     for(uint8 i = 1; i <= GEMS_IN_GEODE; i++) {
@@ -206,11 +229,8 @@ contract GeodeSale {
       // use next 32 bits to determine grade type
       uint8 gradeType = __gradeType(uint32(randomness >> 64));
 
-      // construct the gem UID based on the already calculated attributes
-      uint80 gemUid = __createGem(1, colorId, gradeType, gradeValue, geodeId, 0, i);
-
-      // add into array
-      gems[i - 1] = gemUid;
+      // add into array (plotId, depth, gemNum, color, level, grade)
+      gems[i - 1] = Gem(geodeId, 0, i, colorId, 1, gradeType, gradeValue);
     }
 
     // enforce 1 level 2 gem
@@ -265,33 +285,6 @@ contract GeodeSale {
     }
   }
 
-  // assembles a gem UID from its attributes
-  function __createGem(
-    uint8 levelId,
-    uint8 colorId,
-    uint8 gradeType,
-    uint8 gradeValue,
-    uint16 plotId,
-    uint16 blockId,
-    uint8 gemId
-  ) private constant returns (uint80) {
-    // enforce valid levels: in pre-sale we have only level 1
-    assert(levelId == 1);
-    // enforce valid colors: 1..6
-    assert(colorId >= 1 && colorId <= COLORS);
-    // create gradeId performing internal validations
-    uint16 gradeId = __createGradeId(gradeType, gradeValue);
-    // validate plotId, 1..5000 (GEODES_TO_SELL)
-    assert(plotId >= nextGeode && plotId <= GEODES_TO_SELL);
-    // blockId for geode is zero
-    assert(blockId == 0);
-    // gemId cannot be greater then GEMS_IN_GEODE
-    assert(gemId >= 1 && gemId <= GEMS_IN_GEODE);
-
-    // pack the Gem UID and return
-    return uint80(levelId) << 72 | uint72(colorId) << 64 | uint64(gradeId) << 48 | uint48(plotId) << 24 | gemId;
-  }
-
   // assembled the gradeId from type and value
   function __createGradeId(uint8 gradeType, uint8 gradeValue) private pure returns (uint16) {
     // enforce valid grades: D, C, B, A, AA, AAA – 1, 2, 3, 4, 5, 6 accordingly
@@ -301,30 +294,8 @@ contract GeodeSale {
     return uint16(gradeType) << 8 | gradeValue;
   }
 
-/*
-  // enforce `n` gems to be the same (random) color
-  function __enforceColorConstraint(uint80[] gems, uint8 n, uint32 randomness) private pure {
-    // n must not be greater then number of gems in the array
-    require(gems.length >= n);
-    
-    // generate a random index in range [0, length - n) to rewrite color
-    uint8 index = uint8(__randomValue(0xFFFF & randomness, 0, gems.length - n, 0x10000)); // use low 16 bits
-
-    // generate random color value
-    uint8 colorId = uint8(__randomValue(randomness >> 16, 1, COLORS, 0x10000));
-
-    // rewrite the color in the gems array
-    for(uint8 i = index; i < index + n; i++) {
-      // clear the color
-      gems[i] &= 0xFF00FFFFFFFFFFFFFFFF;
-      // set the new color
-      gems[i] |= uint72(colorId) << 64;
-    }
-  }
-*/
-
   // enforce at least `n` gem(s) of level `levelId`
-  function __enforceLevelConstraint(uint80[] gems, uint8 n, uint8 levelId, uint16 randomness) private pure {
+  function __enforceLevelConstraint(Gem[] gems, uint8 n, uint8 levelId, uint16 randomness) private pure {
     // n must not be greater then number of gems in the array
     require(gems.length >= n);
 
@@ -333,15 +304,13 @@ contract GeodeSale {
 
     // rewrite the color in the gems array
     for(uint8 i = index; i < index + n; i++) {
-      // clear the level
-      gems[i] &= 0x00FFFFFFFFFFFFFFFFFF;
-      // set the new color
-      gems[i] |= uint80(levelId) << 72;
+      // set the new level
+      gems[i].level = levelId;
     }
   }
 
   // enforce at least `n` gem(s) of grade type `gradeType`
-  function __enforceGradeConstraint(uint80[] gems, uint8 n, uint8 gradeType, uint16 randomness) private pure {
+  function __enforceGradeConstraint(Gem[] gems, uint8 n, uint8 gradeType, uint16 randomness) private pure {
     // n must not be greater then number of gems in the array
     require(gems.length >= n);
 
@@ -350,10 +319,8 @@ contract GeodeSale {
 
     // rewrite the grade type in the gems array
     for(uint8 i = index; i < index + n; i++) {
-      // clear the grade type
-      gems[i] &= 0xFFFF00FFFFFFFFFFFFFF;
       // set the new grade type
-      gems[i] |= uint64(gradeType) << 56;
+      gems[i].gradeType = gradeType;
     }
   }
 

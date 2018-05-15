@@ -13,11 +13,14 @@ contract('GemERC721', function(accounts) {
 
 	it("mint: creating a token", async function() {
 		const tk = await Token.new();
-		await assertThrowsAsync(async function() {await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 0x0101);});
+		await assertThrowsAsync(async function() {await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);});
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR);
-		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 0x0101);
+		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
+		await assertThrowsAsync(async function() {await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);});
+		await assertThrowsAsync(async function() {await tk.mint(0, 0x402, 1, 0, 1, 1, 1, 1, 1);});
+		await assertThrowsAsync(async function() {await tk.mint(tk.address, 0x403, 1, 0, 1, 1, 1, 1, 1);});
 		assert.equal(1, await tk.totalSupply(), "wrong totalSupply value after minting a token");
-		await tk.mint(accounts[1], 0x402, 1, 0, 1, 1, 1, 0x0101);
+		await tk.mint(accounts[1], 0x402, 1, 0, 1, 1, 1, 1, 1);
 		assert.equal(2, await tk.totalSupply(), "wrong totalSupply value after minting two tokens");
 		assert.equal(1, await tk.balanceOf(accounts[0]), accounts[0] + " has wrong balance after minting a token");
 		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " has wrong balance after minting a token");
@@ -27,7 +30,7 @@ contract('GemERC721', function(accounts) {
 	it("transfer: transferring a token", async function() {
 		const tk = await Token.new();
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR);
-		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 0x0101);
+		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
 		assert.equal(1, await tk.balanceOf(accounts[0]), accounts[0] + " wrong balance before token transfer");
 		assert.equal(0, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
 		await assertThrowsAsync(async function() {await tk.transferToken(accounts[1], 0x401);});
@@ -35,13 +38,14 @@ contract('GemERC721', function(accounts) {
 		await tk.transferToken(accounts[1], 0x401);
 		assert.equal(0, await tk.balanceOf(accounts[0]), accounts[0] + " wrong balance after token transfer");
 		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
+		assert.equal(accounts[1], await tk.ownerOf(0x401), "wrong token 0x401 owner after token transfer");
 	});
 
 	it("transferFrom: transferring on behalf", async function() {
 		const tk = await Token.new();
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
-		await tk.mint(accounts[1], 0x401, 1, 0, 1, 1, 1, 0x0101);
-		await tk.mint(accounts[0], 0x402, 1, 0, 1, 1, 1, 0x0101);
+		await tk.mint(accounts[1], 0x401, 1, 0, 1, 1, 1, 1, 1);
+		await tk.mint(accounts[0], 0x402, 1, 0, 1, 1, 1, 1, 1);
 		await assertThrowsAsync(async function() {await tk.approveToken(accounts[0], 0x401);});
 		await assertThrowsAsync(async function() {await tk.transferTokenFrom(accounts[1], accounts[2], 0x401);});
 		await tk.approveToken.sendTransaction(accounts[0], 0x401, {from: accounts[1]});
