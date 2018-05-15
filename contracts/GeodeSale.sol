@@ -6,6 +6,15 @@ import "./Token.sol";
  * @notice GeodeSale sells the Gems (as Geodes)
  */
 contract GeodeSale {
+  /// @dev Smart contract version
+  /// @dev Should be incremented manually in this source code
+  ///      each time smart contact source code is changed
+  uint32 public constant SALE_VERSION = 0x1;
+
+  /// @dev Version of the Gem smart contract to work with
+  /// @dev See `Gem.TOKEN_VERSION`
+  uint32 public constant GEM_VERSION_REQUIRED = 0x1;
+
   /// @notice Number of geodes to sell
   uint16 public constant GEODES_TO_SELL = 5000;
 
@@ -57,6 +66,10 @@ contract GeodeSale {
 
     // bind the Gem smart contract
     gemContract = Token(gemAddress);
+
+    // validate if character card instance is valid
+    // by validating smart contract version
+    require(GEM_VERSION_REQUIRED == gemContract.TOKEN_VERSION());
 
     // set the beneficiary
     beneficiary = _beneficiary;
