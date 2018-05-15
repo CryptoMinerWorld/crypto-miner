@@ -7,6 +7,11 @@ pragma solidity 0.4.23;
  *      particular to the Crypto Miner World needs.
  */
 contract Token {
+  /// @dev Smart contract version
+  /// @dev Should be incremented manually in this source code
+  ///      each time smart contact source code is changed
+  uint32 public constant TOKEN_VERSION = 0x1;
+
   /// @dev Core of the Gem as ERC721 token is mapping
   ///      token id => state + owner
   ///      which maps a Token ID (ERC721 tokenId) to a
