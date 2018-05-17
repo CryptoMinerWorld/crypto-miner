@@ -216,18 +216,20 @@ contract GemERC721 is AccessControl {
    * @dev Gets a gem by ID, representing it as two integers.
    *      The two integers are tightly packed with a gem data:
    *      First integer (high bits) contains (from higher to lower bits order):
-   *          creationTime,
-   *          rarity,
-   *          attributesModified,
-   *          attributes,
-   *          lastGamePlayed,
-   *          gamesPlayed,
-   *          wins,
-   *          losses,
+   *          coordinates:
+   *            plotId,
+   *            depth (block ID),
+   *            gemNum (gem ID within a block)
+   *          color,
+   *          levelModified,
+   *          level,
+   *          gradeModified,
+   *          grade,
+   *          stateModified,
+   *          state,
    *      Second integer (low bits) contains (from higher to lower bits order):
-   *          id,
+   *          creationTime,
    *          index,
-   *          state
    *          ownershipModified,
    *          owner
    * @dev Throws if gem doesn't exist
