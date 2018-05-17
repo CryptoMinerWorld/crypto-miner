@@ -627,7 +627,12 @@ contract GemERC721 is AccessControl {
    * @notice Allows transferring ownership rights by a trading operator
    *      on behalf of token owner. Allows building an exchange of tokens.
    * @dev Transfers the ownership of a given token ID to another address
-   * @dev Requires the transaction sender to be the owner, approved, or operator
+   * @dev Requires the transaction sender to be one of:
+   *      owner of a gem - then its just a usual `transferToken`
+   *      approved – an address explicitly approved earlier by
+   *        the owner of a token to transfer this particular token `tokenId`
+   *      operator - an address explicitly approved earlier by
+   *        the owner to transfer all his tokens on behalf
    * @param from current owner of the token
    * @param to address to receive the ownership of the token
    * @param tokenId ID of the token to be transferred
