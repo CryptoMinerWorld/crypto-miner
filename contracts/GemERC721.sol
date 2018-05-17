@@ -7,7 +7,7 @@ import "./AccessControl.sol";
  * @dev A gem is an ERC721 non-fungible token, which maps Token ID,
  *      a 32 bit number to a set of gem properties -
  *      attributes (mostly immutable by their nature) and state variables (mutable)
- * @dev A gem token supports both minting and burning, can be created and destroyed
+ * @dev A gem token supports only minting, it can be only created
  */
 contract GemERC721 is AccessControl {
   /// @dev Smart contract version
@@ -173,7 +173,7 @@ contract GemERC721 is AccessControl {
 
   /// @notice Token destroyer is responsible for destroying tokens
   /// @dev Role ROLE_TOKEN_DESTROYER allows burning tokens
-  uint32 public constant ROLE_TOKEN_DESTROYER = 0x00080000;
+  //uint32 public constant ROLE_TOKEN_DESTROYER = 0x00080000;
 
   /// @dev The number is used as unlimited approvals number
   uint256 public constant UNLIMITED_APPROVALS = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
