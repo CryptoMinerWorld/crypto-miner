@@ -24,7 +24,7 @@ contract GemERC721 is AccessControl {
   /// @dev ERC20 compliant token symbol
   string public constant symbol = "GEM";
   /// @dev ERC20 compliant token name
-  string public constant name = "GEM – Crypto Miner World";
+  string public constant name = "GEM – CryptoMiner World";
   /// @dev ERC20 compliant token decimals
   /// @dev this can be only zero, since ERC721 token is non-fungible
   uint8 public constant decimals = 0;
@@ -210,7 +210,7 @@ contract GemERC721 is AccessControl {
   event UpgradeComplete(address indexed _by, address indexed _owner, uint32 indexed _tokenId, uint16 _gradeReached);
 
   /// @dev Fired in setState()
-  event StateChanged(address indexed _by, address indexed _owner, uint32 indexed _tokenId, uint64 _newState);
+  event StateModified(address indexed _by, address indexed _owner, uint32 indexed _tokenId, uint64 _newState);
 
   /**
    * @dev Gets a gem by ID, representing it as two integers.
@@ -500,7 +500,7 @@ contract GemERC721 is AccessControl {
     gems[tokenId].state = state;
 
     // emit an event
-    emit StateChanged(msg.sender, ownerOf(tokenId), tokenId, state);
+    emit StateModified(msg.sender, ownerOf(tokenId), tokenId, state);
   }
 
   /**
