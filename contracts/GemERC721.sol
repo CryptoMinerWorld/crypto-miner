@@ -303,7 +303,7 @@ contract GemERC721 is AccessControl {
   }
 
   /**
-   * @dev Gets the depth (block ID) within land of plot of a gem
+   * @dev Gets the depth (block ID) within plot of land of a gem
    * @param tokenId ID of the gem to get depth value for
    * @return a token depth
    */
