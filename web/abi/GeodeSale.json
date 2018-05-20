@@ -4,34 +4,6 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "GEODE_PRICE",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "GEODE_PRICE_10",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
       "name": "SALE_VERSION",
       "outputs": [
         {
@@ -51,6 +23,20 @@
         {
           "name": "",
           "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "nextGem",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -177,20 +163,6 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "GEODE_PRICE_5",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
       "name": "nextGeode",
       "outputs": [
         {
@@ -229,9 +201,36 @@
           "indexed": true,
           "name": "owner",
           "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "gems",
+          "type": "uint16"
         }
       ],
       "name": "GeodeSold",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "geodes",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "name": "bonusGems",
+          "type": "uint16"
+        }
+      ],
+      "name": "PurchaseComplete",
       "type": "event"
     },
     {
@@ -245,13 +244,8 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "geodesToSell",
-          "type": "uint256"
-        }
-      ],
-      "name": "calculateGeodesPrice",
+      "inputs": [],
+      "name": "currentPrice",
       "outputs": [
         {
           "name": "",
@@ -288,5 +282,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-20T06:57:40.228Z"
+  "updatedAt": "2018-05-20T14:59:12.423Z"
 }

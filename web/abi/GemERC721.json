@@ -147,34 +147,6 @@
     },
     {
       "constant": true,
-      "inputs": [],
-      "name": "ERC20_TRANSFERS",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "ERC20_TRANSFERS_ON_BEHALF",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
       "inputs": [
         {
           "name": "",
@@ -388,20 +360,6 @@
       "constant": true,
       "inputs": [],
       "name": "FEATURE_TRANSFERS_ON_BEHALF",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "ERC20_INSECURE_TRANSFERS",
       "outputs": [
         {
           "name": "",
@@ -1333,7 +1291,14 @@
     "name": "solc",
     "version": "0.4.23+commit.124ca40d.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "4": {
+      "events": {},
+      "links": {},
+      "address": "0x82389441769d31c679ff8203108e8576d883cc91",
+      "transactionHash": "0xed0a6c027685d5e1897cd49d2c6965945f96a41834c1cef2c17398b41625a08b"
+    }
+  },
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-20T06:57:40.218Z"
+  "updatedAt": "2018-05-20T14:59:12.458Z"
 }

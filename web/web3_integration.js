@@ -239,13 +239,14 @@ function buy() {
 	}
 	try {
 		const n = geodesNum ? geodesNum.value: 1;
-		saleInstance.calculateGeodesPrice(n, function(err, price) {
+		saleInstance.currentPrice(n, function(err, price) {
 			if(err) {
 				printError("Cannot get total price of the " + n + " geodes");
 				return;
 			}
+			price = price.times(n);
 			const priceETH = myWeb3.fromWei(price, "ether");
-			printInfo("Got total price of the " + n + " geodes: " + priceETH);
+			printInfo("Total price of the " + n + " geodes is " + priceETH);
 			saleInstance.getGeodes.sendTransaction({value: price}, function(err, txHash) {
 				if(err) {
 					printError("Transaction failed: " + err.toString().split("\n")[0]);
