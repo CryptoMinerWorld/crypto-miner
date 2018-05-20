@@ -1,3 +1,28 @@
+document.write(`
+<div id="geode_qty_modal" class="overlay">
+	<a class="cancel" href="#"></a>
+	<div class="modal">
+		<h3>Buying Geodes</h3>
+		<div class="content">
+			<select id="NumberOfGeodes" name="NumberOfGeodes" title="Number of Geodes" style="width: 100%; height: 2em; margin: 1em 0 2em 0;">
+				<option value="1">1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+				<option value="5">5 (+1 free Gem)</option>
+				<option value="6">6 (+1 free Gem)</option>
+				<option value="7">7 (+1 free Gem)</option>
+				<option value="8">8 (+1 free Gem)</option>
+				<option value="9">9 (+1 free Gem)</option>
+				<option value="10">10 (+1 free Gem and +1 free Geode)</option>
+			</select>
+			<input type="button" value="Buy" onclick="buy()" style="width: 100%; height: 2em;"/>
+		</div>
+	</div>
+</div>
+`);
+
+
 const jQuery3 = jQuery.noConflict();
 
 const con = document.getElementById("console");
@@ -413,31 +438,6 @@ function notify(msg, type) {
 		'</div>'
 	});
 }
-
-document.write(`
-<div id="geode_qty_modal" class="overlay">
-	<a class="cancel" href="#"></a>
-	<div class="modal">
-		<h3>Buying Geodes</h3>
-		<div class="content">
-			<select id="NumberOfGeodes" name="NumberOfGeodes" title="Number of Geodes" style="width: 100%; height: 2em; margin: 1em 0 2em 0;">
-				<option value="1">1</option>
-				<option value="2">2</option>
-				<option value="3">3</option>
-				<option value="4">4</option>
-				<option value="5">5 (+1 free Gem)</option>
-				<option value="6">6 (+1 free Gem)</option>
-				<option value="7">7 (+1 free Gem)</option>
-				<option value="8">8 (+1 free Gem)</option>
-				<option value="9">9 (+1 free Gem)</option>
-				<option value="10">10 (+1 free Gem and +1 free Geode)</option>
-			</select>
-			<input type="button" value="Buy" onclick="buy()" style="width: 100%; height: 2em;"/>
-		</div>
-	</div>
-</div>
-`);
-
 
 jQuery3(document).ready(function() {
 	init();
