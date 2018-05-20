@@ -4,8 +4,8 @@ const con = document.getElementById("console");
 const tok = document.getElementById("TokenAddress");
 const sale = document.getElementById("SaleAddress");
 const geodesNum = document.getElementById("NumberOfGeodes");
-const tokAddr = "0x82389441769d31c679ff8203108e8576d883cc91";
-const saleAddr = "0x7397f86b23219b8d0b85a303c25d36657d3eccac";
+const tokAddr = "0x9c8cb5a001d7a10a4a25ce1c57c596726eea5948";
+const saleAddr = "0xbf0b907698b624b74faf5f4f40e73adf98309494";
 
 let myWeb3;
 let myAccount;
