@@ -400,7 +400,7 @@ function notify(msg, type) {
 			from: "bottom",
 			align: "right"
 		},
-		delay: type === "error" ? 10000: 1000,
+		delay: type === "danger" ? 10000: 1000,
 		template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
 		'<span data-notify="icon"></span> ' +
 		'<span data-notify="title">{1}</span> ' +
