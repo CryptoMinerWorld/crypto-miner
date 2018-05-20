@@ -397,6 +397,31 @@ function notify(msg, type) {
 	});
 }
 
+document.write(`
+<div id="geode_qty_modal" class="overlay">
+	<a class="cancel" href="#"></a>
+	<div class="modal">
+		<h3>Buying Geodes</h3>
+		<div class="content">
+			<select id="NumberOfGeodes" name="NumberOfGeodes" title="Number of Geodes" style="width: 100%; height: 2em; margin: 1em 0 2em 0;">
+				<option value="1">1 for ~$50</option>
+				<option value="2">2 for ~$100</option>
+				<option value="3">3 for ~$150</option>
+				<option value="4">4 for ~$200</option>
+				<option value="5">5 for ~$240 (4% discount)</option>
+				<option value="6">6 for ~$288 (4% discount)</option>
+				<option value="7">7 for ~$336 (4% discount)</option>
+				<option value="8">8 for ~$384 (4% discount)</option>
+				<option value="9">9 for ~$432 (4% discount)</option>
+				<option value="10">10 for ~$450 (10% discount)</option>
+			</select>
+			<input type="button" value="Buy" onclick="buy()" style="width: 100%; height: 2em;"/>
+		</div>
+	</div>
+</div>
+`);
+
+
 jQuery3(document).ready(function() {
 	init();
 
