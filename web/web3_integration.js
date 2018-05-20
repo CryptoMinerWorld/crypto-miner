@@ -264,7 +264,7 @@ function buy() {
 	}
 	try {
 		const n = geodesNum ? geodesNum.value: 1;
-		saleInstance.currentPrice(n, function(err, price) {
+		saleInstance.currentPrice(function(err, price) {
 			if(err) {
 				printError("Cannot get total price of the " + n + " geodes");
 				return;
