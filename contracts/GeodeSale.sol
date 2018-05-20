@@ -12,7 +12,7 @@ contract GeodeSale {
   uint32 public constant SALE_VERSION = 0x1;
 
   /// @dev Version of the Gem smart contract to work with
-  /// @dev See `Gem.TOKEN_VERSION`
+  /// @dev See `GemERC721.TOKEN_VERSION`
   uint32 public constant GEM_VERSION_REQUIRED = 0x1;
 
   /// @dev Structure used as temporary storage for gem data

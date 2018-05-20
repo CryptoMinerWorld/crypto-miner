@@ -1,3 +1,5 @@
+const ROLE_TOKEN_CREATOR = 0x00040000;
+
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
 		console.log("[deploy gem] test network - skipping the migration script");
@@ -8,7 +10,7 @@ module.exports = async function(deployer, network, accounts) {
 		return;
 	}
 
-	const Gem = artifacts.require("./Gem");
+	const Gem = artifacts.require("./GemERC721");
 	const Sale = artifacts.require("./GeodeSale");
 
 	await deployer.deploy(Gem);
@@ -19,5 +21,10 @@ module.exports = async function(deployer, network, accounts) {
 	await deployer.deploy(Sale, gem.address, accounts[0]);
 
 	const sale = await Sale.deployed();
-	await gem.createOperator(sale.address, 0x00010000);
+	await gem.addOperator(sale.address, ROLE_TOKEN_CREATOR);
+
+	console.log("___________________________________________________");
+	console.log("gem:  " + gem.address);
+	console.log("sale: " + sale.address);
+
 };
