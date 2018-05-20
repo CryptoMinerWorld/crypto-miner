@@ -303,7 +303,7 @@ function updateGeodePrice() {
 		return;
 	}
 	try {
-		saleInstance.GEODE_PRICE(function(err, price) {
+		saleInstance.currentPrice(function(err, price) {
 			if(err) {
 				printError("Unable to read geode price value");
 				saleInstance = null;
@@ -311,7 +311,7 @@ function updateGeodePrice() {
 			}
 			const priceETH = myWeb3.fromWei(price, "ether");
 			const geodePriceETH = priceETH.toString(10);
-			printInfo("call to GEODE_PRICE returned " + geodePriceETH + " ETH");
+			printInfo("call to currentPrice returned " + geodePriceETH + " ETH");
 			jQuery3("#geodePriceETH").html(geodePriceETH);
 		});
 	}
