@@ -445,12 +445,14 @@ jQuery3(document).ready(function() {
 		if(myWeb3 && myWeb3.eth.accounts[0] !== myAccount) {
 			myAccount = myWeb3.eth.accounts[0];
 			printInfo("Your account is switched to " + myAccount);
+			init();
+			setTimeout(updateGeodesSold, 988);
 		}
 	}, 1988);
 
 	// TODO: get rid of this ugly solution to update geodes sold counter
-	if(myWeb3) {
-		setTimeout(updateGeodesSold, 2988);
+	if(myWeb3 && myAccount) {
+		setTimeout(updateGeodesSold, 988);
 	}
 
 	const getGeodeButton = jQuery3("#GetGeodeButton");
