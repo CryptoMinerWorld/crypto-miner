@@ -9,7 +9,7 @@ contract GeodeSale {
   /// @dev Smart contract version
   /// @dev Should be incremented manually in this source code
   ///      each time smart contact source code is changed
-  uint32 public constant SALE_VERSION = 0x1;
+  uint32 public constant SALE_VERSION = 0x2;
 
   /// @dev Version of the Gem smart contract to work with
   /// @dev See `GemERC721.TOKEN_VERSION`
@@ -27,19 +27,10 @@ contract GeodeSale {
   }
 
   /// @notice Number of geodes to sell
-  uint16 public constant GEODES_TO_SELL = 5000;
-
-  /// @notice Price of a single geode
-  uint256 public constant GEODE_PRICE = 100 finney;
-
-  /// @notice Price of a single geode when buying 5 or more (4% discount
-  uint256 public constant GEODE_PRICE_5 = 96 finney;
-
-  /// @notice Price of a single geode when buying 10 or more (10% discount)
-  uint256 public constant GEODE_PRICE_10 = 90 finney;
+  uint16 public constant GEODES_TO_SELL = 5500;
 
   /// @notice Amount of gems in a geode
-  uint8 public constant GEMS_IN_GEODE = 5;
+  uint8 public constant GEMS_IN_GEODE = 4;
 
   /// @notice Number of different colors defined for a gem
   uint8 public constant COLORS = 6;
@@ -53,8 +44,8 @@ contract GeodeSale {
   /// @dev Pointer to a next geode to be sold
   uint16 public nextGeode = 1;
 
-  /// @dev Mapping for the geode owners, will be used to issue land plots
-  mapping(uint16 => address) public geodeOwners;
+  /// @dev Pointer to a next gem do be minted
+  uint32 public nextGem = 0x401;
 
   /// @dev A gem to sell, should be set in constructor
   GemERC721 public gemContract;
@@ -62,11 +53,16 @@ contract GeodeSale {
   /// @dev Address to send all the incoming funds
   address public beneficiary;
 
+  /// @dev Mapping for the geode owners, will be used to issue land plots
+  mapping(uint16 => address) public geodeOwners;
+
   /**
    * @dev event names are self-explanatory
    */
   /// @dev fired in buyGeodes()
-  event GeodeSold(uint16 indexed plotId, address indexed owner);
+  event GeodeSold(uint16 indexed plotId, address indexed owner, uint16 gems);
+  /// @dev fired in buyGeodes()
+  event PurchaseComplete(address indexed owner, uint16 geodes, uint16 bonusGems);
 
   /// @dev Creates a GeodeSale attached to an already deployed Gem smart contract
   constructor(address gemAddress, address _beneficiary) public {
@@ -100,11 +96,14 @@ contract GeodeSale {
     // amount of ether sent with the transaction
     uint256 value = msg.value;
 
+    // current price value
+    uint256 _currentPrice = currentPrice();
+
     // value should be enough to buy at least one geode
-    require(value >= GEODE_PRICE);
+    require(value >= _currentPrice);
 
     // calculate number of geodes to sell
-    uint256 geodesToSell = calculateGeodesToSell(value);
+    uint256 geodesToSell = value / _currentPrice;
 
     // we cannot sell more then GEODES_TO_SELL
     if(geodesSold + geodesToSell > GEODES_TO_SELL) {
@@ -112,7 +111,7 @@ contract GeodeSale {
     }
 
     // recalculate how much value we have to take from player
-    value = calculateGeodesPrice(geodesToSell);
+    value = geodesToSell * _currentPrice;
 
     // overflow check
     require(value <= msg.value);
@@ -120,13 +119,16 @@ contract GeodeSale {
     // calculate how much we have to send back to player
     uint256 change = msg.value - value;
 
+    // if player buys 10 geodes - he receives one for free
+    geodesToSell += geodesToSell / 10;
+
     // update counters
     geodesSold += uint16(geodesToSell);
 
     // create geodes – actually create gems
     for(uint16 i = 0; i < geodesToSell; i++) {
       // open created geode + emit an event
-      __openGeode(nextGeode + i, player);
+      __openGeode(nextGeode + i, player, GEMS_IN_GEODE + ((i + 1) % 5 == 0? 1: 0));
     }
 
     // update next geode to sell pointer
@@ -139,8 +141,18 @@ contract GeodeSale {
     if(change > 0) {
       player.transfer(change);
     }
+
+    // fire an event
+    emit PurchaseComplete(player, geodesSold, geodesSold / 5);
   }
 
+  /// @dev current geode price, implements early bid feature
+  function currentPrice() public constant returns (uint256) {
+    // first 500 geodes price is 0.04 ETH, then 0.08 ETH
+    return geodesSold < 500? 40 finney: 80 finney;
+  }
+
+/*
   /// @dev calculates a price to buy several geodes
   function calculateGeodesPrice(uint256 geodesToSell) public pure returns (uint256) {
     // minimum amount of geodes to buy is one, return price of one on zero input
@@ -180,12 +192,13 @@ contract GeodeSale {
       return value / GEODE_PRICE_10;
     }
   }
+*/
 
   // private function to create geode and send all
   // the gems inside it to a player
-  function __openGeode(uint16 geodeId, address player) private {
+  function __openGeode(uint16 geodeId, address player, uint8 n) private {
     // generate the gems (geode content)
-    Gem[] memory gems = __randomGeode(geodeId);
+    Gem[] memory gems = __randomGeode(geodeId, n);
 
     // store geode owner
     geodeOwners[geodeId] = player;
@@ -194,7 +207,7 @@ contract GeodeSale {
     for(uint32 i = 0; i < gems.length; i++) {
       gemContract.mint(
         player,
-        0x401 + uint32(geodeId) * GEMS_IN_GEODE + i,
+        nextGem++,
         gems[i].plotId,
         gems[i].depth,
         gems[i].gemNum,
@@ -206,19 +219,22 @@ contract GeodeSale {
     }
 
     // emit an event
-    emit GeodeSold(geodeId, player);
+    emit GeodeSold(geodeId, player, uint16(gems.length));
   }
 
   // generates 5 gems for a given geode ID randomly
-  function __randomGeode(uint16 geodeId) private constant returns (Gem[]) {
+  function __randomGeode(uint16 geodeId, uint8 n) private constant returns (Gem[]) {
     // define an array of gems to return as a result of opening the geode specified
-    Gem[] memory gems = new Gem[](GEMS_IN_GEODE);
+    Gem[] memory gems = new Gem[](n);
+
+    // variable for randomness
+    uint256 randomness;
 
     // create the gems
-    for(uint8 i = 1; i <= GEMS_IN_GEODE; i++) {
+    for(uint8 i = 1; i <= n; i++) {
       // get some randomness to work with – 256 bits should be more then enough
       // and.. yeah! – this is heavily influenceable by miners!
-      uint256 randomness = uint256(keccak256(block.number, gasleft(), msg.sender, tx.origin, geodeId, i));
+      randomness = uint256(keccak256(block.number, gasleft(), msg.sender, tx.origin, geodeId, i));
 
       // use lower 16 bits to determine gem color
       uint8 colorId = __colorId(uint16(randomness));

@@ -5,17 +5,17 @@ const Token = artifacts.require("./GemERC721");
 const Sale = artifacts.require("./GeodeSale");
 
 contract('GeodeSale: Gas Usage', function(accounts) {
-	it("geode sale: buying a geode requires 716044 gas", async function() {
+	it("geode sale: buying a geode requires 615660 gas", async function() {
 		const token = await Token.new();
 		const sale = await Sale.new(token.address, accounts[9]);
 
 		await token.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await token.addOperator(sale.address, ROLE_TOKEN_CREATOR);
-		const txHash = await sale.getGeodes.sendTransaction({value: await sale.GEODE_PRICE()});
+		const txHash = await sale.getGeodes.sendTransaction({value: await sale.currentPrice()});
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(716044, gasUsed, "buying a geode gas usage mismatch: " + gasUsed);
+		assertEqual(615660, gasUsed, "buying a geode gas usage mismatch: " + gasUsed);
 	});
 });
 
