@@ -227,7 +227,7 @@ function connect_sale() {
 
 function connection_successful() {
 	if(myWeb3 && gemInstance && saleInstance) {
-		printSuccess("Successfully connected\nNetwork ID: " + myWeb3.version.network);
+		printSuccess("Successfully connected<br/>\nNetwork ID: " + myWeb3.version.network);
 	}
 }
 
