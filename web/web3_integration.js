@@ -194,6 +194,7 @@ function connect_gem() {
 				else {
 					printInfo("You don't own any gems");
 				}
+				connection_successful();
 			});
 		});
 	}
@@ -216,7 +217,7 @@ function connect_sale() {
 	try {
 		registerGeodeSaleEvent();
 		updateGeodePrice();
-		updateGeodesSold();
+		updateGeodesSold(connection_successful);
 	}
 	catch(err) {
 		printError("Cannot access GeodeSale Instance: " + err);
@@ -224,11 +225,17 @@ function connect_sale() {
 	}
 }
 
+function connection_successful() {
+	if(myWeb3 && gemInstance && saleInstance) {
+		printSuccess("Successfully connected\nNetwork ID: " + myWeb3.version.network);
+	}
+}
+
 function buy() {
 	if(!(myWeb3 && saleInstance && myAccount)) {
 		printError("Web3 is not properly initialized. Reload the page.");
 		saleInstance = null;
-		return;
+		return 0x1;
 	}
 	try {
 		const n = geodesNum ? geodesNum.value: 1;
@@ -313,7 +320,7 @@ function updateGeodePrice() {
 	}
 }
 
-function updateGeodesSold() {
+function updateGeodesSold(callback) {
 	if(!(myWeb3 && saleABI && myAccount && saleInstance)) {
 		printError("Web3 is not properly initialized. Reload the page.");
 		saleInstance = null;
@@ -329,6 +336,9 @@ function updateGeodesSold() {
 			const geodesSold = sold.toString(10);
 			printInfo("call to geodesSold returned " + geodesSold);
 			jQuery3("span.counter").html(geodesSold);
+			if(callback) {
+				callback();
+			}
 		});
 	}
 	catch(err) {
@@ -338,6 +348,11 @@ function updateGeodesSold() {
 }
 
 function selectAndBuy() {
+	if(!myWeb3) {
+		location.href = "https://metamask.io/";
+		return;
+	}
+
 	const getGeodeModal = document.getElementById("geode_qty_modal");
 	if(getGeodeModal) {
 		location.href = "#geode_qty_modal";
@@ -385,6 +400,7 @@ function notify(msg, type) {
 			from: "bottom",
 			align: "right"
 		},
+		delay: type === "error" ? 10000: 1000,
 		template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
 		'<span data-notify="icon"></span> ' +
 		'<span data-notify="title">{1}</span> ' +
