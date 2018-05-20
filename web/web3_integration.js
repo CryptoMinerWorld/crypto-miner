@@ -154,13 +154,13 @@ function connect_gem() {
 					printError("Error receiving Minted event: " + err);
 					return;
 				}
-				if(!(receipt && receipt.args && receipt.args.tokenId && receipt.args.to && receipt.args.by)) {
+				if(!(receipt && receipt.args && receipt.args._by && receipt.args._to && receipt.args._tokenId)) {
 					printError("Minted event received in wrong format: wrong arguments");
 					return;
 				}
-				const tokenId = receipt.args.tokenId.toString(16);
-				const to = receipt.args.to;
-				const by = receipt.args.by;
+				const by = receipt.args._by;
+				const to = receipt.args._to;
+				const tokenId = receipt.args._tokenId.toString(16);
 				printInfo("Minted(0x" + tokenId + ", " + to + ", " + by + ")");
 			});
 			printInfo("Successfully registered Minted(uint80, address, address) event listener");
@@ -188,13 +188,13 @@ function connect_gem() {
 					printError("Error receiving Transfer event: " + err);
 					return;
 				}
-				if(!(receipt && receipt.args && receipt.args.from && receipt.args.to && receipt.args.tokenId)) {
+				if(!(receipt && receipt.args && receipt.args._from && receipt.args._to && receipt.args._tokenId)) {
 					printError("Transfer event received in wrong format: wrong arguments");
 					return;
 				}
-				const from = receipt.args.from;
-				const to = receipt.args.to;
-				const gemId = receipt.args.tokenId.toString(16);
+				const from = receipt.args._from;
+				const to = receipt.args._to;
+				const gemId = receipt.args._tokenId.toString(16);
 				printInfo("Transfer(" + from + ", " + to + ", 0x" + gemId + ")");
 			});
 			printInfo("Successfully registered Transfer(address, address, uint80) event listener");
