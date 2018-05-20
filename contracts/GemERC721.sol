@@ -128,15 +128,15 @@ contract GemERC721 is AccessControl {
 
   /// @dev Enables partial support of ERC20 transfers of the tokens,
   ///      allowing to transfer only all owned tokens at once
-  uint32 public constant ERC20_TRANSFERS = 0x00000004;
+  //uint32 public constant ERC20_TRANSFERS = 0x00000004;
 
   /// @dev Enables partial support of ERC20 transfers on behalf
   ///      allowing to transfer only all owned tokens at once
-  uint32 public constant ERC20_TRANSFERS_ON_BEHALF = 0x00000008;
+  //uint32 public constant ERC20_TRANSFERS_ON_BEHALF = 0x00000008;
 
   /// @dev Enables full support of ERC20 transfers of the tokens,
   ///      allowing to transfer arbitrary amount of the tokens at once
-  uint32 public constant ERC20_INSECURE_TRANSFERS = 0x00000010;
+  //uint32 public constant ERC20_INSECURE_TRANSFERS = 0x00000010;
 
   /// @dev Default bitmask indicating that the gem is `mining`
   /// @dev Consists of a single bit at position 1 – binary 1

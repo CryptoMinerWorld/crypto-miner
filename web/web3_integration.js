@@ -4,8 +4,8 @@ const con = document.getElementById("console");
 const tok = document.getElementById("TokenAddress");
 const sale = document.getElementById("SaleAddress");
 const geodesNum = document.getElementById("NumberOfGeodes");
-const tokAddr = "0x022698205db38497753afed4a6f095db341c94ae";
-const saleAddr = "0xf6982cce79eea5b6ad987ce630a12c7423bb20f1";
+const tokAddr = "0x82389441769d31c679ff8203108e8576d883cc91";
+const saleAddr = "0x7397f86b23219b8d0b85a303c25d36657d3eccac";
 
 let myWeb3;
 let myAccount;
@@ -43,7 +43,7 @@ function init() {
 			jQuery3.ajax({
 				async: false,
 				global: false,
-				url: "https://rawgit.com/vgorin/crypto-miner/master/build/contracts/Gem.json",
+				url: "abi/GemERC721.json",
 				dataType: "json",
 				success: function(data, textStatus, jqXHR) {
 					printInfo("Gem ABI loaded successfully");
@@ -51,13 +51,26 @@ function init() {
 					connect_gem();
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
-					printError("Cannot load Gem ABI: " + errorThrown);
+					jQuery3.ajax({
+						async: false,
+						global: false,
+						url: "https://rawgit.com/vgorin/crypto-miner/master/web/abi/GemERC721.json",
+						dataType: "json",
+						success: function(data, textStatus, jqXHR) {
+							printInfo("Gem ABI loaded successfully");
+							gemABI = myWeb3.eth.contract(data.abi);
+							connect_gem();
+						},
+						error: function(jqXHR, textStatus, errorThrown) {
+							printError("Cannot load Gem ABI: " + errorThrown);
+						}
+					});
 				}
 			});
 			jQuery3.ajax({
 				async: false,
 				global: false,
-				url: "https://rawgit.com/vgorin/crypto-miner/master/build/contracts/GeodeSale.json",
+				url: "abi/GeodeSale.json",
 				dataType: "json",
 				success: function(data, textStatus, jqXHR) {
 					printInfo("GeodeSale ABI loaded successfully");
@@ -65,7 +78,20 @@ function init() {
 					connect_sale();
 				},
 				error: function(jqXHR, textStatus, errorThrown) {
-					printError("Cannot load GeodeSale ABI: " + errorThrown);
+					jQuery3.ajax({
+						async: false,
+						global: false,
+						url: "https://rawgit.com/vgorin/crypto-miner/master/web/abi/GeodeSale.json",
+						dataType: "json",
+						success: function(data, textStatus, jqXHR) {
+							printInfo("GeodeSale ABI loaded successfully");
+							saleABI = myWeb3.eth.contract(data.abi);
+							connect_sale();
+						},
+						error: function(jqXHR, textStatus, errorThrown) {
+							printError("Cannot load GeodeSale ABI: " + errorThrown);
+						}
+					});
 				}
 			});
 		})
@@ -113,6 +139,7 @@ function connect_gem() {
 				printInfo("Minted(0x" + tokenId + ", " + to + ", " + by + ")");
 			});
 			printInfo("Successfully registered Minted(uint80, address, address) event listener");
+/*
 			const burnEvent = gemInstance.Burnt({}, {fromBlock: "latest", toBlock: "latest"});
 			burnEvent.watch(function(err, receipt) {
 				if(err) {
@@ -129,6 +156,7 @@ function connect_gem() {
 				printInfo("Burnt(0x" + tokenId + ", " + from + ", " + by + ")");
 			});
 			printInfo("Successfully registered Burnt(uint80, address, address) event listener");
+*/
 			const transferEvent = gemInstance.Transfer({}, {fromBlock: "latest", toBlock: "latest"});
 			transferEvent.watch(function(err, receipt) {
 				if(err) {
