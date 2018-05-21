@@ -17,6 +17,19 @@ contract('GeodeSale: Gas Usage', function(accounts) {
 
 		assertEqual(615660, gasUsed, "buying a geode gas usage mismatch: " + gasUsed);
 	});
+
+	it("geode sale: buying 10 geodes requires 6373548 gas", async function() {
+		const token = await Token.new();
+		const sale = await Sale.new(token.address, accounts[9]);
+
+		await token.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
+		await token.addOperator(sale.address, ROLE_TOKEN_CREATOR);
+		const txHash = await sale.getGeodes.sendTransaction({value: (await sale.currentPrice()).times(10)});
+		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
+		const gasUsed = txReceipt.gasUsed;
+
+		assertEqual(6373548, gasUsed, "buying a geode gas usage mismatch: " + gasUsed);
+	});
 });
 
 
