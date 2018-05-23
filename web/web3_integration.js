@@ -219,7 +219,7 @@ function connect_gem() {
 							// ========= START: Draw Gems in a Table =========
 							const columns = 8;
 							const rows = Math.ceil(collection.length / columns);
-							let html = "<table>\n";
+							let html = "<table id='myGeodes'>\n";
 							for(let i = 0; i < rows; i++) {
 								html += "<tr>\n";
 								for(let j = 0; j < columns; j++) {
@@ -239,7 +239,43 @@ function connect_gem() {
 							html += "</table>\n";
 							jQuery3("#pl-490").html(html);
 							for(let i = 0; i < collection.length; i++) {
-								
+								const id = collection[i];
+								gemInstance.gems(id, function(err, gem) {
+									if(err) {
+										printError("Cannot get gem " + id);
+										return;
+									}
+									const color = gem[1];
+									const level = gem[3];
+									const grade = gem[5];
+									const gradeType = grade.toNumber() >> 8;
+									let thumbnail = "gems/thumbnails/";
+									switch(color.toString(10)) {
+										case "1": thumbnail += "Ame "; break;
+										case "2": thumbnail += "Gar "; break;
+										case "3": thumbnail += "Opa "; break;
+										case "4": thumbnail += "Sap "; break;
+										case "5": thumbnail += "Top "; break;
+										case "6": thumbnail += "Tur "; break;
+									}
+									switch(level.toString(10)) {
+										case "1": thumbnail += "1 "; break;
+										case "2": thumbnail += "2 "; break;
+										case "3": thumbnail += "3 "; break;
+										case "4": thumbnail += "4 "; break;
+										case "5": thumbnail += "5 "; break;
+									}
+									switch(gradeType) {
+										case 1: thumbnail += "D"; break;
+										case 2: thumbnail += "C"; break;
+										case 3: thumbnail += "B"; break;
+										case 4: thumbnail += "A"; break;
+										case 5: thumbnail += "AA"; break;
+										case 6: thumbnail += "AAA"; break;
+									}
+									thumbnail += ".png";
+									document.getElementById("0x" + id.toString(16)).innerHTML = "<img src='" + thumbnail + "'/>";
+								});
 							}
 							// =========  END:  Draw Gems in a Table =========
 
