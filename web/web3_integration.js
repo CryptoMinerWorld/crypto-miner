@@ -245,36 +245,32 @@ function connect_gem() {
 										printError("Cannot get gem " + id);
 										return;
 									}
-									const color = gem[1];
-									const level = gem[3];
-									const grade = gem[5];
-									const gradeType = grade.toNumber() >> 8;
-									let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/";
-									switch(color.toString(10)) {
-										case "1": thumbnail += "Ame "; break;
-										case "2": thumbnail += "Gar "; break;
-										case "3": thumbnail += "Opa "; break;
-										case "4": thumbnail += "Sap "; break;
-										case "5": thumbnail += "Top "; break;
-										case "6": thumbnail += "Tur "; break;
-									}
-									switch(level.toString(10)) {
-										case "1": thumbnail += "1 "; break;
-										case "2": thumbnail += "2 "; break;
-										case "3": thumbnail += "3 "; break;
-										case "4": thumbnail += "4 "; break;
-										case "5": thumbnail += "5 "; break;
+									const colorId = gem[1];
+									let color = "";
+									let grade = "";
+									const level = gem[3].toString(10);
+									const gradeType = gem[5].toNumber() >> 8;
+									switch(colorId.toString(10)) {
+										case "1": color = "Garnet"; break;
+										case "2": color = "Amethyst"; break;
+										case "3": color = "Sapphire"; break;
+										case "4": color = "Opal"; break;
+										case "5": color = "Topaz"; break;
+										case "6": color = "Turquoise"; break;
 									}
 									switch(gradeType) {
-										case 1: thumbnail += "D"; break;
-										case 2: thumbnail += "C"; break;
-										case 3: thumbnail += "B"; break;
-										case 4: thumbnail += "A"; break;
-										case 5: thumbnail += "AA"; break;
-										case 6: thumbnail += "AAA"; break;
+										case 1: grade = "D"; break;
+										case 2: grade = "C"; break;
+										case 3: grade = "B"; break;
+										case 4: grade = "A"; break;
+										case 5: grade = "AA"; break;
+										case 6: grade = "AAA"; break;
 									}
-									thumbnail += ".png";
-									document.getElementById("0x" + id.toString(16)).innerHTML = "<img src='" + thumbnail + "'/>";
+									let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/"
+										+ color.substr(0, 3) + " " + level + " " + grade + ".png";
+									let html = "<img src='" + thumbnail + "'/><br/>\n";
+									html += color + " " + grade + " lvl " + level;
+									document.getElementById("0x" + id.toString(16)).innerHTML = html;
 								});
 							}
 							// =========  END:  Draw Gems in a Table =========
