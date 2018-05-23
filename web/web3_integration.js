@@ -249,7 +249,7 @@ function connect_gem() {
 									const level = gem[3];
 									const grade = gem[5];
 									const gradeType = grade.toNumber() >> 8;
-									let thumbnail = "gems/thumbnails/";
+									let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/";
 									switch(color.toString(10)) {
 										case "1": thumbnail += "Ame "; break;
 										case "2": thumbnail += "Gar "; break;
