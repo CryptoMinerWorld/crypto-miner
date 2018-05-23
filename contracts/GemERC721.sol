@@ -263,6 +263,18 @@ contract GemERC721 is AccessControl {
   }
 
   /**
+   * @notice Retrieves a collection of tokens owned by a particular address
+   * @notice An order of token IDs is not guaranteed and may change
+   *      when a token from the list is transferred
+   * @param owner an address to query a collection for
+   * @return an ordered list of tokens
+   */
+  function getCollection(address owner) public constant returns(uint32[]) {
+    // read a collection from mapping and return
+    return collections[owner];
+  }
+
+  /**
    * @dev Allows setting the `lockedBitmask` parameter of the contract,
    *      which is used to determine if a particular token is locked or not
    * @dev A locked token cannot be transferred, upgraded or burnt

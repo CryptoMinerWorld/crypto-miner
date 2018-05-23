@@ -5,6 +5,15 @@ const Token = artifacts.require("./GemERC721");
 const Sale = artifacts.require("./GeodeSale");
 
 contract('GeodeSale: Gas Usage', function(accounts) {
+	it("Gem ERC721: deploying a GemERC721 requires 4743729 gas", async function() {
+		const token = await Token.new();
+		const txHash = token.transactionHash;
+		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
+		const gasUsed = txReceipt.gasUsed;
+
+		assertEqual(4743729, gasUsed, "deploying a GemERC721 gas usage mismatch: " + gasUsed);
+	});
+
 	it("geode sale: buying a geode requires 615660 gas", async function() {
 		const token = await Token.new();
 		const sale = await Sale.new(token.address, accounts[9]);
