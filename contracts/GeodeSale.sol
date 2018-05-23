@@ -273,7 +273,7 @@ contract GeodeSale {
   // determines grade type randomly
   function __gradeType(uint32 randomness) private pure returns (uint8) {
     // use only low 24 bits of randomness
-    randomness &= 0xFFFFFFFF;
+    randomness &= 0xFFFFFF;
 
     // Grade D: 20% probability of 16777216 total values
     if(randomness < 3355444) {
