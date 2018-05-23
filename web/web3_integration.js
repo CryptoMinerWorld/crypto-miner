@@ -29,8 +29,8 @@ const con = document.getElementById("console");
 const tok = document.getElementById("TokenAddress");
 const sale = document.getElementById("SaleAddress");
 const geodesNum = document.getElementById("NumberOfGeodes");
-const tokAddr = "0x9c8cb5a001d7a10a4a25ce1c57c596726eea5948";
-const saleAddr = "0xbf0b907698b624b74faf5f4f40e73adf98309494";
+const tokAddr = "0xf795fd5c9c9be296997110891b5773181b9968f5";
+const saleAddr = "0x00e1b0dd0ae8f12417fe9729787788100c53f69c";
 
 let myWeb3;
 let myAccount;
@@ -207,12 +207,42 @@ function connect_gem() {
 				if(balance > 0) {
 					printInfo("You own " + balance + " gem(s):");
 					for(let i = 0; i < balance; i++) {
-						gemInstance.collections(myAccount, i, function(err, gemId) {
+						gemInstance.getCollection(myAccount, function(err, collection) {
 							if(err) {
 								printError("Cannot load list of the gems");
 								return;
 							}
-							printInfo("0x" + gemId.toString(16));
+							for(let i = 0; i < collection.length; i++) {
+								printInfo("0x" + collection[i].toString(16));
+							}
+
+							// ========= START: Draw Gems in a Table =========
+							const columns = 8;
+							const rows = Math.ceil(collection.length / columns);
+							let html = "<table>\n";
+							for(let i = 0; i < rows; i++) {
+								html += "<tr>\n";
+								for(let j = 0; j < columns; j++) {
+									const idx = i * columns + j;
+									if(idx < collection.length) {
+										const gemId = "0x" + collection[idx].toString(16);
+										html += "\t<td id='" + gemId + "'>\n";
+										html += "\t\t" + gemId;
+									}
+									else {
+										html += "\t<td>\n";
+									}
+									html += "\t</td>\n";
+								}
+								html += "</tr>\n";
+							}
+							html += "</table>\n";
+							jQuery3("#pl-490").html(html);
+							for(let i = 0; i < collection.length; i++) {
+								
+							}
+							// =========  END:  Draw Gems in a Table =========
+
 						});
 					}
 				}
