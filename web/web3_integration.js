@@ -163,7 +163,7 @@ function connect_gem() {
 				const tokenId = receipt.args._tokenId.toString(16);
 				printInfo("Minted(0x" + tokenId + ", " + to + ", " + by + ")");
 			});
-			printInfo("Successfully registered Minted(uint80, address, address) event listener");
+			printInfo("Successfully registered Minted(uint32, address, address) event listener");
 /*
 			const burnEvent = gemInstance.Burnt({}, {fromBlock: "latest", toBlock: "latest"});
 			burnEvent.watch(function(err, receipt) {
@@ -182,22 +182,22 @@ function connect_gem() {
 			});
 			printInfo("Successfully registered Burnt(uint80, address, address) event listener");
 */
-			const transferEvent = gemInstance.Transfer({}, {fromBlock: "latest", toBlock: "latest"});
-			transferEvent.watch(function(err, receipt) {
+			const tokenTransferEvent = gemInstance.TokenTransfer({}, {fromBlock: "latest", toBlock: "latest"});
+			tokenTransferEvent.watch(function(err, receipt) {
 				if(err) {
-					printError("Error receiving Transfer event: " + err);
+					printError("Error receiving TokenTransfer event: " + err);
 					return;
 				}
 				if(!(receipt && receipt.args && receipt.args._from && receipt.args._to && receipt.args._tokenId)) {
-					printError("Transfer event received in wrong format: wrong arguments");
+					printError("TokenTransfer event received in wrong format: wrong arguments");
 					return;
 				}
 				const from = receipt.args._from;
 				const to = receipt.args._to;
 				const gemId = receipt.args._tokenId.toString(16);
-				printInfo("Transfer(" + from + ", " + to + ", 0x" + gemId + ")");
+				printInfo("TokenTransfer(" + from + ", " + to + ", 0x" + gemId + ")");
 			});
-			printInfo("Successfully registered Transfer(address, address, uint80) event listener");
+			printInfo("Successfully registered TokenTransfer(address, address, uint32) event listener");
 			gemInstance.balanceOf(myAccount, function(err, balance) {
 				if(err) {
 					printError("Unable to read gem balance: " + err);
