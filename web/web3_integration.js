@@ -20,6 +20,15 @@ document.write(`
 		</div>
 	</div>
 </div>
+<div id="gem_picture" class="overlay">
+	<a class="cancel" href="#"></a>
+	<div class="modal">
+		<h3>Lv 1 Amethyst</h3>
+		<div class="content">
+			<img width="800" height="798" src="https://rawgit.com/vgorin/crypto-miner/master/web/gems/Ame 1 A.png"/>
+		</div>
+	</div>
+</div>
 `);
 
 
@@ -269,7 +278,8 @@ function connect_gem() {
 									}
 									let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/"
 										+ color.substr(0, 3) + " " + level + " " + grade + ".png";
-									let html = "<img width='120' height='119' src='" + thumbnail + "'/><br/>\n";
+									let html = '<a href="#gem_picture">';
+									html += "<img width='120' height='119' src='" + thumbnail + "'/></a><br/>\n";
 									html += "Lv." + level + " " + color + " " + grade + " " + gradeValue + "%";
 									document.getElementById("0x" + id.toString(16)).innerHTML = html;
 								});
