@@ -269,7 +269,7 @@ function connect_gem() {
 									}
 									let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/"
 										+ color.substr(0, 3) + " " + level + " " + grade + ".png";
-									let html = "<img width='96' height='95' src='" + thumbnail + "'/><br/>\n";
+									let html = "<img width='120' height='119' src='" + thumbnail + "'/><br/>\n";
 									html += "Lv." + level + " " + color + " " + grade + " " + gradeValue + "%";
 									document.getElementById("0x" + id.toString(16)).innerHTML = html;
 								});
