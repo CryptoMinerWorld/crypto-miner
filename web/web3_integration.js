@@ -217,7 +217,7 @@ function connect_gem() {
 							}
 
 							// ========= START: Draw Gems in a Table =========
-							const columns = 8;
+							const columns = 6;
 							const rows = Math.ceil(collection.length / columns);
 							let html = "<table id='myGeodes'>\n";
 							for(let i = 0; i < rows; i++) {
