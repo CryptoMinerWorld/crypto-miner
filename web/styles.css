@@ -2,3 +2,8 @@ table#myGeodes {
 	margin: 32px 16px;
 	color: white;
 }
+
+table#myGeodes td {
+	text-align: center;
+	border: none;
+}
