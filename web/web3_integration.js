@@ -250,6 +250,7 @@ function connect_gem() {
 									let grade = "";
 									const level = gem[3].toString(10);
 									const gradeType = gem[5].toNumber() >> 8;
+									const gradeValue = gem[5].toNumber() % 256;
 									switch(colorId.toString(10)) {
 										case "1": color = "Garnet"; break;
 										case "2": color = "Amethyst"; break;
@@ -268,13 +269,12 @@ function connect_gem() {
 									}
 									let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/"
 										+ color.substr(0, 3) + " " + level + " " + grade + ".png";
-									let html = "<img src='" + thumbnail + "'/><br/>\n";
-									html += color + " " + grade + " lvl " + level;
+									let html = "<img width='96' height='95' src='" + thumbnail + "'/><br/>\n";
+									html += "Lv." + level + " " + color + " " + grade + " " + gradeValue + "%";
 									document.getElementById("0x" + id.toString(16)).innerHTML = html;
 								});
 							}
 							// =========  END:  Draw Gems in a Table =========
-
 						});
 					}
 				}
