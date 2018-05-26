@@ -39,7 +39,7 @@ const tok = document.getElementById("TokenAddress");
 const sale = document.getElementById("SaleAddress");
 const geodesNum = document.getElementById("NumberOfGeodes");
 const tokAddr = "0x0ede7ed4b82fdc67b3b674712ffbb031b7c202ce";
-const helperAddr = "0xb3750aace6d8b97c70c15c4506c07036d490d714";
+const helperAddr = "0xccdb881a6c5dc16fdb327dad3d317e94558c62a2";
 const saleAddr = "0x4b3cbc6f761bfe978347fbe898f0f6e8bef08c8f";
 
 let myWeb3;
@@ -282,7 +282,7 @@ function connect_gem_helper() {
 				for(let j = 0; j < columns; j++) {
 					const idx = i * columns + j;
 					if(idx < packedCollection.length) {
-						const gemId = "0x" + packedCollection[idx].dividedToIntegerBy(0x4000000000000).toString(16);
+						const gemId = "0x" + packedCollection[idx].dividedToIntegerBy(0x100000000).toString(16);
 						html += "\t<td id='" + gemId + "'>\n";
 						html += "\t\t" + gemId;
 					}
@@ -290,23 +290,21 @@ function connect_gem_helper() {
 						html += "\t<td>\n";
 					}
 					// inject gem data
-					const properties = packedCollection[idx].modulo(0x4000000000000);
-					const colorId = properties.dividedToIntegerBy(0x1000000000);
-					const levelId = properties.dividedToIntegerBy(0x400000).modulo(0x100);
-					const gradeId = properties.modulo(0x400000);
-					const gradeType = gradeId.dividedToIntegerBy(0x100).toNumber();
-					const gradeValue = gradeId.modulo(0x100).toNumber();
+					const properties = packedCollection[idx].modulo(0x100000000);
+					const colorId = properties.dividedToIntegerBy(0x1000000).toNumber();
+					const levelId = properties.dividedToIntegerBy(0x10000).modulo(0x100).toNumber();
+					const gradeType = properties.dividedToIntegerBy(0x100).modulo(0x100).toNumber();
+					const gradeValue = properties.modulo(0x100).toNumber();
 
 					let color = "";
-					const level = levelId.toString(10);
 					let grade = "";
-					switch(colorId.toString(10)) {
-						case "1": color = "Garnet"; break;
-						case "2": color = "Amethyst"; break;
-						case "3": color = "Sapphire"; break;
-						case "4": color = "Opal"; break;
-						case "5": color = "Topaz"; break;
-						case "6": color = "Turquoise"; break;
+					switch(colorId) {
+						case 1: color = "Garnet"; break;
+						case 2: color = "Amethyst"; break;
+						case 3: color = "Sapphire"; break;
+						case 4: color = "Opal"; break;
+						case 5: color = "Topaz"; break;
+						case 6: color = "Turquoise"; break;
 					}
 					switch(gradeType) {
 						case 1: grade = "D"; break;
@@ -317,11 +315,11 @@ function connect_gem_helper() {
 						case 6: grade = "AAA"; break;
 					}
 					let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/";
-					thumbnail += color.substr(0, 3) + " " + level + " " + grade + ".png";
+					thumbnail += color.substr(0, 3) + " " + levelId + " " + grade + ".png";
 
 					html += '<a href="#gem_picture">';
 					html += "<img width='120' height='119' src='" + thumbnail + "'/></a><br/>\n";
-					html += "Lv." + level + " " + color + " " + grade + " " + gradeValue + "%";
+					html += "Lv." + levelId + " " + color + " " + grade + " " + gradeValue + "%";
 
 					html += "\t</td>\n";
 				}
