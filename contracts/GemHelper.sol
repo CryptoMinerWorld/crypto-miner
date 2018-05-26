@@ -31,7 +31,7 @@ contract GemHelper {
       uint16 grade = instance.getGrade(tokenId);
 
       // pack the data
-      result[i] = uint64(tokenId) | uint32(color) << 24 | uint24(level) << 16 | grade;
+      result[i] = uint64(tokenId) << 32 | uint32(color) << 24 | uint24(level) << 16 | grade;
     }
 
     // return the packed data structure
