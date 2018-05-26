@@ -300,7 +300,7 @@ contract GemERC721 is AccessControl {
     // validate token existence
     require(exists(tokenId));
 
-    // obtain token's color from storage and return
+    // obtain token's coordinates from storage and return
     return gems[tokenId].coordinates;
   }
 
@@ -332,6 +332,23 @@ contract GemERC721 is AccessControl {
   function getGemNum(uint32 tokenId) public constant returns(uint16) {
     // extract low 16 bits of the coordinates and return
     return uint16(getCoordinates(tokenId));
+  }
+
+  /**
+   * @dev Gets the gem's properties – color, level and
+   *      grade - as packed uint32 number
+   * @param tokenId ID of the gem to get properties for
+   * @return gem's properties - color, level, grade as packed uint32
+   */
+  function getProperties(uint32 tokenId) public constant returns(uint32) {
+    // validate token existence
+    require(exists(tokenId));
+
+    // read gem from storage
+    Gem memory gem = gems[tokenId];
+
+    // pack data structure and return
+    return uint32(gem.color) << 24 | uint24(gem.level) << 16 | gem.grade;
   }
 
   /**
