@@ -246,7 +246,7 @@ function connect_gem() {
 								html += "</tr>\n";
 							}
 							html += "</table>\n";
-							jQuery3("#pl-490").html(html);
+							jQuery3("#pl-951").html(html);
 							for(let i = 0; i < collection.length; i++) {
 								const id = collection[i];
 								gemInstance.gems(id, function(err, gem) {
