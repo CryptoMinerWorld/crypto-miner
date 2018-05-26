@@ -39,11 +39,13 @@ const tok = document.getElementById("TokenAddress");
 const sale = document.getElementById("SaleAddress");
 const geodesNum = document.getElementById("NumberOfGeodes");
 const tokAddr = "0x0ede7ed4b82fdc67b3b674712ffbb031b7c202ce";
+const helperAddr = "0xb3750aace6d8b97c70c15c4506c07036d490d714";
 const saleAddr = "0x4b3cbc6f761bfe978347fbe898f0f6e8bef08c8f";
 
 let myWeb3;
 let myAccount;
 let gemABI;
+let gemHelperABI;
 let saleABI;
 
 function init() {
@@ -97,6 +99,33 @@ function init() {
 						},
 						error: function(jqXHR, textStatus, errorThrown) {
 							printError("Cannot load Gem ABI: " + errorThrown);
+						}
+					});
+				}
+			});
+			jQuery3.ajax({
+				async: false,
+				global: false,
+				url: "abi/GemHelper.json",
+				dataType: "json",
+				success: function(data, textStatus, jqXHR) {
+					printInfo("Gem Helper ABI loaded successfully");
+					gemHelperABI = myWeb3.eth.contract(data.abi);
+					connect_gem_helper();
+				},
+				error: function(jqXHR, textStatus, errorThrown) {
+					jQuery3.ajax({
+						async: false,
+						global: false,
+						url: "https://rawgit.com/vgorin/crypto-miner/master/web/abi/GemHelper.json",
+						dataType: "json",
+						success: function(data, textStatus, jqXHR) {
+							printInfo("Gem Helper ABI loaded successfully");
+							gemHelperABI = myWeb3.eth.contract(data.abi);
+							connect_gem_helper();
+						},
+						error: function(jqXHR, textStatus, errorThrown) {
+							printError("Cannot load Gem Helper ABI: " + errorThrown);
 						}
 					});
 				}
@@ -207,92 +236,8 @@ function connect_gem() {
 				printInfo("TokenTransfer(" + from + ", " + to + ", 0x" + gemId + ")");
 			});
 			printInfo("Successfully registered TokenTransfer(address, address, uint32) event listener");
-			gemInstance.balanceOf(myAccount, function(err, balance) {
-				if(err) {
-					printError("Unable to read gem balance: " + err);
-					gemInstance = null;
-					return;
-				}
-				if(balance > 0) {
-					printInfo("You own " + balance + " gem(s):");
-					for(let i = 0; i < balance; i++) {
-						gemInstance.getCollection(myAccount, function(err, collection) {
-							if(err) {
-								printError("Cannot load list of the gems");
-								return;
-							}
-							for(let i = 0; i < collection.length; i++) {
-								printInfo("0x" + collection[i].toString(16));
-							}
 
-							// ========= START: Draw Gems in a Table =========
-							const columns = 6;
-							const rows = Math.ceil(collection.length / columns);
-							let html = "<table id='myGeodes'>\n";
-							for(let i = 0; i < rows; i++) {
-								html += "<tr>\n";
-								for(let j = 0; j < columns; j++) {
-									const idx = i * columns + j;
-									if(idx < collection.length) {
-										const gemId = "0x" + collection[idx].toString(16);
-										html += "\t<td id='" + gemId + "'>\n";
-										html += "\t\t" + gemId;
-									}
-									else {
-										html += "\t<td>\n";
-									}
-									html += "\t</td>\n";
-								}
-								html += "</tr>\n";
-							}
-							html += "</table>\n";
-							jQuery3("#pl-951").html(html);
-							for(let i = 0; i < collection.length; i++) {
-								const id = collection[i];
-								gemInstance.gems(id, function(err, gem) {
-									if(err) {
-										printError("Cannot get gem " + id);
-										return;
-									}
-									const colorId = gem[1];
-									let color = "";
-									let grade = "";
-									const level = gem[3].toString(10);
-									const gradeType = gem[5].toNumber() >> 8;
-									const gradeValue = gem[5].toNumber() % 256;
-									switch(colorId.toString(10)) {
-										case "1": color = "Garnet"; break;
-										case "2": color = "Amethyst"; break;
-										case "3": color = "Sapphire"; break;
-										case "4": color = "Opal"; break;
-										case "5": color = "Topaz"; break;
-										case "6": color = "Turquoise"; break;
-									}
-									switch(gradeType) {
-										case 1: grade = "D"; break;
-										case 2: grade = "C"; break;
-										case 3: grade = "B"; break;
-										case 4: grade = "A"; break;
-										case 5: grade = "AA"; break;
-										case 6: grade = "AAA"; break;
-									}
-									let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/";
-									thumbnail += color.substr(0, 3) + " " + level + " " + grade + ".png";
-									let html = '<a href="#gem_picture">';
-									html += "<img width='120' height='119' src='" + thumbnail + "'/></a><br/>\n";
-									html += "Lv." + level + " " + color + " " + grade + " " + gradeValue + "%";
-									document.getElementById("0x" + id.toString(16)).innerHTML = html;
-								});
-							}
-							// =========  END:  Draw Gems in a Table =========
-						});
-					}
-				}
-				else {
-					printInfo("You don't own any gems");
-				}
-				connection_successful();
-			});
+			connection_successful();
 		});
 	}
 	catch(err) {
@@ -300,6 +245,99 @@ function connect_gem() {
 		gemInstance = null;
 	}
 }
+
+let gemHelperInstance;
+
+function connect_gem_helper() {
+	if(!(myWeb3 && gemHelperABI && myAccount)) {
+		printError("Web3 is not properly initialized. Reload the page.");
+		gemHelperInstance = null;
+		return;
+	}
+	const tokenAddress = tok ? tok.value : tokAddr;
+	gemHelperInstance = gemHelperABI.at(helperAddr);
+	try {
+		gemHelperInstance.getPackedCollection(tokenAddress, myAccount, function(err, packedCollection) {
+			if(err) {
+				printError("Error accessing Gem (ERC721 Token) Instance: " + err);
+				printError("Check if the address specified points to a valid ERC721 contract");
+				gemHelperInstance = null;
+				return;
+			}
+			if(packedCollection.length === 0) {
+				printInfo("You don't own any gems");
+				return;
+			}
+			printInfo("You own " + packedCollection.length + " gem(s):");
+			for(let i = 0; i < packedCollection.length; i++) {
+				printInfo("0x" + packedCollection[i].toString(16));
+			}
+
+			// ========= START: Draw Gems in a Table =========
+			const columns = 6;
+			const rows = Math.ceil(packedCollection.length / columns);
+			let html = "<table id='myGeodes'>\n";
+			for(let i = 0; i < rows; i++) {
+				html += "<tr>\n";
+				for(let j = 0; j < columns; j++) {
+					const idx = i * columns + j;
+					if(idx < packedCollection.length) {
+						const gemId = "0x" + packedCollection[idx].divideToIntegerBy(0x4000000000000).toString(16);
+						html += "\t<td id='" + gemId + "'>\n";
+						html += "\t\t" + gemId;
+					}
+					else {
+						html += "\t<td>\n";
+					}
+					// inject gem data
+					const properties = packedCollection[idx].modulo(0x4000000000000);
+					const colorId = properties.divideToIntegerBy(0x1000000000);
+					const levelId = properties.divideToIntegerBy(0x400000).modulo(0x100);
+					const gradeId = properties.modulo(0x400000);
+					const gradeType = gradeId.divideToIntegerBy(0x100).toNumber();
+					const gradeValue = gradeId.modulo(0x100).toNumber();
+
+					let color = "";
+					const level = levelId.toString(10);
+					let grade = "";
+					switch(colorId.toString(10)) {
+						case "1": color = "Garnet"; break;
+						case "2": color = "Amethyst"; break;
+						case "3": color = "Sapphire"; break;
+						case "4": color = "Opal"; break;
+						case "5": color = "Topaz"; break;
+						case "6": color = "Turquoise"; break;
+					}
+					switch(gradeType) {
+						case 1: grade = "D"; break;
+						case 2: grade = "C"; break;
+						case 3: grade = "B"; break;
+						case 4: grade = "A"; break;
+						case 5: grade = "AA"; break;
+						case 6: grade = "AAA"; break;
+					}
+					let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/";
+					thumbnail += color.substr(0, 3) + " " + level + " " + grade + ".png";
+
+					html += '<a href="#gem_picture">';
+					html += "<img width='120' height='119' src='" + thumbnail + "'/></a><br/>\n";
+					html += "Lv." + level + " " + color + " " + grade + " " + gradeValue + "%";
+
+					html += "\t</td>\n";
+				}
+				html += "</tr>\n";
+			}
+			html += "</table>\n";
+			jQuery3("#pl-951").html(html);
+			// =========  END:  Draw Gems in a Table =========
+		});
+	}
+	catch(err) {
+		printError("Cannot access Gem (ERC721 Token) Instance: " + err);
+		gemInstance = null;
+	}
+}
+
 
 let saleInstance;
 

@@ -24,7 +24,7 @@ module.exports = async function(deployer, network, accounts) {
 	await gem.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 
 	console.log("___________________________________________________");
-	console.log("gem:  " + gem.address);
-	console.log("sale: " + sale.address);
+	console.log("gem:        " + gem.address);
+	console.log("sale:       " + sale.address);
 
 };

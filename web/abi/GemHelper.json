@@ -1,0 +1,42 @@
+{
+  "contractName": "GemHelper",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "instanceAddress",
+          "type": "address"
+        },
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "getPackedCollection",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.23+commit.124ca40d.Emscripten.clang"
+  },
+  "networks": {
+    "4": {
+      "events": {},
+      "links": {},
+      "address": "0xb3750aace6d8b97c70c15c4506c07036d490d714",
+      "transactionHash": "0x978a0b47775cafc1c58688bd1319904b7eaea89da389af036d9e7b8a93dadaf0"
+    }
+  },
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-05-26T20:01:14.131Z"
+}
