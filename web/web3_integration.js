@@ -284,44 +284,42 @@ function connect_gem_helper() {
 					if(idx < packedCollection.length) {
 						const gemId = "0x" + packedCollection[idx].dividedToIntegerBy(0x100000000).toString(16);
 						html += "\t<td id='" + gemId + "'>\n";
-						html += "\t\t" + gemId;
+
+						// inject gem data
+						const properties = packedCollection[idx].modulo(0x100000000);
+						const colorId = properties.dividedToIntegerBy(0x1000000).toNumber();
+						const levelId = properties.dividedToIntegerBy(0x10000).modulo(0x100).toNumber();
+						const gradeType = properties.dividedToIntegerBy(0x100).modulo(0x100).toNumber();
+						const gradeValue = properties.modulo(0x100).toNumber();
+
+						let color = "";
+						let grade = "";
+						switch(colorId) {
+							case 1: color = "Garnet"; break;
+							case 2: color = "Amethyst"; break;
+							case 3: color = "Sapphire"; break;
+							case 4: color = "Opal"; break;
+							case 5: color = "Topaz"; break;
+							case 6: color = "Turquoise"; break;
+						}
+						switch(gradeType) {
+							case 1: grade = "D"; break;
+							case 2: grade = "C"; break;
+							case 3: grade = "B"; break;
+							case 4: grade = "A"; break;
+							case 5: grade = "AA"; break;
+							case 6: grade = "AAA"; break;
+						}
+						let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/";
+						thumbnail += color.substr(0, 3) + " " + levelId + " " + grade + ".png";
+
+						html += '<a href="#gem_picture">';
+						html += "<img width='120' height='119' src='" + thumbnail + "'/></a><br/>\n";
+						html += "Lv." + levelId + " " + color + " " + grade + " " + gradeValue + "%";
 					}
 					else {
 						html += "\t<td>\n";
 					}
-					// inject gem data
-					const properties = packedCollection[idx].modulo(0x100000000);
-					const colorId = properties.dividedToIntegerBy(0x1000000).toNumber();
-					const levelId = properties.dividedToIntegerBy(0x10000).modulo(0x100).toNumber();
-					const gradeType = properties.dividedToIntegerBy(0x100).modulo(0x100).toNumber();
-					const gradeValue = properties.modulo(0x100).toNumber();
-
-					let color = "";
-					let grade = "";
-					switch(colorId) {
-						case 1: color = "Garnet"; break;
-						case 2: color = "Amethyst"; break;
-						case 3: color = "Sapphire"; break;
-						case 4: color = "Opal"; break;
-						case 5: color = "Topaz"; break;
-						case 6: color = "Turquoise"; break;
-					}
-					switch(gradeType) {
-						case 1: grade = "D"; break;
-						case 2: grade = "C"; break;
-						case 3: grade = "B"; break;
-						case 4: grade = "A"; break;
-						case 5: grade = "AA"; break;
-						case 6: grade = "AAA"; break;
-					}
-					let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/";
-					thumbnail += color.substr(0, 3) + " " + levelId + " " + grade + ".png";
-
-					html += '<a href="#gem_picture">';
-					html += "<img width='120' height='119' src='" + thumbnail + "'/></a><br/>\n";
-					html += "Lv." + levelId + " " + color + " " + grade + " " + gradeValue + "%";
-
-					html += "\t</td>\n";
 				}
 				html += "</tr>\n";
 			}
