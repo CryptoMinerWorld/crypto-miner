@@ -282,7 +282,7 @@ function connect_gem_helper() {
 				for(let j = 0; j < columns; j++) {
 					const idx = i * columns + j;
 					if(idx < packedCollection.length) {
-						const gemId = "0x" + packedCollection[idx].divideToIntegerBy(0x4000000000000).toString(16);
+						const gemId = "0x" + packedCollection[idx].dividedToIntegerBy(0x4000000000000).toString(16);
 						html += "\t<td id='" + gemId + "'>\n";
 						html += "\t\t" + gemId;
 					}
@@ -291,10 +291,10 @@ function connect_gem_helper() {
 					}
 					// inject gem data
 					const properties = packedCollection[idx].modulo(0x4000000000000);
-					const colorId = properties.divideToIntegerBy(0x1000000000);
-					const levelId = properties.divideToIntegerBy(0x400000).modulo(0x100);
+					const colorId = properties.dividedToIntegerBy(0x1000000000);
+					const levelId = properties.dividedToIntegerBy(0x400000).modulo(0x100);
 					const gradeId = properties.modulo(0x400000);
-					const gradeType = gradeId.divideToIntegerBy(0x100).toNumber();
+					const gradeType = gradeId.dividedToIntegerBy(0x100).toNumber();
 					const gradeValue = gradeId.modulo(0x100).toNumber();
 
 					let color = "";
