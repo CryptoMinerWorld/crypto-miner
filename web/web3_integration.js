@@ -541,21 +541,29 @@ function notify(msg, type) {
 
 function display_gem(color, level, grade, gradeValue) {
 	console.log("display_gem(%s, %s, %s, %s)", color, level, grade, gradeValue);
-	jQuery3("#gem_modal #picture").attr("src", gem_url(color, level, grade));
+	jQuery3("#gem_modal #picture").each(function(i, e) {
+		e.src = gem_url(color, level, grade);
+		e.onload = function() {
+			location.href = "#gem_modal";
+		}
+	});
+
 	jQuery3("#gem_modal #level").html(level);
 	jQuery3("#gem_modal #color").html(color);
 	jQuery3("#gem_modal #grade").html(grade);
 	jQuery3("#gem_modal #grade_value").html(gradeValue);
-	location.href = "#gem_modal";
 }
 
 function preload_images() {
 	const images = [];
-	for(let colorId = 1; colorId <= 12; colorId++) {
+	for(let colorId = 1; colorId <= 6; colorId++) {
 		for(let levelId = 1; levelId <= 2; levelId++) {
 			for(let gradeType = 1; gradeType <= 6; gradeType++) {
 				const img = new Image();
-				img.src = gem_thumbnail_url(gem_color_to_string(colorId), gem_level_to_string(levelId), gem_grade_type_to_string(gradeType));
+				img.src = gem_thumbnail_url(gem_color_to_string((8 + colorId) % 12), gem_level_to_string(levelId), gem_grade_type_to_string(gradeType));
+				img.onload = function() {
+					console.log(img.src + " loaded successfully");
+				};
 				images.push(img);
 			}
 		}
