@@ -311,7 +311,7 @@ function connect_gem_helper() {
 						const thumbnail = gem_thumbnail_url(color, level, grade);
 
 						html += '<a href="javascript:display_gem(\'' + color + '\', \'' + level + '\', \'' + grade + '\', \'' + gradeValue + '\')">';
-						html += "<img width='160' height='160' src='" + thumbnail + "'/></a><br/>\n";
+						html += '<img style="padding: 0;" width="160" height="160" src="' + thumbnail + '"/></a><br/>\n';
 						html += "Lv." + levelId + " " + color.substr(0, color.indexOf(" ")) + " " + grade + " " + gradeValue + "%";
 					}
 					else {
