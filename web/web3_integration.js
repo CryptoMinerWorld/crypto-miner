@@ -38,9 +38,9 @@ const con = document.getElementById("console");
 const tok = document.getElementById("TokenAddress");
 const sale = document.getElementById("SaleAddress");
 const geodesNum = document.getElementById("NumberOfGeodes");
-const tokAddr = "0x0ede7ed4b82fdc67b3b674712ffbb031b7c202ce";
-const helperAddr = "0xccdb881a6c5dc16fdb327dad3d317e94558c62a2";
-const saleAddr = "0x4b3cbc6f761bfe978347fbe898f0f6e8bef08c8f";
+const tokAddr = "0xfe71b017577c8439fa2cecbf3e66a7ea61ce5196";
+const helperAddr = "0x61646e64b6c9bc939139a1847477704cdb26992f";
+const saleAddr = "0x17044300943b4d0206e6f64894c71b6595d8822f";
 
 let myWeb3;
 let myAccount;
