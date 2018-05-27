@@ -120,15 +120,17 @@ contract GeodeSale {
     uint256 change = msg.value - value;
 
     // if player buys 10 geodes - he receives one for free
-    geodesToSell += geodesToSell / 10;
+    if(geodesToSell >= 10) {
+      geodesToSell++;
+    }
 
     // update counters
     geodesSold += uint16(geodesToSell);
 
     // create geodes – actually create gems
     for(uint16 i = 0; i < geodesToSell; i++) {
-      // open created geode + emit an event
-      __openGeode(nextGeode + i, player, GEMS_IN_GEODE + ((i + 1) % 5 == 0? 1: 0));
+      // open created geode + emit an event, geode number 5 (4) contains additional gem
+      __openGeode(nextGeode + i, player, GEMS_IN_GEODE + (i == 4? 1: 0));
     }
 
     // update next geode to sell pointer

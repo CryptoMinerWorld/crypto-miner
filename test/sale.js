@@ -47,8 +47,8 @@ contract('GeodeSale', function(accounts) {
 		await sale.getGeodes.sendTransaction({value: (await sale.currentPrice()).times(10)});
 
 		const gemsInGeode = await sale.GEMS_IN_GEODE();
-		assert(gemsInGeode.times(11).plus(2).eq(await tk.balanceOf(accounts[0])), "wrong token balance after buying 10 geodes");
-		assert(gemsInGeode.times(11).plus(2).eq(await tk.totalSupply()), "wrong token total supply after buying 10 geodes");
+		assert(gemsInGeode.times(11).plus(1).eq(await tk.balanceOf(accounts[0])), "wrong token balance after buying 10 geodes");
+		assert(gemsInGeode.times(11).plus(1).eq(await tk.totalSupply()), "wrong token total supply after buying 10 geodes");
 	});
 	it("geode sale: it is possible to buy few geodes and get a change", async function() {
 		const tk = await Token.new();
