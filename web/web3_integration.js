@@ -297,10 +297,16 @@ function connect_gem_helper() {
 						switch(colorId) {
 							case 1: color = "Garnet"; break;
 							case 2: color = "Amethyst"; break;
-							case 3: color = "Sapphire"; break;
-							case 4: color = "Opal"; break;
-							case 5: color = "Topaz"; break;
-							case 6: color = "Turquoise"; break;
+							case 3: color = "Aquamarine"; break;
+							case 4: color = "Diamond"; break;
+							case 5: color = "Emerald"; break;
+							case 6: color = "Pearl"; break;
+							case 7: color = "Ruby"; break;
+							case 8: color = "Peridot"; break;
+							case 9: color = "Sapphire"; break;
+							case 10: color = "Opal"; break;
+							case 11: color = "Topaz"; break;
+							case 12: color = "Turquoise"; break;
 						}
 						switch(gradeType) {
 							case 1: grade = "D"; break;

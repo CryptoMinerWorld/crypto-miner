@@ -261,7 +261,8 @@ contract GeodeSale {
   // determines color ID randomly
   function __colorId(uint16 randomness) private pure returns (uint8) {
     // normalize 0x10000 random range into 12, starting from 1
-    return uint8(__randomValue(randomness, 1, COLORS, 0x10000));
+    // we need to ensure only colors 9, 10, 11, 12, 1, 2 are allowed
+    return (uint8(__randomValue(randomness, 8, COLORS, 0x10000)) % 12) + 1;
   }
 
   // determines grade value randomly
