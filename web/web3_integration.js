@@ -328,7 +328,7 @@ function connect_gem_helper() {
 						let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/";
 						thumbnail += color.substr(0, 3) + " " + levelId + " " + grade + ".png";
 
-						html += '<a href="javascript:display_gem(' + color + ', ' + level + ', ' + grade + ', ' + gradeValue + ')">';
+						html += '<a href="javascript:display_gem("' + color + '", "' + level + '", "' + grade + '", "' + gradeValue + '")">';
 						html += "<img width='120' height='119' src='" + thumbnail + "'/></a><br/>\n";
 						html += "Lv." + levelId + " " + color + " " + grade + " " + gradeValue + "%";
 					}
