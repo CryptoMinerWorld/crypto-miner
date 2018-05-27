@@ -287,7 +287,7 @@ function connect_gem_helper() {
 			const columns = 6;
 			const rows = Math.ceil(packedCollection.length / columns);
 			let html = "";
-			html += '<h1 id="my_geodes_header">' + packedCollection.length + ' gems in your collection</h1>';
+			html += '<h1 id="my_geodes_header" style="padding-top: 1em; text-align: center; color: white;">' + packedCollection.length + ' gems in your collection</h1>';
 
 			html += '<table id="my_geodes">\n';
 			for(let i = 0; i < rows; i++) {
