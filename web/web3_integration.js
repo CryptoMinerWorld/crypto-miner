@@ -302,44 +302,13 @@ function connect_gem_helper() {
 						const gradeType = properties.dividedToIntegerBy(0x100).modulo(0x100).toNumber();
 						const gradeValue = properties.modulo(0x100).toNumber();
 
-						let color = "";
-						let level = "";
-						let grade = "";
-						switch(colorId) {
-							case 1: color = "Garnet (January)"; break;
-							case 2: color = "Amethyst (February)"; break;
-							case 3: color = "Aquamarine (March)"; break;
-							case 4: color = "Diamond (April)"; break;
-							case 5: color = "Emerald (May)"; break;
-							case 6: color = "Pearl (June)"; break;
-							case 7: color = "Ruby (July)"; break;
-							case 8: color = "Peridot (August)"; break;
-							case 9: color = "Sapphire (September)"; break;
-							case 10: color = "Opal (October)"; break;
-							case 11: color = "Topaz (November)"; break;
-							case 12: color = "Turquoise (December)"; break;
-						}
-						switch(levelId) {
-							case 1: level = "Baby, Level "; break;
-							case 2: level = "Toddler, Level "; break;
-							case 3: level = "Child, Level "; break;
-							case 4: level = "Teen, Level "; break;
-							case 5: level = "Adult, Level "; break;
-						}
-						level += levelId;
-						switch(gradeType) {
-							case 1: grade = "D"; break;
-							case 2: grade = "C"; break;
-							case 3: grade = "B"; break;
-							case 4: grade = "A"; break;
-							case 5: grade = "AA"; break;
-							case 6: grade = "AAA"; break;
-						}
-						let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/";
-						thumbnail += color.substr(0, 3) + " " + levelId + " " + grade + ".png";
+						const color = gem_color_to_string(colorId);
+						const level = gem_level_to_string(levelId);
+						const grade = gem_grade_type_to_string(gradeType);
+						const thumbnail = gem_thumbnail_url(color, level, grade);
 
 						html += '<a href="javascript:display_gem(\'' + color + '\', \'' + level + '\', \'' + grade + '\', \'' + gradeValue + '\')">';
-						html += "<img width='120' height='119' src='" + thumbnail + "'/></a><br/>\n";
+						html += "<img width='160' height='160' src='" + thumbnail + "'/></a><br/>\n";
 						html += "Lv." + levelId + " " + color.substr(0, color.indexOf(" ")) + " " + grade + " " + gradeValue + "%";
 					}
 					else {
@@ -572,12 +541,80 @@ function notify(msg, type) {
 
 function display_gem(color, level, grade, gradeValue) {
 	console.log("display_gem(%s, %s, %s, %s)", color, level, grade, gradeValue);
-	jQuery3("#gem_modal #picture").attr("src", "https://rawgit.com/vgorin/crypto-miner/master/web/gems/" + color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png");
+	jQuery3("#gem_modal #picture").attr("src", gem_url(color, level, grade));
 	jQuery3("#gem_modal #level").html(level);
 	jQuery3("#gem_modal #color").html(color);
 	jQuery3("#gem_modal #grade").html(grade);
 	jQuery3("#gem_modal #grade_value").html(gradeValue);
 	location.href = "#gem_modal";
+}
+
+function preload_images() {
+	const images = [];
+	for(let colorId = 1; colorId <= 12; colorId++) {
+		for(let levelId = 1; levelId <= 2; levelId++) {
+			for(let gradeType = 1; gradeType <= 6; gradeType++) {
+				const img = new Image();
+				img.src = gem_thumbnail_url(gem_color_to_string(colorId), gem_level_to_string(levelId), gem_grade_type_to_string(gradeType));
+				images.push(img);
+			}
+		}
+	}
+}
+
+function gem_color_to_string(colorId) {
+	let color = "";
+	switch(colorId) {
+		case 1: color = "Garnet (January)"; break;
+		case 2: color = "Amethyst (February)"; break;
+		case 3: color = "Aquamarine (March)"; break;
+		case 4: color = "Diamond (April)"; break;
+		case 5: color = "Emerald (May)"; break;
+		case 6: color = "Pearl (June)"; break;
+		case 7: color = "Ruby (July)"; break;
+		case 8: color = "Peridot (August)"; break;
+		case 9: color = "Sapphire (September)"; break;
+		case 10: color = "Opal (October)"; break;
+		case 11: color = "Topaz (November)"; break;
+		case 12: color = "Turquoise (December)"; break;
+	}
+	return color;
+}
+
+function gem_level_to_string(levelId) {
+	let level = "";
+	switch(levelId) {
+		case 1: level = "Baby, Level "; break;
+		case 2: level = "Toddler, Level "; break;
+		case 3: level = "Child, Level "; break;
+		case 4: level = "Teen, Level "; break;
+		case 5: level = "Adult, Level "; break;
+	}
+	level += levelId;
+	return level;
+}
+
+function gem_grade_type_to_string(gradeType) {
+	let grade = "";
+	switch(gradeType) {
+		case 1: grade = "D"; break;
+		case 2: grade = "C"; break;
+		case 3: grade = "B"; break;
+		case 4: grade = "A"; break;
+		case 5: grade = "AA"; break;
+		case 6: grade = "AAA"; break;
+	}
+	return grade;
+}
+
+function gem_thumbnail_url(color, level, grade) {
+	return "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/"
+		+ color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png";
+}
+
+function gem_url(color, level, grade) {
+	return "https://rawgit.com/vgorin/crypto-miner/master/web/gems/"
+		+ color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png";
 }
 
 jQuery3(document).ready(function() {
@@ -601,4 +638,5 @@ jQuery3(document).ready(function() {
 	getGeodeButton.bind("click", selectAndBuy);
 	getGeodeButton.css("cursor", "pointer");
 
+	preload_images();
 });
