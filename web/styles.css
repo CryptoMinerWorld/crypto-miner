@@ -1,9 +1,13 @@
-table#myGeodes {
+#myGeodes {
 	margin: 32px 16px;
 	color: white;
 }
 
-table#myGeodes td {
+#myGeodes td {
 	text-align: center;
+	border: none;
+}
+
+#geode_qty_modal td, #gem_picture td {
 	border: none;
 }
