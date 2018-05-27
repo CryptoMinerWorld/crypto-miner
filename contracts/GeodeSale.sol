@@ -56,6 +56,9 @@ contract GeodeSale {
   /// @dev Mapping for the geode owners, will be used to issue land plots
   mapping(uint16 => address) public geodeOwners;
 
+  /// @dev A mapping storing geode / land plot balances
+  mapping(address => uint16) public geodeBalances;
+
   /**
    * @dev event names are self-explanatory
    */
@@ -204,6 +207,9 @@ contract GeodeSale {
 
     // store geode owner
     geodeOwners[geodeId] = player;
+
+    // update owner geode balance
+    geodeBalances[player]++;
 
     // iterate and mint gems required
     for(uint32 i = 0; i < gems.length; i++) {

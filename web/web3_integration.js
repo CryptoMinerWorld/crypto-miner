@@ -286,7 +286,10 @@ function connect_gem_helper() {
 			// ========= START: Draw Gems in a Table =========
 			const columns = 6;
 			const rows = Math.ceil(packedCollection.length / columns);
-			let html = "<table id='myGeodes'>\n";
+			let html = "";
+			html += '<h1 id="my_geodes_header">' + packedCollection.length + ' gems in your collection</h1>';
+
+			html += '<table id="my_geodes">\n';
 			for(let i = 0; i < rows; i++) {
 				html += "<tr>\n";
 				for(let j = 0; j < columns; j++) {
