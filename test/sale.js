@@ -19,6 +19,7 @@ contract('GeodeSale', function(accounts) {
 		const gemsInGeode = await sale.GEMS_IN_GEODE();
 		assert(gemsInGeode.eq(await tk.balanceOf(accounts[0])), "wrong token balance after buying geode");
 		assert(gemsInGeode.eq(await tk.totalSupply()), "wrong token total supply after buying geode");
+		assert.equal(1, await sale.geodeBalances(accounts[0]), "wrong geode balance after buying one geode");
 	});
 	it("geode sale: it is possible to buy 5 geodes and get 1 free gem", async function() {
 		const tk = await Token.new();
@@ -47,8 +48,9 @@ contract('GeodeSale', function(accounts) {
 		await sale.getGeodes.sendTransaction({value: (await sale.currentPrice()).times(10)});
 
 		const gemsInGeode = await sale.GEMS_IN_GEODE();
-		assert(gemsInGeode.times(11).plus(1).eq(await tk.balanceOf(accounts[0])), "wrong token balance after buying 10 geodes");
-		assert(gemsInGeode.times(11).plus(1).eq(await tk.totalSupply()), "wrong token total supply after buying 10 geodes");
+		assert(gemsInGeode.times(11).plus(1).eq(await tk.balanceOf(accounts[0])), "wrong token balance after buying 10 geodes (+1 free)");
+		assert(gemsInGeode.times(11).plus(1).eq(await tk.totalSupply()), "wrong token total supply after buying 10 geodes (+1 free)");
+		assert.equal(11, await sale.geodeBalances(accounts[0]), "wrong geode balance after buying 10 geodes (+1 free)");
 	});
 	it("geode sale: it is possible to buy few geodes and get a change", async function() {
 		const tk = await Token.new();

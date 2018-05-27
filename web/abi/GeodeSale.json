@@ -104,6 +104,25 @@
       "inputs": [
         {
           "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "geodeBalances",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
           "type": "uint16"
         }
       ],
@@ -253,7 +272,7 @@
         }
       ],
       "payable": false,
-      "stateMutability": "pure",
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -282,5 +301,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-20T14:59:12.423Z"
+  "updatedAt": "2018-05-27T16:12:28.809Z"
 }
