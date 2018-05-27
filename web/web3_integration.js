@@ -20,18 +20,18 @@ document.write(`
 		</div>
 	</div>
 </div>
-<div id="gem_picture" class="overlay">
+<div id="gem_modal" class="overlay">
 	<a class="cancel" href="#"></a>
-	<div class="modal" style="margin-top: 120px; width: 900px;">
+	<div class="modal" style="margin-top: 120px; width: 800px;">
 		<div class="content">
 			<table>
-				<tr><td>
-					<img width="500" height="500" src="https://rawgit.com/vgorin/crypto-miner/master/web/gems/Ame 1 A.png"/>
-				</td><td>
+				<tr><td style="padding: 0; width: 500px;">
+					<img id="picture" width="500" height="500" src="https://rawgit.com/vgorin/crypto-miner/master/web/gems/Ame 1 A.png"/>
+				</td><td style="vertical-align: middle;">
 					<h1>Tipsy Pete</h1>
 					<h4>Mining rate – <span id="grade_value">25</span>%</h4>
 					<h4>Energy level – <span id="energy_level">100</span>%</h4>
-					<h4>Grade <span id="grade_type">B</span>%</h4>
+					<h4>Grade <span id="grade_type">B</span></h4>
 					<h4 id="level">Baby, Level 1</h4>
 					<h4 id="color">Amethyst (February)</h4>
 				</td></tr>
@@ -306,18 +306,18 @@ function connect_gem_helper() {
 						let level = "";
 						let grade = "";
 						switch(colorId) {
-							case 1: color = "Garnet"; break;
-							case 2: color = "Amethyst"; break;
-							case 3: color = "Aquamarine"; break;
-							case 4: color = "Diamond"; break;
-							case 5: color = "Emerald"; break;
-							case 6: color = "Pearl"; break;
-							case 7: color = "Ruby"; break;
-							case 8: color = "Peridot"; break;
-							case 9: color = "Sapphire"; break;
-							case 10: color = "Opal"; break;
-							case 11: color = "Topaz"; break;
-							case 12: color = "Turquoise"; break;
+							case 1: color = "Garnet (January)"; break;
+							case 2: color = "Amethyst (February)"; break;
+							case 3: color = "Aquamarine (March)"; break;
+							case 4: color = "Diamond (April)"; break;
+							case 5: color = "Emerald (May)"; break;
+							case 6: color = "Pearl (June)"; break;
+							case 7: color = "Ruby (July)"; break;
+							case 8: color = "Peridot (August)"; break;
+							case 9: color = "Sapphire (September)"; break;
+							case 10: color = "Opal (October)"; break;
+							case 11: color = "Topaz (November)"; break;
+							case 12: color = "Turquoise (December)"; break;
 						}
 						switch(levelId) {
 							case 1: level = "Baby, Level "; break;
@@ -340,7 +340,7 @@ function connect_gem_helper() {
 
 						html += '<a href="javascript:display_gem(\'' + color + '\', \'' + level + '\', \'' + grade + '\', \'' + gradeValue + '\')">';
 						html += "<img width='120' height='119' src='" + thumbnail + "'/></a><br/>\n";
-						html += "Lv." + levelId + " " + color + " " + grade + " " + gradeValue + "%";
+						html += "Lv." + levelId + " " + color.substr(0, color.indexOf(" ")) + " " + grade + " " + gradeValue + "%";
 					}
 					else {
 						html += "\t<td>\n";
@@ -572,7 +572,12 @@ function notify(msg, type) {
 
 function display_gem(color, level, grade, gradeValue) {
 	console.log("display_gem(%s, %s, %s, %s)", color, level, grade, gradeValue);
-	location.href = "#gem_picture";
+	jQuery3("#gem_modal #picture").attr("src", "https://rawgit.com/vgorin/crypto-miner/master/web/gems/" + color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png");
+	jQuery3("#gem_modal #level").innerHTML = level;
+	jQuery3("#gem_modal #color").innerHTML = color;
+	jQuery3("#gem_modal #grade").innerHTML = grade;
+	jQuery3("#gem_modal #grade_value").innerHTML = gradeValue;
+	location.href = "#gem_modal";
 }
 
 jQuery3(document).ready(function() {
