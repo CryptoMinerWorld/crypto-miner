@@ -22,19 +22,18 @@ document.write(`
 </div>
 <div id="gem_picture" class="overlay">
 	<a class="cancel" href="#"></a>
-	<div class="modal" style="margin-top: 30px;">
-		<h3>Lv 1 Amethyst</h3>
+	<div class="modal" style="margin-top: 120px; width: 900px;">
 		<div class="content">
 			<table>
 				<tr><td>
-					<img width="600" height="600" src="https://rawgit.com/vgorin/crypto-miner/master/web/gems/Ame 1 A.png"/>
+					<img width="500" height="500" src="https://rawgit.com/vgorin/crypto-miner/master/web/gems/Ame 1 A.png"/>
 				</td><td>
 					<h1>Tipsy Pete</h1>
-					<p>Mining rate – <span id="grade_value"></span>%</p>
-					<p>Energy level – <span id="energy_level">100</span>%</p>
-					<p>Grade <span id="grade_type">B</span>%</p>
-					<p id="level">Baby, Level 1</p>
-					<p id="color">Amethyst (February)</p>
+					<h4>Mining rate – <span id="grade_value">25</span>%</h4>
+					<h4>Energy level – <span id="energy_level">100</span>%</h4>
+					<h4>Grade <span id="grade_type">B</span>%</h4>
+					<h4 id="level">Baby, Level 1</h4>
+					<h4 id="color">Amethyst (February)</h4>
 				</td></tr>
 			</table>
 		</div>
