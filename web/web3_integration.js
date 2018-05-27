@@ -573,10 +573,10 @@ function notify(msg, type) {
 function display_gem(color, level, grade, gradeValue) {
 	console.log("display_gem(%s, %s, %s, %s)", color, level, grade, gradeValue);
 	jQuery3("#gem_modal #picture").attr("src", "https://rawgit.com/vgorin/crypto-miner/master/web/gems/" + color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png");
-	jQuery3("#gem_modal #level").innerHTML = level;
-	jQuery3("#gem_modal #color").innerHTML = color;
-	jQuery3("#gem_modal #grade").innerHTML = grade;
-	jQuery3("#gem_modal #grade_value").innerHTML = gradeValue;
+	jQuery3("#gem_modal #level").html(level);
+	jQuery3("#gem_modal #color").html(color);
+	jQuery3("#gem_modal #grade").html(grade);
+	jQuery3("#gem_modal #grade_value").html(gradeValue);
 	location.href = "#gem_modal";
 }
 
