@@ -293,6 +293,7 @@ function connect_gem_helper() {
 						const gradeValue = properties.modulo(0x100).toNumber();
 
 						let color = "";
+						let level = "";
 						let grade = "";
 						switch(colorId) {
 							case 1: color = "Garnet"; break;
@@ -308,6 +309,14 @@ function connect_gem_helper() {
 							case 11: color = "Topaz"; break;
 							case 12: color = "Turquoise"; break;
 						}
+						switch(levelId) {
+							case 1: level = "Baby, Level "; break;
+							case 2: level = "Toddler, Level "; break;
+							case 3: level = "Child, Level "; break;
+							case 4: level = "Teen, Level "; break;
+							case 5: level = "Adult, Level "; break;
+						}
+						level += levelId;
 						switch(gradeType) {
 							case 1: grade = "D"; break;
 							case 2: grade = "C"; break;
@@ -319,7 +328,7 @@ function connect_gem_helper() {
 						let thumbnail = "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/";
 						thumbnail += color.substr(0, 3) + " " + levelId + " " + grade + ".png";
 
-						html += '<a href="#gem_picture">';
+						html += '<a href="javascript:display_gem(' + color + ', ' + level + ', ' + grade + ', ' + gradeValue + ')">';
 						html += "<img width='120' height='119' src='" + thumbnail + "'/></a><br/>\n";
 						html += "Lv." + levelId + " " + color + " " + grade + " " + gradeValue + "%";
 					}
@@ -549,6 +558,11 @@ function notify(msg, type) {
 		'<a href="{3}" target="{4}" data-notify="url"></a>' +
 		'</div>'
 	});
+}
+
+function display_gem(color, level, grade, gradeValue) {
+	console.log("display_gem(%s, %s, %s, %s)", color, level, grade, gradeValue);
+	location.href = "#gem_picture";
 }
 
 jQuery3(document).ready(function() {
