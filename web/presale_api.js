@@ -536,11 +536,11 @@ function PresaleApi(logger, jQuery_instance) {
 		const purchaseCompleteEvent = presaleInstance.PurchaseComplete({_to: myAccount});
 		purchaseCompleteEvent.watch(function(err, receipt) {
 			if(err) {
-				logError("Error receiving PurchaseComplete event: " + err);
+				logError("Error receiving PurchaseComplete event: ", err);
 				return;
 			}
 			if(!(receipt && receipt.args && receipt.args._from && receipt.args._to && receipt.args.geodes && receipt.args.gems && receipt.args.totalPrice)) {
-				logError("PurchaseComplete event received in wrong format: wrong arguments - " + receipt);
+				logError("PurchaseComplete event received in wrong format: wrong arguments - ", receipt);
 				return;
 			}
 			const from = receipt.args._from;
