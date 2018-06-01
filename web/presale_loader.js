@@ -252,7 +252,7 @@ jQuery3(document).ready(function() {
 	);
 
 	// MetaMask is not installed, display proper workshop screen
-	if(errorCode > 0x1) {
+	if(errorCode > 0) {
 		workshop_no_web3();
 	}
 
