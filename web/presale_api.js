@@ -42,6 +42,8 @@ function PresaleApi(logger, jQuery_instance) {
 	const ERR_CONTRACT_VERSION_MISMATCH = 0x10;
 	const ERR_WRONG_ABI = 0x20;
 	const ERR_WEB3_ERROR = 0x40;
+	const ERR_NOT_INITIALIZED = 0x80;
+	const ERR_NO_CALLBACK = 0x100;
 
 	// ---------- START SECTION 1: Constants and Variables ----------
 	// version constants define smart contracts compatible with this API
@@ -443,12 +445,12 @@ function PresaleApi(logger, jQuery_instance) {
 	this.presaleState = function(callback) {
 		if(!callback || {}.toString.call(callback) !== '[object Function]') {
 			logError("callback is undefined or is not a function");
-			return 0x10;
+			return ERR_NO_CALLBACK;
 		}
 		if(!(myWeb3 && myAccount && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			tryCallback(callback, "Presale API is not properly initialized", null);
-			return 0x3;
+			return ERR_NOT_INITIALIZED;
 		}
 		presaleInstance.getPacked(function(err, result) {
 			if(err) {
@@ -485,11 +487,11 @@ function PresaleApi(logger, jQuery_instance) {
 	this.getCollection = function(callback) {
 		if(!callback || {}.toString.call(callback) !== '[object Function]') {
 			logError("callback is undefined or is not a function");
-			return 0x10;
+			return ERR_NO_CALLBACK;
 		}
 		if(!(myWeb3 && myAccount && tokenInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
-			return 0x2;
+			return ERR_NOT_INITIALIZED;
 		}
 		const owner = myAccount;
 		tokenInstance.getPackedCollection(owner, function(err, collection) {
@@ -499,7 +501,7 @@ function PresaleApi(logger, jQuery_instance) {
 				return;
 			}
 			if(collection.length > 0) {
-				logInfo("Cards owned by ", owner, ": ", ...collection);
+				logInfo("Tokens owned by ", owner, ": ", ...collection);
 			}
 			else {
 				logInfo("Address ", owner, " doesn't own any tokens");
@@ -523,6 +525,34 @@ function PresaleApi(logger, jQuery_instance) {
 		// no sync errors – return 0
 		return 0;
 	};
+
+	/**
+	 * Retrieves amount of geodes owned by a particular address
+	 * @param callback
+	 * @return {number}
+	 */
+	this.getGeodeBalance = function(callback) {
+		if(!callback || {}.toString.call(callback) !== '[object Function]') {
+			logError("callback is undefined or is not a function");
+			return 0x10;
+		}
+		if(!(myWeb3 && myAccount && presaleInstance)) {
+			logError("Presale API is not properly initialized. Reload the page.");
+			return 0x2;
+		}
+		const owner = myAccount;
+		presaleInstance.geodeBalances(owner, function(err, result) {
+			if(err) {
+				logError("Cannot get geode balance: ", err);
+				tryCallback(callback, err, null);
+				return;
+			}
+			logInfo("Address ", owner, " has ", result, " geodes");
+			tryCallback(callback, null, result.toNumber());
+		});
+		// no sync errors – return 0
+		return 0;
+	};
 	// ---------- END SECTION 5: Presale API Public Getters ----------
 
 
@@ -539,7 +569,14 @@ function PresaleApi(logger, jQuery_instance) {
 				logError("Error receiving PurchaseComplete event: ", err);
 				return;
 			}
-			if(!(receipt && receipt.args && receipt.args._from && receipt.args._to && receipt.args.geodes && receipt.args.gems && receipt.args.totalPrice)) {
+			if(!(receipt && receipt.args
+					&& receipt.args._from
+					&& receipt.args._to
+					&& receipt.args.geodes
+					&& receipt.args.gems
+					&& receipt.args.price
+					&& receipt.args.geodesTotal
+					&& receipt.args.gemsTotal)) {
 				logError("PurchaseComplete event received in wrong format: wrong arguments - ", receipt);
 				return;
 			}
@@ -547,13 +584,17 @@ function PresaleApi(logger, jQuery_instance) {
 			const to = receipt.args._to;
 			const geodes = receipt.args.geodes;
 			const gems = receipt.args.gems;
-			const price = receipt.args.totalPrice;
-			logInfo("PurchaseComplete(", from, ", ", to, ", ", geodes, ", ", gems, ", ", price, ")");
+			const price = receipt.args.price;
+			const geodesTotal = receipt.args.geodesTotal;
+			const gemsTotal = receipt.args.gemsTotal;
+			logInfo("PurchaseComplete(", from, ", ", to, ", ", geodes, ", ", gems, ", ", price, ", ", geodesTotal, ", ", gemsTotal, ")");
 			tryCallbackIfProvided(callback, null, {
 				event: "purchase_complete",
 				geodes: geodes,
 				gems: gems,
-				totalPrice: price,
+				price: price,
+				geodesTotal: geodesTotal,
+				gemsTotal: gemsTotal,
 				txHash: receipt.transactionHash
 			});
 		});

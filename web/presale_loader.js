@@ -148,6 +148,7 @@ jQuery3(document).ready(function() {
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
 		html += '<h1 id="my_geodes_header" style="padding-top: 1em; text-align: center; color: white;">' + collection.length + ' gems in your collection</h1>';
+		html += '<h2 id="my_geodes_subheader"></h2>';
 
 		html += '<table id="my_geodes">\n';
 		for(let i = 0; i < rows; i++) {
@@ -189,13 +190,13 @@ jQuery3(document).ready(function() {
 	const errorCode = presale.init(
 		// token address
 		{
-			address: "0x6a054a90395fd2abfd114108b062264e2c4940e4",
-			abi_url: "https://rawgit.com/vgorin/crypto-miner/master/web/abi/ERC721.json"
+			address: "0x55fbb4eaa7c9eb0fd0fa3a75e4b873ec61a5b2de",
+			abi_url: "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/abi/ERC721.json"
 		},
 		// presale address
 		{
-			address: "0x813a46d934f7e0ad92f8fa32779653fa668f68c8",
-			abi_url: "https://rawgit.com/vgorin/crypto-miner/master/web/abi/Presale.json"
+			address: "0x7704863fd21fcca381285c91406b9917bb94256f",
+			abi_url: "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/abi/Presale.json"
 		},
 		// callback handler
 		function(errCode, result) {
@@ -222,6 +223,14 @@ jQuery3(document).ready(function() {
 					if(result.length > 0) {
 						// display the collection of gems
 						workshop_display_gems(result);
+
+						// inject number of geodes owned
+						presale.getGeodeBalance(function(err, result) {
+							if(err) {
+								return;
+							}
+							jQuery3("#my_geodes_subheader").html(result + " geodes owned");
+						});
 					}
 					else {
 						// display "no gems" screen
@@ -283,24 +292,34 @@ function display_gem(color, level, grade, gradeValue) {
 	});
 }
 
-function preloadGemThumbnails() {
+function preloadGemGraphics() {
+	const thumbs = [];
 	const images = [];
-	for(let colorId = 1; colorId <= 6; colorId++) {
+	for(let colorIdx = 1; colorIdx <= 6; colorIdx++) {
 		for(let levelId = 1; levelId <= 2; levelId++) {
 			for(let gradeType = 1; gradeType <= 6; gradeType++) {
-				const img = new Image();
-				img.src = gemThumbnailURL(colorName(((7 + colorId) % 12) + 1), levelName(levelId), gradeName(gradeType));
-				img.onload = function() {
-					console.log(img.src + " loaded successfully");
+				const thumb = new Image();
+				const image = new Image();
+				const color = colorName(((7 + colorIdx) % 12) + 1);
+				const level = levelName(levelId);
+				const grade = gradeName(gradeType);
+				thumb.src = gemThumbnailURL(color, level, grade);
+				image.src = gemURL(color, level, grade);
+				thumb.onload = function() {
+					console.log(thumb.src + " thumbnail loaded successfully");
 				};
-				images.push(img);
+				image.onload = function() {
+					console.log(thumb.src + " image loaded successfully");
+				};
+				thumbs.push(thumb);
+				images.push(image);
 			}
 		}
 	}
 }
 
 // preload gems images
-preloadGemThumbnails();
+preloadGemGraphics();
 
 function colorName(colorId) {
 	let color = "";
@@ -348,11 +367,11 @@ function gradeName(gradeType) {
 }
 
 function gemThumbnailURL(color, level, grade) {
-	return "https://rawgit.com/vgorin/crypto-miner/master/web/gems/thumbnails/"
+	return "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/gems/thumbnails/"
 		+ color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png";
 }
 
 function gemURL(color, level, grade) {
-	return "https://rawgit.com/vgorin/crypto-miner/master/web/gems/"
+	return "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/gems/"
 		+ color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png";
 }

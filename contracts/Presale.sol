@@ -63,7 +63,15 @@ contract Presale {
    * @dev event names are self-explanatory
    */
   /// @dev fired in buyGeodes()
-  event PurchaseComplete(address indexed _from, address indexed _to, uint16 geodes, uint16 gems, uint64 totalPrice);
+  event PurchaseComplete(
+    address indexed _from,
+    address indexed _to,
+    uint16 geodes,
+    uint32 gems,
+    uint64 price,
+    uint16 geodesTotal,
+    uint32 gemsTotal
+  );
   /// @dev fired in buyGeodes()
   event PresaleStateChanged(uint16 sold, uint16 left, uint64 lastPrice, uint64 currentPrice);
 
@@ -163,8 +171,10 @@ contract Presale {
       player,
       player,
       uint16(geodesToSell),
-      uint16(GEMS_IN_GEODE * geodesToSell + (geodesToSell >= 5 ? 1 : 0)),
-      uint64(value)
+      uint32(GEMS_IN_GEODE * geodesToSell + (geodesToSell >= 5 ? 1 : 0)),
+      uint64(value),
+      geodeBalances[player],
+      gemContract.balanceOf(player)
     );
 
     // presale state changed (used for UI updates)
