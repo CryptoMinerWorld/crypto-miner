@@ -30,7 +30,7 @@ document.write(`
 					<img id="picture" width="500" height="500" src="gems/Ame 1 A.png"/>
 				</td><td style="vertical-align: middle;">
 					<h1>Tipsy Pete</h1>
-					<h4>Mining rate – <span id="grade_value">25</span>%</h4>
+					<h4>Mining rate – <span id="mining_rate">25</span>%</h4>
 					<h4>Energy level – <span id="energy_level">100</span>%</h4>
 					<h4>Grade <span id="grade_type">B</span></h4>
 					<h4 id="level">Baby, Level 1</h4>
@@ -164,15 +164,16 @@ jQuery3(document).ready(function() {
 					const levelId = collection[idx].levelId;
 					const gradeType = collection[idx].gradeType;
 					const gradeValue = collection[idx].gradeValue;
+					const miningRate = baseRate(gradeType) + gradeValue / 20;
 
 					const color = colorName(colorId);
 					const level = levelName(levelId);
 					const grade = gradeName(gradeType);
 					const thumbnail = gemThumbnailURL(color, level, grade);
 
-					html += '<a href="javascript:display_gem(\'' + color + '\', \'' + level + '\', \'' + grade + '\', \'' + gradeValue + '\')">';
+					html += '<a href="javascript:display_gem(\'' + color + '\', \'' + level + '\', \'' + grade + '\', \'' + miningRate + '\')">';
 					html += '<img style="padding: 0;" width="160" height="160" src="' + thumbnail + '"/></a><br/>\n';
-					html += "Lv." + levelId + " " + color.substr(0, color.indexOf(" ")) + " " + grade + " " + gradeValue + "%";
+					html += "Lv." + levelId + " " + color.substr(0, color.indexOf(" ")) + " " + grade + " " + miningRate + "%";
 				}
 				else {
 					html += "\t<td>\n";
@@ -278,12 +279,12 @@ jQuery3(document).ready(function() {
 });
 
 // Auxiliary functions to draw gems list in a workshop
-function display_gem(color, level, grade, gradeValue) {
-	console.log("display_gem(%s, %s, %s, %s)", color, level, grade, gradeValue);
+function display_gem(color, level, grade, miningRate) {
+	console.log("display_gem(%s, %s, %s, %s)", color, level, grade, miningRate);
 	jQuery3("#gem_modal #level").html(level);
 	jQuery3("#gem_modal #color").html(color);
 	jQuery3("#gem_modal #grade").html(grade);
-	jQuery3("#gem_modal #grade_value").html(gradeValue);
+	jQuery3("#gem_modal #mining_rate").html(miningRate);
 	jQuery3("#gem_modal #picture").each(function(i, e) {
 		e.src = gemURL(color, level, grade);
 		e.onload = function() {
@@ -294,25 +295,18 @@ function display_gem(color, level, grade, gradeValue) {
 
 function preloadGemGraphics() {
 	const thumbs = [];
-	const images = [];
 	for(let colorIdx = 1; colorIdx <= 6; colorIdx++) {
 		for(let levelId = 1; levelId <= 2; levelId++) {
 			for(let gradeType = 1; gradeType <= 6; gradeType++) {
 				const thumb = new Image();
-				const image = new Image();
 				const color = colorName(((7 + colorIdx) % 12) + 1);
 				const level = levelName(levelId);
 				const grade = gradeName(gradeType);
 				thumb.src = gemThumbnailURL(color, level, grade);
-				image.src = gemURL(color, level, grade);
 				thumb.onload = function() {
 					console.log(thumb.src + " thumbnail loaded successfully");
 				};
-				image.onload = function() {
-					console.log(thumb.src + " image loaded successfully");
-				};
 				thumbs.push(thumb);
-				images.push(image);
 			}
 		}
 	}
@@ -364,6 +358,17 @@ function gradeName(gradeType) {
 		case 6: grade = "AAA"; break;
 	}
 	return grade;
+}
+
+function baseRate(gradeType, gradeValue) {
+	switch(gradeType) {
+		case 1: return 0;
+		case 2: return 5;
+		case 3: return 15;
+		case 4: return 30;
+		case 5: return 50;
+		case 6: return 75;
+	}
 }
 
 function gemThumbnailURL(color, level, grade) {
