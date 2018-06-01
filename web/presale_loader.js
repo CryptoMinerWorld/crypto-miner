@@ -214,19 +214,22 @@ jQuery3(document).ready(function() {
 			});
 
 			// load workshop
-			presale.getCollection(function(err, result) {
-				if(err) {
-					return;
-				}
-				if(result.length > 0) {
-					// display the collection of gems
-					workshop_display_gems(result);
-				}
-				else {
-					// display "no gems" screen
-					workshop_no_gems();
-				}
-			});
+			function reload_workshop() {
+				presale.getCollection(function(err, result) {
+					if(err) {
+						return;
+					}
+					if(result.length > 0) {
+						// display the collection of gems
+						workshop_display_gems(result);
+					}
+					else {
+						// display "no gems" screen
+						workshop_no_gems();
+					}
+				});
+			}
+			reload_workshop();
 
 			// update counters each time a PresaleStateChanged event is received
 			presale.registerPresaleStateChangedEventListener(function(err, result) {
@@ -234,6 +237,7 @@ jQuery3(document).ready(function() {
 					return;
 				}
 				update_counters(result);
+				reload_workshop();
 			});
 
 			// show success notification when geode is bought
