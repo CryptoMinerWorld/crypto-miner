@@ -263,6 +263,36 @@ contract GemERC721 is AccessControl {
   }
 
   /**
+   *  @dev Allows to fetch collection of gems, including internal gems data
+   *       in a single function, useful when connecting to external node like INFURA
+   * @param owner an address to query a collection for
+   */
+  function getPackedCollection(address owner) public constant returns (uint64[]) {
+    // get an array of Gem IDs owned by an `owner` address
+    uint32[] memory tokenIds = getCollection(owner);
+
+    // how many gems are there in a collection
+    uint32 balance = uint32(tokenIds.length);
+
+    // data container to store the result
+    uint64[] memory result = new uint64[](balance);
+
+    // fetch gem info one by one and pack into structure
+    for(uint32 i = 0; i < balance; i++) {
+      // gem ID to work with
+      uint32 tokenId = tokenIds[i];
+      // get the gem properties and pack them together with tokenId
+      uint32 properties = getProperties(tokenId);
+
+      // pack the data
+      result[i] = uint64(tokenId) << 32 | properties;
+    }
+
+    // return the packed data structure
+    return result;
+  }
+
+  /**
    * @notice Retrieves a collection of tokens owned by a particular address
    * @notice An order of token IDs is not guaranteed and may change
    *      when a token from the list is transferred

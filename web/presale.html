@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Presale API</title>
+	<style>
+		* {
+			font-family: monospace;
+		}
+		input[type=button] {
+			border-radius: 4px;
+			background: #F0F0F0;
+			box-shadow: 1px 1px 1px 1px silver;
+		}
+		input[type=button]:active {
+			box-shadow: none;
+		}
+	</style>
+	<link rel="stylesheet" type="text/css" href="bootstrap-alert.css"/>
+	<link rel="stylesheet" type="text/css" href="modal.css"/>
+	<link rel="stylesheet" type="text/css" href="styles.css"/>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<script src="https://github.com/mouse0270/bootstrap-notify/releases/download/3.1.3/bootstrap-notify.js"></script>
+</head>
+<body>
+<input id="GetGeodeButton" type="button" value="GetGeodeButton">
+<div id="geodePriceETH">geodePriceETH</div>
+<div><span class="counter">counter</span> geodes left</div>
+<div id="pg-951-0">pg-951-0: Loading...</div>
+<div id="pg-951-1">pg-951-1: No Gems</div>
+<div id="pg-951-2">pg-951-2: No MetaMask</div>
+<div id="pg-951-3">pg-951-3: MetaMask Locked</div>
+</body>
+<script type="text/javascript" src="presale_api.js"></script>
+<script type="text/javascript" src="presale_loader.js"></script>
+</html>
