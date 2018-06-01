@@ -5,15 +5,15 @@ import "./GemERC721.sol";
 /**
  * @notice GeodeSale sells the Gems (as Geodes)
  */
-contract GeodeSale {
+contract Presale {
   /// @dev Smart contract version
   /// @dev Should be incremented manually in this source code
   ///      each time smart contact source code is changed
-  uint32 public constant SALE_VERSION = 0x2;
+  uint32 public constant PRESALE_VERSION = 0x3;
 
   /// @dev Version of the Gem smart contract to work with
   /// @dev See `GemERC721.TOKEN_VERSION`
-  uint32 public constant GEM_VERSION_REQUIRED = 0x1;
+  uint32 public constant TOKEN_VERSION_REQUIRED = 0x1;
 
   /// @dev Structure used as temporary storage for gem data
   struct Gem {
@@ -63,9 +63,9 @@ contract GeodeSale {
    * @dev event names are self-explanatory
    */
   /// @dev fired in buyGeodes()
-  event GeodeSold(uint16 indexed plotId, address indexed owner, uint16 gems);
+  event PurchaseComplete(address indexed _from, address indexed _to, uint16 geodes, uint16 gems, uint64 totalPrice);
   /// @dev fired in buyGeodes()
-  event PurchaseComplete(address indexed owner, uint16 geodes, uint16 bonusGems);
+  event PresaleStateChanged(uint16 sold, uint16 left, uint64 lastPrice, uint64 currentPrice);
 
   /// @dev Creates a GeodeSale attached to an already deployed Gem smart contract
   constructor(address gemAddress, address _beneficiary) public {
@@ -79,10 +79,16 @@ contract GeodeSale {
 
     // validate if character card instance is valid
     // by validating smart contract version
-    require(GEM_VERSION_REQUIRED == gemContract.TOKEN_VERSION());
+    require(TOKEN_VERSION_REQUIRED == gemContract.TOKEN_VERSION());
 
     // set the beneficiary
     beneficiary = _beneficiary;
+  }
+
+  /// @dev Returns the presale state data as a packed uint96 tuple structure
+  function getPacked() public constant returns (uint96) {
+    // pack and return
+    return uint96(geodesSold) << 80 | uint80(geodesLeft()) << 64 | currentPrice();
   }
 
   /**
@@ -100,7 +106,7 @@ contract GeodeSale {
     uint256 value = msg.value;
 
     // current price value
-    uint256 _currentPrice = currentPrice();
+    uint64 _currentPrice = currentPrice();
 
     // value should be enough to buy at least one geode
     require(value >= _currentPrice);
@@ -122,13 +128,17 @@ contract GeodeSale {
     // calculate how much we have to send back to player
     uint256 change = msg.value - value;
 
-    // if player buys 10 geodes - he receives one for free
-    if(geodesToSell >= 10) {
+    // if player buys 10 geodes and there are still additional geodes to sell
+    if(geodesToSell >= 10 && geodesSold + geodesToSell < GEODES_TO_SELL) {
+      // - he receives one free geode
       geodesToSell++;
     }
 
     // update counters
     geodesSold += uint16(geodesToSell);
+
+    // update owner geode balance
+    geodeBalances[player] += uint16(geodesToSell);
 
     // create geodes – actually create gems
     for(uint16 i = 0; i < geodesToSell; i++) {
@@ -147,14 +157,33 @@ contract GeodeSale {
       player.transfer(change);
     }
 
-    // fire an event
-    emit PurchaseComplete(player, geodesSold, geodesSold / 5);
+    // fire required events:
+    // purchase complete (used to display success message to player)
+    emit PurchaseComplete(
+      player,
+      player,
+      uint16(geodesToSell),
+      uint16(GEMS_IN_GEODE * geodesToSell + (geodesToSell >= 5 ? 1 : 0)),
+      uint64(value)
+    );
+
+    // presale state changed (used for UI updates)
+    emit PresaleStateChanged(geodesSold, geodesLeft(), _currentPrice, currentPrice());
   }
 
   /// @dev current geode price, implements early bid feature
-  function currentPrice() public constant returns (uint256) {
+  function currentPrice() public constant returns (uint64) {
     // first 500 geodes price is 0.04 ETH, then 0.08 ETH
     return geodesSold < 500? 40 finney: 80 finney;
+  }
+
+  /// @dev number of geodes available for sale
+  function geodesLeft() public constant returns (uint16) {
+    // overflow check, should not happend by design
+    assert(geodesSold <= GEODES_TO_SELL);
+
+    // calculate based on `geodesSold` value
+    return GEODES_TO_SELL - geodesSold;
   }
 
 /*
@@ -208,9 +237,6 @@ contract GeodeSale {
     // store geode owner
     geodeOwners[geodeId] = player;
 
-    // update owner geode balance
-    geodeBalances[player]++;
-
     // iterate and mint gems required
     for(uint32 i = 0; i < gems.length; i++) {
       gemContract.mint(
@@ -225,9 +251,6 @@ contract GeodeSale {
         gems[i].gradeValue
       );
     }
-
-    // emit an event
-    emit GeodeSold(geodeId, player, uint16(gems.length));
   }
 
   // generates 5 gems for a given geode ID randomly

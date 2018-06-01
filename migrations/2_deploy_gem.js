@@ -11,7 +11,7 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	const Gem = artifacts.require("./GemERC721");
-	const Sale = artifacts.require("./GeodeSale");
+	const Sale = artifacts.require("./Presale");
 
 	await deployer.deploy(Gem);
 
