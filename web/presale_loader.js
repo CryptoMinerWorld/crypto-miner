@@ -148,7 +148,7 @@ jQuery3(document).ready(function() {
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
 		html += '<h1 id="my_geodes_header" style="padding-top: 1em; text-align: center; color: white;">' + collection.length + ' gems in your collection</h1>';
-		html += '<h2 id="my_geodes_subheader"></h2>';
+		html += '<h3 id="my_geodes_subheader" style="text-align: center; color: whitesmoke;"></h3>';
 
 		html += '<table id="my_geodes">\n';
 		for(let i = 0; i < rows; i++) {
@@ -229,7 +229,7 @@ jQuery3(document).ready(function() {
 							if(err) {
 								return;
 							}
-							jQuery3("#my_geodes_subheader").html(result + " geodes owned");
+							jQuery3("#my_geodes_subheader").html(result + " plot(s) of land");
 						});
 					}
 					else {
