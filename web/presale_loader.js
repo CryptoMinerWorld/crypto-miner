@@ -188,9 +188,15 @@ jQuery3(document).ready(function() {
 	// init the Presale API
 	const errorCode = presale.init(
 		// token address
-		"0x663072d79f4915a198113f84f99f98d22f595908",
+		{
+			address: "0x6a054a90395fd2abfd114108b062264e2c4940e4",
+			abi_url: "https://rawgit.com/vgorin/crypto-miner/master/web/abi/ERC721.json"
+		},
 		// presale address
-		"0x717a62b968aa4329544b4e3d0e6fa4a6719fcf6e",
+		{
+			address: "0x813a46d934f7e0ad92f8fa32779653fa668f68c8",
+			abi_url: "https://rawgit.com/vgorin/crypto-miner/master/web/abi/Presale.json"
+		},
 		// callback handler
 		function(errCode, result) {
 			if(errCode > 0) {
