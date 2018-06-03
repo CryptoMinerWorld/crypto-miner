@@ -156,7 +156,7 @@ jQuery3(document).ready(function() {
 			for(let j = 0; j < columns; j++) {
 				const idx = i * columns + j;
 				if(idx < collection.length) {
-					const gemId = "0x" + collection[idx].id;
+					const gemId = collection[idx].id;
 					html += "\t<td id='" + gemId + "'>\n";
 
 					// inject gem data
