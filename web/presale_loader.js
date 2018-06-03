@@ -257,7 +257,7 @@ jQuery3(document).ready(function() {
 					return -1 * fn(x, y);
 				};
 				collection.sort(cmp);
-				for(let i = 0; i < collection.levelId; i++) {
+				for(let i = 0; i < collection.length; i++) {
 					document.getElementById(i).innerHTML = compile_gem_html(collection[i]);
 				}
 			}
