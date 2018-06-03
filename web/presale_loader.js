@@ -173,17 +173,20 @@ jQuery3(document).ready(function() {
 		html += '<h3 id="my_geodes_subheader"></h3>';
 
 		html += `
-			<div id="gem_sorting_options">sort by
+			<div id="gem_sorting_options">
+				sort by
 				<select id="gem_sorting_by">
 					<option value="">--Select--</option>
-					<option value="color">Color</option>
-					<option value="level">Level</option>
-					<option value="grade">Grade</option>
+					<option value="color">color</option>
+					<option value="level">level</option>
+					<option value="grade">grade</option>
 				</select>
+				in
 				<select id="gem_sorting_order">
-					<option value="asc">Ascending</option>
-					<option value="desc">Descending</option>
+					<option value="asc">ascending</option>
+					<option value="desc">descending</option>
 				</select>
+				order
 			</div>
 			<table id="my_geodes">
 			`;
