@@ -107,6 +107,11 @@ function buyGeodes() {
 }
 
 jQuery3(document).ready(function() {
+	function load_and_reload_default_counters() {
+		load_default_counters();
+		setTimeout(load_default_counters, 1023);
+	}
+
 	function load_default_counters() {
 		jQuery3.ajax({
 			global: false,
@@ -219,17 +224,18 @@ jQuery3(document).ready(function() {
 			if(errCode > 0) {
 				// update workshop page to look properly
 				workshop_account_locked();
-				load_default_counters();
+				load_and_reload_default_counters();
 				return;
 			}
 
 			// load counters (presale state)
 			presale.presaleState(function(err, result) {
 				if(err || err > 0) {
-					load_default_counters();
+					load_and_reload_default_counters();
 					return;
 				}
 				update_counters(result);
+				setTimeout(update_counters, 1023, result);
 			});
 
 			// load workshop
@@ -281,7 +287,7 @@ jQuery3(document).ready(function() {
 	// MetaMask is not installed, display proper workshop screen
 	if(errorCode > 0) {
 		workshop_no_web3();
-		load_default_counters();
+		load_and_reload_default_counters();
 	}
 
 	// bind an action to a "get geodes button"
