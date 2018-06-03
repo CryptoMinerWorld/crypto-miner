@@ -174,11 +174,15 @@ jQuery3(document).ready(function() {
 
 		html += `
 			<div id="gem_sorting_options">sort by
-				<select id="gem_sorting_selector">
+				<select id="gem_sorting_by">
 					<option value="">--Select--</option>
 					<option value="color">Color</option>
 					<option value="level">Level</option>
 					<option value="grade">Grade</option>
+				</select>
+				<select id="gem_sorting_order">
+					<option value="asc">Ascending</option>
+					<option value="desc">Descending</option>
 				</select>
 			</div>
 			<table id="my_geodes">
@@ -223,8 +227,7 @@ jQuery3(document).ready(function() {
 		}
 		html += "</table>\n";
 		jQuery3("#pg-951-0").html(html);
-		jQuery3("#gem_sorting_selector").on("change", function(e) {
-			const by = this.value;
+		function sort(by, order) {
 			const byColor = (x, y) => {
 				return x.colorId - y.colorId;
 			};
@@ -250,11 +253,26 @@ jQuery3(document).ready(function() {
 				}; break;
 			}
 			if(fn) {
-				collection.sort(fn);
+				const cmp = order.toLowerCase().startsWith("asc")? fn: (x, y) => {
+					return -1 * fn(x, y);
+				};
+				collection.sort(cmp);
 				for(let i = 0; i < collection.levelId; i++) {
 					document.getElementById(i).innerHTML = compile_gem_html(collection[i]);
 				}
 			}
+		}
+		const srt_by_selector = jQuery3("#gem_sorting_by");
+		const srt_order_selector = jQuery3("gem_sorting_order");
+		srt_by_selector.on("change", function(e) {
+			const by = this.value;
+			const order = srt_order_selector.val();
+			sort(by, order);
+		});
+		srt_order_selector.on("change", function(e) {
+			const by = srt_by_selector.val();
+			const order = this.value;
+			sort(by, order);
 		});
 		// =========  END:  Draw Gems in a Table =========
 
