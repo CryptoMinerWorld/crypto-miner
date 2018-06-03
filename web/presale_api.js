@@ -587,7 +587,7 @@ function PresaleApi(logger, jQuery_instance) {
 					return;
 				}
 				logInfo("Token ", tokenId, " creation time is ", result.timestamp);
-				tryCallback(callback, null, result.timestamp.toNumber());
+				tryCallback(callback, null, result.timestamp);
 			});
 		});
 
