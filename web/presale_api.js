@@ -600,11 +600,15 @@ function PresaleApi(logger, jQuery_instance) {
 	// ---------- START SECTION 6: Public Event Listeners ----------
 	// register PurchaseComplete event listener
 	this.registerPurchaseCompleteEventListener = function(callback) {
+		if(!callback || {}.toString.call(callback) !== '[object Function]') {
+			logError("callback is undefined or is not a function");
+			return ERR_NO_CALLBACK;
+		}
 		if(!(myWeb3 && myAccount && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
 		}
-		const purchaseCompleteEvent = presaleInstance.PurchaseComplete({_to: myAccount});
+		const purchaseCompleteEvent = presaleInstance.PurchaseComplete(/*{_to: myAccount}*/);
 		purchaseCompleteEvent.watch(function(err, receipt) {
 			if(err) {
 				logError("Error receiving PurchaseComplete event: ", err);
@@ -646,6 +650,10 @@ function PresaleApi(logger, jQuery_instance) {
 
 	// register PresaleStateChanged event listener
 	this.registerPresaleStateChangedEventListener = function(callback) {
+		if(!callback || {}.toString.call(callback) !== '[object Function]') {
+			logError("callback is undefined or is not a function");
+			return ERR_NO_CALLBACK;
+		}
 		if(!(myWeb3 && myAccount && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
