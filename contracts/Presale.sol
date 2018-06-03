@@ -56,7 +56,8 @@ contract Presale {
   /// @dev Mapping for the geode owners, will be used to issue land plots
   mapping(uint16 => address) public geodeOwners;
 
-  /// @dev A mapping storing geode / land plot balances
+  /// @dev A mapping storing geode / land plot balances,
+  ///      just to get player an idea how much plot land he owns
   mapping(address => uint16) public geodeBalances;
 
   /**
