@@ -45,11 +45,11 @@ document.write(`
 	<div class="modal">
 		<div class="content">
 			<h1>Purchase Complete!</h1>
-			<p>
+			<h5 style="margin: 1px 0 2px 0;">
 				Successfully bought <span id="geodes_bought"></span> geode(s),
 				containing <span id="gems_received"></span> gems
-			</p>
-			<input type="button" value="Goto Workshop" onclick="window.open('/workshop')" style="width: 100%;"/>
+			</h5>
+			<input type="button" value="Goto Workshop" onclick="location.href = '/workshop';" style="width: 100%;"/>
 		</div>
 	</div>
 </div>
