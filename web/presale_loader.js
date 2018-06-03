@@ -49,7 +49,7 @@ document.write(`
 				Successfully bought <span id="geodes_bought"></span> geode(s),
 				containing <span id="gems_received"></span> gems
 			</h5>
-			<input type="button" value="Goto Workshop" onclick="location.href = '/workshop';" style="width: 100%;"/>
+			<input id="goto_workshop_btn" type="button" value="" onclick="location.href = '/workshop';"/>
 		</div>
 	</div>
 </div>
