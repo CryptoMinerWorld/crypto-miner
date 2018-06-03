@@ -172,10 +172,19 @@ jQuery3(document).ready(function() {
 		html += '<h1 id="my_geodes_header">' + collection.length + ' gems in your collection</h1>';
 		html += '<h3 id="my_geodes_subheader"></h3>';
 
+		// sorting
+		function sort_gems(by) {
+			switch(by) {
+				case "color": console.log(collection); break;
+				case "level": console.log(collection); break;
+				case "grade": console.log(collection); break;
+			}
+		}
+
 		// gem sorting controls
 		html += `
 			<div id="gem_sorting_options">sort by
-				<select id="gem_sorting_selector" onchange="alert('sorting - ' + this.value);">
+				<select id="gem_sorting_selector" onchange="sort_gems(this.value);">
 					<option value="color">Color</option>
 					<option value="level">Level</option>
 					<option value="grade">Grade</option>
