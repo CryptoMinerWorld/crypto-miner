@@ -635,11 +635,11 @@ function PresaleApi(logger, jQuery_instance) {
 			logInfo("PurchaseComplete(", from, ", ", to, ", ", geodes, ", ", gems, ", ", price, ", ", geodesTotal, ", ", gemsTotal, ")");
 			tryCallbackIfProvided(callback, null, {
 				event: "purchase_complete",
-				geodes: geodes,
-				gems: gems,
-				price: price,
-				geodesTotal: geodesTotal,
-				gemsTotal: gemsTotal,
+				geodes: geodes.toNumber(),
+				gems: gems.toNumber(),
+				price: price.toNumber(),
+				geodesTotal: geodesTotal.toNumber(),
+				gemsTotal: gemsTotal.toNumber(),
 				txHash: receipt.transactionHash
 			});
 		});
