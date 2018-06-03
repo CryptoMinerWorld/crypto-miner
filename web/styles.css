@@ -41,7 +41,7 @@
 #goto_workshop_btn {
 	width: 300px;
 	height: 104px;
-	background: url('Go-To-Workshop-Button-300w.png') no-repeat;
+	background: url('https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/Go-To-Workshop-Button-300w.png') no-repeat;
 }
 
 /* initial workshop state: loading */
