@@ -45,7 +45,7 @@ document.write(`
 	<div class="modal">
 		<div class="content">
 			<h1>Purchase Complete!</h1>
-			<h5 style="margin: 1px 0 2px 0;">
+			<h5 style="margin: 1em 0 2em 0;">
 				Successfully bought <span id="geodes_bought"></span> geode(s),
 				containing <span id="gems_received"></span> gems
 			</h5>
