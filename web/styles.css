@@ -28,6 +28,20 @@
 	border: none;
 }
 
+#gem_modal .modal {
+	margin-top: 120px;
+	width: 800px;
+}
+
+#geode_bought_modal .modal {
+	width: 400px;
+	text-align: center;
+}
+
+.modal input {
+	height: 2.2em;
+}
+
 /* initial workshop state: loading */
 #pg-951-1, #pg-951-2, #pg-951-3 {
 	display: none;

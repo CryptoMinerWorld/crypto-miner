@@ -5,7 +5,7 @@ document.write(`
 	<div class="modal">
 		<h3>Buying Geodes</h3>
 		<div class="content">
-			<select id="NumberOfGeodes" name="NumberOfGeodes" title="Number of Geodes" style="width: 100%; height: 2em; margin: 1em 0 2em 0;">
+			<select id="NumberOfGeodes" name="NumberOfGeodes" title="Number of Geodes" style="width: 100%; margin: 1em 0 2em 0;">
 				<option value="1">1</option>
 				<option value="2">2</option>
 				<option value="3">3</option>
@@ -17,13 +17,13 @@ document.write(`
 				<option value="9">9 (+1 free Gem)</option>
 				<option value="10">10 (+1 free Gem, +1 free Geode)</option>
 			</select>
-			<input type="button" value="Buy" onclick="buyGeodes()" style="width: 100%; height: 2em;"/>
+			<input type="button" value="Buy" onclick="buyGeodes()" style="width: 100%;"/>
 		</div>
 	</div>
 </div>
 <div id="gem_modal" class="overlay">
 	<a class="cancel" href="#"></a>
-	<div class="modal" style="margin-top: 120px; width: 800px;">
+	<div class="modal">
 		<div class="content">
 			<table>
 				<tr><td style="padding: 0; width: 500px;">
@@ -44,12 +44,12 @@ document.write(`
 	<a class="cancel" href="#"></a>
 	<div class="modal">
 		<div class="content">
-			<h1>You've Bought Geode(s)!</h1>
+			<h1>Purchase Complete!</h1>
 			<p>
 				Successfully bought <span id="geodes_bought"></span> geode(s),
-				containing <span id="gems_received"></span> gem(s)
+				containing <span id="gems_received"></span> gems
 			</p>
-			<input type="button" value="Goto Workshop" onclick="window.open('/workshop')"/>
+			<input type="button" value="Goto Workshop" onclick="window.open('/workshop')" style="width: 100%;"/>
 		</div>
 	</div>
 </div>
