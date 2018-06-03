@@ -46,8 +46,9 @@ document.write(`
 		<div class="content">
 			<h1>Purchase Complete!</h1>
 			<h5 style="margin: 1em 0 2em 0;">
-				Successfully bought <span id="geodes_bought"></span> geode(s),
-				containing <span id="gems_received"></span> gems
+				Successfully bought <span class="geodes_bought"></span> geode(s)<br/>
+				(and <span class="geodes_bought"></span> Founders Plot of Land),<br/>
+				containing <span class="gems_received"></span> gems
 			</h5>
 			<input id="goto_workshop_btn" type="button" value="" onclick="location.href = '/workshop';"/>
 		</div>
@@ -391,8 +392,8 @@ jQuery3(document).ready(function() {
 
 // Auxiliary function to open a pop up when geode is bought
 function display_geode_bought_modal(geodes, gems) {
-	jQuery3("#geodes_bought").html(geodes);
-	jQuery3("#gems_received").html(gems);
+	jQuery3(".geodes_bought").html(geodes);
+	jQuery3(".gems_received").html(gems);
 	if(location.pathname.indexOf("geode_sale") >= 0) {
 		location.href = "#geode_bought_modal";
 	}
