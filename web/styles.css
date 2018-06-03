@@ -38,6 +38,12 @@
 	text-align: center;
 }
 
+#goto_workshop_btn {
+	width: 300px;
+	height: 104px;
+	background: url('Go-To-Workshop-Button-300w.png') no-repeat;
+}
+
 /* initial workshop state: loading */
 #pg-951-1, #pg-951-2, #pg-951-3 {
 	display: none;
