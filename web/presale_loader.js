@@ -96,7 +96,7 @@ function buyGeodes() {
 			return;
 		}
 		if(result.event === "transaction_sent") {
-			logger.success("Transaction sent")
+			logger.success("Buy Geode(s) transaction sent")
 		}
 	});
 	if(errCode > 0) {
@@ -169,6 +169,9 @@ jQuery3(document).ready(function() {
 		let html = "";
 		html += '<h1 id="my_geodes_header" style="padding-top: 1em; text-align: center; color: white;">' + collection.length + ' gems in your collection</h1>';
 		html += '<h3 id="my_geodes_subheader" style="text-align: center; color: whitesmoke;"></h3>';
+
+		// gem sorting controls
+		html += 'sort by <select><option></option></select>';
 
 		html += '<table id="my_geodes">\n';
 		for(let i = 0; i < rows; i++) {
