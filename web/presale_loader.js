@@ -187,9 +187,8 @@ jQuery3(document).ready(function() {
 
 		html += `
 			<div id="gem_sorting_options">
-				sort by
 				<select id="gem_sorting_by">
-					<option value="">--Select--</option>
+					<option value="">sort by</option>
 					<option value="color">color</option>
 					<option value="level">level</option>
 					<option value="grade">grade</option>
