@@ -38,10 +38,6 @@
 	text-align: center;
 }
 
-.modal input {
-	height: 2.2em;
-}
-
 /* initial workshop state: loading */
 #pg-951-1, #pg-951-2, #pg-951-3 {
 	display: none;

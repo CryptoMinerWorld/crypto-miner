@@ -68,6 +68,12 @@
 }
 
 
+.modal input, .modal select {
+	height: 2.2em;
+	width: 100%;
+}
+
+
 /* Boring Styles */
 /*
 *,
