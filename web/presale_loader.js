@@ -166,14 +166,21 @@ jQuery3(document).ready(function() {
 		workshop_loading();
 
 		// ========= START: Draw Gems in a Table =========
-		const columns = 6;
+		const columns = 4;
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
-		html += '<h1 id="my_geodes_header" style="padding-top: 1em; text-align: center; color: white;">' + collection.length + ' gems in your collection</h1>';
-		html += '<h3 id="my_geodes_subheader" style="text-align: center; color: whitesmoke;"></h3>';
+		html += '<h1 id="my_geodes_header">' + collection.length + ' gems in your collection</h1>';
+		html += '<h3 id="my_geodes_subheader"></h3>';
 
 		// gem sorting controls
-		html += 'sort by <select><option></option></select>';
+		html += `
+			<div id="gem_sorting_options">sort by
+				<select id="gem_sorting_selector" onchange="alert('sorting - ' + this.value);">
+					<option value="color">Color</option>
+					<option value="level">Level</option>
+					<option value="grade">Grade</option>
+				</select>
+			</div>`;
 
 		html += '<table id="my_geodes">\n';
 		for(let i = 0; i < rows; i++) {
@@ -197,7 +204,7 @@ jQuery3(document).ready(function() {
 					const thumbnail = gemThumbnailURL(color, level, grade);
 
 					html += '<a href="javascript:display_gem(\'' + gemId +'\', \'' + color + '\', \'' + level + '\', \'' + grade + '\', \'' + miningRate + '\')">';
-					html += '<img style="padding: 0;" width="160" height="160" src="' + thumbnail + '"/></a><br/>\n';
+					html += '<img style="padding: 0;" width="250" height="250" src="' + thumbnail + '"/></a><br/>\n';
 					html += "Lv." + levelId + " " + color.substr(0, color.indexOf(" ")) + " " + grade + " " + miningRate + "%";
 				}
 				else {

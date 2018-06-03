@@ -1,3 +1,18 @@
+#my_geodes_header {
+	padding-top: 1em;
+	text-align: center;
+	color: white;
+}
+
+#my_geodes_subheader {
+	text-align: center;
+	color: whitesmoke;
+}
+
+#gem_sorting_options {
+	color: snow;
+}
+
 #my_geodes {
 	margin: 32px 16px;
 	color: white;
