@@ -608,7 +608,7 @@ function PresaleApi(logger, jQuery_instance) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
 		}
-		const purchaseCompleteEvent = presaleInstance.PurchaseComplete(/*{_to: myAccount}*/);
+		const purchaseCompleteEvent = presaleInstance.PurchaseComplete({_to: myAccount});
 		purchaseCompleteEvent.watch(function(err, receipt) {
 			if(err) {
 				logError("Error receiving PurchaseComplete event: ", err);
