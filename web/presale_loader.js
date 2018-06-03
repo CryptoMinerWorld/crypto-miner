@@ -42,6 +42,8 @@ document.write(`
 </div>
 `);
 
+const WEB_BASE = "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/";
+
 const jQuery3 = jQuery.noConflict();
 
 // configure bootstrap notify instance
@@ -115,7 +117,7 @@ jQuery3(document).ready(function() {
 	function load_default_counters() {
 		jQuery3.ajax({
 			global: false,
-			url: "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/",
+			url: WEB_BASE + "presale-status.json",
 			dataType: "json",
 			success: function(data, textStatus, jqXHR) {
 				logger.info("successfully loaded default presale JSON: " + data);
@@ -214,13 +216,13 @@ jQuery3(document).ready(function() {
 	const errorCode = presale.init(
 		// token address
 		{
-			address: "0x55fbb4eaa7c9eb0fd0fa3a75e4b873ec61a5b2de",
-			abi_url: "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/abi/ERC721.json"
+			address: "0xb42aab57c4406b19518204c055f273c7acd84ed6",
+			abi_url: WEB_BASE + "abi/ERC721.json"
 		},
 		// presale address
 		{
-			address: "0x7704863fd21fcca381285c91406b9917bb94256f",
-			abi_url: "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/abi/Presale.json"
+			address: "0xfd6c69a612911b2a918ce8fd3d9c174921d359b9",
+			abi_url: WEB_BASE + "abi/Presale.json"
 		},
 		// callback handler
 		function(errCode, result) {
@@ -312,25 +314,27 @@ function display_gem(gemId, color, level, grade, miningRate) {
 	jQuery3("#gem_modal #color").html(color);
 	jQuery3("#gem_modal #grade").html(grade);
 	jQuery3("#gem_modal #mining_rate").html(miningRate + "%");
-	jQuery3("#gem_modal #energy_level").html("calculating...");
+	jQuery3("#gem_modal #energy_level").html(grade.startsWith("A")? "calculating...": "0%");
 	jQuery3("#gem_modal #picture").each(function(i, e) {
 		e.src = gemURL(color, level, grade);
 		e.onload = function() {
 			location.href = "#gem_modal";
 		}
 	});
-	presale.getTokenCreationTime(gemId, function(err, result) {
-		if(err || err > 0) {
-			return;
-		}
-		const ageSeconds = (Date.now() / 1000 | 0) - result;
-		const oneMonthSeconds = 30 * 24 * 3600;
-		let energyLevel = Math.round(100 * ageSeconds / oneMonthSeconds);
-		if(energyLevel > 100) {
-			energyLevel = 100;
-		}
-		jQuery3("#gem_modal #energy_level").html(energyLevel + "%");
-	});
+	if(grade.startsWith("A")) {
+		presale.getTokenCreationTime(gemId, function(err, result) {
+			if(err || err > 0) {
+				return;
+			}
+			const ageSeconds = (Date.now() / 1000 | 0) - result;
+			const oneMonthSeconds = 30 * 24 * 3600;
+			let energyLevel = Math.round(100 * ageSeconds / oneMonthSeconds);
+			if(energyLevel > 100) {
+				energyLevel = 100;
+			}
+			jQuery3("#gem_modal #energy_level").html(energyLevel + "%");
+		});
+	}
 }
 
 function preloadGemGraphics() {
@@ -412,11 +416,9 @@ function baseRate(gradeType, gradeValue) {
 }
 
 function gemThumbnailURL(color, level, grade) {
-	return "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/gems/thumbnails/"
-		+ color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png";
+	return WEB_BASE + "gems/thumbnails/" + color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png";
 }
 
 function gemURL(color, level, grade) {
-	return "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/gems/"
-		+ color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png";
+	return WEB_BASE + "gems/" + color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png";
 }
