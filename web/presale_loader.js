@@ -263,7 +263,7 @@ jQuery3(document).ready(function() {
 			}
 		}
 		const srt_by_selector = jQuery3("#gem_sorting_by");
-		const srt_order_selector = jQuery3("gem_sorting_order");
+		const srt_order_selector = jQuery3("#gem_sorting_order");
 		srt_by_selector.on("change", function(e) {
 			const by = this.value;
 			const order = srt_order_selector.val();
