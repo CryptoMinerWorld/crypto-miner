@@ -293,7 +293,7 @@ function PresaleApi(logger, jQuery_instance) {
 							instance.TOKEN_VERSION(function(err, version) {
 								if(err) {
 									logError("Error accessing ERC721 instance: ", err, "\nCannot access TOKEN_VERSION.");
-								tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
+									tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
 									return;
 								}
 								if(TOKEN_VERSION != version) {
@@ -301,7 +301,7 @@ function PresaleApi(logger, jQuery_instance) {
 										"Check if the address specified points to an ERC721 instance with a valid TOKEN_VERSION.\n" +
 										"Version required: " + TOKEN_VERSION + ". Version found: " + version;
 									logError(err);
-								tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
+									tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
 									return;
 								}
 							logInfo("Successfully connected to ERC721 instance at ", address);
@@ -323,7 +323,7 @@ function PresaleApi(logger, jQuery_instance) {
 						}
 						catch(err) {
 							logError("Wrong ERC721 ABI format: ", err);
-						tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
+							tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
 						}
 					}
 
@@ -335,16 +335,16 @@ function PresaleApi(logger, jQuery_instance) {
 						try {
 							instance.PRESALE_VERSION(function(err, version) {
 								if(err) {
-								logError("Error accessing Presale instance: ", err, "\nCannot access PRESALE_VERSION.");
-								tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
+									logError("Error accessing Presale instance: ", err, "\nCannot access PRESALE_VERSION.");
+									tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
 									return;
 								}
 								if(PRESALE_VERSION != version) {
-								const err = "Error accessing Presale instance: not a valid instance.\n" +
+									const err = "Error accessing Presale instance: not a valid instance.\n" +
 										"Check if the address specified points to a Presale instance with a valid PRESALE_VERSION.\n" +
 										"Version required: " + PRESALE_VERSION + ". Version found: " + version;
 									logError(err);
-								tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
+									tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
 									return;
 								}
 								logInfo("Successfully connected to Presale instance at ", address);
@@ -354,7 +354,7 @@ function PresaleApi(logger, jQuery_instance) {
 						}
 						catch(err) {
 							logError("Wrong Presale ABI format: ", err);
-						tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
+							tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
 						}
 					}
 				// --- END: Internal Section to Load Contracts ---
@@ -576,12 +576,19 @@ function PresaleApi(logger, jQuery_instance) {
 
 		tokenInstance.getCreationTime(tokenId, function(err, result) {
 			if(err) {
-				logError("Cannot get token creation time: ", err);
+				logError("Cannot get token creation block: ", err);
 				tryCallback(callback, err, null);
 				return;
 			}
-			logInfo("Token ", tokenId, " creation time is ", result);
-			tryCallback(callback, null, result.toNumber());
+			myWeb3.eth.getBlock(result, function(err, result) {
+				if(err) {
+					logError("Cannot get token creation block: ", err);
+					tryCallback(callback, err, null);
+					return;
+				}
+				logInfo("Token ", tokenId, " creation time is ", result.timestamp);
+				tryCallback(callback, null, result.timestamp.toNumber());
+			});
 		});
 
 		// no sync errors – return 0
@@ -595,7 +602,7 @@ function PresaleApi(logger, jQuery_instance) {
 	this.registerPurchaseCompleteEventListener = function(callback) {
 		if(!(myWeb3 && myAccount && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
-			return 0x3;
+			return ERR_NOT_INITIALIZED;
 		}
 		const purchaseCompleteEvent = presaleInstance.PurchaseComplete({_to: myAccount});
 		purchaseCompleteEvent.watch(function(err, receipt) {
@@ -641,7 +648,7 @@ function PresaleApi(logger, jQuery_instance) {
 	this.registerPresaleStateChangedEventListener = function(callback) {
 		if(!(myWeb3 && myAccount && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
-			return 0x3;
+			return ERR_NOT_INITIALIZED;
 		}
 		const presaleStateChangedEvent = presaleInstance.PresaleStateChanged();
 		presaleStateChangedEvent.watch(function(err, receipt) {
