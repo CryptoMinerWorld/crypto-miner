@@ -40,6 +40,19 @@ document.write(`
 		</div>
 	</div>
 </div>
+<div id="geode_bought_modal" class="overlay">
+	<a class="cancel" href="#"></a>
+	<div class="modal">
+		<div class="content">
+			<h1>You've Bought Geode(s)!</h1>
+			<p>
+				Successfully bought <span id="geodes_bought"></span> geode(s),
+				containing <span id="gems_received"></span> gem(s)
+			</p>
+			<input type="button" value="Goto Workshop" onclick="window.open('/workshop')"/>
+		</div>
+	</div>
+</div>
 `);
 
 const WEB_BASE = "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/";
@@ -353,6 +366,7 @@ jQuery3(document).ready(function() {
 					return;
 				}
 				logger.success("successfully bought ", result.geodes, " geode(s) (" + result.gems + " gems)");
+				display_geode_bought_modal(result.geodes, result.gems);
 			});
 
 		}
@@ -375,6 +389,13 @@ jQuery3(document).ready(function() {
 	});
 
 });
+
+// Auxiliary function to open a pop up when geode is bought
+function display_geode_bought_modal(geodes, gems) {
+	jQuery3("#geodes_bought").html(geodes);
+	jQuery3("#gems_received").html(gems);
+	location.href = "#geode_bought_modal";
+}
 
 // Auxiliary functions to draw gems list in a workshop
 function display_gem(gemId, color, level, grade, miningRate) {
