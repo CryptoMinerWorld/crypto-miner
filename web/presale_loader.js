@@ -393,7 +393,9 @@ jQuery3(document).ready(function() {
 function display_geode_bought_modal(geodes, gems) {
 	jQuery3("#geodes_bought").html(geodes);
 	jQuery3("#gems_received").html(gems);
-	location.href = "#geode_bought_modal";
+	if(location.pathname.indexOf("geode_sale") >= 0) {
+		location.href = "#geode_bought_modal";
+	}
 }
 
 // Auxiliary functions to draw gems list in a workshop
