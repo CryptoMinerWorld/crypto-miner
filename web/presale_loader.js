@@ -173,17 +173,36 @@ jQuery3(document).ready(function() {
 		html += '<h3 id="my_geodes_subheader"></h3>';
 
 		html += `
+			<div id="gem_sorting_options">sort by
+				<select id="gem_sorting_selector">
+					<option value="">--Select--</option>
+					<option value="color">Color</option>
+					<option value="level">Level</option>
+					<option value="grade">Grade</option>
+				</select>
+			</div>
 			<table id="my_geodes">
-				<tr><td colspan="`+ columns + `">
-				<div id="gem_sorting_options">sort by
-					<select id="gem_sorting_selector">
-						<option value="color">Color</option>
-						<option value="level">Level</option>
-						<option value="grade">Grade</option>
-					</select>
-				</div>
-				</td></tr>
 			`;
+
+		function compile_gem_html(gem) {
+			// inject gem data
+			const colorId = gem.colorId;
+			const levelId = gem.levelId;
+			const gradeType = gem.gradeType;
+			const gradeValue = gem.gradeValue;
+			const miningRate = baseRate(gradeType) + gradeValue / 20;
+
+			const color = colorName(colorId);
+			const level = levelName(levelId);
+			const grade = gradeName(gradeType);
+			const thumbnail = gemThumbnailURL(color, level, grade);
+
+			return `
+				<a href="javascript:display_gem(\'` + gem.id + `\', \'` + color + `\', \'` + level + `\', \'` + grade + `\', \'` + miningRate + `\')">
+					<img style="padding: 0;" width="250" height="250" src="` + thumbnail + `"/>
+				</a><br/>Lv.` + levelId + ` ` + color.substr(0, color.indexOf(" ")) + ` ` + grade + ` ` + miningRate + `%
+			`;
+		}
 
 		for(let i = 0; i < rows; i++) {
 			html += "<tr>\n";
@@ -191,23 +210,10 @@ jQuery3(document).ready(function() {
 				const idx = i * columns + j;
 				if(idx < collection.length) {
 					const gemId = collection[idx].id;
-					html += "\t<td id='" + gemId + "'>\n";
+					html += "\t<td id='" + idx + "'>\n";
 
 					// inject gem data
-					const colorId = collection[idx].colorId;
-					const levelId = collection[idx].levelId;
-					const gradeType = collection[idx].gradeType;
-					const gradeValue = collection[idx].gradeValue;
-					const miningRate = baseRate(gradeType) + gradeValue / 20;
-
-					const color = colorName(colorId);
-					const level = levelName(levelId);
-					const grade = gradeName(gradeType);
-					const thumbnail = gemThumbnailURL(color, level, grade);
-
-					html += '<a href="javascript:display_gem(\'' + gemId +'\', \'' + color + '\', \'' + level + '\', \'' + grade + '\', \'' + miningRate + '\')">';
-					html += '<img style="padding: 0;" width="250" height="250" src="' + thumbnail + '"/></a><br/>\n';
-					html += "Lv." + levelId + " " + color.substr(0, color.indexOf(" ")) + " " + grade + " " + miningRate + "%";
+					html += compile_gem_html(collection[idx]);
 				}
 				else {
 					html += "\t<td>\n";
@@ -219,10 +225,35 @@ jQuery3(document).ready(function() {
 		jQuery3("#pg-951-0").html(html);
 		jQuery3("#gem_sorting_selector").on("change", function(e) {
 			const by = this.value;
+			const byColor = (x, y) => {
+				let delta =  x.colorId - y.colorId;
+			};
+			const byLevel = (x, y) => {
+				return x.levelId - y.levelId;
+			};
+			const byGradeType = (x, y) => {
+				return x.gradeType - y.gradeType;
+			};
+			const byGradeValue = (x, y) => {
+				return x.gradeValue - y.gradeValue;
+			};
+			let fn;
 			switch(by) {
-				case "color": console.log(collection); break;
-				case "level": console.log(collection); break;
-				case "grade": console.log(collection); break;
+				case "color": fn = (x, y) => {
+					return byColor(x, y) * 0x100000 + byLevel(x, y) * 0x10000 + byGradeType(x, y) * 0x100 + byGradeValue(x, y);
+				}; break;
+				case "level": fn = (x, y) => {
+					return byLevel(x, y) * 0x100000 + byGradeType(x, y) * 0x1000 + byGradeValue(x, y) * 0x10 + byColor(x, y);
+				}; break;
+				case "grade": fn = (x, y) => {
+					return byGradeType(x, y) * 0x10000 + byGradeValue(x, y) * 0x100 + byLevel(x, y) * 0x10 + byColor(x, y);
+				}; break;
+			}
+			if(fn) {
+				collection.sort(fn);
+				for(let i = 0; i < collection.levelId; i++) {
+					document.getElementById(i).innerHTML = compile_gem_html(collection[i]);
+				}
 			}
 		});
 		// =========  END:  Draw Gems in a Table =========
