@@ -30,8 +30,8 @@ document.write(`
 					<img id="picture" width="500" height="500" src="gems/Ame 1 A.png"/>
 				</td><td style="vertical-align: middle;">
 					<h1>Tipsy Pete</h1>
-					<h4>Mining rate – <span id="mining_rate">25</span>%</h4>
-					<h4>Energy level – <span id="energy_level">100</span>%</h4>
+					<h4>Mining rate – <span id="mining_rate">25%</span></h4>
+					<h4>Energy level – <span id="energy_level">100%</span></h4>
 					<h4>Grade <span id="grade_type">B</span></h4>
 					<h4 id="level">Baby, Level 1</h4>
 					<h4 id="color">Amethyst (February)</h4>
@@ -92,7 +92,7 @@ const presale = new PresaleApi(logger, jQuery3);
 function buyGeodes() {
 	const qty = jQuery3("#NumberOfGeodes").val();
 	const errCode = presale.buyGeodes(qty, function (err, result) {
-		if(err) {
+		if(err || err > 0) {
 			return;
 		}
 		if(result.event === "transaction_sent") {
@@ -171,7 +171,7 @@ jQuery3(document).ready(function() {
 					const grade = gradeName(gradeType);
 					const thumbnail = gemThumbnailURL(color, level, grade);
 
-					html += '<a href="javascript:display_gem(\'' + color + '\', \'' + level + '\', \'' + grade + '\', \'' + miningRate + '\')">';
+					html += '<a href="javascript:display_gem(\'' + gemId +'\', \'' + color + '\', \'' + level + '\', \'' + grade + '\', \'' + miningRate + '\')">';
 					html += '<img style="padding: 0;" width="160" height="160" src="' + thumbnail + '"/></a><br/>\n';
 					html += "Lv." + levelId + " " + color.substr(0, color.indexOf(" ")) + " " + grade + " " + miningRate + "%";
 				}
@@ -209,7 +209,7 @@ jQuery3(document).ready(function() {
 
 			// load counters (presale state)
 			presale.presaleState(function(err, result) {
-				if(err) {
+				if(err || err > 0) {
 					return;
 				}
 				update_counters(result);
@@ -218,7 +218,7 @@ jQuery3(document).ready(function() {
 			// load workshop
 			function reload_workshop() {
 				presale.getCollection(function(err, result) {
-					if(err) {
+					if(err || err > 0) {
 						return;
 					}
 					if(result.length > 0) {
@@ -227,7 +227,7 @@ jQuery3(document).ready(function() {
 
 						// inject number of geodes owned
 						presale.getGeodeBalance(function(err, result) {
-							if(err) {
+							if(err || err > 0) {
 								return;
 							}
 							jQuery3("#my_geodes_subheader").html(result + " plot(s) of land");
@@ -243,7 +243,7 @@ jQuery3(document).ready(function() {
 
 			// update counters each time a PresaleStateChanged event is received
 			presale.registerPresaleStateChangedEventListener(function(err, result) {
-				if(err) {
+				if(err || err > 0) {
 					return;
 				}
 				update_counters(result);
@@ -252,7 +252,7 @@ jQuery3(document).ready(function() {
 
 			// show success notification when geode is bought
 			presale.registerPurchaseCompleteEventListener(function(err, result) {
-				if(err) {
+				if(err || err > 0) {
 					return;
 				}
 				logger.success("successfully bought ", result.geodes, " geode(s) (" + result.gems + " gems)");
@@ -279,17 +279,30 @@ jQuery3(document).ready(function() {
 });
 
 // Auxiliary functions to draw gems list in a workshop
-function display_gem(color, level, grade, miningRate) {
-	console.log("display_gem(%s, %s, %s, %s)", color, level, grade, miningRate);
+function display_gem(gemId, color, level, grade, miningRate) {
+	console.log("display_gem(%s, %s, %s, %s, %s)", gemId, color, level, grade, miningRate);
 	jQuery3("#gem_modal #level").html(level);
 	jQuery3("#gem_modal #color").html(color);
 	jQuery3("#gem_modal #grade").html(grade);
-	jQuery3("#gem_modal #mining_rate").html(miningRate);
+	jQuery3("#gem_modal #mining_rate").html(miningRate + "%");
+	jQuery3("#gem_modal #energy_level").html("calculating...");
 	jQuery3("#gem_modal #picture").each(function(i, e) {
 		e.src = gemURL(color, level, grade);
 		e.onload = function() {
 			location.href = "#gem_modal";
 		}
+	});
+	presale.getTokenCreationTime(gemId, function(err, result) {
+		if(err || err > 0) {
+			return;
+		}
+		const ageSeconds = (Date.now() / 1000 | 0) - result;
+		const oneMonthSeconds = 30 * 24 * 3600;
+		let energyLevel = Math.round(100 * ageSeconds / oneMonthSeconds);
+		if(energyLevel > 100) {
+			energyLevel = 100;
+		}
+		jQuery3("#gem_modal #energy_level").html(energyLevel + "%");
 	});
 }
 
