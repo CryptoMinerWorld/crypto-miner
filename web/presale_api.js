@@ -201,9 +201,8 @@ function PresaleApi(logger, jQuery_instance) {
 	 * 	if a string is passed instead of object – it will be treated as an address, equal to {address: presale}
 	 * @param callback a function to be executed once initialization is complete,
 	 * callback signature: callback(error, result) – error is null on success
-	 * @return {number} positive error code indicating problems detected (sync only),
-	 * 	* 0x1 MetaMask is not installed
-	 * 	* 0x0 (zero) if no sync problems happened
+	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
+	 * if error occurred asynchronously - error code will be passed to callback
 	 */
 	this.init = function(token, presale, callback) {
 		if(typeof window.web3 == 'undefined') {
@@ -397,7 +396,8 @@ function PresaleApi(logger, jQuery_instance) {
 	 * tokenInstance and presaleInstance initialized
 	 * @param n number of geodes to buy
 	 * @param callback a function to call on error / success
-	 * @return {number} positive error code, if it occurred synchronously, zero otherwise
+	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
+	 * if error occurred asynchronously - error code will be passed to callback
 	 */
 	this.buyGeodes = function(n, callback) {
 		if(!(myWeb3 && myAccount && presaleInstance)) {
@@ -440,7 +440,8 @@ function PresaleApi(logger, jQuery_instance) {
 	 * 	* geodes left
 	 * 	* current geode price
 	 * @param callback a function to call on error / success
-	 * @return {number} positive error code, if it occurred synchronously, zero otherwise
+	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
+	 * if error occurred asynchronously - error code will be passed to callback
 	 */
 	this.presaleState = function(callback) {
 		if(!callback || {}.toString.call(callback) !== '[object Function]') {
@@ -480,9 +481,39 @@ function PresaleApi(logger, jQuery_instance) {
 	};
 
 	/**
+	 * Retrieves amount of geodes owned by a particular address
+	 * @param callback a function to pass a result (if successful) or an error
+	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
+	 * if error occurred asynchronously - error code will be passed to callback
+	 */
+	this.getGeodeBalance = function(callback) {
+		if(!callback || {}.toString.call(callback) !== '[object Function]') {
+			logError("callback is undefined or is not a function");
+			return ERR_NO_CALLBACK;
+		}
+		if(!(myWeb3 && myAccount && presaleInstance)) {
+			logError("Presale API is not properly initialized. Reload the page.");
+			return ERR_NOT_INITIALIZED;
+		}
+		const owner = myAccount;
+		presaleInstance.geodeBalances(owner, function(err, result) {
+			if(err) {
+				logError("Cannot get geode balance: ", err);
+				tryCallback(callback, err, null);
+				return;
+			}
+			logInfo("Address ", owner, " has ", result, " geodes");
+			tryCallback(callback, null, result.toNumber());
+		});
+		// no sync errors – return 0
+		return 0;
+	};
+
+	/**
 	 * Retrieves list of tokens (full objects) owned by a particular address
 	 * @param callback a function to pass a result (if successful) or an error
-	 * @return {number} positive error code, if it occurred synchronously, zero otherwise
+	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
+	 * if error occurred asynchronously - error code will be passed to callback
 	 */
 	this.getCollection = function(callback) {
 		if(!callback || {}.toString.call(callback) !== '[object Function]') {
@@ -527,29 +558,32 @@ function PresaleApi(logger, jQuery_instance) {
 	};
 
 	/**
-	 * Retrieves amount of geodes owned by a particular address
-	 * @param callback
-	 * @return {number}
+	 * Retrieves token creation time in seconds (unix timestamp)
+	 * @param tokenId
+	 * @param callback a function to pass a result (if successful) or an error
+	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
+	 * if error occurred asynchronously - error code will be passed to callback
 	 */
-	this.getGeodeBalance = function(callback) {
+	this.getTokenCreationTime = function(tokenId, callback) {
 		if(!callback || {}.toString.call(callback) !== '[object Function]') {
 			logError("callback is undefined or is not a function");
-			return 0x10;
+			return ERR_NO_CALLBACK;
 		}
-		if(!(myWeb3 && myAccount && presaleInstance)) {
+		if(!(myWeb3 && myAccount && tokenInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
-			return 0x2;
+			return ERR_NOT_INITIALIZED;
 		}
-		const owner = myAccount;
-		presaleInstance.geodeBalances(owner, function(err, result) {
+
+		tokenInstance.getCreationTime(tokenId, function(err, result) {
 			if(err) {
-				logError("Cannot get geode balance: ", err);
+				logError("Cannot get token creation time: ", err);
 				tryCallback(callback, err, null);
 				return;
 			}
-			logInfo("Address ", owner, " has ", result, " geodes");
+			logInfo("Token ", tokenId, " creation time is ", result);
 			tryCallback(callback, null, result.toNumber());
 		});
+
 		// no sync errors – return 0
 		return 0;
 	};
