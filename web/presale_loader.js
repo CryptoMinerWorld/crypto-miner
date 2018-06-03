@@ -226,7 +226,7 @@ jQuery3(document).ready(function() {
 		jQuery3("#gem_sorting_selector").on("change", function(e) {
 			const by = this.value;
 			const byColor = (x, y) => {
-				let delta =  x.colorId - y.colorId;
+				return x.colorId - y.colorId;
 			};
 			const byLevel = (x, y) => {
 				return x.levelId - y.levelId;
