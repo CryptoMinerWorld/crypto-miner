@@ -229,12 +229,22 @@
         {
           "indexed": false,
           "name": "gems",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "price",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "name": "geodesTotal",
           "type": "uint16"
         },
         {
           "indexed": false,
-          "name": "totalPrice",
-          "type": "uint64"
+          "name": "gemsTotal",
+          "type": "uint32"
         }
       ],
       "name": "PurchaseComplete",
@@ -325,5 +335,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-06-01T18:02:39.778Z"
+  "updatedAt": "2018-06-03T18:18:23.673Z"
 }
