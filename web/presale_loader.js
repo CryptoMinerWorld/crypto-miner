@@ -107,6 +107,21 @@ function buyGeodes() {
 }
 
 jQuery3(document).ready(function() {
+	function load_default_counters() {
+		jQuery3.ajax({
+			global: false,
+			url: "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/",
+			dataType: "json",
+			success: function(data, textStatus, jqXHR) {
+				logger.info("successfully loaded default presale JSON: " + data);
+				update_counters(data);
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				logger.error("could not load default presale status JSON: " + errorThrown)
+			}
+		});
+	}
+
 	function update_counters(data) {
 		jQuery3(".counter").html(data.left);
 		jQuery3("#geodePriceETH").html(data.currentPrice);
@@ -204,12 +219,14 @@ jQuery3(document).ready(function() {
 			if(errCode > 0) {
 				// update workshop page to look properly
 				workshop_account_locked();
+				load_default_counters();
 				return;
 			}
 
 			// load counters (presale state)
 			presale.presaleState(function(err, result) {
 				if(err || err > 0) {
+					load_default_counters();
 					return;
 				}
 				update_counters(result);
@@ -264,6 +281,7 @@ jQuery3(document).ready(function() {
 	// MetaMask is not installed, display proper workshop screen
 	if(errorCode > 0) {
 		workshop_no_web3();
+		load_default_counters();
 	}
 
 	// bind an action to a "get geodes button"
