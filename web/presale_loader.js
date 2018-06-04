@@ -149,31 +149,31 @@ jQuery3(document).ready(function() {
 	}
 
 	function workshop_loading() {
-		jQuery3("#pg-951-0").show();
-		jQuery3("#pg-951-1").hide();
-		jQuery3("#pg-951-2").hide();
-		jQuery3("#pg-951-3").hide();
+		jQuery3("#WorkshopLoading").show();
+		jQuery3("#WorkshopNoGems").hide();
+		jQuery3("#WorkshopNoMetamask").hide();
+		jQuery3("#WorkshopMetamaskLocked").hide();
 	}
 
 	function workshop_no_web3() {
-		jQuery3("#pg-951-0").hide();
-		jQuery3("#pg-951-1").hide();
-		jQuery3("#pg-951-2").show();
-		jQuery3("#pg-951-3").hide();
+		jQuery3("#WorkshopLoading").hide();
+		jQuery3("#WorkshopNoGems").hide();
+		jQuery3("#WorkshopNoMetamask").show();
+		jQuery3("#WorkshopMetamaskLocked").hide();
 	}
 
 	function workshop_account_locked() {
-		jQuery3("#pg-951-0").hide();
-		jQuery3("#pg-951-1").hide();
-		jQuery3("#pg-951-2").hide();
-		jQuery3("#pg-951-3").show();
+		jQuery3("#WorkshopLoading").hide();
+		jQuery3("#WorkshopNoGems").hide();
+		jQuery3("#WorkshopNoMetamask").hide();
+		jQuery3("#WorkshopMetamaskLocked").show();
 	}
 
 	function workshop_no_gems() {
-		jQuery3("#pg-951-0").hide();
-		jQuery3("#pg-951-1").show();
-		jQuery3("#pg-951-2").hide();
-		jQuery3("#pg-951-3").hide();
+		jQuery3("#WorkshopLoading").hide();
+		jQuery3("#WorkshopNoGems").show();
+		jQuery3("#WorkshopNoMetamask").hide();
+		jQuery3("#WorkshopMetamaskLocked").hide();
 	}
 
 	function workshop_display_gems(collection) {
@@ -242,7 +242,7 @@ jQuery3(document).ready(function() {
 			html += "</tr>\n";
 		}
 		html += "</table>\n";
-		jQuery3("#pg-951-0").html(html);
+		jQuery3("#WorkshopLoading").html(html);
 		function sort(by, order) {
 			const byColor = (x, y) => {
 				return x.colorId - y.colorId;
