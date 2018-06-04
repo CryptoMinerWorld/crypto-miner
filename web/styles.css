@@ -47,6 +47,6 @@
 }
 
 /* initial workshop state: loading */
-#pg-951-1, #pg-951-2, #pg-951-3 {
+#WorkshopNoGems, #WorkshopNoMetamask, #WorkshopMetamaskLocked {
 	display: none;
 }
