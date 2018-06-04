@@ -242,7 +242,7 @@ jQuery3(document).ready(function() {
 			html += "</tr>\n";
 		}
 		html += "</table>\n";
-		jQuery3("#WorkshopLoading").html(html);
+		jQuery3("#WorkshopLoading").parent().html(html);
 		function sort(by, order) {
 			const byColor = (x, y) => {
 				return x.colorId - y.colorId;
