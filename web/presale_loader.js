@@ -404,7 +404,7 @@ function display_gem(gemId, color, level, grade, miningRate) {
 	console.log("display_gem(%s, %s, %s, %s, %s)", gemId, color, level, grade, miningRate);
 	jQuery3("#gem_modal #level").html(level);
 	jQuery3("#gem_modal #color").html(color);
-	jQuery3("#gem_modal #grade").html(grade);
+	jQuery3("#gem_modal #grade_type").html(grade);
 	jQuery3("#gem_modal #mining_rate").html(miningRate + "%");
 	jQuery3("#gem_modal #energy_level").html(grade.startsWith("A")? "calculating...": "0%");
 	jQuery3("#gem_modal #picture").each(function(i, e) {
