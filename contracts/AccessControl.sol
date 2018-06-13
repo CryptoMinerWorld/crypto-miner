@@ -212,16 +212,6 @@ contract AccessControl {
     emit RoleUpdated(manager, operator, userRoles[operator]);
   }
 
-  /// @dev Checks if requested feature `required` is enabled globally
-  ///      and if transaction sender `msg.sender` has all the required permissions `required`
-  function __isFeatureEnabledAndSenderInRole(uint256 required) internal constant returns(bool) {
-    // read sender's permissions (role)
-    uint256 userRole = userRoles[msg.sender];
-
-    // delegate call to `__hasRole`
-    return __hasRole(features & userRole, required);
-  }
-
   /// @dev Checks if requested feature is enabled globally on the contract
   function __isFeatureEnabled(uint256 featureRequired) internal constant returns(bool) {
     // delegate call to `__hasRole`
