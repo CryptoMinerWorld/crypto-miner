@@ -169,18 +169,3 @@ contract('GeodeSale', function(accounts) {
 		assert(gradeAFound, "there is no grade A gem in the collection");
 	});
 });
-
-async function assertThrowsAsync(fn) {
-	let f = function() {};
-	try {
-		await fn();
-	}
-	catch(e) {
-		f = function() {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
