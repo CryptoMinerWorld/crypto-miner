@@ -292,9 +292,9 @@ contract Presale {
     }
 
     // enforce 1 level 2 gem
-    __enforceLevelConstraint(gems, 1, 2, uint16(randomness >> 96));
+    __enforceLevelConstraint(gems, 2, uint16(randomness >> 96));
     // enforce 1 gem of the grade A
-    __enforceGradeConstraint(gems, 1, 4, uint16(randomness >> 128));
+    __enforceGradeConstraint(gems, 4, uint16(randomness >> 128));
 
     // return created gems array back
     return gems;
@@ -318,33 +318,34 @@ contract Presale {
     // use only low 24 bits of randomness
     randomness &= 0xFFFFFF;
 
-    // Grade D: 20% probability of 16777216 total values
-    if(randomness < 3355444) {
-     return 1;
+    // Grade D: 50% probability of 16777216 total values
+    if(randomness < 8388608) {
+      return 1;
     }
-    // Grade C: 28% probability
-    else if(randomness < 8053064) {
+    // Grade C: 37% probability
+    else if(randomness < 14596178) {
       return 2;
     }
-    // Grade B: 40% probability
-    else if(randomness < 14763950) {
+    // Grade B: 10% probability
+    else if(randomness < 16273900) {
       return 3;
     }
-    // Grade A: 10.95% probability
-    else if(randomness < 16601055) {
+    // Grade A: 2.5% probability
+    else if(randomness < 16693330) {
       return 4;
     }
-    // Grade AA: 1% probability
-    else if(randomness < 16768828) {
+    // Grade AA: 0.49% probability
+    else if(randomness < 16775538) {
       return 5;
     }
-    // Grade AAA: 0.05% probability
+    // Grade AAA: 0.01% probability
     else {
       return 6;
     }
   }
 
-  // assembled the gradeId from type and value
+/*
+  // assembles the gradeId from type and value
   function __createGradeId(uint8 gradeType, uint8 gradeValue) private pure returns (uint16) {
     // enforce valid grades: D, C, B, A, AA, AAA – 1, 2, 3, 4, 5, 6 accordingly
     assert(gradeType >= 1 && gradeType <= 6);
@@ -352,34 +353,42 @@ contract Presale {
     // pack the grade ID and return
     return uint16(gradeType) << 8 | gradeValue;
   }
+*/
 
-  // enforce at least `n` gem(s) of level `levelId`
-  function __enforceLevelConstraint(Gem[] gems, uint8 n, uint8 levelId, uint16 randomness) private pure {
+  // enforce at least one gem of level `levelId`
+  function __enforceLevelConstraint(Gem[] gems, uint8 levelId, uint16 randomness) private pure {
     // n must not be greater then number of gems in the array
-    require(gems.length >= n);
+    require(gems.length > 0);
 
     // generate a random index in range [0, length - n) to rewrite color
-    uint8 index = uint8(__randomValue(randomness, 0, gems.length - n, 0x10000)); // use low 16 bits
+    uint8 index = uint8(__randomValue(randomness, 0, gems.length - 1, 0x10000)); // use low 16 bits
 
-    // rewrite the color in the gems array
-    for(uint8 i = index; i < index + n; i++) {
-      // set the new level
-      gems[i].level = levelId;
-    }
+    // set the new level
+    gems[index].level = levelId;
   }
 
-  // enforce at least `n` gem(s) of grade type `gradeType`
-  function __enforceGradeConstraint(Gem[] gems, uint8 n, uint8 gradeType, uint16 randomness) private pure {
+  // enforce at least one gem of grade type `gradeType`
+  function __enforceGradeConstraint(Gem[] gems, uint8 gradeType, uint16 randomness) private pure {
     // n must not be greater then number of gems in the array
-    require(gems.length >= n);
+    require(gems.length > 0);
 
-    // generate a random index in range [0, length - n) to rewrite grade type
-    uint8 index = uint8(__randomValue(randomness, 0, gems.length - n, 0x10000)); // use low 16 bits
+    // first we check if geode contains gem grade A or higher
+    uint8 maxGrade = 0;
 
-    // rewrite the grade type in the gems array
-    for(uint8 i = index; i < index + n; i++) {
-      // set the new grade type
-      gems[i].gradeType = gradeType;
+    // find the highest grade
+    for(uint8 i = 0; i < gems.length; i++) {
+      if(maxGrade < gems[i].gradeType) {
+        maxGrade = gems[i].gradeType;
+      }
+    }
+
+    // if maximum grade type is lower then gradeType
+    if(maxGrade < gradeType) {
+      // generate a random index in range [0, length - n) to rewrite grade type
+      uint8 index = uint8(__randomValue(randomness, 0, gems.length - 1, 0x10000)); // use low 16 bits
+
+      // rewrite the grade type in the gems array - set the new grade type
+      gems[index].gradeType = gradeType;
     }
   }
 
