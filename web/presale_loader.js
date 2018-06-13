@@ -190,6 +190,7 @@ jQuery3(document).ready(function() {
 			<div id="gem_sorting_options">
 				<select id="gem_sorting_by">
 					<option value="">sort by</option>
+					<option value="id">date</option>
 					<option value="color">color</option>
 					<option value="level">level</option>
 					<option value="grade">grade</option>
@@ -244,6 +245,9 @@ jQuery3(document).ready(function() {
 		html += "</table>\n";
 		jQuery3("#WorkshopLoading").parent().html(html);
 		function sort(by, order) {
+			const byId = (x, y) => {
+				return x.id - y.id;
+			};
 			const byColor = (x, y) => {
 				return x.colorId - y.colorId;
 			};
@@ -258,6 +262,7 @@ jQuery3(document).ready(function() {
 			};
 			let fn;
 			switch(by) {
+				case "id": fn = byId; break;
 				case "color": fn = (x, y) => {
 					return byColor(x, y) * 0x100000 + byLevel(x, y) * 0x10000 + byGradeType(x, y) * 0x100 + byGradeValue(x, y);
 				}; break;
