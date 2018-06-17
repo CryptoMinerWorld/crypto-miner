@@ -31,7 +31,7 @@ document.write(`
 				</td><td style="vertical-align: middle;">
 					<!--<h1>Tipsy Pete</h1>-->
 					<h4>Mining rate – <span id="mining_rate">25%</span></h4>
-					<h4 id="energy_level">Energy level – 100%/h4>
+					<h4 id="energy_level">Energy level – 100%</h4>
 					<h4>Grade <span id="grade_type">B</span></h4>
 					<h4 id="level">Baby, Level 1</h4>
 					<h4 id="color">Amethyst (February)</h4>
