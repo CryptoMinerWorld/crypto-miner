@@ -29,9 +29,9 @@ document.write(`
 				<tr><td style="padding: 0; width: 500px;">
 					<img id="picture" width="500" height="500" src="gems/Ame 1 A.png"/>
 				</td><td style="vertical-align: middle;">
-					<h1>Tipsy Pete</h1>
+					<!--<h1>Tipsy Pete</h1>-->
 					<h4>Mining rate – <span id="mining_rate">25%</span></h4>
-					<h4>Energy level – <span id="energy_level">100%</span></h4>
+					<h4 id="energy_level">Energy level – 100%/h4>
 					<h4>Grade <span id="grade_type">B</span></h4>
 					<h4 id="level">Baby, Level 1</h4>
 					<h4 id="color">Amethyst (February)</h4>
@@ -57,6 +57,8 @@ document.write(`
 `);
 
 const WEB_BASE = "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/";
+const IMAGE_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/";
+const THUMB_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/Temp_Gems-Thumbnails/";
 
 const jQuery3 = jQuery.noConflict();
 
@@ -180,6 +182,9 @@ jQuery3(document).ready(function() {
 		workshop_loading();
 
 		// ========= START: Draw Gems in a Table =========
+		collection.sort((x, y) => {
+			return y.id - x.id;
+		});
 		const columns = 4;
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
@@ -230,7 +235,6 @@ jQuery3(document).ready(function() {
 			for(let j = 0; j < columns; j++) {
 				const idx = i * columns + j;
 				if(idx < collection.length) {
-					const gemId = collection[idx].id;
 					html += "\t<td id='" + idx + "'>\n";
 
 					// inject gem data
@@ -411,7 +415,7 @@ function display_gem(gemId, color, level, grade, miningRate) {
 	jQuery3("#gem_modal #color").html(color);
 	jQuery3("#gem_modal #grade_type").html(grade);
 	jQuery3("#gem_modal #mining_rate").html(miningRate + "%");
-	jQuery3("#gem_modal #energy_level").html(grade.startsWith("A")? "calculating...": "0%");
+	jQuery3("#gem_modal #energy_level").html(grade.startsWith("A")? "Energy level – calculating...": "");
 	jQuery3("#gem_modal #picture").each(function(i, e) {
 		e.src = gemURL(color, level, grade);
 		e.onload = function() {
@@ -429,7 +433,7 @@ function display_gem(gemId, color, level, grade, miningRate) {
 			if(energyLevel > 100) {
 				energyLevel = 100;
 			}
-			jQuery3("#gem_modal #energy_level").html(energyLevel + "%");
+			jQuery3("#gem_modal #energy_level").html("Energy level – " + energyLevel + "%");
 		});
 	}
 }
@@ -513,9 +517,9 @@ function baseRate(gradeType, gradeValue) {
 }
 
 function gemThumbnailURL(color, level, grade) {
-	return WEB_BASE + "gems/thumbnails/" + color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png";
+	return THUMB_BASE + color.substr(0, 3) + "-" + level.substr(-1, 1) + "-" + grade + ".png";
 }
 
 function gemURL(color, level, grade) {
-	return WEB_BASE + "gems/" + color.substr(0, 3) + " " + level.substr(-1, 1) + " " + grade + ".png";
+	return IMAGE_BASE + color.substr(0, 3) + "-" + level.substr(-1, 1) + "-" + grade + ".png";
 }

@@ -184,8 +184,8 @@ contract Presale {
 
   /// @dev current geode price, implements early bid feature
   function currentPrice() public constant returns (uint64) {
-    // first 500 geodes price is 0.04 ETH, then 0.08 ETH
-    return geodesSold < 500? 40 finney: 80 finney;
+    // first 500 geodes price is 0.05 ETH, then 0.1 ETH
+    return geodesSold < 500? 50 finney: 100 finney;
   }
 
   /// @dev number of geodes available for sale
