@@ -517,7 +517,7 @@ function baseRate(gradeType, gradeValue) {
 }
 
 function gemThumbnailURL(color, level, grade) {
-	return THUMB_BASE + color.substr(0, 3) + "-" + level.substr(-1, 1) + "-" + grade + ".png";
+	return THUMB_BASE + color.substr(0, 3) + "-" + level.substr(-1, 1) + "-" + grade + "-250.png";
 }
 
 function gemURL(color, level, grade) {
