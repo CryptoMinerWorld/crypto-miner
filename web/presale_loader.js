@@ -54,7 +54,7 @@ document.write(`
 		</div>
 	</div>
 </div>
-<div id="metamask_info_modal">
+<div id="metamask_info_modal" class="overlay">
 	<a class="cancel" href="#"></a>
 	<div class="modal">
 		<div class="content">
