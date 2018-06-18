@@ -148,7 +148,7 @@ jQuery3(document).ready(function() {
 			url: WEB_BASE + "presale-status.json",
 			dataType: "json",
 			success: function(data, textStatus, jqXHR) {
-				logger.info("successfully loaded default presale JSON: " + data);
+				console.log("successfully loaded default presale JSON: " + data);
 				update_counters(data);
 			},
 			error: function(jqXHR, textStatus, errorThrown) {
