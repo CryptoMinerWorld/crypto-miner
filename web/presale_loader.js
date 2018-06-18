@@ -155,6 +155,7 @@ jQuery3(document).ready(function() {
 		jQuery3("#WorkshopNoGems").hide();
 		jQuery3("#WorkshopNoMetamask").hide();
 		jQuery3("#WorkshopMetamaskLocked").hide();
+		jQuery3("#WorkshopWrongNetwork").hide();
 	}
 
 	function workshop_no_web3() {
@@ -162,6 +163,7 @@ jQuery3(document).ready(function() {
 		jQuery3("#WorkshopNoGems").hide();
 		jQuery3("#WorkshopNoMetamask").show();
 		jQuery3("#WorkshopMetamaskLocked").hide();
+		jQuery3("#WorkshopWrongNetwork").hide();
 	}
 
 	function workshop_account_locked() {
@@ -169,6 +171,7 @@ jQuery3(document).ready(function() {
 		jQuery3("#WorkshopNoGems").hide();
 		jQuery3("#WorkshopNoMetamask").hide();
 		jQuery3("#WorkshopMetamaskLocked").show();
+		jQuery3("#WorkshopWrongNetwork").hide();
 	}
 
 	function workshop_no_gems() {
@@ -176,6 +179,15 @@ jQuery3(document).ready(function() {
 		jQuery3("#WorkshopNoGems").show();
 		jQuery3("#WorkshopNoMetamask").hide();
 		jQuery3("#WorkshopMetamaskLocked").hide();
+		jQuery3("#WorkshopWrongNetwork").hide();
+	}
+
+	function workshop_wrong_network(actual, required) {
+		jQuery3("#WorkshopLoading").hide();
+		jQuery3("#WorkshopNoGems").hide();
+		jQuery3("#WorkshopNoMetamask").hide();
+		jQuery3("#WorkshopMetamaskLocked").hide();
+		jQuery3("#WorkshopWrongNetwork").show();
 	}
 
 	function workshop_display_gems(collection) {
@@ -307,19 +319,24 @@ jQuery3(document).ready(function() {
 	const errorCode = presale.init(
 		// token address
 		{
-			address: "0xb42aab57c4406b19518204c055f273c7acd84ed6",
+			address: "0x6279e492a707ec9f9a2c3d836418fca2dc052487",
 			abi_url: WEB_BASE + "abi/ERC721.json"
 		},
 		// presale address
 		{
-			address: "0xfd6c69a612911b2a918ce8fd3d9c174921d359b9",
+			address: "0xc95d97a3882e885b6b4b0ce1705d7a43ec1b662a",
 			abi_url: WEB_BASE + "abi/Presale.json"
 		},
 		// callback handler
 		function(errCode, result) {
 			if(errCode > 0) {
 				// update workshop page to look properly
-				workshop_account_locked();
+				if(presale.getNetworkId() !== 4) {
+					workshop_wrong_network(presale.getNetworkName(), "4: Rinkeby");
+				}
+				else {
+					workshop_account_locked();
+				}
 				load_and_reload_default_counters();
 				return;
 			}
