@@ -43,6 +43,11 @@
 	text-align: center;
 }
 
+#wrong_network_modal .modal {
+	width: 400px;
+	text-align: center;
+}
+
 #goto_workshop_btn {
 	width: 300px;
 	height: 104px;
