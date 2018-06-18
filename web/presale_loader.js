@@ -62,7 +62,19 @@ document.write(`
 			<h5 style="margin: 1em 0 2em 0;">
 				Seems like you don't have MetaMask installed. Click the button below for more info.
 			</h5>
-			<input id="goto_metamask_info_btn" type="button" value="More Info" onclick="location.href = 'https://www.cryptominerworld.com/game_info#GameInfoMetaMask';"/>
+			<input type="button" value="More Info" onclick="location.href = 'https://www.cryptominerworld.com/game_info#GameInfoMetaMask';"/>
+		</div>
+	</div>
+</div>
+<div id="wrong_network_modal" class="overlay">
+	<a class="cancel" href="javascript:history.back()"></a>
+	<div class="modal">
+		<div class="content">
+			<h1>Wrong Network</h1>
+			<h5 style="margin: 1em 0 2em 0;">
+				Seems like you are connected to a wrong network. Please connect to network <span id="required_network_id">1: Mainnet</span>
+			</h5>
+			<input type="button" value="More Info" onclick="location.href = 'https://www.cryptominerworld.com/game_info#GameInfoMetaMask';"/>
 		</div>
 	</div>
 </div>
@@ -71,6 +83,9 @@ document.write(`
 const WEB_BASE = "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/";
 const IMAGE_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/";
 const THUMB_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/Temp_Gems-Thumbnails/";
+
+const REQUIRED_NETWORK_ID = 4;
+const REQUIRED_NETWORK_NAME = "4: Rinkeby";
 
 const jQuery3 = jQuery.noConflict();
 
@@ -121,6 +136,11 @@ const presale = new PresaleApi(logger, jQuery3);
 
 function buyGeodes() {
 	const qty = jQuery3("#NumberOfGeodes").val();
+	if(presale.getNetworkId() !== REQUIRED_NETWORK_ID) {
+		jQuery3("#required_network_id").html(REQUIRED_NETWORK_NAME);
+		location.href = "#wrong_network_modal";
+		return;
+	}
 	const errCode = presale.buyGeodes(qty, function (err, result) {
 		if(err || err > 0) {
 			return;
@@ -343,8 +363,8 @@ jQuery3(document).ready(function() {
 		function(errCode, result) {
 			if(errCode > 0) {
 				// update workshop page to look properly
-				if(presale.getNetworkId() !== 4) {
-					workshop_wrong_network(presale.getNetworkName(), "4: Rinkeby");
+				if(presale.getNetworkId() !== REQUIRED_NETWORK_ID) {
+					workshop_wrong_network(presale.getNetworkName(), REQUIRED_NETWORK_NAME);
 				}
 				else {
 					workshop_account_locked();
