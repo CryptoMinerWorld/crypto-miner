@@ -47,6 +47,6 @@
 }
 
 /* initial workshop state: loading */
-#WorkshopNoGems, #WorkshopNoMetamask, #WorkshopMetamaskLocked {
+#WorkshopNoGems, #WorkshopNoMetamask, #WorkshopMetamaskLocked, #WorkshopWrongNetwork {
 	display: none;
 }
