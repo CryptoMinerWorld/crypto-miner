@@ -54,6 +54,18 @@ document.write(`
 		</div>
 	</div>
 </div>
+<div id="metamask_info_modal">
+	<a class="cancel" href="#"></a>
+	<div class="modal">
+		<div class="content">
+			<h1>MetaMask Required</h1>
+			<h5 style="margin: 1em 0 2em 0;">
+				Seems like you don't have MetaMask installed. Click the button below for more info.
+			</h5>
+			<input id="goto_metamask_info_btn" type="button" value="More Info" onclick="location.href = 'https://www.cryptominerworld.com/game_info#GameInfoMetaMask';"/>
+		</div>
+	</div>
+</div>
 `);
 
 const WEB_BASE = "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/";
@@ -410,7 +422,7 @@ jQuery3(document).ready(function() {
 			location.href = "#geode_qty_modal";
 		}
 		else {
-			location.href = "https://www.cryptominerworld.com/game_info#GameInfoMetaMask";
+			location.href = "#metamask_info_modal";
 		}
 	});
 
