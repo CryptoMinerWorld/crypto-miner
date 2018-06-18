@@ -1,7 +1,7 @@
 // inject all the required modal windows
 document.write(`
 <div id="geode_qty_modal" class="overlay">
-	<a class="cancel" href="#"></a>
+	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<h3>Buying Geodes</h3>
 		<div class="content">
@@ -22,7 +22,7 @@ document.write(`
 	</div>
 </div>
 <div id="gem_modal" class="overlay">
-	<a class="cancel" href="#"></a>
+	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<div class="content">
 			<table>
@@ -41,7 +41,7 @@ document.write(`
 	</div>
 </div>
 <div id="geode_bought_modal" class="overlay">
-	<a class="cancel" href="#"></a>
+	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<div class="content">
 			<h1>Purchase Complete!</h1>
@@ -55,7 +55,7 @@ document.write(`
 	</div>
 </div>
 <div id="metamask_info_modal" class="overlay">
-	<a class="cancel" href="#"></a>
+	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<div class="content">
 			<h1>MetaMask Required</h1>
