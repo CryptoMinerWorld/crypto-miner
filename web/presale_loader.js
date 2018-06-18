@@ -136,11 +136,6 @@ const presale = new PresaleApi(logger, jQuery3);
 
 function buyGeodes() {
 	const qty = jQuery3("#NumberOfGeodes").val();
-	if(presale.getNetworkId() !== REQUIRED_NETWORK_ID) {
-		jQuery3("#required_network_id").html(REQUIRED_NETWORK_NAME);
-		location.href = "#wrong_network_modal";
-		return;
-	}
 	const errCode = presale.buyGeodes(qty, function (err, result) {
 		if(err || err > 0) {
 			return;
@@ -439,7 +434,13 @@ jQuery3(document).ready(function() {
 	// bind an action to a "get geodes button"
 	jQuery3("#GetGeodeButton").css("cursor", "pointer").on("click", function () {
 		if(presale.getWeb3()) {
-			location.href = "#geode_qty_modal";
+			if(presale.getNetworkId() === REQUIRED_NETWORK_ID) {
+				location.href = "#geode_qty_modal";
+			}
+			else {
+				jQuery3("#required_network_id").html(REQUIRED_NETWORK_NAME);
+				location.href = "#wrong_network_modal";
+			}
 		}
 		else {
 			location.href = "#metamask_info_modal";
