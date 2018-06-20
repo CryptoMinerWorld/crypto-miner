@@ -358,7 +358,7 @@ jQuery3(document).ready(function() {
 		function(errCode, result) {
 			if(errCode > 0) {
 				// update workshop page to look properly
-				if(presale.getNetworkId() !== REQUIRED_NETWORK_ID) {
+				if(presale.getNetworkId() != REQUIRED_NETWORK_ID) {
 					workshop_wrong_network(presale.getNetworkName(), REQUIRED_NETWORK_NAME);
 				}
 				else {
@@ -434,7 +434,7 @@ jQuery3(document).ready(function() {
 	// bind an action to a "get geodes button"
 	jQuery3("#GetGeodeButton").css("cursor", "pointer").on("click", function () {
 		if(presale.getWeb3()) {
-			if(presale.getNetworkId() === REQUIRED_NETWORK_ID) {
+			if(presale.getNetworkId() == REQUIRED_NETWORK_ID) {
 				location.href = "#geode_qty_modal";
 			}
 			else {
