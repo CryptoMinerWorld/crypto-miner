@@ -25,7 +25,7 @@ document.write(`
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<div class="content">
-			<img id="picture"  width="700" height="700" src="gems/Ame 1 A.png"/>
+			<img id="picture" class="centerImg" src="gems/Ame 1 A.png"/>
 			<table class=gemModalFooterTable width=900 height="50" bgcolor="#14141b" align="center">
 				<tr >
 				<td style="padding: 5px; width: auto; display: table-cell; vertical-align: middle; text-align: center; color:e5e5ee;">

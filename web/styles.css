@@ -38,6 +38,16 @@
 	background: background: rgba(255, 255, 255, 0.4);
 }
 
+#gem_modal .content {
+	max-height: inherit;
+}
+#gem_modal .centerImg
+{
+	display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
 
 #geode_bought_modal .modal {
 	width: 400px;
