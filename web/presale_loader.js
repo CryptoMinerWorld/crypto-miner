@@ -265,7 +265,7 @@ jQuery3(document).ready(function() {
 			return `
 				<a href="javascript:display_gem(\'` + gem.id + `\', \'` + color + `\', \'` + level + `\', \'` + grade + `\', \'` + miningRate + `\')">
 					<img style="padding: 0;" width="250" height="250" src="` + thumbnail + `"/>
-				</a><br/>Lvl ` + levelId + ` ` + color.substr(0, color.indexOf(" ")) + ` Grade ` + grade + `-` + miningRate + `%
+				</a><br/>Lvl ` + levelId + ` ` + color.substr(0, color.indexOf(" ")) + ` Grade ` + grade + ` - ` + miningRate + `%
 			`;
 		}
 
