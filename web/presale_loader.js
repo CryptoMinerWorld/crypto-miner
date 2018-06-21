@@ -235,7 +235,7 @@ jQuery3(document).ready(function() {
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
 		html += '<h1 id="my_geodes_header">' + collection.length + ' Gems And ' + id="my_geodes_subheader" +' in your collection!</h1>';
-		html += '<h2> </h3>';
+		html += '<h3>' '</h3>';
 		html += `
 			<div id="gem_sorting_options">
 				<select id="gem_sorting_by">
