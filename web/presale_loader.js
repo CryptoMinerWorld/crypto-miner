@@ -26,21 +26,21 @@ document.write(`
 	<div class="modal">
 		<div class="content">
 			<img id="picture" class="centerImg" src="gems/Ame 1 A.png"/>
-			<table class=gemModalFooterTable width=900 height="50" bgcolor="#14141b" align="center">
+			<table class=gemModalFooterTable>
 				<tr >
-				<td style="padding: 5px; width: auto; display: table-cell; vertical-align: middle; text-align: center; color:e5e5ee;">
+				<td class="gemInfoModalWorkshop">
 					Mining rate – <span id="mining_rate">25%</span>
 				</td>
-				<td style="padding: 5px; width: auto; display: table-cell; vertical-align: middle; text-align: center; color:e5e5ee; id="energy_level";">
+				<td class="gemInfoModalWorkshop" id="energy_level">
 					Energy level – 100%
 				</td>
-				<td style="padding: 5px; width: auto; display: table-cell; vertical-align: middle; text-align: center; color:e5e5ee; ">
+				<td class="gemInfoModalWorkshop">
 					Grade <span id="grade_type">B</span>
 				</td>
-				<td style="padding: 5px; width: auto; display: table-cell; vertical-align: middle; text-align: center; color:e5e5ee;  id="level";">
+				<td sclass="gemInfoModalWorkshop" id="level">
 					Baby, Level 1
 				</td>
-				<td style="padding: 5px; width: auto; display: table-cell; vertical-align: middle; text-align: center; color:e5e5ee; id="color";">
+				<td class="gemInfoModalWorkshop" id="color">
 					Amethyst (Febuary)
 				</td></tr>
 			</table>
