@@ -28,27 +28,48 @@
 	border: none;
 }
 
-#gem_modal .modal {
-	margin-top: 150px;
-	width: 900px;
-	background: #1e1e23;
+#gem_modal .overlay {
+	background: rgba(255, 255, 255, 0.75);
 }
 
-#gem_modal .overlay {
-	background: background: rgba(255, 255, 255, 0.4);
+#gem_modal .modal {
+	margin-top: 150px;
+	width: 1000px;
+	max-width: 80%;
+	background: #1e1e23;
+	padding: 0px;
 }
 
 #gem_modal .content {
 	max-height: inherit;
+	border-radius: 6px;
 }
 #gem_modal .centerImg
 {
 	display: block;
     margin-left: auto;
     margin-right: auto;
-    width: 50%;
+	margin-bottom: 3%;
+	width: 700px;
 }
 
+#gem_modal .gemModalFooterTable {
+	margin: 0px;
+	width: 100%;
+	background-color: #14141B;
+	border-collapse: inherit;
+	padding: 15px;
+/*	align= center;*/
+}
+
+#gem_modal .gemInfoModalWorkshop{
+	width: auto; 
+	padding: 5px;
+	display= table-cell; 
+	vertical-align=	middle; 
+	text-align= center; 
+	text-decoration-color:#e5e5ee;
+}
 #geode_bought_modal .modal {
 	width: 400px;
 	text-align: center;
