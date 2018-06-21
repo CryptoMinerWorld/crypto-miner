@@ -25,16 +25,23 @@ document.write(`
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<div class="content">
-			<table>
-				<tr><td style="padding: 0; width: 500px;">
-					<img id="picture" width="500" height="500" src="gems/Ame 1 A.png"/>
-				</td><td style="vertical-align: middle;">
-					<!--<h1>Tipsy Pete</h1>-->
-					<h4>Mining rate – <span id="mining_rate">25%</span></h4>
-					<h4 id="energy_level">Energy level – 100%</h4>
-					<h4>Grade <span id="grade_type">B</span></h4>
-					<h4 id="level">Baby, Level 1</h4>
-					<h4 id="color">Amethyst (February)</h4>
+			<img id="picture"  width="700" height="700" src="gems/Ame 1 A.png"/>
+			<table class=gemModalFooterTable width=900 height="50" bgcolor="#14141b" align="center">
+				<tr >
+				<td style="padding: 5px; width: auto; display: table-cell; vertical-align: middle; text-align: center; color:e5e5ee;">
+					Mining rate – <span id="mining_rate">25%</span>
+				</td>
+				<td style="padding: 5px; width: auto; display: table-cell; vertical-align: middle; text-align: center; color:e5e5ee; id="energy_level";">
+					Energy level – 100%
+				</td>
+				<td style="padding: 5px; width: auto; display: table-cell; vertical-align: middle; text-align: center; color:e5e5ee; ">
+					Grade <span id="grade_type">B</span>
+				</td>
+				<td style="padding: 5px; width: auto; display: table-cell; vertical-align: middle; text-align: center; color:e5e5ee;  id="level";">
+					Baby, Level 1
+				</td>
+				<td style="padding: 5px; width: auto; display: table-cell; vertical-align: middle; text-align: center; color:e5e5ee; id="color";">
+					Amethyst (Febuary)
 				</td></tr>
 			</table>
 		</div>
