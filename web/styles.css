@@ -63,13 +63,13 @@
 	font-weight: bold;
 	padding: 5px; 
 	text-align: center; 
-	text-decoration-color: #e5e5ee;
+	color: #e5e5ee;
 }
 #gem_modal .energyGemInfoModalWorkshop {
 	font-weight: bold;
 	padding: 5px; 
 	text-align: center; 
-	text-decoration-color: #ff00cd;
+	color: #ff00cd;
 }
 #geode_bought_modal .modal {
 	width: 400px;
