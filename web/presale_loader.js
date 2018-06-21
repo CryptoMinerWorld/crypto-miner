@@ -37,7 +37,7 @@ document.write(`
 				<td class="gemInfoModalWorkshop">
 					Grade <span id="grade_type">B</span>
 				</td>
-				<td sclass="gemInfoModalWorkshop" id="level">
+				<td class="gemInfoModalWorkshop" id="level">
 					Baby, Level 1
 				</td>
 				<td class="gemInfoModalWorkshop" id="color">
