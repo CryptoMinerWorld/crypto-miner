@@ -28,7 +28,6 @@
 	border: none;
 }
 
-
 #gem_modal .modal {
 	margin-top: 150px;
 	width: 1000px;
@@ -42,6 +41,7 @@
 	max-height: inherit;
 	border-radius: 6px;
 }
+
 #gem_modal .centerImg
 {
 	display: block;
@@ -65,12 +65,14 @@
 	text-align: center; 
 	color: #e5e5ee;
 }
+
 #gem_modal .energyGemInfoModalWorkshop {
 	font-weight: bold;
 	padding: 5px; 
 	text-align: center; 
 	color: #ff00cd;
 }
+
 #geode_bought_modal .modal {
 	width: 400px;
 	text-align: center;
