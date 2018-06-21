@@ -53,7 +53,10 @@
 
 #gem_modal .gemModalFooterTable {
 	margin: 0px;
-	background-color: #14141B;
+	background-color: #14141B;    
+	border-collapse: unset;
+    padding-bottom: 20px;
+    padding-top: 20px;
 }
 
 #gem_modal .gemInfoModalWorkshop{
