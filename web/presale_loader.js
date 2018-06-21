@@ -31,7 +31,7 @@ document.write(`
 				<td class="gemInfoModalWorkshop">
 					Mining rate – <span id="mining_rate">25%</span>
 				</td>
-				<td class="gemInfoModalWorkshop" id="energy_level">
+				<td class="energyGemInfoModalWorkshop" id="energy_level">
 					Energy level – 100%
 				</td>
 				<td class="gemInfoModalWorkshop">
