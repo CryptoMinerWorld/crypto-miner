@@ -21,7 +21,7 @@ document.write(`
 		</div>
 	</div>
 </div>
-<div id="gem_modal" class="overlay">
+<div id="gem_modal" class="overlayGemModalWorkshop">
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<div class="content">
