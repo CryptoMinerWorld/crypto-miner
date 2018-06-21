@@ -28,10 +28,26 @@
 	border: none;
 }
 
-#gem_modal .modal {
-	margin-top: 120px;
-	width: 800px;
+/* JOHN EDIT*/
+#gem_modal .overlay {
+	background: background: rgba(255, 255, 255, 0.4);
 }
+
+$width:900px;
+
+#gem_modal .modal {
+	margin-top: 150px;
+	width: 900px;
+	background: #1e1e23;
+}
+
+/*
+.gemModalFooterTable {
+	width: $width;
+}
+#gemModalFooterTable .table*/
+
+/* JOHN EDIT*/
 
 #geode_bought_modal .modal {
 	width: 400px;
