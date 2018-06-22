@@ -234,8 +234,8 @@ jQuery3(document).ready(function() {
 		const columns = 4;
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
-		html += '<h1 id="my_geodes_header">' + collection.length + ' Gems And ' + id="my_geodes_subheader" +' in your collection!</h1>';
-		html += '<h3>' '</h3>';
+		html += '<h1 id="my_geodes_header" style="display:inline;">' + collection.length + ' Gems And </h1>' + '<h1 id="my_geodes_subheader" style="display:inline;"> in your collection!</h1>';
+		html += `</br>`;
 		html += `
 			<div id="gem_sorting_options">
 				<select id="gem_sorting_by">
