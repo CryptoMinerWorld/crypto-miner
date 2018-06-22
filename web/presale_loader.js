@@ -234,7 +234,7 @@ jQuery3(document).ready(function() {
 		const columns = 4;
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
-		html += '<h1 id="my_geodes_header">' + collection.length + '&nbsp &nbsp Gemstone Worker Buddies</h1>';
+		html += '<h1 id="my_geodes_header">' + collection.length + '&nbsp Gemstone Worker Buddies</h1>';
 		html += '<h1 id="my_geodes_subheader"></h1>';
 		html += `
 			<div id="gem_sorting_options">
@@ -399,10 +399,10 @@ jQuery3(document).ready(function() {
 								return;
 							}
 							if(result<=1){
-								jQuery3("#my_geodes_subheader").html(result + "&nbsp &nbsp Founders Plot of Land");
+								jQuery3("#my_geodes_subheader").html(result + "&nbsp Founders Plot of Land");
 							}
 							else{
-								jQuery3("#my_geodes_subheader").html(result + "&nbsp &nbsp Founders Plots of Land");
+								jQuery3("#my_geodes_subheader").html(result + "&nbsp Founders Plots of Land");
 							}	
 						});
 					}
