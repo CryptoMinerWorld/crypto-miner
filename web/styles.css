@@ -6,12 +6,28 @@
 
 #my_geodes_subheader {
 	text-align: center;
-	color: whitesmoke;
+	color: white;
+    font-size: 18px;
 }
 
 #gem_sorting_options {
-	color: snow;
-	padding: 0 50px;
+	color: white;
+    margin-top: 10px;
+    text-align: center;
+}
+#gem_sorting_by{
+	background-color: #141417;
+	color: white;
+	border: none;
+    border-color: #9595a7;
+    padding: 5px;
+}
+#gem_sorting_order{
+	background-color: #141417;
+	color: white;
+	border: none;
+    border-color: #9595a7;
+    padding: 5px;
 }
 
 #my_geodes {

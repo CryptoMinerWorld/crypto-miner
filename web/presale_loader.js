@@ -239,18 +239,17 @@ jQuery3(document).ready(function() {
 		html += `
 			<div id="gem_sorting_options">
 				<select id="gem_sorting_by">
-					<option value="">sort by</option>
-					<option value="id">date</option>
-					<option value="color">color</option>
-					<option value="level">level</option>
-					<option value="grade">grade</option>
+					<option value="">Sort By</option>
+					<option value="id">Date</option>
+					<option value="Grade">grade</option>
+					<option value="Level">level</option>
+					<option value="Color">color</option>
 				</select>
-				in
+				&emsp
 				<select id="gem_sorting_order">
-					<option value="asc">ascending</option>
-					<option value="desc">descending</option>
+					<option value="asc">Ascending</option>
+					<option value="desc">Descending</option>
 				</select>
-				order
 			</div>
 			<table id="my_geodes">
 			`;
