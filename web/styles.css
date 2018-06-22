@@ -18,16 +18,16 @@
 #gem_sorting_by{
 	background-color: #141417;
 	color: white;
-	border: none;
     border-color: #9595a7;
     padding: 5px;
+    font-size: 18px;
 }
 #gem_sorting_order{
 	background-color: #141417;
 	color: white;
-	border: none;
     border-color: #9595a7;
     padding: 5px;
+    font-size: 18px;
 }
 
 #my_geodes {
