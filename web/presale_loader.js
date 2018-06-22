@@ -25,14 +25,14 @@ document.write(`
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<div class="content">
-			<img id="picture" class="centerImg" src="gems/Ame 1 A.png"/>
+			<img id="picture" class="centerImg" src="Temp_Gems/Ame-1-D.png"/>
 			<table class=gemModalFooterTable>
 				<tr >
 				<td class="gemInfoModalWorkshop">
 					Mining rate – <span id="mining_rate">25%</span>
 				</td>
 				<td class="energyGemInfoModalWorkshop" id="energy_level">
-					Energy level – 100%
+					Energy level – 0%
 				</td>
 				<td class="gemInfoModalWorkshop">
 					Grade <span id="grade_type">B</span>
@@ -234,7 +234,7 @@ jQuery3(document).ready(function() {
 		const columns = 4;
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
-		html += '<h1 id="my_geodes_header">' + collection.length + '&nbsp Gemstone Worker Buddies</h1>';
+		html += '<h1 id="my_geodes_header">' + collection.length + ' - Gemstone Worker Buddies</h1>';
 		html += '<h1 id="my_geodes_subheader"></h1>';
 		html += `
 			<div id="gem_sorting_options">
@@ -399,10 +399,10 @@ jQuery3(document).ready(function() {
 								return;
 							}
 							if(result<=1){
-								jQuery3("#my_geodes_subheader").html(result + "&nbsp Founders Plot of Land");
+								jQuery3("#my_geodes_subheader").html(result + " - Founders Plot of Land");
 							}
 							else{
-								jQuery3("#my_geodes_subheader").html(result + "&nbsp Founders Plots of Land");
+								jQuery3("#my_geodes_subheader").html(result + " - Founders Plots of Land");
 							}	
 						});
 					}
