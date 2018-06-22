@@ -399,7 +399,7 @@ jQuery3(document).ready(function() {
 							if(err || err > 0) {
 								return;
 							}
-							if(result.length>=1){
+							if(result>=1){
 								jQuery3("#my_geodes_subheader").html(result + " Founders Plot of Land");
 							}
 							else{
