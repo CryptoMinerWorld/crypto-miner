@@ -47,7 +47,7 @@ function PresaleApi(logger, jQuery_instance) {
 
 	// ---------- START SECTION 1: Constants and Variables ----------
 	// version constants define smart contracts compatible with this API
-	const TOKEN_VERSION = 0x1;
+	const TOKEN_VERSION = 0x2;
 	const PRESALE_VERSION = 0x3;
 
 	// jQuery instance to use
