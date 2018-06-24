@@ -241,7 +241,7 @@ jQuery3(document).ready(function() {
 		const columns = 4;
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
-		html += '<h1 id="my_geodes_header"> <font color="#ff00ce">'+ collection.length + '</font> - Gemstone Worker Buddies</h1>';
+		html += '<h1 id="my_geodes_header">'+ collection.length + ' - Gemstone Worker Buddies</h1>';
 		html += '<h1 id="my_geodes_subheader"></h1>';
 		html += `
 			<div id="gem_sorting_options">
