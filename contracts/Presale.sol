@@ -13,7 +13,7 @@ contract Presale {
 
   /// @dev Version of the Gem smart contract to work with
   /// @dev See `GemERC721.TOKEN_VERSION`
-  uint32 public constant TOKEN_VERSION_REQUIRED = 0x1;
+  uint32 public constant TOKEN_VERSION_REQUIRED = 0x2;
 
   /// @dev Structure used as temporary storage for gem data
   struct Gem {
@@ -175,7 +175,7 @@ contract Presale {
       uint32(GEMS_IN_GEODE * geodesToSell + (geodesToSell >= 5 ? 1 : 0)),
       uint64(value),
       geodeBalances[player],
-      gemContract.balanceOf(player)
+      uint32(gemContract.balanceOf(player))
     );
 
     // presale state changed (used for UI updates)

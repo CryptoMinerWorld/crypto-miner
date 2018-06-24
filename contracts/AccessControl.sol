@@ -1,6 +1,5 @@
 pragma solidity 0.4.23;
 
-// TODO: convert this to a library
 /**
  * @dev Access control module provides an API to check
  *      if specific operation is permitted globally and
