@@ -12,6 +12,14 @@ module.exports = async function(deployer, network, accounts) {
 
 	const Gem = artifacts.require("./GemERC721");
 	const Sale = artifacts.require("./Presale");
+	const AddressUtils = artifacts.require("./AddressUtils");
+	const StringUtils = artifacts.require("./StringUtils");
+
+	await deployer.deploy(AddressUtils);
+	await deployer.link(AddressUtils, Gem);
+
+	await deployer.deploy(StringUtils);
+	await deployer.link(StringUtils, Gem);
 
 	await deployer.deploy(Gem);
 

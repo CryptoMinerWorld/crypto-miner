@@ -9,17 +9,19 @@ contract('GemERC721', function(accounts) {
 		const tk = await Token.new();
 		assert.equal(0, await tk.totalSupply(), "wrong initial totalSupply value");
 		assert.equal(0, await tk.balanceOf(accounts[0]), "wrong initial totalSupply value");
+		await assertThrowsAsync(async function() {await tk.tokenByIndex(0);});
+		await assertThrowsAsync(async function() {await tk.tokenOfOwnerByIndex(accounts[0], 0);});
 	});
 
 	it("mint: creating a token", async function() {
 		const tk = await Token.new();
 		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
-		await assertThrowsAsync(async function() {await tk.mint(accounts[0], 0x400, 1, 0, 1, 1, 1, 1, 1);});
+		await assertThrowsAsync(async function() {await tk.mint(accounts[0], 0x000, 1, 0, 1, 1, 1, 1, 1);});
 		await assertThrowsAsync(async function() {await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);});
 		await assertThrowsAsync(async function() {await tk.mint(0, 0x402, 1, 0, 1, 1, 1, 1, 1);});
 		await assertThrowsAsync(async function() {await tk.mint(tk.address, 0x403, 1, 0, 1, 1, 1, 1, 1);});
 		assert.equal(1, await tk.totalSupply(), "wrong totalSupply value after minting a token");
-		await assertThrowsAsync(async function() {await tk.mint.sendTransaction(accounts[1], 0x402, 1, 0, 1, 1, 1, 1, 1, {from: accounts[1]});});
+		await assertThrowsAsync(async function() {await tk.mint(accounts[1], 0x402, 1, 0, 1, 1, 1, 1, 1, {from: accounts[1]});});
 		await tk.mint(accounts[1], 0x402, 1, 0, 1, 1, 1, 1, 1);
 		assert.equal(2, await tk.totalSupply(), "wrong totalSupply value after minting two tokens");
 		assert.equal(1, await tk.balanceOf(accounts[0]), accounts[0] + " has wrong balance after minting a token");
@@ -51,6 +53,9 @@ contract('GemERC721', function(accounts) {
 		const stateModified = await tk.getStateModified(0x401);
 		assert.equal(0, stateModified, "gem 0x401 wrong state modified");
 
+		const tokenURI = await tk.tokenURI(0x401);
+		assert.equal("http://cryptominerworld.com/gem/401", tokenURI, "wrong 0x401 tokenURI");
+
 		const packed = await tk.getPacked(0x401);
 		assert(packed[0].eq("0x00000011000D000B04000000000500000000030A000000000000000000000000"), "gem 0x401 wrong high");
 		assert(packed[1].eq("0x" + creationTime.toString(16) + "0000000000000000" + accounts[0].substr(2, 40)), "gem 0x401 wrong high");
@@ -58,6 +63,8 @@ contract('GemERC721', function(accounts) {
 		const collection = await tk.getCollection(accounts[0]);
 		assert.equal(1, collection.length, "wrong collection length for " + accounts[0]);
 		assert.equal(0x401, collection[0], "wrong token ID at index 0");
+		assert.equal(0x401, await tk.tokenByIndex(0), "wrong tokenByIndex at index 0");
+		assert.equal(0x401, await tk.tokenOfOwnerByIndex(accounts[0], 0), "wrong tokenOfOwnerByIndex at index 0");
 
 		const packedCollection = await tk.getPackedCollection(accounts[0]);
 		assert.equal(1, packedCollection.length, "wrong packed collection length for " + accounts[0]);
@@ -67,16 +74,17 @@ contract('GemERC721', function(accounts) {
 	it("transfer: transferring a token", async function() {
 		const tk = await Token.new();
 		await tk.updateFeatures(FEATURE_TRANSFERS);
-		await assertThrowsAsync(async function() {await tk.transferToken(accounts[1], 0x401);});
+		const fn = async () => await tk.transfer(accounts[1], 0x401);
+		await assertThrowsAsync(fn);
 		await tk.updateFeatures(0);
 		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
 		assert.equal(1, await tk.balanceOf(accounts[0]), accounts[0] + " wrong balance before token transfer");
 		assert.equal(0, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
-		await assertThrowsAsync(async function() {await tk.transferToken(accounts[1], 0x401);});
+		await assertThrowsAsync(fn);
 		await tk.updateFeatures(FEATURE_TRANSFERS);
-		await assertThrowsAsync(async function() {await tk.transferToken(0x0, 0x401);});
-		await assertThrowsAsync(async function() {await tk.transferToken(accounts[0], 0x401);});
-		await tk.transferToken(accounts[1], 0x401);
+		await assertThrowsAsync(async function() {await tk.transfer(0x0, 0x401);});
+		await assertThrowsAsync(async function() {await tk.transfer(accounts[0], 0x401);});
+		await fn();
 		assert.equal(0, await tk.balanceOf(accounts[0]), accounts[0] + " wrong balance after token transfer");
 		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
 		assert.equal(accounts[1], await tk.ownerOf(0x401), "wrong token 0x401 owner after token transfer");
@@ -86,21 +94,24 @@ contract('GemERC721', function(accounts) {
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
 		await tk.mint(accounts[0], 0x402, 1, 0, 1, 1, 1, 1, 1);
-		await assertThrowsAsync(async function() {await tk.setLockedBitmask.sendTransaction(0x1, {from: accounts[1]});});
+		await assertThrowsAsync(async function() {await tk.setLockedBitmask(0x1, {from: accounts[1]});});
 		await tk.setLockedBitmask(0x1);
 		await tk.setState(0x401, 0x1);
 		await tk.setState(0x402, 0x1);
-		await assertThrowsAsync(async function() {await tk.transferToken(accounts[1], 0x401);});
-		await assertThrowsAsync(async function() {await tk.transferToken(accounts[1], 0x402);});
+		const fn1 = async () => await tk.transfer(accounts[1], 0x401);
+		const fn2 = async () => await tk.transfer(accounts[1], 0x402);
+		await assertThrowsAsync(fn1);
+		await assertThrowsAsync(fn2);
 		await tk.setState(0x401, 0x2);
-		await tk.transferToken(accounts[1], 0x401);
+		await fn1();
 		await tk.setLockedBitmask(0x2);
-		await tk.transferToken(accounts[1], 0x402);
-		await assertThrowsAsync(async function() {await tk.transferToken.sendTransaction(accounts[2], 0x401, {from: accounts[1]});});
+		await fn2();
+		const fn = async () => await tk.transfer(accounts[2], 0x401, {from: accounts[1]});
+		await assertThrowsAsync(fn);
 		await tk.setLockedBitmask(0x3);
-		await assertThrowsAsync(async function() {await tk.transferToken.sendTransaction(accounts[2], 0x401, {from: accounts[1]});});
+		await assertThrowsAsync(fn);
 		await tk.setLockedBitmask(0x4);
-		await tk.transferToken.sendTransaction(accounts[2], 0x401, {from: accounts[1]});
+		await fn();
 		assert.equal(accounts[1], await tk.ownerOf(0x402), "wrong token 0x402 owner");
 		assert.equal(accounts[2], await tk.ownerOf(0x401), "wrong token 0x401 owner");
 	});
@@ -110,23 +121,43 @@ contract('GemERC721', function(accounts) {
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
 		await tk.mint(accounts[1], 0x401, 1, 0, 1, 1, 1, 1, 1);
 		await tk.mint(accounts[0], 0x402, 1, 0, 1, 1, 1, 1, 1);
-		await assertThrowsAsync(async function() {await tk.approveToken(accounts[0], 0x401);});
-		await assertThrowsAsync(async function() {await tk.approveToken(accounts[0], 0x402);});
-		await assertThrowsAsync(async function() {await tk.transferTokenFrom(accounts[1], accounts[2], 0x401);});
-		await tk.approveToken.sendTransaction(accounts[0], 0x401, {from: accounts[1]});
-		await tk.revokeApproval.sendTransaction(0x401, {from: accounts[1]});
-		await assertThrowsAsync(async function() {await tk.revokeApproval.sendTransaction(0x401, {from: accounts[1]});});
-		await assertThrowsAsync(async function() {await tk.transferTokenFrom(accounts[1], accounts[2], 0x401);});
-		await tk.approveToken.sendTransaction(accounts[0], 0x401, {from: accounts[1]});
-		await tk.transferTokenFrom(accounts[1], accounts[2], 0x401);
+		const fn1 = async () => await tk.transferFrom(accounts[1], accounts[2], 0x401);
+		await assertThrowsAsync(async function() {await tk.approve(accounts[0], 0x401);});
+		await assertThrowsAsync(async function() {await tk.approve(accounts[0], 0x402);});
+		await assertThrowsAsync(fn1);
+		await tk.approve(accounts[0], 0x401, {from: accounts[1]});
+		await tk.revokeApproval(0x401, {from: accounts[1]});
+		await assertThrowsAsync(async function() {await tk.revokeApproval(0x401, {from: accounts[1]});});
+		await tk.approve(accounts[0], 0x401, {from: accounts[1]});
+		await fn1();
 		await tk.updateFeatures(FEATURE_TRANSFERS);
-		await assertThrowsAsync(async function() {await tk.transferTokenFrom(accounts[0], accounts[1], 0x402);});
+		const fn = async () => await tk.transferFrom(accounts[0], accounts[1], 0x402);
+		await assertThrowsAsync(fn);
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
-		await assertThrowsAsync(async function() {await tk.transferTokenFrom(accounts[0], accounts[1], 0x402);});
+		await assertThrowsAsync(fn);
 		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
-		await tk.transferTokenFrom(accounts[0], accounts[1], 0x402);
+		await fn();
 		assert.equal(accounts[1], await tk.ownerOf(0x402), "wrong token 0x402 owner after transfer on behalf");
 		assert.equal(accounts[2], await tk.ownerOf(0x401), "wrong token 0x401 owner after transfer on behalf");
+	});
+
+	it("safeTransferFrom: save transfer token to address", async function() {
+		const tk = await Token.new();
+		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
+		await tk.safeTransferFrom(accounts[0], accounts[1], 0x401, "");
+		assert.equal(accounts[1], await tk.ownerOf(0x401), "token 0x401 has wrong owner after safely transferring it");
+	});
+	it("safeTransferFrom: impossible to save transfer to a smart contract", async function() {
+		const tk = await Token.new();
+		const another = await Token.new();
+		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
+		await assertThrowsAsync(async function() {await tk.safeTransferFrom(accounts[0], another.address, 0x401, "");});
+		await assertThrowsAsync(async function() {await tk.safeTransferFrom(accounts[0], tk.address, 0x401, "");});
+		assert.equal(accounts[0], await tk.ownerOf(0x401), "card 0x401 has wrong owner after bad attempt to transfer it");
+		await tk.safeTransferFrom(accounts[0], accounts[1], 0x401, "");
+		assert.equal(accounts[1], await tk.ownerOf(0x401), "token 0x401 has wrong owner after safely transferring it");
 	});
 
 	it("approve: approve and transfer on behalf", async function () {
@@ -135,18 +166,29 @@ contract('GemERC721', function(accounts) {
 		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
 		await tk.mint(accounts[0], 0x402, 1, 0, 1, 1, 1, 1, 1);
 		await tk.mint(accounts[0], 0x403, 1, 0, 1, 1, 1, 1, 1);
-		await assertThrowsAsync(async function() {await tk.approve(0x0, 2);});
-		await assertThrowsAsync(async function() {await tk.approve(accounts[0], 2);});
-		await tk.approve(accounts[1], 2);
-		await tk.transferTokenFrom.sendTransaction(accounts[0], accounts[1], 0x401, {from: accounts[1]});
-		await tk.transferTokenFrom.sendTransaction(accounts[0], accounts[1], 0x402, {from: accounts[1]});
-		await assertThrowsAsync(async function() {
-			await tk.transferTokenFrom.sendTransaction(accounts[0], accounts[1], 0x403, {from: accounts[1]});
-		});
+		await assertThrowsAsync(async function() {await tk.approve(0x0, 0x0);});
+		await assertThrowsAsync(async function() {await tk.approve(accounts[0], 0x401);});
+		await tk.approve(accounts[1], 0x401);
+		await tk.approve(accounts[1], 0x402);
+		assert.equal(accounts[1], await tk.getApproved(0x401), "wrong approved operator for token 0x401");
+		await tk.transferFrom(accounts[0], accounts[1], 0x401, {from: accounts[1]});
+		await tk.transferFrom(accounts[0], accounts[1], 0x402, {from: accounts[1]});
+		assert.equal(0, await tk.getApproved(0x401), "wrong approved operator for token 0x401 after transfer");
+	});
+	it("approve: approve all and transfer on behalf", async function () {
+		const tk = await Token.new();
+		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
+		await tk.mint(accounts[0], 0x402, 1, 0, 1, 1, 1, 1, 1);
+		await tk.mint(accounts[0], 0x403, 1, 0, 1, 1, 1, 1, 1);
+		await assertThrowsAsync(async function() {await tk.setApprovalForAll(0x0, true);});
+		await assertThrowsAsync(async function() {await tk.setApprovalForAll(accounts[0], true);});
 		await tk.setApprovalForAll(accounts[1], true);
-		assert((await tk.UNLIMITED_APPROVALS()).eq(await tk.allowance(accounts[0], accounts[1])), "wrong number of approvals");
+		await tk.transferFrom(accounts[0], accounts[1], 0x401, {from: accounts[1]});
+		await tk.transferFrom(accounts[0], accounts[1], 0x402, {from: accounts[1]});
+		assert(await tk.isApprovedForAll(accounts[0], accounts[1]), "should be approved operator");
 		await tk.setApprovalForAll(accounts[1], false);
-		assert.equal(0, await tk.allowance(accounts[0], accounts[1]), "wrong number of approvals");
+		assert(!await tk.isApprovedForAll(accounts[0], accounts[1]), "should not be approved operator");
 	});
 
 	it("level up: full cycle", async function() {
@@ -155,7 +197,7 @@ contract('GemERC721', function(accounts) {
 		await tk.levelUp(0x401);
 		assert.equal(2, await tk.getLevel(0x401), "wrong gem 0x401 level after leveling up");
 		await assertThrowsAsync(async function() {await tk.levelUp(0x402);});
-		await assertThrowsAsync(async function() {await tk.levelUp.sendTransaction(0x402, {from: accounts[1]});});
+		await assertThrowsAsync(async function() {await tk.levelUp(0x402, {from: accounts[1]});});
 	});
 
 	it("update grade: full cycle", async function() {
@@ -165,7 +207,7 @@ contract('GemERC721', function(accounts) {
 		assert.equal(0x0102, await tk.getGrade(0x401), "wrong gem 0x401 grade after modifying a grade");
 		await assertThrowsAsync(async function() {await tk.upgradeGrade(0x401, 0x0102);});
 		await assertThrowsAsync(async function() {await tk.upgradeGrade(0x402, 0x0103);});
-		await assertThrowsAsync(async function() {await tk.upgradeGrade.sendTransaction(0x401, 0x0103, {from: accounts[1]});});
+		await assertThrowsAsync(async function() {await tk.upgradeGrade(0x401, 0x0103, {from: accounts[1]});});
 		await tk.upgradeGrade(0x401, 0x0103);
 	});
 
@@ -175,7 +217,7 @@ contract('GemERC721', function(accounts) {
 		await tk.setState(0x401, 0x0102);
 		assert.equal(0x0102, await tk.getState(0x401), "wrong gem 0x401 state after setting a state");
 		await assertThrowsAsync(async function() {await tk.setState(0x402, 0x0103);});
-		await assertThrowsAsync(async function() {await tk.setState.sendTransaction(0x401, 0x0103, {from: accounts[1]});});
+		await assertThrowsAsync(async function() {await tk.setState(0x401, 0x0103, {from: accounts[1]});});
 		await tk.setState(0x401, 0x0103);
 	});
 
