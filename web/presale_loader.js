@@ -25,27 +25,27 @@ document.write(`
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<div class="content">
-			<button type="button" class="close" data-dismiss="modal">&times;</button>
+			<button type="button" class="close" id="workshopGemModalClose" href="javascript:history.back()" data-dismiss="modal">&times;</button>
 			<img id="picture" class="centerImg" src= IMAGE_BASE + "Ame-1-D.png"/>
 			<table class=gemModalFooterTable>
 				<tr >
-				<img id="miningRateIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Mining-Rate-Modal-Icon-50.png"/>
+				/*<img id="miningRateIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Mining-Rate-Modal-Icon-50.png"/>*/
 				<td class="gemInfoModalWorkshop">
 					Mining rate – <span id="mining_rate">25%</span>
 				</td>
-				<img id="energyIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Energy-Modal-Icon-50.png"/>
+				/*<img id="energyIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Energy-Modal-Icon-50.png"/>*/
 				<td class="energyGemInfoModalWorkshop" id="energy_level">
 					Energy level – 0%
 				</td>
-				<img id="gradeIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Grade-Modal-Icon-50.png"/>
+				/*<img id="gradeIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Grade-Modal-Icon-50.png"/>*/
 				<td class="gemInfoModalWorkshop">
 					Grade <span id="grade_type">B</span>
 				</td>
-				<img id="AgeIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Age-Modal-Icon-50.png"/>
+				/*<img id="AgeIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Age-Modal-Icon-50.png"/>*/
 				<td class="gemInfoModalWorkshop" id="level">
 					Baby, Level 1
 				</td>
-				<img id="typeIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Type-Modal-Icon-50.png"/>
+				/*<img id="typeIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Type-Modal-Icon-50.png"/>*/
 				<td class="gemInfoModalWorkshop" id="color">
 					Amethyst (Febuary)
 				</td></tr>
