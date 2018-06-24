@@ -405,7 +405,7 @@ jQuery3(document).ready(function() {
 							if(err || err > 0) {
 								return;
 							}
-							jQuery3("#my_geodes_subheader").html("<font color="#ff00ce">" + result + "</font> - Founders Plot" + (result > 1? "s": "") + " of Land");
+							jQuery3("#my_geodes_subheader").html(result + " - Founders Plot" + (result > 1? "s": "") + " of Land");
 						});
 					}
 					else {
