@@ -279,7 +279,7 @@ jQuery3(document).ready(function() {
 			for(let j = 0; j < columns; j++) {
 				const idx = i * columns + j;
 				if(idx < collection.length) {
-					html += "\t<td id='" + collection[idx].id + "'>\n";
+					html += "\t<td id='" + idx + "'>\n";
 
 					// inject gem data
 					html += compile_gem_html(collection[idx]);
@@ -327,7 +327,7 @@ jQuery3(document).ready(function() {
 				};
 				collection.sort(cmp);
 				for(let i = 0; i < collection.length; i++) {
-					document.getElementById(collection[i].id).innerHTML = compile_gem_html(collection[i]);
+					document.getElementById("" + i).innerHTML = compile_gem_html(collection[i]);
 				}
 			}
 		}
@@ -398,12 +398,7 @@ jQuery3(document).ready(function() {
 							if(err || err > 0) {
 								return;
 							}
-							if(result<=1){
-								jQuery3("#my_geodes_subheader").html(result + " - Founders Plot of Land");
-							}
-							else{
-								jQuery3("#my_geodes_subheader").html(result + " - Founders Plots of Land");
-							}	
+							jQuery3("#my_geodes_subheader").html(result + " - Founders Plot" + (result > 1? "s": "") + " of Land");
 						});
 					}
 					else {
