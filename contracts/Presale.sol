@@ -32,11 +32,11 @@ contract Presale {
   /// @notice Amount of gems in a geode
   uint8 public constant GEMS_IN_GEODE = 4;
 
-  /// @notice Number of different colors defined for a gem
-  uint8 public constant COLORS = 6;
-
   /// @notice Number of different grade values defined for a gem
   uint8 public constant GRADE_VALUES = 100;
+
+  /// @notice Number of different colors currently available in presale, can be increased
+  uint8 public colors = 4;
 
   /// @notice Current value of geodes sold, initially zero
   uint16 public geodesSold = 0;
@@ -52,6 +52,9 @@ contract Presale {
 
   /// @dev Address to send all the incoming funds
   address public beneficiary;
+
+  /// @dev Presale creator
+  address public creator;
 
   /// @dev Mapping for the geode owners, will be used to issue land plots
   mapping(uint16 => address) public geodeOwners;
@@ -92,6 +95,9 @@ contract Presale {
 
     // set the beneficiary
     beneficiary = _beneficiary;
+
+    // set the creator
+    creator = msg.sender;
   }
 
   /// @dev Returns the presale state data as a packed uint96 tuple structure
@@ -195,6 +201,18 @@ contract Presale {
 
     // calculate based on `geodesSold` value
     return GEODES_TO_SELL - geodesSold;
+  }
+
+  /// @dev internal use, allows to increase colors available in presale
+  function incrementColors() public {
+    // check if caller is contract creator
+    require(msg.sender == creator);
+
+    // check colors bounds
+    require(colors < 6);
+
+    // increment
+    colors++;
   }
 
 /*
@@ -301,10 +319,10 @@ contract Presale {
   }
 
   // determines color ID randomly
-  function __colorId(uint16 randomness) private pure returns (uint8) {
+  function __colorId(uint16 randomness) private constant returns (uint8) {
     // normalize 0x10000 random range into 12, starting from 1
     // we need to ensure only colors 9, 10, 11, 12, 1, 2 are allowed
-    return (uint8(__randomValue(randomness, 8, COLORS, 0x10000)) % 12) + 1;
+    return (uint8(__randomValue(randomness, 8, colors, 0x10000)) % 12) + 1;
   }
 
   // determines grade value randomly

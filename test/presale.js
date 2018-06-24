@@ -168,4 +168,34 @@ contract('GeodeSale', function(accounts) {
 
 		assert(gradeAFound, "there is no grade A gem in the collection");
 	});
+	it("geode sale: incrementing the color", async function() {
+		const tk = await Token.new();
+		const sale = await Sale.new(tk.address, accounts[9]);
+
+		assert.equal(4, await sale.colors(), "wrong initial value for colors");
+
+		const fn1 = async () => await sale.incrementColors();
+		const fn2 = async () => await sale.incrementColors({from: accounts[1]});
+		await assertThrowsAsync(fn2);
+		await fn1();
+		await fn1();
+		await assertThrowsAsync(fn1);
+
+		assert.equal(6, await sale.colors(), "wrong final value for colors");
+	});
 });
+
+async function assertThrowsAsync(fn) {
+	let f = function() {};
+	try {
+		await fn();
+	}
+	catch(e) {
+		f = function() {
+			throw e;
+		};
+	}
+	finally {
+		assert.throws(f);
+	}
+}
