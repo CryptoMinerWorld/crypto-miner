@@ -25,21 +25,27 @@ document.write(`
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<div class="content">
-			<img id="picture" class="centerImg" src="Temp_Gems/Ame-1-D.png"/>
+			<button type="button" class="close" data-dismiss="modal">&times;</button>
+			<img id="picture" class="centerImg" src= IMAGE_BASE + "Ame-1-D.png"/>
 			<table class=gemModalFooterTable>
 				<tr >
+				<img id="miningRateIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Mining-Rate-Modal-Icon-50.png"/>
 				<td class="gemInfoModalWorkshop">
 					Mining rate – <span id="mining_rate">25%</span>
 				</td>
+				<img id="energyIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Energy-Modal-Icon-50.png"/>
 				<td class="energyGemInfoModalWorkshop" id="energy_level">
 					Energy level – 0%
 				</td>
+				<img id="gradeIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Grade-Modal-Icon-50.png"/>
 				<td class="gemInfoModalWorkshop">
 					Grade <span id="grade_type">B</span>
 				</td>
+				<img id="AgeIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Age-Modal-Icon-50.png"/>
 				<td class="gemInfoModalWorkshop" id="level">
 					Baby, Level 1
 				</td>
+				<img id="typeIcon" class="modalIcon" src= MIS_IMG_BASE + "Gem-Type-Modal-Icon-50.png"/>
 				<td class="gemInfoModalWorkshop" id="color">
 					Amethyst (Febuary)
 				</td></tr>
@@ -90,6 +96,7 @@ document.write(`
 const WEB_BASE = "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/";
 const IMAGE_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/";
 const THUMB_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/Temp_Gems-Thumbnails/";
+const MIS_IMG_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Imgs_for_presale_code_import/";
 
 const REQUIRED_NETWORK_ID = 4;
 const REQUIRED_NETWORK_NAME = "4: Rinkeby";
@@ -234,7 +241,7 @@ jQuery3(document).ready(function() {
 		const columns = 4;
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
-		html += '<h1 id="my_geodes_header">' + collection.length + ' - Gemstone Worker Buddies</h1>';
+		html += '<h1 id="my_geodes_header"> <font color="#ff00ce">'+ collection.length + '</font> - Gemstone Worker Buddies</h1>';
 		html += '<h1 id="my_geodes_subheader"></h1>';
 		html += `
 			<div id="gem_sorting_options">
@@ -398,7 +405,7 @@ jQuery3(document).ready(function() {
 							if(err || err > 0) {
 								return;
 							}
-							jQuery3("#my_geodes_subheader").html(result + " - Founders Plot" + (result > 1? "s": "") + " of Land");
+							jQuery3("#my_geodes_subheader").html("<font color="#ff00ce">" + result + "</font> - Founders Plot" + (result > 1? "s": "") + " of Land");
 						});
 					}
 					else {

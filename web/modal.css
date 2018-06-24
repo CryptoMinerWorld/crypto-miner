@@ -31,10 +31,27 @@
 	right: 0;
 	background: rgba(255, 255, 255, 0.75);
 	transition: opacity 200ms;
+	z-index: 999;
 	visibility: hidden;
 	opacity: 0;
 }
-
+.close {
+    float: right;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+    color: white;
+    text-shadow: 0 1px 0 #fff;/*
+    filter: alpha(opacity=20);*/
+    opacity: .3;
+}
+button.close {
+    -webkit-appearance: none;
+    padding: 0;
+    cursor: pointer;
+    background: 0 0;
+    border: 0;
+}
 .overlayGemModalWorkshop .cancel {
 	position: absolute;
 	width: 100%;

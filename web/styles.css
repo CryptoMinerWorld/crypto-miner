@@ -1,5 +1,5 @@
 #my_geodes_header {
-	padding-top: 140px;
+	padding-top: 110px;
 	text-align: center;
 	color: white;
 }
@@ -30,7 +30,7 @@
 }
 
 #my_geodes {
-	margin: 32px 16px;
+	margin: 32px 0px 32px 0px;
 	color: white;
 }
 
@@ -44,8 +44,8 @@
 }
 
 #gem_modal .modal {
-	margin-top: 150px;
-	width: 1000px;
+	margin-top: 80px;
+	width: 1100px;
 	max-width: 80%;
 	background: #1e1e23;
 	padding: 0px;
