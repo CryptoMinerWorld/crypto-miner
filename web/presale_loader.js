@@ -25,7 +25,7 @@ document.write(`
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<div class="content">
-			<img id="picture" class="centerImg" src="Temp_Gems/Ame-1-D.png"/>
+			<img id="picture" class="centerImg" src= IMAGE_BASE + "Ame-1-D.png"/>
 			<table class=gemModalFooterTable>
 				<tr >
 				<td class="gemInfoModalWorkshop">
@@ -112,6 +112,7 @@ document.write(`
 const WEB_BASE = "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/";
 const IMAGE_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/";
 const THUMB_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/Temp_Gems-Thumbnails/";
+const MIS_IMG_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Imgs_for_presale_code_import/";
 
 const REQUIRED_NETWORK_ID = 4;
 const REQUIRED_NETWORK_NAME = "4: Rinkeby";
@@ -292,7 +293,7 @@ jQuery3(document).ready(function() {
 		const columns = 4;
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
-		html += '<h1 id="my_geodes_header">' + collection.length + ' - Gemstone Worker Buddies</h1>';
+		html += '<h1 id="my_geodes_header">'+ collection.length + ' - Gemstone Worker Buddies</h1>';
 		html += '<h1 id="my_geodes_subheader"></h1>';
 		html += `
 			<div id="gem_sorting_options">
