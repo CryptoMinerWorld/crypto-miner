@@ -489,21 +489,37 @@ function PresaleApi(logger, jQuery_instance) {
 			logError("Wrong presale ABI: useCoupon is undefined");
 			return ERR_WRONG_ABI;
 		}
-		logInfo("using coupon ", code);
-		presaleInstance.useCoupon(code, function(err, result) {
+		if(!presaleInstance.isCouponValid) {
+			logError("Wrong presale ABI: isCouponValid is undefined");
+			return ERR_WRONG_ABI;
+		}
+		presaleInstance.isCouponValid(code, function(err, result) {
 			if(err) {
-				logError("useCoupon() transaction wasn't sent: ", err.toString().split("\n")[0]);
-				tryCallbackIfProvided(callback, err, null);
+				logError("cannot check coupon validity: ", err);
+				tryCallback(callback, err, null);
 				return;
 			}
-			logInfo("useCoupon() transaction sent: ", result);
-			tryCallbackIfProvided(callback, null, {
-				event: "transaction_sent",
-				name: "useCoupon",
-				txHash: result
-			});
+			logInfo("coupon ", code, " is ", result? "": "in", "valid");
+			if(!result) {
+				tryCallback(callback, "invalid coupon", null);
+				return;
+			}
+			logInfo("using coupon ", code);
+			presaleInstance.useCoupon(code, function(err, result) {
+				if(err) {
+					logError("useCoupon() transaction wasn't sent: ", err.toString().split("\n")[0]);
+					tryCallbackIfProvided(callback, err, null);
+					return;
+				}
+				logInfo("useCoupon() transaction sent: ", result);
+				tryCallbackIfProvided(callback, null, {
+					event: "transaction_sent",
+					name: "useCoupon",
+					txHash: result
+				});
 
-			// TODO: wait for this particular event to return and call callback
+				// TODO: wait for this particular event to return and call callback
+			});
 		});
 	};
 	// ---------- END SECTION 4: Presale API Transactions ----------
@@ -573,6 +589,19 @@ function PresaleApi(logger, jQuery_instance) {
 			tryCallback(callback, "Presale API is not properly initialized", null);
 			return ERR_NOT_INITIALIZED;
 		}
+		if(!presaleInstance.isCouponValid) {
+			logError("Wrong presale ABI: isCouponValid is undefined");
+			return ERR_WRONG_ABI;
+		}
+		presaleInstance.isCouponValid(code, function(err, result) {
+			if(err) {
+				logError("cannot check coupon validity: ", err);
+				tryCallback(callback, err, null);
+				return;
+			}
+			logInfo("coupon ", code, " is ", result? "": "in", "valid");
+			tryCallback(callback, null, result);
+		});
 		// no sync errors – return 0
 		return 0;
 	};
