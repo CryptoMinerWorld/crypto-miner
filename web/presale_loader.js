@@ -491,6 +491,7 @@ jQuery3(document).ready(function() {
 					return;
 				}
 				logger.success("received ", result.gems, " free gem(s)");
+				reload_workshop();
 			});
 
 			// show success notification when geode is bought
