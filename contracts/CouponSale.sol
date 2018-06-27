@@ -30,6 +30,21 @@ contract CouponSale is Presale, AccessControl {
   // pointer to a next gem do be minted
   uint32 public nextFreeGem = 0x1001;
 
+  // how many free gems allocated by means of coupons
+  uint32 public freeGemsAllocated;
+
+  // how many free gems were consumed by players (codes used)
+  uint32 public freeGemsUsed;
+
+  // how many coupons were totally added into the system
+  uint32 public couponsCreated;
+
+  // how many coupons were removed
+  uint32 public couponsRemoved;
+
+  // how many coupons were used (consumed) by the players
+  uint32 public couponsConsumed;
+
   // event to be fired once coupon successfully added
   event CouponAdded(address indexed _by, uint256 indexed key, uint32 expires, uint8 freeGems);
 
@@ -73,6 +88,10 @@ contract CouponSale is Presale, AccessControl {
     // there should be free gems to mint
     assert(gems > 0);
 
+    // update counters
+    couponsConsumed++;
+    freeGemsUsed += gems;
+
     // remove coupon from storage
     delete coupons[key];
 
@@ -103,6 +122,10 @@ contract CouponSale is Presale, AccessControl {
     // number of free gems in coupon
     require(freeGems > 0);
 
+    // update counters
+    couponsCreated++;
+    freeGemsAllocated += freeGems;
+
     // create a coupon structure
     Coupon memory coupon = Coupon(uint32(block.number), expires, freeGems);
 
@@ -117,6 +140,12 @@ contract CouponSale is Presale, AccessControl {
   function removeCoupon(uint256 key) public {
     // check appropriate sender permissions
     require(__isSenderInRole(ROLE_COUPON_MANAGER));
+
+    // coupon must exist
+    require(coupons[key].created > 0);
+
+    // update counter
+    couponsRemoved++;
 
     // delete coupon from storage
     delete coupons[key];
