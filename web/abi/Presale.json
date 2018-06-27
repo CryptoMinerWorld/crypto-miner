@@ -50,6 +50,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "couponsConsumed",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "features",
       "outputs": [
         {
@@ -291,6 +305,34 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "freeGemsUsed",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "freeGemsAllocated",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "GEMS_IN_GEODE",
       "outputs": [
         {
@@ -324,6 +366,20 @@
         {
           "name": "",
           "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "couponsCreated",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -389,6 +445,20 @@
         {
           "name": "",
           "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "couponsRemoved",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -739,5 +809,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-06-27T11:04:02.343Z"
+  "updatedAt": "2018-06-27T14:41:03.530Z"
 }
