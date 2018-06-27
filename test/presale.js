@@ -4,7 +4,7 @@ const ROLE_ROLE_MANAGER = 0x10000000;
 const Token = artifacts.require("./GemERC721");
 const Sale = artifacts.require("./Presale");
 
-contract('GeodeSale', function(accounts) {
+contract('Presale', function(accounts) {
 	it("geode sale: it is possible to buy geode", async function() {
 		const tk = await Token.new();
 		const sale = await Sale.new(tk.address, accounts[9]);
