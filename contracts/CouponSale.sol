@@ -31,10 +31,10 @@ contract CouponSale is Presale, AccessControl {
   uint32 public nextFreeGem = 0x1001;
 
   // event to be fired once coupon successfully added
-  event CouponAdded(uint256 indexed key, uint32 expires, uint8 freeGems);
+  event CouponAdded(address indexed _by, uint256 indexed key, uint32 expires, uint8 freeGems);
 
   // event to be fired once coupon was removed
-  event CouponRemoved(uint256 indexed key);
+  event CouponRemoved(address indexed _by, uint256 indexed key);
 
   // event to be fired once coupon was consumed
   event CouponConsumed(address indexed _from, address indexed _to, uint256 indexed key,  uint8 gems);
@@ -110,7 +110,7 @@ contract CouponSale is Presale, AccessControl {
     coupons[key] = coupon;
 
     // emit an event
-    emit CouponAdded(key, expires, freeGems);
+    emit CouponAdded(msg.sender, key, expires, freeGems);
   }
 
   // removes a coupon
@@ -122,7 +122,7 @@ contract CouponSale is Presale, AccessControl {
     delete coupons[key];
 
     // emit an event
-    emit CouponRemoved(key);
+    emit CouponRemoved(msg.sender, key);
   }
 
   // private function to create geode and send all

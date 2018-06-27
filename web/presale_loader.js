@@ -88,7 +88,7 @@ document.write(`
 <div id="add_coupon_modal" class="overlay">
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
-		<h1>Adding a Coupon</h1>
+		<h3>Adding a Coupon</h3>
 		<div class="content">
 			<input id="coupon_code" type="text" value="" placeholder="Coupon Code" style="width: 100%; margin: 1em 0;"/><br/>
 			<input id="free_gems" type="number" min="1" max="50" placeholder="Free Gems it Contains" style="width: 100%; margin: 1em 0 2em 0;"/><br/>
@@ -99,7 +99,7 @@ document.write(`
 <div id="use_coupon_modal" class="overlay">
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
-		<h1>Using a Coupon</h1>
+		<h3>Using a Coupon</h3>
 		<div class="content">
 			<input id="use_coupon" type="text" value="" placeholder="Coupon Code" style="width: 100%; margin: 1em 0 2em 0;"/><br/>
 			<input type="button" value="Use this Coupon" onclick="useCoupon()" style="width: 100%;"/>
@@ -475,6 +475,14 @@ jQuery3(document).ready(function() {
 				}
 				update_counters(result);
 				reload_workshop();
+			});
+
+			// show success notification when coupon is created
+			presale.registerCouponAddedEventListener(function(err, result) {
+				if(err || err > 0) {
+					return;
+				}
+				logger.success("coupon added (expires ", result.expires, ")");
 			});
 
 			// show success notification when coupon is consumed

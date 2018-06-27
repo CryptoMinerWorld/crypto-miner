@@ -695,6 +695,43 @@ function PresaleApi(logger, jQuery_instance) {
 
 
 	// ---------- START SECTION 6: Public Event Listeners ----------
+	// register CouponAdded event listener
+	this.registerCouponAddedEventListener = function(callback) {
+		if(!callback || {}.toString.call(callback) !== '[object Function]') {
+			logError("callback is undefined or is not a function");
+			return ERR_NO_CALLBACK;
+		}
+		if(!(myWeb3 && myAccount && presaleInstance)) {
+			logError("Presale API is not properly initialized. Reload the page.");
+			return ERR_NOT_INITIALIZED;
+		}
+		const couponAddedEvent = presaleInstance.CouponAdded({_by: myAccount});
+		couponAddedEvent.watch(function(err, receipt) {
+			if(err) {
+				logError("Error receiving CouponAdded event: ", err);
+				return;
+			}
+			if(!(receipt && receipt.args && receipt.args._by && receipt.args.key && receipt.args.expires && receipt.args.freeGems)) {
+				logError("CouponAdded event received in wrong format: wrong arguments - ", receipt);
+				return;
+			}
+			const key = receipt.args.key.toString(16);
+			const expires = receipt.args.expires;
+			const gems = receipt.args.freeGems;
+			logInfo("CouponAdded(", key, ", ", expires, ", ", gems, ")");
+			tryCallbackIfProvided(callback, null, {
+				event: "coupon_added",
+				key: key,
+				expires: expires.toNumber(),
+				freeGems: gems.toNumber(),
+				txHash: receipt.transactionHash
+			});
+		});
+		logInfo("Successfully registered CouponAdded(uint256, uint32, uint8) event listener");
+		// no sync errors – return 0
+		return 0;
+	};
+
 	// register CouponConsumed event listener
 	this.registerCouponConsumedEventListener = function(callback) {
 		if(!callback || {}.toString.call(callback) !== '[object Function]') {
@@ -717,7 +754,7 @@ function PresaleApi(logger, jQuery_instance) {
 			}
 			const from = receipt.args._from;
 			const to = receipt.args._to;
-			const key = receipt.args.key;
+			const key = receipt.args.key.toString(16);
 			const gems = receipt.args.gems;
 			logInfo("CouponConsumed(", from, ", ", to, ", ", key, ", ", gems, ")");
 			tryCallbackIfProvided(callback, null, {
