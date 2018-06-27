@@ -501,7 +501,8 @@ function PresaleApi(logger, jQuery_instance) {
 			}
 			logInfo("coupon ", code, " is ", result? "": "in", "valid");
 			if(!result) {
-				tryCallback(callback, "invalid coupon", null);
+				logError("invalid coupon: ", code);
+				tryCallback(callback, "invalid coupon " + code, null);
 				return;
 			}
 			logInfo("using coupon ", code);
