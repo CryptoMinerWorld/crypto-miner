@@ -44,6 +44,7 @@ function PresaleApi(logger, jQuery_instance) {
 	const ERR_WEB3_ERROR = 0x40;
 	const ERR_NOT_INITIALIZED = 0x80;
 	const ERR_NO_CALLBACK = 0x100;
+	const ERR_WRONG_INPUT = 0x200;
 
 	// ---------- START SECTION 1: Constants and Variables ----------
 	// version constants define smart contracts compatible with this API
@@ -289,74 +290,74 @@ function PresaleApi(logger, jQuery_instance) {
 					const contract = myWeb3.eth.contract(abi);
 					const address = token.address || token;
 					const instance = contract.at(address);
-						try {
-							instance.TOKEN_VERSION(function(err, version) {
-								if(err) {
-									logError("Error accessing ERC721 instance: ", err, "\nCannot access TOKEN_VERSION.");
-									tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
-									return;
-								}
-								if(TOKEN_VERSION != version) {
-									const err = "Error accessing ERC721 instance: not a valid instance.\n" +
-										"Check if the address specified points to an ERC721 instance with a valid TOKEN_VERSION.\n" +
-										"Version required: " + TOKEN_VERSION + ". Version found: " + version;
-									logError(err);
-									tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
-									return;
-								}
-							logInfo("Successfully connected to ERC721 instance at ", address);
-								tokenInstance = instance;
-								instanceLoaded(callback);
-								tokenInstance.balanceOf(myAccount, function(err, result) {
-									if(err) {
-										logError("Unable to get ERC721 token balance for account ", myAccount, ": ", err);
-										return;
-									}
-									if(result > 0) {
-										logInfo("You own ", result, " ERC721 tokens");
-									}
-									else {
-										logInfo("You don't own any ERC721 tokens");
-									}
-								});
-							});
-						}
-						catch(err) {
-							logError("Wrong ERC721 ABI format: ", err);
-							tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
-						}
+					if(!instance.TOKEN_VERSION) {
+						const err = "Wrong ERC721 ABI format: TOKEN_VERSION is undefined";
+						logError(err);
+						tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
+						return;
 					}
+					instance.TOKEN_VERSION(function(err, version) {
+						if(err) {
+							logError("Error accessing ERC721 instance: ", err, "\nCannot access TOKEN_VERSION.");
+							tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
+							return;
+						}
+						if(TOKEN_VERSION != version) {
+							const err = "Error accessing ERC721 instance: not a valid instance.\n" +
+								"Check if the address specified points to an ERC721 instance with a valid TOKEN_VERSION.\n" +
+								"Version required: " + TOKEN_VERSION + ". Version found: " + version;
+							logError(err);
+							tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
+							return;
+						}
+					logInfo("Successfully connected to ERC721 instance at ", address);
+						tokenInstance = instance;
+						instanceLoaded(callback);
+						tokenInstance.balanceOf(myAccount, function(err, result) {
+							if(err) {
+								logError("Unable to get ERC721 token balance for account ", myAccount, ": ", err);
+								return;
+							}
+							if(result > 0) {
+								logInfo("You own ", result, " ERC721 tokens");
+							}
+							else {
+								logInfo("You don't own any ERC721 tokens");
+							}
+						});
+					});
+				}
 
 				// helper function to load presale contract by ABI
 				function loadPresaleContract(abi) {
 					const contract = myWeb3.eth.contract(abi);
 					const address = presale.address || presale;
 					const instance = contract.at(address);
-						try {
-							instance.PRESALE_VERSION(function(err, version) {
-								if(err) {
-									logError("Error accessing Presale instance: ", err, "\nCannot access PRESALE_VERSION.");
-									tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
-									return;
-								}
-								if(PRESALE_VERSION != version) {
-									const err = "Error accessing Presale instance: not a valid instance.\n" +
-										"Check if the address specified points to a Presale instance with a valid PRESALE_VERSION.\n" +
-										"Version required: " + PRESALE_VERSION + ". Version found: " + version;
-									logError(err);
-									tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
-									return;
-								}
-								logInfo("Successfully connected to Presale instance at ", address);
-								presaleInstance = instance;
-								instanceLoaded(callback);
-							});
-						}
-						catch(err) {
-							logError("Wrong Presale ABI format: ", err);
-							tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
-						}
+					if(!instance.PRESALE_VERSION) {
+						const err = "Wrong Presale ABI format: PRESALE_VERSION is undefined";
+						logError(err);
+						tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
+						return;
 					}
+					instance.PRESALE_VERSION(function(err, version) {
+						if(err) {
+							logError("Error accessing Presale instance: ", err, "\nCannot access PRESALE_VERSION.");
+							tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
+							return;
+						}
+						if(PRESALE_VERSION != version) {
+							const err = "Error accessing Presale instance: not a valid instance.\n" +
+								"Check if the address specified points to a Presale instance with a valid PRESALE_VERSION.\n" +
+								"Version required: " + PRESALE_VERSION + ". Version found: " + version;
+							logError(err);
+							tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
+							return;
+						}
+						logInfo("Successfully connected to Presale instance at ", address);
+						presaleInstance = instance;
+						instanceLoaded(callback);
+					});
+				}
 				// --- END: Internal Section to Load Contracts ---
 
 			});
@@ -402,7 +403,7 @@ function PresaleApi(logger, jQuery_instance) {
 	this.buyGeodes = function(n, callback) {
 		if(!(myWeb3 && myAccount && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
-			return 0x3;
+			return ERR_NOT_INITIALIZED;
 		}
 		presaleInstance.currentPrice(function(err, result) {
 			if(err) {
@@ -429,6 +430,81 @@ function PresaleApi(logger, jQuery_instance) {
 		});
 		// no sync errors – return 0
 		return 0;
+	};
+
+	/**
+	 * Adds a promotion coupon which allows to get free gems
+	 * @param code coupon code (string)
+	 * @param freeGems number of gems this coupon allows to get
+	 * @param callback a function to call on error / success
+	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
+	 * if error occurred asynchronously - error code will be passed to callback
+	 */
+	this.addCoupon = function(code, freeGems, callback) {
+		if(!(myWeb3 && myAccount && presaleInstance)) {
+			logError("Presale API is not properly initialized. Reload the page.");
+			return ERR_NOT_INITIALIZED;
+		}
+		if(!code || !code.trim || code.trim().length === 0) {
+			logError("coupon code is not set or empty");
+			return ERR_WRONG_INPUT;
+		}
+		if(!freeGems || isNaN(freeGems) || freeGems <= 0) {
+			logError("free gems value is not set, is empty, is zero, or negative");
+			return ERR_WRONG_INPUT;
+		}
+		const key = myWeb3.sha3(code);
+		if(!presaleInstance.addCoupon) {
+			logError("Wrong presale ABI: addCoupon is undefined");
+			return ERR_WRONG_ABI;
+		}
+		logInfo("adding coupon ", code, ", ", key, ", ", freeGems);
+		presaleInstance.addCoupon(key, freeGems, function(err, result) {
+			if(err) {
+				logError("addCoupon() transaction wasn't sent: ", err.toString().split("\n")[0]);
+				tryCallbackIfProvided(callback, err, null);
+				return;
+			}
+			logInfo("addCoupon() transaction sent: ", result);
+			tryCallbackIfProvided(callback, null, {
+				event: "transaction_sent",
+				name: "addCoupon",
+				txHash: result
+			});
+
+			// TODO: wait for this particular event to return and call callback
+		});
+	};
+
+	this.useCoupon = function(code, callback) {
+		if(!(myWeb3 && myAccount && presaleInstance)) {
+			logError("Presale API is not properly initialized. Reload the page.");
+			return ERR_NOT_INITIALIZED;
+		}
+		if(!code || !code.trim || code.trim().length === 0) {
+			logError("coupon code is not set or empty");
+			return ERR_WRONG_INPUT;
+		}
+		if(!presaleInstance.useCoupon) {
+			logError("Wrong presale ABI: useCoupon is undefined");
+			return ERR_WRONG_ABI;
+		}
+		logInfo("using coupon ", code);
+		presaleInstance.useCoupon(code, function(err, result) {
+			if(err) {
+				logError("useCoupon() transaction wasn't sent: ", err.toString().split("\n")[0]);
+				tryCallbackIfProvided(callback, err, null);
+				return;
+			}
+			logInfo("useCoupon() transaction sent: ", result);
+			tryCallbackIfProvided(callback, null, {
+				event: "transaction_sent",
+				name: "useCoupon",
+				txHash: result
+			});
+
+			// TODO: wait for this particular event to return and call callback
+		});
 	};
 	// ---------- END SECTION 4: Presale API Transactions ----------
 
@@ -476,6 +552,27 @@ function PresaleApi(logger, jQuery_instance) {
 				tryCallback(callback, e, null);
 			}
 		});
+		// no sync errors – return 0
+		return 0;
+	};
+
+	/**
+	 * Checks if coupon is valid – exists in the system and is not expired yet
+	 * @param code coupon code to check
+	 * @param callback a function to call on error / success
+	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
+	 * if error occurred asynchronously - error code will be passed to callback
+	 */
+	this.isCouponValid = function(code, callback) {
+		if(!callback || {}.toString.call(callback) !== '[object Function]') {
+			logError("callback is undefined or is not a function");
+			return ERR_NO_CALLBACK;
+		}
+		if(!(myWeb3 && myAccount && presaleInstance)) {
+			logError("Presale API is not properly initialized. Reload the page.");
+			tryCallback(callback, "Presale API is not properly initialized", null);
+			return ERR_NOT_INITIALIZED;
+		}
 		// no sync errors – return 0
 		return 0;
 	};
@@ -598,6 +695,42 @@ function PresaleApi(logger, jQuery_instance) {
 
 
 	// ---------- START SECTION 6: Public Event Listeners ----------
+	// register CouponConsumed event listener
+	this.registerCouponConsumedEventListener = function(callback) {
+		if(!callback || {}.toString.call(callback) !== '[object Function]') {
+			logError("callback is undefined or is not a function");
+			return ERR_NO_CALLBACK;
+		}
+		if(!(myWeb3 && myAccount && presaleInstance)) {
+			logError("Presale API is not properly initialized. Reload the page.");
+			return ERR_NOT_INITIALIZED;
+		}
+		const couponConsumedEvent = presaleInstance.CouponConsumed({_to: myAccount});
+		couponConsumedEvent.watch(function(err, receipt) {
+			if(err) {
+				logError("Error receiving CouponConsumed event: ", err);
+				return;
+			}
+			if(!(receipt && receipt.args && receipt.args._from && receipt.args._to && receipt.args.key && receipt.args.gems)) {
+				logError("CouponConsumed event received in wrong format: wrong arguments - ", receipt);
+				return;
+			}
+			const from = receipt.args._from;
+			const to = receipt.args._to;
+			const key = receipt.args.key;
+			const gems = receipt.args.gems;
+			logInfo("CouponConsumed(", from, ", ", to, ", ", key, ", ", gems, ")");
+			tryCallbackIfProvided(callback, null, {
+				event: "coupon_consumed",
+				gems: gems.toNumber(),
+				txHash: receipt.transactionHash
+			});
+		});
+		logInfo("Successfully registered CouponConsumed(address, address, uint256, uint8) event listener");
+		// no sync errors – return 0
+		return 0;
+	};
+
 	// register PurchaseComplete event listener
 	this.registerPurchaseCompleteEventListener = function(callback) {
 		if(!callback || {}.toString.call(callback) !== '[object Function]') {

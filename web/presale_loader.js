@@ -85,6 +85,28 @@ document.write(`
 		</div>
 	</div>
 </div>
+<div id="add_coupon_modal" class="overlay">
+	<a class="cancel" href="javascript:history.back()"></a>
+	<div class="modal">
+		<h1>Adding a Coupon</h1>
+		<div class="content">
+			<input id="coupon_code" type="text" value="" placeholder="Coupon Code" style="width: 100%; margin: 1em 0;"/><br/>
+			<input id="free_gems" type="number" min="1" max="50" placeholder="Free Gems it Contains" style="width: 100%; margin: 1em 0 2em 0;"/><br/>
+			<input type="button" value="Add a Coupon" onclick="addCoupon()" style="width: 100%;"/>
+		</div>
+	</div>
+</div>
+<div id="use_coupon_modal" class="overlay">
+	<a class="cancel" href="javascript:history.back()"></a>
+	<div class="modal">
+		<h1>Using a Coupon</h1>
+		<div class="content">
+			<input id="use_coupon" type="text" value="" placeholder="Coupon Code" style="width: 100%; margin: 1em 0 2em 0;"/><br/>
+			<input type="button" value="Use this Coupon" onclick="useCoupon()" style="width: 100%;"/>
+		</div>
+	</div>
+</div>
+
 `);
 
 const WEB_BASE = "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/";
@@ -140,6 +162,42 @@ const logger = {
 
 // create an API client
 const presale = new PresaleApi(logger, jQuery3);
+
+function addCoupon() {
+	const code = document.getElementById("coupon_code").value;
+	const freeGems = document.getElementById("free_gems").value;
+
+	const errCode = presale.addCoupon(code, freeGems, function(err, result) {
+		if(err || err > 0) {
+			return;
+		}
+		if(result.event === "transaction_sent") {
+			logger.success("Add Coupon transaction sent")
+		}
+	});
+	if(errCode > 0) {
+		alert("Error: " + errCode);
+	}
+}
+
+function useCoupon() {
+	const code = document.getElementById("use_coupon").value;
+
+	const errCode = presale.useCoupon(code, function(err, result) {
+		if(err || err > 0) {
+			return;
+		}
+		if(result.event === "transaction_sent") {
+			logger.success("Use Coupon transaction sent")
+		}
+	});
+	if(errCode > 0) {
+		alert("Error: " + errCode);
+	}
+
+	// hide the modal
+	location.href = "#";
+}
 
 function buyGeodes() {
 	const qty = jQuery3("#NumberOfGeodes").val();
@@ -351,12 +409,12 @@ jQuery3(document).ready(function() {
 	const errorCode = presale.init(
 		// token address
 		{
-			address: "0x7ed8f54badd5b3797acba340ac0910f701b31f03",
+			address: "0x781ab793204dbd066882715d8aa5126c1e67ad5c",
 			abi_url: WEB_BASE + "abi/ERC721.json"
 		},
 		// presale address
 		{
-			address: "0x9aa7638b867943432b2025485cfe09ba5f2984c5",
+			address: "0x40a39474edb0c1c13d993f3a0daf090119af0d54",
 			abi_url: WEB_BASE + "abi/Presale.json"
 		},
 		// callback handler
@@ -416,6 +474,14 @@ jQuery3(document).ready(function() {
 				}
 				update_counters(result);
 				reload_workshop();
+			});
+
+			// show success notification when coupon is consumed
+			presale.registerCouponConsumedEventListener(function(err, result) {
+				if(err || err > 0) {
+					return;
+				}
+				logger.success("received ", result.gems, " free gem(s)");
 			});
 
 			// show success notification when geode is bought

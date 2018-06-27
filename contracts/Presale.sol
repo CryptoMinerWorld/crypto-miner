@@ -45,7 +45,7 @@ contract Presale {
   uint16 public nextGeode = 1;
 
   /// @dev Pointer to a next gem do be minted
-  uint32 public nextGem = 0x401;
+  uint32 public nextGem = 0x10001;
 
   /// @dev A gem to sell, should be set in constructor
   GemERC721 public gemContract;
@@ -261,7 +261,7 @@ contract Presale {
   // the gems inside it to a player
   function __openGeode(uint16 geodeId, address player, uint8 n) private {
     // generate the gems (geode content)
-    Gem[] memory gems = __randomGeode(geodeId, n);
+    Gem[] memory gems = __randomGems(geodeId, n, true);
 
     // store geode owner
     geodeOwners[geodeId] = player;
@@ -282,8 +282,8 @@ contract Presale {
     }
   }
 
-  // generates 5 gems for a given geode ID randomly
-  function __randomGeode(uint16 geodeId, uint8 n) private constant returns (Gem[]) {
+  // generates `n` gems for a given geode ID randomly
+  function __randomGems(uint16 geodeId, uint8 n, bool enforceConstraints) internal constant returns (Gem[]) {
     // define an array of gems to return as a result of opening the geode specified
     Gem[] memory gems = new Gem[](n);
 
@@ -296,26 +296,36 @@ contract Presale {
       // and.. yeah! – this is heavily influenceable by miners!
       randomness = uint256(keccak256(block.number, gasleft(), msg.sender, tx.origin, geodeId, i));
 
-      // use lower 16 bits to determine gem color
-      uint8 colorId = __colorId(uint16(randomness));
-
-      // use next 16 bits to determine grade value
-      uint8 gradeValue = __gradeValue(uint16(randomness >> 32));
-
-      // use next 32 bits to determine grade type
-      uint8 gradeType = __gradeType(uint32(randomness >> 64));
-
-      // add into array (plotId, depth, gemNum, color, level, grade)
-      gems[i - 1] = Gem(geodeId, 0, i, colorId, 1, gradeType, gradeValue);
+      // add random gem into array (plotId, depth, gemNum, color, level, grade)
+      gems[i - 1] = __randomGem(geodeId, 0, i, uint64(randomness));
     }
 
-    // enforce 1 level 2 gem
-    __enforceLevelConstraint(gems, 2, uint16(randomness >> 96));
-    // enforce 1 gem of the grade A
-    __enforceGradeConstraint(gems, 4, uint16(randomness >> 128));
+    // if geode presale mode - we need to enforce constraints for color and grade
+    if(enforceConstraints) {
+      // enforce 1 level 2 gem
+      __enforceLevelConstraint(gems, 2, uint16(randomness >> 96));
+      // enforce 1 gem of the grade A
+      __enforceGradeConstraint(gems, 4, uint16(randomness >> 128));
+    }
 
     // return created gems array back
     return gems;
+  }
+
+  // create a gem with defined plot ID, depth, number and random color and grade
+  // level is set to one
+  function __randomGem(uint16 plotId, uint8 depth, uint8 gemNum, uint64 randomness) private constant returns(Gem) {
+    // use lower 16 bits to determine gem color
+    uint8 colorId = __colorId(uint16(randomness));
+
+    // use next 16 bits to determine grade value
+    uint8 gradeValue = __gradeValue(uint16(randomness >> 16));
+
+    // use next 32 bits to determine grade type
+    uint8 gradeType = __gradeType(uint32(randomness >> 32));
+
+    // create a gem and return
+    return Gem(plotId, depth, gemNum, colorId, 1, gradeType, gradeValue);
   }
 
   // determines color ID randomly

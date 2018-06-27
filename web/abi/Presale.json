@@ -1,6 +1,116 @@
 {
-  "contractName": "Presale",
+  "contractName": "CouponSale",
   "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "creator",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_COUPON_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "role",
+          "type": "uint256"
+        }
+      ],
+      "name": "addOperator",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "COUPON_SALE_VERSION",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "coupons",
+      "outputs": [
+        {
+          "name": "created",
+          "type": "uint32"
+        },
+        {
+          "name": "expires",
+          "type": "uint32"
+        },
+        {
+          "name": "freeGems",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "incrementColors",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
     {
       "constant": true,
       "inputs": [],
@@ -37,20 +147,6 @@
         {
           "name": "",
           "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "COLORS",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint8"
         }
       ],
       "payable": false,
@@ -123,6 +219,25 @@
       "inputs": [
         {
           "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
           "type": "uint16"
         }
       ],
@@ -138,6 +253,42 @@
       "type": "function"
     },
     {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "role",
+          "type": "uint256"
+        }
+      ],
+      "name": "removeRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "role",
+          "type": "uint256"
+        }
+      ],
+      "name": "addRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "constant": true,
       "inputs": [],
       "name": "GEMS_IN_GEODE",
@@ -145,6 +296,20 @@
         {
           "name": "",
           "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "currentPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64"
         }
       ],
       "payable": false,
@@ -166,6 +331,20 @@
       "type": "function"
     },
     {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "removeOperator",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "constant": true,
       "inputs": [],
       "name": "PRESALE_VERSION",
@@ -182,11 +361,90 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "geodesLeft",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "getGeodes",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "nextGeode",
       "outputs": [
         {
           "name": "",
           "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "nextFreeGem",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "colors",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getPacked",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint96"
         }
       ],
       "payable": false,
@@ -207,6 +465,111 @@
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "key",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "expires",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "freeGems",
+          "type": "uint8"
+        }
+      ],
+      "name": "CouponAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "key",
+          "type": "uint256"
+        }
+      ],
+      "name": "CouponRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "key",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "gems",
+          "type": "uint8"
+        }
+      ],
+      "name": "CouponConsumed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "FeaturesUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_role",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -279,12 +642,17 @@
     },
     {
       "constant": true,
-      "inputs": [],
-      "name": "getPacked",
+      "inputs": [
+        {
+          "name": "code",
+          "type": "string"
+        }
+      ],
+      "name": "isCouponValid",
       "outputs": [
         {
           "name": "",
-          "type": "uint96"
+          "type": "bool"
         }
       ],
       "payable": false,
@@ -293,42 +661,73 @@
     },
     {
       "constant": false,
-      "inputs": [],
-      "name": "getGeodes",
+      "inputs": [
+        {
+          "name": "code",
+          "type": "string"
+        }
+      ],
+      "name": "useCoupon",
       "outputs": [],
-      "payable": true,
-      "stateMutability": "payable",
+      "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
-      "constant": true,
-      "inputs": [],
-      "name": "currentPrice",
-      "outputs": [
+      "constant": false,
+      "inputs": [
         {
-          "name": "",
-          "type": "uint64"
+          "name": "key",
+          "type": "uint256"
+        },
+        {
+          "name": "freeGems",
+          "type": "uint8"
         }
       ],
+      "name": "addCoupon",
+      "outputs": [],
       "payable": false,
-      "stateMutability": "view",
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
-      "constant": true,
-      "inputs": [],
-      "name": "geodesLeft",
-      "outputs": [
+      "constant": false,
+      "inputs": [
         {
-          "name": "",
-          "type": "uint16"
+          "name": "key",
+          "type": "uint256"
+        },
+        {
+          "name": "expires",
+          "type": "uint32"
+        },
+        {
+          "name": "freeGems",
+          "type": "uint8"
         }
       ],
+      "name": "addCouponWithExpiration",
+      "outputs": [],
       "payable": false,
-      "stateMutability": "view",
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "key",
+          "type": "uint256"
+        }
+      ],
+      "name": "removeCoupon",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-06-24T17:40:16.846Z"
+  "updatedAt": "2018-06-27T10:10:01.836Z"
 }
