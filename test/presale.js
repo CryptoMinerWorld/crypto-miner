@@ -121,9 +121,11 @@ contract('Presale', function(accounts) {
 			const plotId = gemCoordinates.dividedToIntegerBy(4294967296);
 			const depth = gemCoordinates.dividedToIntegerBy(65536).modulo(65536);
 			const gemNum = gemCoordinates.modulo(65536);
+			const color = await tk.getColor(gemId);
 			assert.equal(1 + i % GEMS_IN_GEODE, gemNum, "gemNum coordinate is wrong");
 			assert.equal(0, depth, "depth coordinate is wrong");
 			assert.equal(1 + Math.floor(i / GEMS_IN_GEODE), plotId, "plotId coordinate is wrong");
+			assert(color >= 9 && color <= 10 || color >= 1 && color <= 2, "wrong color ID " + color);
 		}
 	});
 	it("geode sale: gems created from the geode contain 1 gem of the level 2", async function() {
@@ -168,20 +170,31 @@ contract('Presale', function(accounts) {
 
 		assert(gradeAFound, "there is no grade A gem in the collection");
 	});
-	it("geode sale: incrementing the color", async function() {
+	it("geode sale: adding a color", async function() {
 		const tk = await Token.new();
 		const sale = await Sale.new(tk.address, accounts[9]);
 
-		assert.equal(4, await sale.colors(), "wrong initial value for colors");
+		assert.equal(9, await sale.colors(0), "wrong initial color at index 0");
+		assert.equal(10, await sale.colors(1), "wrong initial color at index 0");
+		assert.equal(1, await sale.colors(2), "wrong initial color at index 0");
+		assert.equal(2, await sale.colors(3), "wrong initial color at index 0");
+		await assertThrowsAsync(async function() {await sale.colors(4);});
+		await assertThrowsAsync(async function() {await sale.colors(5);});
 
-		const fn1 = async () => await sale.incrementColors();
-		const fn2 = async () => await sale.incrementColors({from: accounts[1]});
+		const fn1 = async () => await sale.addColor(11);
+		const fn1a = async () => await sale.addColor(12);
+		const fn2 = async () => await sale.addColor(11, {from: accounts[1]});
+		const fn2a = async () => await sale.addColor(12, {from: accounts[1]});
 		await assertThrowsAsync(fn2);
-		await fn1();
+		await assertThrowsAsync(fn2a);
 		await fn1();
 		await assertThrowsAsync(fn1);
+		await fn1a();
+		await assertThrowsAsync(fn1a);
 
-		assert.equal(6, await sale.colors(), "wrong final value for colors");
+		assert.equal(11, await sale.colors(4), "wrong color at index 4");
+		assert.equal(12, await sale.colors(5), "wrong color at index 4");
+		await assertThrowsAsync(async function() {await sale.colors(6);});
 	});
 });
 

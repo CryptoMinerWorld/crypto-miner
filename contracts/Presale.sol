@@ -35,8 +35,8 @@ contract Presale {
   /// @notice Number of different grade values defined for a gem
   uint8 public constant GRADE_VALUES = 100;
 
-  /// @notice Number of different colors currently available in presale, can be increased
-  uint8 public colors = 4;
+  /// @notice colors available for sale, colors can be added
+  uint8[] public colors = [9, 10, 1, 2];
 
   /// @notice Current value of geodes sold, initially zero
   uint16 public geodesSold = 0;
@@ -203,16 +203,25 @@ contract Presale {
     return GEODES_TO_SELL - geodesSold;
   }
 
-  /// @dev internal use, allows to increase colors available in presale
-  function incrementColors() public {
+  /// @dev internal use, allows to add colors available in presale
+  function addColor(uint8 color) public {
     // check if caller is contract creator
     require(msg.sender == creator);
 
-    // check colors bounds
-    require(colors < 6);
+    // maximum 6 colors are available in presale
+    require(colors.length <= 6);
 
-    // increment
-    colors++;
+    // a color to ad is either 11 or 12
+    require(color == 11 || color == 12);
+
+    // check if the color doesn't exist in the array yet
+    for(uint8 i = 0; i < colors.length; i++) {
+      // if color already added - throw
+      require(colors[i] != color);
+    }
+
+    // add the color required
+    colors.push(color);
   }
 
 /*
@@ -330,9 +339,8 @@ contract Presale {
 
   // determines color ID randomly
   function __colorId(uint16 randomness) private constant returns (uint8) {
-    // normalize 0x10000 random range into 12, starting from 1
-    // we need to ensure only colors 9, 10, 11, 12, 1, 2 are allowed
-    return (uint8(__randomValue(randomness, 8, colors, 0x10000)) % 12) + 1;
+    // pick random color from array of available colors
+    return colors[__randomValue(randomness, 0, colors.length, 0x10000)];
   }
 
   // determines grade value randomly

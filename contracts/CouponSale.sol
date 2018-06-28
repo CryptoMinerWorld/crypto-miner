@@ -119,8 +119,8 @@ contract CouponSale is Presale, AccessControl {
     // validate inputs:
     // expiration date
     require(expires > block.number);
-    // number of free gems in coupon
-    require(freeGems > 0);
+    // number of free gems in coupon: 1 or 4
+    require(freeGems == 1 || freeGems == 4);
 
     // update counters
     couponsCreated++;
@@ -158,7 +158,7 @@ contract CouponSale is Presale, AccessControl {
   // the gems inside it to a player
   function __createGems(address player, uint8 n) private {
     // generate the gems (geode content)
-    Gem[] memory gems = __randomGems(0, n, false);
+    Gem[] memory gems = __randomGems(0, n, n == 4);
 
     // iterate and mint gems required
     for(uint32 i = 0; i < gems.length; i++) {
