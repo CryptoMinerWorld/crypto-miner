@@ -42,6 +42,11 @@ contract('CouponSale', function(accounts) {
 		await sale.addCoupon(couponKey, 4);
 		await fn();
 		assert.equal(4, await tk.balanceOf(accounts[1]), "wrong token balance after using a coupon");
+		await sale.addCoupon(couponKey, 1);
+		await fn();
+		assert.equal(5, await tk.balanceOf(accounts[1]), "wrong token balance after using a coupon");
+
+		await assertThrowsAsync(async function() {await sale.addCoupon(couponKey, 3);});
 	});
 });
 
