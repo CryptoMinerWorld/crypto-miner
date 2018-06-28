@@ -90,8 +90,13 @@ document.write(`
 	<div class="modal">
 		<h3>Adding a Coupon</h3>
 		<div class="content">
-			<input id="coupon_code" type="text" value="" placeholder="Coupon Code" style="width: 100%; margin: 1em 0;"/><br/>
-			<input id="free_gems" type="number" min="1" max="50" placeholder="Free Gems it Contains" style="width: 100%; margin: 1em 0 2em 0;"/><br/>
+			<input id="coupon_code" type="text" value="" placeholder="Coupon Code" style="margin: 1em 0;"/>
+			<input type="button" value="Generate" onclick="document.getElementById('coupon_code').value = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);"/><br/>
+			<select id="free_gems" style="width: 100%; margin: 1em 0 2em 0;">
+				<option value="">Free Gems it Contains</option>
+				<option value="1">One (1)</option>
+				<option value="4">Four (4)</option>
+			</select><br/>
 			<input type="button" value="Add a Coupon" onclick="addCoupon()" style="width: 100%;"/>
 		</div>
 	</div>
