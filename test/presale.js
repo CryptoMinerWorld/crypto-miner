@@ -181,10 +181,10 @@ contract('Presale', function(accounts) {
 		await assertThrowsAsync(async function() {await sale.colors(4);});
 		await assertThrowsAsync(async function() {await sale.colors(5);});
 
-		const fn1 = async () => await sale.addColor(11);
-		const fn1a = async () => await sale.addColor(12);
-		const fn2 = async () => await sale.addColor(11, {from: accounts[1]});
-		const fn2a = async () => await sale.addColor(12, {from: accounts[1]});
+		const fn1 = async () => await sale.addColor(5);
+		const fn1a = async () => await sale.addColor(6);
+		const fn2 = async () => await sale.addColor(5, {from: accounts[1]});
+		const fn2a = async () => await sale.addColor(6, {from: accounts[1]});
 		await assertThrowsAsync(fn2);
 		await assertThrowsAsync(fn2a);
 		await fn1();
@@ -192,8 +192,8 @@ contract('Presale', function(accounts) {
 		await fn1a();
 		await assertThrowsAsync(fn1a);
 
-		assert.equal(11, await sale.colors(4), "wrong color at index 4");
-		assert.equal(12, await sale.colors(5), "wrong color at index 4");
+		assert.equal(5, await sale.colors(4), "wrong color at index 4");
+		assert.equal(6, await sale.colors(5), "wrong color at index 4");
 		await assertThrowsAsync(async function() {await sale.colors(6);});
 	});
 });

@@ -211,8 +211,8 @@ contract Presale {
     // maximum 6 colors are available in presale
     require(colors.length <= 6);
 
-    // a color to ad is either 11 or 12
-    require(color == 11 || color == 12);
+    // a color to ad is either 5 or 6
+    require(color == 5 || color == 6);
 
     // check if the color doesn't exist in the array yet
     for(uint8 i = 0; i < colors.length; i++) {
