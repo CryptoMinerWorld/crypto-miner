@@ -25,7 +25,14 @@ document.write(`
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
 		<div class="content">
-			<img id="picture" class="centerImg" src= IMAGE_BASE + "Ame-1-D.png"/>
+			<img id="picture" class="centerImg" src="https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/Top-1-C.png"/>
+			<video id="video"
+				autoplay loop muted preload="auto"
+				style="display: none;"
+				src=""
+				poster="https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/Top-1-C.png">
+				<source src="" type="video/mp4"/>
+			</video>
 			<table class=gemModalFooterTable>
 				<tr >
 				<td class="gemInfoModalWorkshop">
@@ -117,6 +124,7 @@ document.write(`
 const WEB_BASE = "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/";
 const IMAGE_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/";
 const THUMB_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/Temp_Gems-Thumbnails/";
+const VIDEO_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Gems_Video/";
 const MIS_IMG_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Imgs_for_presale_code_import/";
 
 const REQUIRED_NETWORK_ID = 4;
