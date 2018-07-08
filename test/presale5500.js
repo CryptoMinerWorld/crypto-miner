@@ -7,7 +7,7 @@ const Sale = artifacts.require("./Presale");
 contract('Presale 5500', function(accounts) {
 	it("presale: buying all 5500 geodes", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 		await tk.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 

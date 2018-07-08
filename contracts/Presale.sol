@@ -30,7 +30,7 @@ contract Presale {
   uint16 public constant GEODES_TO_SELL = 5500;
 
   /// @notice Amount of gems in a geode
-  uint8 public constant GEMS_IN_GEODE = 4;
+  uint8 public constant GEMS_IN_GEODE = 3;
 
   /// @notice Number of different grade values defined for a gem
   uint8 public constant GRADE_VALUES = 100;
@@ -50,7 +50,10 @@ contract Presale {
   /// @dev A gem to sell, should be set in constructor
   GemERC721 public gemContract;
 
-  /// @dev Address to send all the incoming funds
+  /// @dev Address to send 19.05% of the incoming funds
+  address public chestVault;
+
+  /// @dev Address to send 80.95% of the incoming funds
   address public beneficiary;
 
   /// @dev Presale creator
@@ -80,11 +83,13 @@ contract Presale {
   event PresaleStateChanged(uint16 sold, uint16 left, uint64 lastPrice, uint64 currentPrice);
 
   /// @dev Creates a GeodeSale attached to an already deployed Gem smart contract
-  constructor(address gemAddress, address _beneficiary) public {
+  constructor(address gemAddress, address _chestVault, address _beneficiary) public {
     // validate inputs
     require(gemAddress != address(0));
     require(_beneficiary != address(0));
+    require(_chestVault != address(0));
     require(gemAddress != _beneficiary);
+    require(gemAddress != _chestVault);
 
     // bind the Gem smart contract
     gemContract = GemERC721(gemAddress);
@@ -164,8 +169,14 @@ contract Presale {
     // update next geode to sell pointer
     nextGeode += uint16(geodesToSell);
 
-    // send the value to the beneficiary
-    beneficiary.transfer(value);
+    // 19.05% of the value
+    uint256 value1905 = 381 * value / 2000;
+
+    // send 19.05% of the value to the chest vault
+    chestVault.transfer(value1905);
+
+    // send the rest of the value to the beneficiary
+    beneficiary.transfer(value - value1905);
 
     // send change back to player
     if(change > 0) {
