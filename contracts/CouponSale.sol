@@ -55,7 +55,7 @@ contract CouponSale is Presale, AccessControl {
   event CouponConsumed(address indexed _from, address indexed _to, uint256 indexed key,  uint8 gems);
 
   // creates a coupon sale, arguments are the same as in presale
-  constructor(address gemAddress, address _beneficiary) Presale(gemAddress, _beneficiary) public {
+  constructor(address gemAddress, address _chestVault, address _beneficiary) Presale(gemAddress, _chestVault, _beneficiary) public {
     
   }
 

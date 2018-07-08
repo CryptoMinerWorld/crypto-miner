@@ -14,9 +14,9 @@ contract('GeodeSale: Gas Usage', function(accounts) {
 		assertEqual(5926324, gasUsed, "deploying a GemERC721 gas usage mismatch: " + gasUsed);
 	});
 
-	it("geode sale: buying a geode requires 693705 gas", async function() {
+	it("geode sale: buying a geode requires 572310 gas", async function() {
 		const token = await Token.new();
-		const sale = await Sale.new(token.address, accounts[9]);
+		const sale = await Sale.new(token.address, accounts[9], accounts[9]);
 
 		await token.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await token.addOperator(sale.address, ROLE_TOKEN_CREATOR);
@@ -24,12 +24,12 @@ contract('GeodeSale: Gas Usage', function(accounts) {
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(693705, gasUsed, "buying a geode gas usage mismatch: " + gasUsed);
+		assertEqual(572310, gasUsed, "buying a geode gas usage mismatch: " + gasUsed);
 	});
 
-	it("geode sale: buying 10 geodes requires 6597255 gas", async function() {
+	it("geode sale: buying 10 geodes requires 5155634 gas", async function() {
 		const token = await Token.new();
-		const sale = await Sale.new(token.address, accounts[9]);
+		const sale = await Sale.new(token.address, accounts[9], accounts[9]);
 
 		await token.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await token.addOperator(sale.address, ROLE_TOKEN_CREATOR);
@@ -37,7 +37,7 @@ contract('GeodeSale: Gas Usage', function(accounts) {
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(6597255, gasUsed, "buying a geode gas usage mismatch: " + gasUsed);
+		assertEqual(5155634, gasUsed, "buying a geode gas usage mismatch: " + gasUsed);
 	});
 });
 

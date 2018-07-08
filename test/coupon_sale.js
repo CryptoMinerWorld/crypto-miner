@@ -8,7 +8,7 @@ const Sale = artifacts.require("./CouponSale");
 contract('CouponSale', function(accounts) {
 	it("coupon sale: adding a coupon, removing coupon", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 		await tk.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 
@@ -31,7 +31,7 @@ contract('CouponSale', function(accounts) {
 	});
 	it("coupon sale: using coupon", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 		await tk.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 		const couponCode = "SALE-900";

@@ -7,7 +7,7 @@ const Sale = artifacts.require("./Presale");
 contract('Presale', function(accounts) {
 	it("geode sale: it is possible to buy geode", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 
 		assert.equal(0, await tk.balanceOf(accounts[0]), "initial token balance is not zero");
 		assert.equal(0, await tk.totalSupply(), "initial token total supply is not zero");
@@ -23,7 +23,7 @@ contract('Presale', function(accounts) {
 	});
 	it("geode sale: it is possible to buy 5 geodes and get 1 free gem", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 
 		assert.equal(0, await tk.balanceOf(accounts[0]), "initial token balance is not zero");
 		assert.equal(0, await tk.totalSupply(), "initial token total supply is not zero");
@@ -38,7 +38,7 @@ contract('Presale', function(accounts) {
 	});
 	it("geode sale: it is possible to buy 10 geodes and get 1 free geode", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 
 		assert.equal(0, await tk.balanceOf(accounts[0]), "initial token balance is not zero");
 		assert.equal(0, await tk.totalSupply(), "initial token total supply is not zero");
@@ -54,7 +54,7 @@ contract('Presale', function(accounts) {
 	});
 	it("geode sale: it is possible to buy few geodes and get a change", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 
 		assert.equal(0, await tk.balanceOf(accounts[0]), "initial token balance is not zero");
 		assert.equal(0, await tk.totalSupply(), "initial token total supply is not zero");
@@ -71,7 +71,7 @@ contract('Presale', function(accounts) {
 	});
 	it("geode sale: gems created from the geode have correct amount and owner", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 
 		await tk.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
@@ -82,30 +82,32 @@ contract('Presale', function(accounts) {
 		assert.equal(gemsInGeode, await tk.totalSupply(), "wrong number of gems in geode");
 		assert.equal(gemsInGeode, await tk.balanceOf(accounts[1]), "wrong number of gems on account");
 
-		const gemNumber4 = await tk.collections(accounts[1], 3);
+		const lastGem = await tk.collections(accounts[1], gemsInGeode - 1);
 
-		assert.equal(accounts[1], await tk.ownerOf(gemNumber4), "gem #4 has wrong owner");
+		assert.equal(accounts[1], await tk.ownerOf(lastGem), "gem #" + gemsInGeode + " has wrong owner");
 	});
 	it("geode sale: gems created from the geode have correct coordinates", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 
 		await tk.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 		await sale.getGeodes.sendTransaction({from: accounts[1], value: await sale.currentPrice()});
 
-		const gem4Id = await tk.collections(accounts[1], 3);
+		const gemsInGeode = (await sale.GEMS_IN_GEODE()).toNumber();
+
+		const gem4Id = await tk.collections(accounts[1], gemsInGeode - 1);
 		const gem4Coordinates = await tk.getCoordinates(gem4Id);
 		const plotId = gem4Coordinates.dividedToIntegerBy(4294967296);
 		const depth = gem4Coordinates.dividedToIntegerBy(65536).modulo(65536);
 		const gemNum = gem4Coordinates.modulo(65536);
 		assert.equal(1, plotId, "plotId coordinate is wrong");
 		assert.equal(0, depth, "depth coordinate is wrong");
-		assert.equal(0x4, gemNum, "gemNum coordinate is wrong");
+		assert.equal(gemsInGeode, gemNum, "gemNum coordinate is wrong");
 	});
 	it("geode sale: iterate over the gems bought from few geodes", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 
 		await tk.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
@@ -130,7 +132,7 @@ contract('Presale', function(accounts) {
 	});
 	it("geode sale: gems created from the geode contain 1 gem of the level 2", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 
 		await tk.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
@@ -151,7 +153,7 @@ contract('Presale', function(accounts) {
 	});
 	it("geode sale: gems created from the geode contain 1 gem of the grade A", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 
 		await tk.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
@@ -172,7 +174,7 @@ contract('Presale', function(accounts) {
 	});
 	it("geode sale: adding a color", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
 
 		assert.equal(9, await sale.colors(0), "wrong initial color at index 0");
 		assert.equal(10, await sale.colors(1), "wrong initial color at index 0");
