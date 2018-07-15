@@ -17,7 +17,7 @@ contract GemERC721 is AccessControl, ERC165 {
   /// @dev Smart contract version
   /// @dev Should be incremented manually in this source code
   ///      each time smart contact source code is changed
-  uint32 public constant TOKEN_VERSION = 0x2;
+  uint32 public constant TOKEN_VERSION = 0x3;
 
   /// @dev ERC20 compliant token symbol
   string public constant symbol = "GEM";
@@ -52,9 +52,9 @@ contract GemERC721 is AccessControl, ERC165 {
     ///      when the gem was created
     uint32 gradeModified;
 
-    /// @dev High 8 bits store grade type and low 8 bits grade value
+    /// @dev High 8 bits store grade type and low 24 bits grade value
     /// @dev Grade type is one of D (1), C (2), B (3), A (4), AA (5) and AAA (6)
-    uint16 grade;
+    uint32 grade;
 
     /// @dev Store state modified time
     /// @dev Stored as Ethereum Block Number of the transaction
@@ -62,7 +62,7 @@ contract GemERC721 is AccessControl, ERC165 {
     uint32 stateModified;
 
     /// @dev State value, mutable
-    uint64 state;
+    uint48 state;
 
 
     /// Low 256 bits
@@ -251,10 +251,10 @@ contract GemERC721 is AccessControl, ERC165 {
   event LevelUp(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint8 _levelReached);
 
   /// @dev Fired in upgradeGrade()
-  event UpgradeComplete(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint16 _gradeReached);
+  event UpgradeComplete(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint32 _gradeFrom, uint32 _gradeTo);
 
   /// @dev Fired in setState()
-  event StateModified(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint64 _newState);
+  event StateModified(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint48 _stateFrom, uint48 _stateTo);
 
   /// @dev Creates a Gem ERC721 instance,
   /// @dev Registers a ERC721 interface using ERC165
@@ -302,9 +302,9 @@ contract GemERC721 is AccessControl, ERC165 {
                  | uint184(gem.levelModified) << 152
                  | uint152(gem.level) << 144
                  | uint144(gem.gradeModified) << 112
-                 | uint112(gem.grade) << 96
-                 | uint96(gem.stateModified) << 64
-                 | uint64(gem.state);
+                 | uint112(gem.grade) << 80
+                 | uint80(gem.stateModified) << 48
+                 | uint48(gem.state);
 
     // pack low 256 bits of the result
     uint256 low  = uint256(gem.creationTime) << 224
@@ -321,7 +321,7 @@ contract GemERC721 is AccessControl, ERC165 {
    *       in a single function, useful when connecting to external node like INFURA
    * @param owner an address to query a collection for
    */
-  function getPackedCollection(address owner) public constant returns (uint64[]) {
+  function getPackedCollection(address owner) public constant returns (uint80[]) {
     // get an array of Gem IDs owned by an `owner` address
     uint32[] memory tokenIds = getCollection(owner);
 
@@ -329,17 +329,17 @@ contract GemERC721 is AccessControl, ERC165 {
     uint32 balance = uint32(tokenIds.length);
 
     // data container to store the result
-    uint64[] memory result = new uint64[](balance);
+    uint80[] memory result = new uint80[](balance);
 
     // fetch token info one by one and pack into structure
     for(uint32 i = 0; i < balance; i++) {
       // token ID to work with
       uint32 tokenId = tokenIds[i];
       // get the token properties and pack them together with tokenId
-      uint32 properties = getProperties(tokenId);
+      uint48 properties = getProperties(tokenId);
 
       // pack the data
-      result[i] = uint64(tokenId) << 32 | properties;
+      result[i] = uint80(tokenId) << 48 | properties;
     }
 
     // return the packed data structure
@@ -424,7 +424,7 @@ contract GemERC721 is AccessControl, ERC165 {
    * @param _tokenId ID of the gem to get properties for
    * @return gem's properties - color, level, grade as packed uint32
    */
-  function getProperties(uint256 _tokenId) public constant returns(uint32) {
+  function getProperties(uint256 _tokenId) public constant returns(uint48) {
     // validate token existence
     require(exists(_tokenId));
 
@@ -432,7 +432,7 @@ contract GemERC721 is AccessControl, ERC165 {
     Gem memory gem = gems[_tokenId];
 
     // pack data structure and return
-    return uint32(gem.color) << 24 | uint24(gem.level) << 16 | gem.grade;
+    return uint48(gem.color) << 40 | uint40(gem.level) << 32 | gem.grade;
   }
 
   /**
@@ -514,7 +514,7 @@ contract GemERC721 is AccessControl, ERC165 {
    * @param _tokenId ID of the gem to get grade for
    * @return a token grade
    */
-  function getGrade(uint256 _tokenId) public constant returns(uint16) {
+  function getGrade(uint256 _tokenId) public constant returns(uint32) {
     // validate token existence
     require(exists(_tokenId));
 
@@ -529,7 +529,7 @@ contract GemERC721 is AccessControl, ERC165 {
    */
   function getGradeType(uint256 _tokenId) public constant returns(uint8) {
     // extract high 8 bits of the grade and return
-    return uint8(getGrade(_tokenId) >> 8);
+    return uint8(getGrade(_tokenId) >> 24);
   }
 
   /**
@@ -537,9 +537,9 @@ contract GemERC721 is AccessControl, ERC165 {
    * @param _tokenId ID of the gem to get grade value for
    * @return a token grade value
    */
-  function getGradeValue(uint256 _tokenId) public constant returns(uint8) {
-    // extract low 8 bits of the grade and return
-    return uint8(getGrade(_tokenId));
+  function getGradeValue(uint256 _tokenId) public constant returns(uint24) {
+    // extract low 24 bits of the grade and return
+    return uint24(getGrade(_tokenId));
   }
 
   /**
@@ -549,24 +549,24 @@ contract GemERC721 is AccessControl, ERC165 {
    * @param _tokenId ID of the gem to modify the grade for
    * @param grade new grade to set for the token, should be higher then current state
    */
-  function upgradeGrade(uint256 _tokenId, uint16 grade) public {
+  function upgradeGrade(uint256 _tokenId, uint32 grade) public {
     // check that the call is made by a grade provider
     require(__isSenderInRole(ROLE_GRADE_PROVIDER));
 
     // check that token to set grade for exists
     require(exists(_tokenId));
 
-    // update the grade modified date
-    gems[_tokenId].gradeModified = uint32(block.number);
-
     // check if we're not downgrading the gem
     require(gems[_tokenId].grade < grade);
+
+    // emit an event
+    emit UpgradeComplete(msg.sender, ownerOf(_tokenId), _tokenId, gems[_tokenId].grade, grade);
 
     // set the grade required
     gems[_tokenId].grade = grade;
 
-    // emit an event
-    emit UpgradeComplete(msg.sender, ownerOf(_tokenId), _tokenId, grade);
+    // update the grade modified date
+    gems[_tokenId].gradeModified = uint32(block.number);
   }
 
   /**
@@ -587,7 +587,7 @@ contract GemERC721 is AccessControl, ERC165 {
    * @param _tokenId ID of the token to get state for
    * @return a token state
    */
-  function getState(uint256 _tokenId) public constant returns(uint64) {
+  function getState(uint256 _tokenId) public constant returns(uint48) {
     // validate token existence
     require(exists(_tokenId));
 
@@ -601,21 +601,21 @@ contract GemERC721 is AccessControl, ERC165 {
    * @param _tokenId ID of the token to set state for
    * @param state new state to set for the token
    */
-  function setState(uint256 _tokenId, uint64 state) public {
+  function setState(uint256 _tokenId, uint48 state) public {
     // check that the call is made by a state provider
     require(__isSenderInRole(ROLE_STATE_PROVIDER));
 
     // check that token to set state for exists
     require(exists(_tokenId));
 
-    // update the state modified date
-    gems[_tokenId].stateModified = uint32(block.number);
+    // emit an event
+    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, gems[_tokenId].state, state);
 
     // set the state required
     gems[_tokenId].state = state;
 
-    // emit an event
-    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state);
+    // update the state modified date
+    gems[_tokenId].stateModified = uint32(block.number);
   }
 
   /**
@@ -737,7 +737,7 @@ contract GemERC721 is AccessControl, ERC165 {
     uint8 color,
     uint8 level,
     uint8 gradeType,
-    uint8 gradeValue
+    uint24 gradeValue
   ) public {
     // validate destination address
     require(to != address(0));
@@ -998,7 +998,7 @@ contract GemERC721 is AccessControl, ERC165 {
     uint8 color,
     uint8 level,
     uint8 gradeType,
-    uint8 gradeValue
+    uint24 gradeValue
   ) private {
     // check that `tokenId` is inside valid bounds
     require(tokenId > 0);
@@ -1013,7 +1013,7 @@ contract GemERC721 is AccessControl, ERC165 {
       levelModified: 0,
       level: level,
       gradeModified: 0,
-      grade: uint16(gradeType) << 8 | gradeValue,
+      grade: uint32(gradeType) << 24 | gradeValue,
       stateModified: 0,
       state: 0,
 

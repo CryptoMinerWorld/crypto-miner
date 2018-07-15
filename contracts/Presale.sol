@@ -9,11 +9,11 @@ contract Presale {
   /// @dev Smart contract version
   /// @dev Should be incremented manually in this source code
   ///      each time smart contact source code is changed
-  uint32 public constant PRESALE_VERSION = 0x3;
+  uint32 public constant PRESALE_VERSION = 0x4;
 
   /// @dev Version of the Gem smart contract to work with
   /// @dev See `GemERC721.TOKEN_VERSION`
-  uint32 public constant TOKEN_VERSION_REQUIRED = 0x2;
+  uint32 public constant TOKEN_VERSION_REQUIRED = 0x3;
 
   /// @dev Structure used as temporary storage for gem data
   struct Gem {
@@ -23,7 +23,7 @@ contract Presale {
     uint8 color;
     uint8 level;
     uint8 gradeType;
-    uint8 gradeValue;
+    uint24 gradeValue;
   }
 
   /// @notice Number of geodes to sell
@@ -33,7 +33,7 @@ contract Presale {
   uint8 public constant GEMS_IN_GEODE = 3;
 
   /// @notice Number of different grade values defined for a gem
-  uint8 public constant GRADE_VALUES = 100;
+  uint24 public constant GRADE_VALUES = 1000000;
 
   /// @notice colors available for sale, colors can be added
   uint8[] public colors = [9, 10, 1, 2];
@@ -317,15 +317,15 @@ contract Presale {
       randomness = uint256(keccak256(block.number, gasleft(), msg.sender, tx.origin, geodeId, i));
 
       // add random gem into array (plotId, depth, gemNum, color, level, grade)
-      gems[i - 1] = __randomGem(geodeId, 0, i, uint64(randomness));
+      gems[i - 1] = __randomGem(geodeId, 0, i, uint128(randomness));
     }
 
     // if geode presale mode - we need to enforce constraints for color and grade
     if(enforceConstraints) {
       // enforce 1 level 2 gem
-      __enforceLevelConstraint(gems, 2, uint16(randomness >> 96));
+      __enforceLevelConstraint(gems, 2, uint16(randomness >> 144));
       // enforce 1 gem of the grade A
-      __enforceGradeConstraint(gems, 4, uint16(randomness >> 128));
+      __enforceGradeConstraint(gems, 4, uint16(randomness >> 160));
     }
 
     // return created gems array back
@@ -334,15 +334,15 @@ contract Presale {
 
   // create a gem with defined plot ID, depth, number and random color and grade
   // level is set to one
-  function __randomGem(uint16 plotId, uint8 depth, uint8 gemNum, uint64 randomness) private constant returns(Gem) {
+  function __randomGem(uint16 plotId, uint8 depth, uint8 gemNum, uint128 randomness) private constant returns(Gem) {
     // use lower 16 bits to determine gem color
     uint8 colorId = __colorId(uint16(randomness));
 
     // use next 16 bits to determine grade value
-    uint8 gradeValue = __gradeValue(uint16(randomness >> 16));
+    uint24 gradeValue = __gradeValue(uint48(randomness >> 16));
 
     // use next 32 bits to determine grade type
-    uint8 gradeType = __gradeType(uint32(randomness >> 32));
+    uint8 gradeType = __gradeType(uint32(randomness >> 64));
 
     // create a gem and return
     return Gem(plotId, depth, gemNum, colorId, 1, gradeType, gradeValue);
@@ -355,9 +355,9 @@ contract Presale {
   }
 
   // determines grade value randomly
-  function __gradeValue(uint16 randomness) private pure returns (uint8) {
-    // normalize 0x10000 random range into 100
-    return uint8(__randomValue(randomness, 0, GRADE_VALUES, 0x10000));
+  function __gradeValue(uint48 randomness) private pure returns (uint24) {
+    // normalize 0x1000000000000 random range into 1000000
+    return uint24(__randomValue(randomness, 0, GRADE_VALUES, 0x1000000000000));
   }
 
   // determines grade type randomly

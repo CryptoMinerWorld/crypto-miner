@@ -39,8 +39,8 @@ contract('GemERC721', function(accounts) {
 		assert.equal(5, await tk.getLevel(0x401), "gem 0x401 wrong level");
 		assert.equal(3, await tk.getGradeType(0x401), "gem 0x401 wrong gradeType");
 		assert.equal(10, await tk.getGradeValue(0x401), "gem 0x401 wrong gradeValue");
-		assert.equal(0x030A, await tk.getGrade(0x401), "gem 0x401 wrong grade");
-		assert.equal(0x0405030A, await tk.getProperties(0x401), "gem 0x401 has wrong properties");
+		assert.equal(0x0300000A, await tk.getGrade(0x401), "gem 0x401 wrong grade");
+		assert.equal(0x04050300000A, await tk.getProperties(0x401), "gem 0x401 has wrong properties");
 
 		const creationTime = await tk.getCreationTime(0x401);
 		assert(creationTime.gt(0), "gem 0x401 wrong creation time");
@@ -57,7 +57,7 @@ contract('GemERC721', function(accounts) {
 		assert.equal("http://cryptominerworld.com/gem/401", tokenURI, "wrong 0x401 tokenURI");
 
 		const packed = await tk.getPacked(0x401);
-		assert(packed[0].eq("0x00000011000D000B04000000000500000000030A000000000000000000000000"), "gem 0x401 wrong high");
+		assert(packed[0].eq("0x00000011000D000B040000000005000000000300000A00000000000000000000"), "gem 0x401 wrong high");
 		assert(packed[1].eq("0x" + creationTime.toString(16) + "0000000000000000" + accounts[0].substr(2, 40)), "gem 0x401 wrong high");
 
 		const collection = await tk.getCollection(accounts[0]);
@@ -68,7 +68,7 @@ contract('GemERC721', function(accounts) {
 
 		const packedCollection = await tk.getPackedCollection(accounts[0]);
 		assert.equal(1, packedCollection.length, "wrong packed collection length for " + accounts[0]);
-		assert.equal(0x000004010405030A, packedCollection[0], "wrong token packed data at index 0");
+		assert.equal(0x0000040104050300000A, packedCollection[0], "wrong token packed data at index 0");
 	});
 
 	it("transfer: transferring a token", async function() {
@@ -203,12 +203,14 @@ contract('GemERC721', function(accounts) {
 	it("update grade: full cycle", async function() {
 		const tk = await Token.new();
 		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
-		await tk.upgradeGrade(0x401, 0x0102);
-		assert.equal(0x0102, await tk.getGrade(0x401), "wrong gem 0x401 grade after modifying a grade");
-		await assertThrowsAsync(async function() {await tk.upgradeGrade(0x401, 0x0102);});
-		await assertThrowsAsync(async function() {await tk.upgradeGrade(0x402, 0x0103);});
-		await assertThrowsAsync(async function() {await tk.upgradeGrade(0x401, 0x0103, {from: accounts[1]});});
-		await tk.upgradeGrade(0x401, 0x0103);
+		await tk.upgradeGrade(0x401, 0x01000002);
+		assert.equal(0x01000002, await tk.getGrade(0x401), "wrong gem 0x401 grade after modifying a grade");
+		assert.equal(0x01, await tk.getGradeType(0x401), "wrong gem 0x401 grade level after modifying a grade");
+		assert.equal(0x02, await tk.getGradeValue(0x401), "wrong gem 0x401 grade value after modifying a grade");
+		await assertThrowsAsync(async function() {await tk.upgradeGrade(0x401, 0x01000002);});
+		await assertThrowsAsync(async function() {await tk.upgradeGrade(0x402, 0x01000003);});
+		await assertThrowsAsync(async function() {await tk.upgradeGrade(0x401, 0x01000003, {from: accounts[1]});});
+		await tk.upgradeGrade(0x401, 0x01000003);
 	});
 
 	it("set state: full cycle", async function() {
