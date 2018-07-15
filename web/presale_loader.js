@@ -332,7 +332,8 @@ jQuery3(document).ready(function() {
 			const levelId = gem.levelId;
 			const gradeType = gem.gradeType;
 			const gradeValue = gem.gradeValue;
-			const miningRate = baseRate(gradeType) + gradeValue / 20;
+			const miningRate = calcMiningRate(gradeType, gradeValue);
+			const miningRateDisplay = miningRate.toString(2);
 
 			const color = colorName(colorId);
 			const level = levelName(levelId);
@@ -340,9 +341,9 @@ jQuery3(document).ready(function() {
 			const thumbnail = gemThumbnailURL(color, level, grade);
 
 			return `
-				<a href="javascript:display_gem(\'` + gem.id + `\', \'` + color + `\', \'` + level + `\', \'` + grade + `\', \'` + miningRate + `\')">
+				<a href="javascript:display_gem(\'` + gem.id + `\', \'` + color + `\', \'` + level + `\', \'` + grade + `\', \'` + miningRateDisplay + `\')">
 					<img style="padding: 0;" width="250" height="250" src="` + thumbnail + `"/>
-				</a><br/>Lvl ` + levelId + ` ` + color.substr(0, color.indexOf(" ")) + `<br/>Grade ` + grade + ` - ` + miningRate + `%
+				</a><br/>Lvl ` + levelId + ` ` + color.substr(0, color.indexOf(" ")) + `<br/>Grade ` + grade + ` - ` + miningRateDisplay + `%
 			`;
 		}
 
@@ -650,14 +651,14 @@ function gradeName(gradeType) {
 	return grade;
 }
 
-function baseRate(gradeType, gradeValue) {
+function calcMiningRate(gradeType, gradeValue) {
 	switch(gradeType) {
-		case 1: return 0;
-		case 2: return 5;
-		case 3: return 15;
-		case 4: return 30;
-		case 5: return 50;
-		case 6: return 75;
+		case 1: return gradeValue / 200000;
+		case 2: return 10 + gradeValue / 200000;
+		case 3: return 20 + gradeValue / 200000;
+		case 4: return 40 + 3 * gradeValue / 200000;
+		case 5: return 100 + gradeValue / 40000;
+		case 6: return 300 + gradeValue / 10000;
 	}
 }
 

@@ -48,8 +48,8 @@ function PresaleApi(logger, jQuery_instance) {
 
 	// ---------- START SECTION 1: Constants and Variables ----------
 	// version constants define smart contracts compatible with this API
-	const TOKEN_VERSION = 0x2;
-	const PRESALE_VERSION = 0x3;
+	const TOKEN_VERSION = 0x3;
+	const PRESALE_VERSION = 0x4;
 
 	// jQuery instance to use
 	const jQuery3 = jQuery_instance || jQuery || $;
@@ -665,11 +665,11 @@ function PresaleApi(logger, jQuery_instance) {
 				logInfo("Address ", owner, " doesn't own any tokens");
 			}
 			for(let i = 0; i < collection.length; i++) {
-				const id = collection[i].dividedToIntegerBy(0x100000000);
-				const colorId = collection[i].dividedToIntegerBy(0x1000000).modulo(0x100);
-				const levelId = collection[i].dividedToIntegerBy(0x10000).modulo(0x100);
-				const gradeType = collection[i].dividedToIntegerBy(0x100).modulo(0x100);
-				const gradeValue = collection[i].modulo(0x100);
+				const id = collection[i].dividedToIntegerBy(0x1000000000000);
+				const colorId = collection[i].dividedToIntegerBy(0x10000000000).modulo(0x100);
+				const levelId = collection[i].dividedToIntegerBy(0x100000000).modulo(0x100);
+				const gradeType = collection[i].dividedToIntegerBy(0x1000000).modulo(0x100);
+				const gradeValue = collection[i].modulo(0x1000000);
 				collection[i] = {
 					id: id.toNumber(),
 					colorId: colorId.toNumber(),
