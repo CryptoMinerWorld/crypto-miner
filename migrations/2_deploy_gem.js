@@ -16,8 +16,8 @@ module.exports = async function(deployer, network, accounts) {
 		return;
 	}
 
-	let beneficiary = "0x92589b179c2e902770140011367b286c1741dd63"; // MainNet MultiSig
-	let chest = "0xaF8413e5785d63694cF562Cf2dDA9B59Ff00E0FD"; // TODO: fix that its rinkeby!
+	let beneficiary = "0xe0123204873fd29a29aef3f99faf1b1c45fe3b1e"; // MainNet MultiSig
+	let chest = "0xc352f692f55def49f0b736ec1f7ca0f862eabd23"; // MainNet Chest Wallet
 	if(network === "development") {
 		beneficiary = "0xb4e8e4f7e6024b37ed2584e8c86b2917dae9a2da"; // Rinkeby MultiSig
 		chest = "0xaF8413e5785d63694cF562Cf2dDA9B59Ff00E0FD"; // Rinkeby Chest Wallet
