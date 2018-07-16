@@ -333,7 +333,7 @@ jQuery3(document).ready(function() {
 			const gradeType = gem.gradeType;
 			const gradeValue = gem.gradeValue;
 			const miningRate = calcMiningRate(gradeType, gradeValue);
-			const miningRateDisplay = miningRate.toString(2);
+			const miningRateDisplay = miningRate.toFixed(2);
 
 			const color = colorName(colorId);
 			const level = levelName(levelId);
