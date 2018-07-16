@@ -385,13 +385,13 @@ jQuery3(document).ready(function() {
 			switch(by) {
 				case "id": fn = byId; break;
 				case "color": fn = (x, y) => {
-					return byColor(x, y) * 0x100000 + byLevel(x, y) * 0x10000 + byGradeType(x, y) * 0x100 + byGradeValue(x, y);
+					return byColor(x, y) * 0x100000000 + byLevel(x, y) * 0x10000000 + byGradeType(x, y) * 0x100000 + byGradeValue(x, y);
 				}; break;
 				case "level": fn = (x, y) => {
-					return byLevel(x, y) * 0x100000 + byGradeType(x, y) * 0x1000 + byGradeValue(x, y) * 0x10 + byColor(x, y);
+					return byLevel(x, y) * 0x100000000 + byGradeType(x, y) * 0x1000000 + byGradeValue(x, y) * 0x10 + byColor(x, y);
 				}; break;
 				case "grade": fn = (x, y) => {
-					return byGradeType(x, y) * 0x10000 + byGradeValue(x, y) * 0x100 + byLevel(x, y) * 0x10 + byColor(x, y);
+					return byGradeType(x, y) * 0x10000000 + byGradeValue(x, y) * 0x100 + byLevel(x, y) * 0x10 + byColor(x, y);
 				}; break;
 			}
 			if(fn) {
