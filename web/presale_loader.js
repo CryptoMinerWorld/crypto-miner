@@ -127,8 +127,8 @@ const THUMB_BASE = "https://cryptominerworld.com/wp-content/uploads/Gem_Images/G
 const VIDEO_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Gems_Video/";
 const MIS_IMG_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Imgs_for_presale_code_import/";
 
-const REQUIRED_NETWORK_ID = 4;
-const REQUIRED_NETWORK_NAME = "4: Rinkeby";
+const REQUIRED_NETWORK_ID = 1;
+const REQUIRED_NETWORK_NAME = "1: Mainnet";
 
 const jQuery3 = jQuery.noConflict();
 
