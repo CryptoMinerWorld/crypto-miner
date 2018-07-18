@@ -122,8 +122,8 @@ document.write(`
 `);
 
 const WEB_BASE = "https://rawgit.com/CryptoMinerWorld/crypto-miner/master/web/";
-const IMAGE_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/";
-const THUMB_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/Temp_Gems-Thumbnails/";
+const IMAGE_BASE = "https://cryptominerworld.com/wp-content/uploads/Gem_Images/";
+const THUMB_BASE = "https://cryptominerworld.com/wp-content/uploads/Gem_Images/Gem_Images_Thumbnails/";
 const VIDEO_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Gems_Video/";
 const MIS_IMG_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Imgs_for_presale_code_import/";
 
