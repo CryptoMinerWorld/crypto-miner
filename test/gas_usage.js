@@ -2,7 +2,7 @@ const ROLE_TOKEN_CREATOR = 0x00040000;
 const ROLE_ROLE_MANAGER = 0x10000000;
 
 const Token = artifacts.require("./GemERC721");
-const Sale = artifacts.require("./Presale");
+const Sale = artifacts.require("./CouponSale");
 
 contract('GeodeSale: Gas Usage', function(accounts) {
 	it("Gem ERC721: deploying a GemERC721 requires 5926324 gas", async function() {
@@ -12,6 +12,16 @@ contract('GeodeSale: Gas Usage', function(accounts) {
 		const gasUsed = txReceipt.gasUsed;
 
 		assertEqual(5926324, gasUsed, "deploying a GemERC721 gas usage mismatch: " + gasUsed);
+	});
+
+	it("geode sale: deploying a geode sale requires 3896364 gas", async function() {
+		const token = await Token.new();
+		const sale = await Sale.new(token.address, accounts[9], accounts[9]);
+		const txHash = sale.transactionHash;
+		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
+		const gasUsed = txReceipt.gasUsed;
+
+		assertEqual(3896364, gasUsed, "deploying a geode sale gas usage mismatch: " + gasUsed);
 	});
 
 	it("geode sale: buying a geode requires 572310 gas", async function() {
