@@ -16,8 +16,8 @@ module.exports = async function(deployer, network, accounts) {
 		return;
 	}
 
-	let beneficiary = "0xe0123204873fd29a29aef3f99faf1b1c45fe3b1e"; // MainNet MultiSig
 	let chest = "0xc352f692f55def49f0b736ec1f7ca0f862eabd23"; // MainNet Chest Wallet
+	let beneficiary = "0xe0123204873fd29a29aef3f99faf1b1c45fe3b1e"; // MainNet MultiSig
 /*
 	if(network === "development") {
 		beneficiary = "0xb4e8e4f7e6024b37ed2584e8c86b2917dae9a2da"; // Rinkeby MultiSig
@@ -36,7 +36,7 @@ module.exports = async function(deployer, network, accounts) {
 	const gem = await Gem.deployed();
 //	await gem.updateFeatures(0xFFFFFFFF);
 
-	await deployer.deploy(Sale, gem.address, beneficiary, chest);
+	await deployer.deploy(Sale, gem.address, chest, beneficiary);
 
 	const sale = await Sale.deployed();
 	await gem.addOperator(sale.address, ROLE_TOKEN_CREATOR);
