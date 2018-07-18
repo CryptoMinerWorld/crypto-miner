@@ -28,7 +28,7 @@ contract CouponSale is Presale, AccessControl {
   mapping(uint256 => Coupon) public coupons;
 
   // pointer to a next gem do be minted
-  uint32 public nextFreeGem = 0x1001;
+  uint32 public nextFreeGem = 0x1101;
 
   // how many free gems allocated by means of coupons
   uint32 public freeGemsAllocated;

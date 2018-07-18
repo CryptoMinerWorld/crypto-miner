@@ -45,7 +45,7 @@ contract Presale {
   uint16 public nextGeode = 1;
 
   /// @dev Pointer to a next gem do be minted
-  uint32 public nextGem = 0x10001;
+  uint32 public nextGem = 0x11001;
 
   /// @dev A gem to sell, should be set in constructor
   GemERC721 public gemContract;
@@ -100,6 +100,9 @@ contract Presale {
 
     // set the beneficiary
     beneficiary = _beneficiary;
+
+    // set the chestVault
+    chestVault = _chestVault;
 
     // set the creator
     creator = msg.sender;
