@@ -20,7 +20,7 @@ String.prototype.pad = function(size) {
 Array.prototype.pack = function(size) {
 	let copy = new Array(this.length);
 	for(let i = 0; i < this.length; i++) {
-		copy[i] = ("" +  this[i]).pad(size);
+		copy[i] = this[i].toString(16).pad(size);
 	}
 	return copy.join("");
 };
@@ -749,7 +749,7 @@ function PresaleApi(logger, jQuery_instance) {
 			const expires = receipt.args.expires;
 			const gems = receipt.args.freeGems;
 			logInfo("CouponAdded(", key, ", ", expires, ", ", gems, ")");
-			tryCallbackIfProvided(callback, null, {
+			tryCallback(callback, null, {
 				event: "coupon_added",
 				key: key,
 				expires: expires.toNumber(),
@@ -787,7 +787,7 @@ function PresaleApi(logger, jQuery_instance) {
 			const key = receipt.args.key.toString(16);
 			const gems = receipt.args.gems;
 			logInfo("CouponConsumed(", from, ", ", to, ", ", key, ", ", gems, ")");
-			tryCallbackIfProvided(callback, null, {
+			tryCallback(callback, null, {
 				event: "coupon_consumed",
 				gems: gems.toNumber(),
 				txHash: receipt.transactionHash
@@ -833,7 +833,7 @@ function PresaleApi(logger, jQuery_instance) {
 			const geodesTotal = receipt.args.geodesTotal;
 			const gemsTotal = receipt.args.gemsTotal;
 			logInfo("PurchaseComplete(", from, ", ", to, ", ", geodes, ", ", gems, ", ", price, ", ", geodesTotal, ", ", gemsTotal, ")");
-			tryCallbackIfProvided(callback, null, {
+			tryCallback(callback, null, {
 				event: "purchase_complete",
 				geodes: geodes.toNumber(),
 				gems: gems.toNumber(),
@@ -877,7 +877,7 @@ function PresaleApi(logger, jQuery_instance) {
 			const lastPrice = receipt.args.lastPrice;
 			const currentPrice = receipt.args.currentPrice;
 			logInfo("PresaleStateChanged(", sold, ", ", left, ", ", lastPrice, ", ", currentPrice, ")");
-			tryCallbackIfProvided(callback, null, {
+			tryCallback(callback, null, {
 				event: "presale_state_changed",
 				sold: sold.toNumber(),
 				left: left.toNumber(),
