@@ -405,7 +405,7 @@
         },
         {
           "name": "grade",
-          "type": "uint16"
+          "type": "uint32"
         },
         {
           "name": "stateModified",
@@ -413,7 +413,7 @@
         },
         {
           "name": "state",
-          "type": "uint64"
+          "type": "uint48"
         },
         {
           "name": "creationTime",
@@ -624,8 +624,13 @@
         },
         {
           "indexed": false,
-          "name": "_gradeReached",
-          "type": "uint16"
+          "name": "_gradeFrom",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "_gradeTo",
+          "type": "uint32"
         }
       ],
       "name": "UpgradeComplete",
@@ -651,8 +656,13 @@
         },
         {
           "indexed": false,
-          "name": "_newState",
-          "type": "uint64"
+          "name": "_stateFrom",
+          "type": "uint48"
+        },
+        {
+          "indexed": false,
+          "name": "_stateTo",
+          "type": "uint48"
         }
       ],
       "name": "StateModified",
@@ -737,7 +747,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint64[]"
+          "type": "uint80[]"
         }
       ],
       "payable": false,
@@ -865,7 +875,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint32"
+          "type": "uint48"
         }
       ],
       "payable": false,
@@ -974,7 +984,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint16"
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -1012,7 +1022,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint8"
+          "type": "uint24"
         }
       ],
       "payable": false,
@@ -1028,7 +1038,7 @@
         },
         {
           "name": "grade",
-          "type": "uint16"
+          "type": "uint32"
         }
       ],
       "name": "upgradeGrade",
@@ -1068,7 +1078,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint64"
+          "type": "uint48"
         }
       ],
       "payable": false,
@@ -1084,7 +1094,7 @@
         },
         {
           "name": "state",
-          "type": "uint64"
+          "type": "uint48"
         }
       ],
       "name": "setState",
@@ -1281,7 +1291,7 @@
         },
         {
           "name": "gradeValue",
-          "type": "uint8"
+          "type": "uint24"
         }
       ],
       "name": "mint",
@@ -1491,5 +1501,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-06-27T14:41:03.564Z"
+  "updatedAt": "2018-07-18T17:26:09.658Z"
 }
