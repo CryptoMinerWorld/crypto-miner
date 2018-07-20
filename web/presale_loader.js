@@ -549,7 +549,7 @@ function display_geode_bought_modal(geodes, gems) {
 	jQuery3(".geodes_bought").html(geodes);
 	jQuery3(".geodes_bought_plural").html(geodes > 1? "": "s");
 	jQuery3(".gems_received").html(gems);
-	if(location.pathname.indexOf("geode_sale") >= 0) {
+	if(location.pathname.indexOf("geode_pre-sale") >= 0) {
 		location.href = "#geode_bought_modal";
 	}
 }
