@@ -117,15 +117,6 @@
       "type": "function"
     },
     {
-      "constant": false,
-      "inputs": [],
-      "name": "incrementColors",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "constant": true,
       "inputs": [],
       "name": "beneficiary",
@@ -156,6 +147,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "chestVault",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "TOKEN_VERSION_REQUIRED",
       "outputs": [
         {
@@ -174,7 +179,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint8"
+          "type": "uint24"
         }
       ],
       "payable": false,
@@ -416,6 +421,25 @@
     },
     {
       "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "colors",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [],
       "name": "geodesLeft",
       "outputs": [
@@ -494,17 +518,17 @@
       "type": "function"
     },
     {
-      "constant": true,
-      "inputs": [],
-      "name": "colors",
-      "outputs": [
+      "constant": false,
+      "inputs": [
         {
-          "name": "",
+          "name": "color",
           "type": "uint8"
         }
       ],
+      "name": "addColor",
+      "outputs": [],
       "payable": false,
-      "stateMutability": "view",
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -525,6 +549,10 @@
       "inputs": [
         {
           "name": "gemAddress",
+          "type": "address"
+        },
+        {
+          "name": "_chestVault",
           "type": "address"
         },
         {
@@ -809,5 +837,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-06-27T14:41:03.530Z"
+  "updatedAt": "2018-07-18T17:26:09.599Z"
 }
