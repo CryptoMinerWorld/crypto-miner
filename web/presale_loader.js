@@ -234,6 +234,7 @@ jQuery3(document).ready(function() {
 	function load_and_reload_default_counters() {
 		load_default_counters();
 		setTimeout(load_default_counters, 1023);
+		setTimeout(load_default_counters, 2048);
 	}
 
 	function load_default_counters() {
