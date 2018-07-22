@@ -36,10 +36,10 @@ document.write(`
 			<table class=gemModalFooterTable>
 				<tr >
 				<td class="gemInfoModalWorkshop">
-					Mining rate – <span id="mining_rate">25%</span>
+					Mining rate &nbsp;+<span id="mining_rate">25%</span>
 				</td>
 				<td class="energyGemInfoModalWorkshop" id="energy_level">
-					Energy level – 0%
+					Energy level &nbsp;+0%
 				</td>
 				<td class="gemInfoModalWorkshop">
 					Grade <span id="grade_type">B</span>
@@ -580,7 +580,7 @@ function display_gem(gemId, color, level, grade, miningRate) {
 			if(energyLevel > 100) {
 				energyLevel = 100;
 			}
-			jQuery3("#gem_modal #energy_level").html("Energy level – " + energyLevel + "%");
+			jQuery3("#gem_modal #energy_level").html("Energy level &nbsp;+" + energyLevel + "%");
 		});
 	}
 }
