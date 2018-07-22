@@ -22,7 +22,7 @@ document.write(`
 	</div>
 </div>
 <div id="gem_modal" class="overlayGemModalWorkshop">
-	<a class="cancel" href="javascript:history.back()"></a>
+	<a class="cancel" href="#"></a>
 	<div class="modal">
 		<div class="content">
 			<img id="picture" class="centerImg" src="https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/Top-1-C.png"/>
