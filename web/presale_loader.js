@@ -253,7 +253,7 @@ jQuery3(document).ready(function() {
 	}
 
 	function update_counters(data) {
-		jQuery3(".counter").html(data.left);
+		jQuery3(".counter").html(data.sold);
 		jQuery3("#geodePriceETH").html(data.currentPrice);
 	}
 
