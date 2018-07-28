@@ -33,21 +33,29 @@ document.write(`
 				poster="https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/Top-1-C.png">
 				<source src="" type="video/mp4"/>
 			</video>
-			<table class=gemModalFooterTable>
-				<tr >
-				<td class="gemInfoModalWorkshop">
-					Mining rate &nbsp;+<span id="mining_rate">25%</span>
-				</td>
-				<td class="energyGemInfoModalWorkshop" id="energy_level">
+			<table id="gemModalFooterTable">
+				<tr><td class="gemInfoModalWorkshop">
+					Mining rate &nbsp;+<span class="mining_rate">25%</span>
+				</td><td class="energyGemInfoModalWorkshop energy_level">
 					Energy level &nbsp;0%
-				</td>
-				<td class="gemInfoModalWorkshop">
-					Grade <span id="grade_type">B</span>
-				</td>
-				<td class="gemInfoModalWorkshop" id="level">
+				</td><td class="gemInfoModalWorkshop">
+					Grade <span class="grade_type">B</span>
+				</td><td class="gemInfoModalWorkshop level">
 					Baby, Level 1
-				</td>
-				<td class="gemInfoModalWorkshop" id="color">
+				</td><td class="gemInfoModalWorkshop color">
+					Amethyst (Febuary)
+				</td></tr>
+			</table>
+			<table id="gemModalFooterTableMobile">
+				<tr><td class="gemInfoModalWorkshop">
+					Mining rate &nbsp;+<span class="mining_rate">25%</span>
+				</td></tr><tr><td class="energyGemInfoModalWorkshop energy_level">
+					Energy level &nbsp;0%
+				</td></tr><tr><td class="gemInfoModalWorkshop">
+					Grade <span class="grade_type">B</span>
+				</td></tr><tr><td class="gemInfoModalWorkshop level">
+					Baby, Level 1
+				</td></tr><tr><td class="gemInfoModalWorkshop color">
 					Amethyst (Febuary)
 				</td></tr>
 			</table>
@@ -304,7 +312,7 @@ jQuery3(document).ready(function() {
 		collection.sort((x, y) => {
 			return y.id - x.id;
 		});
-		const columns = 4;
+		const columns = jQuery3(window).width() > 640? 4: 2;
 		const rows = Math.ceil(collection.length / columns);
 		let html = "";
 		html += '<h1 id="my_geodes_header">'+ collection.length + ' - Gemstone Worker Buddies</h1>';
@@ -361,6 +369,7 @@ jQuery3(document).ready(function() {
 				else {
 					html += "\t<td>\n";
 				}
+				html += "\t</td>";
 			}
 			html += "</tr>\n";
 		}
@@ -558,11 +567,12 @@ function display_geode_bought_modal(geodes, gems) {
 // Auxiliary functions to draw gems list in a workshop
 function display_gem(gemId, color, level, grade, miningRate) {
 	console.log("display_gem(%s, %s, %s, %s, %s)", gemId, color, level, grade, miningRate);
-	jQuery3("#gem_modal #level").html(level);
-	jQuery3("#gem_modal #color").html(color);
-	jQuery3("#gem_modal #grade_type").html(grade);
-	jQuery3("#gem_modal #mining_rate").html(miningRate + "%");
-	jQuery3("#gem_modal #energy_level").html(grade.startsWith("A")? "Energy level – calculating...": "");
+	const energyLevelContainer = jQuery3("#gem_modal .energy_level");
+	jQuery3("#gem_modal .level").html(level);
+	jQuery3("#gem_modal .color").html(color);
+	jQuery3("#gem_modal .grade_type").html(grade);
+	jQuery3("#gem_modal .mining_rate").html(miningRate + "%");
+	energyLevelContainer.html(grade.startsWith("A")? "Energy level – calculating...": "");
 	jQuery3("#gem_modal #picture").each(function(i, e) {
 		e.src = gemURL(color, level, grade);
 		e.onload = function() {
@@ -580,7 +590,7 @@ function display_gem(gemId, color, level, grade, miningRate) {
 			if(energyLevel > 100) {
 				energyLevel = 100;
 			}
-			jQuery3("#gem_modal #energy_level").html("Energy level &nbsp;" + energyLevel + "%");
+			energyLevelContainer.html("Energy level &nbsp;" + energyLevel + "%");
 		});
 	}
 }

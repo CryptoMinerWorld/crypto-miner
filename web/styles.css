@@ -66,12 +66,12 @@
 	width: 700px;
 }
 
-#gem_modal .gemModalFooterTable {
-	margin: 0px;
+#gem_modal #gemModalFooterTable {
+	margin: 0;
 	background-color: #14141B;    
 	border-collapse: unset;
-    padding-bottom: 20px;
-    padding-top: 20px;
+	padding-bottom: 20px;
+	padding-top: 20px;
 }
 
 #gem_modal .gemInfoModalWorkshop{
@@ -114,4 +114,77 @@
 /* initial workshop state: loading */
 #WorkshopNoGems, #WorkshopNoMetamask, #WorkshopMetamaskLocked, #WorkshopWrongNetwork {
 	display: none;
+}
+
+#sale_header {
+	text-align: center;
+	color: #ff00ce;
+}
+
+#what_header {
+	color: #ffffff;
+	text-align: left;
+	font-size: 2.8em;
+}
+
+#what_list li {
+	color: #ffffff;
+	text-align: left;
+	font-size: 1.8em;
+}
+
+#what_list li:first-letter, #what_list .pink {
+	color: #ff00ce;
+}
+
+.workshop_title, .workshop_subtitle {
+	text-align: center;
+	color: #fff5f0;
+}
+
+#sale_header, .workshop_title {
+	font-size: 5.8em;
+}
+
+#gem_modal #gemModalFooterTableMobile {
+	display: none;
+}
+
+@media only screen and (max-width: 640px) {
+	#my_geodes_header {
+		padding-top: 125px;
+	}
+
+	#my_geodes_header, #my_geodes_subheader {
+		font-size: 1.5em;
+	}
+
+	#my_geodes td {
+		font-size: 1em;
+	}
+
+	#sale_header, .workshop_title {
+		font-size: 2.8em;
+	}
+
+	div.a {
+		font-size: 1.75em;
+	}
+
+	#what_header {
+		font-size: 2em;
+	}
+
+	#what_list li {
+		font-size: 1em;
+	}
+
+	#gem_modal #gemModalFooterTable {
+		display: none;
+	}
+
+	#gem_modal #gemModalFooterTableMobile {
+		display: table;
+	}
+
 }
