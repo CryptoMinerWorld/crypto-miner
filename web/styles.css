@@ -48,7 +48,7 @@
 	width: 1100px;
 	max-width: 80%;
 	background: #1e1e23;
-	padding: 0px;
+	padding: 0;
 	border: none;
 }
 
@@ -150,6 +150,10 @@
 	display: none;
 }
 
+.responsive_margin {
+	margin: 1em 0 2em 0;
+}
+
 @media only screen and (max-width: 640px) {
 	#my_geodes_header {
 		padding-top: 125px;
@@ -187,4 +191,29 @@
 		display: table;
 	}
 
+	#geode_bought_modal .modal {
+		margin-top: 150px;
+		width: 320px;
+	}
+
+	#goto_workshop_btn {
+		width: 270px;
+		height: 94px;
+		margin-bottom: 4px;
+		outline: none;
+		background: url('https://cryptominerworld.com/wp-content/uploads/2018/07/Go-To-Workshop-Button-300w.png') no-repeat;
+		background-size: 270px 94px;
+	}
+
+	#geode_bought_modal h1 {
+		font-size: 2em;
+	}
+
+	#geode_bought_modal h5 {
+		font-size: 1.2em;
+	}
+
+	.responsive_margin {
+		margin: 1em 0;
+	}
 }

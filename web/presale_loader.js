@@ -67,7 +67,7 @@ document.write(`
 	<div class="modal">
 		<div class="content">
 			<h1>Purchase Complete!</h1>
-			<h5 style="margin: 1em 0 2em 0;">
+			<h5 class="responsive_margin">
 				Successfully bought <span class="geodes_bought"></span> geode<span class="geodes_bought_plural"></span><br/>
 				containing <span class="gems_received"></span> gems<br/>
 				and <span class="geodes_bought"></span> Founders Plot<span class="geodes_bought_plural"></span> of Land
@@ -81,7 +81,7 @@ document.write(`
 	<div class="modal">
 		<div class="content">
 			<h1>MetaMask Required</h1>
-			<h5 style="margin: 1em 0 2em 0;">
+			<h5 class="responsive_margin">
 				Seems like you don't have MetaMask installed. Click the button below for more info.
 			</h5>
 			<input type="button" value="More Info" onclick="location.href = 'https://www.cryptominerworld.com/game_info#GameInfoMetaMask';"/>
@@ -93,7 +93,7 @@ document.write(`
 	<div class="modal">
 		<div class="content">
 			<h1>Wrong Network</h1>
-			<h5 style="margin: 1em 0 2em 0;">
+			<h5 class="responsive_margin">
 				Seems like you are connected to a wrong network. Please connect to network <span id="required_network_id">1: Mainnet</span>
 			</h5>
 			<input type="button" value="More Info" onclick="location.href = 'https://www.cryptominerworld.com/game_info#GameInfoMetaMask';"/>
@@ -107,7 +107,7 @@ document.write(`
 		<div class="content">
 			<input id="coupon_code" type="text" value="" placeholder="Coupon Code" style="margin: 1em 0;"/>
 			<input type="button" value="Generate" onclick="document.getElementById('coupon_code').value = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);"/><br/>
-			<select id="free_gems" style="width: 100%; margin: 1em 0 2em 0;">
+			<select id="free_gems" class="responsive_margin">
 				<option value="">Free Gems it Contains</option>
 				<option value="1">One (1)</option>
 				<option value="4">Four (4)</option>
@@ -121,7 +121,7 @@ document.write(`
 	<div class="modal">
 		<h3>Using a Coupon</h3>
 		<div class="content">
-			<input id="use_coupon" type="text" value="" placeholder="Coupon Code" style="width: 100%; margin: 1em 0 2em 0;"/><br/>
+			<input id="use_coupon" type="text" value="" placeholder="Coupon Code" class="responsive_margin" style="width: 100%;"/><br/>
 			<input type="button" value="Use this Coupon" onclick="useCoupon()" style="width: 100%;"/>
 		</div>
 	</div>
