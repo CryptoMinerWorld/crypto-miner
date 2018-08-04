@@ -119,8 +119,8 @@ contract CouponSale is Presale, AccessControl {
     // validate inputs:
     // expiration date
     require(expires > block.number);
-    // number of free gems in coupon: 1 or 4
-    require(freeGems == 1 || freeGems == 4);
+    // number of free gems in coupon: 1 or 3 (GEMS_IN_GEODE)
+    require(freeGems == 1 || freeGems == GEMS_IN_GEODE);
 
     // update counters
     couponsCreated++;

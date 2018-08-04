@@ -3,7 +3,7 @@ pragma solidity 0.4.23;
 import "./GemERC721.sol";
 
 /**
- * @notice GeodeSale sells the Gems (as Geodes)
+ * @notice Presale sells the Gems (as Geodes)
  */
 contract Presale {
   /// @dev Smart contract version
