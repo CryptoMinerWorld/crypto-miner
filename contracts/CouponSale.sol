@@ -158,7 +158,7 @@ contract CouponSale is Presale, AccessControl {
   // the gems inside it to a player
   function __createGems(address player, uint8 n) private {
     // generate the gems (geode content)
-    Gem[] memory gems = __randomGems(0, n, n == 4);
+    Gem[] memory gems = __randomGems(0, n, n == GEMS_IN_GEODE);
 
     // iterate and mint gems required
     for(uint32 i = 0; i < gems.length; i++) {
