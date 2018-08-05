@@ -14,7 +14,7 @@ contract('CouponSale', function(accounts) {
 
 		const couponCode = "SALE-900";
 		const couponKey = web3.sha3(couponCode);
-		const fn1 = async () => await sale.addCoupon(couponKey, 4, {from: accounts[1]});
+		const fn1 = async () => await sale.addCoupon(couponKey, 3, {from: accounts[1]});
 		const fn2 = async () => await sale.removeCoupon(couponKey, {from: accounts[1]});
 
 		await assertThrowsAsync(fn1);
@@ -39,14 +39,14 @@ contract('CouponSale', function(accounts) {
 
 		const fn = async () => await sale.useCoupon(couponCode, {from: accounts[1]});
 		await assertThrowsAsync(fn);
-		await sale.addCoupon(couponKey, 4);
+		await sale.addCoupon(couponKey, 3);
 		await fn();
-		assert.equal(4, await tk.balanceOf(accounts[1]), "wrong token balance after using a coupon");
+		assert.equal(3, await tk.balanceOf(accounts[1]), "wrong token balance after using a coupon");
 		await sale.addCoupon(couponKey, 1);
 		await fn();
-		assert.equal(5, await tk.balanceOf(accounts[1]), "wrong token balance after using a coupon");
+		assert.equal(4, await tk.balanceOf(accounts[1]), "wrong token balance after using a coupon");
 
-		await assertThrowsAsync(async function() {await sale.addCoupon(couponKey, 3);});
+		await assertThrowsAsync(async function() {await sale.addCoupon(couponKey, 2);});
 	});
 });
 
