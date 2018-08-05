@@ -210,7 +210,7 @@ contract Presale {
 
   /// @dev number of geodes available for sale
   function geodesLeft() public constant returns (uint16) {
-    // overflow check, should not happend by design
+    // overflow check, should not happen by design
     assert(geodesSold <= GEODES_TO_SELL);
 
     // calculate based on `geodesSold` value
