@@ -157,6 +157,9 @@ contract Presale2 is AccessControl {
   // fired once coupon was consumed
   event CouponConsumed(address indexed _from, address indexed _to, uint256 indexed key, uint8 gems, uint8 plots);
 
+  // fired in __openGeodes
+  event GeodesOpened(address indexed _by, uint16 geodes, uint32 gems);
+
   // public getter for the geodeOwners
   function geodeOwners(uint16 n) public constant returns (address) {
     // taking into account geode number `n` delegate to parent sale or use current mapping
@@ -512,14 +515,26 @@ contract Presale2 is AccessControl {
     // update owner geode balance
     _geodeBalances[player] += n;
 
+    // issued gems counter
+    uint32 gemsCounter = 0;
+
     // create geodes – actually create gems
     for(uint16 i = 0; i < n; i++) {
+      // how many gems do we have in this geode
+      uint8 gems = GEMS_IN_GEODE + (i == 4? 1: 0);
+
       // open created geode + emit an event, geode number 5 (4) contains additional gem
-      __openGeode(nextGeode + i, player, GEMS_IN_GEODE + (i == 4? 1: 0));
+      __openGeode(nextGeode + i, player, gems);
+
+      // update counter
+      gemsCounter += gems;
     }
 
     // update next geode to sell pointer
     nextGeode += n;
+
+    // emit an event
+    emit GeodesOpened(player, n, gemsCounter);
   }
 
   // private function to create geode and send all
