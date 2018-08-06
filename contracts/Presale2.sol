@@ -504,6 +504,28 @@ contract Presale2 is AccessControl {
     emit PresaleStateChanged(geodesSold, geodesLeft(), _currentPrice, priceIncreaseIn());
   }
 
+  // allows to fix next gem pointer if it points to already existing gem
+  function fixNextGemPointer(uint32 gas) public {
+    // ensure pointer is in bad state, ensure no overflow
+    require(gemContract.exists(nextGem) && nextGem > 0x11001);
+
+    // increase it until fixed and enough gas
+    while(gemContract.exists(nextGem) && gasleft() > gas) {
+      nextGem++;
+    }
+  }
+
+  // allows to fix next free gem pointer if it points to already existing gem
+  function fixNextFreeGemPointer(uint32 gas) public {
+    // ensure pointer is in bad state, ensure safe max limit
+    require(gemContract.exists(nextFreeGem) && nextFreeGem < 0x11001);
+
+    // increase it until fixed and enough gas
+    while(gemContract.exists(nextFreeGem) && gasleft() > gas) {
+      nextFreeGem++;
+    }
+  }
+
   // private function to create several geodes and send all
   // the gems inside them to a player
   function __openGeodes(uint16 n, address player) private {
