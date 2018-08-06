@@ -130,8 +130,8 @@ contract Presale2 is AccessControl {
 
   // fired in buyGeodes()
   event PurchaseComplete(
-    address indexed _referral,
-    address indexed _player,
+    address indexed _ref,
+    address indexed _to,
     uint16 geodes,
     uint32 gems,
     uint64 price,
@@ -436,7 +436,7 @@ contract Presale2 is AccessControl {
 
     // referral bonus
     // check that a valid referral has been passed
-    if(referral != address(0) && referral != player && geodeBalances(referral) > 0) {
+    if(referral != address(0) && referral != player && geodeBalances(player) == 0 && geodeBalances(referral) > 0) {
       // add new referral points holders
       if(referralPoints[player] == 0) {
         referralPointsHolders.push(player);

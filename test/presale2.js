@@ -2,7 +2,7 @@ const ROLE_COUPON_MANAGER = 0x00000100;
 const ROLE_TOKEN_CREATOR = 0x00040000;
 const ROLE_ROLE_MANAGER = 0x10000000;
 
-const GEODES_SOLD = 544; //544;
+const GEODES_SOLD = 14; //544;
 const FIRST_500_GEODES = 500;
 const MAX_GEODES_BUY = 11;
 
@@ -61,11 +61,12 @@ contract('Presale2', accounts => {
 
 		await tk.addOperator(sale2.address, ROLE_TOKEN_CREATOR);
 
-		console.log("    buying single geode with no referral");
 		const gemsInGeode = (await sale2.GEMS_IN_GEODE()).toNumber();
 		price1 = await sale2.currentPrice();
 		price10 = price1.times(10);
 		await assertThrowsAsync(async () => await sale2.getGeodes(2, 0, {from: accounts[15], value: price1}));
+
+		console.log("    buying single geode with no referral");
 		await sale2.getGeodes(1, 0, {from: accounts[15], value: price1});
 		assert.equal(gemsInGeode, await tk.balanceOf(accounts[15]), "wrong token balance after buying 1 geode");
 		assert.equal(1, await sale2.geodeBalances(accounts[15]), "wrong geode balance after buying 1 geode");
@@ -79,15 +80,26 @@ contract('Presale2', accounts => {
 		assert.equal(0, await sale2.unusedReferralPoints(accounts[15]), "wrong initial unusedReferralPoints for account 15");
 		assert.equal(0, await sale2.totalRefPoints(), "wrong initial total referral points");
 
+		console.log("    buying single geode with referral in invalid state");
+		await sale2.getGeodes(1, accounts[1], {from: accounts[15], value: price1});
+		assert.equal(gemsInGeode * 2, await tk.balanceOf(accounts[15]), "wrong token balance after buying next geode");
+		assert.equal(2, await sale2.geodeBalances(accounts[15]), "wrong geode balance after buying next geode");
+		assert(price1.times(2).times(1905).div(10000).eq((await web3.eth.getBalance(accounts[13])).minus(balance13)), "wrong chest balance after buying next geode");
+		assert(price1.times(2).times(8095).div(10000).eq((await web3.eth.getBalance(accounts[14])).minus(balance14)), "wrong beneficiary balance after buying next geode");
+		assert.equal(0, await sale2.referralPoints(accounts[15]), "wrong referralPoints for account 15 after buying next geode");
+		assert.equal(0, await sale2.referralPointsConsumed(accounts[15]), "wrong referralPointsConsumed for account 15 after buying next geode");
+		assert.equal(0, await sale2.unusedReferralPoints(accounts[15]), "wrong unusedReferralPoints for account 15 after buying next geode");
+		assert.equal(0, await sale2.totalRefPoints(), "wrong total referral points after buying next geode");
+
 		console.log("    buying 10 geodes with a referral");
-		await sale2.getGeodes(10, accounts[1], {from: accounts[15], value: price10});
-		assert.equal(gemsInGeode * 12 + 1, await tk.balanceOf(accounts[15]), "wrong token balance after buying 10 more geodes");
-		assert.equal(12, await sale2.geodeBalances(accounts[15]), "wrong geode balance after buying 10 more geodes");
-		assert(price1.times(11).times(1905).div(10000).eq((await web3.eth.getBalance(accounts[13])).minus(balance13)), "wrong chest balance after buying 10 more geodes");
-		assert(price1.times(11).times(8095).div(10000).eq((await web3.eth.getBalance(accounts[14])).minus(balance14)), "wrong beneficiary balance after buying 10 more geodes");
-		assert.equal(10, await sale2.referralPoints(accounts[15]), "wrong referralPoints for account 15 after buying 10 geodes");
-		assert.equal(0, await sale2.referralPointsConsumed(accounts[15]), "wrong referralPointsConsumed for account 15 after buying 10 geodes");
-		assert.equal(10, await sale2.unusedReferralPoints(accounts[15]), "wrong unusedReferralPoints for account 15 after buying 10 geodes");
+		await sale2.getGeodes(10, accounts[1], {from: accounts[16], value: price10});
+		assert.equal(gemsInGeode * 11 + 1, await tk.balanceOf(accounts[16]), "wrong token balance after buying 10 geodes");
+		assert.equal(11, await sale2.geodeBalances(accounts[16]), "wrong geode balance after buying 10 geodes");
+		assert(price1.times(12).times(1905).div(10000).eq((await web3.eth.getBalance(accounts[13])).minus(balance13)), "wrong chest balance after buying 10 geodes");
+		assert(price1.times(12).times(8095).div(10000).eq((await web3.eth.getBalance(accounts[14])).minus(balance14)), "wrong beneficiary balance after buying 10 geodes");
+		assert.equal(10, await sale2.referralPoints(accounts[16]), "wrong referralPoints for account 16 after buying 10 geodes");
+		assert.equal(0, await sale2.referralPointsConsumed(accounts[16]), "wrong referralPointsConsumed for account 16 after buying 10 geodes");
+		assert.equal(10, await sale2.unusedReferralPoints(accounts[16]), "wrong unusedReferralPoints for account 16 after buying 10 geodes");
 		assert.equal(20, await sale2.referralPoints(accounts[1]), "wrong referralPoints for account 1 after referring 10 geodes");
 		assert.equal(0, await sale2.referralPointsConsumed(accounts[1]), "wrong referralPointsConsumed for account 1 after referring 10 geodes");
 		assert.equal(20, await sale2.unusedReferralPoints(accounts[1]), "wrong unusedReferralPoints for account 1 after referring 10 geodes");
@@ -95,18 +107,18 @@ contract('Presale2', accounts => {
 
 		console.log("    consuming referral points");
 		const account1Gems = await tk.balanceOf(accounts[1]);
-		const account15Gems = await tk.balanceOf(accounts[15]);
+		const account16Gems = await tk.balanceOf(accounts[16]);
 		const account1Geodes = await sale2.geodeBalances(accounts[1]);
-		const account15Geodes = await sale2.geodeBalances(accounts[15]);
+		const account16Geodes = await sale2.geodeBalances(accounts[16]);
 		await sale2.useReferralPoints({from: accounts[1]});
-		await sale2.useReferralPoints({from: accounts[15]});
+		await sale2.useReferralPoints({from: accounts[16]});
 		assert(account1Gems.plus(gemsInGeode).eq(await tk.balanceOf(accounts[1])), "wrong token balance for referral account 1");
-		assert(account15Gems.plus(1).eq(await tk.balanceOf(accounts[15])), "wrong token balance for referral account 15");
+		assert(account16Gems.plus(1).eq(await tk.balanceOf(accounts[16])), "wrong token balance for referral account 16");
 		assert(account1Geodes.plus(1).eq(await sale2.geodeBalances(accounts[1])), "wrong geode balance for referral account 1");
-		assert(account15Geodes.eq(await sale2.geodeBalances(accounts[15])), "wrong geode balance for referral account 15");
-		assert.equal(10, await sale2.referralPoints(accounts[15]), "wrong referralPoints for account 15 after consuming");
-		assert.equal(10, await sale2.referralPointsConsumed(accounts[15]), "wrong referralPointsConsumed for account 15 after consuming");
-		assert.equal(0, await sale2.unusedReferralPoints(accounts[15]), "wrong unusedReferralPoints for account 15 after consuming");
+		assert(account16Geodes.eq(await sale2.geodeBalances(accounts[16])), "wrong geode balance for referral account 16");
+		assert.equal(10, await sale2.referralPoints(accounts[16]), "wrong referralPoints for account 16 after consuming");
+		assert.equal(10, await sale2.referralPointsConsumed(accounts[16]), "wrong referralPointsConsumed for account 16 after consuming");
+		assert.equal(0, await sale2.unusedReferralPoints(accounts[16]), "wrong unusedReferralPoints for account 16 after consuming");
 		assert.equal(20, await sale2.referralPoints(accounts[1]), "wrong referralPoints for account 1 after consuming");
 		assert.equal(20, await sale2.referralPointsConsumed(accounts[1]), "wrong referralPointsConsumed for account 1 after consuming");
 		assert.equal(0, await sale2.unusedReferralPoints(accounts[1]), "wrong unusedReferralPoints for account 1 after consuming");
