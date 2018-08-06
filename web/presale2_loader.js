@@ -107,7 +107,7 @@ document.write(`
 		<div class="content">
 			<input id="coupon_code" type="text" value="" placeholder="Coupon Code" style="margin: 1em 0;"/>
 			<input type="button" value="Generate Random Code" onclick="document.getElementById('coupon_code').value = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);"/><br/>
-			<select id="free_gems" class="responsive_margin">
+			<select id="free_gems" class="responsive_margin" style="margin-bottom: 0;">
 				<option value="">Free Gems it Contains</option>
 				<option value="1">One (1)</option>
 				<option value="3">Three (3)</option>
@@ -451,7 +451,7 @@ jQuery3(document).ready(function() {
 		},
 		// presale2 address
 		{
-			address: "0xf98f2c37c65d379d7fdc68059e57c2a6961b4e6f",
+			address: "0x8a8c3980bb6e8602bfe13c7e0c492d26e3bcdfc0",
 			abi_url: WEB_BASE + "abi/Presale2.json"
 		},
 		// callback handler

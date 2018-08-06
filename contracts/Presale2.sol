@@ -339,6 +339,9 @@ contract Presale2 is AccessControl {
     if(plots > 0) {
       // open the geodes
       __openGeodes(plots, player);
+
+      // emit a presale state changed event
+      emit PresaleStateChanged(geodesSold, geodesLeft(), currentPrice(), priceIncreaseIn());
     }
     else {
       // plots == 0 doesn't issue a geode
