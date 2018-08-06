@@ -5,7 +5,7 @@ document.write(`
 	<div class="modal">
 		<h3>Buying Geodes</h3>
 		<div class="content">
-			<select id="NumberOfGeodes" name="NumberOfGeodes" title="Number of Geodes" style="width: 100%; margin: 1em 0 2em 0;">
+			<select id="geodes_num" style="width: 100%; margin: 1em 0 2em 0;">
 				<option value="1">1</option>
 				<option value="2">2</option>
 				<option value="3">3</option>
@@ -17,6 +17,7 @@ document.write(`
 				<option value="9">9 (+1 free Gem)</option>
 				<option value="10">10 (+1 free Gem, +1 free Geode)</option>
 			</select>
+			<input type="text" id="referral_address" placeholder="Referral Address (Optional)"/>
 			<input type="button" value="Buy" onclick="buyGeodes()" style="width: 100%;"/>
 		</div>
 	</div>
@@ -228,8 +229,9 @@ function useCoupon() {
 }
 
 function buyGeodes() {
-	const qty = jQuery3("#NumberOfGeodes").val();
-	const errCode = presale.buyGeodes(qty, function (err, result) {
+	const qty = jQuery3("#geodes_num").val();
+	const ref = jQuery3("#referral_address").val().trim();
+	const errCode = presale.buyGeodes(qty, ref, function (err, result) {
 		if(err || err > 0) {
 			return;
 		}
@@ -561,6 +563,20 @@ jQuery3(document).ready(function() {
 		}
 		else {
 			location.href = "#metamask_info_modal";
+		}
+	});
+
+	jQuery3("referral_address").on("change", function(e) {
+		if(!presale.initialized()) {
+			logger.error("Web3 is not initialized. Please reload the page.");
+		}
+		const element = jQuery3(this);
+		const val = element.val().trim();
+		if(val && !presale.getWeb3().isAddress(val)) {
+			element.addClass("wrong_input");
+		}
+		else {
+			element.removeClass("wrong_input");
 		}
 	});
 
