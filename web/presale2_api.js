@@ -401,7 +401,7 @@ function PresaleApi(logger, jQuery_instance) {
 	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
 	 * if error occurred asynchronously - error code will be passed to callback
 	 */
-	this.buyGeodes = function(n, referral = "0x0",  callback) {
+	this.buyGeodes = function(n, referral, callback) {
 		if(!(myWeb3 && myAccount && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
@@ -412,7 +412,7 @@ function PresaleApi(logger, jQuery_instance) {
 				tryCallbackIfProvided(callback, err, null);
 				return;
 			}
-			if(!myWeb3.isAddress(referral)) {
+			if(referral && !myWeb3.isAddress(referral)) {
 				logError("referral is not a valid address");
 				return ERR_WRONG_INPUT;
 			}
