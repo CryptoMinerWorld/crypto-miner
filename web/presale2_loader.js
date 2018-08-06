@@ -434,12 +434,12 @@ jQuery3(document).ready(function() {
 	const errorCode = presale.init(
 		// token address
 		{
-			address: "0xeae9d154da7a1cd05076db1b83233f3213a95e4f",
+			address: "0xd78ea452d277060af6283ca7065b5f5330a62a7a",
 			abi_url: WEB_BASE + "abi/ERC721.json"
 		},
-		// presale address
+		// presale2 address
 		{
-			address: "0xa207d2496688134f538a307b25e174b267ba6765",
+			address: "0xf98f2c37c65d379d7fdc68059e57c2a6961b4e6f",
 			abi_url: WEB_BASE + "abi/Presale2.json"
 		},
 		// callback handler
