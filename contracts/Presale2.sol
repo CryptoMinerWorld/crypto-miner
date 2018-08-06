@@ -39,7 +39,7 @@ contract Presale2 is AccessControl {
   uint32 public constant ROLE_COUPON_MANAGER = 0x00000100;
 
   // total number of geodes to sell
-  uint16 public constant GEODES_TO_SELL = 5500;
+  uint16 public constant GEODES_TO_SELL = 55000;
 
   // amount of gems in a geode
   uint8 public constant GEMS_IN_GEODE = 3;
@@ -47,26 +47,26 @@ contract Presale2 is AccessControl {
   // number of different grade values defined for a gem
   uint24 public constant GRADE_VALUES = 1000000;
 
-  // number of geodes sold in previous sale
-  uint16 public constant GEODES_SOLD = 544;
-
   // interval between price increases, seconds
   uint64 public constant PRICE_INCREASE_INTERVAL = 86400;
+
+  // number of geodes sold in previous sale
+  uint16 public GEODES_SOLD;
 
   // gem colors available for sale
   uint8[] public colors = [9, 10, 1, 2];
 
   // current value of geodes sold
-  uint16 public geodesSold = GEODES_SOLD; // was: 0;
+  uint16 public geodesSold; // was: 0;
 
   // pointer to a next geode to sell
-  uint16 public nextGeode = GEODES_SOLD + 1; // was: 1;
+  uint16 public nextGeode; // was: 1;
 
   // pointer to a next gem do be minted
-  uint32 public nextGem = 71312; // was: 0x11001;
+  uint32 public nextGem; // was: 0x11001;
 
   // pointer to a next gem do be minted
-  uint32 public nextFreeGem = 4408; // was: 0x1101;
+  uint32 public nextFreeGem; // was: 0x1101;
 
   // how many free gems allocated by means of coupons
   uint32 public freeGemsAllocated;
@@ -119,6 +119,9 @@ contract Presale2 is AccessControl {
   // referral points mapping
   mapping(address => uint32) public referralPoints;
 
+  // consumed referral points
+  mapping(address => uint32) public referralPointsConsumed;
+
   // list of referral points holders
   address[] public referralPointsHolders;
 
@@ -138,6 +141,12 @@ contract Presale2 is AccessControl {
 
   // fired in buyGeodes()
   event PresaleStateChanged(uint16 sold, uint16 left, uint64 price, uint64 priceIncreaseIn);
+
+  // fired in buyGeodes()
+  event ReferralPointsIssued(address indexed _to, uint32 issued, uint32 total);
+
+  // fired in useReferralPoints()
+  event ReferralPointsConsumed(address indexed _by, uint32 used, uint32 left);
 
   // fired once coupon successfully added
   event CouponAdded(address indexed _by, uint256 indexed key, uint32 expires, uint8 freeGems, uint8 freePlots);
@@ -161,22 +170,29 @@ contract Presale2 is AccessControl {
   }
 
   // creates a GeodeSale attached to previous presale and already deployed Gem smart contract
-  constructor(address parentSaleAddress, address gemAddress, address _chestVault, address _beneficiary) public {
+  constructor(address parentSaleAddress, address _chestVault, address _beneficiary) public {
     // validate inputs
     require(parentSaleAddress != address(0));
-    require(gemAddress != address(0));
     require(_beneficiary != address(0));
     require(_chestVault != address(0));
 
     // bind the parent sale contract
     parentSale = Presale2(parentSaleAddress);
 
-    // validate the parent sale state
-    require(parentSale.geodesSold() == geodesSold);
-    require(parentSale.nextGeode() == nextGeode);
-    require(parentSale.nextGem() == nextGem);
-    require(parentSale.nextFreeGem() == nextFreeGem);
-    require(address(parentSale.gemContract()) == gemAddress);
+    // initialize parameters from the parent sale state
+    geodesSold = parentSale.geodesSold();
+    GEODES_SOLD = geodesSold;
+    nextGeode = parentSale.nextGeode();
+    nextGem = parentSale.nextGem();
+    nextFreeGem = parentSale.nextFreeGem();
+    address gemAddress = address(parentSale.gemContract());
+
+    // validate parameters initialized
+    require(geodesSold > 0);
+    require(nextGeode > 1);
+    require(nextGem > 0x11001);
+    //require(nextFreeGem > 0x1101);
+    require(gemAddress != address(0));
 
     // bind the Gem smart contract
     gemContract = GemERC721(gemAddress);
@@ -227,6 +243,48 @@ contract Presale2 is AccessControl {
     return uint160(geodesSold) << 144 | uint144(geodesLeft()) << 128 | uint128(currentPrice()) << 64 | priceIncreaseIn();
   }
 
+  // use referral points to get geode(s)
+  function useReferralPoints() public {
+    // call sender nicely - referral
+    address referral = msg.sender;
+
+    // how many unused points referral has
+    uint32 unusedPoints = unusedReferralPoints(referral);
+
+    // there should be at least 10 unused points
+    require(unusedPoints >= 10);
+
+    // how many geodes to issue
+    uint32 geodesToIssue = unusedPoints / 20;
+
+    // how many gems to issue
+    uint32 gemsToIssue = (unusedPoints % 20) / 10;
+
+    // how many referral points to consume
+    uint32 pointsToConsume = geodesToIssue * 20 + gemsToIssue * 10;
+
+    // update points consumed
+    referralPointsConsumed[referral] += pointsToConsume;
+
+    // open geodes
+    if(geodesToIssue > 0) {
+      __openGeodes(uint16(geodesToIssue), referral);
+    }
+
+    // issue gems
+    if(gemsToIssue > 0) {
+      __createGems(referral, uint8(gemsToIssue));
+    }
+
+    // emit an event
+    emit ReferralPointsConsumed(referral, pointsToConsume, unusedReferralPoints(referral));
+  }
+
+  // how many referral points are available to consume
+  function unusedReferralPoints(address referral) public constant returns (uint32) {
+    // difference between total and consumed values
+    return referralPoints[referral] - referralPointsConsumed[referral];
+  }
 
   // checks if coupon is valid
   function isCouponValid(string code) public constant returns (bool) {
@@ -276,16 +334,8 @@ contract Presale2 is AccessControl {
 
     // mint free gems and send them to player
     if(plots > 0) {
-      // save new geode holder if required
-      if(_geodeBalances[player] == 0) {
-        geodeHolders.push(player);
-      }
-
-      // update owner geode balance
-      _geodeBalances[player]++;
-
-      // plots == 1 is like opening a geode
-      __openGeode(nextGeode++, player, gems);
+      // open the geodes
+      __openGeodes(plots, player);
     }
     else {
       // plots == 0 doesn't issue a geode
@@ -348,7 +398,7 @@ contract Presale2 is AccessControl {
 
   // calculates number of geodes to sell and sells them by
   // minting correspondent number of gems to the sender
-  function getGeodes(address referral) public payable {
+  function getGeodes(uint8 minimumQuantity, address referral) public payable {
     // check if there are still geodes to sell
     require(geodesSold < GEODES_TO_SELL);
 
@@ -366,6 +416,9 @@ contract Presale2 is AccessControl {
 
     // calculate number of geodes to sell
     uint256 geodesToSell = value / _currentPrice;
+
+    // ensure minimum quantity constraint
+    require(geodesToSell >= minimumQuantity);
 
     // we cannot sell more then GEODES_TO_SELL
     if(geodesSold + geodesToSell > GEODES_TO_SELL) {
@@ -400,6 +453,10 @@ contract Presale2 is AccessControl {
 
       // update total referral points
       totalRefPoints += uint32(geodesToSell * 3);
+
+      // emit events
+      emit ReferralPointsIssued(player, uint32(geodesToSell), referralPoints[player]);
+      emit ReferralPointsIssued(referral, uint32(geodesToSell * 2), referralPoints[referral]);
     }
 
     // if player buys 10 geodes and there are still additional geodes to sell
@@ -408,25 +465,8 @@ contract Presale2 is AccessControl {
       geodesToSell++;
     }
 
-    // update counters
-    geodesSold += uint16(geodesToSell);
-
-    // save new geode holder if required
-    if(_geodeBalances[player] == 0) {
-      geodeHolders.push(player);
-    }
-
-    // update owner geode balance
-    _geodeBalances[player] += uint16(geodesToSell);
-
-    // create geodes – actually create gems
-    for(uint16 i = 0; i < geodesToSell; i++) {
-      // open created geode + emit an event, geode number 5 (4) contains additional gem
-      __openGeode(nextGeode + i, player, GEMS_IN_GEODE + (i == 4? 1: 0));
-    }
-
-    // update next geode to sell pointer
-    nextGeode += uint16(geodesToSell);
+    // open the geodes
+    __openGeodes(uint16(geodesToSell), player);
 
     // 19.05% of the value
     uint256 value1905 = 381 * value / 2000;
@@ -456,6 +496,30 @@ contract Presale2 is AccessControl {
 
     // presale state changed (used for UI updates)
     emit PresaleStateChanged(geodesSold, geodesLeft(), _currentPrice, priceIncreaseIn());
+  }
+
+  // private function to create several geodes and send all
+  // the gems inside them to a player
+  function __openGeodes(uint16 n, address player) private {
+    // update geodes sold counter
+    geodesSold += n;
+
+    // save new geode holder if required
+    if(_geodeBalances[player] == 0) {
+      geodeHolders.push(player);
+    }
+
+    // update owner geode balance
+    _geodeBalances[player] += n;
+
+    // create geodes – actually create gems
+    for(uint16 i = 0; i < n; i++) {
+      // open created geode + emit an event, geode number 5 (4) contains additional gem
+      __openGeode(nextGeode + i, player, GEMS_IN_GEODE + (i == 4? 1: 0));
+    }
+
+    // update next geode to sell pointer
+    nextGeode += n;
   }
 
   // private function to create geode and send all
