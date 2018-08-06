@@ -238,6 +238,12 @@ function buyGeodes() {
 	location.href = "#";
 }
 
+jQuery3(document).on("keyup", function(e) {
+	if(e.keyCode == 27) {
+		location.href = "#";
+	}
+});
+
 jQuery3(document).ready(function() {
 	function load_and_reload_default_counters() {
 		load_default_counters();
