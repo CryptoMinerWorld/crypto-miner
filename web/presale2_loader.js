@@ -106,11 +106,16 @@ document.write(`
 		<h3>Adding a Coupon</h3>
 		<div class="content">
 			<input id="coupon_code" type="text" value="" placeholder="Coupon Code" style="margin: 1em 0;"/>
-			<input type="button" value="Generate" onclick="document.getElementById('coupon_code').value = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);"/><br/>
+			<input type="button" value="Generate Random Code" onclick="document.getElementById('coupon_code').value = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);"/><br/>
 			<select id="free_gems" class="responsive_margin">
 				<option value="">Free Gems it Contains</option>
 				<option value="1">One (1)</option>
-				<option value="4">Four (4)</option>
+				<option value="3">Three (3)</option>
+			</select><br/>
+			<select id="free_geodes" class="responsive_margin">
+				<option value="">Land Plots it Contains</option>
+				<option value="0">None (0)</option>
+				<option value="1">One (1)</option>
 			</select><br/>
 			<input type="button" value="Add a Coupon" onclick="addCoupon()" style="width: 100%;"/>
 		</div>
@@ -188,8 +193,9 @@ const presale = new PresaleApi(logger, jQuery3);
 function addCoupon() {
 	const code = document.getElementById("coupon_code").value;
 	const freeGems = document.getElementById("free_gems").value;
+	const freeGeodes = document.getElementById("free_geodes").value;
 
-	const errCode = presale.addCoupon(code, freeGems, function(err, result) {
+	const errCode = presale.addCoupon(code, freeGems, freeGeodes, function(err, result) {
 		if(err || err > 0) {
 			return;
 		}
