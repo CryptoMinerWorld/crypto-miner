@@ -597,11 +597,11 @@ function display_gem(gemId, color, level, grade, miningRate) {
 
 function preloadGemGraphics() {
 	const thumbs = [];
-	for(let colorIdx = 1; colorIdx <= 6; colorIdx++) {
+	for(let colorIdx = 0; colorIdx < 4; colorIdx++) {
 		for(let levelId = 1; levelId <= 2; levelId++) {
 			for(let gradeType = 1; gradeType <= 6; gradeType++) {
 				const thumb = new Image();
-				const color = colorName(((7 + colorIdx) % 12) + 1);
+				const color = colorName(((8 + colorIdx) % 10) + 1);
 				const level = levelName(levelId);
 				const grade = gradeName(gradeType);
 				thumb.src = gemThumbnailURL(color, level, grade);
