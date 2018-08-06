@@ -5,7 +5,7 @@ document.write(`
 	<div class="modal">
 		<h3>Buying Geodes</h3>
 		<div class="content">
-			<select id="geodes_num" style="width: 100%; margin: 1em 0 2em 0;">
+			<select id="geodes_num" class="responsive_margin" style="margin-bottom: 0;">
 				<option value="1">1</option>
 				<option value="2">2</option>
 				<option value="3">3</option>
@@ -17,7 +17,7 @@ document.write(`
 				<option value="9">9 (+1 free Gem)</option>
 				<option value="10">10 (+1 free Gem, +1 free Geode)</option>
 			</select>
-			<input type="text" id="referral_address" placeholder="Referral Address (Optional)"/>
+			<input type="text" id="referral_address" class="responsive_margin" placeholder="Referral Address (Optional)"/>
 			<input type="button" value="Buy" onclick="buyGeodes()" style="width: 100%;"/>
 		</div>
 	</div>
@@ -566,7 +566,7 @@ jQuery3(document).ready(function() {
 		}
 	});
 
-	jQuery3("referral_address").on("change", function(e) {
+	jQuery3("#referral_address").on("change", function(e) {
 		if(!presale.initialized()) {
 			logger.error("Web3 is not initialized. Please reload the page.");
 		}
