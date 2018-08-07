@@ -649,7 +649,10 @@ function PresaleApi(logger, jQuery_instance) {
 						const rate = data[0].price_usd;
 						const balanceUSD = balanceETH * rate;
 						logInfo("ETH/USD exchange rate ", rate, " chest vault balance is ", balanceUSD, " USD");
-						tryCallback(callback, null, balanceUSD);
+						tryCallback(callback, null, {
+							balance_eth: balanceETH,
+							balance_usd: balanceUSD
+						});
 					}
 					else {
 						const err = "Cannot get ETH/USD exchange rate: wrong response data format";
