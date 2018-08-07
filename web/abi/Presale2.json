@@ -1091,8 +1091,36 @@
       "payable": true,
       "stateMutability": "payable",
       "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "gas",
+          "type": "uint32"
+        }
+      ],
+      "name": "fixNextGemPointer",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "gas",
+          "type": "uint32"
+        }
+      ],
+      "name": "fixNextFreeGemPointer",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-06T19:51:36.685Z"
+  "updatedAt": "2018-08-06T23:56:35.717Z"
 }
