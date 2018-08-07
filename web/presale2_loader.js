@@ -513,7 +513,8 @@ jQuery3(document).ready(function() {
 				if(err) {
 					return;
 				}
-				logger.success("chest vault balance: ", result.balance_eth, " ETH (", result.balance_usd, " USD)");
+				jQuery3("#founder_chest_total_amount_eth").val(result.balance_eth);
+				jQuery3("#founder_chest_total_amount_usd").val(result.balance_usd);
 			});
 
 			// update counters each time a PresaleStateChanged event is received
