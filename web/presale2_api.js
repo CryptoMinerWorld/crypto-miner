@@ -45,6 +45,8 @@ function PresaleApi(logger, jQuery_instance) {
 	const ERR_NOT_INITIALIZED = 0x80;
 	const ERR_NO_CALLBACK = 0x100;
 	const ERR_WRONG_INPUT = 0x200;
+	const ERR_CONFIG_ERROR = 0x400;
+	const ERR_COIN_MARKET_CAP_API = 0x800;
 
 	// ---------- START SECTION 1: Constants and Variables ----------
 	// version constants define smart contracts compatible with this API
@@ -60,6 +62,7 @@ function PresaleApi(logger, jQuery_instance) {
 	let myNetwork;
 	let tokenInstance;
 	let presaleInstance;
+	let chestVault;
 	// ---------- END SECTION 1: Constants and Variables ----------
 
 
@@ -168,7 +171,7 @@ function PresaleApi(logger, jQuery_instance) {
 	// Callback is executed only on success. In case of error it has been already executed
 	// in the place where an error occurred
 	function instanceLoaded(callback) {
-		if(tokenInstance && presaleInstance) {
+		if(tokenInstance && presaleInstance && chestVault) {
 			logSuccess("Application loaded successfully.\nNetwork " + networkName(myNetwork));
 			tryCallbackIfProvided(callback, null, {
 				event: "init_complete",
@@ -362,6 +365,22 @@ function PresaleApi(logger, jQuery_instance) {
 				}
 				// --- END: Internal Section to Load Contracts ---
 
+			});
+
+			myWeb3.eth.getBalance(config.chestVault, function(err, result) {
+				if(err) {
+					logError("Error getting chest vault balance. Address ",  config.chestVault, ". ", err);
+					tryCallbackIfProvided(callback, ERR_CONFIG_ERROR, err);
+					return;
+				}
+				if(result < 210000000000000) { // 0.21 finney
+					const err = "Error getting chest vault balance. Address " + config.chestVault;
+					tryCallbackIfProvided(callback, ERR_CONFIG_ERROR, err);
+					return;
+				}
+				logInfo("Chest Vault balance is ", myWeb3.fromWei(result, 'ether'), " ETH");
+				chestVault = config.chestVault;
+				instanceLoaded(callback);
 			});
 		});
 
@@ -567,7 +586,6 @@ function PresaleApi(logger, jQuery_instance) {
 		}
 		if(!(myWeb3 && myAccount && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
-			tryCallback(callback, "Presale API is not properly initialized", null);
 			return ERR_NOT_INITIALIZED;
 		}
 		presaleInstance.getPacked(function(err, result) {
@@ -600,6 +618,56 @@ function PresaleApi(logger, jQuery_instance) {
 	};
 
 	/**
+	 * Gets the balance of chest vault in USD. Integrated with api.coinmarketcap.com
+	 * @param callback a function to call on error / success
+	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
+	 * if error occurred asynchronously - error code will be passed to callback
+	 */
+	this.getChestVaultValueUSD = function(callback) {
+		if(!callback || {}.toString.call(callback) !== '[object Function]') {
+			logError("callback is undefined or is not a function");
+			return ERR_NO_CALLBACK;
+		}
+		if(!(myWeb3 && myAccount && chestVault)) {
+			logError("Presale API is not properly initialized. Reload the page.");
+			return ERR_NOT_INITIALIZED;
+		}
+		myWeb3.eth.getBalance(chestVault, function(err, result) {
+			if(err) {
+				logError("Error getting chest vault balance. Address ",  chestVault, ". ", err);
+				tryCallback(callback, err, null);
+				return;
+			}
+			const balanceETH = myWeb3.fromWei(result, 'ether');
+			logInfo("Chest Vault balance is ", balanceETH, " ETH");
+			jQuery3.ajax({
+				global: false,
+				url: "https://api.coinmarketcap.com/v1/ticker/ethereum/",
+				dataType: "json",
+				success: function(data, textStatus, jqXHR) {
+					if(data.length > 0 && data[0].price_usd) {
+						const rate = data[0].price_usd;
+						const balanceUSD = balanceETH * rate;
+						logInfo("ETH/USD exchange rate ", rate, " chest vault balance is ", balanceUSD, " USD");
+						tryCallback(callback, null, balanceUSD);
+					}
+					else {
+						const err = "Cannot get ETH/USD exchange rate: wrong response data format";
+						logError(err);
+						tryCallback(callback, ERR_COIN_MARKET_CAP_API, err);
+					}
+				},
+				error: function(jqXHR, textStatus, errorThrown) {
+					logError("Cannot get ETH/USD exchange rate: ", errorThrown);
+					tryCallback(callback, ERR_COIN_MARKET_CAP_API, errorThrown);
+				}
+
+			});
+		});
+
+	};
+
+	/**
 	 * Checks if coupon is valid – exists in the system and is not expired yet
 	 * @param code coupon code to check
 	 * @param callback a function to call on error / success
@@ -613,7 +681,6 @@ function PresaleApi(logger, jQuery_instance) {
 		}
 		if(!(myWeb3 && myAccount && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
-			tryCallback(callback, "Presale API is not properly initialized", null);
 			return ERR_NOT_INITIALIZED;
 		}
 		if(!presaleInstance.isCouponValid) {

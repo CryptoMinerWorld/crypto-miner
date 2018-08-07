@@ -455,7 +455,7 @@ jQuery3(document).ready(function() {
 				address: "0xaab2cc311e640344238acd666cca3f8558329fde",
 				abi_url: WEB_BASE + "abi/Presale2.json"
 			},
-			chestVault: "0x0"
+			chestVault: "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"
 		},
 
 		// callback handler
@@ -507,6 +507,14 @@ jQuery3(document).ready(function() {
 				});
 			}
 			reload_workshop();
+
+			// load chest vault balance
+			presale.getChestVaultValueUSD(function(err, result) {
+				if(err) {
+					return;
+				}
+				logger.success("chest vault balance: ", result, " USD");
+			});
 
 			// update counters each time a PresaleStateChanged event is received
 			presale.registerPresaleStateChangedEventListener(function(err, result) {
