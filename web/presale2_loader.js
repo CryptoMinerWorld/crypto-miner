@@ -363,9 +363,9 @@ jQuery3(document).ready(function() {
 			const thumbnail = gemThumbnailURL(color, level, grade);
 
 			return `
-				<a href="javascript:display_gem(\'` + gem.id + `\', \'` + color + `\', \'` + level + `\', \'` + grade + `\', \'` + miningRateDisplay + `\')">
-					<img style="padding: 0;" width="250" height="250" src="` + thumbnail + `"/>
-				</a><br/>Lvl ` + levelId + ` ` + color.substr(0, color.indexOf(" ")) + `<br/>Grade ` + grade + ` &nbsp;+` + miningRateDisplay + `%
+				<a href="javascript:display_gem(\'${gem.id}\', \'${color}\', \'${level}\', \'${grade}\', \'${miningRateDisplay}\')">
+					<img style="padding: 0;" width="250" height="250" src="${thumbnail}"/>
+				</a><br/>Lvl ${levelId} ${color.substr(0, color.indexOf(" "))}<br/>Grade ${grade} &nbsp;+${miningRateDisplay}%
 			`;
 		}
 
@@ -374,7 +374,7 @@ jQuery3(document).ready(function() {
 			for(let j = 0; j < columns; j++) {
 				const idx = i * columns + j;
 				if(idx < collection.length) {
-					html += "\t<td id='" + idx + "'>\n";
+					html += `\t<td id='${idx}'>\n`;
 
 					// inject gem data
 					html += compile_gem_html(collection[idx]);
