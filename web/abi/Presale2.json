@@ -110,6 +110,20 @@
     },
     {
       "constant": true,
+      "inputs": [],
+      "name": "ROLE_DEVOPS_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "",
@@ -1094,13 +1108,8 @@
     },
     {
       "constant": false,
-      "inputs": [
-        {
-          "name": "gas",
-          "type": "uint32"
-        }
-      ],
-      "name": "fixNextGemPointer",
+      "inputs": [],
+      "name": "incrementNextGem",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -1108,13 +1117,8 @@
     },
     {
       "constant": false,
-      "inputs": [
-        {
-          "name": "gas",
-          "type": "uint32"
-        }
-      ],
-      "name": "fixNextFreeGemPointer",
+      "inputs": [],
+      "name": "incrementNextFreeGem",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -1122,5 +1126,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-06T23:56:35.717Z"
+  "updatedAt": "2018-08-07T00:42:25.125Z"
 }

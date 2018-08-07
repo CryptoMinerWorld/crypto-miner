@@ -38,6 +38,9 @@ contract Presale2 is AccessControl {
   // a role required to create/add coupons
   uint32 public constant ROLE_COUPON_MANAGER = 0x00000100;
 
+  // a role required to fix next gem and next free gem pointers
+  uint32 public constant ROLE_DEVOPS_MANAGER = 0x00000200;
+
   // total number of geodes to sell
   uint16 public constant GEODES_TO_SELL = 55000;
 
@@ -505,25 +508,27 @@ contract Presale2 is AccessControl {
   }
 
   // allows to fix next gem pointer if it points to already existing gem
-  function fixNextGemPointer(uint32 gas) public {
+  function incrementNextGem() public {
+    // check caller permissions
+    require(__isSenderInRole(ROLE_DEVOPS_MANAGER));
+
     // ensure pointer is in bad state, ensure no overflow
     require(gemContract.exists(nextGem) && nextGem > 0x11001);
 
-    // increase it until fixed and enough gas
-    while(gemContract.exists(nextGem) && gasleft() > gas) {
-      nextGem++;
-    }
+    // increment it
+    nextGem++;
   }
 
   // allows to fix next free gem pointer if it points to already existing gem
-  function fixNextFreeGemPointer(uint32 gas) public {
+  function incrementNextFreeGem() public {
+    // check caller permissions
+    require(__isSenderInRole(ROLE_DEVOPS_MANAGER));
+
     // ensure pointer is in bad state, ensure safe max limit
     require(gemContract.exists(nextFreeGem) && nextFreeGem < 0x11001);
 
-    // increase it until fixed and enough gas
-    while(gemContract.exists(nextFreeGem) && gasleft() > gas) {
-      nextFreeGem++;
-    }
+    // increment it
+    nextFreeGem++;
   }
 
   // private function to create several geodes and send all

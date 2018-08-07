@@ -417,7 +417,7 @@ function PresaleApi(logger, jQuery_instance) {
 				return ERR_WRONG_INPUT;
 			}
 			logInfo("current geode price ", myWeb3.fromWei(result, 'ether'), " ETH");
-			presaleInstance.getGeodes.sendTransaction(n, referral, {value: result.times(n)}, function(err, txHash) {
+			presaleInstance.getGeodes(n, referral, {value: result.times(n)}, function(err, txHash) {
 				if(err) {
 					logError("getGeodes() transaction wasn't sent: ", err.toString().split("\n")[0]);
 					tryCallbackIfProvided(callback, err, null);
