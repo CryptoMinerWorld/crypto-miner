@@ -329,7 +329,7 @@ jQuery3(document).ready(function() {
 		const columns = jQuery3(window).width() > 640? 4: 2;
 		const rows = Math.ceil(collection.length / columns);
 		let html = `
-			<h1 id="my_geodes_header">{{collection.length}} - Gemstone Worker Buddies</h1>
+			<h1 id="my_geodes_header">${collection.length} - Gemstone Worker Buddies</h1>
 			<h1 id="my_geodes_subheader"></h1>
 			<div id="gem_sorting_options">
 				<select id="gem_sorting_by">
@@ -445,16 +445,19 @@ jQuery3(document).ready(function() {
 
 	// init the Presale API
 	const errorCode = presale.init(
-		// token address
+		// configuration
 		{
-			address: "0xd78ea452d277060af6283ca7065b5f5330a62a7a",
-			abi_url: WEB_BASE + "abi/ERC721.json"
+			token: {
+				address: "0xd78ea452d277060af6283ca7065b5f5330a62a7a",
+				abi_url: WEB_BASE + "abi/ERC721.json"
+			},
+			presale: {
+				address: "0xaab2cc311e640344238acd666cca3f8558329fde",
+				abi_url: WEB_BASE + "abi/Presale2.json"
+			},
+			chestVault: "0x0"
 		},
-		// presale2 address
-		{
-			address: "0xaab2cc311e640344238acd666cca3f8558329fde",
-			abi_url: WEB_BASE + "abi/Presale2.json"
-		},
+
 		// callback handler
 		function(errCode, result) {
 			if(errCode > 0) {

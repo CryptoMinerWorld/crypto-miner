@@ -194,10 +194,12 @@ function PresaleApi(logger, jQuery_instance) {
 	 * tokenInstance remains null
 	 * If something goes wrong with Presale smart contract initialization,
 	 * presaleInstance remains null
-	 * @param token an object, representing deployed token instance, contains address, ABI URL or ABI itself
+	 * @param config an object, representing information about deployed token, presale, chest vault instances:
+	 * 	{token: {token}, presale: {presale}, chestVault: "0xabc"}
+	 * token contains address, ABI URL or ABI itself
 	 * 	{address: "0xabc...", abi_url: "https://path.to/abi.json", abi: [...abi array...]}
 	 * 	if a string is passed instead of object – it will be treated as an address, equal to {address: token}
-	 * @param presale an object, representing deployed presale instance, contains address, ABI URL or ABI itself
+	 * presale contains address, ABI URL or ABI itself
 	 * 	{address: "0xabc...", abi_url: "https://path.to/abi.json", abi: [...abi array...]}
 	 * 	if a string is passed instead of object – it will be treated as an address, equal to {address: presale}
 	 * @param callback a function to be executed once initialization is complete,
@@ -205,7 +207,7 @@ function PresaleApi(logger, jQuery_instance) {
 	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
 	 * if error occurred asynchronously - error code will be passed to callback
 	 */
-	this.init = function(token, presale, callback) {
+	this.init = function(config, callback) {
 		if(typeof window.web3 == 'undefined') {
 			logError("Web3 is not enabled. Do you need to install MetaMask?");
 			return ERR_NO_WEB3;
@@ -243,14 +245,14 @@ function PresaleApi(logger, jQuery_instance) {
 				}
 
 				// if token contains ABI – do not make AJAX call, just load the contract
-				if(token.abi) {
-					loadTokenContract(token.abi);
+				if(config.token.abi) {
+					loadTokenContract(config.token.abi);
 				}
 				// if token doesn't contain ABI – load it through AJAX call and then load the contract
 				else {
 					jQuery3.ajax({
 						global: false,
-						url: token.abi_url || "abi/ERC721.json",
+						url: config.token.abi_url || "abi/ERC721.json",
 						dataType: "json",
 						success: function(data, textStatus, jqXHR) {
 							logInfo("ERC721 ABI loaded successfully");
@@ -264,14 +266,14 @@ function PresaleApi(logger, jQuery_instance) {
 				}
 
 				// if presale contains ABI – do not make AJAX call, just load the contract
-				if(presale.abi) {
-					loadPresaleContract(presale.abi);
+				if(config.presale.abi) {
+					loadPresaleContract(config.presale.abi);
 				}
 				// if presale doesn't contain ABI – load it through AJAX call and then load the contract
 				else {
 					jQuery3.ajax({
 						global: false,
-						url: presale.abi_url || "abi/Presale2.json",
+						url: config.presale.abi_url || "abi/Presale2.json",
 						dataType: "json",
 						success: function(data, textStatus, jqXHR) {
 							logInfo("Presale ABI loaded successfully");
@@ -288,7 +290,7 @@ function PresaleApi(logger, jQuery_instance) {
 				// helper function to load token contract by ABI
 				function loadTokenContract(abi) {
 					const contract = myWeb3.eth.contract(abi);
-					const address = token.address || token;
+					const address = config.token.address || config.token;
 					const instance = contract.at(address);
 					if(!instance.TOKEN_VERSION) {
 						const err = "Wrong ERC721 ABI format: TOKEN_VERSION is undefined";
@@ -331,7 +333,7 @@ function PresaleApi(logger, jQuery_instance) {
 				// helper function to load presale contract by ABI
 				function loadPresaleContract(abi) {
 					const contract = myWeb3.eth.contract(abi);
-					const address = presale.address || presale;
+					const address = config.presale.address || config.presale;
 					const instance = contract.at(address);
 					if(!instance.PRESALE_VERSION) {
 						const err = "Wrong Presale ABI format: PRESALE_VERSION is undefined";
