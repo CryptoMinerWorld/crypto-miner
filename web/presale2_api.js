@@ -650,8 +650,8 @@ function PresaleApi(logger, jQuery_instance) {
 						const balanceUSD = balanceETH * rate;
 						logInfo("ETH/USD exchange rate ", rate, " chest vault balance is ", balanceUSD, " USD");
 						tryCallback(callback, null, {
-							balance_eth: balanceETH,
-							balance_usd: balanceUSD
+							balance_eth: balanceETH.toFixed(2),
+							balance_usd: balanceUSD.toFixed(2)
 						});
 					}
 					else {
