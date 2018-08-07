@@ -453,7 +453,7 @@ jQuery3(document).ready(function() {
 		},
 		// presale2 address
 		{
-			address: "0x8a8c3980bb6e8602bfe13c7e0c492d26e3bcdfc0",
+			address: "0xaab2cc311e640344238acd666cca3f8558329fde",
 			abi_url: WEB_BASE + "abi/Presale2.json"
 		},
 		// callback handler
