@@ -197,7 +197,7 @@ function addCoupon() {
 	const freeGeodes = document.getElementById("free_geodes").value;
 
 	const errCode = presale.addCoupon(code, freeGems, freeGeodes, function(err, result) {
-		if(err || err > 0) {
+		if(err) {
 			return;
 		}
 		if(result.event === "transaction_sent") {
@@ -213,7 +213,7 @@ function useCoupon() {
 	const code = document.getElementById("use_coupon").value;
 
 	const errCode = presale.useCoupon(code, function(err, result) {
-		if(err || err > 0) {
+		if(err) {
 			return;
 		}
 		if(result.event === "transaction_sent") {
@@ -232,7 +232,7 @@ function buyGeodes() {
 	const qty = jQuery3("#geodes_num").val();
 	const ref = jQuery3("#referral_address").val().trim();
 	const errCode = presale.buyGeodes(qty, ref, function (err, result) {
-		if(err || err > 0) {
+		if(err) {
 			return;
 		}
 		if(result.event === "transaction_sent") {
@@ -328,10 +328,9 @@ jQuery3(document).ready(function() {
 		});
 		const columns = jQuery3(window).width() > 640? 4: 2;
 		const rows = Math.ceil(collection.length / columns);
-		let html = "";
-		html += '<h1 id="my_geodes_header">'+ collection.length + ' - Gemstone Worker Buddies</h1>';
-		html += '<h1 id="my_geodes_subheader"></h1>';
-		html += `
+		let html = `
+			<h1 id="my_geodes_header">{{collection.length}} - Gemstone Worker Buddies</h1>
+			<h1 id="my_geodes_subheader"></h1>
 			<div id="gem_sorting_options">
 				<select id="gem_sorting_by">
 					<option value="">Sort By</option>
@@ -472,7 +471,7 @@ jQuery3(document).ready(function() {
 
 			// load counters (presale state)
 			presale.presaleState(function(err, result) {
-				if(err || err > 0) {
+				if(err) {
 					load_and_reload_default_counters();
 					return;
 				}
@@ -483,7 +482,7 @@ jQuery3(document).ready(function() {
 			// load workshop
 			function reload_workshop() {
 				presale.getCollection(function(err, result) {
-					if(err || err > 0) {
+					if(err) {
 						return;
 					}
 					if(result.length > 0) {
@@ -492,7 +491,7 @@ jQuery3(document).ready(function() {
 
 						// inject number of geodes owned
 						presale.getGeodeBalance(function(err, result) {
-							if(err || err > 0) {
+							if(err) {
 								return;
 							}
 							jQuery3("#my_geodes_subheader").html(result + " - Founders Plot" + (result > 1? "s": "") + " of Land");
@@ -508,7 +507,7 @@ jQuery3(document).ready(function() {
 
 			// update counters each time a PresaleStateChanged event is received
 			presale.registerPresaleStateChangedEventListener(function(err, result) {
-				if(err || err > 0) {
+				if(err) {
 					return;
 				}
 				update_counters(result);
@@ -517,7 +516,7 @@ jQuery3(document).ready(function() {
 
 			// show success notification when coupon is created
 			presale.registerCouponAddedEventListener(function(err, result) {
-				if(err || err > 0) {
+				if(err) {
 					return;
 				}
 				logger.success("coupon added (expires ", result.expires, ")");
@@ -525,7 +524,7 @@ jQuery3(document).ready(function() {
 
 			// show success notification when coupon is consumed
 			presale.registerCouponConsumedEventListener(function(err, result) {
-				if(err || err > 0) {
+				if(err) {
 					return;
 				}
 				logger.success("received ", result.gems, " free gem(s)");
@@ -534,13 +533,20 @@ jQuery3(document).ready(function() {
 
 			// show success notification when geode is bought
 			presale.registerPurchaseCompleteEventListener(function(err, result) {
-				if(err || err > 0) {
+				if(err) {
 					return;
 				}
 				logger.success("successfully bought ", result.geodes, " geode(s) (" + result.gems + " gems)");
 				display_geode_bought_modal(result.geodes, result.gems);
 			});
 
+			// show notification when referral points received
+			presale.registerReferralPointsIssuedEventListener(function(err, result) {
+				if(err) {
+					return;
+				}
+				logger.success("received " + result.issued + " referral points");
+			});
 		}
 	);
 
@@ -609,7 +615,7 @@ function display_gem(gemId, color, level, grade, miningRate) {
 	});
 	if(grade.startsWith("A")) {
 		presale.getTokenCreationTime(gemId, function(err, result) {
-			if(err || err > 0) {
+			if(err) {
 				return;
 			}
 			const ageSeconds = (Date.now() / 1000 | 0) - result;
