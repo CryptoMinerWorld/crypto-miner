@@ -997,6 +997,24 @@
     {
       "constant": false,
       "inputs": [],
+      "name": "consumeAllReferralPoints",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "geodesPoints",
+          "type": "uint32"
+        },
+        {
+          "name": "gemsPoints",
+          "type": "uint32"
+        }
+      ],
       "name": "useReferralPoints",
       "outputs": [],
       "payable": false,
@@ -1155,5 +1173,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-08T15:51:15.942Z"
+  "updatedAt": "2018-08-08T22:22:13.097Z"
 }

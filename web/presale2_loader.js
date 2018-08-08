@@ -141,7 +141,7 @@ document.write(`
 				<tr><td>10 per Gem</td><td>20 per Geode</td></tr>
 				<tr><td><input id="points_gems" type="number" min="0" max="100" step="10" value="0"/></td>
 				<td><input id="points_geodes" type="number" min="0" max="200" step="20" value="0"/></td></tr>
-				<tr><td colspan="2"><span id="points_selected">0</span> of <span id="points_available">10</span></td></tr>
+				<tr><td colspan="2" style="text-align: center;"><span id="points_selected">0</span> points of <span id="points_available">10</span></td></tr>
 				<tr><td colspan="2"><input type="button" value="Buy" onclick="usePoints()" disabled/></td></tr>
 			</table>
 		</div>
