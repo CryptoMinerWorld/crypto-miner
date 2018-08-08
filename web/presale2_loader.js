@@ -135,14 +135,14 @@ document.write(`
 <div id="use_points_modal" class="overlay">
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
-		<h3>Use Referral Points</h3>
+		<h1>Use Referral Points</h1>
 		<div class="content">
 			<table>
 				<tr><td>10 per Gem</td><td>20 per Geode</td></tr>
 				<tr><td><input id="points_gems" type="number" min="10" max="100" step="10" value="0"/></td>
 				<td><input id="points_geodes" type="number" min="20" max="200" step="20" value="0"/></td></tr>
 				<tr><td colspan="2"><span id="points_selected">0</span> of <span id="points_available">10</span></td></tr>
-				<tr><td colspan="2"><input type="button" value="Buy" onclick="" disabled/></td></tr>
+				<tr><td colspan="2"><input type="button" value="Buy" onclick="usePoints()" disabled/></td></tr>
 			</table>
 		</div>
 	</div>
@@ -222,6 +222,10 @@ function addCoupon() {
 	if(errCode > 0) {
 		alert("Error: " + errCode);
 	}
+}
+
+function usePoints() {
+	
 }
 
 function useCoupon() {
@@ -508,7 +512,11 @@ jQuery3(document).ready(function() {
 						// prepare the link
 						link = "#use_points_modal";
 						// prepare modal data
-						
+						jQuery3("#points_available").html(value);
+						jQuery3("#points_gems").val(0);
+						jQuery3("#points_gems").prop("max", value);
+						jQuery3("#points_geodes").val(0);
+						jQuery3("#points_geodes").prop("max", value);
 					}
 					subheader.html(`<a href="${link}">${value}</a> &dash; Referral Points Available`);
 				}
@@ -643,6 +651,24 @@ jQuery3(document).ready(function() {
 		else {
 			element.removeClass("wrong_input");
 		}
+	});
+
+	jQuery3("#points_gems").on("change", function(e) {
+		const available = parseInt(jQuery3("#points_available").html());
+		const points_gems = parseInt(this.value);
+		const points_geodes = parseInt(jQuery3("#points_geodes").val());
+		const max_points_geodes = available - points_gems;
+		jQuery3("#points_geodes").prop("max", max_points_geodes);
+		jQuery3("#points_selected").html(points_gems + points_geodes);
+	});
+
+	jQuery3("#points_geodes").on("change", function(e) {
+		const available = parseInt(jQuery3("#points_available").html());
+		const points_gems = parseInt(jQuery3("#points_gems").val());
+		const points_geodes = parseInt(this.value);
+		const max_points_gems = available - points_geodes;
+		jQuery3("#points_gems").prop("max", max_points_gems);
+		jQuery3("#points_selected").html(points_gems + points_geodes);
 	});
 
 });

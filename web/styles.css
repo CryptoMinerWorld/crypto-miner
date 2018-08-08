@@ -105,6 +105,15 @@
 	text-align: center;
 }
 
+#use_points_modal .modal {
+	width: 400px;
+	font-size: 1.5em;
+}
+
+#use_points_modal input[type=button] {
+	font-size: 1em;
+}
+
 #goto_workshop_btn {
 	width: 300px;
 	height: 104px;
