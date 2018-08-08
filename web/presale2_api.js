@@ -876,18 +876,20 @@ function PresaleApi(logger, jQuery_instance) {
 				logError("Error receiving ReferralPointsIssued event: ", err);
 				return;
 			}
-			if(!(receipt && receipt.args && receipt.args._to && receipt.args.issued && receipt.args.total)) {
+			if(!(receipt && receipt.args && receipt.args._to && receipt.args.issued && receipt.args.left && receipt.args.total)) {
 				logError("ReferralPointsIssued event received in wrong format: wrong arguments - ", receipt);
 				return;
 			}
 			const to = receipt.args._to;
 			const issued = receipt.args.issued;
+			const left = receipt.args.left;
 			const total = receipt.args.total;
 			logInfo("ReferralPointsIssued(", to, ", ", issued, ", ", total, ")");
 			tryCallback(callback, null, {
 				event: "referral_points_issued",
 				to: to,
 				issued: issued.toNumber(),
+				left: left.toNumber(),
 				total: total.toNumber(),
 				txHash: receipt.transactionHash
 			});
@@ -913,19 +915,21 @@ function PresaleApi(logger, jQuery_instance) {
 				logError("Error receiving ReferralPointsConsumed event: ", err);
 				return;
 			}
-			if(!(receipt && receipt.args && receipt.args._by && receipt.args.used && receipt.args.left)) {
+			if(!(receipt && receipt.args && receipt.args._by && receipt.args.used && receipt.args.left && receipt.args.total)) {
 				logError("ReferralPointsConsumed event received in wrong format: wrong arguments - ", receipt);
 				return;
 			}
 			const by = receipt.args._by;
 			const used = receipt.args.used;
 			const left = receipt.args.left;
+			const total = receipt.args.total;
 			logInfo("ReferralPointsConsumed(", by, ", ", used, ", ", left, ")");
 			tryCallback(callback, null, {
 				event: "referral_points_issued",
 				by: by,
 				used: used.toNumber(),
 				left: left.toNumber(),
+				total: total.toNumber(),
 				txHash: receipt.transactionHash
 			});
 		});

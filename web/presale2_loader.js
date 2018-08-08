@@ -132,6 +132,20 @@ document.write(`
 		</div>
 	</div>
 </div>
+<div id="use_points_modal" class="overlay">
+	<a class="cancel" href="javascript:history.back()"></a>
+	<div class="modal">
+		<h3>Use Referral Points</h3>
+		<div class="content">
+			<table>
+				<tr><td>10 per Gem</td><td>20 per Geode</td></tr>
+				<tr><td><input id="points_gems" type="number" min="10" max="100" step="10" value="0"/></td>
+				<td><input id="points_geodes" type="number" min="20" max="200" step="20" value="0"/></td></tr>
+				<tr><td colspan="2"><input type="button" value="Buy" onclick="" style="width: 100%;"/></td></tr>
+			</table>
+		</div>
+	</div>
+</div>
 
 `);
 
@@ -330,7 +344,7 @@ jQuery3(document).ready(function() {
 		const columns = jQuery3(window).width() > 640? 4: 2;
 		const rows = Math.ceil(collection.length / columns);
 		let html = `
-			<h1 id="my_geodes_header">${collection.length} - Gemstone Worker Buddies</h1>
+			<h1 id="my_geodes_header">${collection.length} &dash; Gemstone Worker Buddies</h1>
 			<h1 id="my_geodes_subheader"></h1>
 			<h2 id="my_points_subheader"></h2>
 			<div id="gem_sorting_options">
@@ -484,6 +498,24 @@ jQuery3(document).ready(function() {
 				setTimeout(update_counters, 1023, result);
 			});
 
+			// update referral points counters and modal
+			function update_referral_points(value) {
+				const subheader = jQuery3("#my_points_subheader");
+				if(value > 0) {
+					let link = "";
+					if(value >= 10) {
+						// prepare the link
+						link = "#use_points_modal";
+						// prepare modal data
+						
+					}
+					subheader.html(`<a href="${link}">${value}</a> &dash; Referral Points Available`);
+				}
+				else {
+					subheader.html("");
+				}
+			}
+
 			// load workshop
 			function reload_workshop() {
 				presale.getCollection(function(err, result) {
@@ -499,17 +531,8 @@ jQuery3(document).ready(function() {
 							if(err) {
 								return;
 							}
-							jQuery3("#my_geodes_subheader").html(result.geodes + " - Founders Plot" + (result.geodes > 1? "s": "") + " of Land");
-							if(result.pointsLeft > 0) {
-								let link = "";
-								if(result.pointsLeft >= 10) {
-									link = "#";
-								}
-								jQuery3("#my_points_subheader").html(`<a href="${link}">${result.pointsLeft}</a> Referral Points Available`);
-							}
-							else {
-								jQuery3("#my_points_subheader").html("");
-							}
+							jQuery3("#my_geodes_subheader").html(result.geodes + " &dash; Founders Plot" + (result.geodes > 1? "s": "") + " of Land");
+							update_referral_points(result.pointsLeft);
 						});
 					}
 					else {
@@ -570,6 +593,16 @@ jQuery3(document).ready(function() {
 					return;
 				}
 				logger.success("received " + result.issued + " referral points");
+				update_referral_points(result.left);
+			});
+
+			// show notification when referral points consumed
+			presale.registerReferralPointsConsumedEventListener(function(err, result) {
+				if(err) {
+					return;
+				}
+				logger.success("received " + result.issued + " referral points");
+				update_referral_points(result.left);
 				reload_workshop();
 			});
 		}
