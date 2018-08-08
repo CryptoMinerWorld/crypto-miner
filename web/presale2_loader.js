@@ -500,7 +500,16 @@ jQuery3(document).ready(function() {
 								return;
 							}
 							jQuery3("#my_geodes_subheader").html(result.geodes + " - Founders Plot" + (result.geodes > 1? "s": "") + " of Land");
-							jQuery3("#my_points_subheader").html(result.pointsLeft > 0? (result.pointsLeft + " Referral Points Available"): "");
+							if(result.pointsLeft > 0) {
+								let link = "";
+								if(result.pointsLeft >= 10) {
+									link = "#";
+								}
+								jQuery3("#my_points_subheader").html(`<a href="${link}">${result.pointsLeft}</a> Referral Points Available`);
+							}
+							else {
+								jQuery3("#my_points_subheader").html("");
+							}
 						});
 					}
 					else {
