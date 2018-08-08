@@ -516,8 +516,8 @@ jQuery3(document).ready(function() {
 				if(err) {
 					return;
 				}
-				jQuery3("#founder_chest_total_amount_eth").val(result.balance_eth);
-				jQuery3("#founder_chest_total_amount_usd").val(result.balance_usd);
+				jQuery3("#founder_chest_total_amount_eth").html(result.balance_eth);
+				jQuery3("#founder_chest_total_amount_usd").html(result.balance_usd);
 			});
 
 			// update counters each time a PresaleStateChanged event is received
