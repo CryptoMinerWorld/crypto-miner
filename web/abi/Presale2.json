@@ -695,6 +695,11 @@
         },
         {
           "indexed": false,
+          "name": "left",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
           "name": "total",
           "type": "uint32"
         }
@@ -718,6 +723,11 @@
         {
           "indexed": false,
           "name": "left",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "total",
           "type": "uint32"
         }
       ],
@@ -966,6 +976,25 @@
       "type": "function"
     },
     {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "player",
+          "type": "address"
+        }
+      ],
+      "name": "getPackedBalances",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint112"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "constant": false,
       "inputs": [],
       "name": "useReferralPoints",
@@ -1126,5 +1155,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-07T00:42:25.125Z"
+  "updatedAt": "2018-08-08T15:51:15.942Z"
 }

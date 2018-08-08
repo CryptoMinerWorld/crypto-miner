@@ -600,7 +600,7 @@ function PresaleApi(logger, jQuery_instance) {
 				const left = result.dividedToIntegerBy(uint64).dividedToIntegerBy(uint64).modulo(0x10000);
 				const price = result.dividedToIntegerBy(uint64).modulo(uint64);
 				const priceIncreaseIn = result.modulo(uint64);
-				logInfo("sold: ", sold, " left: ", left, ", current price: ", price);
+				logInfo("sold: ", sold, " left: ", left, ", price: ", price, " price increase in: ", priceIncreaseIn);
 				tryCallback(callback, null, {
 					sold: sold.toNumber(),
 					left: left.toNumber(),
@@ -668,6 +668,45 @@ function PresaleApi(logger, jQuery_instance) {
 			});
 		});
 
+	};
+
+	/**
+	 * Retrieves amount of referral points owned by a particular address
+	 * @param callback a function to pass a result (if successful) or an error
+	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
+	 * if error occurred asynchronously - error code will be passed to callback
+	 */
+	this.getBalances = function(callback) {
+		if(!callback || {}.toString.call(callback) !== '[object Function]') {
+			logError("callback is undefined or is not a function");
+			return ERR_NO_CALLBACK;
+		}
+		if(!(myWeb3 && myAccount && presaleInstance)) {
+			logError("Presale API is not properly initialized. Reload the page.");
+			return ERR_NOT_INITIALIZED;
+		}
+		const owner = myAccount;
+		presaleInstance.getPackedBalances(owner, function(err, result) {
+			if(err) {
+				logError("Cannot get packed balances: ", err);
+				tryCallback(callback, err, null);
+				return;
+			}
+			logInfo("Address ", owner, " packed balances is ", result);
+
+			const tokens = result.dividedToIntegerBy(0x100000000).dividedToIntegerBy(0x100000000).dividedToIntegerBy(0x10000);
+			const geodes = result.dividedToIntegerBy(0x100000000).dividedToIntegerBy(0x100000000).modulo(0x10000);
+			const pointsLeft = result.dividedToIntegerBy(0x100000000).modulo(0x100000000);
+			const pointsTotal = result.modulo(0x100000000);
+			tryCallback(callback, null, {
+				gems: tokens.toNumber(),
+				geodes: geodes.toNumber(),
+				pointsLeft: pointsLeft.toNumber(),
+				pointsTotal: pointsTotal.toNumber()
+			});
+		});
+		// no sync errors – return 0
+		return 0;
 	};
 
 	/**

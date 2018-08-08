@@ -146,10 +146,10 @@ contract Presale2 is AccessControl {
   event PresaleStateChanged(uint16 sold, uint16 left, uint64 price, uint64 priceIncreaseIn);
 
   // fired in buyGeodes()
-  event ReferralPointsIssued(address indexed _to, uint32 issued, uint32 total);
+  event ReferralPointsIssued(address indexed _to, uint32 issued, uint32 left, uint32 total);
 
   // fired in useReferralPoints()
-  event ReferralPointsConsumed(address indexed _by, uint32 used, uint32 left);
+  event ReferralPointsConsumed(address indexed _by, uint32 used, uint32 left, uint32 total);
 
   // fired once coupon successfully added
   event CouponAdded(address indexed _by, uint256 indexed key, uint32 expires, uint8 freeGems, uint8 freePlots);
@@ -249,6 +249,12 @@ contract Presale2 is AccessControl {
     return uint160(geodesSold) << 144 | uint144(geodesLeft()) << 128 | uint128(currentPrice()) << 64 | priceIncreaseIn();
   }
 
+  // token balance, geodes balance, available referral points, total referral points earned as packed data structure
+  function getPackedBalances(address player) public constant returns (uint112) {
+    // pack and return
+    return uint112(gemContract.balanceOf(player)) << 80 | uint80(geodeBalances(player)) << 64 | uint64(unusedReferralPoints(player)) << 32 | referralPoints[player];
+  }
+
   // use referral points to get geode(s)
   function useReferralPoints() public {
     // call sender nicely - referral
@@ -283,7 +289,7 @@ contract Presale2 is AccessControl {
     }
 
     // emit an event
-    emit ReferralPointsConsumed(referral, pointsToConsume, unusedReferralPoints(referral));
+    emit ReferralPointsConsumed(referral, pointsToConsume, unusedReferralPoints(referral), referralPoints[referral]);
   }
 
   // how many referral points are available to consume
@@ -464,8 +470,8 @@ contract Presale2 is AccessControl {
       totalRefPoints += uint32(geodesToSell * 3);
 
       // emit events
-      emit ReferralPointsIssued(player, uint32(geodesToSell), referralPoints[player]);
-      emit ReferralPointsIssued(referral, uint32(geodesToSell * 2), referralPoints[referral]);
+      emit ReferralPointsIssued(player, uint32(geodesToSell), unusedReferralPoints(player), referralPoints[player]);
+      emit ReferralPointsIssued(referral, uint32(geodesToSell * 2), unusedReferralPoints(referral), referralPoints[referral]);
     }
 
     // if player buys 10 geodes and there are still additional geodes to sell
