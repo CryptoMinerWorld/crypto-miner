@@ -3,6 +3,10 @@
 	color: white;
 }
 
+#my_geodes_header a, #my_geodes_subheader a, #my_points_subheader a {
+	color: #ff00cd;
+}
+
 #my_geodes_header {
 	padding-top: 110px;
 }
