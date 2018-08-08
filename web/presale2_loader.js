@@ -277,6 +277,7 @@ jQuery3(document).ready(function() {
 	function update_counters(data) {
 		jQuery3(".counter").html(data.sold);
 		jQuery3("#geodePriceETH").html(data.currentPrice);
+		jQuery3("#priceIncrease").html(data.priceIncreaseIn);
 	}
 
 	function workshop_loading() {
@@ -525,7 +526,6 @@ jQuery3(document).ready(function() {
 					return;
 				}
 				update_counters(result);
-				reload_workshop();
 			});
 
 			// show success notification when coupon is created
@@ -551,6 +551,7 @@ jQuery3(document).ready(function() {
 					return;
 				}
 				logger.success("successfully bought ", result.geodes, " geode(s) (" + result.gems + " gems)");
+				reload_workshop();
 				display_geode_bought_modal(result.geodes, result.gems);
 			});
 
@@ -560,6 +561,7 @@ jQuery3(document).ready(function() {
 					return;
 				}
 				logger.success("received " + result.issued + " referral points");
+				reload_workshop();
 			});
 		}
 	);
