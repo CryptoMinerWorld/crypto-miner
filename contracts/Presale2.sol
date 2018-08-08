@@ -255,8 +255,8 @@ contract Presale2 is AccessControl {
     return uint112(gemContract.balanceOf(player)) << 80 | uint80(geodeBalances(player)) << 64 | uint64(unusedReferralPoints(player)) << 32 | referralPoints[player];
   }
 
-  // use referral points to get geode(s)
-  function useReferralPoints() public {
+  // use all referral points to get gem(s) and geode(s)
+  function consumeAllReferralPoints() public {
     // call sender nicely - referral
     address referral = msg.sender;
 
@@ -272,24 +272,32 @@ contract Presale2 is AccessControl {
     // how many gems to issue
     uint32 gemsToIssue = (unusedPoints % 20) / 10;
 
+    // delegate call to `__consumeRefPoints`
+    __consumeRefPoints(referral, geodesToIssue, gemsToIssue);
+  }
+
+  // use some referral points to get gem(s) / geode(s)
+  function useReferralPoints(uint32 geodesPoints, uint32 gemsPoints) public {
+    // call sender nicely - referral
+    address referral = msg.sender;
+
     // how many referral points to consume
-    uint32 pointsToConsume = geodesToIssue * 20 + gemsToIssue * 10;
+    uint32 pointsToConsume = geodesPoints + gemsPoints;
 
-    // update points consumed
-    referralPointsConsumed[referral] += pointsToConsume;
+    // there should be enough unused points
+    require(pointsToConsume <= unusedReferralPoints(referral));
 
-    // open geodes
-    if(geodesToIssue > 0) {
-      __openGeodes(uint16(geodesToIssue), referral);
-    }
+    // how many geodes to issue
+    uint32 geodesToIssue = geodesPoints / 20;
 
-    // issue gems
-    if(gemsToIssue > 0) {
-      __createGems(referral, uint8(gemsToIssue));
-    }
+    // how many gems to issue
+    uint32 gemsToIssue = gemsPoints / 10;
 
-    // emit an event
-    emit ReferralPointsConsumed(referral, pointsToConsume, unusedReferralPoints(referral), referralPoints[referral]);
+    // there should be something to issue
+    require(geodesToIssue > 0 || gemsToIssue > 0);
+
+    // delegate call to `__consumeRefPoints`
+    __consumeRefPoints(referral, geodesToIssue, gemsToIssue);
   }
 
   // how many referral points are available to consume
@@ -535,6 +543,28 @@ contract Presale2 is AccessControl {
 
     // increment it
     nextFreeGem++;
+  }
+
+  // consumes referral points
+  function __consumeRefPoints(address referral, uint32 geodesToIssue, uint32 gemsToIssue) private {
+    // how many referral points to consume
+    uint32 pointsToConsume = geodesToIssue * 20 + gemsToIssue * 10;
+
+    // update points consumed
+    referralPointsConsumed[referral] += pointsToConsume;
+
+    // open geodes
+    if(geodesToIssue > 0) {
+      __openGeodes(uint16(geodesToIssue), referral);
+    }
+
+    // issue gems
+    if(gemsToIssue > 0) {
+      __createGems(referral, uint8(gemsToIssue));
+    }
+
+    // emit an event
+    emit ReferralPointsConsumed(referral, pointsToConsume, unusedReferralPoints(referral), referralPoints[referral]);
   }
 
   // private function to create several geodes and send all

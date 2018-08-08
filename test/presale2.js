@@ -110,8 +110,8 @@ contract('Presale2', accounts => {
 		const account16Gems = await tk.balanceOf(accounts[16]);
 		const account1Geodes = await sale2.geodeBalances(accounts[1]);
 		const account16Geodes = await sale2.geodeBalances(accounts[16]);
-		await sale2.useReferralPoints({from: accounts[1]});
-		await sale2.useReferralPoints({from: accounts[16]});
+		await sale2.consumeAllReferralPoints({from: accounts[1]});
+		await sale2.consumeAllReferralPoints({from: accounts[16]});
 		assert(account1Gems.plus(gemsInGeode).eq(await tk.balanceOf(accounts[1])), "wrong token balance for referral account 1");
 		assert(account16Gems.plus(1).eq(await tk.balanceOf(accounts[16])), "wrong token balance for referral account 16");
 		assert(account1Geodes.plus(1).eq(await sale2.geodeBalances(accounts[1])), "wrong geode balance for referral account 1");
