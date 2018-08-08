@@ -331,6 +331,7 @@ jQuery3(document).ready(function() {
 		let html = `
 			<h1 id="my_geodes_header">${collection.length} - Gemstone Worker Buddies</h1>
 			<h1 id="my_geodes_subheader"></h1>
+			<h2 id="my_points_subheader"></h2>
 			<div id="gem_sorting_options">
 				<select id="gem_sorting_by">
 					<option value="">Sort By</option>
@@ -452,7 +453,7 @@ jQuery3(document).ready(function() {
 				abi_url: WEB_BASE + "abi/ERC721.json"
 			},
 			presale: {
-				address: "0xaab2cc311e640344238acd666cca3f8558329fde",
+				address: "0x12e554148b44cabd189bace1f11a957b777ca115",
 				abi_url: WEB_BASE + "abi/Presale2.json"
 			},
 			chestVault: "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"
@@ -492,12 +493,13 @@ jQuery3(document).ready(function() {
 						// display the collection of gems
 						workshop_display_gems(result);
 
-						// inject number of geodes owned
-						presale.getGeodeBalance(function(err, result) {
+						// inject number of geodes, referral points owned
+						presale.getBalances(function(err, result) {
 							if(err) {
 								return;
 							}
-							jQuery3("#my_geodes_subheader").html(result + " - Founders Plot" + (result > 1? "s": "") + " of Land");
+							jQuery3("#my_geodes_subheader").html(result.geodes + " - Founders Plot" + (result.geodes > 1? "s": "") + " of Land");
+							jQuery3("#my_points_subheader").html(result.pointsLeft > 0? (result.pointsLeft + " Referral Points Available"): "");
 						});
 					}
 					else {

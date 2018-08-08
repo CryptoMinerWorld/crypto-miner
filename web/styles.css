@@ -1,12 +1,10 @@
-#my_geodes_header {
-	padding-top: 110px;
+#my_geodes_header, #my_geodes_subheader, #my_points_subheader {
 	text-align: center;
 	color: white;
 }
 
-#my_geodes_subheader {
-	text-align: center;
-	color: white;
+#my_geodes_header {
+	padding-top: 110px;
 }
 
 #gem_sorting_options {
@@ -165,6 +163,10 @@
 
 	#my_geodes_header, #my_geodes_subheader {
 		font-size: 1.5em;
+	}
+
+	#my_points_subheader {
+		font-size: 1em;
 	}
 
 	#my_geodes td {
