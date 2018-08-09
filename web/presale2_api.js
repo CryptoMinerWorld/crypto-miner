@@ -948,7 +948,14 @@ function PresaleApi(logger, jQuery_instance) {
 				logError("Error receiving ReferralPointsConsumed event: ", err);
 				return;
 			}
-			if(!(receipt && receipt.args && receipt.args._by && receipt.args.used && receipt.args.left && receipt.args.total)) {
+			if(!(receipt && receipt.args
+					&& receipt.args._by
+					&& receipt.args.used
+					&& receipt.args.left
+					&& receipt.args.total
+					&& receipt.args.geodes
+					&& receipt.args.gems
+				)) {
 				logError("ReferralPointsConsumed event received in wrong format: wrong arguments - ", receipt);
 				return;
 			}
@@ -956,6 +963,8 @@ function PresaleApi(logger, jQuery_instance) {
 			const used = receipt.args.used;
 			const left = receipt.args.left;
 			const total = receipt.args.total;
+			const geodes = receipt.args.geodes;
+			const gems = receipt.args.gems;
 			logInfo("ReferralPointsConsumed(", by, ", ", used, ", ", left, ")");
 			tryCallback(callback, null, {
 				event: "referral_points_issued",
@@ -963,10 +972,12 @@ function PresaleApi(logger, jQuery_instance) {
 				used: used.toNumber(),
 				left: left.toNumber(),
 				total: total.toNumber(),
+				geodes: geodes.toNumber(),
+				gems: gems.toNumber(),
 				txHash: receipt.transactionHash
 			});
 		});
-		logInfo("Successfully registered ReferralPointsConsumed(address, uint32, uint32) event listener");
+		logInfo("Successfully registered ReferralPointsConsumed(address, uint32, uint32, uint16, uint8) event listener");
 		// no sync errors – return 0
 		return 0;
 	};
