@@ -43,7 +43,7 @@ module.exports = async function(deployer, network, accounts) {
 		tokenAddress = "0xd78ea452d277060af6283ca7065b5f5330a62a7a";
 		gem = Gem.at(tokenAddress);
 
-		saleAddress = "0xaab2cc311e640344238acd666cca3f8558329fde";
+		saleAddress = "0x12e554148b44cabd189bace1f11a957b777ca115";
 		sale = Sale.at(saleAddress);
 	}
 
