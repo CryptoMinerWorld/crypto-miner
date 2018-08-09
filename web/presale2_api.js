@@ -497,10 +497,6 @@ function PresaleApi(logger, jQuery_instance) {
 			return ERR_WRONG_INPUT;
 		}
 		const key = myWeb3.sha3(code);
-		if(!presaleInstance.addCoupon) {
-			logError("Wrong presale ABI: addCoupon is undefined");
-			return ERR_WRONG_ABI;
-		}
 		logInfo("adding coupon ", code, ", ", key, ", ", freeGems);
 		presaleInstance.addCoupon(key, freeGems, freePlots, function(err, result) {
 			if(err) {
@@ -528,24 +524,16 @@ function PresaleApi(logger, jQuery_instance) {
 			logError("coupon code is not set or empty");
 			return ERR_WRONG_INPUT;
 		}
-		if(!presaleInstance.useCoupon) {
-			logError("Wrong presale ABI: useCoupon is undefined");
-			return ERR_WRONG_ABI;
-		}
-		if(!presaleInstance.isCouponValid) {
-			logError("Wrong presale ABI: isCouponValid is undefined");
-			return ERR_WRONG_ABI;
-		}
 		presaleInstance.isCouponValid(code, function(err, result) {
 			if(err) {
 				logError("cannot check coupon validity: ", err);
-				tryCallback(callback, err, null);
+				tryCallbackIfProvided(callback, err, null);
 				return;
 			}
 			logInfo("coupon ", code, " is ", result? "": "in", "valid");
 			if(!result) {
 				logError("invalid coupon: ", code);
-				tryCallback(callback, "invalid coupon " + code, null);
+				tryCallbackIfProvided(callback, "invalid coupon " + code, null);
 				return;
 			}
 			logInfo("using coupon ", code);
@@ -559,6 +547,51 @@ function PresaleApi(logger, jQuery_instance) {
 				tryCallbackIfProvided(callback, null, {
 					event: "transaction_sent",
 					name: "useCoupon",
+					txHash: result
+				});
+
+				// TODO: wait for this particular event to return and call callback
+			});
+		});
+	};
+
+	this.usePoints = function(gemPoints, geodePoints, callback) {
+		if(!(myWeb3 && myAccount && presaleInstance)) {
+			logError("Presale API is not properly initialized. Reload the page.");
+			return ERR_NOT_INITIALIZED;
+		}
+		if(!code || !code.trim || code.trim().length === 0) {
+			logError("coupon code is not set or empty");
+			return ERR_WRONG_INPUT;
+		}
+		const owner = myAccount;
+		presaleInstance.unusedReferralPoints(owner, function(err, result) {
+			if(err) {
+				logError("cannot check referral points balance: ", err);
+				tryCallbackIfProvided(callback, err, null);
+				return;
+			}
+			result = result.toNumber();
+			logInfo("account ", owner, " has ", result, " unused referral points");
+			gemPoints = parseInt(gemPoints);
+			geodePoints = parseInt(geodePoints);
+			if(gemPoints + geodePoints > result) {
+				const err = "insufficient referral points: " + result + " available, " + (gemPoints + geodePoints) + " required";
+				logError(err);
+				tryCallbackIfProvided(callback, err, null);
+				return;
+			}
+			logInfo("using referral points ", gemPoints, "/", geodePoints);
+			presaleInstance.useReferralPoints(geodePoints, gemPoints, function(err, result) {
+				if(err) {
+					logError("useReferralPoints() transaction wasn't sent: ", err.toString().split("\n")[0]);
+					tryCallbackIfProvided(callback, err, null);
+					return;
+				}
+				logInfo("useReferralPoints() transaction sent: ", result);
+				tryCallbackIfProvided(callback, null, {
+					event: "transaction_sent",
+					name: "useReferralPoints",
 					txHash: result
 				});
 
@@ -724,10 +757,6 @@ function PresaleApi(logger, jQuery_instance) {
 		if(!(myWeb3 && myAccount && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
-		}
-		if(!presaleInstance.isCouponValid) {
-			logError("Wrong presale ABI: isCouponValid is undefined");
-			return ERR_WRONG_ABI;
 		}
 		presaleInstance.isCouponValid(code, function(err, result) {
 			if(err) {
