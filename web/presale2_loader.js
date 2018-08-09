@@ -216,7 +216,7 @@ function addCoupon() {
 			return;
 		}
 		if(result.event === "transaction_sent") {
-			logger.success("Add Coupon transaction sent")
+			logger.success("Add Coupon transaction sent");
 		}
 	});
 	if(errCode > 0) {
@@ -225,7 +225,23 @@ function addCoupon() {
 }
 
 function usePoints() {
-	
+	const gemPoints = document.getElementById("points_gems").value;
+	const geodePoints = document.getElementById("points_geodes").value;
+
+	const errCode = presale.usePoints(gemPoints, geodePoints, function(err, result) {
+		if(err) {
+			return;
+		}
+		if(result.event === "transaction_sent") {
+			logger.success("Use Referral Points transaction sent");
+		}
+	});
+	if(errCode > 0) {
+		alert("Error: " + errCode);
+	}
+
+	// hide the modal
+	location.href = "#";
 }
 
 function useCoupon() {
@@ -236,7 +252,7 @@ function useCoupon() {
 			return;
 		}
 		if(result.event === "transaction_sent") {
-			logger.success("Use Coupon transaction sent")
+			logger.success("Use Coupon transaction sent");
 		}
 	});
 	if(errCode > 0) {
@@ -255,7 +271,7 @@ function buyGeodes() {
 			return;
 		}
 		if(result.event === "transaction_sent") {
-			logger.success("Buy Geode(s) transaction sent")
+			logger.success("Buy Geode(s) transaction sent");
 		}
 	});
 	if(errCode > 0) {
