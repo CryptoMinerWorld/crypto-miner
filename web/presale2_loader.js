@@ -617,7 +617,7 @@ jQuery3(document).ready(function() {
 				if(err) {
 					return;
 				}
-				logger.success("received " + result.issued + " referral points");
+				logger.success("received ", result.issued, " referral points");
 				update_referral_points(result.left);
 			});
 
@@ -626,7 +626,7 @@ jQuery3(document).ready(function() {
 				if(err) {
 					return;
 				}
-				logger.success("received " + result.issued + " referral points");
+				logger.success("spent ", result.used, " points for ", result.gems, " gems and ", result.geodes, " geodes");
 				update_referral_points(result.left);
 				reload_workshop();
 			});
