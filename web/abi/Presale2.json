@@ -729,6 +729,16 @@
           "indexed": false,
           "name": "total",
           "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "geodes",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "name": "gems",
+          "type": "uint8"
         }
       ],
       "name": "ReferralPointsConsumed",
@@ -1007,11 +1017,11 @@
       "constant": false,
       "inputs": [
         {
-          "name": "geodesPoints",
+          "name": "geodePoints",
           "type": "uint32"
         },
         {
-          "name": "gemsPoints",
+          "name": "gemPoints",
           "type": "uint32"
         }
       ],
@@ -1173,5 +1183,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-09T14:12:24.011Z"
+  "updatedAt": "2018-08-09T15:37:18.145Z"
 }
