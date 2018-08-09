@@ -32,7 +32,7 @@
 }
 
 #my_geodes {
-	margin: 32px 0px 32px 0px;
+	margin: 32px 0;
 	color: white;
 }
 
@@ -90,23 +90,11 @@
 	color: #ff00cd;
 }
 
-#geode_bought_modal .modal {
-	width: 400px;
-	text-align: center;
-}
-
-#metamask_info_modal .modal {
-	width: 400px;
-	text-align: center;
-}
-
-#wrong_network_modal .modal {
-	width: 400px;
+#geode_bought_modal .modal, #metamask_info_modal .modal, #wrong_network_modal .modal {
 	text-align: center;
 }
 
 #use_points_modal .modal {
-	width: 400px;
 	font-size: 1.5em;
 }
 
