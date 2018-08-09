@@ -3,9 +3,6 @@ const ROLE_COUPON_MANAGER = 0x00000100;
 
 const Gem = artifacts.require("./GemERC721");
 const Sale = artifacts.require("./CouponSale");
-const Sale2 = artifacts.require("./Presale2");
-const AddressUtils = artifacts.require("./AddressUtils");
-const StringUtils = artifacts.require("./StringUtils");
 
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
@@ -38,7 +35,7 @@ module.exports = async function(deployer, network, accounts) {
 
 	// for test network we redeploy first Presale
 	if(network === "development") {
-		tokenAddress = "0xd78ea452d277060af6283ca7065b5f5330a62a7a";
+		tokenAddress = "0x165c417549d653d979e1dc17036e012a2e479967";
 		gem = Gem.at(tokenAddress);
 
 		console.log("deploying Presale (development network)");
@@ -51,6 +48,7 @@ module.exports = async function(deployer, network, accounts) {
 	console.log("gem:        " + tokenAddress);
 	console.log("sale:       " + saleAddress);
 	console.log("______________________________________________________");
+	console.log("supply:     " + await gem.totalSupply());
 	console.log("gems:       " + await gem.balanceOf(accounts[0]));
 	console.log("geodes:     " + await sale.geodeBalances(accounts[0]));
 
