@@ -162,3 +162,10 @@ a.button:hover {
 	box-shadow:0 12px 23px rgba(0, 0, 0, 0.23), 0 10px 10px rgba(0, 0, 0, 0.19);
 }
 */
+
+@media only screen and (max-width: 640px) {
+	.modal {
+		margin: 150px auto;
+		width: 300px;
+	}
+}
