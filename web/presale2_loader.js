@@ -3,7 +3,7 @@ document.write(`
 <div id="geode_qty_modal" class="overlay">
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
-		<h3>Buying Geodes</h3>
+		<h1>Buying Geodes</h1>
 		<div class="content">
 			<select id="geodes_num" class="responsive_margin" style="margin-bottom: 0;">
 				<option value="1">1</option>
