@@ -469,11 +469,11 @@ jQuery3(document).ready(function() {
 		// configuration
 		{
 			token: {
-				address: "0xd78ea452d277060af6283ca7065b5f5330a62a7a",
+				address: "0x165c417549d653d979e1dc17036e012a2e479967",
 				abi_url: WEB_BASE + "abi/ERC721.json"
 			},
 			presale: {
-				address: "0x5c73708a769e4bc2d83c94fbac760c46c3d96410",
+				address: "0xeef784678d4da8530aabb0dbe637a1e191146dc1",
 				abi_url: WEB_BASE + "abi/Presale2.json"
 			},
 			chestVault: "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"
