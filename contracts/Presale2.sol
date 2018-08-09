@@ -149,7 +149,7 @@ contract Presale2 is AccessControl {
   event ReferralPointsIssued(address indexed _to, uint32 issued, uint32 left, uint32 total);
 
   // fired in useReferralPoints()
-  event ReferralPointsConsumed(address indexed _by, uint32 used, uint32 left, uint32 total);
+  event ReferralPointsConsumed(address indexed _by, uint32 used, uint32 left, uint32 total, uint16 geodes, uint8 gems);
 
   // fired once coupon successfully added
   event CouponAdded(address indexed _by, uint256 indexed key, uint32 expires, uint8 freeGems, uint8 freePlots);
@@ -277,24 +277,24 @@ contract Presale2 is AccessControl {
   }
 
   // use some referral points to get gem(s) / geode(s)
-  function useReferralPoints(uint32 geodesPoints, uint32 gemsPoints) public {
+  function useReferralPoints(uint32 geodePoints, uint32 gemPoints) public {
     // call sender nicely - referral
     address referral = msg.sender;
 
     // how many referral points to consume
-    uint32 pointsToConsume = geodesPoints + gemsPoints;
+    uint32 pointsToConsume = gemPoints + geodePoints;
 
     // there should be enough unused points
     require(pointsToConsume <= unusedReferralPoints(referral));
 
     // how many geodes to issue
-    uint32 geodesToIssue = geodesPoints / 20;
+    uint32 geodesToIssue = geodePoints / 20;
 
     // how many gems to issue
-    uint32 gemsToIssue = gemsPoints / 10;
+    uint32 gemsToIssue = gemPoints / 10;
 
-    // there should be something to issue
-    require(geodesToIssue > 0 || gemsToIssue > 0);
+    // there should be something to issue, overflow check
+    require(geodesToIssue > 0 || gemsToIssue > 0 && gemsToIssue <= 0xFF);
 
     // delegate call to `__consumeRefPoints`
     __consumeRefPoints(referral, geodesToIssue, gemsToIssue);
@@ -564,7 +564,14 @@ contract Presale2 is AccessControl {
     }
 
     // emit an event
-    emit ReferralPointsConsumed(referral, pointsToConsume, unusedReferralPoints(referral), referralPoints[referral]);
+    emit ReferralPointsConsumed(
+      referral,
+      pointsToConsume,
+      unusedReferralPoints(referral),
+      referralPoints[referral],
+      uint16(geodesToIssue),
+      uint8(gemsToIssue)
+    );
   }
 
   // private function to create several geodes and send all
