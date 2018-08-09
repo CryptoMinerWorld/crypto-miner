@@ -94,11 +94,11 @@
 	text-align: center;
 }
 
-#use_points_modal .modal {
+#use_points_modal .modal, #geode_qty_modal .modal {
 	font-size: 1.5em;
 }
 
-#use_points_modal input[type=button] {
+#use_points_modal input[type=button], #geode_qty_modal input[type=button] {
 	font-size: 1em;
 }
 
