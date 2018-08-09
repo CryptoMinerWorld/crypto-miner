@@ -142,7 +142,7 @@ document.write(`
 				<tr><td><input id="points_gems" type="number" min="0" max="100" step="10" value="0"/></td>
 				<td><input id="points_geodes" type="number" min="0" max="200" step="20" value="0"/></td></tr>
 				<tr><td colspan="2" style="text-align: center;"><span id="points_selected">0</span> points of <span id="points_available">10</span></td></tr>
-				<tr><td colspan="2"><input type="button" value="Buy" onclick="usePoints()" disabled/></td></tr>
+				<tr><td colspan="2"><input id="use_points_btn" type="button" value="Buy" onclick="usePoints()" disabled/></td></tr>
 			</table>
 		</div>
 	</div>
@@ -676,6 +676,7 @@ jQuery3(document).ready(function() {
 		const max_points_geodes = available - points_gems;
 		jQuery3("#points_geodes").prop("max", max_points_geodes);
 		jQuery3("#points_selected").html(points_gems + points_geodes);
+		jQuery3("#use_points_btn").prop("disabled", !(points_gems > 0 && points_gems % 10 == 0 || points_geodes > 0 && points_geodes % 20 == 0));
 	});
 
 	jQuery3("#points_geodes").on("change", function(e) {
@@ -685,6 +686,7 @@ jQuery3(document).ready(function() {
 		const max_points_gems = available - points_geodes;
 		jQuery3("#points_gems").prop("max", max_points_gems);
 		jQuery3("#points_selected").html(points_gems + points_geodes);
+		jQuery3("#use_points_btn").prop("disabled", !(points_gems > 0 && points_gems % 10 == 0 || points_geodes > 0 && points_geodes % 20 == 0));
 	});
 
 });
