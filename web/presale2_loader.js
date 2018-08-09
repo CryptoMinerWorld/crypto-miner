@@ -489,7 +489,7 @@ jQuery3(document).ready(function() {
 				abi_url: WEB_BASE + "abi/ERC721.json"
 			},
 			presale: {
-				address: "0xeef784678d4da8530aabb0dbe637a1e191146dc1",
+				address: "0xad7637dcfdb1f439dea4cd8e3743c80b01299ab5",
 				abi_url: WEB_BASE + "abi/Presale2.json"
 			},
 			chestVault: "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"
