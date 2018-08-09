@@ -560,10 +560,16 @@ function PresaleApi(logger, jQuery_instance) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
 		}
-		if(!code || !code.trim || code.trim().length === 0) {
-			logError("coupon code is not set or empty");
+		if(gemPoints && isNaN(gemPoints)) {
+			logError("gem points is not a valid number");
 			return ERR_WRONG_INPUT;
 		}
+		if(geodePoints && isNaN(geodePoints)) {
+			logError("geode points is not a valid number");
+			return ERR_WRONG_INPUT;
+		}
+		gemPoints = gemPoints? parseInt(gemPoints): 0;
+		geodePoints = geodePoints? parseInt(geodePoints): 0;
 		const owner = myAccount;
 		presaleInstance.unusedReferralPoints(owner, function(err, result) {
 			if(err) {
@@ -573,8 +579,6 @@ function PresaleApi(logger, jQuery_instance) {
 			}
 			result = result.toNumber();
 			logInfo("account ", owner, " has ", result, " unused referral points");
-			gemPoints = parseInt(gemPoints);
-			geodePoints = parseInt(geodePoints);
 			if(gemPoints + geodePoints > result) {
 				const err = "insufficient referral points: " + result + " available, " + (gemPoints + geodePoints) + " required";
 				logError(err);
