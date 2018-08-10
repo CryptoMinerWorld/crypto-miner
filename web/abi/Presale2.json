@@ -690,7 +690,7 @@
         },
         {
           "indexed": false,
-          "name": "issued",
+          "name": "amount",
           "type": "uint32"
         },
         {
@@ -717,7 +717,7 @@
         },
         {
           "indexed": false,
-          "name": "used",
+          "name": "amount",
           "type": "uint32"
         },
         {
@@ -1007,7 +1007,7 @@
     {
       "constant": false,
       "inputs": [],
-      "name": "consumeAllReferralPoints",
+      "name": "useAllReferralPoints",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -1017,11 +1017,7 @@
       "constant": false,
       "inputs": [
         {
-          "name": "geodePoints",
-          "type": "uint32"
-        },
-        {
-          "name": "gemPoints",
+          "name": "points",
           "type": "uint32"
         }
       ],
@@ -1183,5 +1179,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-09T15:37:18.145Z"
+  "updatedAt": "2018-08-10T07:37:01.703Z"
 }
