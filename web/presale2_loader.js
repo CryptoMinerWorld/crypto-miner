@@ -529,10 +529,9 @@ jQuery3(document).ready(function() {
 						link = "#use_points_modal";
 						// prepare modal data
 						jQuery3("#points_available").html(value);
-						jQuery3("#points_gems").val(0);
-						jQuery3("#points_gems").prop("max", value);
-						jQuery3("#points_geodes").val(0);
-						jQuery3("#points_geodes").prop("max", value);
+						jQuery3("#points_selected").html(0);
+						jQuery3("#points_to_spend").val(0);
+						jQuery3("#points_to_spend").prop("max", value);
 					}
 					subheader.html(`<a href="${link}">${value}</a> &dash; Referral Points Available`);
 				}
