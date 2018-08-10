@@ -10,7 +10,7 @@ import "./Random.sol";
  */
 contract Presale2 is AccessControl {
   // smart contract version, incremented manually on Presale API changes
-  uint32 public constant PRESALE_VERSION = 0x10;
+  uint32 public constant PRESALE_VERSION = 0x11;
 
   // structure used as temporary storage for gem data
   struct Gem {
@@ -146,10 +146,10 @@ contract Presale2 is AccessControl {
   event PresaleStateChanged(uint16 sold, uint16 left, uint64 price, uint64 priceIncreaseIn);
 
   // fired in buyGeodes()
-  event ReferralPointsIssued(address indexed _to, uint32 issued, uint32 left, uint32 total);
+  event ReferralPointsIssued(address indexed _to, uint32 amount, uint32 left, uint32 total);
 
   // fired in useReferralPoints()
-  event ReferralPointsConsumed(address indexed _by, uint32 used, uint32 left, uint32 total, uint16 geodes, uint8 gems);
+  event ReferralPointsConsumed(address indexed _by, uint32 amount, uint32 left, uint32 total, uint16 geodes, uint8 gems);
 
   // fired once coupon successfully added
   event CouponAdded(address indexed _by, uint256 indexed key, uint32 expires, uint8 freeGems, uint8 freePlots);
@@ -256,48 +256,50 @@ contract Presale2 is AccessControl {
   }
 
   // use all referral points to get gem(s) and geode(s)
-  function consumeAllReferralPoints() public {
-    // call sender nicely - referral
-    address referral = msg.sender;
-
-    // how many unused points referral has
-    uint32 unusedPoints = unusedReferralPoints(referral);
-
-    // there should be at least 10 unused points
-    require(unusedPoints >= 10);
-
-    // how many geodes to issue
-    uint32 geodesToIssue = unusedPoints / 20;
-
-    // how many gems to issue
-    uint32 gemsToIssue = (unusedPoints % 20) / 10;
-
-    // delegate call to `__consumeRefPoints`
-    __consumeRefPoints(referral, geodesToIssue, gemsToIssue);
+  function useAllReferralPoints() public {
+    // delegate call to `useReferralPoints`
+    useReferralPoints(unusedReferralPoints(msg.sender));
   }
 
   // use some referral points to get gem(s) / geode(s)
-  function useReferralPoints(uint32 geodePoints, uint32 gemPoints) public {
+  function useReferralPoints(uint32 points) public {
     // call sender nicely - referral
     address referral = msg.sender;
 
-    // how many referral points to consume
-    uint32 pointsToConsume = gemPoints + geodePoints;
-
-    // there should be enough unused points
-    require(pointsToConsume <= unusedReferralPoints(referral));
+    // there should be at least 10 unused points
+    require(points >= 10 && points <= unusedReferralPoints(referral));
 
     // how many geodes to issue
-    uint32 geodesToIssue = geodePoints / 20;
+    uint32 geodesToIssue = points / 20;
 
     // how many gems to issue
-    uint32 gemsToIssue = gemPoints / 10;
+    uint32 gemsToIssue = (points % 20) / 10;
 
-    // there should be something to issue, overflow check
-    require(geodesToIssue > 0 || gemsToIssue > 0 && gemsToIssue <= 0xFF);
+    // how many referral points to consume
+    uint32 pointsToConsume = (points / 10) * 10;
 
-    // delegate call to `__consumeRefPoints`
-    __consumeRefPoints(referral, geodesToIssue, gemsToIssue);
+    // update points consumed
+    referralPointsConsumed[referral] += pointsToConsume;
+
+    // open geodes
+    if(geodesToIssue > 0) {
+      __openGeodes(uint16(geodesToIssue), referral);
+    }
+
+    // issue gems
+    if(gemsToIssue > 0) {
+      __createGems(referral, uint8(gemsToIssue));
+    }
+
+    // emit an event
+    emit ReferralPointsConsumed(
+      referral,
+      pointsToConsume,
+      unusedReferralPoints(referral),
+      referralPoints[referral],
+      uint16(geodesToIssue),
+      uint8(gemsToIssue)
+    );
   }
 
   // how many referral points are available to consume
@@ -543,35 +545,6 @@ contract Presale2 is AccessControl {
 
     // increment it
     nextFreeGem++;
-  }
-
-  // consumes referral points
-  function __consumeRefPoints(address referral, uint32 geodesToIssue, uint32 gemsToIssue) private {
-    // how many referral points to consume
-    uint32 pointsToConsume = geodesToIssue * 20 + gemsToIssue * 10;
-
-    // update points consumed
-    referralPointsConsumed[referral] += pointsToConsume;
-
-    // open geodes
-    if(geodesToIssue > 0) {
-      __openGeodes(uint16(geodesToIssue), referral);
-    }
-
-    // issue gems
-    if(gemsToIssue > 0) {
-      __createGems(referral, uint8(gemsToIssue));
-    }
-
-    // emit an event
-    emit ReferralPointsConsumed(
-      referral,
-      pointsToConsume,
-      unusedReferralPoints(referral),
-      referralPoints[referral],
-      uint16(geodesToIssue),
-      uint8(gemsToIssue)
-    );
   }
 
   // private function to create several geodes and send all
