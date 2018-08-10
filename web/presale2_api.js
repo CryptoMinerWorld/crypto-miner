@@ -51,7 +51,7 @@ function PresaleApi(logger, jQuery_instance) {
 	// ---------- START SECTION 1: Constants and Variables ----------
 	// version constants define smart contracts compatible with this API
 	const TOKEN_VERSION = 0x3;
-	const PRESALE_VERSION = 0x10;
+	const PRESALE_VERSION = 0x11;
 
 	// jQuery instance to use
 	const jQuery3 = jQuery_instance || jQuery || $;
@@ -555,21 +555,16 @@ function PresaleApi(logger, jQuery_instance) {
 		});
 	};
 
-	this.usePoints = function(gemPoints, geodePoints, callback) {
+	this.usePoints = function(points, callback) {
 		if(!(myWeb3 && myAccount && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
 		}
-		if(gemPoints && isNaN(gemPoints)) {
-			logError("gem points is not a valid number");
+		if(points && isNaN(points)) {
+			logError("referral points is not a valid number");
 			return ERR_WRONG_INPUT;
 		}
-		if(geodePoints && isNaN(geodePoints)) {
-			logError("geode points is not a valid number");
-			return ERR_WRONG_INPUT;
-		}
-		gemPoints = gemPoints? parseInt(gemPoints): 0;
-		geodePoints = geodePoints? parseInt(geodePoints): 0;
+		points = points? parseInt(points): 0;
 		const owner = myAccount;
 		presaleInstance.unusedReferralPoints(owner, function(err, result) {
 			if(err) {
@@ -579,14 +574,14 @@ function PresaleApi(logger, jQuery_instance) {
 			}
 			result = result.toNumber();
 			logInfo("account ", owner, " has ", result, " unused referral points");
-			if(gemPoints + geodePoints > result) {
-				const err = "insufficient referral points: " + result + " available, " + (gemPoints + geodePoints) + " required";
+			if(points > result) {
+				const err = "insufficient referral points: " + result + " available, " + points + " required";
 				logError(err);
 				tryCallbackIfProvided(callback, err, null);
 				return;
 			}
-			logInfo("using referral points ", gemPoints, "/", geodePoints);
-			presaleInstance.useReferralPoints(geodePoints, gemPoints, function(err, result) {
+			logInfo("using referral points ", points);
+			presaleInstance.useReferralPoints(points, function(err, result) {
 				if(err) {
 					logError("useReferralPoints() transaction wasn't sent: ", err.toString().split("\n")[0]);
 					tryCallbackIfProvided(callback, err, null);
@@ -909,19 +904,19 @@ function PresaleApi(logger, jQuery_instance) {
 				logError("Error receiving ReferralPointsIssued event: ", err);
 				return;
 			}
-			if(!(receipt && receipt.args && receipt.args._to && receipt.args.issued && receipt.args.left && receipt.args.total)) {
+			if(!(receipt && receipt.args && receipt.args._to && receipt.args.amount && receipt.args.left && receipt.args.total)) {
 				logError("ReferralPointsIssued event received in wrong format: wrong arguments - ", receipt);
 				return;
 			}
 			const to = receipt.args._to;
-			const issued = receipt.args.issued;
+			const amount = receipt.args.amount;
 			const left = receipt.args.left;
 			const total = receipt.args.total;
-			logInfo("ReferralPointsIssued(", to, ", ", issued, ", ", total, ")");
+			logInfo("ReferralPointsIssued(", to, ", ", amount, ", ", total, ")");
 			tryCallback(callback, null, {
 				event: "referral_points_issued",
 				to: to,
-				issued: issued.toNumber(),
+				amount: amount.toNumber(),
 				left: left.toNumber(),
 				total: total.toNumber(),
 				txHash: receipt.transactionHash
@@ -950,7 +945,7 @@ function PresaleApi(logger, jQuery_instance) {
 			}
 			if(!(receipt && receipt.args
 					&& receipt.args._by
-					&& receipt.args.used
+					&& receipt.args.amount
 					&& receipt.args.left
 					&& receipt.args.total
 					&& receipt.args.geodes
@@ -960,16 +955,16 @@ function PresaleApi(logger, jQuery_instance) {
 				return;
 			}
 			const by = receipt.args._by;
-			const used = receipt.args.used;
+			const amount = receipt.args.amount;
 			const left = receipt.args.left;
 			const total = receipt.args.total;
 			const geodes = receipt.args.geodes;
 			const gems = receipt.args.gems;
-			logInfo("ReferralPointsConsumed(", by, ", ", used, ", ", left, ")");
+			logInfo("ReferralPointsConsumed(", by, ", ", amount, ", ", left, ", ", geodes, ", ", gems,  ")");
 			tryCallback(callback, null, {
 				event: "referral_points_issued",
 				by: by,
-				used: used.toNumber(),
+				amount: amount.toNumber(),
 				left: left.toNumber(),
 				total: total.toNumber(),
 				geodes: geodes.toNumber(),
