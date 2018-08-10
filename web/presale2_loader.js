@@ -668,7 +668,7 @@ jQuery3(document).ready(function() {
 		}
 	});
 
-	jQuery3("#points_to_spend").on("change", function(e) {
+	jQuery3("#points_to_spend").on("input", function(e) {
 		const th = jQuery3(this);
 		const points = parseInt(th.val());
 		const geodes = Math.floor(points / 20);

@@ -154,7 +154,7 @@
 }
 
 .wrong_input {
-	border-color: red;
+	border: 2px solid red !important;
 }
 
 @media only screen and (max-width: 640px) {
