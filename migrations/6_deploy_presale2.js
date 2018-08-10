@@ -38,10 +38,10 @@ module.exports = async function(deployer, network, accounts) {
 
 	// for test network we redeploy first Presale
 	if(network === "development") {
-		tokenAddress = "0x165c417549d653d979e1dc17036e012a2e479967";
+		tokenAddress = "0x5bfc66060cf5deb655fd51dfceca3a24794f5ae0";
 		gem = Gem.at(tokenAddress);
 
-		saleAddress = "0xeef784678d4da8530aabb0dbe637a1e191146dc1";
+		saleAddress = "0xd4be83a9a31c04ebc93e5b3f5d8375c989183a1d";
 		sale = Sale.at(saleAddress);
 	}
 
