@@ -157,6 +157,10 @@
 	border: 2px solid red !important;
 }
 
+input[type=button][disabled=true]:hover {
+	background: #333333 !important;
+}
+
 @media only screen and (max-width: 640px) {
 	#my_geodes_header {
 		padding-top: 125px;
