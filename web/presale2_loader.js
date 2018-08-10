@@ -139,9 +139,10 @@ document.write(`
 		<div class="content">
 			<table style="table-layout: fixed;">
 				<tr><td>10 per Gem</td><td>20 per Geode</td></tr>
-				<tr><td><input id="points_gems" type="number" min="0" max="100" step="10" value="0"/></td>
-				<td><input id="points_geodes" type="number" min="0" max="200" step="20" value="0"/></td></tr>
+				<tr><td colspan="2"><input id="points_to_spend" type="range" min="0" max="10" step="10" value="0"/></td></tr>
 				<tr><td colspan="2" style="text-align: center;"><span id="points_selected">0</span> points of <span id="points_available">10</span></td></tr>
+				<tr><td><span id="referral_gems">No</span> Gem<span id="referral_gems_plural">s</span></td>
+				<td><span id="referral_geodes">No</span> Geode<span id="referral_geodes_plural">s</span></td></tr>
 				<tr><td colspan="2"><input id="use_points_btn" type="button" value="Buy" onclick="usePoints()" disabled/></td></tr>
 			</table>
 		</div>
@@ -225,10 +226,9 @@ function addCoupon() {
 }
 
 function usePoints() {
-	const gemPoints = document.getElementById("points_gems").value;
-	const geodePoints = document.getElementById("points_geodes").value;
+	const points = document.getElementById("points_to_spend").value;
 
-	const errCode = presale.usePoints(gemPoints, geodePoints, function(err, result) {
+	const errCode = presale.usePoints(points, function(err, result) {
 		if(err) {
 			return;
 		}
@@ -669,26 +669,18 @@ jQuery3(document).ready(function() {
 		}
 	});
 
-	jQuery3("#points_gems").on("change", function(e) {
-		const available = parseInt(jQuery3("#points_available").html());
-		const points_gems = parseInt(this.value);
-		const points_geodes = parseInt(jQuery3("#points_geodes").val());
-		const max_points_geodes = available - points_gems;
-		jQuery3("#points_geodes").prop("max", max_points_geodes);
-		jQuery3("#points_selected").html(points_gems + points_geodes);
-		jQuery3("#use_points_btn").prop("disabled", !(points_gems > 0 && points_gems % 10 == 0 || points_geodes > 0 && points_geodes % 20 == 0));
+	jQuery3("#points_to_spend").on("change", function(e) {
+		const th = jQuery3(this);
+		const points = parseInt(th.val());
+		const geodes = Math.ceil(points / 20);
+		const gems = Math.ceil((points % 20) / 10);
+		jQuery3("#referral_geodes").html(geodes > 0? geodes: "No");
+		jQuery3("#referral_geodes_plural").html(geodes == 1? "": "s");
+		jQuery3("#referral_gems").html(gems > 0? gems: "No");
+		jQuery3("referral_gems_plural").hrml(gems == 1? "": "s");
+		jQuery3("#points_selected").html(points);
+		jQuery3("#use_points_btn").prop("disabled", geodes == 0 && gems == 0);
 	});
-
-	jQuery3("#points_geodes").on("change", function(e) {
-		const available = parseInt(jQuery3("#points_available").html());
-		const points_gems = parseInt(jQuery3("#points_gems").val());
-		const points_geodes = parseInt(this.value);
-		const max_points_gems = available - points_geodes;
-		jQuery3("#points_gems").prop("max", max_points_gems);
-		jQuery3("#points_selected").html(points_gems + points_geodes);
-		jQuery3("#use_points_btn").prop("disabled", !(points_gems > 0 && points_gems % 10 == 0 || points_geodes > 0 && points_geodes % 20 == 0));
-	});
-
 });
 
 // Auxiliary function to open a pop up when geode is bought
