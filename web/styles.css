@@ -157,7 +157,7 @@
 	border: 2px solid red !important;
 }
 
-#geode_qty_modal input[type=button][disabled=true]:hover {
+#use_points_modal input[type=button][disabled=true]:hover {
 	background: #333333 !important;
 }
 
