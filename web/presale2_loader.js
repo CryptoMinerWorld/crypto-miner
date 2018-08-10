@@ -677,7 +677,7 @@ jQuery3(document).ready(function() {
 		jQuery3("#referral_geodes").html(geodes > 0? geodes: "No");
 		jQuery3("#referral_geodes_plural").html(geodes == 1? "": "s");
 		jQuery3("#referral_gems").html(gems > 0? gems: "No");
-		jQuery3("referral_gems_plural").hrml(gems == 1? "": "s");
+		jQuery3("referral_gems_plural").html(gems == 1? "": "s");
 		jQuery3("#points_selected").html(points);
 		jQuery3("#use_points_btn").prop("disabled", geodes == 0 && gems == 0);
 	});
