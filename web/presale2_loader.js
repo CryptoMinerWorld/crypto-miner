@@ -485,11 +485,11 @@ jQuery3(document).ready(function() {
 		// configuration
 		{
 			token: {
-				address: "0x165c417549d653d979e1dc17036e012a2e479967",
+				address: "0x5bfc66060cf5deb655fd51dfceca3a24794f5ae0",
 				abi_url: WEB_BASE + "abi/ERC721.json"
 			},
 			presale: {
-				address: "0xad7637dcfdb1f439dea4cd8e3743c80b01299ab5",
+				address: "0x846bf97f6838543c8f04f0d60703bd8431481124",
 				abi_url: WEB_BASE + "abi/Presale2.json"
 			},
 			chestVault: "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"
@@ -617,7 +617,7 @@ jQuery3(document).ready(function() {
 				if(err) {
 					return;
 				}
-				logger.success("received ", result.issued, " referral points");
+				logger.success("received ", result.amount, " referral points");
 				update_referral_points(result.left);
 			});
 
@@ -626,7 +626,7 @@ jQuery3(document).ready(function() {
 				if(err) {
 					return;
 				}
-				logger.success("spent ", result.used, " points for ", result.gems, " gems and ", result.geodes, " geodes");
+				logger.success("spent ", result.amount, " points for ", result.gems, " gems and ", result.geodes, " geodes");
 				update_referral_points(result.left);
 				reload_workshop();
 			});
