@@ -522,16 +522,20 @@ jQuery3(document).ready(function() {
 			// update referral points counters and modal
 			function update_referral_points(value) {
 				const subheader = jQuery3("#my_points_subheader");
+				// prepare modal data
+				jQuery3("#points_available").html(value);
+				jQuery3("#points_to_spend").val("0");
+				jQuery3("#points_to_spend").prop("max", value);
+				jQuery3("#referral_geodes").html("No");
+				jQuery3("#referral_geodes_plural").html("s");
+				jQuery3("#referral_gems").html("No");
+				jQuery3("referral_gems_plural").html("s");
+				jQuery3("#points_selected").html("0");
 				if(value > 0) {
 					let link = "";
 					if(value >= 10) {
 						// prepare the link
 						link = "#use_points_modal";
-						// prepare modal data
-						jQuery3("#points_available").html(value);
-						jQuery3("#points_selected").html(0);
-						jQuery3("#points_to_spend").val(0);
-						jQuery3("#points_to_spend").prop("max", value);
 					}
 					subheader.html(`<a href="${link}">${value}</a> &dash; Referral Points Available`);
 				}
@@ -626,7 +630,6 @@ jQuery3(document).ready(function() {
 					return;
 				}
 				logger.success("spent ", result.amount, " points for ", result.gems, " gems and ", result.geodes, " geodes");
-				update_referral_points(result.left);
 				reload_workshop();
 			});
 		}
