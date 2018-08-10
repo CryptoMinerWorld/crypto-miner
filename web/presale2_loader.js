@@ -672,8 +672,8 @@ jQuery3(document).ready(function() {
 	jQuery3("#points_to_spend").on("change", function(e) {
 		const th = jQuery3(this);
 		const points = parseInt(th.val());
-		const geodes = Math.ceil(points / 20);
-		const gems = Math.ceil((points % 20) / 10);
+		const geodes = Math.floor(points / 20);
+		const gems = Math.floor((points % 20) / 10);
 		jQuery3("#referral_geodes").html(geodes > 0? geodes: "No");
 		jQuery3("#referral_geodes_plural").html(geodes == 1? "": "s");
 		jQuery3("#referral_gems").html(gems > 0? gems: "No");
