@@ -672,6 +672,18 @@ jQuery3(document).ready(function() {
 	jQuery3("#GetGeodeButton").css("cursor", "pointer").on("click", function () {
 		if(presale.getWeb3()) {
 			if(presale.getNetworkId() == REQUIRED_NETWORK_ID) {
+				// check owner geodes balance and disable referral input if balance > 0
+				presale.getBalances(function(err, result) {
+					if(err) {
+						return;
+					}
+					const referral_address = jQuery3("#referral_address");
+					referral_address.prop("disabled", result.geodes > 0);
+					if(result.geodes > 0) {
+						referral_address.val("");
+					}
+				});
+				// the modal is opened asynchronously, we do not wait until referral address input is disabled/enabled
 				location.href = "#geode_qty_modal";
 			}
 			else {
