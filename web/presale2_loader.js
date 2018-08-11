@@ -667,6 +667,13 @@ jQuery3(document).ready(function() {
 				reload_workshop();
 				display_coupons_used_modal(result.geodes, result.gems);
 			});
+
+			// pre-fill referral address
+			const urlParams = new URLSearchParams(location.search);
+			const referral_address = urlParams.get("ref");
+			if(referral_address) {
+				jQuery3("#referral_address").val(referral_address);
+			}
 		}
 	);
 
