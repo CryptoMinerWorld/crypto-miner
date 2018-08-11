@@ -393,6 +393,9 @@ jQuery3(document).ready(function() {
 			<h1 id="my_geodes_header">${collection.length} &dash; Gemstone Worker Buddies</h1>
 			<h1 id="my_geodes_subheader"></h1>
 			<h2 id="my_points_subheader"></h2>
+			<h2 id="create_ref_link_subheader">
+				<input id="create_ref_link_btn" type="button" onclick="create_ref_link()" value="Create Referral Link"/>
+			</h2>
 			<div id="gem_sorting_options">
 				<select id="gem_sorting_by">
 					<option value="">Sort By</option>
@@ -762,6 +765,11 @@ function display_coupons_used_modal(geodes, gems) {
 	if(location.pathname.indexOf("workshop") < 0) {
 		location.href = "#coupons_used_modal";
 	}
+}
+
+// create referral link function
+function create_ref_link() {
+	jQuery3("#create_ref_link_subheader").html(`<input type="text" value="${location.origin}${location.pathname}${location.search}${location.search?'&':'?'}ref=${presale.getDefaultAccount()}${location.hash}" onclick="this.select();document.execCommand('copy');" readonly/>`);
 }
 
 // Auxiliary functions to draw gems list in a workshop

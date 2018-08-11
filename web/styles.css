@@ -1,9 +1,9 @@
-#my_geodes_header, #my_geodes_subheader, #my_points_subheader {
+#my_geodes_header, #my_geodes_subheader, #my_points_subheader, #create_ref_link_subheader {
 	text-align: center;
 	color: white;
 }
 
-#my_geodes_header a, #my_geodes_subheader a, #my_points_subheader a {
+#my_geodes_header a, #my_geodes_subheader a, #my_points_subheader a, #create_ref_link_subheader a {
 	color: #ff00cd;
 }
 
@@ -180,7 +180,7 @@
 		font-size: 1.5em;
 	}
 
-	#my_points_subheader {
+	#my_points_subheader, #create_ref_link_subheader {
 		font-size: 1em;
 	}
 
