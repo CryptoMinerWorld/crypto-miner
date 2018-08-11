@@ -90,7 +90,7 @@
 	color: #ff00cd;
 }
 
-#geode_bought_modal .modal, #metamask_info_modal .modal, #wrong_network_modal .modal {
+#geode_bought_modal .modal, #coupons_used_modal .modal, #metamask_info_modal .modal, #wrong_network_modal .modal {
 	text-align: center;
 }
 
@@ -203,7 +203,7 @@
 		display: table;
 	}
 
-	#geode_bought_modal .modal {
+	#geode_bought_modal .modal, #coupons_used_modal .modal {
 		margin-top: 150px;
 		width: 320px;
 	}
@@ -217,11 +217,11 @@
 		background-size: 270px 94px;
 	}
 
-	#geode_bought_modal h1 {
+	#geode_bought_modal h1, #coupons_used_modal h1 {
 		font-size: 2em;
 	}
 
-	#geode_bought_modal h5 {
+	#geode_bought_modal h5, #coupons_used_modal h5 {
 		font-size: 1.2em;
 	}
 
