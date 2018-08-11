@@ -542,7 +542,7 @@ jQuery3(document).ready(function() {
 					points_html += `${value} &dash; Referral Points Available`;
 					if(value >= 10) {
 						// prepare the button
-						points_html += `<br/><input id="my_points_btn" type="button" onclick="window.location = '#use_points_modal'" value="User Referral Points"/>`;
+						points_html += `<br/><input id="my_points_btn" type="button" onclick="window.location = '#use_points_modal'" value="Use Referral Points"/>`;
 					}
 				}
 				subheader.html(points_html);
