@@ -77,6 +77,23 @@ document.write(`
 		</div>
 	</div>
 </div>
+<div id="coupons_used_modal" class="overlay">
+	<a class="cancel" href="javascript:history.back()"></a>
+	<div class="modal">
+		<div class="content">
+			<h1><span class="coupons_used"></span> Coupons Used!</h1>
+			<h5 class="responsive_margin">
+				Successfully obtained
+				<span id="coupons_geodes">
+					<span id="geodes_obtained"></span> Geode<span id="geodes_obtained_plural"></span>
+				</span>
+				<span id="coupons_and"> and </span>
+				<span id="coupons_gems">1 Gem</span>
+			</h5>
+			<input id="goto_workshop_btn" type="button" value="" onclick="location.href = '/workshop';"/>
+		</div>
+	</div>
+</div>
 <div id="metamask_info_modal" class="overlay">
 	<a class="cancel" href="javascript:history.back()"></a>
 	<div class="modal">
@@ -640,6 +657,7 @@ jQuery3(document).ready(function() {
 				}
 				logger.success("spent ", result.amount, " points for ", result.gems, " gems and ", result.geodes, " geodes");
 				reload_workshop();
+				display_coupons_used_modal(result.geodes, result.gems);
 			});
 		}
 	);
@@ -701,6 +719,18 @@ function display_geode_bought_modal(geodes, gems) {
 	jQuery3(".gems_received").html(gems);
 	if(location.pathname.indexOf("workshop") < 0) {
 		location.href = "#geode_bought_modal";
+	}
+}
+
+// Auxiliary function to open a pop up when coupons are used
+function display_coupons_used_modal(geodes, gems) {
+	jQuery3("#coupons_geodes").toggle(geodes > 0);
+	jQuery3("#geodes_obtained").html(geodes);
+	jQuery3("#geodes_obtained_plural").html(geodes > 1? "": "s");
+	jQuery3("#coupons_and").toggle(geodes > 0 && gems > 0);
+	jQuery3("#coupons_gems").toggle(gems > 0);
+	if(location.pathname.indexOf("workshop") < 0) {
+		location.href = "#coupons_used_modal";
 	}
 }
 
