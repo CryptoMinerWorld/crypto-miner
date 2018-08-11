@@ -704,11 +704,12 @@ function PresaleApi(logger, jQuery_instance) {
 
 	/**
 	 * Retrieves amount of referral points owned by a particular address
+	 * @param owner an address to query balance for, optional
 	 * @param callback a function to pass a result (if successful) or an error
 	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
 	 * if error occurred asynchronously - error code will be passed to callback
 	 */
-	this.getBalances = function(callback) {
+	this.getBalancesFor = function(owner, callback) {
 		if(!callback || {}.toString.call(callback) !== '[object Function]') {
 			logError("callback is undefined or is not a function");
 			return ERR_NO_CALLBACK;
@@ -717,7 +718,6 @@ function PresaleApi(logger, jQuery_instance) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
 		}
-		const owner = myAccount;
 		presaleInstance.getPackedBalances(owner, function(err, result) {
 			if(err) {
 				logError("Cannot get packed balances: ", err);
@@ -739,6 +739,17 @@ function PresaleApi(logger, jQuery_instance) {
 		});
 		// no sync errors – return 0
 		return 0;
+	};
+
+
+	/**
+	 * Retrieves amount of referral points owned by a particular address
+	 * @param callback a function to pass a result (if successful) or an error
+	 * @return {number} positive error code, if error occurred synchronously, zero otherwise
+	 * if error occurred asynchronously - error code will be passed to callback
+	 */
+	this.getBalances = function(callback) {
+		return this.getBalancesFor(myAccount, callback);
 	};
 
 	/**

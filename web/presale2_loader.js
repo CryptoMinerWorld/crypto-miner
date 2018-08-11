@@ -701,7 +701,19 @@ jQuery3(document).ready(function() {
 			element.addClass("wrong_input");
 		}
 		else {
-			element.removeClass("wrong_input");
+			// get balance for the address input as referral and check if its a valid referral
+			presale.getBalancesFor(val, function(err, result) {
+				if(err) {
+					element.addClass("wrong_input");
+					return;
+				}
+				if(result > 0) {
+					element.removeClass("wrong_input");
+				}
+				else {
+					element.addClass("wrong_input");
+				}
+			});
 		}
 	});
 
