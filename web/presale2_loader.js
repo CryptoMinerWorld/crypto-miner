@@ -537,17 +537,15 @@ jQuery3(document).ready(function() {
 				jQuery3("#referral_gems").html("No");
 				jQuery3("referral_gems_plural").html("s");
 				jQuery3("#points_selected").html("0");
+				let points_html = ``;
 				if(value > 0) {
-					let link = "";
+					points_html += `${value} &dash; Referral Points Available`;
 					if(value >= 10) {
-						// prepare the link
-						link = "#use_points_modal";
+						// prepare the button
+						points_html += `<br/><input id="my_points_btn" type="button" onclick="window.location = '#use_points_modal'" value="User Referral Points"/>`;
 					}
-					subheader.html(`<a href="${link}">${value}</a> &dash; Referral Points Available`);
 				}
-				else {
-					subheader.html("");
-				}
+				subheader.html(points_html);
 			}
 
 			// load workshop
