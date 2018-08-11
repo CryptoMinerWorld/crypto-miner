@@ -171,6 +171,18 @@
 	font-size: 0.85em;
 }
 
+#create_ref_link_subheader input[type=text] {
+	background: black;
+	color: white;
+	border: none;
+	font-size: 0.65em;
+	cursor: pointer;
+}
+
+#create_ref_link_subheader input[type=text]:hover {
+	background: #a0007a;
+}
+
 @media only screen and (max-width: 640px) {
 	#my_geodes_header {
 		padding-top: 125px;
