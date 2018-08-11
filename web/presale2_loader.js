@@ -587,6 +587,13 @@ jQuery3(document).ready(function() {
 							}
 							jQuery3("#my_geodes_subheader").html(result.geodes + " &dash; Founders Plot" + (result.geodes > 1? "s": "") + " of Land");
 							update_referral_points(result.pointsLeft);
+
+							// enable / disable referral address input depending on the geodes balance
+							const referral_address = jQuery3("#referral_address");
+							referral_address.prop("disabled", result.geodes > 0);
+							if(result.geodes > 0) {
+								referral_address.val("");
+							}
 						});
 					}
 					else {
@@ -672,18 +679,6 @@ jQuery3(document).ready(function() {
 	jQuery3("#GetGeodeButton").css("cursor", "pointer").on("click", function () {
 		if(presale.getWeb3()) {
 			if(presale.getNetworkId() == REQUIRED_NETWORK_ID) {
-				// check owner geodes balance and disable referral input if balance > 0
-				presale.getBalances(function(err, result) {
-					if(err) {
-						return;
-					}
-					const referral_address = jQuery3("#referral_address");
-					referral_address.prop("disabled", result.geodes > 0);
-					if(result.geodes > 0) {
-						referral_address.val("");
-					}
-				});
-				// the modal is opened asynchronously, we do not wait until referral address input is disabled/enabled
 				location.href = "#geode_qty_modal";
 			}
 			else {
