@@ -394,7 +394,7 @@ jQuery3(document).ready(function() {
 			<h1 id="my_geodes_subheader"></h1>
 			<h2 id="my_points_subheader"></h2>
 			<h2 id="create_ref_link_subheader">
-				<input id="create_ref_link_btn" type="button" onclick="create_ref_link()" value="Create Referral Link"/>
+				${ref_link_btn_html}
 			</h2>
 			<div id="gem_sorting_options">
 				<select id="gem_sorting_by">
@@ -768,9 +768,19 @@ function display_coupons_used_modal(geodes, gems) {
 }
 
 // create referral link function
-function create_ref_link() {
-	jQuery3("#create_ref_link_subheader").html(`<input type="text" value="${location.origin}${location.pathname}${location.search}${location.search?'&':'?'}ref=${presale.getDefaultAccount()}#geode_qty_modal" onclick="this.select();document.execCommand('copy');this.style.display='none';" title='Click to Copy to Clipboard' readonly/>`);
+function show_ref_link() {
+	jQuery3("#create_ref_link_subheader").html(`<input id="ref_link_text" type="text" value="https://cryptominerworld.com/founders_geode_pre-sale/?ref=${presale.getDefaultAccount()}#geode_qty_modal" onclick="copy_ref_link()" title='Click to Copy to Clipboard' readonly/>`);
 }
+
+// copy ref link to clipboard
+function copy_ref_link() {
+	jQuery3("#ref_link_text").select();
+	document.execCommand('copy');
+	jQuery3("#create_ref_link_subheader").html(ref_link_btn_html);
+}
+
+// ref link button html
+const ref_link_btn_html = `<input id="create_ref_link_btn" type="button" onclick="show_ref_link()" value="Show Referral Link"/>`;
 
 // Auxiliary functions to draw gems list in a workshop
 function display_gem(gemId, color, level, grade, miningRate) {
