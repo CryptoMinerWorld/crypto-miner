@@ -314,7 +314,7 @@ jQuery3(document).ready(function() {
 		jQuery3("#geodePriceETH").html(data.currentPrice);
 		jQuery3("#priceIncrease").html(data.priceIncreaseIn);
 
-		const discount = 1000 * (0.1 - data.currentPrice);
+		const discount = Math.round(1000 * (0.1 - data.currentPrice));
 		jQuery3("#geodeDiscountAmount").html(discount);
 		if(discount <= 0) {
 			jQuery3("#discountContainer").hide();
