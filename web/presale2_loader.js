@@ -700,24 +700,24 @@ jQuery3(document).ready(function() {
 		const val = element.val().trim();
 		const err_container = jQuery3("#ref_addr_err_msg");
 		err_container.html("");
-		if(val && !presale.getWeb3().isAddress(val)) {
-			element.addClass("wrong_input");
-			err_container.html("not a valid Ethereum address");
-		}
-		else {
-			// get balance for the address input as referral and check if its a valid referral
-			presale.getBalancesFor(val, function(err, result) {
-				if(err) {
-					return;
-				}
-				if(result.geodes > 0) {
-					element.removeClass("wrong_input");
-				}
-				else {
-					element.addClass("wrong_input");
-					err_container.html("this address cannot be used as a referral");
-				}
-			});
+		element.removeClass("wrong_input");
+		if(val) {
+			if(!presale.getWeb3().isAddress(val)) {
+				element.addClass("wrong_input");
+				err_container.html("not a valid Ethereum address");
+			}
+			else {
+				// get balance for the address input as referral and check if its a valid referral
+				presale.getBalancesFor(val, function(err, result) {
+					if(err) {
+						return;
+					}
+					if(result.geodes == 0) {
+						element.addClass("wrong_input");
+						err_container.html("this address cannot be used as a referral");
+					}
+				});
+			}
 		}
 	});
 
