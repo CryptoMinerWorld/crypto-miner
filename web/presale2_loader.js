@@ -707,7 +707,7 @@ jQuery3(document).ready(function() {
 					element.addClass("wrong_input");
 					return;
 				}
-				if(result > 0) {
+				if(result.geodes > 0) {
 					element.removeClass("wrong_input");
 				}
 				else {
