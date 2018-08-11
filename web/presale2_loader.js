@@ -83,7 +83,7 @@ document.write(`
 		<div class="content">
 			<h1><span class="coupons_used"></span> Coupons Used!</h1>
 			<h5 class="responsive_margin">
-				Successfully obtained
+				Successfully obtained<br/>
 				<span id="coupons_geodes">
 					<span id="geodes_obtained"></span> Geode<span id="geodes_obtained_plural"></span>
 				</span>
