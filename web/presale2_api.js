@@ -962,7 +962,7 @@ function PresaleApi(logger, jQuery_instance) {
 			const gems = receipt.args.gems;
 			logInfo("ReferralPointsConsumed(", by, ", ", amount, ", ", left, ", ", geodes, ", ", gems,  ")");
 			tryCallback(callback, null, {
-				event: "referral_points_issued",
+				event: "referral_points_consumed",
 				by: by,
 				amount: amount.toNumber(),
 				left: left.toNumber(),
@@ -1002,7 +1002,7 @@ function PresaleApi(logger, jQuery_instance) {
 			const gems = receipt.args.gems;
 			logInfo("GeodesOpened(", by, ", ", geodes, ", ", gems, ")");
 			tryCallback(callback, null, {
-				event: "referral_points_issued",
+				event: "geodes_opened",
 				by: by,
 				geodes: geodes.toNumber(),
 				gems: gems.toNumber(),
