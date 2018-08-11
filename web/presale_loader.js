@@ -21,7 +21,7 @@ document.write(`
 		</div>
 	</div>
 </div>
-<div id="gem_modal" class="overlayGemModalWorkshop">
+<div id="gem_modal" class="overlay">
 	<a class="cancel" href="#"></a>
 	<div class="modal">
 		<div class="content">
