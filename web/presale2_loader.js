@@ -1,7 +1,7 @@
 // inject all the required modal windows
 document.write(`
 <div id="geode_qty_modal" class="overlay">
-	<a class="cancel" href="javascript:history.back()"></a>
+	<a class="cancel" href="#"></a>
 	<div class="modal">
 		<h1>Buying Geodes</h1>
 		<div class="content">
