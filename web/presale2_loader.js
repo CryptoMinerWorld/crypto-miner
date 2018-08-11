@@ -769,7 +769,7 @@ function display_coupons_used_modal(geodes, gems) {
 
 // create referral link function
 function create_ref_link() {
-	jQuery3("#create_ref_link_subheader").html(`<input type="text" value="${location.origin}${location.pathname}${location.search}${location.search?'&':'?'}ref=${presale.getDefaultAccount()}#use_points_modal" onclick="this.select();document.execCommand('copy');" title='Click to Copy to Clipboard' readonly/>`);
+	jQuery3("#create_ref_link_subheader").html(`<input type="text" value="${location.origin}${location.pathname}${location.search}${location.search?'&':'?'}ref=${presale.getDefaultAccount()}#use_points_modal" onclick="this.select();document.execCommand('copy');this.style.display='none';" title='Click to Copy to Clipboard' readonly/>`);
 }
 
 // Auxiliary functions to draw gems list in a workshop
