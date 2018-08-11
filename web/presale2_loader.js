@@ -595,6 +595,7 @@ jQuery3(document).ready(function() {
 							// enable / disable referral address input depending on the geodes balance
 							const referral_address = jQuery3("#referral_address");
 							referral_address.prop("disabled", result.geodes > 0);
+							referral_address.toggle(result.geodes == 0);
 							if(result.geodes > 0) {
 								referral_address.val("");
 							}
