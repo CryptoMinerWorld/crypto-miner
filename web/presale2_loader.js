@@ -371,6 +371,7 @@ jQuery3(document).ready(function() {
 		const columns = jQuery3(window).width() > 640? 4: 2;
 		const rows = Math.ceil(collection.length / columns);
 		let html = `
+			<div id="WorkshopLoading">
 			<h1 id="my_geodes_header">${collection.length} &dash; Gemstone Worker Buddies</h1>
 			<h1 id="my_geodes_subheader"></h1>
 			<h2 id="my_points_subheader"></h2>
@@ -429,7 +430,7 @@ jQuery3(document).ready(function() {
 			}
 			html += "</tr>\n";
 		}
-		html += "</table>\n";
+		html += "</table>\n</div>\n";
 		jQuery3("#WorkshopLoading").parent().html(html);
 		function sort(by, order) {
 			const byId = (x, y) => {
