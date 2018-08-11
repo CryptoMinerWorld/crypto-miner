@@ -157,8 +157,9 @@
 	border: 2px solid red !important;
 }
 
-#use_points_modal input[type=button][disabled=true]:hover {
-	background: #333333 !important;
+#my_points_btn {
+	font-size: 1em;
+	height: 1.5em;
 }
 
 @media only screen and (max-width: 640px) {
