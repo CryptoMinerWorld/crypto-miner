@@ -5,7 +5,7 @@ document.write(`
 	<div class="modal">
 		<h1>Buying Geodes</h1>
 		<div class="content">
-			<select id="geodes_num" class="responsive_margin" style="margin-bottom: 0;">
+			<select id="geodes_num" class="responsive_margin" style="margin-bottom: 1em;">
 				<option value="1">1</option>
 				<option value="2">2</option>
 				<option value="3">3</option>
@@ -17,8 +17,9 @@ document.write(`
 				<option value="9">9 (+1 free Gem)</option>
 				<option value="10">10 (+1 free Gem, +1 free Geode)</option>
 			</select>
-			<input type="text" id="referral_address" class="responsive_margin" placeholder="Referral Address (Optional)"/>
-			<input type="button" value="Buy" onclick="buyGeodes()" style="width: 100%;"/>
+			<input type="text" id="referral_address" placeholder="Referral Address (Optional)"/>
+			<span id="ref_addr_err_msg"></span>
+			<input type="button" class="responsive_margin2" value="Buy" onclick="buyGeodes()" style="width: 100%;"/>
 		</div>
 	</div>
 </div>
@@ -697,14 +698,16 @@ jQuery3(document).ready(function() {
 		}
 		const element = jQuery3(this);
 		const val = element.val().trim();
+		const err_container = jQuery3("#ref_addr_err_msg");
+		err_container.html("");
 		if(val && !presale.getWeb3().isAddress(val)) {
 			element.addClass("wrong_input");
+			err_container.html("not a valid Ethereum address");
 		}
 		else {
 			// get balance for the address input as referral and check if its a valid referral
 			presale.getBalancesFor(val, function(err, result) {
 				if(err) {
-					element.addClass("wrong_input");
 					return;
 				}
 				if(result.geodes > 0) {
@@ -712,6 +715,7 @@ jQuery3(document).ready(function() {
 				}
 				else {
 					element.addClass("wrong_input");
+					err_container.html("this address cannot be used as a referral");
 				}
 			});
 		}

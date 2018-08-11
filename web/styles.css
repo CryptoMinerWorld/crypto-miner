@@ -153,6 +153,10 @@
 	margin: 1em 0 2em 0;
 }
 
+.responsive_margin2 {
+	margin-top: 2em;
+}
+
 .wrong_input {
 	border: 2px solid red !important;
 }
@@ -160,6 +164,11 @@
 #my_points_btn {
 	font-size: 1em;
 	height: 1.5em;
+}
+
+#ref_addr_err_msg {
+	color: red;
+	font-size: 0.85em;
 }
 
 @media only screen and (max-width: 640px) {
@@ -227,5 +236,9 @@
 
 	.responsive_margin {
 		margin: 1em 0;
+	}
+
+	.responsive_margin2 {
+		margin-top: 1em;
 	}
 }
