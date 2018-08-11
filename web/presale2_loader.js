@@ -466,7 +466,11 @@ jQuery3(document).ready(function() {
 				};
 				collection.sort(cmp);
 				for(let i = 0; i < collection.length; i++) {
-					document.getElementById("" + i).innerHTML = compile_gem_html(collection[i]);
+					const element = jQuery3(`#${i}`);
+					if(!element.length) {
+						console.warn(`#${i} doesn't exist!`);
+					}
+					element.html(compile_gem_html(collection[i]));
 				}
 			}
 		}
