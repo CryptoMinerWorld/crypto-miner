@@ -96,7 +96,7 @@ contract Presale2 is AccessControl {
   uint32 public totalRefPoints;
 
   // smart contract deployment unix timestamp
-  uint64 public created;
+  uint64 public launchDate;
 
   // a gem to sell, should be set in constructor
   GemERC721 public gemContract;
@@ -176,11 +176,15 @@ contract Presale2 is AccessControl {
   }
 
   // creates a GeodeSale attached to previous presale and already deployed Gem smart contract
-  constructor(address parentSaleAddress, address _chestVault, address _beneficiary) public {
+  constructor(address parentSaleAddress, address _chestVault, address _beneficiary, uint64 _launchDate) public {
     // validate inputs
     require(parentSaleAddress != address(0));
     require(_beneficiary != address(0));
     require(_chestVault != address(0));
+
+    // make sure launch date is in reasonable bounds from now
+    // (up to 40 hrs in the future or up to 4 hrs in the past)
+    require(_launchDate - now < 144000 || now - _launchDate < 14400);
 
     // bind the parent sale contract
     parentSale = Presale2(parentSaleAddress);
@@ -210,28 +214,36 @@ contract Presale2 is AccessControl {
     chestVault = _chestVault;
 
     // initialize smart contract creation timestamp
-    created = uint64(now);
+    launchDate = _launchDate;
   }
 
   // current geode price, implements price increase each 24 hours
   function currentPrice() public constant returns (uint64) {
     // determine how old presale is
-    uint64 age = uint64(now) - created;
+    // age may overflow but we limit the price max and don't care
+    uint64 age = uint64(now) - launchDate;
 
     // how many full intervals
     uint64 ageIntervals = age / PRICE_INCREASE_INTERVAL;
 
     // the geode price is 0.075 ETH + 0.001 ETH increase each interval
-    return 75 finney + 1 finney * ageIntervals;
+    uint64 price = 75 finney + 1 finney * ageIntervals;
+
+    // return price, it cannot exceed 100 finney
+    return price > 100 finney? 100 finney: price;
   }
 
   // time left until next price increase
   function priceIncreaseIn() public constant returns (uint64 sec) {
-    // determine how old presale is
-    uint64 age = uint64(now) - created;
-
-    // determine how many seconds left till next price increase
-    return PRICE_INCREASE_INTERVAL - age % PRICE_INCREASE_INTERVAL;
+    // if launch date is in the past
+    if(now > launchDate) {
+      // calculate how many seconds left until next price increase
+      return PRICE_INCREASE_INTERVAL - uint64(now - launchDate) % PRICE_INCREASE_INTERVAL;
+    }
+    else {
+      // calculate how many seconds left until launch date
+      return uint64(launchDate - now);
+    }
   }
 
   // number of geodes available for sale

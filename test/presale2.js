@@ -2,7 +2,7 @@ const ROLE_COUPON_MANAGER = 0x00000100;
 const ROLE_TOKEN_CREATOR = 0x00040000;
 const ROLE_ROLE_MANAGER = 0x10000000;
 
-const GEODES_SOLD = 544; //544;
+const GEODES_SOLD = 14; //544;
 const FIRST_500_GEODES = 500;
 const MAX_GEODES_BUY = 11;
 
@@ -55,7 +55,10 @@ contract('Presale2', accounts => {
 
 		const balance13 = await web3.eth.getBalance(accounts[13]);
 		const balance14 = await web3.eth.getBalance(accounts[14]);
-		const sale2 = await Sale2.new(sale.address, accounts[13], accounts[14]);
+		const sale2LaunchDate = new Date().getTime() / 1000 | 0;
+		const sale2 = await Sale2.new(sale.address, accounts[13], accounts[14], sale2LaunchDate);
+		const priceIncreaseInterval = await sale2.PRICE_INCREASE_INTERVAL();
+		assert.equal(0, await sale2.priceIncreaseIn(), "incorrect priceIncreaseIn() right after deployment");
 		assert.equal(GEODES_SOLD, await sale2.geodesSold(), "wrong geodes sold counter (2)");
 		console.log("    presale 2 created successfully");
 
@@ -125,13 +128,15 @@ contract('Presale2', accounts => {
 		assert.equal(30, await sale2.totalRefPoints(), "wrong total referral points after consuming");
 
 		console.log("    checking price increase feature");
-		await increaseTime(86385);
+		await increaseTime(priceIncreaseInterval.minus(15).toNumber());
+		assert(await sale2.priceIncreaseIn() < 15, "incorrect priceIncreaseIn() 15 seconds before 1 day has passed");
 		assert(price1.eq(await sale2.currentPrice()), "wrong geode price 15 seconds before 1 day has passed");
 		await increaseTime(15);
 		assert(price1.plus(web3.toWei(1, "finney")).eq(await sale2.currentPrice()), "wrong geode price after 1 day has passed");
 		for(let i = 0; i < 30; i++) {
-			await increaseTime(86400);
-			assert(price1.plus(web3.toWei(i + 2, "finney")).eq(await sale2.currentPrice()), "wrong geode price after " + (i + 2) + " days have passed");
+			await increaseTime(priceIncreaseInterval.toNumber());
+			assert(price1.plus(web3.toWei(Math.min(i + 2, 25), "finney")).eq(await sale2.currentPrice()),
+				"wrong geode price after " + (i + 2) + " days have passed");
 		}
 	});
 });
