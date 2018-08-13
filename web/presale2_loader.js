@@ -517,11 +517,11 @@ jQuery3(document).ready(function() {
 		// configuration
 		{
 			token: {
-				address: "0x5bfc66060cf5deb655fd51dfceca3a24794f5ae0",
+				address: "0x82ff6bbd7b64f707e704034907d582c7b6e09d97",
 				abi_url: WEB_BASE + "abi/ERC721.json"
 			},
 			presale: {
-				address: "0x53441c10a9cdc4e63d37c9a3658ff79d2d9651ce",
+				address: "0x10a0f683304b6878e5e70295445fb03eeb6dec75",
 				abi_url: WEB_BASE + "abi/Presale2.json"
 			},
 			chestVault: "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"

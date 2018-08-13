@@ -23,10 +23,10 @@ module.exports = async function(deployer, network, accounts) {
 
 	// for test network we use few coupons
 	if(network === "development") {
-		tokenAddress = "0x5bfc66060cf5deb655fd51dfceca3a24794f5ae0";
+		tokenAddress = "0x82ff6bbd7b64f707e704034907d582c7b6e09d97";
 		gem = Gem.at(tokenAddress);
 
-		saleAddress = "0xd4be83a9a31c04ebc93e5b3f5d8375c989183a1d";
+		saleAddress = "0x08d6a2643197afbd46030473ed6f2479a5b574ad";
 		sale = Sale.at(saleAddress);
 
 		// buy few geodes using old presale, create and use few coupons
