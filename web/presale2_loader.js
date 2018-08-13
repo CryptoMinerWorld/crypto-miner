@@ -328,7 +328,7 @@ jQuery3(document).ready(function() {
 	}
 
 	function update_counters(data) {
-		logger.info(`updating counters: sold(${data.sold}), left(${data.left}), price(${data.currentPrice}), priceIncreaseIn(${data.priceIncreaseIn})`);
+		console.log(`updating counters: sold(${data.sold}), left(${data.left}), price(${data.currentPrice}), priceIncreaseIn(${data.priceIncreaseIn})`);
 
 		jQuery3(".counter").html(data.sold);
 		jQuery3("#geodePriceETH").html(data.currentPrice);
