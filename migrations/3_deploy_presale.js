@@ -35,7 +35,7 @@ module.exports = async function(deployer, network, accounts) {
 
 	// for test network we redeploy first Presale
 	if(network === "development") {
-		tokenAddress = "0x5bfc66060cf5deb655fd51dfceca3a24794f5ae0";
+		tokenAddress = "0x82ff6bbd7b64f707e704034907d582c7b6e09d97";
 		gem = Gem.at(tokenAddress);
 
 		console.log("deploying Presale (development network)");
