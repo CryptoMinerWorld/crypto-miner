@@ -24,7 +24,7 @@ document.write(`
 	</div>
 </div>
 <div id="gem_modal" class="overlay">
-	<a class="cancel" href="javascript:Location.replace('#')"></a>
+	<a class="cancel" href="javascript:location.replace('#')"></a>
 	<div class="modal">
 		<div class="content">
 			<img id="picture" class="centerImg" src="https://www.cryptominerworld.com/wp-content/uploads/Temp_Gems/Top-1-C.png"/>
