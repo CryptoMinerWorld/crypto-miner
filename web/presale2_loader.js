@@ -565,7 +565,7 @@ jQuery3(document).ready(function() {
 				jQuery3("#points_selected").html("0");
 				let points_html = ``;
 				if(value > 0) {
-					points_html += `${value} &dash; Referral Points Available`;
+					points_html += `${value} &dash; Referral Point${value > 1? 's': ''} Available`;
 					if(value >= 10) {
 						// prepare the button
 						points_html += `<br/><input id="my_points_btn" type="button" onclick="window.location = '#use_points_modal'" value="Use Referral Points"/>`;
