@@ -185,6 +185,7 @@
 
 #ref_link_copied {
 	color: #ff00ce;
+	font-size: 0.65em;
 }
 
 @media only screen and (max-width: 640px) {

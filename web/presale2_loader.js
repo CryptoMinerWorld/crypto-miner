@@ -779,7 +779,7 @@ function copy_ref_link() {
 	document.execCommand('copy');
 	const subheader = jQuery3("#create_ref_link_subheader");
 	subheader.html("<span id='ref_link_copied'>Copied!</span>");
-	setTimeout(() => subheader.html(ref_link_btn_html), 741);
+	setTimeout(() => subheader.html(ref_link_btn_html), 247);
 }
 
 // ref link button html
