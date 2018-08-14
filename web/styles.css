@@ -183,6 +183,10 @@
 	background: #a0007a;
 }
 
+#ref_link_copied {
+	color: #ff00ce;
+}
+
 @media only screen and (max-width: 640px) {
 	#my_geodes_header {
 		padding-top: 125px;
