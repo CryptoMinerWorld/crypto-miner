@@ -74,7 +74,7 @@ document.write(`
 				containing <span class="gems_received"></span> gems<br/>
 				and <span class="geodes_bought"></span> Founders Plot<span class="geodes_bought_plural"></span> of Land
 			</h5>
-			<input id="goto_workshop_btn" type="button" value="" onclick="location.href = '/workshop';"/>
+			<input id="goto_workshop_btn" type="button" value="" onclick="location.replace('/workshop');"/>
 		</div>
 	</div>
 </div>
@@ -91,7 +91,7 @@ document.write(`
 				<span id="points_and"> and </span>
 				<span id="points_gems">1 Gem</span>
 			</h5>
-			<input id="goto_workshop_btn" type="button" value="" onclick="location.href = '/workshop';"/>
+			<input id="goto_workshop_btn" type="button" value="" onclick="location.replace('/workshop');"/>
 		</div>
 	</div>
 </div>
@@ -103,7 +103,7 @@ document.write(`
 			<h5 class="responsive_margin">
 				Seems like you don't have MetaMask installed. Click the button below for more info.
 			</h5>
-			<input type="button" value="More Info" onclick="location.href = 'https://www.cryptominerworld.com/game_info#GameInfoMetaMask';"/>
+			<input type="button" value="More Info" onclick="location.replace('https://www.cryptominerworld.com/game_info#GameInfoMetaMask');"/>
 		</div>
 	</div>
 </div>
@@ -115,7 +115,7 @@ document.write(`
 			<h5 class="responsive_margin">
 				Seems like you are connected to a wrong network. Please connect to network <span id="required_network_id">1: Mainnet</span>
 			</h5>
-			<input type="button" value="More Info" onclick="location.href = 'https://www.cryptominerworld.com/game_info#GameInfoMetaMask';"/>
+			<input type="button" value="More Info" onclick="location.replace('https://www.cryptominerworld.com/game_info#GameInfoMetaMask');"/>
 		</div>
 	</div>
 </div>
@@ -259,7 +259,7 @@ function usePoints() {
 	}
 
 	// hide the modal
-	location.href = "#";
+	location.replace('#');
 }
 
 function useCoupon() {
@@ -278,7 +278,7 @@ function useCoupon() {
 	}
 
 	// hide the modal
-	location.href = "#";
+	location.replace('#');
 }
 
 function buyGeodes() {
@@ -293,7 +293,7 @@ function buyGeodes() {
 		}
 	});
 	if(errCode > 0) {
-		location.href = "https://www.cryptominerworld.com/game_info#GameInfoMetaMask";
+		location.replace("https://www.cryptominerworld.com/game_info#GameInfoMetaMask");
 	}
 	// hide the modal
 	location.replace('#');
