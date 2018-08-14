@@ -782,7 +782,7 @@ function copy_ref_link() {
 	jQuery3("#ref_link_copied").animate({
 		top: -100,
 		opacity: 0
-	}, 247, "linear", () => subheader.html(ref_link_btn_html));
+	}, 494, "linear", () => subheader.html(ref_link_btn_html));
 }
 
 // ref link button html
