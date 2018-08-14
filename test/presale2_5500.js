@@ -2,30 +2,38 @@ const ROLE_TOKEN_CREATOR = 0x00040000;
 const ROLE_ROLE_MANAGER = 0x10000000;
 
 const Token = artifacts.require("./GemERC721");
-const Sale = artifacts.require("./Presale");
+const Sale = artifacts.require("./CouponSale");
+const Sale2 = artifacts.require("./Presale2");
 
-contract('Presale 5500', function(accounts) {
-	it("presale: buying all 5500 geodes", async function() {
+contract('Presale2 5500', function(accounts) {
+	it("presale: buying 5500 geodes", async function() {
 		const tk = await Token.new();
-		const sale = await Sale.new(tk.address, accounts[9], accounts[9]);
+		const sale = await Sale.new(tk.address, accounts[11], accounts[12]);
 		await tk.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
+		await sale.getGeodes({
+			from: accounts[10],
+			value: await sale.currentPrice()
+		});
 
-		const first500 = (await sale.currentPrice()).times(10);
-		const next5000 = first500.times(2);
+		const sale2LaunchDate = new Date().getTime() / 1000 | 0;
+		const sale2 = await Sale2.new(sale.address, accounts[11], accounts[12], sale2LaunchDate);
+		await tk.addOperator(sale2.address, ROLE_TOKEN_CREATOR);
+
+		const price = (await sale2.currentPrice()).times(10);
 		process.stdout.write("    ");
-		for(let i = 0; i < 500; i++) {
+		for(let i = 0; i < 5; i++) {
 			process.stdout.write("" + i);
-			await sale.getGeodes.sendTransaction({
-				from: accounts[i % 8],
-				value: i < 46? first500: next5000
+			await sale2.getGeodes(10, 0x0, {
+				from: accounts[i % 10],
+				value: price
 			});
 			process.stdout.write(".");
 		}
 		process.stdout.write("\n");
 
 		let allTheGems = [];
-		for(let i = 0; i < 8; i++) {
+		for(let i = 0; i < 10; i++) {
 			const collection = await tk.getPackedCollection(accounts[i]);
 			console.log("    collection " + i + " size: " + collection.length);
 			allTheGems = allTheGems.concat(collection);
