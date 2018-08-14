@@ -6,7 +6,7 @@ const Sale = artifacts.require("./CouponSale");
 const Sale2 = artifacts.require("./Presale2");
 
 contract('Presale2 5500', function(accounts) {
-	it("presale: buying 5500 geodes", async function() {
+	it("presale2: buying 5500 geodes", async function() {
 		const tk = await Token.new();
 		const sale = await Sale.new(tk.address, accounts[11], accounts[12]);
 		await tk.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);
@@ -22,7 +22,7 @@ contract('Presale2 5500', function(accounts) {
 
 		const price = (await sale2.currentPrice()).times(10);
 		process.stdout.write("    ");
-		for(let i = 0; i < 5; i++) {
+		for(let i = 0; i < 500; i++) {
 			process.stdout.write("" + i);
 			await sale2.getGeodes(10, 0x0, {
 				from: accounts[i % 10],
