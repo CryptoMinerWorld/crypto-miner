@@ -538,6 +538,8 @@ jQuery3(document).ready(function() {
 
 	// bind an action to a "get geodes button"
 	jQuery3("#GetGeodeButton").css("cursor", "pointer").on("click", function () {
+		alert("Sorry, you can not buy Geodes at this time. We are updating the Pre-Sale at the moment. Check back in an hour or 2.");
+/*
 		if(presale.getWeb3()) {
 			if(presale.getNetworkId() == REQUIRED_NETWORK_ID) {
 				location.href = "#geode_qty_modal";
@@ -550,6 +552,7 @@ jQuery3(document).ready(function() {
 		else {
 			location.href = "#metamask_info_modal";
 		}
+*/
 	});
 
 });
