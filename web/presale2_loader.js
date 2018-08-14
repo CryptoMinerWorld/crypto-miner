@@ -72,7 +72,7 @@ document.write(`
 			<h5 class="responsive_margin">
 				Successfully bought <span class="geodes_bought"></span> geode<span class="geodes_bought_plural"></span><br/>
 				containing <span class="gems_received"></span> gems<br/>
-				and <span class="geodes_bought"></span> Founders Plot<span class="geodes_bought_plural"></span> of Land
+				and <span class="geodes_bought"></span> Founder&apos;s Plot<span class="geodes_bought_plural"></span> of Land
 			</h5>
 			<input id="goto_workshop_btn" type="button" value="" onclick="location.replace('/workshop');"/>
 		</div>
