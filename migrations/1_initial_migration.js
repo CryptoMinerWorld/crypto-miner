@@ -10,5 +10,5 @@ module.exports = function(deployer, network) {
 		return;
 	}
 
-  deployer.deploy(Migrations);
+	deployer.deploy(Migrations);
 };
