@@ -780,9 +780,9 @@ function copy_ref_link() {
 	const subheader = jQuery3("#create_ref_link_subheader");
 	subheader.html("<span id='ref_link_copied'>Copied!</span>");
 	jQuery3("#ref_link_copied").animate({
-		top: -100,
+		top: "-1em",
 		opacity: 0
-	}, 494, "linear", () => subheader.html(ref_link_btn_html));
+	}, 741, "linear", () => subheader.html(ref_link_btn_html));
 }
 
 // ref link button html
