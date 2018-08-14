@@ -596,6 +596,7 @@ jQuery3(document).ready(function() {
 							const referral_address = jQuery3("#referral_address");
 							referral_address.prop("disabled", result.geodes > 0);
 							referral_address.toggle(result.geodes == 0);
+							jQuery3("#ref_addr_err_msg").toggle(result.geodes == 0);
 							if(result.geodes > 0) {
 								referral_address.val("");
 							}
