@@ -18,8 +18,8 @@ module.exports = async function(deployer, network, accounts) {
 	// where the funds go to: chestVault - 19.05%, beneficiary - 80.95%
 	let chestVault = "0xc352f692f55def49f0b736ec1f7ca0f862eabd23"; // MainNet Chest Wallet
 	let beneficiary = "0xe0123204873fd29a29aef3f99faf1b1c45fe3b1e"; // MainNet MultiSig
-	// MainNet Presale2 launch date: August 15, 8PM EST = August 16, 00:00 UTC
-	let sale2LaunchDate = new Date('2018-08-16T00:00Z').getTime() / 1000 | 0;
+	// MainNet Presale2 launch date: August 15, 8PM EST = August 16, 00:15 UTC - 15 seconds reserved
+	let sale2LaunchDate = new Date('2018-08-16T00:15Z').getTime() / 1000 | 0;
 
 	// for test network we redefine MultiSig addresses and launch date
 	if(network === "development") {
