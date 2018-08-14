@@ -175,8 +175,8 @@ const THUMB_BASE = "https://cryptominerworld.com/wp-content/uploads/Gem_Images/G
 const VIDEO_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Gems_Video/";
 const MIS_IMG_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Imgs_for_presale_code_import/";
 
-const REQUIRED_NETWORK_ID = 4;
-const REQUIRED_NETWORK_NAME = "4: Rinkeby";
+const REQUIRED_NETWORK_ID = 1;
+const REQUIRED_NETWORK_NAME = "1: Mainnet";
 
 const jQuery3 = jQuery.noConflict();
 
@@ -517,14 +517,14 @@ jQuery3(document).ready(function() {
 		// configuration
 		{
 			token: {
-				address: "0x82ff6bbd7b64f707e704034907d582c7b6e09d97",
+				address: "0xeae9d154da7a1cd05076db1b83233f3213a95e4f",
 				abi_url: WEB_BASE + "abi/ERC721.json"
 			},
 			presale: {
-				address: "0x10a0f683304b6878e5e70295445fb03eeb6dec75",
+				address: "0xe0a21044eeeb9efc340809e35dc0e9d82dc87dd1",
 				abi_url: WEB_BASE + "abi/Presale2.json"
 			},
-			chestVault: "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"
+			chestVault: "0xc352f692f55def49f0b736ec1f7ca0f862eabd23"
 		},
 
 		// callback handler
