@@ -15,11 +15,11 @@ module.exports = {
 				const nonceTracker = new NonceTrackerSubprovider();
 				wallet.engine._providers.unshift(nonceTracker);
 				nonceTracker.setEngine(wallet.engine);
-				return wallet
+				return wallet;
 			},
 			network_id: "1", // Match mainnet only
 			gas: 4500000,
-			gasPrice: 11000000000 // 11 GWei
+			gasPrice: 7000000000 // 7 GWei
 		},
 		development: {
 			provider: function () {
@@ -30,10 +30,10 @@ module.exports = {
 				const nonceTracker = new NonceTrackerSubprovider();
 				wallet.engine._providers.unshift(nonceTracker);
 				nonceTracker.setEngine(wallet.engine);
-				return wallet
+				return wallet;
 			},
 			network_id: "*", // Match any network (determined by provider)
-			gas: 4500000,
+			gas: 7000000,
 			gasPrice: 21000000000 // 21 GWei
 		},
 		coverage: {
