@@ -589,7 +589,7 @@ jQuery3(document).ready(function() {
 							if(err) {
 								return;
 							}
-							jQuery3("#my_geodes_subheader").html(result.geodes + " &dash; Founders Plot" + (result.geodes > 1? "s": "") + " of Land");
+							jQuery3("#my_geodes_subheader").html(result.geodes + " &dash; Founder&apos;s Plot" + (result.geodes > 1? "s": "") + " of Land");
 							update_referral_points(result.pointsLeft);
 
 							// enable / disable referral address input depending on the geodes balance
