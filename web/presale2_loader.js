@@ -1,7 +1,7 @@
 // inject all the required modal windows
 document.write(`
 <div id="geode_qty_modal" class="overlay">
-	<a class="cancel" href="#"></a>
+	<a class="cancel" href="javascript:location.replace('#')"></a>
 	<div class="modal">
 		<h1>Buying Geodes</h1>
 		<div class="content">
@@ -65,7 +65,7 @@ document.write(`
 	</div>
 </div>
 <div id="geode_bought_modal" class="overlay">
-	<a class="cancel" href="javascript:history.back()"></a>
+	<a class="cancel" href="javascript:location.replace('#')"></a>
 	<div class="modal">
 		<div class="content">
 			<h1>Purchase Complete!</h1>
@@ -79,7 +79,7 @@ document.write(`
 	</div>
 </div>
 <div id="points_used_modal" class="overlay">
-	<a class="cancel" href="javascript:history.back()"></a>
+	<a class="cancel" href="javascript:location.replace('#')"></a>
 	<div class="modal">
 		<div class="content">
 			<h1><span class="coupons_used"></span> Points Used!</h1>
@@ -96,7 +96,7 @@ document.write(`
 	</div>
 </div>
 <div id="metamask_info_modal" class="overlay">
-	<a class="cancel" href="javascript:history.back()"></a>
+	<a class="cancel" href="javascript:location.replace('#')"></a>
 	<div class="modal">
 		<div class="content">
 			<h1>MetaMask Required</h1>
@@ -108,7 +108,7 @@ document.write(`
 	</div>
 </div>
 <div id="wrong_network_modal" class="overlay">
-	<a class="cancel" href="javascript:history.back()"></a>
+	<a class="cancel" href="javascript:location.replace('#')"></a>
 	<div class="modal">
 		<div class="content">
 			<h1>Wrong Network</h1>
@@ -120,7 +120,7 @@ document.write(`
 	</div>
 </div>
 <div id="add_coupon_modal" class="overlay">
-	<a class="cancel" href="javascript:history.back()"></a>
+	<a class="cancel" href="javascript:location.replace('#')"></a>
 	<div class="modal">
 		<h3>Adding a Coupon</h3>
 		<div class="content">
@@ -141,7 +141,7 @@ document.write(`
 	</div>
 </div>
 <div id="use_coupon_modal" class="overlay">
-	<a class="cancel" href="javascript:history.back()"></a>
+	<a class="cancel" href="javascript:location.replace('#')"></a>
 	<div class="modal">
 		<h3>Using a Coupon</h3>
 		<div class="content">
@@ -151,7 +151,7 @@ document.write(`
 	</div>
 </div>
 <div id="use_points_modal" class="overlay">
-	<a class="cancel" href="javascript:history.back()"></a>
+	<a class="cancel" href="javascript:location.replace('#')"></a>
 	<div class="modal">
 		<h1>Use Referral Points</h1>
 		<div class="content">
@@ -296,12 +296,12 @@ function buyGeodes() {
 		location.href = "https://www.cryptominerworld.com/game_info#GameInfoMetaMask";
 	}
 	// hide the modal
-	location.href = "#";
+	location.replace('#');
 }
 
 jQuery3(document).on("keyup", function(e) {
 	if(e.keyCode == 27) {
-		location.href = "#";
+		location.replace('#');
 	}
 });
 
