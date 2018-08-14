@@ -674,10 +674,10 @@ jQuery3(document).ready(function() {
 
 			// pre-fill referral address
 			const urlParams = new URLSearchParams(location.search);
-			const referral_address = urlParams.get("ref");
-			if(referral_address) {
+			const ref = urlParams.get("ref");
+			if(ref) {
 				const referral_address = jQuery3("#referral_address");
-				referral_address.val(referral_address);
+				referral_address.val(ref);
 				referral_address.trigger("change");
 			}
 		}
