@@ -676,7 +676,9 @@ jQuery3(document).ready(function() {
 			const urlParams = new URLSearchParams(location.search);
 			const referral_address = urlParams.get("ref");
 			if(referral_address) {
-				jQuery3("#referral_address").val(referral_address);
+				const referral_address = jQuery3("#referral_address");
+				referral_address.val(referral_address);
+				referral_address.trigger("change");
 			}
 		}
 	);
