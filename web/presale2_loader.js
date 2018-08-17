@@ -181,13 +181,14 @@ const REQUIRED_NETWORK_NAME = "1: Mainnet";
 const jQuery3 = jQuery.noConflict();
 
 // configure bootstrap notify instance
-jQuery3.notifyDefaults({
-	placement: {
-		from: "bottom",
-		align: "right"
-	},
-	delay: 8192,
-	template: `
+if(jQuery3.notifyDefaults) {
+	jQuery3.notifyDefaults({
+		placement: {
+			from: "bottom",
+			align: "right"
+		},
+		delay: 8192,
+		template: `
 	<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">
 		<span data-notify="icon"></span>
 		<span data-notify="title">{1}</span>
@@ -198,27 +199,43 @@ jQuery3.notifyDefaults({
 		<a href="{3}" target="{4}" data-notify="url"></a>
 	</div>
 `
-});
+	});
+}
 
 // define a logger
 const logger = {
 	error: function(...msg) {
-		jQuery3.notify(msg.join("").replace(/\n/g, '<br/>'), {
-			type: "danger",
-			delay: 8500,
-		});
+		if(jQuery3.notify) {
+			jQuery3.notify(msg.join("").replace(/\n/g, '<br/>'), {
+				type: "danger",
+				delay: 8500,
+			});
+		}
+		else {
+			console.error(msg);
+		}
 	},
 	warning: function(...msg) {
-		jQuery3.notify(msg.join("").replace(/\n/g, '<br/>'), {
-			type: "warning",
-			delay: 5500,
-		});
+		if(jQuery3.notify) {
+			jQuery3.notify(msg.join("").replace(/\n/g, '<br/>'), {
+				type: "warning",
+				delay: 5500,
+			});
+		}
+		else {
+			console.warn(msg);
+		}
 	},
 	success: function(...msg) {
-		jQuery3.notify(msg.join("").replace(/\n/g, '<br/>'), {
-			type: "success",
-			delay: 1500,
-		});
+		if(jQuery3.notify) {
+			jQuery3.notify(msg.join("").replace(/\n/g, '<br/>'), {
+				type: "success",
+				delay: 1500,
+			});
+		}
+		else {
+			console.info(msg);
+		}
 	},
 };
 
