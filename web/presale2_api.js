@@ -216,7 +216,7 @@ function PresaleApi(logger, jQuery_instance) {
 			return ERR_NO_WEB3;
 		}
 		else if(typeof window.web3 == 'undefined') {
-			myWeb3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/"));
+			myWeb3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/000e2a10115948bca0ba880169f968f0"));
 		}
 		else {
 			myWeb3 = new Web3(window.web3.currentProvider);
