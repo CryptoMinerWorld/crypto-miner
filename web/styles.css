@@ -90,7 +90,7 @@
 	color: #ff00cd;
 }
 
-#geode_bought_modal .modal, #points_used_modal .modal, #metamask_info_modal .modal, #wrong_network_modal .modal {
+#geode_bought_modal .modal, #points_used_modal .modal, #no_metamask .modal, #locked_metamask .modal, #wrong_network_modal .modal {
 	text-align: center;
 }
 
