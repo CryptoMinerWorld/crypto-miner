@@ -371,15 +371,7 @@ function PresaleApi(logger, jQuery_instance) {
 				instanceLoaded(callback);
 			});
 
-			if(!myAccount) {
-				if(infura) {
-					logInfo("Infura web3 integration loaded. Network id is ", networkName(myNetwork));
-				}
-				else {
-					logError("Cannot access default account.\nIs MetaMask locked?");
-				}
-			}
-			else {
+			if(myAccount) {
 				logInfo("Web3 integration loaded. Your account is ", myAccount, ", network id ", networkName(myNetwork));
 				myWeb3.eth.getBalance(myAccount, function(err, balance) {
 					if(err) {
@@ -397,6 +389,12 @@ function PresaleApi(logger, jQuery_instance) {
 						logError("Your ETH balance is zero.\nYou won't be able to send any transaction.");
 					}
 				});
+			}
+			else if(infura) {
+				logWarning("No MetaMask installation found. Infura web3 integration loaded instead. Network id is ", networkName(myNetwork));
+			}
+			else {
+				logError("Cannot access default account.\nIs MetaMask locked?");
 			}
 		});
 
