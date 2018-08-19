@@ -717,18 +717,19 @@ jQuery3(document).ready(function() {
 
 	// bind an action to a "get geodes button"
 	jQuery3("#GetGeodeButton").css("cursor", "pointer").on("click", function () {
-		if(presale.getDefaultAccount()) {
-			if(presale.getNetworkId() == REQUIRED_NETWORK_ID) {
-				location.href = "#geode_qty_modal";
-			}
-			else {
-				jQuery3("#required_network_id").html(REQUIRED_NETWORK_NAME);
-				location.href = "#wrong_network_modal";
-			}
-		}
-		else {
+		// infura or no web3 - redirect to info modal
+		if(presale.isInfura() || !presale.getWeb3()) {
 			location.href = "#metamask_info_modal";
+			return;
 		}
+		// MetaMask connected to wrong network
+		if(presale.getNetworkId() != REQUIRED_NETWORK_ID) {
+			jQuery3("#required_network_id").html(REQUIRED_NETWORK_NAME);
+			location.href = "#wrong_network_modal";
+			return;
+		}
+		// everything is good, pass to the geode quantity chooser modal
+		location.href = "#geode_qty_modal";
 	});
 
 	jQuery3("#referral_address").on("change", function(e) {

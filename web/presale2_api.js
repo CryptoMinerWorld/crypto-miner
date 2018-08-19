@@ -406,6 +406,11 @@ function PresaleApi(logger, jQuery_instance) {
 	this.getWeb3 = function() {
 		return myWeb3;
 	};
+	// tells if Web3 instance represents an infura based Web3 implementation,
+	// which is very restricted and doesn't have a default account
+	this.isInfura = function() {
+		return infura;
+	};
 	// current active account, returns null if not initialized or account is inaccessible (probably MetaMask is locked)
 	this.getDefaultAccount = function() {
 		return myAccount;
