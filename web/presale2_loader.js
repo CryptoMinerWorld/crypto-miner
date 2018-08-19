@@ -628,7 +628,7 @@ jQuery3(document).ready(function() {
 					}
 				});
 			}
-			if(!result.infura) {
+			if(result.defaultAccount) {
 				reload_workshop();
 			}
 
@@ -649,51 +649,54 @@ jQuery3(document).ready(function() {
 				update_counters(result);
 			});
 
-			// show success notification when coupon is created
-			presale.registerCouponAddedEventListener(function(err, result) {
-				if(err) {
-					return;
-				}
-				logger.success("coupon added (expires ", result.expires, ")");
-			});
+			if(result.defaultAccount) {
+				// show success notification when coupon is created
+				presale.registerCouponAddedEventListener(function(err, result) {
+					if(err) {
+						return;
+					}
+					logger.success("coupon added (expires ", result.expires, ")");
+				});
 
-			// show success notification when coupon is consumed
-			presale.registerCouponConsumedEventListener(function(err, result) {
-				if(err) {
-					return;
-				}
-				logger.success("received ", result.gems, " free gem(s)");
-				reload_workshop();
-			});
+				// show success notification when coupon is consumed
+				presale.registerCouponConsumedEventListener(function(err, result) {
+					if(err) {
+						return;
+					}
+					logger.success("received ", result.gems, " free gem(s)");
+					reload_workshop();
+				});
 
-			// show success notification when geode is bought
-			presale.registerPurchaseCompleteEventListener(function(err, result) {
-				if(err) {
-					return;
-				}
-				logger.success("successfully bought ", result.geodes, " geode(s) (" + result.gems + " gems)");
-				reload_workshop();
-				display_geode_bought_modal(result.geodes, result.gems);
-			});
+				// show success notification when geode is bought
+				presale.registerPurchaseCompleteEventListener(function(err, result) {
+					if(err) {
+						return;
+					}
+					logger.success("successfully bought ", result.geodes, " geode(s) (" + result.gems + " gems)");
+					reload_workshop();
+					display_geode_bought_modal(result.geodes, result.gems);
+				});
 
-			// show notification when referral points received
-			presale.registerReferralPointsIssuedEventListener(function(err, result) {
-				if(err) {
-					return;
-				}
-				logger.success("received ", result.amount, " referral points");
-				update_referral_points(result.left);
-			});
+				// show notification when referral points received
+				presale.registerReferralPointsIssuedEventListener(function(err, result) {
+					if(err) {
+						return;
+					}
+					logger.success("received ", result.amount, " referral points");
+					update_referral_points(result.left);
+				});
 
-			// show notification when referral points consumed
-			presale.registerReferralPointsConsumedEventListener(function(err, result) {
-				if(err) {
-					return;
-				}
-				logger.success("spent ", result.amount, " points for ", result.gems, " gems and ", result.geodes, " geodes");
-				reload_workshop();
-				display_points_used_modal(result.geodes, result.gems);
-			});
+				// show notification when referral points consumed
+				presale.registerReferralPointsConsumedEventListener(function(err, result) {
+					if(err) {
+						return;
+					}
+					logger.success("spent ", result.amount, " points for ", result.gems, " gems and ", result.geodes, " geodes");
+					reload_workshop();
+					display_points_used_modal(result.geodes, result.gems);
+				});
+
+			}
 
 			// pre-fill referral address
 			const urlParams = new URLSearchParams(location.search);
