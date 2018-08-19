@@ -95,13 +95,25 @@ document.write(`
 		</div>
 	</div>
 </div>
-<div id="metamask_info_modal" class="overlay">
+<div id="no_metamask" class="overlay">
 	<a class="cancel" href="javascript:location.replace('#')"></a>
 	<div class="modal">
 		<div class="content">
 			<h1>MetaMask Required</h1>
 			<h5 class="responsive_margin">
 				Seems like you don't have MetaMask installed. Click the button below for more info.
+			</h5>
+			<input type="button" value="More Info" onclick="location.replace('https://www.cryptominerworld.com/game_info#GameInfoMetaMask');"/>
+		</div>
+	</div>
+</div>
+<div id="locked_metamask" class="overlay">
+	<a class="cancel" href="javascript:location.replace('#')"></a>
+	<div class="modal">
+		<div class="content">
+			<h1>MetaMask is Locked</h1>
+			<h5 class="responsive_margin">
+				Seems like your MetaMask is locked. Click the button below for more info.
 			</h5>
 			<input type="button" value="More Info" onclick="location.replace('https://www.cryptominerworld.com/game_info#GameInfoMetaMask');"/>
 		</div>
@@ -713,7 +725,11 @@ jQuery3(document).ready(function() {
 	jQuery3("#GetGeodeButton").css("cursor", "pointer").on("click", function () {
 		// infura or no web3 - redirect to info modal
 		if(presale.isInfura() || !presale.getWeb3()) {
-			location.href = "#metamask_info_modal";
+			location.href = "#no_metamask";
+			return;
+		}
+		if(!presale.defaultAccount()) {
+			location.href = "#locked_metamask";
 			return;
 		}
 		// MetaMask connected to wrong network
