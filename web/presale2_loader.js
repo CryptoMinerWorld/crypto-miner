@@ -557,6 +557,9 @@ jQuery3(document).ready(function() {
 				load_and_reload_default_counters();
 				return;
 			}
+			if(result.infura) {
+				workshop_no_web3();
+			}
 
 			// load counters (presale state)
 			presale.presaleState(function(err, result) {
@@ -625,7 +628,9 @@ jQuery3(document).ready(function() {
 					}
 				});
 			}
-			reload_workshop();
+			if(!result.infura) {
+				reload_workshop();
+			}
 
 			// load chest vault balance
 			presale.getChestVaultValueUSD(function(err, result) {
@@ -709,7 +714,7 @@ jQuery3(document).ready(function() {
 
 	// bind an action to a "get geodes button"
 	jQuery3("#GetGeodeButton").css("cursor", "pointer").on("click", function () {
-		if(presale.getWeb3()) {
+		if(presale.getDefaultAccount()) {
 			if(presale.getNetworkId() == REQUIRED_NETWORK_ID) {
 				location.href = "#geode_qty_modal";
 			}

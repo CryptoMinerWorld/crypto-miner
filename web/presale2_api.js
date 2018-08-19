@@ -58,6 +58,7 @@ function PresaleApi(logger, jQuery_instance) {
 
 	// API state variables, depend on current connected network, default account, etc
 	let myWeb3;
+	let infura = false;
 	let myAccount;
 	let myNetwork;
 	let tokenInstance;
@@ -175,7 +176,10 @@ function PresaleApi(logger, jQuery_instance) {
 			logSuccess("Application loaded successfully.\nNetwork " + networkName(myNetwork));
 			tryCallbackIfProvided(callback, null, {
 				event: "init_complete",
-				network: networkName(myNetwork)
+				network: networkName(myNetwork),
+				web3: myWeb3,
+				infura: infura,
+				defaultAccount: myAccount
 			});
 		}
 	}
@@ -217,6 +221,7 @@ function PresaleApi(logger, jQuery_instance) {
 		}
 		else if(typeof window.web3 == 'undefined') {
 			myWeb3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/000e2a10115948bca0ba880169f968f0"));
+			infura = true;
 		}
 		else {
 			myWeb3 = new Web3(window.web3.currentProvider);
@@ -229,100 +234,79 @@ function PresaleApi(logger, jQuery_instance) {
 			}
 			myAccount = accounts[0];
 			myNetwork = myWeb3.version.network;
-			if(!myAccount) {
-				const err = "Cannot access default account.\nIs MetaMask locked?";
-				logError(err);
-				tryCallbackIfProvided(callback, ERR_WEB3_LOCKED, err);
-				return;
+
+			// if token contains ABI – do not make AJAX call, just load the contract
+			if(config.token.abi) {
+				loadTokenContract(config.token.abi);
 			}
-			logInfo("Web3 integration loaded. Your account is ", myAccount, ", network id ", networkName(myNetwork));
-			myWeb3.eth.getBalance(myAccount, function(err, balance) {
-				if(err) {
-					logError("getBalance() error: ", err);
-					tryCallbackIfProvided(callback, ERR_WEB3_ETH_ERROR, err);
+			// if token doesn't contain ABI – load it through AJAX call and then load the contract
+			else {
+				jQuery3.ajax({
+					global: false,
+					url: config.token.abi_url || "abi/ERC721.json",
+					dataType: "json",
+					success: function(data, textStatus, jqXHR) {
+						logInfo("ERC721 ABI loaded successfully");
+						loadTokenContract(data.abi);
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						logError("Cannot load ERC721 ABI: ", errorThrown);
+						tryCallbackIfProvided(callback, ERR_AJAX_LOAD_ABI, errorThrown);
+					}
+				});
+			}
+
+			// if presale contains ABI – do not make AJAX call, just load the contract
+			if(config.presale.abi) {
+				loadPresaleContract(config.presale.abi);
+			}
+			// if presale doesn't contain ABI – load it through AJAX call and then load the contract
+			else {
+				jQuery3.ajax({
+					global: false,
+					url: config.presale.abi_url || "abi/Presale2.json",
+					dataType: "json",
+					success: function(data, textStatus, jqXHR) {
+						logInfo("Presale ABI loaded successfully");
+						loadPresaleContract(data.abi);
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						logError("Cannot load Presale2 ABI: ", errorThrown);
+						tryCallbackIfProvided(callback, ERR_AJAX_LOAD_ABI, errorThrown);
+					}
+				});
+			}
+
+			// --- START: Internal Section to Load Contracts ---
+			// helper function to load token contract by ABI
+			function loadTokenContract(abi) {
+				const contract = myWeb3.eth.contract(abi);
+				const address = config.token.address || config.token;
+				const instance = contract.at(address);
+				if(!instance.TOKEN_VERSION) {
+					const err = "Wrong ERC721 ABI format: TOKEN_VERSION is undefined";
+					logError(err);
+					tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
 					return;
 				}
-				if(balance > 210000000000000) { // 0.21 finney
-					logInfo("Your balance is ", myWeb3.fromWei(balance, 'ether'), " ETH");
-				}
-				else if(balance > 0) {
-					logWarning("Your ETH balance is close to zero.\nYou won't be able to send most transactions.");
-				}
-				else {
-					logError("Your ETH balance is zero.\nYou won't be able to send any transaction.");
-				}
-
-				// if token contains ABI – do not make AJAX call, just load the contract
-				if(config.token.abi) {
-					loadTokenContract(config.token.abi);
-				}
-				// if token doesn't contain ABI – load it through AJAX call and then load the contract
-				else {
-					jQuery3.ajax({
-						global: false,
-						url: config.token.abi_url || "abi/ERC721.json",
-						dataType: "json",
-						success: function(data, textStatus, jqXHR) {
-							logInfo("ERC721 ABI loaded successfully");
-							loadTokenContract(data.abi);
-						},
-						error: function(jqXHR, textStatus, errorThrown) {
-							logError("Cannot load ERC721 ABI: ", errorThrown);
-							tryCallbackIfProvided(callback, ERR_AJAX_LOAD_ABI, errorThrown);
-						}
-					});
-				}
-
-				// if presale contains ABI – do not make AJAX call, just load the contract
-				if(config.presale.abi) {
-					loadPresaleContract(config.presale.abi);
-				}
-				// if presale doesn't contain ABI – load it through AJAX call and then load the contract
-				else {
-					jQuery3.ajax({
-						global: false,
-						url: config.presale.abi_url || "abi/Presale2.json",
-						dataType: "json",
-						success: function(data, textStatus, jqXHR) {
-							logInfo("Presale ABI loaded successfully");
-							loadPresaleContract(data.abi);
-						},
-						error: function(jqXHR, textStatus, errorThrown) {
-							logError("Cannot load Presale2 ABI: ", errorThrown);
-							tryCallbackIfProvided(callback, ERR_AJAX_LOAD_ABI, errorThrown);
-						}
-					});
-				}
-
-				// --- START: Internal Section to Load Contracts ---
-				// helper function to load token contract by ABI
-				function loadTokenContract(abi) {
-					const contract = myWeb3.eth.contract(abi);
-					const address = config.token.address || config.token;
-					const instance = contract.at(address);
-					if(!instance.TOKEN_VERSION) {
-						const err = "Wrong ERC721 ABI format: TOKEN_VERSION is undefined";
-						logError(err);
-						tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
+				instance.TOKEN_VERSION(function(err, version) {
+					if(err) {
+						logError("Error accessing ERC721 instance: ", err, "\nCannot access TOKEN_VERSION.");
+						tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
 						return;
 					}
-					instance.TOKEN_VERSION(function(err, version) {
-						if(err) {
-							logError("Error accessing ERC721 instance: ", err, "\nCannot access TOKEN_VERSION.");
-							tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
-							return;
-						}
-						if(TOKEN_VERSION != version) {
-							const err = "Error accessing ERC721 instance: not a valid instance.\n" +
-								"Check if the address specified points to an ERC721 instance with a valid TOKEN_VERSION.\n" +
-								"Version required: " + TOKEN_VERSION + ". Version found: " + version;
-							logError(err);
-							tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
-							return;
-						}
+					if(TOKEN_VERSION != version) {
+						const err = "Error accessing ERC721 instance: not a valid instance.\n" +
+							"Check if the address specified points to an ERC721 instance with a valid TOKEN_VERSION.\n" +
+							"Version required: " + TOKEN_VERSION + ". Version found: " + version;
+						logError(err);
+						tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
+						return;
+					}
 					logInfo("Successfully connected to ERC721 instance at ", address);
-						tokenInstance = instance;
-						instanceLoaded(callback);
+					tokenInstance = instance;
+					instanceLoaded(callback);
+					if(myAccount) {
 						tokenInstance.balanceOf(myAccount, function(err, result) {
 							if(err) {
 								logError("Unable to get ERC721 token balance for account ", myAccount, ": ", err);
@@ -335,42 +319,41 @@ function PresaleApi(logger, jQuery_instance) {
 								logInfo("You don't own any ERC721 tokens");
 							}
 						});
-					});
-				}
+					}
+				});
+			}
 
-				// helper function to load presale contract by ABI
-				function loadPresaleContract(abi) {
-					const contract = myWeb3.eth.contract(abi);
-					const address = config.presale.address || config.presale;
-					const instance = contract.at(address);
-					if(!instance.PRESALE_VERSION) {
-						const err = "Wrong Presale ABI format: PRESALE_VERSION is undefined";
-						logError(err);
-						tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
+			// helper function to load presale contract by ABI
+			function loadPresaleContract(abi) {
+				const contract = myWeb3.eth.contract(abi);
+				const address = config.presale.address || config.presale;
+				const instance = contract.at(address);
+				if(!instance.PRESALE_VERSION) {
+					const err = "Wrong Presale ABI format: PRESALE_VERSION is undefined";
+					logError(err);
+					tryCallbackIfProvided(callback, ERR_WRONG_ABI, err);
+					return;
+				}
+				instance.PRESALE_VERSION(function(err, version) {
+					if(err) {
+						logError("Error accessing Presale instance: ", err, "\nCannot access PRESALE_VERSION.");
+						tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
 						return;
 					}
-					instance.PRESALE_VERSION(function(err, version) {
-						if(err) {
-							logError("Error accessing Presale instance: ", err, "\nCannot access PRESALE_VERSION.");
-							tryCallbackIfProvided(callback, ERR_WEB3_ERROR, err);
-							return;
-						}
-						if(PRESALE_VERSION != version) {
-							const err = "Error accessing Presale instance: not a valid instance.\n" +
-								"Check if the address specified points to a Presale instance with a valid PRESALE_VERSION.\n" +
-								"Version required: " + PRESALE_VERSION + ". Version found: " + version;
-							logError(err);
-							tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
-							return;
-						}
-						logInfo("Successfully connected to Presale instance at ", address);
-						presaleInstance = instance;
-						instanceLoaded(callback);
-					});
-				}
-				// --- END: Internal Section to Load Contracts ---
-
-			});
+					if(PRESALE_VERSION != version) {
+						const err = "Error accessing Presale instance: not a valid instance.\n" +
+							"Check if the address specified points to a Presale instance with a valid PRESALE_VERSION.\n" +
+							"Version required: " + PRESALE_VERSION + ". Version found: " + version;
+						logError(err);
+						tryCallbackIfProvided(callback, ERR_CONTRACT_VERSION_MISMATCH, err);
+						return;
+					}
+					logInfo("Successfully connected to Presale instance at ", address);
+					presaleInstance = instance;
+					instanceLoaded(callback);
+				});
+			}
+			// --- END: Internal Section to Load Contracts ---
 
 			myWeb3.eth.getBalance(config.chestVault, function(err, result) {
 				if(err) {
@@ -387,6 +370,34 @@ function PresaleApi(logger, jQuery_instance) {
 				chestVault = config.chestVault;
 				instanceLoaded(callback);
 			});
+
+			if(!myAccount) {
+				if(infura) {
+					logInfo("Infura web3 integration loaded. Network id is ", networkName(myNetwork));
+				}
+				else {
+					logError("Cannot access default account.\nIs MetaMask locked?");
+				}
+			}
+			else {
+				logInfo("Web3 integration loaded. Your account is ", myAccount, ", network id ", networkName(myNetwork));
+				myWeb3.eth.getBalance(myAccount, function(err, balance) {
+					if(err) {
+						logError("getBalance() error: ", err);
+						tryCallbackIfProvided(callback, ERR_WEB3_ETH_ERROR, err);
+						return;
+					}
+					if(balance > 210000000000000) { // 0.21 finney
+						logInfo("Your balance is ", myWeb3.fromWei(balance, 'ether'), " ETH");
+					}
+					else if(balance > 0) {
+						logWarning("Your ETH balance is close to zero.\nYou won't be able to send most transactions.");
+					}
+					else {
+						logError("Your ETH balance is zero.\nYou won't be able to send any transaction.");
+					}
+				});
+			}
 		});
 
 		return 0;
@@ -621,7 +632,7 @@ function PresaleApi(logger, jQuery_instance) {
 			logError("callback is undefined or is not a function");
 			return ERR_NO_CALLBACK;
 		}
-		if(!(myWeb3 && myAccount && presaleInstance)) {
+		if(!(myWeb3 && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
 		}
@@ -665,7 +676,7 @@ function PresaleApi(logger, jQuery_instance) {
 			logError("callback is undefined or is not a function");
 			return ERR_NO_CALLBACK;
 		}
-		if(!(myWeb3 && myAccount && chestVault)) {
+		if(!(myWeb3 && chestVault)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
 		}
@@ -719,7 +730,7 @@ function PresaleApi(logger, jQuery_instance) {
 			logError("callback is undefined or is not a function");
 			return ERR_NO_CALLBACK;
 		}
-		if(!(myWeb3 && myAccount && presaleInstance)) {
+		if(!(myWeb3 && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
 		}
@@ -754,6 +765,11 @@ function PresaleApi(logger, jQuery_instance) {
 	 * if error occurred asynchronously - error code will be passed to callback
 	 */
 	this.getBalances = function(callback) {
+		if(!myAccount) {
+			logError("Presale API is not properly initialized. Reload the page.");
+			return ERR_NOT_INITIALIZED;
+		}
+
 		return this.getBalancesFor(myAccount, callback);
 	};
 
@@ -769,7 +785,7 @@ function PresaleApi(logger, jQuery_instance) {
 			logError("callback is undefined or is not a function");
 			return ERR_NO_CALLBACK;
 		}
-		if(!(myWeb3 && myAccount && presaleInstance)) {
+		if(!(myWeb3 && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
 		}
@@ -875,7 +891,7 @@ function PresaleApi(logger, jQuery_instance) {
 			logError("callback is undefined or is not a function");
 			return ERR_NO_CALLBACK;
 		}
-		if(!(myWeb3 && myAccount && tokenInstance)) {
+		if(!(myWeb3 && tokenInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
 		}
@@ -1175,7 +1191,7 @@ function PresaleApi(logger, jQuery_instance) {
 			logError("callback is undefined or is not a function");
 			return ERR_NO_CALLBACK;
 		}
-		if(!(myWeb3 && myAccount && presaleInstance)) {
+		if(!(myWeb3 && presaleInstance)) {
 			logError("Presale API is not properly initialized. Reload the page.");
 			return ERR_NOT_INITIALIZED;
 		}
