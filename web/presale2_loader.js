@@ -323,12 +323,6 @@ jQuery3(document).on("keyup", function(e) {
 });
 
 jQuery3(document).ready(function() {
-	function load_and_reload_default_counters() {
-		load_default_counters();
-		setTimeout(load_default_counters, 1023);
-		setTimeout(load_default_counters, 2048);
-	}
-
 	function load_default_counters() {
 		jQuery3.ajax({
 			global: false,
@@ -551,7 +545,7 @@ jQuery3(document).ready(function() {
 				if(presale.getNetworkId() != REQUIRED_NETWORK_ID) {
 					workshop_wrong_network(presale.getNetworkName(), REQUIRED_NETWORK_NAME);
 				}
-				load_and_reload_default_counters();
+				load_default_counters();
 				return;
 			}
 			if(result.infura) {
@@ -564,7 +558,7 @@ jQuery3(document).ready(function() {
 			// load counters (presale state)
 			presale.presaleState(function(err, result) {
 				if(err) {
-					load_and_reload_default_counters();
+					load_default_counters();
 					return;
 				}
 				update_counters(result);
@@ -712,7 +706,7 @@ jQuery3(document).ready(function() {
 	// MetaMask is not installed, display proper workshop screen
 	if(errorCode > 0) {
 		workshop_no_web3();
-		load_and_reload_default_counters();
+		load_default_counters();
 	}
 
 	// bind an action to a "get geodes button"
