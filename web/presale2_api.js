@@ -211,11 +211,16 @@ function PresaleApi(logger, jQuery_instance) {
 	 * if error occurred asynchronously - error code will be passed to callback
 	 */
 	this.init = function(config, callback) {
-		if(typeof window.web3 == 'undefined') {
+		if(typeof window.web3 == 'undefined' && typeof window.Web3 == 'undefined') {
 			logError("Web3 is not enabled. Do you need to install MetaMask?");
 			return ERR_NO_WEB3;
 		}
-		myWeb3 = new Web3(window.web3.currentProvider);
+		else if(typeof window.web3 == 'undefined') {
+			myWeb3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/"));
+		}
+		else {
+			myWeb3 = new Web3(window.web3.currentProvider);
+		}
 		myWeb3.eth.getAccounts(function(err, accounts) {
 			if(err) {
 				logError("getAccounts() error: ", err);
