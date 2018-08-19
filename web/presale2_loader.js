@@ -551,14 +551,14 @@ jQuery3(document).ready(function() {
 				if(presale.getNetworkId() != REQUIRED_NETWORK_ID) {
 					workshop_wrong_network(presale.getNetworkName(), REQUIRED_NETWORK_NAME);
 				}
-				else {
-					workshop_account_locked();
-				}
 				load_and_reload_default_counters();
 				return;
 			}
 			if(result.infura) {
 				workshop_no_web3();
+			}
+			else if(!result.defaultAccount) {
+				workshop_account_locked();
 			}
 
 			// load counters (presale state)
