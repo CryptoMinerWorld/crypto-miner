@@ -409,7 +409,7 @@ jQuery3(document).ready(function() {
     		const defaultSort = {by: "grade", order: "desc"};
     		sort(defaultSort.by, defaultSort.order);
 		
-		const columns = jQuery3(window).width() > 640 ? 4: 2;
+		const columns = jQuery3(window).width() > 640? 4: 2;
 		const rows = Math.ceil(collection.length / columns);
 		let html = `
 			<div id="WorkshopLoading">
