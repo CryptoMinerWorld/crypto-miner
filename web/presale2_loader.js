@@ -728,7 +728,7 @@ jQuery3(document).ready(function() {
 			location.href = "#no_metamask";
 			return;
 		}
-		if(!presale.defaultAccount()) {
+		if(!presale.getDefaultAccount()) {
 			location.href = "#locked_metamask";
 			return;
 		}
