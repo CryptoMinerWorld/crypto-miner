@@ -407,7 +407,7 @@ jQuery3(document).ready(function() {
 
 		// ========= START: Draw Gems in a Table =========
 		collection.sort((x, y) => {
-			return y.gradeValue - x.gradeValue;
+			return y.gradeType - x.gradeType;
 		});
 
 		const columns = jQuery3(window).width() > 640? 4: 2;
