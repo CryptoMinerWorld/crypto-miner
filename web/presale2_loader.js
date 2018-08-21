@@ -405,10 +405,10 @@ jQuery3(document).ready(function() {
 	function workshop_display_gems(collection) {
 		workshop_loading();
 
-		// ========= START: Draw Gems in a Table =========
-		collection.sort((x, y) => {
-			return y.id - x.id;
-		});
+		// ========= START: Set default sort then draw Gems in a Table =========
+    		const defaultSort = {by: "grade", order: "desc"};
+    		sort(defaultSort.by, defaultSort.order);
+		
 		const columns = jQuery3(window).width() > 640? 4: 2;
 		const rows = Math.ceil(collection.length / columns);
 		let html = `
@@ -423,14 +423,14 @@ jQuery3(document).ready(function() {
 				<select id="gem_sorting_by">
 					<option value="">Sort By</option>
 					<option value="id">Date</option>
-					<option value="grade">Grade</option>
+					<option value="grade" select>Grade</option>
 					<option value="level">Age(Lvl)</option>
 					<option value="color">Color</option>
 				</select>
 				&nbsp &nbsp &nbsp &nbsp &nbsp 
 				<select id="gem_sorting_order">
 					<option value="asc">Ascending</option>
-					<option value="desc">Descending</option>
+					<option value="desc" select>Descending</option>
 				</select>
 			</div>
 			<table id="my_geodes">
