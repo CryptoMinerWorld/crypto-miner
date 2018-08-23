@@ -193,17 +193,6 @@ const REQUIRED_NETWORK_NAME = TEST_MODE? "4: Rinkeby": "1: Mainnet";
 const CONFIG = TEST_MODE?
 {
 	token: {
-		address: "0xeae9d154da7a1cd05076db1b83233f3213a95e4f",
-		abi_url: WEB_BASE + "abi/ERC721.json"
-	},
-	presale: {
-		address: "0xe0a21044eeeb9efc340809e35dc0e9d82dc87dd1",
-		abi_url: WEB_BASE + "abi/Presale2.json"
-	},
-	chestVault: "0xc352f692f55def49f0b736ec1f7ca0f862eabd23"
-}:
-{
-	token: {
 		address: "0x82ff6bbd7b64f707e704034907d582c7b6e09d97",
 		abi_url: WEB_BASE + "abi/ERC721.json"
 	},
@@ -212,6 +201,17 @@ const CONFIG = TEST_MODE?
 		abi_url: WEB_BASE + "abi/Presale2.json"
 	},
 	chestVault: "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"
+}:
+{
+	token: {
+		address: "0xeae9d154da7a1cd05076db1b83233f3213a95e4f",
+		abi_url: WEB_BASE + "abi/ERC721.json"
+	},
+	presale: {
+		address: "0xe0a21044eeeb9efc340809e35dc0e9d82dc87dd1",
+		abi_url: WEB_BASE + "abi/Presale2.json"
+	},
+	chestVault: "0xc352f692f55def49f0b736ec1f7ca0f862eabd23"
 };
 
 const jQuery3 = jQuery.noConflict();
