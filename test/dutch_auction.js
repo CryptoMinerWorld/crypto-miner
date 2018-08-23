@@ -8,8 +8,70 @@ const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
 const Token = artifacts.require("./GemERC721");
 const Auction = artifacts.require("./DutchAuction");
 
+// some default token ID to work with
+const token0x401 = 0x401;
+
+// some default minting process for that token
+const mint0x401 = async function(tk, accounts) {
+	// issue a token to account 1
+	await tk.mint(
+		accounts[1], // owner
+		token0x401, // unique token ID
+		1, // plot ID
+		0, // depth
+		1, // gem number
+		1, // color ID
+		1, // level ID
+		1, // grade type
+		1  // grade value
+	);
+};
+
 contract('Dutch Auction', function(accounts) {
-	it("sell/buy: successful cycle", async function() {
+	it("auction: testing wrong parameters", async function() {
+		// zero address token
+		await assertThrowsAsync(async () => await Auction.new(0));
+		// invalid ERC721  token
+		await assertThrowsAsync(async () => await Auction.new(accounts[0]));
+
+		const tk = await Token.new();
+		const auction = await Auction.new(tk.address);
+		const now = new Date().getTime() / 1000;
+
+		// to list a token in the auction transfers on behalf feature is required
+		// to buy a token from an auction transfers feature is required
+		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+
+		// issue a token to account 1
+		await mint0x401(tk, accounts);
+
+		// account 1 is required to allow auction to transfer that token on its behalf
+		await tk.approve(auction.address, token0x401, {from: accounts[1]});
+
+		// adding token to an auction - wrong parameters
+		await assertThrowsAsync(async () => await auction.addWith(token0x401, now, now + 60, 100, 200));
+		await assertThrowsAsync(async () => await auction.addWith(token0x401, now, now, 200, 100));
+		await assertThrowsAsync(async () => await auction.add(token0x401, 0, 200, 100));
+		await assertThrowsAsync(async () => await auction.add(token0x401, 60, 100, 200));
+		await assertThrowsAsync(async () => await auction.addWith(token0x401, now - 60, now, 200, 100));
+		await assertThrowsAsync(async () => await auction.addWith(token0x401, 0, now + 60, 200, 100));
+		await assertThrowsAsync(async () => await auction.add(0, 60, 200, 100));
+		// adding token to an auction - correct parameters
+		await auction.addWith(token0x401, now, now + 60, 200, 100);
+
+		// ensure auction lists this token for sale
+		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");
+
+		// remove with wrong parameters - wrong parameters
+		await assertThrowsAsync(async () => await auction.remove(0x402));
+		await assertThrowsAsync(async () => await auction.remove(token0x401, {from: accounts[2]}));
+		// removing token from an auction - correct parameters
+		await auction.remove(token0x401, {from: accounts[1]});
+
+		// ensure auction doesn't list this token anymore
+		assert(!await auction.isTokenOnSale(token0x401), "token 0x401 is still on sale after removing it");
+	});
+	it("auction: putting up for sale", async function() {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
@@ -17,21 +79,55 @@ contract('Dutch Auction', function(accounts) {
 		// to buy a token from an auction transfers feature is required
 		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 
-		// a token ID to work with
-		const token0x401 = 0x401;
+		// issue a token to account 1
+		await mint0x401(tk, accounts);
+
+		// account 1 is required to allow auction to transfer that token on its behalf
+		await tk.approve(auction.address, token0x401, {from: accounts[1]});
+
+		// adding token to an auction
+		await auction.add(token0x401, 60, 200, 100);
+
+		// ensure auction lists this token for sale
+		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");
+	});
+	it("auction: putting up and removing from sale", async function() {
+		const tk = await Token.new();
+		const auction = await Auction.new(tk.address);
+
+		// to list a token in the auction transfers on behalf feature is required
+		// to buy a token from an auction transfers feature is required
+		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 
 		// issue a token to account 1
-		await tk.mint(
-			accounts[1], // owner
-			token0x401, // unique token ID
-			1, // plot ID
-			0, // depth
-			1, // gem number
-			1, // color ID
-			1, // level ID
-			1, // grade type
-			1  // grade value
-		);
+		await mint0x401(tk, accounts);
+
+		// account 1 is required to allow auction to transfer that token on its behalf
+		await tk.approve(auction.address, token0x401, {from: accounts[1]});
+
+		// adding token to an auction
+		await auction.add(token0x401, 60, 200, 100);
+
+			// ensure auction lists this token for sale
+		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");
+
+		// removing token from an auction
+		await auction.remove(token0x401);
+
+		// ensure auction doesn't list this token anymore
+		assert(!await auction.isTokenOnSale(token0x401), "token 0x401 is still on sale after removing it");
+	});
+
+	it("auction: selling, buying, adding, removing lifecycle", async function() {
+		const tk = await Token.new();
+		const auction = await Auction.new(tk.address);
+
+		// to list a token in the auction transfers on behalf feature is required
+		// to buy a token from an auction transfers feature is required
+		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+
+		// issue a token to account 1
+		await mint0x401(tk, accounts);
 
 		// account 1 is required to allow auction to transfer that token on its behalf
 		await tk.approve(auction.address, token0x401, {from: accounts[1]});
@@ -50,6 +146,10 @@ contract('Dutch Auction', function(accounts) {
 
 		// check that the price is p0
 		assert.equal(p0, await auction.getCurrentPrice(token0x401), "wrong initial price for token 0x401");
+
+		// check few transactions are not possible with wrong parameters
+		await assertThrowsAsync(async () => await auction.getCurrentPrice(0x402));
+		await assertThrowsAsync(async () => await auction.buy(0x402, {from: accounts[2], value: p0}));
 
 		// skip one second for auction to start
 		await increaseTime(offset);
@@ -116,6 +216,21 @@ contract('Dutch Auction', function(accounts) {
 		assert(!await auction.isTokenOnSale(token0x401), "token 0x401 is still on sale after removing it");
 	});
 });
+
+async function assertThrowsAsync(fn) {
+	let f = function() {};
+	try {
+		await fn();
+	}
+	catch(e) {
+		f = function() {
+			throw e;
+		};
+	}
+	finally {
+		assert.throws(f);
+	}
+}
 
 async function increaseTime(delta) {
 	await web3.currentProvider.send({
