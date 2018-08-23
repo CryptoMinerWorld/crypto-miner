@@ -187,9 +187,9 @@ const THUMB_BASE = "https://cryptominerworld.com/wp-content/uploads/Gem_Images/G
 const VIDEO_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Gems_Video/";
 const MIS_IMG_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Imgs_for_presale_code_import/";
 
-const REQUIRED_NETWORK_ID = 1;
-const REQUIRED_NETWORK_NAME = "1: Mainnet";
 const TEST_MODE = location.search.indexOf("test_mode=true") > 0;
+const REQUIRED_NETWORK_ID = TEST_MODE? 4: 1;
+const REQUIRED_NETWORK_NAME = TEST_MODE? "4: Rinkeby": "1: Mainnet";
 const CONFIG = TEST_MODE?
 {
 	token: {
