@@ -189,6 +189,30 @@ const MIS_IMG_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Imgs_f
 
 const REQUIRED_NETWORK_ID = 1;
 const REQUIRED_NETWORK_NAME = "1: Mainnet";
+const TEST_MODE = location.search.indexOf("test_mode=true") > 0;
+const CONFIG = TEST_MODE?
+{
+	token: {
+		address: "0xeae9d154da7a1cd05076db1b83233f3213a95e4f",
+		abi_url: WEB_BASE + "abi/ERC721.json"
+	},
+	presale: {
+		address: "0xe0a21044eeeb9efc340809e35dc0e9d82dc87dd1",
+		abi_url: WEB_BASE + "abi/Presale2.json"
+	},
+	chestVault: "0xc352f692f55def49f0b736ec1f7ca0f862eabd23"
+}:
+{
+	token: {
+		address: "0x82ff6bbd7b64f707e704034907d582c7b6e09d97",
+		abi_url: WEB_BASE + "abi/ERC721.json"
+	},
+	presale: {
+		address: "0x10a0f683304b6878e5e70295445fb03eeb6dec75",
+		abi_url: WEB_BASE + "abi/Presale2.json"
+	},
+	chestVault: "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"
+};
 
 const jQuery3 = jQuery.noConflict();
 
@@ -538,23 +562,13 @@ jQuery3(document).ready(function() {
 	// init the Presale API
 	const errorCode = presale.init(
 		// configuration
-		{
-			token: {
-				address: "0xeae9d154da7a1cd05076db1b83233f3213a95e4f",
-				abi_url: WEB_BASE + "abi/ERC721.json"
-			},
-			presale: {
-				address: "0xe0a21044eeeb9efc340809e35dc0e9d82dc87dd1",
-				abi_url: WEB_BASE + "abi/Presale2.json"
-			},
-			chestVault: "0xc352f692f55def49f0b736ec1f7ca0f862eabd23"
-		},
+		CONFIG,
 
 		// callback handler
 		function(errCode, result) {
 			if(errCode > 0) {
 				// update workshop page to look properly
-				if(presale.getNetworkId() != REQUIRED_NETWORK_ID) {
+				if(!TEST_MODE && presale.getNetworkId() != REQUIRED_NETWORK_ID) {
 					workshop_wrong_network(presale.getNetworkName(), REQUIRED_NETWORK_NAME);
 				}
 				load_default_counters();
@@ -733,7 +747,7 @@ jQuery3(document).ready(function() {
 			return;
 		}
 		// MetaMask connected to wrong network
-		if(presale.getNetworkId() != REQUIRED_NETWORK_ID) {
+		if(!TEST_MODE && presale.getNetworkId() != REQUIRED_NETWORK_ID) {
 			jQuery3("#required_network_id").html(REQUIRED_NETWORK_NAME);
 			location.href = "#wrong_network_modal";
 			return;
