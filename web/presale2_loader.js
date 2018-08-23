@@ -188,10 +188,12 @@ const VIDEO_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Gems_Vid
 const MIS_IMG_BASE = "https://www.cryptominerworld.com/wp-content/uploads/Imgs_for_presale_code_import/";
 
 const TEST_MODE = location.search.indexOf("test_mode=true") > 0;
+console.log("TEST_MODE: " + TEST_MODE);
 const REQUIRED_NETWORK_ID = TEST_MODE? 4: 1;
 const REQUIRED_NETWORK_NAME = TEST_MODE? "4: Rinkeby": "1: Mainnet";
 const CONFIG = TEST_MODE?
 {
+	// Rinkeby Settings
 	token: {
 		address: "0x82ff6bbd7b64f707e704034907d582c7b6e09d97",
 		abi_url: WEB_BASE + "abi/ERC721.json"
@@ -203,6 +205,7 @@ const CONFIG = TEST_MODE?
 	chestVault: "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"
 }:
 {
+	// Mainnet Settings
 	token: {
 		address: "0xeae9d154da7a1cd05076db1b83233f3213a95e4f",
 		abi_url: WEB_BASE + "abi/ERC721.json"
