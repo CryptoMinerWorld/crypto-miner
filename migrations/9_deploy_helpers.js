@@ -38,6 +38,11 @@ module.exports = async function(deployer, network, accounts) {
 	// grant permissions to create gems and store metadata
 	await storage.addOperator("0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", METADATA_OPERATOR); // John
 	await mintHelper.addOperator("0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", MINT_OPERATOR); // John
+	if(network === "development") {
+		// additionally add Josh on development network
+		await storage.addOperator("0xd9b74f73d933fde459766f74400971b29b90c9d2", METADATA_OPERATOR); // Josh
+		await mintHelper.addOperator("0xd9b74f73d933fde459766f74400971b29b90c9d2", MINT_OPERATOR); // Josh
+	}
 
 
 	console.log("______________________________________________________");
