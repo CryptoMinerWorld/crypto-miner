@@ -1,0 +1,8 @@
+gem:              0x82ff6bbd7b64f707e704034907d582c7b6e09d97
+presale2:         0x10a0f683304b6878e5e70295445fb03eeb6dec75
+chest:            0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69
+auction:          0x51e5b41f82b71dcebe11a7bd67ce12c862772e98
+metadata storage: 0x71a0f651f4c1f9265209436b0f1ac978bbd4382d
+mint helper:      0x6afd5f5f431279b0cac7f5ff406f13d804b183c9
+John:             0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6
+Josh:             0xd9b74f73d933fde459766f74400971b29b90c9d2
