@@ -27,8 +27,8 @@ const mint0x401 = async function(tk, accounts) {
 	);
 };
 
-contract('Dutch Auction', function(accounts) {
-	it("auction: testing wrong parameters", async function() {
+contract('Dutch Auction', accounts => {
+	it("auction: testing wrong parameters", async () => {
 		// zero address token
 		await assertThrowsAsync(async () => await Auction.new(0));
 		// invalid ERC721  token
@@ -71,7 +71,7 @@ contract('Dutch Auction', function(accounts) {
 		// ensure auction doesn't list this token anymore
 		assert(!await auction.isTokenOnSale(token0x401), "token 0x401 is still on sale after removing it");
 	});
-	it("auction: putting up for sale", async function() {
+	it("auction: putting up for sale", async () => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
@@ -91,7 +91,7 @@ contract('Dutch Auction', function(accounts) {
 		// ensure auction lists this token for sale
 		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");
 	});
-	it("auction: putting up and removing from sale", async function() {
+	it("auction: putting up and removing from sale", async () => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
@@ -118,7 +118,7 @@ contract('Dutch Auction', function(accounts) {
 		assert(!await auction.isTokenOnSale(token0x401), "token 0x401 is still on sale after removing it");
 	});
 
-	it("auction: selling, buying, adding, removing lifecycle", async function() {
+	it("auction: selling, buying, adding, removing lifecycle", async () => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
@@ -218,12 +218,12 @@ contract('Dutch Auction', function(accounts) {
 });
 
 async function assertThrowsAsync(fn) {
-	let f = function() {};
+	let f = () => {};
 	try {
 		await fn();
 	}
 	catch(e) {
-		f = function() {
+		f = () => {
 			throw e;
 		};
 	}

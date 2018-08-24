@@ -50,7 +50,7 @@ contract DutchAuction is AccessControl {
 
   /// @dev Auxiliary data structure to keep track of previous item owners
   /// @dev Used to be able to return items back to owners
-  mapping(uint256 => address) owners;
+  mapping(uint256 => address) public owners;
 
   /// @notice All the items available for sale with their sale parameters
   /// @dev Includes both expired and available items

@@ -5,8 +5,8 @@ const Token = artifacts.require("./GemERC721");
 const Sale = artifacts.require("./CouponSale");
 const Sale2 = artifacts.require("./Presale2");
 
-contract('Presale2 5500', function(accounts) {
-	it("presale2: buying 5500 geodes", async function() {
+contract('Presale2 5500', accounts => {
+	it("presale2: buying 5500 geodes", async () => {
 		const tk = await Token.new();
 		const sale = await Sale.new(tk.address, accounts[11], accounts[12]);
 		await tk.updateFeatures(ROLE_ROLE_MANAGER | ROLE_TOKEN_CREATOR);

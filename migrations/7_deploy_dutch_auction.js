@@ -2,11 +2,11 @@ const Auction = artifacts.require("./DutchAuction");
 
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
-		console.log("[deploy gem] test network - skipping the migration script");
+		console.log("[deploy dutch auction] test network - skipping the migration script");
 		return;
 	}
 	if(network === "coverage") {
-		console.log("[deploy gem] coverage network - skipping the migration script");
+		console.log("[deploy dutch auction] coverage network - skipping the migration script");
 		return;
 	}
 

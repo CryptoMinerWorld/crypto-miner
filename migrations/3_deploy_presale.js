@@ -6,11 +6,11 @@ const Sale = artifacts.require("./CouponSale");
 
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
-		console.log("[deploy gem] test network - skipping the migration script");
+		console.log("[deploy presale] test network - skipping the migration script");
 		return;
 	}
 	if(network === "coverage") {
-		console.log("[deploy gem] coverage network - skipping the migration script");
+		console.log("[deploy presale] coverage network - skipping the migration script");
 		return;
 	}
 
