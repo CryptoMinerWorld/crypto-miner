@@ -2,6 +2,7 @@ pragma solidity 0.4.23;
 
 import "./AccessControl.sol";
 import "./GemERC721.sol";
+import "./Fractions.sol";
 
 /**
  * @notice Dutch auction represents a method of selling
@@ -27,6 +28,8 @@ import "./GemERC721.sol";
  *      token ID space is expected to be uint32
  */
 contract DutchAuction is AccessControl {
+  /// @dev Using library Fractions for fraction math
+  using Fractions for Fractions.Fraction;
 
   /// @dev Base structure representing an item for sale on the auction
   /// @dev 256 bits structure, occupies exactly one memory slot
@@ -40,13 +43,29 @@ contract DutchAuction is AccessControl {
     // sale end price, wei, cannot exceed 10^6 ETH
     uint80 p1;
   }
-  
+
   /// @notice Auction manager is responsible for removing items
   /// @dev Role ROLE_AUCTION_MANAGER allows executing removeItem
   uint32 public constant ROLE_AUCTION_MANAGER = 0x00000002;
 
+  /// @notice Fee manager is responsible for setting sale fees on the smart contract
+  /// @dev Role ROLE_FEE_MANAGER allows executing setFee, setBeneficiary, setFeeAndBeneficiary
+  uint32 public constant ROLE_FEE_MANAGER = 0x00000004;
+
+  /// @notice Maximum fee that can be set on the contract
+  /// @dev This is an inverted value of the maximum fee:
+  ///      `MAX_FEE = 1 / MAX_FEE_INV`
+  uint8 public constant MAX_FEE_INV = 20; // 1/20 or 5%
+
   /// @dev This auction operates on GemERC721 instances
   GemERC721 public tokenInstance;
+
+  /// @dev Transaction fee, defined by its nominator and denominator
+  /// @dev Fee is guaranteed to be in a range between 0 and 5 percent
+  Fractions.Fraction public fee;
+
+  /// @dev Address which receives the transaction fee
+  address beneficiary;
 
   /// @dev Auxiliary data structure to keep track of previous item owners
   /// @dev Used to be able to return items back to owners
@@ -89,8 +108,12 @@ contract DutchAuction is AccessControl {
     uint48 t1, // seconds
     uint80 p0, // wei
     uint80 p1, // wei
-    uint80 p   // current price in wei
+    uint80 p,  // current price in wei
+    uint80 fee // fee payed
   );
+
+  /// @dev Fired in setFee, setBeneficiary, setFeeAndBeneficiary
+  event TransactionFeeUpdated(uint16 nominator, uint16 denominator, address beneficiary);
 
   /**
    * @dev Creates a dutch auction instance operating on GemERC721 tokens
@@ -148,7 +171,7 @@ contract DutchAuction is AccessControl {
     require(t0 > 0);
     // make sure t1 > t0 constraint is satisfied
     require(t1 > t0);
-    // make sure we're no adding an already expired sale
+    // make sure we're not adding an already expired sale
     require(t1 > now);
     // p0 can be potentially zero
     // make sure p0 > p1 constraint is satisfied
@@ -230,7 +253,8 @@ contract DutchAuction is AccessControl {
     Item memory item = items[tokenId];
     
     // check that the sale has already started
-    require(item.t0 <= now);
+    // TODO: this line is in question: do we really need this check?
+    //require(item.t0 <= now);
 
     // calculate current item price
     uint80 p = priceNow(item.t0, item.t1, item.p0, item.p1);
@@ -247,8 +271,23 @@ contract DutchAuction is AccessControl {
     // remove item on sale properties
     delete items[tokenId];
 
+    // transaction fee value
+    uint256 feeValue = 0;
+
+    // fee (if any) is extracted from the seller
+    if(beneficiary != address(0) && !fee.isZero()) {
+      // calculate the fee
+      feeValue = fee.multiplyByInteger(p);
+
+      // transfer the fee to beneficiary
+      beneficiary.transfer(feeValue);
+    }
+
+    // fee cannot exceed MAX FEE limit by design
+    assert(feeValue <= p / MAX_FEE_INV);
+
     // transfer value to the seller
-    seller.transfer(p);
+    seller.transfer(p - feeValue);
 
     // if the incoming value is too big
     if(msg.value > p) {
@@ -257,7 +296,68 @@ contract DutchAuction is AccessControl {
     }
 
     // emit an event
-    emit ItemBought(seller, buyer, tokenId, item.t0, item.t1, item.p0, item.p1, p);
+    emit ItemBought(seller, buyer, tokenId, item.t0, item.t1, item.p0, item.p1, p, uint80(feeValue));
+  }
+
+  /**
+   * @dev Allows to set the transaction fee less or equal to 5%
+   * @dev Throws if fee exceeds 5%
+   * @dev Requires sender to have `ROLE_FEE_MANAGER` permission
+   * @param nominator fee fraction nominator
+   * @param denominator fee fraction denominator, not zero
+   */
+  function setFee(uint16 nominator, uint16 denominator) public {
+    // ensure sender has valid permissions
+    require(__isSenderInRole(ROLE_FEE_MANAGER));
+
+    // ensure fee cannot exceed the MAX FEE limit
+    require(nominator <= denominator / MAX_FEE_INV);
+
+    // create and assign the fee
+    fee = Fractions.createProperFraction(nominator, denominator);
+
+    // emit an event
+    emit TransactionFeeUpdated(nominator, denominator, beneficiary);
+  }
+
+  /**
+   * @dev Allows to set the transaction fee beneficiary
+   * @dev Requires sender to have `ROLE_FEE_MANAGER` permission
+   * @param _beneficiary transaction fee beneficiary
+   */
+  function setBeneficiary(address _beneficiary) public {
+    // ensure sender has valid permissions
+    require(__isSenderInRole(ROLE_FEE_MANAGER));
+
+    // address can be zero as well, zero address disables transaction fees
+    beneficiary = _beneficiary;
+
+    // emit an event
+    emit TransactionFeeUpdated(fee.getNominator(), fee.getDenominator(), beneficiary);
+  }
+
+  /**
+   * @dev Allows to set the transaction fee and beneficiary
+   * @dev Requires sender to have `ROLE_FEE_MANAGER` permission
+   * @param nominator fee fraction nominator
+   * @param denominator fee fraction denominator, not zero
+   * @param _beneficiary transaction fee beneficiary
+   */
+  function setFeeAndBeneficiary(uint16 nominator, uint16 denominator, address _beneficiary) public {
+    // ensure sender has valid permissions
+    require(__isSenderInRole(ROLE_FEE_MANAGER));
+
+    // ensure fee cannot exceed the MAX FEE limit
+    require(nominator <= denominator / MAX_FEE_INV);
+
+    // create and assign the fee, it can be zero in which case it disables transaction fees
+    fee = Fractions.createProperFraction(nominator, denominator);
+
+    // address can be zero as well, zero address disables transaction fees
+    beneficiary = _beneficiary;
+
+    // emit an event
+    emit TransactionFeeUpdated(nominator, denominator, beneficiary);
   }
 
   /**
@@ -298,7 +398,7 @@ contract DutchAuction is AccessControl {
    * @param p1 final price
    * @return price in time `now` according to formula `p = p0 - (now - t0) * (p0 - p1) / (t1 - t0)`
    */
-  function priceNow(uint48 t0, uint48 t1, uint80 p0, uint80 p1) public constant returns(uint80) {
+  function priceNow(uint48 t0, uint48 t1, uint80 p0, uint80 p1) private constant returns(uint80) {
     // delegate call to `p`
     return price(t0, t1, uint48(now), p0, p1);
   }
@@ -314,7 +414,7 @@ contract DutchAuction is AccessControl {
    * @param _p1 final price
    * @return price in time `t` according to formula `p = p0 - (t - t0) * (p0 - p1) / (t1 - t0)`
    */
-  function price(uint48 _t0, uint48 _t1, uint48 _t, uint80 _p0, uint80 _p1) public pure returns(uint80) {
+  function price(uint48 _t0, uint48 _t1, uint48 _t, uint80 _p0, uint80 _p1) private pure returns(uint80) {
     // if current time `t` is lower then start time `t0`
     if(_t < _t0) {
       // return initial price `p0`
@@ -339,4 +439,7 @@ contract DutchAuction is AccessControl {
     return uint80(p0 - (t - t0) * (p0 - p1) / (t1 - t0));
   }
 
+  function getNow() public constant returns(uint256) {
+    return now;
+  }
 }

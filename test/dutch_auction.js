@@ -1,5 +1,4 @@
-const ROLE_AUCTION_STAFF = 0x00000001;
-const ROLE_AUCTION_MANAGER = 0x00000003;
+const ROLE_FEE_MANAGER = 0x00000004;
 const ROLE_TOKEN_CREATOR = 0x00040000;
 const ROLE_ROLE_MANAGER = 0x10000000;
 const FEATURE_TRANSFERS = 0x00000001;
@@ -135,8 +134,8 @@ contract('Dutch Auction', accounts => {
 		// account 1 wants to sell its token on the auction
 		const p0 = web3.toWei(1, "finney"); // price starts at 1 finney
 		const p1 = web3.toWei(1, "szabo");  // and drops to 1 szabo
-		const duration  = 60; // in 1 minutes (60 seconds)
-		const offset = 1; // starting in 1 second
+		const duration  = 60; // in 1 minute (60 seconds)
+		const offset = 30; // starting in 30 seconds
 		// auction will start in one second
 		const t0 = offset + new Date().getTime() / 1000 | 0;
 		const t1 = t0 + duration;
@@ -155,8 +154,8 @@ contract('Dutch Auction', accounts => {
 		await increaseTime(offset);
 
 		// saving current account 1 and 2 balances
-		const account1Balance = await web3.eth.getBalance(accounts[1]);
-		const account2Balance = await web3.eth.getBalance(accounts[2]);
+		const balance1 = await web3.eth.getBalance(accounts[1]);
+		const balance2 = await web3.eth.getBalance(accounts[2]);
 
 		// account 2 wants to buy that token from the auction
 		const tx = await auction.buy(token0x401, {from: accounts[2], value: p0});
@@ -166,13 +165,13 @@ contract('Dutch Auction', accounts => {
 		const gasUsed = tx.receipt.gasUsed;
 
 		// account 1 is expected to increase balance by p
-		const account1ExpectedBalance = account1Balance.plus(p);
+		const expectedBalance1 = balance1.plus(p);
 		// account 2 is expected in decrease balance by p plus gas used
-		const account2ExpectedBalance = account2Balance.minus(p).minus(gasUsed);
+		const expectedBalance2 = balance2.minus(p).minus(gasUsed);
 
 		// check the value was transferred properly from account 2 to account 1
-		assert(account1ExpectedBalance.eq(await web3.eth.getBalance(accounts[1])), "wrong account 1 balance after selling a gem on auction");
-		assert(account2ExpectedBalance.eq(await web3.eth.getBalance(accounts[2])), "wrong account 2 balance after buying a gem on auction");
+		assert(expectedBalance1.eq(await web3.eth.getBalance(accounts[1])), "wrong account 1 balance after selling a gem on auction");
+		assert(expectedBalance2.eq(await web3.eth.getBalance(accounts[2])), "wrong account 2 balance after buying a gem on auction");
 
 		// ensure token has correct owner
 		assert.equal(accounts[2], await tk.ownerOf(token0x401), "wrong token 0x401 owner after selling it on auction");
@@ -214,6 +213,73 @@ contract('Dutch Auction', accounts => {
 
 		// ensure auction doesn't list this token anymore
 		assert(!await auction.isTokenOnSale(token0x401), "token 0x401 is still on sale after removing it");
+	});
+
+	it("auction: transaction fees", async () => {
+		const tk = await Token.new();
+		const auction = await Auction.new(tk.address);
+
+		// to list a token in the auction transfers on behalf feature is required
+		// to buy a token from an auction transfers feature is required
+		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+
+		// account 3 will try to set transaction fee and beneficiary
+		const f1 = async () => await auction.setFee(1, 100, {from: accounts[3]});
+		const f2 = async () => await auction.setBeneficiary(accounts[0], {from: accounts[3]});
+		const f3 = async () => await auction.setFeeAndBeneficiary(1, 100, accounts[0], {from: accounts[3]});
+
+		// transaction fee and beneficiary cannot be set without a permission
+		await assertThrowsAsync(f1);
+		await assertThrowsAsync(f2);
+		await assertThrowsAsync(f3);
+
+		// grant account 3 role ROLE_FEE_MANAGER required
+		await auction.addOperator(accounts[3], ROLE_FEE_MANAGER);
+
+		// try again, should work now
+		await f1();
+		await f2();
+		await f3();
+
+		// issue a token token0x401 to account 1
+		await mint0x401(tk, accounts);
+
+		// account 1 is required to allow auction to transfer that token on its behalf
+		await tk.approve(auction.address, token0x401, {from: accounts[1]});
+
+		// add token to an auction, to prevent price change - delay start by 60 seconds
+		const now = new Date().getTime() / 1000 | 0;
+		const price = web3.toWei(1, "finney");
+		await auction.addWith(token0x401, now + 300, now + 3000, price, 0);
+
+		// keep record of balances of interest
+		const balance0 = await web3.eth.getBalance(accounts[0]); // beneficiary
+		const balance1 = await web3.eth.getBalance(accounts[1]); // token seller
+		const balance2 = await web3.eth.getBalance(accounts[2]); // token buyer
+
+		// ensure the price has not been changed
+		assert.equal(price, await auction.getCurrentPrice(token0x401), "token price has changed!");
+
+		// buy token on an auction
+		const tx = await auction.buy(token0x401, {from: accounts[2], value: price});
+		// how much gas account 2 spent to buy the token
+		const gasUsed = tx.receipt.gasUsed;
+
+		// beneficiary's balance is expected to increase by 1% of the price
+		assert(
+			balance0.plus(price / 100).eq(await web3.eth.getBalance(accounts[0])),
+			"wrong beneficiary's balance after the token transfer on the auction"
+		);
+		// seller's balance is expected to increase by 99% of the price
+		assert(
+			balance1.plus(99 * price / 100).eq(await web3.eth.getBalance(accounts[1])),
+			"wrong seller's balance after the token transfer on the auction"
+		);
+		// buyer's balance is expected to decrease by token price plus gas fees
+		assert(
+			balance2.minus(price).minus(gasUsed).eq(await web3.eth.getBalance(accounts[2])),
+			"wrong buyer's balance after the token transfer on the auction"
+		);
 	});
 });
 
