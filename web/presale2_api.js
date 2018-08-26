@@ -173,7 +173,15 @@ function PresaleApi(logger, jQuery_instance) {
 	// in the place where an error occurred
 	function instanceLoaded(callback) {
 		if(tokenInstance && presaleInstance && chestVault) {
-			logSuccess("Application loaded successfully.\nNetwork " + networkName(myNetwork));
+			if(infura) {
+				logWarning("No MetaMask installation found. Infura web3 integration loaded instead.\nNetwork id is ", networkName(myNetwork));
+			}
+			else {
+				logSuccess("Application loaded successfully.\nNetwork " + networkName(myNetwork));
+				if(!myAccount) {
+					logError("Cannot access default account.\nIs MetaMask locked?");
+				}
+			}
 			tryCallbackIfProvided(callback, null, {
 				event: "init_complete",
 				network: networkName(myNetwork),
@@ -389,12 +397,6 @@ function PresaleApi(logger, jQuery_instance) {
 						logError("Your ETH balance is zero.\nYou won't be able to send any transaction.");
 					}
 				});
-			}
-			else if(infura) {
-				logWarning("No MetaMask installation found. Infura web3 integration loaded instead. Network id is ", networkName(myNetwork));
-			}
-			else {
-				logError("Cannot access default account.\nIs MetaMask locked?");
 			}
 		});
 
