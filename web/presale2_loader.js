@@ -665,15 +665,15 @@ jQuery3(document).ready(function() {
 				jQuery3("#founder_chest_total_amount_usd").html(result.balance_usd);
 			});
 
-			// update counters each time a PresaleStateChanged event is received
-			presale.registerPresaleStateChangedEventListener(function(err, result) {
-				if(err) {
-					return;
-				}
-				update_counters(result);
-			});
-
 			if(result.defaultAccount) {
+				// update counters each time a PresaleStateChanged event is received
+				presale.registerPresaleStateChangedEventListener(function(err, result) {
+					if(err) {
+						return;
+					}
+					update_counters(result);
+				});
+
 				// show success notification when coupon is created
 				presale.registerCouponAddedEventListener(function(err, result) {
 					if(err) {
