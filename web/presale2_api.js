@@ -174,7 +174,7 @@ function PresaleApi(logger, jQuery_instance) {
 	function instanceLoaded(callback) {
 		if(tokenInstance && presaleInstance && chestVault) {
 			if(infura) {
-				logWarning("No MetaMask installation found. Infura web3 integration loaded instead.\nNetwork id is ", networkName(myNetwork));
+				logWarning("No MetaMask installation found. Infura web3 integration loaded instead.\nNetwork ", networkName(myNetwork));
 			}
 			else {
 				logSuccess("Application loaded successfully.\nNetwork " + networkName(myNetwork));
