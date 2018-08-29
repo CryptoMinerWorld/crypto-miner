@@ -479,7 +479,7 @@ jQuery3(document).ready(function() {
 			const thumbnail = gemThumbnailURL(color, level, grade);
 
 			return `
-				<a href="javascript:display_gem(\'${gem.id}\', \'${color}\', \'${level}\', \'${grade}\', \'${miningRateDisplay}\')">
+				<a href="javascript:display_gem(\'${gem.id}\', \'${color}\', \'${level}\', \'${gradeType}\', \'${miningRateDisplay}\')">
 					<img style="padding: 0;" width="250" height="250" src="${thumbnail}"/>
 				</a><br/>Lvl ${levelId} ${color.substr(0, color.indexOf(" "))}<br/>Grade ${grade} &nbsp;+${miningRateDisplay}%
 			`;
@@ -846,7 +846,8 @@ function copy_ref_link() {
 const ref_link_btn_html = `<input id="create_ref_link_btn" type="button" onclick="show_ref_link()" value="Show Referral Link"/>`;
 
 // Auxiliary functions to draw gems list in a workshop
-function display_gem(gemId, color, level, grade, miningRate) {
+function display_gem(gemId, color, level, gradeType, miningRate) {
+	const grade = gradeName(gradeType);
 	console.log("display_gem(%s, %s, %s, %s, %s)", gemId, color, level, grade, miningRate);
 	const energyLevelContainer = jQuery3("#gem_modal .energy_level");
 	jQuery3("#gem_modal .level").html(level);
@@ -869,7 +870,7 @@ function display_gem(gemId, color, level, grade, miningRate) {
 			const oneDaySeconds = 24 * 3600;
 			const oneMonthSeconds = 30 * oneDaySeconds;
 			const ageDays = Math.floor(ageSeconds / oneDaySeconds);
-			const restingEnergyMinutes = Math.floor(0.0000578703703703704 * ageDays * oneDaySeconds + 2);
+			const restingEnergyMinutes = Math.round((17280 / ((2 + (6 - gradeType) / 4) * (11 + ageDays)))*(1 + (11 * Math.log(1 + (ageDays - 1) / 11))));
 			console.log(`gem ${gemId} grade ${grade} rate ${miningRate}% age ${ageDays} days, resting energy is ${restingEnergyMinutes} minutes`);
 			let energyLevel = Math.round(100 * ageSeconds / oneMonthSeconds);
 			if(energyLevel > 100) {
