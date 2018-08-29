@@ -870,7 +870,7 @@ function display_gem(gemId, color, level, gradeType, miningRate) {
 			const oneDaySeconds = 24 * 3600;
 			const oneMonthSeconds = 30 * oneDaySeconds;
 			const ageDays = Math.floor(ageSeconds / oneDaySeconds);
-			const restingEnergyMinutes = Math.round((17280 / ((2 + (6 - gradeType) / 4) * (11 + ageDays)))*(1 + (11 * Math.log(1 + (ageDays - 1) / 11))));
+			const restingEnergyMinutes = Math.round((1440 / (2 + (6 - gradeType) / 4))*(1 + (11 * Math.log(1 + (ageDays - 1) / 11))));
 			console.log(`gem ${gemId} grade ${grade} rate ${miningRate}% age ${ageDays} days, resting energy is ${restingEnergyMinutes} minutes`);
 			let energyLevel = Math.round(100 * ageSeconds / oneMonthSeconds);
 			if(energyLevel > 100) {
