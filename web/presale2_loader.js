@@ -479,7 +479,7 @@ jQuery3(document).ready(function() {
 			const thumbnail = gemThumbnailURL(color, level, grade);
 
 			return `
-				<a href="javascript:display_gem(\'${gem.id}\', \'${color}\', \'${level}\', \'${gradeType}\', \'${miningRateDisplay}\')">
+				<a href="javascript:display_gem(\'${gem.id}\', \'${color}\', \'${level}\', ${gradeType}, \'${miningRateDisplay}\')">
 					<img style="padding: 0;" width="250" height="250" src="${thumbnail}"/>
 				</a><br/>Lvl ${levelId} ${color.substr(0, color.indexOf(" "))}<br/>Grade ${grade} &nbsp;+${miningRateDisplay}%
 			`;
