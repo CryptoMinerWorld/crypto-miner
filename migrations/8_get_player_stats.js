@@ -16,7 +16,7 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	const sale2Instance = Sale2.at(sale2Address);
-	console.log(`address, gems, geodes, total, used, available`);
+	console.log(`address, gems, geodes, ref points, refs used, refs available`);
 	const uint64 = web3.toBigNumber("0x10000000000000000");
 	let i = 0, addr;
 	while((addr = await sale2Instance.referralPointsHolders(i++)) != '0x') {
