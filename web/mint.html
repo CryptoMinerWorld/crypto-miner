@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Mint a Gem</title>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	<style type="text/css">
+		* {
+			font-family: monospace;
+		}
+	</style>
+</head>
+<body>
+<form id="mint_form" action="#">
+<fieldset>
+	<legend>Network</legend>
+	<label for="helper_address">Select a Network:</label>
+	<select id="helper_address" required>
+		<option value="">Select an Option</option>
+		<option value="0x6afd5f5f431279b0cac7f5ff406f13d804b183c9">Rinkeby</option>
+		<option value="0x0">Mainnet</option>
+	</select>
+</fieldset>
+<fieldset><legend>Gem Properties</legend>
+	<div>
+		<label for="color_id">Color:</label>
+		<select id="color_id" required>
+			<option value="">Select an Option</option>
+			<option value="9">Sapphire (September)</option>
+			<option value="10">Opal (October)</option>
+			<option value="1">Garnet (January)</option>
+			<option value="2">Amethyst (February)</option>
+		</select>
+	</div>
+	<div>
+		<label for="level_id">Level:</label>
+		<select id="level_id" required>
+			<option value="">Select an Option</option>
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+		</select>
+	</div>
+	<div>
+		<label for="grade_type">Grade Type:</label>
+		<select id="grade_type" required>
+			<option value="">Select an Option</option>
+			<option value="1">D</option>
+			<option value="2">C</option>
+			<option value="3">B</option>
+			<option value="4">A</option>
+			<option value="5">AA</option>
+			<option value="6">AAA</option>
+		</select>
+	</div>
+	<div>
+		<label for="grade_value">Grade Value</label>
+		<input type="number" id="grade_value" min="0" max="999999" required/>
+		<input type="button" value="Random" onclick="document.getElementById('grade_value').value = Math.floor(1000000 * Math.random());"/>
+	</div>
+</fieldset>
+<input type="submit" value="Mint">
+</form>
+</body>
+<script type="text/javascript">
+	const myWeb3 = new Web3(window.web3.currentProvider);
+	const abi = [
+		{
+			"constant": false,
+			"inputs": [
+				{
+					"name": "color",
+					"type": "uint8"
+				},
+				{
+					"name": "level",
+					"type": "uint8"
+				},
+				{
+					"name": "gradeType",
+					"type": "uint8"
+				},
+				{
+					"name": "gradeValue",
+					"type": "uint24"
+				}
+			],
+			"name": "mint",
+			"outputs": [],
+			"payable": false,
+			"stateMutability": "nonpayable",
+			"type": "function"
+		}
+	];
+	const contract = myWeb3.eth.contract(abi);
+	const address = $("#helper_address").val();
+	const instance = contract.at(address);
+
+	$("form#mint_form").on("submit", function(e) {
+		e.preventDefault();
+
+		const color = parseInt($("#color_id").val());
+		const level = parseInt($("#level_id").val());
+		const gradeType = parseInt($("#grade_type").val());
+		const gradeValue = parseInt($("#grade_value").val());
+
+		console.log(color, level, gradeType, gradeValue);
+
+		instance.mint(color, level, gradeType, gradeValue, function(err, result) {
+			if(err) {
+				console.error(err);
+				return;
+			}
+			console.log(result);
+		});
+	});
+</script>
+</html>
