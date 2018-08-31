@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity 0.4.23;
 
 /**
  * Library for working with strings, primarily converting
