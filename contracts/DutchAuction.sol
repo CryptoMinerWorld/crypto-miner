@@ -438,8 +438,4 @@ contract DutchAuction is AccessControl {
     // apply formula and return
     return uint80(p0 - (t - t0) * (p0 - p1) / (t1 - t0));
   }
-
-  function getNow() public constant returns(uint256) {
-    return now;
-  }
 }
