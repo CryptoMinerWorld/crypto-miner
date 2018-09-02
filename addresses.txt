@@ -1,0 +1,20 @@
+Mainnet:
+GemERC721:        0xeae9d154da7a1cd05076db1b83233f3213a95e4f
+Presale2:         0xe0a21044eeeb9efc340809e35dc0e9d82dc87dd1
+ChestVault:       0xc352f692f55def49f0b736ec1f7ca0f862eabd23
+DutchAuction:     0xdcb90310b6a286f7bb188faa393734787a0d3808
+MetadataStorage:  0x5570b4d415bE50dfaDB9cDbD196fDa3855309313
+MintHelper:       0xc3b54e757fD79264828eCBb78f5Bceae7fF118bC
+John's address:   0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6
+Josh's address:   0xd9b74f73d933fde459766f74400971b29b90c9d2
+
+
+Rinkeby:
+GemERC721:        0x82ff6bbd7b64f707e704034907d582c7b6e09d97
+Presale2:         0x10a0f683304b6878e5e70295445fb03eeb6dec75
+ChestVault:       0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69
+DutchAuction:     0xD97f21e4402a5b70B48DFad8B630B5554B6396b8
+MetadataStorage:  0x71a0f651f4c1f9265209436b0f1ac978bbd4382d
+MintHelper:       0x6afd5f5f431279b0cac7f5ff406f13d804b183c9
+John's address:   0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6
+Josh's address:   0xd9b74f73d933fde459766f74400971b29b90c9d2
