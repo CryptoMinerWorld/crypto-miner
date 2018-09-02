@@ -272,13 +272,10 @@ contract DutchAuction is AccessControl {
     delete items[tokenId];
 
     // transaction fee value
-    uint256 feeValue = 0;
+    uint256 feeValue = calculateFeeValue(p);
 
     // fee (if any) is extracted from the seller
-    if(beneficiary != address(0) && !fee.isZero()) {
-      // calculate the fee
-      feeValue = fee.multiplyByInteger(p);
-
+    if(feeValue > 0) {
       // transfer the fee to beneficiary
       beneficiary.transfer(feeValue);
     }
@@ -361,6 +358,44 @@ contract DutchAuction is AccessControl {
   }
 
   /**
+   * @dev Returns item sale status parameters as a packed 224 bits structure.
+   * @dev The data returned:
+   *      t0  auction start time (unix timestamp), 32 bits
+   *      t1  auction end time (unix timestamp), 32 bits
+   *      t   current time (unix timestamp), 32 bits
+   *      p0  starting price (Gwei), 32 bits
+   *      p1  final price (Gwei), 32 bits
+   *      p   current price (Gwei), 32 bits
+   *      fee estimated fee value (Gwei), 32 bits
+   * @param tokenId id of the item
+   * @return packed int data structure representing the item sale status,
+   *      or zero – if item is not on sale
+   */
+  function getTokenSaleStatus(uint32 tokenId) constant public returns(uint224) {
+    // read item into memory from storage
+    Item memory item = items[tokenId];
+
+    // if item is not on sale than t0 is zero
+    if(item.t0 == 0) {
+      // in such a case we just return zero
+      return 0;
+    }
+
+    // read and calculate all the required data
+    uint32 t0 = uint32(item.t0);
+    uint32 t1 = uint32(item.t1);
+    uint32 t = uint32(now);
+    uint32 p0 = uint32(item.p0 / 1000000000); // Gwei
+    uint32 p1 = uint32(item.p1 / 1000000000); // Gwei
+    uint80 price = priceNow(item.t0, item.t1, item.p0, item.p1); // in wei
+    uint32 p = uint32(price / 1000000000); // Gwei
+    uint32 feeValue = uint32(calculateFeeValue(price) / 1000000000); // Gwei
+
+    // pack the data and return
+    return uint224(t0) << 192 | uint192(t1) << 160 | uint160(t) << 128 | uint128(p0) << 96 | uint96(p1) << 64 | uint64(p) << 32 | uint32(feeValue);
+  }
+
+  /**
    * @dev Checks if the item specified is listed for sale
    * @param tokenId id of the item
    * @return true of the item defined by its tokenId is for sale
@@ -401,6 +436,23 @@ contract DutchAuction is AccessControl {
   function priceNow(uint48 t0, uint48 t1, uint80 p0, uint80 p1) private constant returns(uint80) {
     // delegate call to `p`
     return price(t0, t1, uint48(now), p0, p1);
+  }
+
+  /**
+   * @dev Calculates fee value based on the fee percent set in the smart contract,
+   *      taking into account also if beneficiary address is set
+   * @param price selling price to calculate fee for
+   * @return calculated fee value, zero if either beneficiary address or fee is zero
+   */
+  function calculateFeeValue(uint80 price) private constant returns(uint256) {
+    // fee is applied only when it is not zero and when beneficiary is defined
+    if(beneficiary != address(0) && !fee.isZero()) {
+      // calculate the fee and return
+      return fee.multiplyByInteger(price);
+    }
+
+    // no fee / beneficiary is set - return 0
+    return 0;
   }
 
   /**

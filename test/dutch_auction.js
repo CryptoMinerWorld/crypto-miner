@@ -107,7 +107,7 @@ contract('Dutch Auction', accounts => {
 		// adding token to an auction
 		await auction.add(token0x401, 60, 200, 100);
 
-			// ensure auction lists this token for sale
+		// ensure auction lists this token for sale
 		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");
 
 		// removing token from an auction
@@ -280,6 +280,74 @@ contract('Dutch Auction', accounts => {
 			balance2.minus(price).minus(gasUsed).eq(await web3.eth.getBalance(accounts[2])),
 			"wrong buyer's balance after the token transfer on the auction"
 		);
+	});
+
+	it("auction: token sale status", async () => {
+		const tk = await Token.new();
+		const auction = await Auction.new(tk.address);
+
+		// to list a token in the auction transfers on behalf feature is required
+		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
+
+		// issue a token token0x401 to account 1
+		await mint0x401(tk, accounts);
+		// account 1 is required to allow auction to transfer that token on its behalf
+		await tk.approve(auction.address, token0x401, {from: accounts[1]});
+
+		// add token to an auction, to prevent price change - delay start by 60 seconds
+		const now = new Date().getTime() / 1000 | 0;
+		const t0 = now + 300;
+		const t1 = now + 3000;
+		const p0 = web3.toBigNumber(web3.toWei(1, "finney"));
+		const p1 = web3.toBigNumber(web3.toWei(1, "szabo"));
+		const p0_Gwei = p0.dividedToIntegerBy(1000000000);
+		const p1_Gwei = p1.dividedToIntegerBy(1000000000);
+		// initially token sale status is zero
+		assert.equal(0, await auction.getTokenSaleStatus(token0x401), "wrong initial token sale status (no token listed)");
+		// add to the auction
+		await auction.addWith(token0x401, t0, t1, p0, p1);
+
+		// read sale status data again
+		const status = await auction.getTokenSaleStatus(token0x401);
+		// auxiliary numbers
+		const uint32 = 0x100000000;
+		const uint64 = web3.toBigNumber("0x10000000000000000");
+		const uint128 = uint64.pow(2);
+		// extract the data
+		const _t0 = status.dividedToIntegerBy(uint128).dividedToIntegerBy(uint64).toNumber();
+		const _t1 = status.dividedToIntegerBy(uint128).dividedToIntegerBy(uint32).modulo(uint32).toNumber();
+		const t = status.dividedToIntegerBy(uint128).modulo(uint32).toNumber();
+		const _p0 = status.dividedToIntegerBy(uint64).dividedToIntegerBy(uint32).modulo(uint32).toNumber();
+		const _p1 = status.dividedToIntegerBy(uint64).modulo(uint32).toNumber();
+		const p = status.dividedToIntegerBy(uint32).modulo(uint32).toNumber();
+		const fee = status.modulo(uint32).toNumber();
+
+		// validate the status is as expected
+		assert.equal(t0, _t0, "wrong t0");
+		assert.equal(t1, _t1, "wrong t1");
+		assert.equal(p0_Gwei, _p0, "wrong p0");
+		assert.equal(p1_Gwei, _p1, "wrong p1");
+		assert.equal(p0_Gwei, p, "wrong p");
+		assert.equal(0, fee, "wrong fee (not zero)");
+
+		// set the fee to maximum - 5%
+		await auction.setFeeAndBeneficiary(5, 100, accounts[0]);
+		// read the fee again
+		const fee1 = (await auction.getTokenSaleStatus(token0x401)).modulo(uint32).toNumber();
+		// validate new fee
+		assert.equal(p0_Gwei.dividedToIntegerBy(20), fee1, "wrong fee (not 5%)");
+
+		// move time to the end of an auction
+		await increaseTime(3600);
+
+		// read current price and fee again
+		const status2 = await auction.getTokenSaleStatus(token0x401);
+		const p2 = status2.dividedToIntegerBy(uint32).modulo(uint32).toNumber();
+		const fee2 = status2.modulo(uint32).toNumber();
+
+		// check the price and fee changed accordingly
+		assert.equal(p1_Gwei, p2, "wrong final auction price");
+		assert.equal(p1_Gwei.dividedToIntegerBy(20), fee2, "wrong final fee (not 5%)");
 	});
 });
 
