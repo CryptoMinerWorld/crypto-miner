@@ -70,13 +70,12 @@ contract('Dutch Auction', accounts => {
 		// ensure auction doesn't list this token anymore
 		assert(!await auction.isTokenOnSale(token0x401), "token 0x401 is still on sale after removing it");
 	});
-	it("auction: putting up for sale", async () => {
+	it("auction: putting up for sale - approve() + add()", async () => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
 		// to list a token in the auction transfers on behalf feature is required
-		// to buy a token from an auction transfers feature is required
-		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
 
 		// issue a token to account 1
 		await mint0x401(tk, accounts);
@@ -89,6 +88,51 @@ contract('Dutch Auction', accounts => {
 
 		// ensure auction lists this token for sale
 		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");
+	});
+	it("auction: putting up for sale - safeTransferFrom()", async () => {
+		const tk = await Token.new();
+		const auction = await Auction.new(tk.address);
+
+		// to list a token in the auction transfers on behalf feature is required
+		// to buy a token from an auction transfers feature is required
+		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+
+		// issue a token to account 1
+		await mint0x401(tk, accounts);
+
+		// construct auction parameters
+		const tokenId = web3.toBigNumber(token0x401);
+		const t0 = new Date().getTime() / 1000 | 0;
+		const t1 = t0 + 60;
+		const p0 = 200;
+		const p1 = 100;
+		const gWei = 1000000000;
+		const two = web3.toBigNumber(2);
+		let data = toBytes(two.pow(224).times(tokenId)
+			.plus(two.pow(192).times(t0))
+			.plus(two.pow(160).times(t1))
+			.plus(two.pow(80).times(gWei * p0))
+			.plus(gWei * p1));
+
+		// account 1 transfers token to an auction automatically activating it
+		await tk.safeTransferFrom(accounts[1], auction.address, token0x401, data, {from: accounts[1]});
+
+		// ensure auction lists this token for sale
+		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");
+
+		// read sale status data
+		const status = await auction.getTokenSaleStatus(token0x401);
+		// extract the data
+		const _t0 = status.dividedToIntegerBy(two.pow(192)).toNumber();
+		const _t1 = status.dividedToIntegerBy(two.pow(160)).modulo(two.pow(32)).toNumber();
+		const _p0 = status.dividedToIntegerBy(two.pow(96)).modulo(two.pow(32)).toNumber();
+		const _p1 = status.dividedToIntegerBy(two.pow(64)).modulo(two.pow(32)).toNumber();
+
+		// check the data returned back from an auction is correct
+		assert.equal(t0, _t0, "wrong t0 after putting item up for sale");
+		assert.equal(t1, _t1, "wrong t1 after putting item up for sale");
+		assert.equal(p0, _p0, "wrong p0 after putting item up for sale");
+		assert.equal(p1, _p1, "wrong p1 after putting item up for sale");
 	});
 	it("auction: putting up and removing from sale", async () => {
 		const tk = await Token.new();
@@ -310,17 +354,15 @@ contract('Dutch Auction', accounts => {
 		// read sale status data again
 		const status = await auction.getTokenSaleStatus(token0x401);
 		// auxiliary numbers
-		const uint32 = 0x100000000;
-		const uint64 = web3.toBigNumber("0x10000000000000000");
-		const uint128 = uint64.pow(2);
+		const two = web3.toBigNumber(2);
 		// extract the data
-		const _t0 = status.dividedToIntegerBy(uint128).dividedToIntegerBy(uint64).toNumber();
-		const _t1 = status.dividedToIntegerBy(uint128).dividedToIntegerBy(uint32).modulo(uint32).toNumber();
-		const t = status.dividedToIntegerBy(uint128).modulo(uint32).toNumber();
-		const _p0 = status.dividedToIntegerBy(uint64).dividedToIntegerBy(uint32).modulo(uint32).toNumber();
-		const _p1 = status.dividedToIntegerBy(uint64).modulo(uint32).toNumber();
-		const p = status.dividedToIntegerBy(uint32).modulo(uint32).toNumber();
-		const fee = status.modulo(uint32).toNumber();
+		const _t0 = status.dividedToIntegerBy(two.pow(192)).toNumber();
+		const _t1 = status.dividedToIntegerBy(two.pow(160)).modulo(two.pow(32)).toNumber();
+		const t = status.dividedToIntegerBy(two.pow(128)).modulo(two.pow(32)).toNumber();
+		const _p0 = status.dividedToIntegerBy(two.pow(96)).modulo(two.pow(32)).toNumber();
+		const _p1 = status.dividedToIntegerBy(two.pow(64)).modulo(two.pow(32)).toNumber();
+		const p = status.dividedToIntegerBy(two.pow(32)).modulo(two.pow(32)).toNumber();
+		const fee = status.modulo(two.pow(32)).toNumber();
 
 		// validate the status is as expected
 		assert.equal(t0, _t0, "wrong t0");
@@ -333,7 +375,7 @@ contract('Dutch Auction', accounts => {
 		// set the fee to maximum - 5%
 		await auction.setFeeAndBeneficiary(5, 100, accounts[0]);
 		// read the fee again
-		const fee1 = (await auction.getTokenSaleStatus(token0x401)).modulo(uint32).toNumber();
+		const fee1 = (await auction.getTokenSaleStatus(token0x401)).modulo(two.pow(32)).toNumber();
 		// validate new fee
 		assert.equal(p0_Gwei.dividedToIntegerBy(20), fee1, "wrong fee (not 5%)");
 
@@ -342,14 +384,28 @@ contract('Dutch Auction', accounts => {
 
 		// read current price and fee again
 		const status2 = await auction.getTokenSaleStatus(token0x401);
-		const p2 = status2.dividedToIntegerBy(uint32).modulo(uint32).toNumber();
-		const fee2 = status2.modulo(uint32).toNumber();
+		const p2 = status2.dividedToIntegerBy(two.pow(32)).modulo(two.pow(32)).toNumber();
+		const fee2 = status2.modulo(two.pow(32)).toNumber();
 
 		// check the price and fee changed accordingly
 		assert.equal(p1_Gwei, p2, "wrong final auction price");
 		assert.equal(p1_Gwei.dividedToIntegerBy(20), fee2, "wrong final fee (not 5%)");
 	});
 });
+
+// converts BigNumber representing Solidity uint256 into String representing Solidity bytes
+function toBytes(uint256) {
+	let s = uint256.toString(16);
+	const len = s.length;
+	// 256 bits must occupy exactly 64 hex digits
+	if(len > 64) {
+		s = s.substr(0, 64);
+	}
+	for(let i = 0; i < 64 - len; i++) {
+		s = "0" +s;
+	}
+	return "0x" + s;
+}
 
 async function assertThrowsAsync(fn) {
 	let f = () => {};

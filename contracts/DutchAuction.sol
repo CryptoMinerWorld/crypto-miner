@@ -1,5 +1,6 @@
 pragma solidity 0.4.23;
 
+import "./ERC721Receiver.sol";
 import "./AccessControl.sol";
 import "./GemERC721.sol";
 import "./Fractions.sol";
@@ -27,7 +28,7 @@ import "./Fractions.sol";
  * @dev This implementation operates with a GemERC721 token as an item:
  *      token ID space is expected to be uint32
  */
-contract DutchAuction is AccessControl {
+contract DutchAuction is AccessControl, ERC721Receiver {
   /// @dev Using library Fractions for fraction math
   using Fractions for Fractions.Fraction;
 
@@ -79,6 +80,8 @@ contract DutchAuction is AccessControl {
   event ItemAdded(
     // who added this item for sale by calling addItem()
     address indexed _by,
+    // who is the owner of this item for sale
+    address indexed _from,
     // rest of the values correspond to addItem() signature and Item structure
     uint32 indexed tokenId,
     uint48 t0, // seconds
@@ -166,6 +169,28 @@ contract DutchAuction is AccessControl {
    * @param p1 sale end price
    */
   function addWith(uint32 tokenId, uint32 t0, uint32 t1, uint80 p0, uint80 p1) public {
+    // determine who is current owner of the token
+    address tokenOwner = tokenInstance.ownerOf(tokenId);
+
+    // take the token away from the owner to an auction smart contract
+    tokenInstance.transferFrom(tokenOwner, address(this), tokenId);
+
+    // delegate call to `__addWith`
+    __addWith(msg.sender, tokenOwner, tokenId, t0, t1, p0, p1);
+  }
+
+  /**
+   * @dev Lists an already transferred item on the auction.
+   * @dev Requires an item to be already transferred.
+   * @dev Unsafe. Internal use only!
+   * @param from an address where on item originally was transferred from
+   * @param tokenId token ID for sale
+   * @param t0 sale start time
+   * @param t1 sale end time
+   * @param p0 sale start price
+   * @param p1 sale end price
+   */
+  function __addWith(address operator, address from, uint32 tokenId, uint32 t0, uint32 t1, uint80 p0, uint80 p1) private {
     // validate sale parameters:
     // make sure caller didn't forget to set t0
     require(t0 > 0);
@@ -177,14 +202,12 @@ contract DutchAuction is AccessControl {
     // make sure p0 > p1 constraint is satisfied
     require(p0 > p1);
 
-    // determine who is current owner of the token
-    address tokenOwner = tokenInstance.ownerOf(tokenId);
-
-    // take the token away from the owner here, to an auction smart contract
-    tokenInstance.transferFrom(tokenOwner, address(this), tokenId);
+    // require the token is already transferred
+    // also ensures the token is a whitelisted GemERC721 instance
+    require(tokenInstance.ownerOf(tokenId) == address(this));
 
     // save previous owner of the token
-    owners[tokenId] = tokenOwner;
+    owners[tokenId] = from;
 
     // create item sale parameters structure
     Item memory item = Item(t0, t1, p0, p1);
@@ -196,7 +219,7 @@ contract DutchAuction is AccessControl {
     uint80 p = priceNow(t0, t1, p0, p1);
 
     // emit an event
-    emit ItemAdded(msg.sender, tokenId, t0, t1, p0, p1, p);
+    emit ItemAdded(operator, from, tokenId, t0, t1, p0, p1, p);
   }
 
   /**
@@ -294,6 +317,59 @@ contract DutchAuction is AccessControl {
 
     // emit an event
     emit ItemBought(seller, buyer, tokenId, item.t0, item.t1, item.p0, item.p1, p, uint80(feeValue));
+  }
+
+  /**
+   * @notice Handle the receipt of an NFT: adds it into an auction
+   * @dev The ERC721 smart contract calls this function on the recipient after a `transfer`.
+   *      This function MAY throw to revert and reject the transfer.
+   *      Return of other than the magic value MUST result in the transaction being reverted.
+   * @notice The contract address is always the message sender.
+   *      A wallet/broker/auction application MUST implement the wallet interface
+   *      if it will accept safe transfers.
+   * @param _operator The address which called `safeTransferFrom` function
+   * @param _from The address which previously owned the token
+   * @param _tokenId The NFT identifier which is being transferred
+   * @param _data Additional data contains tokenId, t0, t1, p0, p1 (256 packed)
+   * @return `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))` unless throwing
+   */
+  function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes _data) external returns(bytes4) {
+    // check the data array is exactly 32 bytes (256 bits long)
+    require(_data.length == 0x20);
+
+    // define an integer variable to store the last bytes parameter `_data` value
+    uint256 data;
+
+    // it is possible to do only using inline assembly
+    assembly {
+      // calldata in our case consists of 164 bytes:
+      // first 4 bytes represent Method ID
+      // next 32 bytes contain _operator address (only 20 bytes are really used, first 12 bytes are zeroes)
+      // next 32 bytes contain _from address (only 20 bytes are really used, first 12 bytes are zeroes)
+      // next 32 bytes contain _tokenId (only 4 bytes are really used, first 28 bytes are zeroes)
+      // next 64 bytes contain _data (32 bytes contain length header and 32 bytes contain data itself)
+      // therefore we are interested in the last 32 bytes of the calldata (offset 4 + 32 + 32 + 32 + 32 = 132),
+      // containing tokenId (4 bytes) + t0 (4 bytes) + t1 (4 bytes) + p0 (10 bytes) + p1 (10 bytes)
+
+      // the real data in `_data` starts at offset 164 in calldata
+      data := calldataload(164)
+    }
+
+    // unpack all the required variables from data
+    uint32 tokenId = uint32(data >> 224);
+    uint32 t0 = uint32(data >> 192);
+    uint32 t1 = uint32(data >> 160);
+    uint80 p0 = uint80(data >> 80);
+    uint80 p1 = uint80(data);
+
+    // check the tokenId is consistent with what is passed as an explicit input parameter
+    require(tokenId == _tokenId);
+
+    // delegate call to `addWith`
+    __addWith(_operator, _from, tokenId, t0, t1, p0, p1);
+
+    // return "magic" number on success, see GemERC721.ERC721_RECEIVED
+    return 0x150b7a02;
   }
 
   /**
