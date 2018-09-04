@@ -347,8 +347,9 @@ contract DutchAuction is AccessControl, ERC721Receiver {
       // next 32 bytes contain _operator address (only 20 bytes are really used, first 12 bytes are zeroes)
       // next 32 bytes contain _from address (only 20 bytes are really used, first 12 bytes are zeroes)
       // next 32 bytes contain _tokenId (only 4 bytes are really used, first 28 bytes are zeroes)
+      // next 32 bytes contain something strange (value 0x80 = 128) // TODO: understand what is stored here
       // next 64 bytes contain _data (32 bytes contain length header and 32 bytes contain data itself)
-      // therefore we are interested in the last 32 bytes of the calldata (offset 4 + 32 + 32 + 32 + 32 = 132),
+      // therefore we are interested in the last 32 bytes of the calldata (offset 4 + 32 + 32 + 32 + 32 + 32 = 164),
       // containing tokenId (4 bytes) + t0 (4 bytes) + t1 (4 bytes) + p0 (10 bytes) + p1 (10 bytes)
 
       // the real data in `_data` starts at offset 164 in calldata
