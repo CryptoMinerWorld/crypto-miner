@@ -1,4 +1,7 @@
-const ROLE_FEE_MANAGER = 0x00000004;
+const FEATURE_ADD = 0x00000001;
+const FEATURE_BUY = 0x00000002;
+const ROLE_AUCTION_MANAGER = 0x00010000;
+const ROLE_FEE_MANAGER = 0x00020000;
 const ROLE_TOKEN_CREATOR = 0x00040000;
 const ROLE_ROLE_MANAGER = 0x10000000;
 const FEATURE_TRANSFERS = 0x00000001;
@@ -37,8 +40,10 @@ contract('Dutch Auction', accounts => {
 		const auction = await Auction.new(tk.address);
 		const now = new Date().getTime() / 1000;
 
+		// to list a token in the auction FEATURE_ADD is required
+		await auction.updateFeatures(FEATURE_ADD);
 		// to list a token in the auction transfers on behalf feature is required
-		// to buy a token from an auction transfers feature is required
+		// to remove a token from an auction transfers feature is required
 		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 
 		// issue a token to account 1
@@ -74,6 +79,8 @@ contract('Dutch Auction', accounts => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
+		// to list a token in the auction FEATURE_ADD is required
+		await auction.updateFeatures(FEATURE_ADD);
 		// to list a token in the auction transfers on behalf feature is required
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
 
@@ -93,8 +100,9 @@ contract('Dutch Auction', accounts => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
-		// to list a token in the auction transfers on behalf feature is required
-		// to buy a token from an auction transfers feature is required
+		// to list a token in the auction FEATURE_ADD is required
+		await auction.updateFeatures(FEATURE_ADD);
+		// to list a token in the auction using safeTransferFrom both transfers features may be required
 		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 
 		// issue a token to account 1
@@ -104,21 +112,24 @@ contract('Dutch Auction', accounts => {
 		const tokenId = web3.toBigNumber(token0x401);
 		const t0 = new Date().getTime() / 1000 | 0;
 		const t1 = t0 + 60;
-		const p0 = 200;
-		const p1 = 100;
+		const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
+		const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
 		const gWei = 1000000000;
 		const two = web3.toBigNumber(2);
-		let data = toBytes(two.pow(224).times(tokenId)
+		const data = toBytes(two.pow(224).times(tokenId)
 			.plus(two.pow(192).times(t0))
 			.plus(two.pow(160).times(t1))
-			.plus(two.pow(80).times(gWei * p0))
-			.plus(gWei * p1));
+			.plus(two.pow(80).times(p0))
+			.plus(p1));
 
 		// account 1 transfers token to an auction automatically activating it
 		await tk.safeTransferFrom(accounts[1], auction.address, token0x401, data, {from: accounts[1]});
 
 		// ensure auction lists this token for sale
 		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");
+
+		// ensure previous owner is kept correct
+		assert.equal(accounts[1], await auction.owners(token0x401), "token 0x401 has wrong owner in the auction");
 
 		// read sale status data
 		const status = await auction.getTokenSaleStatus(token0x401);
@@ -131,15 +142,17 @@ contract('Dutch Auction', accounts => {
 		// check the data returned back from an auction is correct
 		assert.equal(t0, _t0, "wrong t0 after putting item up for sale");
 		assert.equal(t1, _t1, "wrong t1 after putting item up for sale");
-		assert.equal(p0, _p0, "wrong p0 after putting item up for sale");
-		assert.equal(p1, _p1, "wrong p1 after putting item up for sale");
+		assert.equal(p0 / gWei, _p0, "wrong p0 after putting item up for sale");
+		assert.equal(p1 / gWei, _p1, "wrong p1 after putting item up for sale");
 	});
 	it("auction: putting up and removing from sale", async () => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
+		// to list a token in the auction FEATURE_ADD is required
+		await auction.updateFeatures(FEATURE_ADD);
 		// to list a token in the auction transfers on behalf feature is required
-		// to buy a token from an auction transfers feature is required
+		// to remove a token from an auction transfers feature is required
 		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 
 		// issue a token to account 1
@@ -165,7 +178,11 @@ contract('Dutch Auction', accounts => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
+		// to list a token in the auction FEATURE_ADD is required
+		// to buy a token from an auction FEATURE_BUY is required
+		await auction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
 		// to list a token in the auction transfers on behalf feature is required
+		// to remove a token from an auction transfers feature is required
 		// to buy a token from an auction transfers feature is required
 		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 
@@ -176,8 +193,8 @@ contract('Dutch Auction', accounts => {
 		await tk.approve(auction.address, token0x401, {from: accounts[1]});
 
 		// account 1 wants to sell its token on the auction
-		const p0 = web3.toWei(1, "finney"); // price starts at 1 finney
-		const p1 = web3.toWei(1, "szabo");  // and drops to 1 szabo
+		const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
+		const p1 = web3.toWei(1, "finney");  // and drops to 1 finney
 		const duration  = 60; // in 1 minute (60 seconds)
 		const offset = 30; // starting in 30 seconds
 		// auction will start in one second
@@ -259,10 +276,72 @@ contract('Dutch Auction', accounts => {
 		assert(!await auction.isTokenOnSale(token0x401), "token 0x401 is still on sale after removing it");
 	});
 
+	it("auction: selling, buying, adding, removing - using safeTransferFrom()", async () => {
+		const tk = await Token.new();
+		const auction = await Auction.new(tk.address);
+
+		// to list a token in the auction FEATURE_ADD is required
+		// to buy a token from an auction FEATURE_BUY is required
+		await auction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
+		// to list a token in the auction using safeTransferFrom both transfers features may be required
+		// to remove a token from an auction transfers feature is required
+		// to buy a token from an auction transfers feature is required
+		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+
+		// issue a token to account 1
+		await mint0x401(tk, accounts);
+
+		// construct auction parameters
+		const tokenId = web3.toBigNumber(token0x401);
+		const t0 = new Date().getTime() / 1000 | 0;
+		const t1 = t0 + 300;
+		const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
+		const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
+		const two = web3.toBigNumber(2);
+		const data = toBytes(two.pow(224).times(tokenId)
+			.plus(two.pow(192).times(t0))
+			.plus(two.pow(160).times(t1))
+			.plus(two.pow(80).times(p0))
+			.plus(p1));
+
+		// account 1 transfers token to an auction automatically activating it
+		await tk.safeTransferFrom(accounts[1], auction.address, token0x401, data, {from: accounts[1]});
+
+		// set 1% transaction fee on the auction to account 3
+		await auction.setFeeAndBeneficiary(1, 100, accounts[3]);
+
+		// saving current accounts 1, 2 and 3 balances
+		const balance1 = await web3.eth.getBalance(accounts[1]);
+		const balance2 = await web3.eth.getBalance(accounts[2]);
+		const balance3 = await web3.eth.getBalance(accounts[3]);
+
+		// account 2 buys that token from an auction
+		const tx = await auction.buy(token0x401, {from: accounts[2], value: p0});
+		// find out what was the real auction price
+		const p = tx.logs[0].args.p;
+		// find out what was the transaction fee
+		const fee = tx.logs[0].args.fee;
+		// how much gas account 2 spent for the transaction
+		const gasUsed = tx.receipt.gasUsed;
+
+		// check the fee is 1%
+		assert(fee.eq(p.dividedToIntegerBy(100)), "wrong transaction fee");
+
+		// we expect account 1 to get p minus fee after buying a token
+		assert(balance1.plus(p).minus(fee).eq(await web3.eth.getBalance(accounts[1])), "account 1 has wrong balance after selling a token");
+		// we expect account 2 to spend p + gasUsed after buying a token
+		assert(balance2.minus(p).minus(gasUsed).eq(await web3.eth.getBalance(accounts[2])), "account 2 has wrong balance after buying a token");
+		// we expect account 3 to get the fee after successful sale
+		assert(balance3.plus(fee).eq(await web3.eth.getBalance(accounts[3])), "account 3 has wrong balance after successful sale");
+	});
+
 	it("auction: transaction fees", async () => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
+		// to list a token in the auction FEATURE_ADD is required
+		// to buy a token from an auction FEATURE_BUY is required
+		await auction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
 		// to list a token in the auction transfers on behalf feature is required
 		// to buy a token from an auction transfers feature is required
 		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
@@ -330,6 +409,8 @@ contract('Dutch Auction', accounts => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
+		// to list a token in the auction FEATURE_ADD is required
+		await auction.updateFeatures(FEATURE_ADD);
 		// to list a token in the auction transfers on behalf feature is required
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
 
@@ -338,12 +419,12 @@ contract('Dutch Auction', accounts => {
 		// account 1 is required to allow auction to transfer that token on its behalf
 		await tk.approve(auction.address, token0x401, {from: accounts[1]});
 
-		// add token to an auction, to prevent price change - delay start by 60 seconds
+		// add token to an auction, to prevent price change - delay start by 300 seconds
 		const now = new Date().getTime() / 1000 | 0;
 		const t0 = now + 300;
 		const t1 = now + 3000;
-		const p0 = web3.toBigNumber(web3.toWei(1, "finney"));
-		const p1 = web3.toBigNumber(web3.toWei(1, "szabo"));
+		const p0 = web3.toBigNumber(web3.toWei(1, "ether"));
+		const p1 = web3.toBigNumber(web3.toWei(1, "finney"));
 		const p0_Gwei = p0.dividedToIntegerBy(1000000000);
 		const p1_Gwei = p1.dividedToIntegerBy(1000000000);
 		// initially token sale status is zero

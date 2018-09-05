@@ -45,13 +45,19 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     uint80 p1;
   }
 
+  /// @dev Enables add(), addWith(), onERC721Received()
+  uint32 public constant FEATURE_ADD = 0x00000001;
+
+  /// @dev Enables buy()
+  uint32 public constant FEATURE_BUY = 0x00000002;
+
   /// @notice Auction manager is responsible for removing items
   /// @dev Role ROLE_AUCTION_MANAGER allows executing removeItem
-  uint32 public constant ROLE_AUCTION_MANAGER = 0x00000002;
+  uint32 public constant ROLE_AUCTION_MANAGER = 0x00010000;
 
   /// @notice Fee manager is responsible for setting sale fees on the smart contract
   /// @dev Role ROLE_FEE_MANAGER allows executing setFee, setBeneficiary, setFeeAndBeneficiary
-  uint32 public constant ROLE_FEE_MANAGER = 0x00000004;
+  uint32 public constant ROLE_FEE_MANAGER = 0x00020000;
 
   /// @notice Maximum fee that can be set on the contract
   /// @dev This is an inverted value of the maximum fee:
@@ -86,6 +92,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     uint32 indexed tokenId,
     uint48 t0, // seconds
     uint48 t1, // seconds
+    uint48 t,  // seconds
     uint80 p0, // wei
     uint80 p1, // wei
     uint80 p   // current price in wei
@@ -109,6 +116,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     uint32 indexed tokenId,
     uint48 t0, // seconds
     uint48 t1, // seconds
+    uint48 t,  // seconds
     uint80 p0, // wei
     uint80 p1, // wei
     uint80 p,  // current price in wei
@@ -191,6 +199,9 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    * @param p1 sale end price
    */
   function __addWith(address operator, address from, uint32 tokenId, uint32 t0, uint32 t1, uint80 p0, uint80 p1) private {
+    // check if adding items to sale is enabled
+    require(__isFeatureEnabled(FEATURE_ADD));
+
     // validate sale parameters:
     // make sure caller didn't forget to set t0
     require(t0 > 0);
@@ -219,7 +230,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     uint80 p = priceNow(t0, t1, p0, p1);
 
     // emit an event
-    emit ItemAdded(operator, from, tokenId, t0, t1, p0, p1, p);
+    emit ItemAdded(operator, from, tokenId, t0, t1, uint48(now), p0, p1, p);
   }
 
   /**
@@ -263,6 +274,9 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    * @param tokenId unique ID of the item on sale (token ID)
    */
   function buy(uint32 tokenId) public payable {
+    // check if adding items to sale is enabled
+    require(__isFeatureEnabled(FEATURE_BUY));
+
     // call sender gracefully - buyer
     address buyer = msg.sender;
 
@@ -316,7 +330,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     }
 
     // emit an event
-    emit ItemBought(seller, buyer, tokenId, item.t0, item.t1, item.p0, item.p1, p, uint80(feeValue));
+    emit ItemBought(seller, buyer, tokenId, item.t0, item.t1, uint48(now), item.p0, item.p1, p, uint80(feeValue));
   }
 
   /**
