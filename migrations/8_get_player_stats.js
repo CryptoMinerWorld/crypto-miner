@@ -13,6 +13,9 @@ module.exports = async function(deployer, network, accounts) {
 	let sale2Address = "0xe0a21044eeeb9efc340809e35dc0e9d82dc87dd1"; // mainnet
 	if(network !== "mainnet") {
 		sale2Address = "0x10a0f683304b6878e5e70295445fb03eeb6dec75"; // rinkeby
+		if(network === "ropsten") {
+			sale2Address = "0x3cf439e50cf3a1147f79ca59a2ad52affd1fa0f0"; // ropsten
+		}
 	}
 
 	const sale2Instance = Sale2.at(sale2Address);
