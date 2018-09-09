@@ -1,0 +1,9 @@
+syntax:glob
+
+node_modules/
+build/
+coverage/
+coverageEnv/
+coverage.json
+package-lock.json
+*.iml
