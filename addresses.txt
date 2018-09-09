@@ -12,7 +12,7 @@ Rinkeby:
 GemERC721:        0x82ff6bbd7b64f707e704034907d582c7b6e09d97
 Presale2:         0x10a0f683304b6878e5e70295445fb03eeb6dec75
 ChestVault:       0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69
-DutchAuction:     0xc49a4aadf3891317d311e2d089237224bf4cbebe
+DutchAuction:     0xdd229423db08b1e9a0add49986e358dab72b7f54
 MetadataStorage:  0x71a0f651f4c1f9265209436b0f1ac978bbd4382d
 MintHelper:       0x6afd5f5f431279b0cac7f5ff406f13d804b183c9
 
