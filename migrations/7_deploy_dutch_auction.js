@@ -1,3 +1,6 @@
+const FEATURE_ADD = 0x00000001;
+const FEATURE_BUY = 0x00000002;
+
 const Auction = artifacts.require("./DutchAuction");
 
 module.exports = async function(deployer, network, accounts) {
@@ -20,6 +23,7 @@ module.exports = async function(deployer, network, accounts) {
 
 	await deployer.deploy(Auction, tokenAddress);
 	const auction = await Auction.deployed();
+	await auction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
 
 	console.log("______________________________________________________");
 	console.log("token:   " + tokenAddress);

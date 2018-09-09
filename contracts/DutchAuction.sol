@@ -154,7 +154,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    * @param p0 sale start price
    * @param p1 sale end price
    */
-  function add(uint32 tokenId, uint32 duration, uint80 p0, uint80 p1) public {
+  function addNow(uint32 tokenId, uint32 duration, uint80 p0, uint80 p1) public {
     // derive missing parameters for `addWith`
 
     // t0 is now
@@ -217,6 +217,13 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     // p0 can be potentially zero
     // make sure p0 > p1 constraint is satisfied
     require(p0 > p1);
+
+    // make sure both p0 and p1 are multiple of 1 Gwei
+    require(p0 / 1000000000 * 1000000000 == p0);
+    require(p1 / 1000000000 * 1000000000 == p1);
+
+    // make sure p0 is at least 1 Szabo
+    require(p0 >= 1 szabo);
 
     // require the token is already transferred
     // also ensures the token is a whitelisted GemERC721 instance
@@ -555,6 +562,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    * @dev Calculates auction price in the given moment for the sale parameters given.
    * @dev Doesn't check the `_t0 < _t1` and `_p0 > _p1` constraints.
    *      It is in caller responsibility to ensure them otherwise result is not correct.
+   * @dev The result is rounded down to be a multiple of 1 Gwei
    * @param _t0 auction start time
    * @param _t1 auction end time
    * @param _t time of interest / time to query the price for
@@ -563,27 +571,34 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    * @return price in time `t` according to formula `p = p0 - (t - t0) * (p0 - p1) / (t1 - t0)`
    */
   function price(uint48 _t0, uint48 _t1, uint48 _t, uint80 _p0, uint80 _p1) private pure returns(uint80) {
+    // the result will be stored in this variable
+    uint80 p;
+
     // if current time `t` is lower then start time `t0`
     if(_t < _t0) {
       // return initial price `p0`
-      return _p0;
+      p = _p0;
     }
     // if current time `t` is greater then end time `t1`
-    if(_t > _t1) {
+    else if(_t > _t1) {
       // return the final price `p0`
-      return _p1;
+      p = _p1;
+    }
+    // otherwise calculate the price
+    else {
+
+      // convert all numbers into uint128 to get rid of possible arithmetic overflow
+      uint128 t0 = uint128(_t0);
+      uint128 t1 = uint128(_t1);
+      uint128 t = uint128(_t);
+      uint128 p0 = uint128(_p0);
+      uint128 p1 = uint128(_p1);
+
+      // apply formula and return
+      p = uint80(p0 - (t - t0) * (p0 - p1) / (t1 - t0));
     }
 
-    // otherwise calculate the price
-
-    // convert all numbers into uint128 to get rid of possible arithmetic overflow
-    uint128 t0 = uint128(_t0);
-    uint128 t1 = uint128(_t1);
-    uint128 t = uint128(_t);
-    uint128 p0 = uint128(_p0);
-    uint128 p1 = uint128(_p1);
-
-    // apply formula and return
-    return uint80(p0 - (t - t0) * (p0 - p1) / (t1 - t0));
+    // round down to be a multiple of 1 Gwei and return
+    return p / 1000000000 * 1000000000;
   }
 }

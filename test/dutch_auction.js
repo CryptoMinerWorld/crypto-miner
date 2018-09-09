@@ -29,6 +29,10 @@ const mint0x401 = async function(tk, accounts) {
 	);
 };
 
+// some common prices
+const P0 = web3.toWei(2, "szabo");
+const P1 = web3.toWei(1, "szabo");
+
 contract('Dutch Auction', accounts => {
 	it("auction: testing wrong parameters", async () => {
 		// zero address token
@@ -53,15 +57,18 @@ contract('Dutch Auction', accounts => {
 		await tk.approve(auction.address, token0x401, {from: accounts[1]});
 
 		// adding token to an auction - wrong parameters
-		await assertThrowsAsync(async () => await auction.addWith(token0x401, now, now + 60, 100, 200));
-		await assertThrowsAsync(async () => await auction.addWith(token0x401, now, now, 200, 100));
-		await assertThrowsAsync(async () => await auction.add(token0x401, 0, 200, 100));
-		await assertThrowsAsync(async () => await auction.add(token0x401, 60, 100, 200));
-		await assertThrowsAsync(async () => await auction.addWith(token0x401, now - 60, now, 200, 100));
-		await assertThrowsAsync(async () => await auction.addWith(token0x401, 0, now + 60, 200, 100));
-		await assertThrowsAsync(async () => await auction.add(0, 60, 200, 100));
+		await assertThrowsAsync(async () => await auction.addWith(token0x401, now, now + 60, P1, P0));
+		await assertThrowsAsync(async () => await auction.addWith(token0x401, now, now, P0, P1));
+		await assertThrowsAsync(async () => await auction.addNow(token0x401, 0, P0, P1));
+		await assertThrowsAsync(async () => await auction.addNow(token0x401, 60, P1, P0));
+		await assertThrowsAsync(async () => await auction.addWith(token0x401, now - 60, now, P0, P1));
+		await assertThrowsAsync(async () => await auction.addWith(token0x401, 0, now + 60, P0, P1));
+		await assertThrowsAsync(async () => await auction.addNow(0, 60, P0, P1));
+		await assertThrowsAsync(async () => await auction.addNow(token0x401, 60, P0 / 1000, P1 / 1000));
+		await assertThrowsAsync(async () => await auction.addNow(token0x401, 60, P0 + 17, P1));
+		await assertThrowsAsync(async () => await auction.addNow(token0x401, 60, P0, P1 + 17));
 		// adding token to an auction - correct parameters
-		await auction.addWith(token0x401, now, now + 60, 200, 100);
+		await auction.addWith(token0x401, now, now + 60, P0, P1);
 
 		// ensure auction lists this token for sale
 		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");
@@ -84,7 +91,7 @@ contract('Dutch Auction', accounts => {
 			// allow auction to transfer token on behalf of account 1
 			await tk.approve(auction.address, token0x401, {from: accounts[1]});
 			// add to an auction
-			await auction.add(token0x401, 600, 200, 100, {from: accounts[i]});
+			await auction.addNow(token0x401, 600, P0, P1, {from: accounts[i]});
 			// remove from an auction
 			await auction.remove(token0x401, {from: accounts[i]});
 		};
@@ -121,7 +128,7 @@ contract('Dutch Auction', accounts => {
 		// account 2 is now ROLE_AUCTION_MANAGER and can operate
 		await f(2);
 	});
-	it("auction: putting up for sale - approve() + add()", async () => {
+	it("auction: putting up for sale - approve() + addNow()", async () => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
 
@@ -137,7 +144,7 @@ contract('Dutch Auction', accounts => {
 		await tk.approve(auction.address, token0x401, {from: accounts[1]});
 
 		// adding token to an auction
-		await auction.add(token0x401, 60, 200, 100);
+		await auction.addNow(token0x401, 60, P0, P1);
 
 		// ensure auction lists this token for sale
 		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");
@@ -208,7 +215,7 @@ contract('Dutch Auction', accounts => {
 		await tk.approve(auction.address, token0x401, {from: accounts[1]});
 
 		// adding token to an auction
-		await auction.add(token0x401, 60, 200, 100);
+		await auction.addNow(token0x401, 60, P0, P1);
 
 		// ensure auction lists this token for sale
 		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");
@@ -241,7 +248,7 @@ contract('Dutch Auction', accounts => {
 		// account 1 wants to sell its token on the auction
 		const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
 		const p1 = web3.toWei(1, "finney");  // and drops to 1 finney
-		const duration  = 60; // in 1 minute (60 seconds)
+		const duration = 60; // in 1 minute (60 seconds)
 		const offset = 30; // starting in 30 seconds
 		// auction will start in one second
 		const t0 = offset + new Date().getTime() / 1000 | 0;
@@ -291,7 +298,7 @@ contract('Dutch Auction', accounts => {
 
 		// account 2 decides to sell this token on the auction
 		await tk.approve(auction.address, token0x401, {from: accounts[2]});
-		await auction.add(token0x401, duration, p0, p1, {from: accounts[2]});
+		await auction.addNow(token0x401, duration, p0, p1, {from: accounts[2]});
 
 		// now wait till auction ends
 		await increaseTime(duration);
@@ -310,7 +317,7 @@ contract('Dutch Auction', accounts => {
 
 		// account 3 decides to sell this token on the auction
 		await tk.approve(auction.address, token0x401, {from: accounts[3]});
-		await auction.add(token0x401, duration, p0, p1, {from: accounts[3]});
+		await auction.addNow(token0x401, duration, p0, p1, {from: accounts[3]});
 
 		// ensure auction lists this token for sale
 		assert(await auction.isTokenOnSale(token0x401), "token 0x401 is not on sale after adding it");

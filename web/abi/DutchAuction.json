@@ -491,7 +491,7 @@
           "type": "uint80"
         }
       ],
-      "name": "add",
+      "name": "addNow",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -699,5 +699,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-09-05T17:30:36.609Z"
+  "updatedAt": "2018-09-09T10:22:14.793Z"
 }
