@@ -22,7 +22,7 @@ module.exports = async function(deployer, network, accounts) {
 	let sale2LaunchDate = new Date('2018-08-16T00:15Z').getTime() / 1000 | 0;
 
 	// for test network we redefine MultiSig addresses and launch date
-	if(network === "development") {
+	if(network !== "mainnet") {
 		// beneficiary = "0xb4e8e4f7e6024b37ed2584e8c86b2917dae9a2da"; // Rinkeby MultiSig
 		// chestVault = "0xaF8413e5785d63694cF562Cf2dDA9B59Ff00E0FD"; // Rinkeby Chest Wallet
 		beneficiary = "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69";
@@ -41,7 +41,7 @@ module.exports = async function(deployer, network, accounts) {
 	// sale2 is defined below
 
 	// for test network we redeploy first Presale
-	if(network === "development") {
+	if(network !== "mainnet") {
 		tokenAddress = "0x82ff6bbd7b64f707e704034907d582c7b6e09d97";
 		gem = Gem.at(tokenAddress);
 

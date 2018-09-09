@@ -18,7 +18,7 @@ module.exports = async function(deployer, network, accounts) {
 
 	// token is already deployed in both networks
 	let tokenAddress = "0xeae9d154da7a1cd05076db1b83233f3213a95e4f"; // MainNet token address
-	if(network === "development") {
+	if(network !== "mainnet") {
 		tokenAddress = "0x82ff6bbd7b64f707e704034907d582c7b6e09d97"; // Rinkeby token address
 	}
 	// bind gem instance
@@ -38,7 +38,7 @@ module.exports = async function(deployer, network, accounts) {
 	// grant permissions to create gems and store metadata
 	await storage.addOperator("0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", METADATA_OPERATOR); // John
 	await mintHelper.addOperator("0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", MINT_OPERATOR); // John
-	if(network === "development") {
+	if(network !== "mainnet") {
 		// additionally add Josh on development network
 		await storage.addOperator("0xd9b74f73d933fde459766f74400971b29b90c9d2", METADATA_OPERATOR); // Josh
 		await mintHelper.addOperator("0xd9b74f73d933fde459766f74400971b29b90c9d2", MINT_OPERATOR); // Josh

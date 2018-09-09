@@ -22,7 +22,7 @@ module.exports = async function(deployer, network, accounts) {
 	let sale = Sale.at(saleAddress);
 
 	// for test network we use few coupons
-	if(network === "development") {
+	if(network !== "mainnet") {
 		tokenAddress = "0x82ff6bbd7b64f707e704034907d582c7b6e09d97";
 		gem = Gem.at(tokenAddress);
 

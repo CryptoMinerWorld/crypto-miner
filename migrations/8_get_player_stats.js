@@ -11,7 +11,7 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	let sale2Address = "0xe0a21044eeeb9efc340809e35dc0e9d82dc87dd1"; // mainnet
-	if(network === "development") {
+	if(network !== "mainnet") {
 		sale2Address = "0x10a0f683304b6878e5e70295445fb03eeb6dec75"; // rinkeby
 	}
 

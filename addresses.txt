@@ -1,5 +1,6 @@
 Mainnet:
 GemERC721:        0xeae9d154da7a1cd05076db1b83233f3213a95e4f
+Presale:          0xa207d2496688134f538a307b25e174b267ba6765
 Presale2:         0xe0a21044eeeb9efc340809e35dc0e9d82dc87dd1
 ChestVault:       0xc352f692f55def49f0b736ec1f7ca0f862eabd23
 DutchAuction:

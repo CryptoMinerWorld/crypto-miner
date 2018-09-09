@@ -21,7 +21,7 @@ module.exports = async function(deployer, network, accounts) {
 	let gem = Gem.at(tokenAddress);
 
 	// for test network we redeploy the Gem
-	if(network === "development") {
+	if(network !== "mainnet") {
 		console.log("deploying Gem (development network)");
 		await deployer.deploy(AddressUtils);
 		await deployer.link(AddressUtils, Gem);
@@ -34,7 +34,7 @@ module.exports = async function(deployer, network, accounts) {
 		tokenAddress = gem.address;
 	}
 	// for MainNet we need to revoke old presale permission to mint gems
-	if(network === "mainnet") {
+	else {
 		await gem.removeOperator(saleAddress);
 	}
 

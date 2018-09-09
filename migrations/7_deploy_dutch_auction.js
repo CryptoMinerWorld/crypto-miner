@@ -11,7 +11,7 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	let tokenAddress = "0xeae9d154da7a1cd05076db1b83233f3213a95e4f"; // mainnet
-	if(network === "development") {
+	if(network !== "mainnet") {
 		tokenAddress = "0x82ff6bbd7b64f707e704034907d582c7b6e09d97"; // rinkeby
 	}
 
