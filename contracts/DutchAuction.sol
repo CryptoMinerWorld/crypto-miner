@@ -180,6 +180,11 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     // determine who is current owner of the token
     address tokenOwner = tokenInstance.ownerOf(tokenId);
 
+    // since we set the auction prices and other parameters,
+    // require token to be added only by its owner or
+    // by the auction manager
+    require(msg.sender == tokenOwner || __isSenderInRole(ROLE_AUCTION_MANAGER));
+
     // take the token away from the owner to an auction smart contract
     tokenInstance.transferFrom(tokenOwner, address(this), tokenId);
 
@@ -289,10 +294,6 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     // get the item for sale data
     Item memory item = items[tokenId];
     
-    // check that the sale has already started
-    // TODO: this line is in question: do we really need this check?
-    //require(item.t0 <= now);
-
     // calculate current item price
     uint80 p = priceNow(item.t0, item.t1, item.p0, item.p1);
 
@@ -357,17 +358,21 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     // it is possible to do only using inline assembly
     assembly {
       // calldata in our case consists of 164 bytes:
-      // first 4 bytes represent Method ID
-      // next 32 bytes contain _operator address (only 20 bytes are really used, first 12 bytes are zeroes)
-      // next 32 bytes contain _from address (only 20 bytes are really used, first 12 bytes are zeroes)
-      // next 32 bytes contain _tokenId (only 4 bytes are really used, first 28 bytes are zeroes)
-      // next 32 bytes contain something strange (value 0x80 = 128) // TODO: understand what is stored here
-      // next 64 bytes contain _data (32 bytes contain length header and 32 bytes contain data itself)
-      // therefore we are interested in the last 32 bytes of the calldata (offset 4 + 32 + 32 + 32 + 32 + 32 = 164),
+      // first 4 bytes represent Method ID - function selector,
+      // followed by three elementary typed inputs which occupy exactly 1 slot (32 bytes) each:
+      //    _operator address (only 20 bytes are really used, first 12 bytes are zeroes)
+      //    _from address (only 20 bytes are really used, first 12 bytes are zeroes)
+      //    _tokenId (only 4 bytes are really used, first 28 bytes are zeroes)
+      // next slot (offset 0x64) contains _data (dynamic bytes array) offset (0x80 - exactly the size of the head part)
+      // 64 bytes at position 0x80 contain _data (32 bytes contain length header and 32 bytes contain data itself)
+      // therefore we are interested in the last 32 bytes of the calldata (offset 0x4 + 0x80 + 0x20 = 0xA4),
       // containing tokenId (4 bytes) + t0 (4 bytes) + t1 (4 bytes) + p0 (10 bytes) + p1 (10 bytes)
 
-      // the real data in `_data` starts at offset 164 in calldata
-      data := calldataload(164)
+      // read the _data offset, increment it by method ID (0x4) and first data slot size (0x20) containing data length
+      let offset := add(0x24, calldataload(0x64))
+
+      // the real data in `_data` starts at offset now (0xA4)
+      data := calldataload(offset)
     }
 
     // unpack all the required variables from data

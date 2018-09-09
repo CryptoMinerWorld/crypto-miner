@@ -75,6 +75,52 @@ contract('Dutch Auction', accounts => {
 		// ensure auction doesn't list this token anymore
 		assert(!await auction.isTokenOnSale(token0x401), "token 0x401 is still on sale after removing it");
 	});
+	it("auction: putting up for sale – permissions", async () => {
+		const tk = await Token.new();
+		const auction = await Auction.new(tk.address);
+
+		// define add and remove function
+		const f = async (i) => {
+			// allow auction to transfer token on behalf of account 1
+			await tk.approve(auction.address, token0x401, {from: accounts[1]});
+			// add to an auction
+			await auction.add(token0x401, 600, 200, 100, {from: accounts[i]});
+			// remove from an auction
+			await auction.remove(token0x401, {from: accounts[i]});
+		};
+
+		// issue a token to account 1
+		await mint0x401(tk, accounts);
+
+		// adding/removing is not possible without features set
+		await assertThrowsAsync(f, 0);
+		await assertThrowsAsync(f, 1);
+		await assertThrowsAsync(f, 2);
+
+		// to list a token in the auction FEATURE_ADD is required, but its not enough
+		await auction.updateFeatures(FEATURE_ADD);
+
+		// adding/removing is still not possible
+		await assertThrowsAsync(f, 0);
+		await assertThrowsAsync(f, 1);
+		await assertThrowsAsync(f, 2);
+
+		// to list a token in the auction transfers on behalf feature is required
+		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+
+		// account 0 is ROLE_AUCTION_MANAGER initially and can operate
+		await f(0);
+		// account 1 is owner and can operate
+		await f(1);
+		// account 2 cannot operate
+		await assertThrowsAsync(f, 2);
+
+		// granting account 2 ROLE_AUCTION_MANAGER permission allows it to operate
+		await auction.addOperator(accounts[2], ROLE_AUCTION_MANAGER);
+
+		// account 2 is now ROLE_AUCTION_MANAGER and can operate
+		await f(2);
+	});
 	it("auction: putting up for sale - approve() + add()", async () => {
 		const tk = await Token.new();
 		const auction = await Auction.new(tk.address);
@@ -488,10 +534,10 @@ function toBytes(uint256) {
 	return "0x" + s;
 }
 
-async function assertThrowsAsync(fn) {
+async function assertThrowsAsync(fn, ...args) {
 	let f = () => {};
 	try {
-		await fn();
+		await fn(args);
 	}
 	catch(e) {
 		f = () => {
