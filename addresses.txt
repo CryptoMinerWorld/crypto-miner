@@ -6,8 +6,6 @@ ChestVault:       0xc352f692f55def49f0b736ec1f7ca0f862eabd23
 DutchAuction:
 MetadataStorage:  0x5570b4d415bE50dfaDB9cDbD196fDa3855309313
 MintHelper:       0xc3b54e757fD79264828eCBb78f5Bceae7fF118bC
-John's address:   0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6
-Josh's address:   0xd9b74f73d933fde459766f74400971b29b90c9d2
 
 
 Rinkeby:
@@ -17,5 +15,18 @@ ChestVault:       0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69
 DutchAuction:     0xedf5e6ff1e1fe98a5197c426a853355980895bc0
 MetadataStorage:  0x71a0f651f4c1f9265209436b0f1ac978bbd4382d
 MintHelper:       0x6afd5f5f431279b0cac7f5ff406f13d804b183c9
+
+
+Ropsten:
+GemERC721:        0x35b5da40008b225ab540dbbf28d2b5e74836df2c
+Presale:          0x410879a9de3aa893b1f987752f0663f759786017
+Presale2:         0x3cf439e50cf3a1147f79ca59a2ad52affd1fa0f0
+ChestVault:       0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69
+DutchAuction:     0xf9d6ff0267689a07de3e32db27eb4e87bd288cfc
+MetadataStorage:  0x35959663bc022eedbba1b22346e23125c30e7da6
+MintHelper:       0xa7dc659de6e6e6d07841f9b383d5528ddd556fbb
+
+
+Common Addresses (Not Smart Contracts):
 John's address:   0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6
 Josh's address:   0xd9b74f73d933fde459766f74400971b29b90c9d2
