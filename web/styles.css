@@ -43,6 +43,10 @@
 
 #geode_qty_modal td, #gem_modal td, #use_points_modal td {
 	border: none;
+	padding-top: 0px;
+	padding-bottom: 0px;
+	font-size: 23px;
+	color: black;
 }
 
 #gem_modal .modal {
