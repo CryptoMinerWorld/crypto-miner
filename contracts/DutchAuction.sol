@@ -282,6 +282,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
   /**
    * @notice Allows to buy an item listed for sale.
+   * @notice An item bought is sent back to `msg.sender`
    * @notice Requires that the sale for that item is not expired
    *      and that enough value is sent to the function
    * @dev Requires now < t1
@@ -289,11 +290,26 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    * @param tokenId unique ID of the item on sale (token ID)
    */
   function buy(uint32 tokenId) public payable {
+    // delegate call to `buyTo`
+    buyTo(tokenId, msg.sender);
+  }
+
+  /**
+   * @notice Allows to buy an item listed for sale for someone else.
+   * @notice An item bought is sent back to `buyer`
+   * @notice Requires that the sale for that item is not expired
+   *      and that enough value is sent to the function
+   * @dev Requires now < t1
+   * @dev Requires msg.value >= p
+   * @param tokenId unique ID of the item on sale (token ID)
+   * @param buyer an address to send the item bought to
+   */
+  function buyTo(uint32 tokenId, address buyer) public payable {
     // check if adding items to sale is enabled
     require(__isFeatureEnabled(FEATURE_BUY));
 
-    // call sender gracefully - buyer
-    address buyer = msg.sender;
+    // check address `_to` is valid
+    require(buyer != address(0));
 
     // find previous owner of the item - seller
     address seller = owners[tokenId];
