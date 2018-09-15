@@ -1,28 +1,5 @@
 // inject all the required modal windows
 document.write(`
-<div id="geode_qty_modal" class="overlay">
-	<a class="cancel" href="javascript:location.replace('#')"></a>
-	<div class="modal">
-		<h1>Buying Geodes</h1>
-		<div class="content">
-			<select id="geodes_num" class="responsive_margin" style="margin-bottom: 1em;">
-				<option value="1">1</option>
-				<option value="2">2</option>
-				<option value="3">3</option>
-				<option value="4">4</option>
-				<option value="5">5 (+1 free Gem)</option>
-				<option value="6">6 (+1 free Gem)</option>
-				<option value="7">7 (+1 free Gem)</option>
-				<option value="8">8 (+1 free Gem)</option>
-				<option value="9">9 (+1 free Gem)</option>
-				<option value="10">10 (+1 free Gem, +1 free Geode)</option>
-			</select>
-			<input type="text" id="referral_address" placeholder="Referral Address (Optional)"/>
-			<span id="ref_addr_err_msg"></span>
-			<input type="button" class="responsive_margin2" value="Buy" onclick="buyGeodes()" style="width: 100%;"/>
-		</div>
-	</div>
-</div>
 <div id="gem_modal" class="overlay">
 	<a class="cancel" href="javascript:location.replace('#')"></a>
 	<div class="modal">
