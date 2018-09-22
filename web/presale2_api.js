@@ -3,6 +3,7 @@
  * @param size new String length, will be padded with zeros
  * @return {String} zero padded string
  */
+/*
 String.prototype.pad = function(size) {
 	let s = this;
 	while(s.length < (size || 2)) {
@@ -10,6 +11,7 @@ String.prototype.pad = function(size) {
 	}
 	return s;
 };
+*/
 
 /**
  * Extend Array prototype by adding pack function.
@@ -17,6 +19,7 @@ String.prototype.pad = function(size) {
  * @param size used to pad each element in the array before joining
  * @return {String} packed string containing entire array
  */
+/*
 Array.prototype.pack = function(size) {
 	let copy = new Array(this.length);
 	for(let i = 0; i < this.length; i++) {
@@ -24,6 +27,7 @@ Array.prototype.pack = function(size) {
 	}
 	return copy.join("");
 };
+*/
 
 
 /**
