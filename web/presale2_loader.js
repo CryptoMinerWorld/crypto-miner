@@ -844,16 +844,21 @@ function display_gem(gemId, color, level, gradeType, miningRate) {
 				return;
 			}
 			const ageSeconds = (Date.now() / 1000 | 0) - result;
-			const oneDaySeconds = 24 * 3600;
-			const oneMonthSeconds = 30 * oneDaySeconds;
-			const ageDays = Math.floor(ageSeconds / oneDaySeconds);
-			const restingEnergyMinutes = Math.round((1440 / (2 + (6 - gradeType) / 4)) * (1 + (11 * Math.log(1 + (ageDays - 1) / 11))));
+			let ageMinutes = Math.floor(ageSeconds / 60);
+			if(ageMinutes > 38614) {
+				ageMinutes = 38614;
+			}
+			const ageDays = Math.floor(ageSeconds / 24 / 3600);
+			// const restingEnergyMinutes = Math.round((1440 / (2 + (6 - gradeType) / 4)) * (1 + (11 * Math.log(1 + (ageDays - 1) / 11))));
+			const restingEnergyMinutes = -7E-06 * Math.pow(ageMinutes, 2) + 0.5406 * ageMinutes;
 			console.log(`gem ${gemId} grade ${grade} rate ${miningRate}% age ${ageDays} days, resting energy is ${restingEnergyMinutes} minutes`);
-			let energyLevel = Math.round(100 * ageSeconds / oneMonthSeconds);
+/*
+			let energyLevel = Math.round(100 * ageSeconds / 24 / 3600);
 			if(energyLevel > 100) {
 				energyLevel = 100;
 			}
-			energyLevelContainer.html("Energy level &nbsp;" + energyLevel + "%");
+*/
+			energyLevelContainer.html("Resting energy &nbsp;" + restingEnergyMinutes + " minutes");
 		});
 	}
 }
@@ -875,6 +880,7 @@ function preloadGemGraphics() {
 			}
 		}
 	}
+	console.log(thumbs.length + " gem thumbnails preloaded");
 }
 
 // preload gems images
