@@ -1,0 +1,1 @@
+truffle deploy -f 10 --network mainnet 2>&1 | tee -a gems.csv

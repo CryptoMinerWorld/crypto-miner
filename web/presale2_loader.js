@@ -852,7 +852,7 @@ function display_gem(gemId, color, level, gradeType, miningRate) {
 			// const restingEnergyMinutes = Math.round((1440 / (2 + (6 - gradeType) / 4)) * (1 + (11 * Math.log(1 + (ageDays - 1) / 11))));
 			const restingEnergyMinutes = Math.floor(-7E-06 * Math.pow(ageMinutes, 2) + 0.5406 * ageMinutes);
 			console.log(`gem ${gemId} grade ${grade} rate ${miningRate}% age ${ageDays} days, resting energy is ${restingEnergyMinutes} minutes`);
-			energyLevelContainer.html("Resting energy &nbsp;" + restingEnergyMinutes + " minutes");
+			energyLevelContainer.html("Resting energy &nbsp;" + restingEnergyMinutes + " min");
 		});
 	}
 }
