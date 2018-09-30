@@ -141,12 +141,9 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     // bind token instance to the address specified
     tokenInstance = GemERC721(tokenAddress);
 
-    // validate GemERC721 instance by requiring all supported interfaces
+    // validate ERC721 instance by checking required interfaces
     require(tokenInstance.supportsInterface(0x01ffc9a7)); // ERC165
     require(tokenInstance.supportsInterface(0x80ac58cd)); // ERC721
-    require(tokenInstance.supportsInterface(0x4f558e79)); // ERC721 exists
-    require(tokenInstance.supportsInterface(0x780e9d63)); // ERC721 enumerable
-    require(tokenInstance.supportsInterface(0x5b5e139f)); // ERC721 metadata
   }
 
   /**
@@ -189,6 +186,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     require(msg.sender == tokenOwner || __isSenderInRole(ROLE_AUCTION_MANAGER));
 
     // take the token away from the owner to an auction smart contract
+    // do not use safe transfer - we're just transferring token into here
     tokenInstance.transferFrom(tokenOwner, address(this), tokenId);
 
     // delegate call to `__addWith`
@@ -268,7 +266,8 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     require(operator == owner || __isSenderInRole(ROLE_AUCTION_MANAGER));
 
     // transfer item back to owner
-    tokenInstance.transfer(owner, tokenId);
+    // do not use safe transfer - we're returning the token back to where it came from
+    tokenInstance.transferFrom(address(this), owner, tokenId);
 
     // remove from previous owners mapping
     delete owners[tokenId];
@@ -327,7 +326,8 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     require(p <= msg.value);
 
     // transfer the item to the buyer
-    tokenInstance.transfer(buyer, tokenId);
+    // use safe transfer since we don't know if buyer supports receiving ERC721
+    tokenInstance.safeTransferFrom(address(this), buyer, tokenId);
 
     // remove from previous owners mapping
     delete owners[tokenId];
