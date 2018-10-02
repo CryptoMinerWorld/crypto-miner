@@ -1,5 +1,6 @@
 pragma solidity 0.4.23;
 
+import "./ERC165.sol";
 import "./ERC721.sol";
 import "./ERC721Receiver.sol";
 import "./AccessControl.sol";
@@ -152,8 +153,8 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     require(tokenAddress != address(0));
 
     // validate ERC721 instance by checking required interfaces
-    require(ERC721(tokenAddress).supportsInterface(0x01ffc9a7)); // ERC165
-    require(ERC721(tokenAddress).supportsInterface(0x80ac58cd)); // ERC721
+    require(ERC165(tokenAddress).supportsInterface(0x01ffc9a7)); // ERC165
+    require(ERC165(tokenAddress).supportsInterface(0x80ac58cd)); // ERC721
 
     // update the whitelist
     supportedTokenAddresses[tokenAddress] = supported;
