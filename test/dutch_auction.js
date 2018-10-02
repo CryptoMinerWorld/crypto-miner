@@ -373,13 +373,14 @@ contract('Dutch Auction', accounts => {
 		// account 1 transfers token to an auction automatically activating it
 		await tk.safeTransferFrom(accounts[1], auction.address, token0x401, data, {from: accounts[1]});
 
-		// set 1% transaction fee on the auction to account 3
-		await auction.setFeeAndBeneficiary(1, 100, accounts[3]);
+		// set 1% transaction fee on the auction to account 3, chest vault - account 4
+		await auction.setFeeAndBeneficiary(1, 100, accounts[3], accounts[4]);
 
-		// saving current accounts 1, 2 and 3 balances
+		// saving current accounts 1, 2, 3 and 4 balances
 		const balance1 = await web3.eth.getBalance(accounts[1]);
 		const balance2 = await web3.eth.getBalance(accounts[2]);
 		const balance3 = await web3.eth.getBalance(accounts[3]);
+		const balance4 = await web3.eth.getBalance(accounts[4]);
 
 		// account 2 buys that token from an auction
 		const tx = await auction.buy(tk.address, token0x401, {from: accounts[2], value: p0});
@@ -393,12 +394,18 @@ contract('Dutch Auction', accounts => {
 		// check the fee is 1%
 		assert(fee.eq(p.dividedToIntegerBy(100)), "wrong transaction fee");
 
+		// split fee into beneficiary fee and chest vault fee
+		const beneficiaryFee = fee.times(4).dividedToIntegerBy(5);
+		const chestVaultFee = fee.dividedToIntegerBy(5);
+
 		// we expect account 1 to get p minus fee after buying a token
 		assert(balance1.plus(p).minus(fee).eq(await web3.eth.getBalance(accounts[1])), "account 1 has wrong balance after selling a token");
 		// we expect account 2 to spend p + gasUsed after buying a token
 		assert(balance2.minus(p).minus(gasUsed).eq(await web3.eth.getBalance(accounts[2])), "account 2 has wrong balance after buying a token");
-		// we expect account 3 to get the fee after successful sale
-		assert(balance3.plus(fee).eq(await web3.eth.getBalance(accounts[3])), "account 3 has wrong balance after successful sale");
+		// we expect account 3 to get the 80% of the fee after successful sale
+		assert(balance3.plus(beneficiaryFee).eq(await web3.eth.getBalance(accounts[3])), "account 3 has wrong balance after successful sale");
+		// we expect account 4 to get the 20% of the fee after successful sale
+		assert(balance4.plus(chestVaultFee).eq(await web3.eth.getBalance(accounts[4])), "account 4 has wrong balance after successful sale");
 	});
 
 	it("auction: transaction fees", async () => {
@@ -414,10 +421,10 @@ contract('Dutch Auction', accounts => {
 		// to buy a token from an auction transfers feature is required
 		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 
-		// account 3 will try to set transaction fee and beneficiary
+		// account 3 will try to set transaction fee and beneficiary (chest vault equal to beneficiary)
 		const f1 = async () => await auction.setFee(1, 100, {from: accounts[3]});
-		const f2 = async () => await auction.setBeneficiary(accounts[0], {from: accounts[3]});
-		const f3 = async () => await auction.setFeeAndBeneficiary(1, 100, accounts[0], {from: accounts[3]});
+		const f2 = async () => await auction.setBeneficiary(accounts[0], accounts[0], {from: accounts[3]});
+		const f3 = async () => await auction.setFeeAndBeneficiary(1, 100, accounts[0], accounts[0], {from: accounts[3]});
 
 		// transaction fee and beneficiary cannot be set without a permission
 		await assertThrowsAsync(f1);
@@ -444,7 +451,7 @@ contract('Dutch Auction', accounts => {
 		await auction.addWith(tk.address, token0x401, now + 300, now + 3000, price, 0);
 
 		// keep record of balances of interest
-		const balance0 = await web3.eth.getBalance(accounts[0]); // beneficiary
+		const balance0 = await web3.eth.getBalance(accounts[0]); // beneficiary + chest vault
 		const balance1 = await web3.eth.getBalance(accounts[1]); // token seller
 		const balance2 = await web3.eth.getBalance(accounts[2]); // token buyer
 
@@ -524,7 +531,7 @@ contract('Dutch Auction', accounts => {
 		assert.equal(0, fee, "wrong fee (not zero)");
 
 		// set the fee to maximum - 5%
-		await auction.setFeeAndBeneficiary(5, 100, accounts[0]);
+		await auction.setFeeAndBeneficiary(5, 100, accounts[0], accounts[1]);
 		// read the fee again
 		const fee1 = (await auction.getTokenSaleStatus(tk.address, token0x401)).modulo(two.pow(32)).toNumber();
 		// validate new fee

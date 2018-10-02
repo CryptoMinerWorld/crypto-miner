@@ -77,8 +77,11 @@ contract DutchAuction is AccessControl, ERC721Receiver {
   /// @dev Fee is guaranteed to be in a range between 0 and 5 percent
   Fractions.Fraction public fee;
 
-  /// @dev Address which receives the transaction fee
-  address beneficiary;
+  /// @dev Address which receives 80% the transaction fee
+  address public beneficiary;
+
+  /// @dev Address to send 20% of the transaction fee to
+  address public chestVault;
 
   /// @dev Auxiliary data structure to keep track of previous item owners
   /// @dev Used to be able to return items back to owners
@@ -364,8 +367,14 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
     // fee (if any) is extracted from the seller
     if(feeValue > 0) {
-      // transfer the fee to beneficiary
-      beneficiary.transfer(feeValue);
+      // 20% of the value
+      uint256 value20 = feeValue / 5;
+
+      // send 20% of the value to the chest vault
+      chestVault.transfer(value20);
+
+      // send the rest of the value (80%) to the beneficiary
+      beneficiary.transfer(feeValue - value20);
     }
 
     // fee cannot exceed MAX FEE limit by design
@@ -468,12 +477,13 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    * @dev Requires sender to have `ROLE_FEE_MANAGER` permission
    * @param _beneficiary transaction fee beneficiary
    */
-  function setBeneficiary(address _beneficiary) public {
+  function setBeneficiary(address _beneficiary, address _chestVault) public {
     // ensure sender has valid permissions
     require(__isSenderInRole(ROLE_FEE_MANAGER));
 
-    // address can be zero as well, zero address disables transaction fees
+    // addresses can be zero as well, zero addresses disable transaction fees
     beneficiary = _beneficiary;
+    chestVault = _chestVault;
 
     // emit an event
     emit TransactionFeeUpdated(fee.getNominator(), fee.getDenominator(), beneficiary);
@@ -486,7 +496,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    * @param denominator fee fraction denominator, not zero
    * @param _beneficiary transaction fee beneficiary
    */
-  function setFeeAndBeneficiary(uint16 nominator, uint16 denominator, address _beneficiary) public {
+  function setFeeAndBeneficiary(uint16 nominator, uint16 denominator, address _beneficiary, address _chestVault) public {
     // ensure sender has valid permissions
     require(__isSenderInRole(ROLE_FEE_MANAGER));
 
@@ -496,8 +506,9 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     // create and assign the fee, it can be zero in which case it disables transaction fees
     fee = Fractions.createProperFraction(nominator, denominator);
 
-    // address can be zero as well, zero address disables transaction fees
+    // addresses can be zero as well, zero addresses disable transaction fees
     beneficiary = _beneficiary;
+    chestVault = _chestVault;
 
     // emit an event
     emit TransactionFeeUpdated(nominator, denominator, beneficiary);
@@ -589,18 +600,18 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
   /**
    * @dev Calculates fee value based on the fee percent set in the smart contract,
-   *      taking into account also if beneficiary address is set
+   *      taking into account also if beneficiary / chest vault addresses are set
    * @param price selling price to calculate fee for
    * @return calculated fee value, zero if either beneficiary address or fee is zero
    */
   function calculateFeeValue(uint80 price) private constant returns(uint256) {
-    // fee is applied only when it is not zero and when beneficiary is defined
-    if(beneficiary != address(0) && !fee.isZero()) {
+    // fee is applied only when it is not zero and when beneficiary and chestVault are defined
+    if(beneficiary != address(0) && chestVault != address(0) && !fee.isZero()) {
       // calculate the fee and return
       return fee.multiplyByInteger(price);
     }
 
-    // no fee / beneficiary is set - return 0
+    // no fee / beneficiary / chest vault is set - return 0
     return 0;
   }
 
