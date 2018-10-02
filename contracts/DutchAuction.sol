@@ -156,8 +156,11 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     require(tokenAddress != address(0));
 
     // validate ERC721 instance by checking required interfaces
-    require(ERC165(tokenAddress).supportsInterface(0x01ffc9a7)); // ERC165
-    require(ERC165(tokenAddress).supportsInterface(0x80ac58cd)); // ERC721
+    if(supported) {
+      // we do not make this check if removing token from whitelist
+      require(ERC165(tokenAddress).supportsInterface(0x01ffc9a7)); // ERC165
+      require(ERC165(tokenAddress).supportsInterface(0x80ac58cd)); // ERC721
+    }
 
     // update the whitelist
     supportedTokenAddresses[tokenAddress] = supported;

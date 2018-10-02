@@ -66,8 +66,30 @@ contract('Dutch Auction', accounts => {
 		await assertThrowsAsync(async () => await auction.addNow(tk.address, token0x401, 60, P0 / 1000, P1 / 1000));
 		await assertThrowsAsync(async () => await auction.addNow(tk.address, token0x401, 60, P0 + 17, P1));
 		await assertThrowsAsync(async () => await auction.addNow(tk.address, token0x401, 60, P0, P1 + 17));
-		// adding token to an auction - correct parameters
-		await auction.addWith(tk.address, token0x401, now, now + 60, P0, P1);
+
+		// few wrong whitelisting attempts
+		await assertThrowsAsync(async () => await auction.whitelist(tk.address, true, {from: accounts[1]}));
+		await assertThrowsAsync(async () => await auction.whitelist(0, true));
+		await assertThrowsAsync(async () => await auction.whitelist(auction.address, true));
+
+		// remove token from whitelist
+		await auction.whitelist(tk.address, false);
+
+		// try to add it with no whitelisting
+		const f = async () => await auction.addWith(tk.address, token0x401, now, now + 60, P0, P1);
+		await assertThrowsAsync(f);
+
+		// put token back to whitelist
+		await auction.whitelist(tk.address, true);
+
+		// try to add id without a feature required
+		await auction.updateFeatures(0);
+		await assertThrowsAsync(f);
+
+		// put the feature back
+		await auction.updateFeatures(FEATURE_ADD);
+		// and try again
+		await f();
 
 		// ensure auction lists this token for sale
 		assert(await auction.isTokenOnSale(tk.address, token0x401), "token 0x401 is not on sale after adding it");
@@ -478,6 +500,59 @@ contract('Dutch Auction', accounts => {
 			balance2.minus(price).minus(gasUsed).eq(await web3.eth.getBalance(accounts[2])),
 			"wrong buyer's balance after the token transfer on the auction"
 		);
+	});
+
+	it("auction: selling two different ERC721 tokens", async () => {
+		const tk1 = await Token.new();
+		const tk2 = await Token.new();
+		const auction = await Auction.new();
+
+		// to list a token in the auction it must be whitelisted
+		await auction.whitelist(tk1.address, true);
+		await auction.whitelist(tk2.address, true);
+		// to list a token in the auction FEATURE_ADD is required
+		// to buy a token from an auction FEATURE_BUY is required
+		await auction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
+		// to list a token in the auction using safeTransferFrom both transfers features may be required
+		// to remove a token from an auction transfers feature is required
+		// to buy a token from an auction transfers feature is required
+		await tk1.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk2.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+
+		// issue tokens to account 1
+		await mint0x401(tk1, accounts);
+		await mint0x401(tk2, accounts);
+
+		// construct auction parameters
+		const tokenId = web3.toBigNumber(token0x401);
+		const t0 = new Date().getTime() / 1000 | 0;
+		const t1 = t0 + 300;
+		const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
+		const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
+		const two = web3.toBigNumber(2);
+		const data = toBytes(two.pow(224).times(tokenId)
+			.plus(two.pow(192).times(t0))
+			.plus(two.pow(160).times(t1))
+			.plus(two.pow(80).times(p0))
+			.plus(p1));
+
+		// account 1 transfers tokens to an auction automatically activating it
+		await tk1.safeTransferFrom(accounts[1], auction.address, token0x401, data, {from: accounts[1]});
+		await tk2.safeTransferFrom(accounts[1], auction.address, token0x401, data, {from: accounts[1]});
+
+		// check that both items are on sale
+		assert.equal(auction.address, await tk1.ownerOf(token0x401), "wrong token 0x401 (1) owner after putting it on sale");
+		assert.equal(auction.address, await tk2.ownerOf(token0x401), "wrong token 0x401 (2) owner after putting it on sale");
+		assert(await auction.isTokenOnSale(tk1.address, token0x401), "token 0x401 (1) is not on sale after adding it");
+		assert(await auction.isTokenOnSale(tk2.address, token0x401), "token 0x401 (2) is not on sale after adding it");
+
+		// accounts 2 and buys both tokens from an auction
+		await auction.buy(tk1.address, token0x401, {from: accounts[2], value: p0});
+		await auction.buy(tk2.address, token0x401, {from: accounts[3], value: p0});
+
+		// check that both items belong to proper owners now
+		assert.equal(accounts[2], await tk1.ownerOf(token0x401), "wrong token 0x401 (1) owner after buying it");
+		assert.equal(accounts[3], await tk2.ownerOf(token0x401), "wrong token 0x401 (2) owner after buying it");
 	});
 
 	it("auction: token sale status", async () => {
