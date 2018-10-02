@@ -32,12 +32,14 @@ const P0 = web3.toWei(2, "szabo");
 const P1 = web3.toWei(1, "szabo");
 
 contract('Dutch Auction: Gas Usage', accounts => {
-	// 191345 - without optimizer
-	// 165838 - with optimizer
-	it("auction: putting up for sale - approve() + addNow() - consumes 165838 gas", async () => {
+	// 189724 - without optimizer
+	// 181021 - with optimizer
+	it("auction: putting up for sale - approve() + addNow() - consumes 181021 gas", async () => {
 		const tk = await Token.new();
-		const auction = await Auction.new(tk.address);
+		const auction = await Auction.new();
 
+		// to list a token in the auction it must be whitelisted
+		await auction.whitelist(tk.address, true);
 		// to list a token in the auction FEATURE_ADD is required
 		await auction.updateFeatures(FEATURE_ADD);
 		// to list a token in the auction transfers on behalf feature is required
@@ -50,20 +52,22 @@ contract('Dutch Auction: Gas Usage', accounts => {
 		const tx1 = await tk.approve(auction.address, token0x401, {from: accounts[1]});
 
 		// adding token to an auction
-		const tx2 = await auction.addNow(token0x401, 60, P0, P1);
+		const tx2 = await auction.addNow(tk.address, token0x401, 60, P0, P1);
 
 		// calculate total gas usage
 		const gasUsed = tx1.receipt.gasUsed + tx2.receipt.gasUsed;
 
 		// ensure gas used is in reasonable bounds
-		assertEqual(165838, gasUsed, "putting gem for sale gas usage mismatch: " + gasUsed);
+		assertEqual(181021, gasUsed, "putting gem for sale gas usage mismatch: " + gasUsed);
 	});
-	// 154732 - without optimizer
-	// 128948 - with optimizer
-	it("auction: putting up for sale - safeTransferFrom() - consumes 128948 gas", async () => {
+	// 151604 - without optimizer
+	// 142385 - with optimizer
+	it("auction: putting up for sale - safeTransferFrom() - consumes 142385 gas", async () => {
 		const tk = await Token.new();
-		const auction = await Auction.new(tk.address);
+		const auction = await Auction.new();
 
+		// to list a token in the auction it must be whitelisted
+		await auction.whitelist(tk.address, true);
 		// to list a token in the auction FEATURE_ADD is required
 		await auction.updateFeatures(FEATURE_ADD);
 		// to list a token in the auction using safeTransferFrom both transfers features may be required
@@ -92,14 +96,16 @@ contract('Dutch Auction: Gas Usage', accounts => {
 		const gasUsed = tx.receipt.gasUsed;
 
 		// ensure gas used is in reasonable bounds
-		assertEqual(128948, gasUsed, "putting gem for sale gas usage mismatch: " + gasUsed);
+		assertEqual(142385, gasUsed, "putting gem for sale gas usage mismatch: " + gasUsed);
 	});
-	// 92547 - without optimizer
+	// 95394 - without optimizer
 	// 65502 - with optimizer
 	it("auction: buying on an auction before it starts - consumes 65502 gas", async () => {
 		const tk = await Token.new();
-		const auction = await Auction.new(tk.address);
+		const auction = await Auction.new();
 
+		// to list a token in the auction it must be whitelisted
+		await auction.whitelist(tk.address, true);
 		// to list a token in the auction FEATURE_ADD is required
 		// to buy a token from an auction FEATURE_BUY is required
 		await auction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
@@ -116,10 +122,10 @@ contract('Dutch Auction: Gas Usage', accounts => {
 		const now = new Date().getTime() / 1000 | 0;
 
 		// adding token to an auction
-		await auction.addWith(token0x401, now + 600, now + 6000, P0, P1);
+		await auction.addWith(tk.address, token0x401, now + 600, now + 6000, P0, P1);
 
 		// account 2 buys that token on an auction
-		const tx = await auction.buy(token0x401, {from: accounts[2], value: P0});
+		const tx = await auction.buy(tk.address, token0x401, {from: accounts[2], value: P0});
 
 		// get the gas usage
 		const gasUsed = tx.receipt.gasUsed;
@@ -127,12 +133,14 @@ contract('Dutch Auction: Gas Usage', accounts => {
 		// ensure gas used is in reasonable bounds
 		assertEqual(65502, gasUsed, "buying gem on an auction gas usage mismatch: " + gasUsed);
 	});
-	// 92547 - without optimizer
+	// 95432 - without optimizer
 	// 65502 - with optimizer
 	it("auction: buying on an auction after it ends - consumes 65502 gas", async () => {
 		const tk = await Token.new();
-		const auction = await Auction.new(tk.address);
+		const auction = await Auction.new();
 
+		// to list a token in the auction it must be whitelisted
+		await auction.whitelist(tk.address, true);
 		// to list a token in the auction FEATURE_ADD is required
 		// to buy a token from an auction FEATURE_BUY is required
 		await auction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
@@ -146,13 +154,13 @@ contract('Dutch Auction: Gas Usage', accounts => {
 		await tk.approve(auction.address, token0x401, {from: accounts[1]});
 
 		// adding token to an auction
-		await auction.addNow(token0x401, 60, P0, P1);
+		await auction.addNow(tk.address, token0x401, 60, P0, P1);
 
 		// skip 90 seconds to ensure an auction ends
 		await increaseTime(90);
 
 		// account 2 buys that token on an auction
-		const tx = await auction.buy(token0x401, {from: accounts[2], value: P1});
+		const tx = await auction.buy(tk.address, token0x401, {from: accounts[2], value: P1});
 
 		// get the gas usage
 		const gasUsed = tx.receipt.gasUsed;
@@ -160,12 +168,14 @@ contract('Dutch Auction: Gas Usage', accounts => {
 		// ensure gas used is in reasonable bounds
 		assertEqual(65502, gasUsed, "buying gem on an auction gas usage mismatch: " + gasUsed);
 	});
-	// 100062 - without optimizer
-	// 73146 - with optimizer
-	it("auction: buying on an auction in the middle - consumes 73146 gas", async () => {
+	// 103176 - without optimizer
+	// 76324 - with optimizer
+	it("auction: buying on an auction in the middle - consumes 76324 gas", async () => {
 		const tk = await Token.new();
-		const auction = await Auction.new(tk.address);
+		const auction = await Auction.new();
 
+		// to list a token in the auction it must be whitelisted
+		await auction.whitelist(tk.address, true);
 		// to list a token in the auction FEATURE_ADD is required
 		// to buy a token from an auction FEATURE_BUY is required
 		await auction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
@@ -179,26 +189,28 @@ contract('Dutch Auction: Gas Usage', accounts => {
 		await tk.approve(auction.address, token0x401, {from: accounts[1]});
 
 		// adding token to an auction
-		await auction.addNow(token0x401, 600, P0, P1);
+		await auction.addNow(tk.address, token0x401, 600, P0, P1);
 
 		// skip 300 seconds to ensure an auction is in the middle
 		await increaseTime(300);
 
 		// account 2 buys that token on an auction
-		const tx = await auction.buy(token0x401, {from: accounts[2], value: P0});
+		const tx = await auction.buy(tk.address, token0x401, {from: accounts[2], value: P0});
 
 		// get the gas usage
 		const gasUsed = tx.receipt.gasUsed;
 
 		// ensure gas used is in reasonable bounds
-		assertEqual(73146, gasUsed, "buying gem on an auction gas usage mismatch: " + gasUsed);
+		assertEqual(76324, gasUsed, "buying gem on an auction gas usage mismatch: " + gasUsed);
 	});
-	// 79760 - without optimizer
-	// 56498 - with optimizer
-	it("auction: removing from an auction - consumes 56498 gas", async () => {
+	// 82008 - without optimizer
+	// 57692 - with optimizer
+	it("auction: removing from an auction - consumes 57692 gas", async () => {
 		const tk = await Token.new();
-		const auction = await Auction.new(tk.address);
+		const auction = await Auction.new();
 
+		// to list a token in the auction it must be whitelisted
+		await auction.whitelist(tk.address, true);
 		// to list a token in the auction FEATURE_ADD is required
 		await auction.updateFeatures(FEATURE_ADD);
 		// to list a token in the auction using safeTransferFrom both transfers features may be required
@@ -211,16 +223,16 @@ contract('Dutch Auction: Gas Usage', accounts => {
 		await tk.approve(auction.address, token0x401, {from: accounts[1]});
 
 		// adding token to an auction
-		await auction.addNow(token0x401, 60, P0, P1);
+		await auction.addNow(tk.address, token0x401, 60, P0, P1);
 
 		// account 2 buys that token on an auction
-		const tx = await auction.remove(token0x401);
+		const tx = await auction.remove(tk.address, token0x401);
 
 		// get the gas usage
 		const gasUsed = tx.receipt.gasUsed;
 
 		// ensure gas used is in reasonable bounds
-		assertEqual(56498, gasUsed, "removing gem from an auction gas usage mismatch: " + gasUsed);
+		assertEqual(57692, gasUsed, "removing gem from an auction gas usage mismatch: " + gasUsed);
 	});
 });
 
