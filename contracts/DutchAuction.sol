@@ -1,21 +1,21 @@
 pragma solidity 0.4.23;
 
+import "./ERC721.sol";
 import "./ERC721Receiver.sol";
 import "./AccessControl.sol";
-import "./GemERC721.sol";
 import "./Fractions.sol";
 
 /**
  * @notice Dutch auction represents a method of selling
  *      in which the price is reduced until a buyer is found
  *      or sale time has ended (item expired for sale).
- * @dev This implementation supports up to 65535 items listed for sale.
  * @dev For each item on sale the following parameters are defined:
  *      * sale start time - t0
  *      * sale start price - p0
  *      * sale end time - t1
  *      * sale end price - p1
  *      * item ID (ERC721 token ID)
+ *      * ERC721 instance address
  * @dev Current price `p` of each item is calculated linearly based
  *      on the sale parameters:
  *      `p = p0 - (now - t0) * (p0 - p1) / (t1 - t0)
@@ -25,8 +25,8 @@ import "./Fractions.sol";
  * @dev Following constraints when buying item on sale must be met:
  *      * now < t1: item has not expired
  *      * msg.value >= p: price constraint
- * @dev This implementation operates with a GemERC721 token as an item:
- *      token ID space is expected to be uint32
+ * @dev This implementation operates with an arbitrary ERC721 token as an item,
+ *      with the only limitation: token ID space is expected to be uint32
  */
 contract DutchAuction is AccessControl, ERC721Receiver {
   /// @dev Using library Fractions for fraction math
@@ -52,12 +52,17 @@ contract DutchAuction is AccessControl, ERC721Receiver {
   uint32 public constant FEATURE_BUY = 0x00000002;
 
   /// @notice Auction manager is responsible for removing items
-  /// @dev Role ROLE_AUCTION_MANAGER allows executing removeItem
+  /// @dev Role ROLE_AUCTION_MANAGER allows executing remove
   uint32 public constant ROLE_AUCTION_MANAGER = 0x00010000;
 
   /// @notice Fee manager is responsible for setting sale fees on the smart contract
   /// @dev Role ROLE_FEE_MANAGER allows executing setFee, setBeneficiary, setFeeAndBeneficiary
   uint32 public constant ROLE_FEE_MANAGER = 0x00020000;
+
+  /// @notice Whitelist manager is responsible for managing the whitelist of
+  ///      supported ERC721 token addresses - `supportedTokenAddresses`
+  /// @dev Role ROLE_WHITELIST_MANAGER allows executing whitelist function
+  uint32 public constant ROLE_WHITELIST_MANAGER = 0x00040000;
 
   /// @notice Maximum fee that can be set on the contract
   /// @dev This is an inverted value of the maximum fee:
@@ -66,9 +71,6 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
   /// @dev 1 Gwei = 1000000000
   uint80 private constant GWEI = 1000000000;
-
-  /// @dev This auction operates on GemERC721 instances
-  GemERC721 public tokenInstance;
 
   /// @dev Transaction fee, defined by its nominator and denominator
   /// @dev Fee is guaranteed to be in a range between 0 and 5 percent
@@ -79,20 +81,24 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
   /// @dev Auxiliary data structure to keep track of previous item owners
   /// @dev Used to be able to return items back to owners
-  mapping(uint256 => address) public owners;
+  mapping(address => mapping(uint256 => address)) public owners;
 
   /// @notice All the items available for sale with their sale parameters
   /// @dev Includes both expired and available items
-  mapping(uint256 => Item) public items;
+  mapping(address => mapping(uint256 => Item)) public items;
 
-  /// @dev Fired in addItem()
+  /// @notice All the token addresses supported by this auction implementation
+  mapping(address => bool) public supportedTokenAddresses;
+
+  /// @dev Fired in addNow(), addWith()
   event ItemAdded(
-    // who added this item for sale by calling addItem()
-    address indexed _by,
+    // who added this item for sale by calling addWith()
+    address _by,
     // who is the owner of this item for sale
-    address indexed _from,
-    // rest of the values correspond to addItem() signature and Item structure
-    uint32 indexed tokenId,
+    address _from,
+    // rest of the values correspond to addWith() signature
+    address indexed tokenAddress, // deployed ERC721 instance
+    uint32 indexed tokenId,       // unique item ID (token ID)
     uint48 t0, // seconds
     uint48 t1, // seconds
     uint48 t,  // seconds
@@ -101,10 +107,12 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     uint80 p   // current price in wei
   );
 
-  /// @dev Fired in removeItem()
+  /// @dev Fired in remove()
   event ItemRemoved(
     // auction manager who sent a transaction (ROLE_AUCTION_MANAGER)
-    address indexed _by,
+    address _by,
+    // smart contract address representing this ERC721 token
+    address indexed tokenAddress,
     // unique item ID (token ID)
     uint32 indexed tokenId
   );
@@ -112,11 +120,12 @@ contract DutchAuction is AccessControl, ERC721Receiver {
   /// @dev Fired in buyItem()
   event ItemBought(
     // previous item owner
-    address indexed _from,
+    address _from,
     // new item owner
-    address indexed _to,
-    // rest of the values correspond to addItem() signature and Item structure
-    uint32 indexed tokenId,
+    address _to,
+    // rest of the values correspond to addWith() signature and Item structure
+    address indexed tokenAddress, // deployed ERC721 instance
+    uint32 indexed tokenId,       // unique item ID (token ID)
     uint48 t0, // seconds
     uint48 t1, // seconds
     uint48 t,  // seconds
@@ -130,31 +139,36 @@ contract DutchAuction is AccessControl, ERC721Receiver {
   event TransactionFeeUpdated(uint16 nominator, uint16 denominator, address beneficiary);
 
   /**
-   * @dev Creates a dutch auction instance operating on GemERC721 tokens
-   *      defined by the `tokenAddress` specified
-   * @param tokenAddress deployed GemERC721 instance address
+   * @dev Whitelists the ERC721 token address specified to allow adding
+   *      corresponding token instances into an auction
+   * @dev Requires sender to have `ROLE_WHITELIST_MANAGER` permission
+   * @param tokenAddress deployed ERC721 instance address
    */
-  constructor(address tokenAddress) public {
-    // check that we didn't forget to pass an address
+  function whitelist(address tokenAddress, bool supported) public {
+    // check sender's permissions (whitelist manager role)
+    require(__isSenderInRole(ROLE_WHITELIST_MANAGER));
+
+    // check that sender didn't forget to pass an address
     require(tokenAddress != address(0));
 
-    // bind token instance to the address specified
-    tokenInstance = GemERC721(tokenAddress);
-
     // validate ERC721 instance by checking required interfaces
-    require(tokenInstance.supportsInterface(0x01ffc9a7)); // ERC165
-    require(tokenInstance.supportsInterface(0x80ac58cd)); // ERC721
+    require(ERC721(tokenAddress).supportsInterface(0x01ffc9a7)); // ERC165
+    require(ERC721(tokenAddress).supportsInterface(0x80ac58cd)); // ERC721
+
+    // update the whitelist
+    supportedTokenAddresses[tokenAddress] = supported;
   }
 
   /**
    * @dev Adds an item to the auction, starting right now.
    * @dev Requires an item to be transferred on behalf of its owner.
+   * @param tokenAddress ERC721 deployed instance address
    * @param tokenId token ID for sale
    * @param duration duration of the auction in seconds
    * @param p0 sale start price
    * @param p1 sale end price
    */
-  function addNow(uint32 tokenId, uint32 duration, uint80 p0, uint80 p1) public {
+  function addNow(address tokenAddress, uint32 tokenId, uint32 duration, uint80 p0, uint80 p1) public {
     // derive missing parameters for `addWith`
 
     // t0 is now
@@ -164,21 +178,22 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     uint32 t1 = t0 + duration;
 
     // delegate call to `addWith`
-    addWith(tokenId, t0, t1, p0, p1);
+    addWith(tokenAddress, tokenId, t0, t1, p0, p1);
   }
 
   /**
    * @dev Adds an item to the auction. Allows to set auction start time.
    * @dev Requires an item to be transferred on behalf of its owner.
+   * @param tokenAddress ERC721 deployed instance address
    * @param tokenId token ID for sale
    * @param t0 sale start time
    * @param t1 sale end time
    * @param p0 sale start price
    * @param p1 sale end price
    */
-  function addWith(uint32 tokenId, uint32 t0, uint32 t1, uint80 p0, uint80 p1) public {
+  function addWith(address tokenAddress, uint32 tokenId, uint32 t0, uint32 t1, uint80 p0, uint80 p1) public {
     // determine who is current owner of the token
-    address tokenOwner = tokenInstance.ownerOf(tokenId);
+    address tokenOwner = ERC721(tokenAddress).ownerOf(tokenId);
 
     // since we set the auction prices and other parameters,
     // require token to be added only by its owner or
@@ -187,26 +202,31 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
     // take the token away from the owner to an auction smart contract
     // do not use safe transfer - we're just transferring token into here
-    tokenInstance.transferFrom(tokenOwner, address(this), tokenId);
+    ERC721(tokenAddress).transferFrom(tokenOwner, address(this), tokenId);
 
     // delegate call to `__addWith`
-    __addWith(msg.sender, tokenOwner, tokenId, t0, t1, p0, p1);
+    __addWith(msg.sender, tokenOwner, tokenAddress, tokenId, t0, t1, p0, p1);
   }
 
   /**
    * @dev Lists an already transferred item on the auction.
    * @dev Requires an item to be already transferred.
    * @dev Unsafe. Internal use only!
+   * @param operator an address which performs an operation
    * @param from an address where on item originally was transferred from
+   * @param tokenAddress ERC721 deployed instance address
    * @param tokenId token ID for sale
    * @param t0 sale start time
    * @param t1 sale end time
    * @param p0 sale start price
    * @param p1 sale end price
    */
-  function __addWith(address operator, address from, uint32 tokenId, uint32 t0, uint32 t1, uint80 p0, uint80 p1) private {
+  function __addWith(address operator, address from, address tokenAddress, uint32 tokenId, uint32 t0, uint32 t1, uint80 p0, uint80 p1) private {
     // check if adding items to sale is enabled
     require(__isFeatureEnabled(FEATURE_ADD));
+
+    // validate that token address is whitelisted
+    require(supportedTokenAddresses[tokenAddress]);
 
     // validate sale parameters:
     // make sure caller didn't forget to set t0
@@ -227,37 +247,38 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     require(p0 >= 1 szabo);
 
     // require the token is already transferred
-    // also ensures the token is a whitelisted GemERC721 instance
-    require(tokenInstance.ownerOf(tokenId) == address(this));
+    // also ensures the token is a whitelisted ERC721 instance
+    //require(ERC721(tokenAddress).ownerOf(tokenId) == address(this));
 
     // save previous owner of the token
-    owners[tokenId] = from;
+    owners[tokenAddress][tokenId] = from;
 
     // create item sale parameters structure
     Item memory item = Item(t0, t1, p0, p1);
 
     // save newly created structure
-    items[tokenId] = item;
+    items[tokenAddress][tokenId] = item;
 
     // current price
     uint80 p = priceNow(t0, t1, p0, p1);
 
     // emit an event
-    emit ItemAdded(operator, from, tokenId, t0, t1, uint48(now), p0, p1, p);
+    emit ItemAdded(operator, from, tokenAddress, tokenId, t0, t1, uint48(now), p0, p1, p);
   }
 
   /**
    * @dev Removes an item from the auction.
    * @dev Requires sender to be previous owner of the item
    *      or to have `ROLE_AUCTION_MANAGER` permission.
+   * @param tokenAddress ERC721 deployed instance address
    * @param tokenId unique ID of the item, previously generated when item was added
    */
-  function remove(uint32 tokenId) public {
+  function remove(address tokenAddress, uint32 tokenId) public {
     // call sender gracefully - operator
     address operator = msg.sender;
 
     // get previous token owner
-    address owner = owners[tokenId];
+    address owner = owners[tokenAddress][tokenId];
 
     // check that previous owner is not zero (item is on sale)
     require(owner != address(0));
@@ -267,16 +288,16 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
     // transfer item back to owner
     // do not use safe transfer - we're returning the token back to where it came from
-    tokenInstance.transferFrom(address(this), owner, tokenId);
+    ERC721(tokenAddress).transferFrom(address(this), owner, tokenId);
 
     // remove from previous owners mapping
-    delete owners[tokenId];
+    delete owners[tokenAddress][tokenId];
 
     // remove item on sale properties
-    delete items[tokenId];
+    delete items[tokenAddress][tokenId];
 
     // emit an event
-    emit ItemRemoved(operator, tokenId);
+    emit ItemRemoved(operator, tokenAddress, tokenId);
   }
 
   /**
@@ -286,11 +307,12 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    *      and that enough value is sent to the function
    * @dev Requires now < t1
    * @dev Requires msg.value >= p
+   * @param tokenAddress ERC721 deployed instance address
    * @param tokenId unique ID of the item on sale (token ID)
    */
-  function buy(uint32 tokenId) public payable {
+  function buy(address tokenAddress, uint32 tokenId) public payable {
     // delegate call to `buyTo`
-    buyTo(tokenId, msg.sender);
+    buyTo(tokenAddress, tokenId, msg.sender);
   }
 
   /**
@@ -300,10 +322,11 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    *      and that enough value is sent to the function
    * @dev Requires now < t1
    * @dev Requires msg.value >= p
+   * @param tokenAddress ERC721 deployed instance address
    * @param tokenId unique ID of the item on sale (token ID)
    * @param buyer an address to send the item bought to
    */
-  function buyTo(uint32 tokenId, address buyer) public payable {
+  function buyTo(address tokenAddress, uint32 tokenId, address buyer) public payable {
     // check if adding items to sale is enabled
     require(__isFeatureEnabled(FEATURE_BUY));
 
@@ -311,13 +334,13 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     require(buyer != address(0));
 
     // find previous owner of the item - seller
-    address seller = owners[tokenId];
+    address seller = owners[tokenAddress][tokenId];
 
     // verify that previous owner exists
     require(seller != address(0));
 
     // get the item for sale data
-    Item memory item = items[tokenId];
+    Item memory item = items[tokenAddress][tokenId];
     
     // calculate current item price
     uint80 p = priceNow(item.t0, item.t1, item.p0, item.p1);
@@ -327,13 +350,13 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
     // transfer the item to the buyer
     // use safe transfer since we don't know if buyer supports receiving ERC721
-    tokenInstance.safeTransferFrom(address(this), buyer, tokenId);
+    ERC721(tokenAddress).safeTransferFrom(address(this), buyer, tokenId);
 
     // remove from previous owners mapping
-    delete owners[tokenId];
+    delete owners[tokenAddress][tokenId];
 
     // remove item on sale properties
-    delete items[tokenId];
+    delete items[tokenAddress][tokenId];
 
     // transaction fee value
     uint256 feeValue = calculateFeeValue(p);
@@ -357,7 +380,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     }
 
     // emit an event
-    emit ItemBought(seller, buyer, tokenId, item.t0, item.t1, uint48(now), item.p0, item.p1, p, uint80(feeValue));
+    emit ItemBought(seller, buyer, tokenAddress, tokenId, item.t0, item.t1, uint48(now), item.p0, item.p1, p, uint80(feeValue));
   }
 
   /**
@@ -412,7 +435,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     require(tokenId == _tokenId);
 
     // delegate call to `addWith`
-    __addWith(_operator, _from, tokenId, t0, t1, p0, p1);
+    __addWith(_operator, _from, msg.sender, tokenId, t0, t1, p0, p1);
 
     // return "magic" number on success, see GemERC721.ERC721_RECEIVED
     return 0x150b7a02;
@@ -489,13 +512,14 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    *      p1  final price (Gwei), 32 bits
    *      p   current price (Gwei), 32 bits
    *      fee estimated fee value (Gwei), 32 bits
+   * @param tokenAddress ERC721 deployed instance address
    * @param tokenId id of the item
    * @return packed int data structure representing the item sale status,
    *      or zero – if item is not on sale
    */
-  function getTokenSaleStatus(uint32 tokenId) constant public returns(uint224) {
+  function getTokenSaleStatus(address tokenAddress, uint32 tokenId) constant public returns(uint224) {
     // read item into memory from storage
-    Item memory item = items[tokenId];
+    Item memory item = items[tokenAddress][tokenId];
 
     // if item is not on sale than t0 is zero
     if(item.t0 == 0) {
@@ -519,27 +543,29 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
   /**
    * @dev Checks if the item specified is listed for sale
+   * @param tokenAddress ERC721 deployed instance address
    * @param tokenId id of the item
    * @return true of the item defined by its tokenId is for sale
    */
-  function isTokenOnSale(uint32 tokenId) constant public returns(bool) {
+  function isTokenOnSale(address tokenAddress, uint32 tokenId) constant public returns(bool) {
     // check if token exists by checking its previous owner
-    return owners[tokenId] != address(0);
+    return owners[tokenAddress][tokenId] != address(0);
   }
 
   /**
    * @dev Calculates current auction price for the item specified.
    * @dev Doesn't check the `_t0 < _t1` and `_p0 > _p1` constraints.
    *      It is in caller responsibility to ensure them otherwise result is not correct.
+   * @param tokenAddress ERC721 deployed instance address
    * @param tokenId ID of item to query price for
    * @return current item price (at the time `now`)
    */
-  function getCurrentPrice(uint32 tokenId) public constant returns(uint80) {
+  function getCurrentPrice(address tokenAddress, uint32 tokenId) public constant returns(uint80) {
     // get the item for sale data
-    Item memory item = items[tokenId];
+    Item memory item = items[tokenAddress][tokenId];
 
     // check that the item is listed for sale
-    require(owners[tokenId] != address(0));
+    require(owners[tokenAddress][tokenId] != address(0));
 
     // calculate current item price by delegating to `priceNow` and return
     return priceNow(item.t0, item.t1, item.p0, item.p1);
