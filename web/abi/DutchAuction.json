@@ -2,25 +2,6 @@
   "contractName": "DutchAuction",
   "abi": [
     {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "owners",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "constant": false,
       "inputs": [
         {
@@ -36,6 +17,20 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_WHITELIST_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -69,11 +64,60 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "tokenInstance",
+      "name": "beneficiary",
       "outputs": [
         {
           "name": "",
           "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "chestVault",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "items",
+      "outputs": [
+        {
+          "name": "t0",
+          "type": "uint48"
+        },
+        {
+          "name": "t1",
+          "type": "uint48"
+        },
+        {
+          "name": "p0",
+          "type": "uint80"
+        },
+        {
+          "name": "p1",
+          "type": "uint80"
         }
       ],
       "payable": false,
@@ -164,6 +208,29 @@
       "type": "function"
     },
     {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "owners",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "constant": false,
       "inputs": [
         {
@@ -179,12 +246,17 @@
     },
     {
       "constant": true,
-      "inputs": [],
-      "name": "ROLE_AUCTION_MANAGER",
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "supportedTokenAddresses",
       "outputs": [
         {
           "name": "",
-          "type": "uint32"
+          "type": "bool"
         }
       ],
       "payable": false,
@@ -193,29 +265,12 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "items",
+      "inputs": [],
+      "name": "ROLE_AUCTION_MANAGER",
       "outputs": [
         {
-          "name": "t0",
-          "type": "uint48"
-        },
-        {
-          "name": "t1",
-          "type": "uint48"
-        },
-        {
-          "name": "p0",
-          "type": "uint80"
-        },
-        {
-          "name": "p1",
-          "type": "uint80"
+          "name": "",
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -269,27 +324,21 @@
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "name": "tokenAddress",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
+          "indexed": false,
           "name": "_by",
           "type": "address"
         },
         {
-          "indexed": true,
+          "indexed": false,
           "name": "_from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "tokenAddress",
           "type": "address"
         },
         {
@@ -335,8 +384,13 @@
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
+          "indexed": false,
           "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "tokenAddress",
           "type": "address"
         },
         {
@@ -352,13 +406,18 @@
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
+          "indexed": false,
           "name": "_from",
           "type": "address"
         },
         {
-          "indexed": true,
+          "indexed": false,
           "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "tokenAddress",
           "type": "address"
         },
         {
@@ -475,6 +534,28 @@
       "constant": false,
       "inputs": [
         {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "supported",
+          "type": "bool"
+        }
+      ],
+      "name": "whitelist",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
           "name": "tokenId",
           "type": "uint32"
         },
@@ -500,6 +581,10 @@
     {
       "constant": false,
       "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
         {
           "name": "tokenId",
           "type": "uint32"
@@ -531,6 +616,10 @@
       "constant": false,
       "inputs": [
         {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
           "name": "tokenId",
           "type": "uint32"
         }
@@ -545,11 +634,37 @@
       "constant": false,
       "inputs": [
         {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
           "name": "tokenId",
           "type": "uint32"
         }
       ],
       "name": "buy",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "tokenId",
+          "type": "uint32"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "buyTo",
       "outputs": [],
       "payable": true,
       "stateMutability": "payable",
@@ -610,6 +725,10 @@
         {
           "name": "_beneficiary",
           "type": "address"
+        },
+        {
+          "name": "_chestVault",
+          "type": "address"
         }
       ],
       "name": "setBeneficiary",
@@ -632,6 +751,10 @@
         {
           "name": "_beneficiary",
           "type": "address"
+        },
+        {
+          "name": "_chestVault",
+          "type": "address"
         }
       ],
       "name": "setFeeAndBeneficiary",
@@ -643,6 +766,10 @@
     {
       "constant": true,
       "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
         {
           "name": "tokenId",
           "type": "uint32"
@@ -663,6 +790,10 @@
       "constant": true,
       "inputs": [
         {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
           "name": "tokenId",
           "type": "uint32"
         }
@@ -682,6 +813,10 @@
       "constant": true,
       "inputs": [
         {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
           "name": "tokenId",
           "type": "uint32"
         }
@@ -699,5 +834,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-09-09T10:24:42.829Z"
+  "updatedAt": "2018-10-03T09:25:58.344Z"
 }
