@@ -4,6 +4,7 @@ Presale:          0xa207d2496688134f538a307b25e174b267ba6765
 Presale2:         0xe0a21044eeeb9efc340809e35dc0e9d82dc87dd1
 ChestVault:       0xc352f692f55def49f0b736ec1f7ca0f862eabd23
 DutchAuction:     0x18bF88690f50D5b358307Bb8a062B164a1677436
+DutchAuction 2:
 MetadataStorage:  0x5570b4d415bE50dfaDB9cDbD196fDa3855309313
 MintHelper:       0xc3b54e757fD79264828eCBb78f5Bceae7fF118bC
 
@@ -14,6 +15,7 @@ Presale:          0x08d6a2643197afbd46030473ed6f2479a5b574ad
 Presale2:         0x10a0f683304b6878e5e70295445fb03eeb6dec75
 ChestVault:       0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69
 DutchAuction:     0x4b2d1ce79453fb3e0001006c2c6011c7f932f3a5
+DutchAuction 2:   0x4ec415d87e00101867fbfa28db19cce0d564d8b3
 MetadataStorage:  0x71a0f651f4c1f9265209436b0f1ac978bbd4382d
 MintHelper:       0x6afd5f5f431279b0cac7f5ff406f13d804b183c9
 
@@ -24,6 +26,7 @@ Presale:          0x410879a9de3aa893b1f987752f0663f759786017
 Presale2:         0x3cf439e50cf3a1147f79ca59a2ad52affd1fa0f0
 ChestVault:       0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69
 DutchAuction:     0x7623f4fd20a2a51b73f993d13dc70e73a32b219b
+DutchAuction 2:
 MetadataStorage:  0x35959663bc022eedbba1b22346e23125c30e7da6
 MintHelper:       0xa7dc659de6e6e6d07841f9b383d5528ddd556fbb
 
