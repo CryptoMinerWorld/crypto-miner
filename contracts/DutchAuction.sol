@@ -337,20 +337,20 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    * @dev Requires msg.value >= p
    * @param tokenAddress ERC721 deployed instance address
    * @param tokenId unique ID of the item on sale (token ID)
-   * @param buyer an address to send the item bought to
+   * @param _to an address to send the item bought to
    */
-  function buyTo(address tokenAddress, uint32 tokenId, address buyer) public payable {
+  function buyTo(address tokenAddress, uint32 tokenId, address _to) public payable {
     // check if adding items to sale is enabled
     require(__isFeatureEnabled(FEATURE_BUY));
 
     // check address `_to` is valid
-    require(buyer != address(0));
+    require(_to != address(0));
 
-    // find previous owner of the item - seller
-    address seller = owners[tokenAddress][tokenId];
+    // find previous owner of the item - seller / _from
+    address _from = owners[tokenAddress][tokenId];
 
     // verify that previous owner exists
-    require(seller != address(0));
+    require(_from != address(0));
 
     // get the item for sale data
     Item memory item = items[tokenAddress][tokenId];
@@ -363,7 +363,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
     // transfer the item to the buyer
     // use safe transfer since we don't know if buyer supports receiving ERC721
-    ERC721(tokenAddress).safeTransferFrom(address(this), buyer, tokenId);
+    ERC721(tokenAddress).safeTransferFrom(address(this), _to, tokenId);
 
     // remove from previous owners mapping
     delete owners[tokenAddress][tokenId];
@@ -390,16 +390,16 @@ contract DutchAuction is AccessControl, ERC721Receiver {
     assert(feeValue <= p / MAX_FEE_INV);
 
     // transfer value to the seller
-    seller.transfer(p - feeValue);
+    _from.transfer(p - feeValue);
 
     // if the incoming value is too big
     if(msg.value > p) {
       // transfer change back to buyer
-      buyer.transfer(msg.value - p);
+      _to.transfer(msg.value - p);
     }
 
     // emit an event
-    emit ItemBought(seller, buyer, tokenAddress, tokenId, item.t0, item.t1, uint48(now), item.p0, item.p1, p, uint80(feeValue));
+    emit ItemBought(_from, _to, tokenAddress, tokenId, item.t0, item.t1, uint48(now), item.p0, item.p1, p, uint80(feeValue));
   }
 
   /**
