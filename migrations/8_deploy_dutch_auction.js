@@ -21,8 +21,9 @@ module.exports = async function(deployer, network, accounts) {
 		}
 	}
 
-	await deployer.deploy(Auction, tokenAddress);
+	await deployer.deploy(Auction);
 	const auction = await Auction.deployed();
+	await auction.whitelist(tokenAddress, true);
 	await auction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
 
 	console.log("______________________________________________________");
