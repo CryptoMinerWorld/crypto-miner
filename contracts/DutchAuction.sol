@@ -85,10 +85,12 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
   /// @dev Auxiliary data structure to keep track of previous item owners
   /// @dev Used to be able to return items back to owners
+  ///      token address -> token ID -> owner address
   mapping(address => mapping(uint256 => address)) public owners;
 
   /// @notice All the items available for sale with their sale parameters
   /// @dev Includes both expired and available items
+  ///     token address -> token ID -> auction data (see Item struct)
   mapping(address => mapping(uint256 => Item)) public items;
 
   /// @notice All the token addresses supported by this auction implementation
