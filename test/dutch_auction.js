@@ -356,7 +356,7 @@ contract('Dutch Auction', accounts => {
 		await auction.buyTo(tk.address, token0x401, accounts[3], {from: accounts[2], value: p0});
 
 		// check that the token belongs to account 3 now
-		assert.equal(accounts[3], await tk.ownerOf(token0x401), "token 0x401 has wrong woner after buying it to account 3");
+		assert.equal(accounts[3], await tk.ownerOf(token0x401), "token 0x401 has wrong owner after buying it to account 3");
 	});
 
 	it("auction: selling, buying, adding, removing lifecycle", async () => {
