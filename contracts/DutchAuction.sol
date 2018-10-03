@@ -19,12 +19,16 @@ import "./Fractions.sol";
  *      * ERC721 instance address
  * @dev Current price `p` of each item is calculated linearly based
  *      on the sale parameters:
- *      `p = p0 - (now - t0) * (p0 - p1) / (t1 - t0)
+ *      a) if current time `t` is in range (t0, t1):
+ *          `p = p0 - (t - t0) * (p0 - p1) / (t1 - t0)`
+ *      b) if current time `t` is lower than  or equal to`t0`:
+ *          `p = p0`
+ *      c) if current time `t` is greater than or equal to `t1`:
+ *          `p = p1`
  * @dev Following constraints when adding item for sale must be met:
  *      * t1 > t0: sale starts before it ends
  *      * p0 > p1: start price is higher then end price
  * @dev Following constraints when buying item on sale must be met:
- *      * now < t1: item has not expired
  *      * msg.value >= p: price constraint
  * @dev This implementation operates with an arbitrary ERC721 token as an item,
  *      with the only limitation: token ID space is expected to be uint32
