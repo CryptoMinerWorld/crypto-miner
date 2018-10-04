@@ -843,14 +843,22 @@ function display_gem(gemId, color, level, gradeType, miningRate) {
 			if(err) {
 				return;
 			}
+			/*
+			 * linear threshold is the root of the equation (-7E-06x^2 + 0.5406x)' = 0.0199, where x is gem age in minutes
+			 * and k = 0.0199 is energy increase per minute, which is calculated as k = 10437 / (365 * 24 * 60),
+			 * where 365 * 24 * 60 is number of minutes in one year and 10437 is a root of equation
+			 * (-7E-06x^2 + 0.5406x)' = 0 - number of minutes to parabola peak
+			 */
+			const linearThreshold = 37193;
 			const ageSeconds = (Date.now() / 1000 | 0) - result;
-			let ageMinutes = Math.floor(ageSeconds / 60);
-			if(ageMinutes > 38614) {
-				ageMinutes = 38614;
-			}
+			const ageMinutes = Math.floor(ageSeconds / 60);
 			const ageDays = Math.floor(ageSeconds / 24 / 3600);
 			// const restingEnergyMinutes = Math.round((1440 / (2 + (6 - gradeType) / 4)) * (1 + (11 * Math.log(1 + (ageDays - 1) / 11))));
-			const restingEnergyMinutes = Math.floor(-7E-06 * Math.pow(ageMinutes, 2) + 0.5406 * ageMinutes);
+			const restingEnergyMinutes = Math.floor(
+				-7E-06 * Math.pow(Math.min(ageMinutes, linearThreshold), 2)
+				+ 0.5406 * Math.min(ageMinutes, linearThreshold)
+				+ 0.0199 * Math.max(ageMinutes - linearThreshold, 0)
+			);
 			console.log(`gem ${gemId} grade ${grade} rate ${miningRate}% age ${ageDays} days, resting energy is ${restingEnergyMinutes} minutes`);
 			energyLevelContainer.html("Resting energy &nbsp;" + restingEnergyMinutes + " min");
 		});
