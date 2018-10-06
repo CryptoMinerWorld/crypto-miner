@@ -4,7 +4,7 @@ Presale:          0xa207d2496688134f538a307b25e174b267ba6765
 Presale2:         0xe0a21044eeeb9efc340809e35dc0e9d82dc87dd1
 ChestVault:       0xc352f692f55def49f0b736ec1f7ca0f862eabd23
 DutchAuction:     0x18bF88690f50D5b358307Bb8a062B164a1677436
-DutchAuction 2:
+DutchAuction 2:   0x1F4f6625e92C4789dCe4B92886981D7b5f484750
 MetadataStorage:  0x5570b4d415bE50dfaDB9cDbD196fDa3855309313
 MintHelper:       0xc3b54e757fD79264828eCBb78f5Bceae7fF118bC
 
