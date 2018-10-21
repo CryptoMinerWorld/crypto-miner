@@ -28,7 +28,7 @@ contract('GemERC721', function(accounts) {
 		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " has wrong balance after minting a token");
 		assert.equal(0, await tk.balanceOf(accounts[2]), accounts[2] + " has wrong initial balance");
 	});
-	it("mint: integrity of a created a token", async function() {
+	it("mint: integrity of newly created token", async function() {
 		const tk = await Token.new();
 		await tk.mint(accounts[0], 0x401, 17, 13, 11, 4, 5, 3, 10);
 		assert.equal(17, await tk.getPlotId(0x401), "gem 0x401 has wrong plotId");
