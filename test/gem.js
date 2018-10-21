@@ -8,7 +8,7 @@ contract('GemERC721', function(accounts) {
 	it("initial state: no tokens exist initially", async function() {
 		const tk = await Token.new();
 		assert.equal(0, await tk.totalSupply(), "wrong initial totalSupply value");
-		assert.equal(0, await tk.balanceOf(accounts[0]), "wrong initial totalSupply value");
+		assert.equal(0, await tk.balanceOf(accounts[0]), "wrong initial balanceOf() value");
 		await assertThrowsAsync(async function() {await tk.tokenByIndex(0);});
 		await assertThrowsAsync(async function() {await tk.tokenOfOwnerByIndex(accounts[0], 0);});
 	});
