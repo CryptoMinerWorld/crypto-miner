@@ -141,14 +141,14 @@ contract('GemERC721', function(accounts) {
 		assert.equal(accounts[2], await tk.ownerOf(0x401), "wrong token 0x401 owner after transfer on behalf");
 	});
 
-	it("safeTransferFrom: save transfer token to address", async function() {
+	it("safeTransferFrom: safe transfer token to address", async function() {
 		const tk = await Token.new();
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
 		await tk.safeTransferFrom(accounts[0], accounts[1], 0x401, "");
 		assert.equal(accounts[1], await tk.ownerOf(0x401), "token 0x401 has wrong owner after safely transferring it");
 	});
-	it("safeTransferFrom: impossible to save transfer to a smart contract", async function() {
+	it("safeTransferFrom: impossible to safe transfer to a smart contract", async function() {
 		const tk = await Token.new();
 		const another = await Token.new();
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
