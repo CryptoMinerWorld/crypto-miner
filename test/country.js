@@ -297,6 +297,20 @@ contract('CountryERC721', function(accounts) {
 		assert(bitmap.eq(expected), "unexpected bitmap");
 	});
 
+	it("taxes: check the tax rate is set correctly initially", async () => {
+		const tk = await Token.new(COUNTRY_DATA);
+
+		// mint token 1 with correct params
+		await tk.mint(accounts[0], token1);
+
+		// ensure correct tax rate on the token 1
+		assert.equal(1, (await tk.getTax(token1))[0], "wrong tax rate nominator set on token 1");
+		assert.equal(10, (await tk.getTax(token1))[1], "wrong tax rate denominator set on token 1");
+		assert.equal(10, await tk.getTaxPercent(token1), "wrong tax rate set on token 1");
+		assert.equal(0, await tk.calculateTaxValueFor(token1, 9), "wrong calculated tax value on token 1 for value 9");
+		assert.equal(1, await tk.calculateTaxValueFor(token1, 10), "wrong calculated tax value on token 1 for value 10");
+	});
+
 	it("integrity: create few tokens, check the integrity", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 

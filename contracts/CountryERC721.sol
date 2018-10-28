@@ -18,7 +18,7 @@ import "./Fractions16.sol";
  */
 contract CountryERC721 is AccessControl, ERC165 {
   /// @dev Using library Fractions for fraction math
-  using Fractions16 for Fractions16.Fraction16;
+  using Fractions16 for uint16;
 
   /// @dev Smart contract version
   /// @dev Should be incremented manually in this source code
@@ -34,7 +34,7 @@ contract CountryERC721 is AccessControl, ERC165 {
   uint8 public constant decimals = 0;
 
   /// @dev Country data structure
-  /// @dev Occupies 1 storage slot (208 bits)
+  /// @dev Occupies 1 storage slot (240 bits)
   struct Country {
     /// @dev Unique country ID ∈ [1, 192]
     uint8 id;
@@ -44,7 +44,12 @@ contract CountryERC721 is AccessControl, ERC165 {
     uint16 plots;
 
     /// @dev Percentage country owner receives from each sale
-    Fractions16.Fraction16 tax;
+    uint16 tax;
+
+    /// @dev Tax modified time
+    /// @dev Stored as Ethereum Block Number of the transaction
+    ///      when the tax was modified
+    uint32 taxModified;
 
     /// @dev Country index within an owner's collection of countries
     uint8 index;
@@ -92,10 +97,23 @@ contract CountryERC721 is AccessControl, ERC165 {
   ///      is equal to one if token with ID i exists and to zero if it doesn't
   uint192 public tokenMap;
 
+  /// @notice The maximum frequency at which tax rate for a token can be changed
+  /// @dev Tax rate cannot be changed more frequently than once per `MAX_TAX_CHANGE_FREQ` blocks
+  uint32 public maxTaxChangeFreq = 6000; // blocks
+
   /// @dev Maximum tokens allowed should comply with the `tokenMap` type
   /// @dev This setting is used only in contract constructor, actual
   ///      maximum supply is defined by `countryData` array length
   uint8 public constant TOTAL_SUPPLY_MAX = 192;
+
+  /// @notice Maximum tax rate that can be set on the country
+  /// @dev This is an inverted value of the maximum tax:
+  ///      `MAX_TAX_RATE = 1 / MAX_TAX_INV`
+  uint8 public constant MAX_TAX_INV = 5; // 1/5 or 20%
+
+  /// @notice Default tax rate that is assigned to each country
+  /// @dev This tax rate is set on each country when minting its token
+  uint16 public constant DEFAULT_TAX_RATE = 0x010A; // 1/10 or 10%
 
   /// @dev Enables ERC721 transfers of the tokens
   uint32 public constant FEATURE_TRANSFERS = 0x00000001;
@@ -105,6 +123,11 @@ contract CountryERC721 is AccessControl, ERC165 {
 
   /// @dev Allows owners to update tax value
   uint32 public constant FEATURE_ALLOW_TAX_UPDATE = 0x00000004;
+
+  /// @notice Tax manager is responsible for updating maximum
+  ///     allowed frequency of tax rate change
+  /// @dev Role ROLE_TAX_MANAGER allows updating `maxTaxChangeFreq`
+  uint32 public constant ROLE_TAX_MANAGER = 0x00020000;
 
   /// @notice Token creator is responsible for creating tokens
   /// @dev Role ROLE_TOKEN_CREATOR allows minting tokens
@@ -179,6 +202,9 @@ contract CountryERC721 is AccessControl, ERC165 {
   /// @dev Fired in setApprovalForAll()
   /// @dev ERC721 compliant event
   event ApprovalForAll(address indexed _owner, address indexed _operator, bool _value);
+
+  /// @dev Fired in updateTaxRate()
+  event TaxRateUpdated(address indexed _owner, uint256 indexed _tokenId, uint16 tax, uint16 oldTax);
 
   /**
    * @dev Creates a Country ERC721 instance,
@@ -257,7 +283,7 @@ contract CountryERC721 is AccessControl, ERC165 {
     Country memory country = countries[_tokenId];
 
     // pack the data and return
-    return uint32(country.plots) << 16 | uint16(country.tax.getNominator()) << 8 | country.tax.getDenominator();
+    return uint32(country.plots) << 16 | country.tax;
   }
 
   /**
@@ -320,17 +346,96 @@ contract CountryERC721 is AccessControl, ERC165 {
   }
 
   /**
+   * @notice Returns tax as a proper fraction for the given country, defined by `_tokenId`
+   * @param _tokenId country id to query tax for
+   * @return tax as a proper fraction (tuple containing nominator and denominator)
+   */
+  function getTax(uint256 _tokenId) public constant returns(uint8, uint8) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's tax from storage
+    uint16 tax = countries[_tokenId].tax;
+
+    // return tax as a proper fraction
+    return (tax.getNominator(), tax.getDenominator());
+  }
+
+  /**
    * @notice Returns tax percent for the given country, defined by `_tokenId`
    * @dev Converts 16-bit fraction structure into 8-bit [0, 100] percent value
    * @param _tokenId country id to query tax for
    * @return tax percent value, [0, 100]
    */
-  function getTaxPercent(uint256 _tokenId) public constant returns (uint8){
+  function getTaxPercent(uint256 _tokenId) public constant returns (uint8) {
     // validate token existence
     require(exists(_tokenId));
 
     // obtain token's tax percent from storage and return
     return countries[_tokenId].tax.toPercent();
+  }
+
+  /**
+   * @notice Calculates tax value for the given token and value
+   * @param _tokenId token id to use tax rate from
+   * @param _value an amount to apply tax to
+   * @return calculated tax value based on the tokens tax rate and value
+   */
+  function calculateTaxValueFor(uint256 _tokenId, uint256 _value) public constant returns (uint256) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's tax percent from storage, multiply by value and return
+    return countries[_tokenId].tax.multiplyByInteger(_value);
+  }
+
+  /**
+   * @notice Allows token owner to update tax rate of the country this token represents
+   * @dev Requires tax update feature to be enabled on the contract
+   * @dev Requires message sender to be owner of the token
+   * @dev Requires previous tax change to be more then `maxTaxChangeFreq` blocks ago
+   * @param _tokenId country id to update tax for
+   * @param nominator tax rate nominator
+   * @param denominator tax rate denominator
+   */
+  function updateTaxRate(uint256 _tokenId, uint8 nominator, uint8 denominator) public {
+    // check if tax updating is enabled
+    require(__isFeatureEnabled(FEATURE_ALLOW_TAX_UPDATE));
+
+    // check that sender is token owner, ensures also that token exists
+    require(msg.sender == ownerOf(_tokenId));
+
+    // check that tax rate doesn't exceed MAX_TAX_RATE
+    require(nominator <= denominator / MAX_TAX_INV);
+
+    // check that enough time has passed since last tax update
+    require(countries[_tokenId].taxModified + maxTaxChangeFreq < block.number);
+
+    // save old tax value to log
+    uint16 oldTax = countries[_tokenId].tax;
+
+    // update the tax rate
+    countries[_tokenId].tax = Fractions16.createProperFraction16(nominator, denominator);
+
+    // update tax rate updated timestamp
+    countries[_tokenId].taxModified = uint32(block.number);
+
+    // emit an event
+    emit TaxRateUpdated(msg.sender, _tokenId, countries[_tokenId].tax, oldTax);
+  }
+
+  /**
+   * @dev Allows setting the `maxTaxChangeFreq` parameter of the contract,
+   *      which specifies how frequently the tax rate can be changed
+   * @dev Requires sender to have `ROLE_TAX_MANAGER` permission.
+   * @param _maxTaxChangeFreq a value to set `maxTaxChangeFreq` to
+   */
+  function updateMaxTaxChangeFreq(uint32 _maxTaxChangeFreq) public {
+    // check if caller has sufficient permissions to update tax change frequency
+    require(__isSenderInRole(ROLE_TAX_MANAGER));
+
+    // update the tax change frequency
+    maxTaxChangeFreq = _maxTaxChangeFreq;
   }
 
 
@@ -347,7 +452,6 @@ contract CountryERC721 is AccessControl, ERC165 {
     require(to != address(this));
 
     // check if caller has sufficient permissions to mint a token
-    // and if feature is enabled globally
     require(__isSenderInRole(ROLE_TOKEN_CREATOR));
 
     // delegate call to `__mint`
@@ -777,7 +881,8 @@ contract CountryERC721 is AccessControl, ERC165 {
     Country memory country = Country({
       id: tokenId,
       plots: countryData[tokenId - 1],
-      tax: Fractions16.createProperFraction16(1, 10),
+      tax: DEFAULT_TAX_RATE,
+      taxModified: 0,
       index: uint8(collections[to].length),
       owner: to
     });
