@@ -228,6 +228,16 @@ contract CountryERC721 is AccessControl, ERC165 {
   }
 
   /**
+   * @notice Number of countries this contract can have
+   * @dev Maximum number of tokens that contract can mint
+   * @return length of country data array
+   */
+  function getNumberOfCountries() public constant returns(uint8) {
+    // read country data array length and return
+    return uint8(countryData.length);
+  }
+
+  /**
    * @dev Calculates cumulative number of plots all the countries have in total
    * @return sum of the countries number of plots
    */

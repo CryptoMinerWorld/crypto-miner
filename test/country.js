@@ -210,6 +210,9 @@ contract('CountryERC721', function(accounts) {
 	it("initial state: no tokens exist initially", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 
+		// check that number of countries is correct
+		assert.equal(COUNTRY_DATA.length, await tk.getNumberOfCountries(), "wrong number of countries");
+
 		// check that total number of plots is correct
 		assert.equal(TOTAL_PLOTS, await tk.getTotalNumberOfPlots(), "wrong total number of plots");
 
@@ -347,7 +350,7 @@ contract('CountryERC721', function(accounts) {
 	});
 
 
-	it("transfer: transferring a token", async function() {
+	it("transfer: transferring a token", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		const fn = async () => await tk.transfer(accounts[1], token1);
@@ -358,26 +361,26 @@ contract('CountryERC721', function(accounts) {
 		assert.equal(0, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
 		await assertThrowsAsync(fn);
 		await tk.updateFeatures(FEATURE_TRANSFERS);
-		await assertThrowsAsync(async function() {await tk.transfer(0x0, token1);});
-		await assertThrowsAsync(async function() {await tk.transfer(accounts[0], token1);});
+		await assertThrowsAsync(async () => await tk.transfer(0x0, token1));
+		await assertThrowsAsync(async () => await tk.transfer(accounts[0], token1));
 		await fn();
 		assert.equal(0, await tk.balanceOf(accounts[0]), accounts[0] + " wrong balance after token transfer");
 		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
 		assert.equal(accounts[1], await tk.ownerOf(token1), "wrong token token1 owner after token transfer");
 	});
 
-	it("transferFrom: transferring on behalf", async function() {
+	it("transferFrom: transferring on behalf", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
 		await tk.mint(accounts[1], token1);
 		await tk.mint(accounts[0], token2);
 		const fn1 = async () => await tk.transferFrom(accounts[1], accounts[2], token1);
-		await assertThrowsAsync(async function() {await tk.approve(accounts[0], token1);});
-		await assertThrowsAsync(async function() {await tk.approve(accounts[0], token2);});
+		await assertThrowsAsync(async () => await tk.approve(accounts[0], token1));
+		await assertThrowsAsync(async () => await tk.approve(accounts[0], token2));
 		await assertThrowsAsync(fn1);
 		await tk.approve(accounts[0], token1, {from: accounts[1]});
 		await tk.revokeApproval(token1, {from: accounts[1]});
-		await assertThrowsAsync(async function() {await tk.revokeApproval(token1, {from: accounts[1]});});
+		await assertThrowsAsync(async () => await tk.revokeApproval(token1, {from: accounts[1]}));
 		await tk.approve(accounts[0], token1, {from: accounts[1]});
 		await fn1();
 		await tk.updateFeatures(FEATURE_TRANSFERS);
@@ -391,33 +394,33 @@ contract('CountryERC721', function(accounts) {
 		assert.equal(accounts[2], await tk.ownerOf(token1), "wrong token token1 owner after transfer on behalf");
 	});
 
-	it("safeTransferFrom: safe transfer token to address", async function() {
+	it("safeTransferFrom: safe transfer token to address", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 		await tk.mint(accounts[0], token1);
-		await tk.safeTransferFrom(accounts[0], accounts[1], token1);
+		await tk.safeTransferFrom(accounts[0], accounts[1], token1, "");
 		assert.equal(accounts[1], await tk.ownerOf(token1), "token token1 has wrong owner after safely transferring it");
 	});
-	it("safeTransferFrom: impossible to safe transfer to a smart contract", async function() {
+	it("safeTransferFrom: impossible to safe transfer to a smart contract", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 		const another = await Token.new(COUNTRY_DATA);
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 		await tk.mint(accounts[0], token1);
-		await assertThrowsAsync(async function() {await tk.safeTransferFrom(accounts[0], another.address, token1);});
-		await assertThrowsAsync(async function() {await tk.safeTransferFrom(accounts[0], tk.address, token1);});
+		await assertThrowsAsync(async () => await tk.safeTransferFrom(accounts[0], another.address, token1, ""));
+		await assertThrowsAsync(async () => await tk.safeTransferFrom(accounts[0], tk.address, token1, ""));
 		assert.equal(accounts[0], await tk.ownerOf(token1), "card token1 has wrong owner after bad attempt to transfer it");
-		await tk.safeTransferFrom(accounts[0], accounts[1], token1);
+		await tk.safeTransferFrom(accounts[0], accounts[1], token1, "");
 		assert.equal(accounts[1], await tk.ownerOf(token1), "token token1 has wrong owner after safely transferring it");
 	});
 
-	it("approve: approve and transfer on behalf", async function () {
+	it("approve: approve and transfer on behalf", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
 		await tk.mint(accounts[0], token1);
 		await tk.mint(accounts[0], token2);
 		await tk.mint(accounts[0], token3);
-		await assertThrowsAsync(async function() {await tk.approve(0x0, 0x0);});
-		await assertThrowsAsync(async function() {await tk.approve(accounts[0], token1);});
+		await assertThrowsAsync(async () => await tk.approve(0x0, 0x0));
+		await assertThrowsAsync(async () => await tk.approve(accounts[0], token1));
 		await tk.approve(accounts[1], token1);
 		await tk.approve(accounts[1], token2);
 		assert.equal(accounts[1], await tk.getApproved(token1), "wrong approved operator for token token1");
@@ -425,14 +428,14 @@ contract('CountryERC721', function(accounts) {
 		await tk.transferFrom(accounts[0], accounts[1], token2, {from: accounts[1]});
 		assert.equal(0, await tk.getApproved(token1), "wrong approved operator for token token1 after transfer");
 	});
-	it("approve: approve all and transfer on behalf", async function () {
+	it("approve: approve all and transfer on behalf", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
 		await tk.mint(accounts[0], token1);
 		await tk.mint(accounts[0], token2);
 		await tk.mint(accounts[0], token3);
-		await assertThrowsAsync(async function() {await tk.setApprovalForAll(0x0, true);});
-		await assertThrowsAsync(async function() {await tk.setApprovalForAll(accounts[0], true);});
+		await assertThrowsAsync(async () => await tk.setApprovalForAll(0x0, true));
+		await assertThrowsAsync(async () => await tk.setApprovalForAll(accounts[0], true));
 		await tk.setApprovalForAll(accounts[1], true);
 		await tk.transferFrom(accounts[0], accounts[1], token1, {from: accounts[1]});
 		await tk.transferFrom(accounts[0], accounts[1], token2, {from: accounts[1]});
