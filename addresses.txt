@@ -18,6 +18,8 @@ DutchAuction:     0x4b2d1ce79453fb3e0001006c2c6011c7f932f3a5
 DutchAuction 2:   0x4ec415d87e00101867fbfa28db19cce0d564d8b3
 MetadataStorage:  0x71a0f651f4c1f9265209436b0f1ac978bbd4382d
 MintHelper:       0x6afd5f5f431279b0cac7f5ff406f13d804b183c9
+CountryERC721:    0x000d512ef28344069b55141602dd5a232ff724f8
+CountrySale:      0x29da2129edec5d79f31d3de4f7f9f5222fb10ebb
 
 
 Ropsten:
