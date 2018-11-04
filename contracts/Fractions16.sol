@@ -24,7 +24,7 @@ library Fractions16 {
     require(n < d);
 
     // construct fraction and return
-    return uint16(n) | d;
+    return uint16(n) << 8 | d;
   }
 
   /**

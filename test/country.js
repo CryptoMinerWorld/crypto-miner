@@ -1,5 +1,6 @@
 const FEATURE_TRANSFERS = 0x00000001;
 const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
+const FEATURE_ALLOW_TAX_UPDATE = 0x00000004;
 const ROLE_TOKEN_CREATOR = 0x00040000;
 
 const Token = artifacts.require("./CountryERC721.sol");
@@ -206,7 +207,10 @@ const token1 = 1;
 const token2 = 2;
 const token3 = 3;
 
-contract('CountryERC721', function(accounts) {
+// auxiliary constant "2"
+const two = web3.toBigNumber(2);
+
+contract('CountryERC721', (accounts) => {
 	it("initial state: no tokens exist initially", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 
@@ -223,6 +227,9 @@ contract('CountryERC721', function(accounts) {
 		assert.equal(0, await tk.totalSupply(), "wrong initial totalSupply value");
 		assert.equal(0, await tk.balanceOf(accounts[0]), "wrong initial balanceOf() value");
 
+		// balanceOf(0) throws:
+		await assertThrowsAsync(async () => await tk.balanceOf(0));
+
 		// check the token map
 		assert.equal(0, await tk.tokenMap(), "wrong initial token map");
 
@@ -233,6 +240,10 @@ contract('CountryERC721', function(accounts) {
 
 	it("mint: creating a token", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
+
+		// minting with invalid parameters
+		await assertThrowsAsync(async() => await tk.mint(0, token1));
+		await assertThrowsAsync(async() => await tk.mint(tk.address, token1));
 
 		// mint token 1 with correct params
 		await tk.mint(accounts[0], token1);
@@ -261,11 +272,29 @@ contract('CountryERC721', function(accounts) {
 	});
 	it("mint: integrity of newly created token", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
+
+		// define functions to read token properties
+		const getPacked = async() => await tk.getPacked(token1);
+		const getNumberOfPlots = async() => await tk.getNumberOfPlots(token1);
+		const getTax = async() => await tk.getTax(token1);
+		const getTaxPercent = async() => await tk.getTaxPercent(token1);
+		const calculateTaxValueFor = async() => await tk.calculateTaxValueFor(token1, 100);
+
+		// initially all functions throw
+		await assertThrowsAsync(getPacked);
+		await assertThrowsAsync(getNumberOfPlots);
+		await assertThrowsAsync(getTax);
+		await assertThrowsAsync(getTaxPercent);
+		await assertThrowsAsync(calculateTaxValueFor);
+
 		await tk.mint(accounts[0], token1);
 
 		// check data integrity
-		assert.equal(COUNTRY_DATA[0], await tk.getNumberOfPlots(token1), "token 1 has wrong number of plots");
-		assert.equal(10, await tk.getTaxPercent(token1), "token 1 has wrong tax percent");
+		assert(two.pow(16).times(COUNTRY_DATA[0]).plus(0x010A).eq(await getPacked()), "token 1 has wrong packed attributes");
+		assert.equal(COUNTRY_DATA[0], await getNumberOfPlots(), "token 1 has wrong number of plots");
+		assert.deepEqual([web3.toBigNumber(1), web3.toBigNumber(10)], await getTax(), "token 1 has wrong tax");
+		assert.equal(10, await getTaxPercent(), "token 1 has wrong tax percent");
+		assert.equal(10, await calculateTaxValueFor(), "token 1 calculated tax value is wrong");
 
 		const tokenCollection = await tk.getCollection(accounts[0]);
 		assert.equal(1, tokenCollection.length, "wrong token collection size for account 0");
@@ -282,8 +311,6 @@ contract('CountryERC721', function(accounts) {
 		// define token IDs to mint:
 		const tokens = [187, 115, 39];
 
-		// auxiliary variable 2
-		const two = web3.toBigNumber(2);
 		// expected will hold the expected token bitmap value
 		let expected = web3.toBigNumber(0);
 
@@ -313,6 +340,27 @@ contract('CountryERC721', function(accounts) {
 		assert.equal(0, await tk.calculateTaxValueFor(token1, 9), "wrong calculated tax value on token 1 for value 9");
 		assert.equal(1, await tk.calculateTaxValueFor(token1, 10), "wrong calculated tax value on token 1 for value 10");
 	});
+	it("taxes: update tax rate, maximum rate", async () => {
+		const tk = await Token.new(COUNTRY_DATA);
+
+		// mint token 1
+		await tk.mint(accounts[0], token1);
+
+		// define tax update functions
+		const updateTaxRate = async () => await tk.updateTaxRate(token1, 1, 15);
+		const updateMaxTaxChangeFreq = async () => await tk.updateMaxTaxChangeFreq(0);
+
+		await assertThrowsAsync(updateTaxRate);
+		await tk.updateFeatures(FEATURE_ALLOW_TAX_UPDATE);
+		await updateTaxRate();
+		await assertThrowsAsync(updateTaxRate);
+		await updateMaxTaxChangeFreq();
+		await updateTaxRate();
+
+		// validate tax change
+		assert.equal(3, await tk.calculateTaxValueFor(token1, 45), "wrong tax value after update (45)");
+		assert.equal(2, await tk.calculateTaxValueFor(token1, 44), "wrong tax value after update (44)");
+	});
 
 	it("integrity: create few tokens, check the integrity", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
@@ -335,10 +383,6 @@ contract('CountryERC721', function(accounts) {
 		assert.deepEqual(tokens0, (await tk.getCollection(accounts[0])).map(Number), "wrong token ID collection for account 0");
 		assert.deepEqual(tokens1, (await tk.getCollection(accounts[1])).map(Number), "wrong token ID collection for account 1");
 		//assert.deepEqual(tokens0.concat(tokens1), (await tk.allTokens()).map(Number), "wrong all tokens collection");
-
-
-		// auxiliary variable 2
-		const two = web3.toBigNumber(2);
 
 		// construct expected packed struct for tokens0
 		const expectedPacked0 = [];
@@ -383,12 +427,12 @@ contract('CountryERC721', function(accounts) {
 		await assertThrowsAsync(async () => await tk.revokeApproval(token1, {from: accounts[1]}));
 		await tk.approve(accounts[0], token1, {from: accounts[1]});
 		await fn1();
-		await tk.updateFeatures(FEATURE_TRANSFERS);
+		await tk.updateFeatures(ROLE_TOKEN_CREATOR);
 		const fn = async () => await tk.transferFrom(accounts[0], accounts[1], token2);
 		await assertThrowsAsync(fn);
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
 		await assertThrowsAsync(fn);
-		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.updateFeatures(FEATURE_TRANSFERS);
 		await fn();
 		assert.equal(accounts[1], await tk.ownerOf(token2), "wrong token token2 owner after transfer on behalf");
 		assert.equal(accounts[2], await tk.ownerOf(token1), "wrong token token1 owner after transfer on behalf");
@@ -396,7 +440,7 @@ contract('CountryERC721', function(accounts) {
 
 	it("safeTransferFrom: safe transfer token to address", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
-		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS);
 		await tk.mint(accounts[0], token1);
 		await tk.safeTransferFrom(accounts[0], accounts[1], token1, "");
 		assert.equal(accounts[1], await tk.ownerOf(token1), "token token1 has wrong owner after safely transferring it");
@@ -404,7 +448,7 @@ contract('CountryERC721', function(accounts) {
 	it("safeTransferFrom: impossible to safe transfer to a smart contract", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 		const another = await Token.new(COUNTRY_DATA);
-		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS);
 		await tk.mint(accounts[0], token1);
 		await assertThrowsAsync(async () => await tk.safeTransferFrom(accounts[0], another.address, token1, ""));
 		await assertThrowsAsync(async () => await tk.safeTransferFrom(accounts[0], tk.address, token1, ""));

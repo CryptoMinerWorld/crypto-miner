@@ -46,9 +46,7 @@ contract CountryERC721 is AccessControl, ERC165 {
     /// @dev Percentage country owner receives from each sale
     uint16 tax;
 
-    /// @dev Tax modified time
-    /// @dev Stored as Ethereum Block Number of the transaction
-    ///      when the tax was modified
+    /// @dev Tax modified time - unix timestamp
     uint32 taxModified;
 
     /// @dev Country index within an owner's collection of countries
@@ -98,8 +96,8 @@ contract CountryERC721 is AccessControl, ERC165 {
   uint192 public tokenMap;
 
   /// @notice The maximum frequency at which tax rate for a token can be changed
-  /// @dev Tax rate cannot be changed more frequently than once per `MAX_TAX_CHANGE_FREQ` blocks
-  uint32 public maxTaxChangeFreq = 6000; // blocks
+  /// @dev Tax rate cannot be changed more frequently than once per `MAX_TAX_CHANGE_FREQ` seconds
+  uint32 public maxTaxChangeFreq = 86400; // seconds
 
   /// @dev Maximum tokens allowed should comply with the `tokenMap` type
   /// @dev This setting is used only in contract constructor, actual
@@ -361,14 +359,24 @@ contract CountryERC721 is AccessControl, ERC165 {
    * @return tax as a proper fraction (tuple containing nominator and denominator)
    */
   function getTax(uint256 _tokenId) public constant returns(uint8, uint8) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // obtain token's tax from storage
-    uint16 tax = countries[_tokenId].tax;
+    // obtain token's tax as packed fraction
+    uint16 tax = getTaxPacked(_tokenId);
 
     // return tax as a proper fraction
     return (tax.getNominator(), tax.getDenominator());
+  }
+
+  /**
+   * @notice Returns tax as a proper fraction for the given country, defined by `_tokenId`
+   * @param _tokenId country id to query tax for
+   * @return tax as a proper fraction packed into uint16
+   */
+  function getTaxPacked(uint256 _tokenId) public constant returns(uint16) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's tax from storage and return tax
+    return countries[_tokenId].tax;
   }
 
   /**
@@ -419,7 +427,7 @@ contract CountryERC721 is AccessControl, ERC165 {
     require(nominator <= denominator / MAX_TAX_INV);
 
     // check that enough time has passed since last tax update
-    require(countries[_tokenId].taxModified + maxTaxChangeFreq < block.number);
+    require(countries[_tokenId].taxModified + maxTaxChangeFreq <= now);
 
     // save old tax value to log
     uint16 oldTax = countries[_tokenId].tax;
@@ -428,7 +436,7 @@ contract CountryERC721 is AccessControl, ERC165 {
     countries[_tokenId].tax = Fractions16.createProperFraction16(nominator, denominator);
 
     // update tax rate updated timestamp
-    countries[_tokenId].taxModified = uint32(block.number);
+    countries[_tokenId].taxModified = uint32(now);
 
     // emit an event
     emit TaxRateUpdated(msg.sender, _tokenId, countries[_tokenId].tax, oldTax);
@@ -587,13 +595,15 @@ contract CountryERC721 is AccessControl, ERC165 {
    *        the owner of a token to transfer this particular token `tokenId`
    *      operator - an address explicitly approved earlier by
    *        the owner to transfer all his tokens on behalf
-   * @param from current owner of the token
-   * @param to address to receive the ownership of the token
+   * @param _from current owner of the token
+   * @param _to address to receive the ownership of the token
    * @param _tokenId ID of the token to be transferred
    */
-  function transferFrom(address from, address to, uint256 _tokenId) public {
-    // check if transfers on behalf feature is enabled
-    require(__isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
+  function transferFrom(address _from, address _to, uint256 _tokenId) public {
+    // if `_from` is equal to sender, require transfers feature to be enabled
+    // otherwise require transfers on behalf feature to be enabled
+    require(_from == msg.sender && __isFeatureEnabled(FEATURE_TRANSFERS)
+      || _from != msg.sender && __isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
 
     // call sender gracefully - `operator`
     address operator = msg.sender;
@@ -605,7 +615,7 @@ contract CountryERC721 is AccessControl, ERC165 {
     // this will be explicitly checked in `__transfer`
 
     // fetch how much approvals left for an operator
-    bool approvedOperator = approvedOperators[from][operator];
+    bool approvedOperator = approvedOperators[_from][operator];
 
     // operator must have an approval to transfer this particular token
     // or operator must be approved to transfer all the tokens
@@ -616,14 +626,11 @@ contract CountryERC721 is AccessControl, ERC165 {
       // we will treat him as a token owner and sender and try to perform
       // a regular transfer:
       // check `from` to be `operator` (transaction sender):
-      require(from == operator);
-
-      // additionally check if token transfers feature is enabled
-      require(__isFeatureEnabled(FEATURE_TRANSFERS));
+      require(_from == operator);
     }
 
     // delegate call to unsafe `__transfer`
-    __transfer(from, to, _tokenId);
+    __transfer(_from, _to, _tokenId);
   }
 
   /**

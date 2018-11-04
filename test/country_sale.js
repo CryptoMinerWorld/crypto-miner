@@ -396,11 +396,48 @@ const COUNTRY_PRICE_DATA = [
 //  calculate total number of plots
 const TOTAL_PRICE = COUNTRY_PRICE_DATA.reduce((a, b) => a.plus(b), web3.toBigNumber(0));
 
-contract('CountrySale', function(accounts) {
+// default token ID to work with
+const token1 = 1;
+const token2 = 2;
+const token3 = 3;
+
+// token prices
+const price1 = COUNTRY_PRICE_DATA[token1 - 1];
+
+// auxiliary constant "2"
+const two = web3.toBigNumber(2);
+
+contract('CountrySale', (accounts) => {
 	it("config: total price", async() => {
 		// calculated using http://calculla.com/columnar_addition_calculator
 		const expectedTotal = web3.toBigNumber("200344323366820265649");
 		assert(expectedTotal.eq(TOTAL_PRICE), "invalid total price");
+	});
+
+	it("sale: creating a sale", async() => {
+		const beneficiary = accounts[1];
+		const buyer1 = accounts[2];
+		const price1a = price1.plus(1);
+
+		const tk = await Token.new(COUNTRY_DATA);
+		await assertThrowsAsync(async () => await Sale.new(0, beneficiary, COUNTRY_PRICE_DATA));
+		await assertThrowsAsync(async () => await Sale.new(tk.address, 0, COUNTRY_PRICE_DATA));
+		await assertThrowsAsync(async () => await Sale.new(tk.address, tk.address, COUNTRY_PRICE_DATA));
+		await assertThrowsAsync(async () => await Sale.new(beneficiary, beneficiary, COUNTRY_PRICE_DATA));
+		await assertThrowsAsync(async () => await Sale.new(tk.address, beneficiary, [1, 2]));
+		const sale = await Sale.new(tk.address, beneficiary, COUNTRY_PRICE_DATA);
+		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
+
+		await assertThrowsAsync(async () => await sale.buyTo(token1, 0, {value: price1a}));
+		await assertThrowsAsync(async () => await sale.buyTo(token1, sale.address, {value: price1a}));
+		await assertThrowsAsync(async () => await sale.buyTo(token1, tk.address, {value: price1a}));
+		await sale.buyTo(token1, buyer1, {value: price1a});
+		await assertThrowsAsync(async () => await sale.buyTo(token1, buyer1, {value: price1a}));
+
+		await assertThrowsAsync(async () => await sale.getPrice(0));
+		await sale.getPrice(token1);
+
+		await assertThrowsAsync(async () => await sale.removeCoupon(1));
 	});
 
 	it("buy: country buy flow", async() => {
