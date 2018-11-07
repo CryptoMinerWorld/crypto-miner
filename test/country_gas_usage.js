@@ -421,30 +421,48 @@ contract("CountrySale: Gas Usage", (accounts) => {
 		assertEqual(72017, gasUsed, "transferring a country gas usage mismatch: " + gasUsed);
 	});
 
-	it("CountrySale: deploying a country sale requires 3148271 gas", async () => {
+	it("CountrySale: deploying a country sale requires 3360909 gas", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 		const sale = await Sale.new(tk.address, accounts[0], COUNTRY_PRICE_DATA);
 		const txHash = sale.transactionHash;
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(3148271, gasUsed, "deploying CountrySale gas usage mismatch: " + gasUsed);
+		assertEqual(3360909, gasUsed, "deploying CountrySale gas usage mismatch: " + gasUsed);
 	});
 
 	it("CountrySale: buying a country requires 184086 gas", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 		const sale = await Sale.new(tk.address, accounts[0], COUNTRY_PRICE_DATA);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
-		const gasUsed = (await sale.buy(tokenId, {from: accounts[1], value: COUNTRY_PRICE_DATA[tokenId - 1]})).receipt.gasUsed;
+		const gasUsed = (await sale.buy(tokenId, {from: accounts[1], value: getPrice(tokenId)})).receipt.gasUsed;
 
 		assertEqual(184086, gasUsed, "buying a country gas usage mismatch: " + gasUsed);
 	});
+
+	it("CountrySale: buying 5 countries requires 541798 gas", async () => {
+		const tk = await Token.new(COUNTRY_DATA);
+		const sale = await Sale.new(tk.address, accounts[0], COUNTRY_PRICE_DATA);
+		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
+		const countries = [1, 2, 3, 4, 5];
+		const price = countries.reduce((a, b) => a.plus(getPrice(b)), web3.toBigNumber(0));
+		const gasUsed = (await sale.bulkBuy(countries, {from: accounts[1], value: price})).receipt.gasUsed;
+
+		assertEqual(541798, gasUsed, "buying 5 countries gas usage mismatch: " + gasUsed);
+	});
 });
 
+// check if 2 values are equal with a 5% precision
 function assertEqual(expected, actual, msg) {
 	assertEqualWith(expected, 0.05, actual, msg);
 }
 
+// check if 2 values are equal with the 'leeway' precision
 function assertEqualWith(expected, leeway, actual, msg) {
 	assert(expected * (1 - leeway) < actual && expected * (1 + leeway) > actual, msg);
+}
+
+// get price by token ID
+function getPrice(tokenId) {
+	return COUNTRY_PRICE_DATA[tokenId - 1];
 }

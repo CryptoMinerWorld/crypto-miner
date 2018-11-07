@@ -494,6 +494,60 @@ contract('CountrySale', (accounts) => {
 		assert(balance2.eq(await web3.eth.getBalance(buyer2)), "wrong buyer 2 balance");
 	});
 
+	it("bulk buy: countries buy flow", async() => {
+		const beneficiary = accounts[1];
+
+		const tk = await Token.new(COUNTRY_DATA);
+		const sale = await Sale.new(tk.address, beneficiary, COUNTRY_PRICE_DATA);
+
+		// buyers
+		const buyer1 = accounts[2];
+		const buyer2 = accounts[3];
+
+		// countries to buy
+		const countries1 = [1, 2]; // Russia, Canada
+		const countries2 = [3, 4, 5]; // China, USA, Brazil
+
+		// prices
+		const price1 = countries1.reduce((a, b) => a.plus(getPrice(b)), web3.toBigNumber(0));
+		const price2 = countries2.reduce((a, b) => a.plus(getPrice(b)), web3.toBigNumber(0));
+
+		// buy 2 groups of countries
+		// sale requires permission to mint tokens, without it transaction fails
+		await assertThrowsAsync(async () => await sale.bulkBuy(countries1, {from: buyer1, value: price1}));
+
+		// give permissions required
+		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
+
+		// sending not enough value to buy/buyTo still fails
+		await assertThrowsAsync(async () => await sale.bulkBuy(countries1, {from: buyer1, value: price1.minus(1)}));
+		await assertThrowsAsync(async () => await sale.bulkBuyTo(buyer2, countries2, {from: buyer1, value: price2.minus(1)}));
+
+		// check balances
+		const balance0 = await web3.eth.getBalance(beneficiary); // beneficiary balance
+		const balance1 = await web3.eth.getBalance(buyer1); // buyer 1 balance
+		const balance2 = await web3.eth.getBalance(buyer2); // buyer 2 balance
+
+		// sending enough value succeeds
+		const gas1 = (await sale.bulkBuy(countries1, {from: buyer1, value: price1})).receipt.gasUsed;
+		const gas2 = (await sale.bulkBuyTo(buyer2, countries2, {from: buyer1, value: price2})).receipt.gasUsed;
+
+		// check created countries existence and ownership
+		for(const id of countries1) {
+			assert(await tk.exists(id), "country " + id + " doesn't exist after selling it");
+			assert.equal(buyer1, await tk.ownerOf(id), "country " + id + " ownership is incorrect");
+		}
+		for(const id of countries2) {
+			assert(await tk.exists(id), "country " + id + " doesn't exist after selling it");
+			assert.equal(buyer2, await tk.ownerOf(id), "country " + id + " ownership is incorrect");
+		}
+
+		// check that funds are transferred correctly
+		assert(balance0.plus(price1).plus(price2).eq(await web3.eth.getBalance(beneficiary)), "wrong beneficiary balance");
+		assert(balance1.minus(price1).minus(price2).minus(gas1).minus(gas2).eq(await web3.eth.getBalance(buyer1)), "wrong buyer 1 balance");
+		assert(balance2.eq(await web3.eth.getBalance(buyer2)), "wrong buyer 2 balance");
+	});
+
 	it("coupons: using a coupon flow", async() => {
 		const beneficiary = accounts[1];
 
@@ -572,6 +626,11 @@ contract('CountrySale', (accounts) => {
 
 });
 
+
+// get price by token ID
+function getPrice(tokenId) {
+	return COUNTRY_PRICE_DATA[tokenId - 1];
+}
 
 // auxiliary function to ensure function `fn` throws
 async function assertThrowsAsync(fn, ...args) {

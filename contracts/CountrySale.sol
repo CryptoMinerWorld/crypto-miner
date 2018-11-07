@@ -34,6 +34,9 @@ contract CountrySale is AccessControl {
   /// @dev Fired in buy(), buyTo()
   event PurchaseComplete(address indexed _by, address indexed _to, uint8 indexed _tokenId, uint16 plots, uint64 price);
 
+  /// @dev Fired in bulkBuy(), bulkNuyTo()
+  event BulkPurchaseComplete(address indexed _by, address indexed _to, uint8[] ids, uint32 totalPlots, uint128 totalPrice);
+
   /// @dev Fired in addCoupon()
   event CouponAdded(address indexed _by, uint256 indexed key, uint8 _tokenId);
 
@@ -92,18 +95,12 @@ contract CountrySale is AccessControl {
    * @param _to an address to send the item bought to
    */
   function buyTo(uint8 _tokenId, address _to) public payable {
-    // verify that the `_to` address is correct:
-    // is not a zero address (parameter `_to` is not really specified)
-    require(_to != address(0));
+    // checks provided by mint function (used later in this function):
+    // * non-zero `_to` address, not pointing to token smart contract itself
+    // * valid, non existent `_tokenId`
 
-    // we're not sending country to this smart contract itself
+    // check we're not sending token to sale smart contract itself
     require(_to != address(this));
-
-    // and we're not sending country to its smart contract itself
-    require(_to != address(countryContract));
-
-    // ensure token doesn't already exist
-    require(!countryContract.exists(_tokenId));
 
     // get token sale price value
     uint64 price = getPrice(_tokenId);
@@ -128,6 +125,69 @@ contract CountrySale is AccessControl {
 
     // emit an event
     emit PurchaseComplete(msg.sender, _to, _tokenId, countryContract.getNumberOfPlots(_tokenId), price);
+  }
+
+  /**
+   * @notice Allows to buy several countries in a single transaction.
+   * @notice The countries bought are sent back to `msg.sender`
+   * @notice Requires enough funds (value) to be sent inside the transaction
+   * @param ids array of unique IDs of the items on sale (token IDs)
+   */
+  function bulkBuy(uint8[] ids) public payable {
+    // delegate call to `bulkBuyTo`
+    bulkBuyTo(msg.sender, ids);
+  }
+
+  /**
+   * @notice Allows to buy several countries in a single transaction for someone else.
+   * @notice The countries bought are sent to address '_to'
+   * @param _to an address to send the item bought to
+   * @param ids array of unique IDs of the items on sale (token IDs)
+   */
+  function bulkBuyTo(address _to, uint8[] ids) public payable {
+    // checks provided by mint function (used later in this function):
+    // * non-zero `_to` address, not pointing to token smart contract itself
+    // * valid, non existent `_tokenId`
+
+    // check we're not sending token to sale smart contract itself
+    require(_to != address(this));
+
+    // variable to accumulate total price for the countries requested
+    uint128 totalPrice = 0;
+
+    // variable to accumulate total number of plots requested countries contain
+    uint32 totalPlots = 0;
+
+    // iterate over tokens requested, calculate total price
+    for(uint i = 0; i < ids.length; i++) {
+      // accumulate total price
+      totalPrice += getPrice(ids[i]);
+
+      // mint the token (in case of any further error this action will be reverted)
+      countryContract.mint(_to, ids[i]);
+
+      // accumulate total plots value
+      totalPlots += countryContract.getNumberOfPlots(ids[i]);
+    }
+
+    // ensure message contains enough value to buy tokens requested
+    // if that fails all previous actions (minting + event) are discarded
+    require(msg.value >= totalPrice);
+
+    // calculate the change
+    uint256 change = msg.value - totalPrice;
+
+    // transfer the funds to beneficiary
+    beneficiary.transfer(totalPrice);
+
+    // if there is any change to transfer back
+    if(change > 0) {
+      // transfer the change back to sender (not to `_to`!)
+      msg.sender.transfer(change);
+    }
+
+    // emit bulk purchase event
+    emit BulkPurchaseComplete(msg.sender, _to, ids, totalPlots, totalPrice);
   }
 
   /**
