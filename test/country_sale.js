@@ -409,7 +409,9 @@ const two = web3.toBigNumber(2);
 
 contract('CountrySale', (accounts) => {
 	it("config: total price", async() => {
-		// calculated using http://calculla.com/columnar_addition_calculator
+		// according to http://calculla.com/columnar_addition_calculator
+		// 224395274215419002270 wei (224.395274215419 wei)
+		// according to John's excel: 224.3952742 ETH
 		const expectedTotal = web3.toBigNumber("224395274215419002270");
 		assert(expectedTotal.eq(TOTAL_PRICE), "invalid total price");
 	});
