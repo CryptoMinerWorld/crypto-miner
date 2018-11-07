@@ -266,6 +266,38 @@
         },
         {
           "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "ids",
+          "type": "uint8[]"
+        },
+        {
+          "indexed": false,
+          "name": "totalPlots",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "totalPrice",
+          "type": "uint128"
+        }
+      ],
+      "name": "BulkPurchaseComplete",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
           "name": "key",
           "type": "uint256"
         },
@@ -399,6 +431,38 @@
       "type": "function"
     },
     {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "ids",
+          "type": "uint8[]"
+        }
+      ],
+      "name": "bulkBuy",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "ids",
+          "type": "uint8[]"
+        }
+      ],
+      "name": "bulkBuyTo",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
       "constant": true,
       "inputs": [
         {
@@ -484,5 +548,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-11-04T16:41:34.062Z"
+  "updatedAt": "2018-11-07T12:14:44.212Z"
 }
