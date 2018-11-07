@@ -461,8 +461,8 @@ contract('CountrySale', (accounts) => {
 		const price2 = await sale.getPrice(country2);
 
 		// validate prices
-		assert(COUNTRY_PRICE_DATA[country1 - 1].eq(price1), "incorrect price for country 1");
-		assert(COUNTRY_PRICE_DATA[country2 - 1].eq(price2), "incorrect price for country 2");
+		assert(getPrice(country1).eq(price1), "incorrect price for country 1");
+		assert(getPrice(country2).eq(price2), "incorrect price for country 2");
 
 		// buy 2 countries
 		// sale requires permission to mint tokens, without it transaction fails
