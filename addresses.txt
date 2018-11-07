@@ -18,8 +18,8 @@ DutchAuction:     0x4b2d1ce79453fb3e0001006c2c6011c7f932f3a5
 DutchAuction 2:   0x4ec415d87e00101867fbfa28db19cce0d564d8b3
 MetadataStorage:  0x71a0f651f4c1f9265209436b0f1ac978bbd4382d
 MintHelper:       0x6afd5f5f431279b0cac7f5ff406f13d804b183c9
-CountryERC721:    0xa31b0ae3164f7fe619fb208d97e1a2bb8a075b69
-CountrySale:      0xe3a57fd2830fef4a43d65405d28f3cb9780e6480
+CountryERC721:    0x3dc3cd66827e4a6a6f047ed66a0624b3cfa2ad39
+CountrySale:      0x9f9e438cad9550d7cc8f2f1058a2cc04a8d70809
 
 
 Ropsten:
