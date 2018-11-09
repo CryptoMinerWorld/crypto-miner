@@ -196,11 +196,7 @@ contract('Dutch Auction', accounts => {
 		const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
 		const gWei = 1000000000;
 		const two = web3.toBigNumber(2);
-		const data = toBytes(two.pow(224).times(tokenId)
-			.plus(two.pow(192).times(t0))
-			.plus(two.pow(160).times(t1))
-			.plus(two.pow(80).times(p0))
-			.plus(p1));
+		const data = abiPack(tokenId, t0, t1, p0, p1);
 
 		// account 1 transfers token to an auction automatically activating it
 		await tk.safeTransferFrom(accounts[1], auction.address, token0x401, data, {from: accounts[1]});
@@ -279,12 +275,7 @@ contract('Dutch Auction', accounts => {
 		const t1 = t0 + 300;
 		const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
 		const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
-		const two = web3.toBigNumber(2);
-		const data = toBytes(two.pow(224).times(tokenId)
-			.plus(two.pow(192).times(t0))
-			.plus(two.pow(160).times(t1))
-			.plus(two.pow(80).times(p0))
-			.plus(p1));
+		const data = abiPack(tokenId, t0, t1, p0, p1);
 
 		// account 1 transfers token to an auction automatically activating it
 		await tk.safeTransferFrom(accounts[1], auction.address, token0x401, data, {from: accounts[1]});
@@ -562,12 +553,7 @@ contract('Dutch Auction', accounts => {
 		const t1 = t0 + 300;
 		const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
 		const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
-		const two = web3.toBigNumber(2);
-		const data = toBytes(two.pow(224).times(tokenId)
-			.plus(two.pow(192).times(t0))
-			.plus(two.pow(160).times(t1))
-			.plus(two.pow(80).times(p0))
-			.plus(p1));
+		const data = abiPack(tokenId, t0, t1, p0, p1);
 
 		// account 1 transfers tokens to an auction automatically activating it
 		await tk1.safeTransferFrom(accounts[1], auction.address, token0x401, data, {from: accounts[1]});
@@ -658,6 +644,16 @@ contract('Dutch Auction', accounts => {
 		assert.equal(p1_Gwei.dividedToIntegerBy(20), fee2, "wrong final fee (not 5%)");
 	});
 });
+
+// packs tokenId, t0, t1, p0 and p1 into abi-compliant structure
+function abiPack(tokenId, t0, t1, p0, p1) {
+	const two = web3.toBigNumber(2);
+	return toBytes(two.pow(224).times(tokenId)
+		.plus(two.pow(192).times(t0))
+		.plus(two.pow(160).times(t1))
+		.plus(two.pow(80).times(p0))
+		.plus(p1));
+}
 
 // converts BigNumber representing Solidity uint256 into String representing Solidity bytes
 function toBytes(uint256) {
