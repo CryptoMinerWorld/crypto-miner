@@ -219,7 +219,7 @@ module.exports = async function(deployer, network, accounts) {
 	// deployed country token smart contract addresses
 	let countryAddress = ""; // MainNet country token address
 	if(network !== "mainnet") {
-		countryAddress = "0x3dc3cd66827e4a6a6f047ed66a0624b3cfa2ad39"; // Rinkeby country token address
+		countryAddress = "0x3DC3Cd66827E4a6A6f047eD66a0624b3cFA2Ad39"; // Rinkeby country token address
 	}
 
 	// country instance

@@ -16,7 +16,7 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// where the funds go to: chestVault - 19.05%, beneficiary - 80.95%
-	let chestVault = "0xc352f692f55def49f0b736ec1f7ca0f862eabd23"; // MainNet Founder's Chest Wallet
+	let chestVault = "0xC352f692F55dEf49f0B736Ec1F7CA0F862eabD23"; // MainNet Founder's Chest Wallet
 	let beneficiary = "0xe0123204873fd29a29aef3f99faf1b1c45fe3b1e"; // MainNet MultiSig
 	// MainNet Presale2 launch date: August 15, 8PM EST = August 16, 00:15 UTC - 15 seconds reserved
 	let sale2LaunchDate = new Date('2018-08-16T00:15Z').getTime() / 1000 | 0;
@@ -32,8 +32,8 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// token and presale address already exist, presale 2 is new to deploy
-	let tokenAddress = "0xeae9d154da7a1cd05076db1b83233f3213a95e4f"; // MainNet token address
-	let saleAddress = "0xa207d2496688134f538a307b25e174b267ba6765"; // MainNet Presale address
+	let tokenAddress = "0xeAe9d154dA7a1cD05076dB1B83233f3213a95e4F"; // MainNet token address
+	let saleAddress = "0xa207d2496688134f538a307b25E174b267bA6765"; // MainNet Presale address
 	let sale2Address = "";
 
 	let gem = Gem.at(tokenAddress);
@@ -42,10 +42,10 @@ module.exports = async function(deployer, network, accounts) {
 
 	// for test network we redeploy first Presale
 	if(network !== "mainnet") {
-		tokenAddress = "0x82ff6bbd7b64f707e704034907d582c7b6e09d97";
-		saleAddress = "0x08d6a2643197afbd46030473ed6f2479a5b574ad";
+		tokenAddress = "0x82FF6Bbd7B64f707e704034907d582C7B6E09d97";
+		saleAddress = "0x08d6A2643197aFBd46030473ed6F2479A5b574AD";
 		if(network === "ropsten") {
-			tokenAddress = "0x35b5da40008b225ab540dbbf28d2b5e74836df2c";
+			tokenAddress = "0x35B5dA40008B225AB540dbBF28D2B5e74836DF2c";
 			saleAddress = "0x410879a9de3aa893b1f987752f0663f759786017";
 		}
 

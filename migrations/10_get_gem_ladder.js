@@ -11,11 +11,11 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// deployed token smart contract addresses
-	let tokenAddress = "0xeae9d154da7a1cd05076db1b83233f3213a95e4f"; // MainNet token address
+	let tokenAddress = "0xeAe9d154dA7a1cD05076dB1B83233f3213a95e4F"; // MainNet token address
 	if(network !== "mainnet") {
-		tokenAddress = "0x82ff6bbd7b64f707e704034907d582c7b6e09d97"; // Rinkeby token address
+		tokenAddress = "0x82FF6Bbd7B64f707e704034907d582C7B6E09d97"; // Rinkeby token address
 		if(network === "ropsten") {
-			tokenAddress = "0x35b5da40008b225ab540dbbf28d2b5e74836df2c"; // Ropsten token address
+			tokenAddress = "0x35B5dA40008B225AB540dbBF28D2B5e74836DF2c"; // Ropsten token address
 		}
 	}
 

@@ -16,7 +16,7 @@ module.exports = async function(deployer, network, accounts) {
 		return;
 	}
 
-	let chest = "0xc352f692f55def49f0b736ec1f7ca0f862eabd23"; // MainNet Chest Wallet
+	let chest = "0xC352f692F55dEf49f0B736Ec1F7CA0F862eabD23"; // MainNet Chest Wallet
 	let beneficiary = "0xe0123204873fd29a29aef3f99faf1b1c45fe3b1e"; // MainNet MultiSig
 /*
 	if(network === "development") {

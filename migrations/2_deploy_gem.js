@@ -16,8 +16,8 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// token and presale address already exist, presale 2 is new to deploy
-	let tokenAddress = "0xeae9d154da7a1cd05076db1b83233f3213a95e4f"; // MainNet token address
-	let saleAddress = "0xa207d2496688134f538a307b25e174b267ba6765"; // MainNet Presale address
+	let tokenAddress = "0xeAe9d154dA7a1cD05076dB1B83233f3213a95e4F"; // MainNet token address
+	let saleAddress = "0xa207d2496688134f538a307b25E174b267bA6765"; // MainNet Presale address
 	let gem = Gem.at(tokenAddress);
 
 	// for test network we redeploy the Gem
