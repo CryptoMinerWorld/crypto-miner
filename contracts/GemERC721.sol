@@ -41,7 +41,7 @@ contract GemERC721 is AccessControl, ERC165 {
 
     /// @dev Level modified time
     /// @dev Stored as Ethereum Block Number of the transaction
-    ///      when the gem was created
+    ///      when the level was modified
     uint32 levelModified;
 
     /// @dev Level value (mutable), one of 1, 2, 3, 4, 5
@@ -49,7 +49,7 @@ contract GemERC721 is AccessControl, ERC165 {
 
     /// @dev Grade modified time
     /// @dev Stored as Ethereum Block Number of the transaction
-    ///      when the gem was created
+    ///      when the grade was modified
     uint32 gradeModified;
 
     /// @dev High 8 bits store grade type and low 24 bits grade value
@@ -58,7 +58,7 @@ contract GemERC721 is AccessControl, ERC165 {
 
     /// @dev Store state modified time
     /// @dev Stored as Ethereum Block Number of the transaction
-    ///      when the gem was created
+    ///      when the state was modified
     uint32 stateModified;
 
     /// @dev State value, mutable
@@ -744,7 +744,6 @@ contract GemERC721 is AccessControl, ERC165 {
     require(to != address(this));
 
     // check if caller has sufficient permissions to mint a token
-    // and if feature is enabled globally
     require(__isSenderInRole(ROLE_TOKEN_CREATOR));
 
     // delegate call to `__mint`
@@ -1037,6 +1036,7 @@ contract GemERC721 is AccessControl, ERC165 {
 
     // fire Minted event
     emit Minted(msg.sender, to, tokenId);
+
     // fire ERC20/ERC721 transfer event
     emit Transfer(address(0), to, tokenId, 1);
   }
