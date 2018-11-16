@@ -425,14 +425,14 @@ contract("CountrySale: Gas Usage", (accounts) => {
 		assertEqual(72017, gasUsed, "transferring a country gas usage mismatch: " + gasUsed);
 	});
 
-	it("CountrySale: deploying a country sale requires 3360909 gas", async () => {
+	it("CountrySale: deploying a country sale requires 3165563 gas", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 		const sale = await Sale.new(tk.address, accounts[0], COUNTRY_PRICE_DATA);
 		const txHash = sale.transactionHash;
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(3360909, gasUsed, "deploying CountrySale gas usage mismatch: " + gasUsed);
+		assertEqual(3165563, gasUsed, "deploying CountrySale gas usage mismatch: " + gasUsed);
 	});
 
 	it("CountrySale: buying a country requires 184086 gas", async () => {
