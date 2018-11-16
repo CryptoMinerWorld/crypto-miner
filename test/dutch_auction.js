@@ -664,7 +664,7 @@ function toBytes(uint256) {
 		s = s.substr(0, 64);
 	}
 	for(let i = 0; i < 64 - len; i++) {
-		s = "0" +s;
+		s = "0" + s;
 	}
 	return "0x" + s;
 }

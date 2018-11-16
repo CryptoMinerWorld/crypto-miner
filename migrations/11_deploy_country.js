@@ -1,23 +1,24 @@
 const Country = artifacts.require("./CountryERC721");
 
 // prepare country initialization data
+// TODO: load from country_data.js
 const COUNTRY_DATA = [
-	62916, // Russia
+	62920, // Russia
 	36777, // Canada
-	35260, // China
+	35261, // China
 	35084, // United States of America
-	31366, // Brazil
-	28332, // Australia
+	31367, // Brazil
+	28333, // Australia
 	12108, // India
 	10241, // Argentina
 	10037, // Kazakhstan
 	8773, // Algeria
 	8639, // Democratic Republic of the Congo
-	8142, // Kingdom of Denmark
+	7978, // Greenland
 	7918, // Saudi Arabia
-	7235, // Mexico
+	7236, // Mexico
 	7015, // Indonesia
-	6856, // Sudan
+	6857, // Sudan
 	6481, // Libya
 	6070, // Iran
 	5764, // Mongolia
@@ -27,7 +28,7 @@ const COUNTRY_DATA = [
 	4592, // Angola
 	4567, // Mali
 	4493, // South Africa
-	4410, // Colombia
+	4411, // Colombia
 	4152, // Ethiopia
 	4046, // Bolivia
 	3796, // Mauritania
@@ -112,7 +113,7 @@ const COUNTRY_DATA = [
 	363, // South Korea
 	343, // Hungary
 	340, // Jordan
-	336, // Portugal (Total)
+	336, // Portugal
 	325, // Serbia
 	319, // Azerbaijan
 	309, // Austria
@@ -133,7 +134,8 @@ const COUNTRY_DATA = [
 	179, // Dominican Republic
 	173, // Bhutan
 	167, // Estonia
-	157, // Netherlands (Total)
+	159, // Denmark
+	157, // Netherlands
 	152, // Switzerland
 	133, // Guinea-Bissau
 	133, // Republic of China (Taiwan, Quemoy, Matsu)
@@ -190,7 +192,6 @@ const COUNTRY_DATA = [
 	5, // Malta
 	5, // Maldives
 	5, // Saint Kitts and Nevis
-	5, // Marshall Islands
 	5, // Liechtenstein
 ];
 

@@ -4,23 +4,24 @@ const Country = artifacts.require("./CountryERC721");
 const Sale = artifacts.require("./CountrySale");
 
 //  prepare country initialization data
+// TODO: load from country_data.js
 const COUNTRY_PRICE_DATA = [
-	web3.toBigNumber(15729000000000000000), // Russia, fits into max uint64: 18446744073709551615
+	web3.toBigNumber(15730000000000000000), // Russia, fits into max uint64: 18446744073709551615
 	web3.toBigNumber(11863548387096800000), // Canada
-	web3.toBigNumber(11753333333333300000), // China
+	web3.toBigNumber(11753666666666700000), // China
 	web3.toBigNumber(11694666666666700000), // United States of America
-	web3.toBigNumber(11005614035087700000), // Brazil
-	web3.toBigNumber(11332800000000000000), // Australia
+	web3.toBigNumber(11005964912280700000), // Brazil
+	web3.toBigNumber(11333200000000000000), // Australia
 	web3.toBigNumber(5381333333333330000), // India
 	web3.toBigNumber(4655000000000000000), // Argentina
 	web3.toBigNumber(4562272727272730000), // Kazakhstan
 	web3.toBigNumber(4080465116279070000), // Algeria
 	web3.toBigNumber(4018139534883720000), // Democratic Republic of the Congo
-	web3.toBigNumber(3786976744186050000), // Kingdom of Denmark
+	web3.toBigNumber(3710697674418610000), // Greenland
 	web3.toBigNumber(3682790697674420000), // Saudi Arabia
-	web3.toBigNumber(3365116279069770000), // Mexico
+	web3.toBigNumber(3365581395348840000), // Mexico
 	web3.toBigNumber(3340476190476190000), // Indonesia
-	web3.toBigNumber(3264761904761910000), // Sudan
+	web3.toBigNumber(3265238095238100000), // Sudan
 	web3.toBigNumber(3161463414634150000), // Libya
 	web3.toBigNumber(3035000000000000000), // Iran
 	web3.toBigNumber(2955897435897440000), // Mongolia
@@ -30,7 +31,7 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(2551111111111110000), // Angola
 	web3.toBigNumber(2537222222222220000), // Mali
 	web3.toBigNumber(2496111111111110000), // South Africa
-	web3.toBigNumber(2450000000000000000), // Colombia
+	web3.toBigNumber(2450555555555560000), // Colombia
 	web3.toBigNumber(2372571428571430000), // Ethiopia
 	web3.toBigNumber(2312000000000000000), // Bolivia
 	web3.toBigNumber(2169142857142860000), // Mauritania
@@ -115,7 +116,7 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(242000000000000000), // South Korea
 	web3.toBigNumber(228666666666667000), // Hungary
 	web3.toBigNumber(226666666666667000), // Jordan
-	web3.toBigNumber(224000000000000000), // Portugal (Total)
+	web3.toBigNumber(224000000000000000), // Portugal
 	web3.toBigNumber(216666666666667000), // Serbia
 	web3.toBigNumber(212666666666667000), // Azerbaijan
 	web3.toBigNumber(206000000000000000), // Austria
@@ -136,10 +137,11 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(119333333333333000), // Dominican Republic
 	web3.toBigNumber(115333333333333000), // Bhutan
 	web3.toBigNumber(111333333333333000), // Estonia
-	web3.toBigNumber(104666666666667000), // Netherlands (Total)
+	web3.toBigNumber(106000000000000000), // Denmark
+	web3.toBigNumber(104666666666667000), // Netherlands
 	web3.toBigNumber(101333333333333000), // Switzerland
 	web3.toBigNumber(88666666666666700), // Guinea-Bissau
-	web3.toBigNumber(88666666666666700), // Republic of China (Taiwan, Quemoy, Matsu)
+	web3.toBigNumber(88666666666666700), // Republic of China (Taiwan), Quemoy), Matsu)
 	web3.toBigNumber(83333333333333300), // Moldova
 	web3.toBigNumber(80000000000000000), // Belgium
 	web3.toBigNumber(74666666666666700), // Lesotho
@@ -193,7 +195,6 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(3333333333333330), // Malta
 	web3.toBigNumber(3333333333333330), // Maldives
 	web3.toBigNumber(3333333333333330), // Saint Kitts and Nevis
-	web3.toBigNumber(3333333333333330), // Marshall Islands
 	web3.toBigNumber(3333333333333330), // Liechtenstein
 ];
 
