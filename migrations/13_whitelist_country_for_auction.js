@@ -18,7 +18,7 @@ module.exports = async function(deployer, network, accounts) {
 	let countryAddress = ""; // MainNet country token address
 	let auctionAddress = "0x1F4f6625e92C4789dCe4B92886981D7b5f484750"; // MainNet dutch auction instance address
 	if(network !== "mainnet") {
-		countryAddress = "0x3DC3Cd66827E4a6A6f047eD66a0624b3cFA2Ad39"; // Rinkeby country token address
+		countryAddress = "0x0cb00C298A7712eF0903e437a85d72e4d245d504"; // Rinkeby country token address
 		auctionAddress = "0x4Ec415d87e00101867FbfA28Db19cCe0D564D8b3"; // Rinkeby dutch auction instance address
 	}
 
