@@ -68,7 +68,9 @@ contract CountrySale is AccessControl {
     require(TOKEN_VERSION_REQUIRED == countryContract.TOKEN_VERSION());
 
     // check that price data length matches with the country data length
-    require(_priceData.length == countryContract.getNumberOfCountries());
+    // strict equals not required anymore: we may provide smaller price data
+    // array to leave some countries for "coupon only" sale
+    require(_priceData.length <= countryContract.getNumberOfCountries());
 
     // set the beneficiary
     beneficiary = _beneficiary;
@@ -200,6 +202,7 @@ contract CountrySale is AccessControl {
     require(_tokenId != 0);
 
     // get country price data from the config and return
+    // that will also ensure that price for the given token ID exists
     return priceData[_tokenId - 1];
   }
 

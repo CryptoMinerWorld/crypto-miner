@@ -373,6 +373,7 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(7333333333333340), // Samoa
 	web3.toBigNumber(6666666666666670), // Luxembourg
 	web3.toBigNumber(5333333333333330), // Comoros
+/*
 	web3.toBigNumber(3333333333333330), // Mauritius
 	web3.toBigNumber(3333333333333330), // São Tomé and Príncipe
 	web3.toBigNumber(3333333333333330), // Dominica
@@ -393,6 +394,7 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(3333333333333330), // Maldives
 	web3.toBigNumber(3333333333333330), // Saint Kitts and Nevis
 	web3.toBigNumber(3333333333333330), // Liechtenstein
+*/
 ];
 
 const tokenId = 117;

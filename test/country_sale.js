@@ -372,6 +372,7 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(7333333333333340), // Samoa
 	web3.toBigNumber(6666666666666670), // Luxembourg
 	web3.toBigNumber(5333333333333330), // Comoros
+/*
 	web3.toBigNumber(3333333333333330), // Mauritius
 	web3.toBigNumber(3333333333333330), // São Tomé and Príncipe
 	web3.toBigNumber(3333333333333330), // Dominica
@@ -392,19 +393,24 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(3333333333333330), // Maldives
 	web3.toBigNumber(3333333333333330), // Saint Kitts and Nevis
 	web3.toBigNumber(3333333333333330), // Liechtenstein
+*/
 ];
 
 // calculate total cumulative price of all countries
 // TODO: load from country_data.js
 const TOTAL_PRICE = COUNTRY_PRICE_DATA.reduce((a, b) => a.plus(b), web3.toBigNumber(0));
 
-// default token ID to work with
+// default token IDs to work with (countries to buy)
 const token1 = 1;
 const token2 = 2;
 const token3 = 3;
+const token171 = 171;
 
 // token prices
 const price1 = getPrice(token1);
+const price2 = getPrice(token2);
+const price3 = getPrice(token3);
+const price171 = getPrice(token171);
 
 // auxiliary constant "2"
 const two = web3.toBigNumber(2);
@@ -412,9 +418,9 @@ const two = web3.toBigNumber(2);
 contract('CountrySale', (accounts) => {
 	it("config: total price", async() => {
 		// according to http://calculla.com/columnar_addition_calculator
-		// 224425242885155448940 wei (224.42524288515544894 wei)
-		// according to John's excel: 224.4252429 ETH
-		const expectedTotal = web3.toBigNumber("224425242885155448940");
+		// 224358576218488782340 wei (224,358576218488782340 wei) (170 countries)
+		// according to John's excel: 224.4252429 ETH (190 countries, not 170)
+		const expectedTotal = web3.toBigNumber("224358576218488782340");
 		assert(expectedTotal.eq(TOTAL_PRICE), "invalid total price");
 	});
 
@@ -428,7 +434,7 @@ contract('CountrySale', (accounts) => {
 		await assertThrowsAsync(async () => await Sale.new(tk.address, 0, COUNTRY_PRICE_DATA));
 		await assertThrowsAsync(async () => await Sale.new(tk.address, tk.address, COUNTRY_PRICE_DATA));
 		await assertThrowsAsync(async () => await Sale.new(beneficiary, beneficiary, COUNTRY_PRICE_DATA));
-		await assertThrowsAsync(async () => await Sale.new(tk.address, beneficiary, [1, 2]));
+		await assertThrowsAsync(async () => await Sale.new(tk.address, beneficiary, COUNTRY_PRICE_DATA.slice().push(1)));
 		const sale = await Sale.new(tk.address, beneficiary, COUNTRY_PRICE_DATA);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 
@@ -453,29 +459,28 @@ contract('CountrySale', (accounts) => {
 		// buyers
 		const buyer1 = accounts[2];
 		const buyer2 = accounts[3];
-
-		// countries to buy
-		const country1 = 1; // Russia
-		const country2 = 2; // Canada
-
-		// prices
-		const price1 = await sale.getPrice(country1);
-		const price2 = await sale.getPrice(country2);
+		const buyer3 = accounts[4];
 
 		// validate prices
-		assert(getPrice(country1).eq(price1), "incorrect price for country 1");
-		assert(getPrice(country2).eq(price2), "incorrect price for country 2");
+		assert(getPrice(token1).eq(price1), "incorrect price for country 1");
+		assert(getPrice(token2).eq(price2), "incorrect price for country 2");
 
 		// buy 2 countries
 		// sale requires permission to mint tokens, without it transaction fails
-		await assertThrowsAsync(async () => await sale.buy(country1, {from: buyer1, value: price1}));
+		await assertThrowsAsync(async () => await sale.buy(token1, {from: buyer1, value: price1}));
 
 		// give permissions required
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 
 		// sending not enough value to buy/buyTo still fails
-		await assertThrowsAsync(async () => await sale.buy(country1, {from: buyer1, value: price1.minus(1)}));
-		await assertThrowsAsync(async () => await sale.buyTo(country2, buyer2, {from: buyer1, value: price2.minus(1)}));
+		await assertThrowsAsync(async () => await sale.buy(token1, {from: buyer1, value: price1.minus(1)}));
+		await assertThrowsAsync(async () => await sale.buyTo(token2, buyer2, {from: buyer1, value: price2.minus(1)}));
+		await assertThrowsAsync(async () => await sale.bulkBuy([token3], {from: buyer1, value: price3.minus(1)}));
+
+		// impossible to buy country out of country price range
+		await assertThrowsAsync(async () => await sale.buy(token171, {from: buyer1, value: price171}));
+		await assertThrowsAsync(async () => await sale.buyTo(token171, buyer2, {from: buyer1, value: price171}));
+		await assertThrowsAsync(async () => await sale.bulkBuy([token171], {from: buyer1, value: price171}));
 
 		// check balances
 		const balance0 = await web3.eth.getBalance(beneficiary); // beneficiary balance
@@ -483,19 +488,24 @@ contract('CountrySale', (accounts) => {
 		const balance2 = await web3.eth.getBalance(buyer2); // buyer 2 balance
 
 		// sending enough value succeeds
-		const gas1 = (await sale.buy(country1, {from: buyer1, value: price1})).receipt.gasUsed;
-		const gas2 = (await sale.buyTo(country2, buyer2, {from: buyer1, value: price2})).receipt.gasUsed;
+		const gas1 = (await sale.buy(token1, {from: buyer1, value: price1})).receipt.gasUsed;
+		const gas2 = (await sale.buyTo(token2, buyer2, {from: buyer1, value: price2})).receipt.gasUsed;
 
 		// check created countries existence and ownership
-		assert(await tk.exists(country1), "country 1 doesn't exist after selling it");
-		assert(await tk.exists(country2), "country 2 doesn't exist after selling it");
-		assert.equal(buyer1, await tk.ownerOf(country1), "country 1 ownership is incorrect");
-		assert.equal(buyer2, await tk.ownerOf(country2), "country 2 ownership is incorrect");
+		assert(await tk.exists(token1), "country 1 doesn't exist after selling it");
+		assert(await tk.exists(token2), "country 2 doesn't exist after selling it");
+		assert.equal(buyer1, await tk.ownerOf(token1), "country 1 ownership is incorrect");
+		assert.equal(buyer2, await tk.ownerOf(token2), "country 2 ownership is incorrect");
 
 		// check that funds are transferred correctly
 		assert(balance0.plus(price1).plus(price2).eq(await web3.eth.getBalance(beneficiary)), "wrong beneficiary balance");
 		assert(balance1.minus(price1).minus(price2).minus(gas1).minus(gas2).eq(await web3.eth.getBalance(buyer1)), "wrong buyer 1 balance");
 		assert(balance2.eq(await web3.eth.getBalance(buyer2)), "wrong buyer 2 balance");
+
+		// additionally check dummy bulk buy case
+		await sale.bulkBuy([token3], {from: buyer3, value: price3});
+		assert(await tk.exists(token3), "country 3 doesn't exist after selling it");
+		assert.equal(buyer3, await tk.ownerOf(token3), "country 3 ownership is incorrect");
 	});
 
 	it("bulk buy: countries buy flow", async() => {
@@ -562,74 +572,92 @@ contract('CountrySale', (accounts) => {
 		const player1 = accounts[1];
 		const player2 = accounts[2];
 
-		// define some coupon
-		const couponCode = "RUSSIA";
-		const couponKey = web3.sha3(couponCode);
-		const token1 = 1; // Russia
-		const token2 = 2; // Canada
+		// define some coupons
+		const couponCode1 = "RUSSIA";
+		const couponKey1 = web3.sha3(couponCode1);
+		const couponCode171 = "MAURITIUS";
+		const couponKey171 = web3.sha3(couponCode171);
 
-		// add the coupon
-		await sale.addCoupon(couponKey, token1);
+		// add the coupons
+		await sale.addCoupon(couponKey1, token1);
+		await sale.addCoupon(couponKey171, token171);
 
-		// ensure it cannot be added once again
-		await assertThrowsAsync(async () => await sale.addCoupon(couponKey, token1));
+		// ensure they cannot be added once again
+		await assertThrowsAsync(async () => await sale.addCoupon(couponKey1, token1));
+		await assertThrowsAsync(async () => await sale.addCoupon(couponKey171, token171));
 
-		// ensure added coupon exists and is valid
-		assert.equal(token1, await sale.isCouponValid(couponCode), "invalid coupon");
+		// ensure added coupons exist and are valid
+		assert.equal(token1, await sale.isCouponValid(couponCode1), "invalid coupon 1");
+		assert.equal(token171, await sale.isCouponValid(couponCode171), "invalid coupon 171");
 
 		// sale doesn't have permission to mint countries - coupon cannot be used
-		await assertThrowsAsync(async () => await sale.useCoupon(couponCode, {from: player1}));
+		await assertThrowsAsync(async () => await sale.useCoupon(couponCode1, {from: player1}));
+		await assertThrowsAsync(async () => await sale.useCoupon(couponCode171, {from: player1}));
 
 		// give permissions required
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 
-		// remove the coupon
-		await sale.removeCoupon(couponKey);
+		// remove the coupon 1
+		await sale.removeCoupon(couponKey1);
 
-		// ensure removed coupon doesn't exist
-		assert.equal(0, await sale.isCouponValid(couponCode), "coupon is still valid while it should not");
+		// ensure removed coupon 1 doesn't exist
+		assert.equal(0, await sale.isCouponValid(couponCode1), "coupon is still valid while it should not");
 
-		// ensure removed coupon cannot be used
-		await assertThrowsAsync(async () => await ale.useCoupon(couponCode, {from: player1}));
+		// ensure removed coupon 1 cannot be used
+		await assertThrowsAsync(async () => await ale.useCoupon(couponCode1, {from: player1}));
 
-		// add the coupon again
-		await sale.addCoupon(couponKey, token1);
+		// add the coupon 1 again
+		await sale.addCoupon(couponKey1, token1);
 
-		// use newly added coupon
-		await sale.useCoupon(couponCode, {from: player1});
+		// use newly added coupon 1
+		await sale.useCoupon(couponCode1, {from: player1});
 
-		// verify the country was minted properly
-		assert.equal(1, await tk.balanceOf(player1), "wrong country count for player 1");
-		assert((await tk.getNumberOfPlots(token1)).eq(await tk.getNumberOfPlotsByCountryOwner(player1)), "wrong number of plots for player 1");
+		// use another coupon - 171
+		await sale.useCoupon(couponCode171, {from: player1});
+
+		// verify the countries were minted properly
+		assert.equal(2, await tk.balanceOf(player1), "wrong country count for player 1");
+		assert.equal(getNumberOfPlots(token1, token171), await tk.getNumberOfPlotsByCountryOwner(player1), "wrong number of plots for player 1");
 		assert(await tk.exists(token1), "token 1 doesn't exist");
+		assert(await tk.exists(token171), "token 1 doesn't exist");
 		assert.equal(player1, await tk.ownerOf(token1), "token 1 has wrong owner");
+		assert.equal(player1, await tk.ownerOf(token171), "token 1 has wrong owner");
 
-		// ensure coupon is invalid now
-		assert.equal(0, await sale.isCouponValid(couponCode), "coupon is still valid");
+		// ensure coupon 1 is invalid now
+		assert.equal(0, await sale.isCouponValid(couponCode1), "coupon is still valid");
 
 		// ensure coupon cannot be used twice
-		await assertThrowsAsync(async () => await sale.useCoupon(couponCode, {from: player2}));
+		await assertThrowsAsync(async () => await sale.useCoupon(couponCode1, {from: player2}));
 
-		// redefine the coupon
-		await sale.removeCoupon(couponKey);
-		await sale.addCoupon(couponKey, token2);
+		// redefine the coupon 1
+		await sale.removeCoupon(couponKey1);
+		await sale.addCoupon(couponKey1, token2);
 
-		// ensure coupon is valid now
-		assert.equal(2, await sale.isCouponValid(couponCode), "coupon is still invalid");
+		// ensure coupon 1 is valid again
+		assert.equal(2, await sale.isCouponValid(couponCode1), "coupon is still invalid");
 
-		// use the coupon again
-		await sale.useCoupon(couponCode, {from: player1});
+		// use the coupon 1 again
+		await sale.useCoupon(couponCode1, {from: player1});
 
 		// verify the country was minted properly
-		assert.equal(2, await tk.balanceOf(player1), "wrong country count for player 1 (2)");
-		assert((await tk.getNumberOfPlots(token1)).plus(await tk.getNumberOfPlots(token2)).eq(await tk.getNumberOfPlotsByCountryOwner(player1)), "wrong number of plots for player 1 (2)");
+		assert.equal(3, await tk.balanceOf(player1), "wrong country count for player 1 (2)");
+		assert.equal(getNumberOfPlots(token1, token2, token171), await tk.getNumberOfPlotsByCountryOwner(player1), "wrong number of plots for player 1 (2)");
 		assert(await tk.exists(token2), "token 2 doesn't exist");
-		assert.equal(player1, await tk.ownerOf(token2), "token 1 has wrong owner");
+		assert.equal(player1, await tk.ownerOf(token2), "token 2 has wrong owner");
 
 	});
 
 });
 
+
+// get number of plots by token ID
+function getNumberOfPlots(...tokenIds) {
+	let sum = 0;
+	for(const tokenId of tokenIds) {
+		sum += COUNTRY_DATA[tokenId - 1];
+	}
+	return sum;
+}
 
 // get price by token ID
 function getPrice(tokenId) {

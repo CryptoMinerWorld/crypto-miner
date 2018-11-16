@@ -176,6 +176,7 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(7333333333333340), // Samoa
 	web3.toBigNumber(6666666666666670), // Luxembourg
 	web3.toBigNumber(5333333333333330), // Comoros
+/*
 	web3.toBigNumber(3333333333333330), // Mauritius
 	web3.toBigNumber(3333333333333330), // São Tomé and Príncipe
 	web3.toBigNumber(3333333333333330), // Dominica
@@ -196,6 +197,7 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(3333333333333330), // Maldives
 	web3.toBigNumber(3333333333333330), // Saint Kitts and Nevis
 	web3.toBigNumber(3333333333333330), // Liechtenstein
+*/
 ];
 
 module.exports = async function(deployer, network, accounts) {
@@ -220,7 +222,7 @@ module.exports = async function(deployer, network, accounts) {
 	// deployed country token smart contract addresses
 	let countryAddress = ""; // MainNet country token address
 	if(network !== "mainnet") {
-		countryAddress = "0x3DC3Cd66827E4a6A6f047eD66a0624b3cFA2Ad39"; // Rinkeby country token address
+		countryAddress = "0x0cb00C298A7712eF0903e437a85d72e4d245d504"; // Rinkeby country token address
 	}
 
 	// country instance
@@ -233,6 +235,25 @@ module.exports = async function(deployer, network, accounts) {
 
 	// give permissions to sale smart contract to mint tokens
 	await country.addOperator(saleAddress, ROLE_TOKEN_CREATOR);
+
+	// generate 20 coupons for the last 20 (5-plots) countries
+	const couponCodes = [];
+	for(let i = 171; i <= 190; i++) {
+		let couponCode = "";
+		for(let j = 0; j < 16; j++) {
+			couponCode += String.fromCharCode(Math.floor(Math.random() * 26) + 65);
+		}
+		couponCode += "_" + i;
+		console.log(couponCode);
+		await sale.addCoupon(web3.sha3(couponCode), i);
+		couponCodes.push(couponCode);
+	}
+
+	// print all the added coupons
+	console.log("__________c_o_u_p_o_n_____c_o_d_e_s___________________");
+	for(const couponCode of couponCodes) {
+		console.log(couponCode);
+	}
 
 	console.log("______________________________________________________");
 	console.log("country:    " + countryAddress);
