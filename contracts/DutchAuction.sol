@@ -330,7 +330,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
 
   /**
    * @notice Allows to buy an item listed for sale for someone else.
-   * @notice An item bought is sent back to `buyer`
+   * @notice An item bought is sent to address '_to'
    * @notice Requires that the sale for that item is not expired
    *      and that enough value is sent to the function
    * @dev Requires now < t1
@@ -485,6 +485,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    * @dev Allows to set the transaction fee beneficiary
    * @dev Requires sender to have `ROLE_FEE_MANAGER` permission
    * @param _beneficiary transaction fee beneficiary
+   * @param _chestVault some small portion of the fee goes to this address
    */
   function setBeneficiary(address _beneficiary, address _chestVault) public {
     // ensure sender has valid permissions
@@ -504,6 +505,7 @@ contract DutchAuction is AccessControl, ERC721Receiver {
    * @param nominator fee fraction nominator
    * @param denominator fee fraction denominator, not zero
    * @param _beneficiary transaction fee beneficiary
+   * @param _chestVault some small portion of the fee goes to this address
    */
   function setFeeAndBeneficiary(uint16 nominator, uint16 denominator, address _beneficiary, address _chestVault) public {
     // ensure sender has valid permissions
