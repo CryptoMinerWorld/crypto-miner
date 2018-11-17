@@ -5,6 +5,9 @@ const ROLE_TOKEN_CREATOR = 0x00040000;
 const Token = artifacts.require("./CountryERC721.sol");
 const Sale = artifacts.require("./CountrySale.sol");
 
+// using secure random generator instead of default Math.random()
+const secureRandomInRange = require("random-number-csprng");
+
 // prepare country initialization data
 const COUNTRY_DATA = [
 	62920, // Russia
@@ -647,8 +650,47 @@ contract('CountrySale', (accounts) => {
 
 	});
 
+	it("coupons: generating 20 random coupons", async() => {
+		const beneficiary = accounts[1];
+		const player = accounts[1];
+
+		const tk = await Token.new(COUNTRY_DATA);
+		const sale = await Sale.new(tk.address, beneficiary, COUNTRY_PRICE_DATA);
+		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
+
+		const offset = 171;
+		const length = 20;
+
+		// generate 20 coupons for the last 20 (5-plots) countries and register them
+		const couponCodes = [];
+		for(let i = offset; i < offset + length; i++) {
+			const couponCode = await generateCouponCode(i);
+			couponCodes.push(couponCode);
+		}
+
+		// register coupons
+		for(let i = 0; i < length; i++) {
+			await sale.addCoupon(web3.sha3(couponCodes[i]), offset + i);
+		}
+
+		// use these codes and check country owners
+		for(let i = offset; i < offset + length; i++) {
+			await sale.useCoupon(couponCodes[i - offset], {from: player});
+			assert.equal(player, await tk.ownerOf(i), "wrong country " + i + " owner")
+		}
+	});
+
 });
 
+// generate a secure random coupon code for country `i`
+async function generateCouponCode(i) {
+	let couponCode = "";
+	for(let j = 0; j < 16; j++) {
+		couponCode += String.fromCharCode(await secureRandomInRange(65, 90));
+	}
+	couponCode += "_" + i;
+	return couponCode;
+}
 
 // get number of plots by token ID
 function getNumberOfPlots(...tokenIds) {

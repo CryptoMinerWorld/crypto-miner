@@ -3,6 +3,9 @@ const ROLE_TOKEN_CREATOR = 0x00040000;
 const Country = artifacts.require("./CountryERC721");
 const Sale = artifacts.require("./CountrySale");
 
+// using secure random generator instead of default Math.random()
+const secureRandomInRange = require("random-number-csprng");
+
 //  prepare country initialization data
 // TODO: load from country_data.js
 const COUNTRY_PRICE_DATA = [
@@ -236,23 +239,27 @@ module.exports = async function(deployer, network, accounts) {
 	// give permissions to sale smart contract to mint tokens
 	await country.addOperator(saleAddress, ROLE_TOKEN_CREATOR);
 
+	// 20 coupons starting from country 171
+	const offset = 171;
+	const length = 20;
+
 	// generate 20 coupons for the last 20 (5-plots) countries
 	const couponCodes = [];
-	for(let i = 171; i <= 190; i++) {
-		let couponCode = "";
-		for(let j = 0; j < 16; j++) {
-			couponCode += String.fromCharCode(Math.floor(Math.random() * 26) + 65);
-		}
-		couponCode += "_" + i;
-		console.log(couponCode);
-		await sale.addCoupon(web3.sha3(couponCode), i);
+	for(let i = offset; i < offset + length; i++) {
+		let couponCode = await generateCouponCode(i);
 		couponCodes.push(couponCode);
 	}
 
-	// print all the added coupons
-	console.log("__________c_o_u_p_o_n_____c_o_d_e_s___________________");
+	// print all coupons to be added
+	console.log("_____c_o_u_p_o_n_____c_o_d_e_s_____t_o_____a_d_d______");
 	for(const couponCode of couponCodes) {
 		console.log(couponCode);
+	}
+
+	// register created coupons in smart contract
+	for(let i = offset; i < offset + length; i++) {
+		await sale.addCoupon(web3.sha3(couponCodes[i]), i);
+		console.log("added coupon " + couponCodes[i]);
 	}
 
 	console.log("______________________________________________________");
@@ -261,3 +268,13 @@ module.exports = async function(deployer, network, accounts) {
 	console.log("sale:       " + saleAddress);
 
 };
+
+// generate a secure random coupon code for country `i`
+async function generateCouponCode(i) {
+	let couponCode = "";
+	for(let j = 0; j < 16; j++) {
+		couponCode += String.fromCharCode(await secureRandomInRange(65, 90));
+	}
+	couponCode += "_" + i;
+	return couponCode;
+}
