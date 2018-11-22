@@ -13,8 +13,8 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(11863548387096800000), // Canada
 	web3.toBigNumber(11753666666666700000), // China
 	web3.toBigNumber(11694666666666700000), // United States of America
-	web3.toBigNumber(11005964912280700000), // Brazil
-	web3.toBigNumber(11333200000000000000), // Australia
+	web3.toBigNumber(11406181818181800000), // Brazil
+	web3.toBigNumber(10897307692307700000), // Australia
 	web3.toBigNumber(5381333333333330000), // India
 	web3.toBigNumber(4655000000000000000), // Argentina
 	web3.toBigNumber(4562272727272730000), // Kazakhstan
@@ -144,7 +144,7 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(104666666666667000), // Netherlands
 	web3.toBigNumber(101333333333333000), // Switzerland
 	web3.toBigNumber(88666666666666700), // Guinea-Bissau
-	web3.toBigNumber(88666666666666700), // Republic of China (Taiwan), Quemoy), Matsu)
+	web3.toBigNumber(88666666666666700), // Republic of China (Taiwan, Quemoy, Matsu)
 	web3.toBigNumber(83333333333333300), // Moldova
 	web3.toBigNumber(80000000000000000), // Belgium
 	web3.toBigNumber(74666666666666700), // Lesotho
@@ -169,7 +169,7 @@ const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(34000000000000000), // Montenegro
 	web3.toBigNumber(30000000000000000), // Vanuatu
 	web3.toBigNumber(28000000000000000), // Qatar
-	web3.toBigNumber(28000000000000000), // The Gambia
+	web3.toBigNumber(28000000000000000), // Gambia
 	web3.toBigNumber(26666666666666700), // Jamaica
 	web3.toBigNumber(25333333333333300), // Lebanon
 	web3.toBigNumber(22666666666666700), // Cyprus
@@ -257,8 +257,8 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// register created coupons in smart contract
-	for(let i = offset; i < offset + length; i++) {
-		await sale.addCoupon(web3.sha3(couponCodes[i]), i);
+	for(let i = 0; i < length; i++) {
+		await sale.addCoupon(web3.sha3(couponCodes[i]), i + offset);
 		console.log("added coupon " + couponCodes[i]);
 	}
 

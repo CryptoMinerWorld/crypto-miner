@@ -162,7 +162,7 @@ export const COUNTRY_DATA = [
 	51, // Montenegro
 	45, // Vanuatu
 	42, // Qatar
-	42, // The Gambia
+	42, // Gambia
 	40, // Jamaica
 	38, // Lebanon
 	34, // Cyprus
@@ -203,8 +203,8 @@ export const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(11863548387096800000), // Canada
 	web3.toBigNumber(11753666666666700000), // China
 	web3.toBigNumber(11694666666666700000), // United States of America
-	web3.toBigNumber(11005964912280700000), // Brazil
-	web3.toBigNumber(11333200000000000000), // Australia
+	web3.toBigNumber(11406181818181800000), // Brazil
+	web3.toBigNumber(10897307692307700000), // Australia
 	web3.toBigNumber(5381333333333330000), // India
 	web3.toBigNumber(4655000000000000000), // Argentina
 	web3.toBigNumber(4562272727272730000), // Kazakhstan
@@ -334,7 +334,7 @@ export const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(104666666666667000), // Netherlands
 	web3.toBigNumber(101333333333333000), // Switzerland
 	web3.toBigNumber(88666666666666700), // Guinea-Bissau
-	web3.toBigNumber(88666666666666700), // Republic of China (Taiwan), Quemoy), Matsu)
+	web3.toBigNumber(88666666666666700), // Republic of China (Taiwan, Quemoy, Matsu)
 	web3.toBigNumber(83333333333333300), // Moldova
 	web3.toBigNumber(80000000000000000), // Belgium
 	web3.toBigNumber(74666666666666700), // Lesotho
@@ -359,7 +359,7 @@ export const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(34000000000000000), // Montenegro
 	web3.toBigNumber(30000000000000000), // Vanuatu
 	web3.toBigNumber(28000000000000000), // Qatar
-	web3.toBigNumber(28000000000000000), // The Gambia
+	web3.toBigNumber(28000000000000000), // Gambia
 	web3.toBigNumber(26666666666666700), // Jamaica
 	web3.toBigNumber(25333333333333300), // Lebanon
 	web3.toBigNumber(22666666666666700), // Cyprus
@@ -369,6 +369,7 @@ export const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(7333333333333340), // Samoa
 	web3.toBigNumber(6666666666666670), // Luxembourg
 	web3.toBigNumber(5333333333333330), // Comoros
+/*
 	web3.toBigNumber(3333333333333330), // Mauritius
 	web3.toBigNumber(3333333333333330), // São Tomé and Príncipe
 	web3.toBigNumber(3333333333333330), // Dominica
@@ -389,6 +390,7 @@ export const COUNTRY_PRICE_DATA = [
 	web3.toBigNumber(3333333333333330), // Maldives
 	web3.toBigNumber(3333333333333330), // Saint Kitts and Nevis
 	web3.toBigNumber(3333333333333330), // Liechtenstein
+*/
 ];
 
 // calculate total cumulative price of all countries

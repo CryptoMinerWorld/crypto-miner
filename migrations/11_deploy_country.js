@@ -163,7 +163,7 @@ const COUNTRY_DATA = [
 	51, // Montenegro
 	45, // Vanuatu
 	42, // Qatar
-	42, // The Gambia
+	42, // Gambia
 	40, // Jamaica
 	38, // Lebanon
 	34, // Cyprus
