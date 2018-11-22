@@ -19,6 +19,7 @@ module.exports = async function(deployer, network, accounts) {
 		saleAddress = "0x63E70723c2D871b032DE07236C17FA03453551e1";
 	}
 
+	// link to deployed sale contract
 	const sale = Sale.at(saleAddress);
 
 	// 20 coupons starting from country 171
