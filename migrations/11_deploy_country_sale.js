@@ -225,7 +225,7 @@ module.exports = async function(deployer, network, accounts) {
 	// deployed country token smart contract addresses
 	let countryAddress = ""; // MainNet country token address
 	if(network !== "mainnet") {
-		countryAddress = "0x797AAB879c58b7fd977782d0fAcc8022385C6483"; // Rinkeby country token address
+		countryAddress = "0x6AC79cbA4Cf4c07303d30410739b13Ee6914b619"; // Rinkeby country token address
 	}
 
 	// country instance
@@ -239,11 +239,17 @@ module.exports = async function(deployer, network, accounts) {
 	// give permissions to sale smart contract to mint tokens
 	await country.addOperator(saleAddress, ROLE_TOKEN_CREATOR);
 
-	// 20 coupons starting from country 171
-	const offset = 171;
-	const length = 20;
+	// 20 coupons starting from country 171 (5 plots countries) – for mainnet
+	let offset = 171;
+	let length = 20;
 
-	// generate 20 coupons for the last 20 (5-plots) countries
+	// 40 coupons starting from country 151 - for testnets
+	if(network !== "mainnet") {
+		offset = 151;
+		length = 40;
+	}
+
+	// generate coupons for the countries in the list
 	const couponCodes = [];
 	for(let i = offset; i < offset + length; i++) {
 		let couponCode = await generateCouponCode(i);
