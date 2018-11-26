@@ -14,9 +14,9 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// deployed sale smart contract address
-	let saleAddress = "";
+	let saleAddress = ""; // mainnet sale address
 	if(network !== "mainet") {
-		saleAddress = "0x63E70723c2D871b032DE07236C17FA03453551e1";
+		saleAddress = "0x63E70723c2D871b032DE07236C17FA03453551e1"; // testnet sale address
 	}
 
 	// link to deployed sale contract
