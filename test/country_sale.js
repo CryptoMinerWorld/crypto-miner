@@ -450,6 +450,9 @@ contract('CountrySale', (accounts) => {
 		await assertThrowsAsync(async () => await sale.getPrice(0));
 		await sale.getPrice(token1);
 
+		await assertThrowsAsync(async () => await sale.getBulkPrice([0]));
+		await sale.getBulkPrice([token1]);
+
 		await assertThrowsAsync(async () => await sale.removeCoupon(1));
 	});
 
@@ -465,8 +468,13 @@ contract('CountrySale', (accounts) => {
 		const buyer3 = accounts[4];
 
 		// validate prices
-		assert(getPrice(token1).eq(price1), "incorrect price for country 1");
-		assert(getPrice(token2).eq(price2), "incorrect price for country 2");
+		assert((await sale.getPrice(token1)).eq(price1), "incorrect price for country 1");
+		assert((await sale.getPrice(token2)).eq(price2), "incorrect price for country 2");
+
+		// validate bulk prices
+		assert((await sale.getBulkPrice([token1])).eq(price1), "incorrect bulk price for country 1");
+		assert((await sale.getBulkPrice([token2])).eq(price2), "incorrect bulk price for country 2");
+		assert((await sale.getBulkPrice([token1, token2])).eq(getBulkPrice([token1, token2])), "incorrect bulk price for countries [1, 2]");
 
 		// buy 2 countries
 		// sale requires permission to mint tokens, without it transaction fails
@@ -526,19 +534,23 @@ contract('CountrySale', (accounts) => {
 		const countries2 = [3, 4, 5]; // China, USA, Brazil
 
 		// prices
-		const price1 = countries1.reduce((a, b) => a.plus(getPrice(b)), web3.toBigNumber(0));
-		const price2 = countries2.reduce((a, b) => a.plus(getPrice(b)), web3.toBigNumber(0));
+		const bulkPrice1 = getBulkPrice(countries1);
+		const bulkPrice2 = getBulkPrice(countries2);
+
+		// verify bulk prices are calculated correctly
+		assert((await sale.getBulkPrice(countries1)).eq(getBulkPrice(countries1)), "incorrect bulk price for countries group 1");
+		assert((await sale.getBulkPrice(countries2)).eq(getBulkPrice(countries2)), "incorrect bulk price for countries group 2");
 
 		// buy 2 groups of countries
 		// sale requires permission to mint tokens, without it transaction fails
-		await assertThrowsAsync(async () => await sale.bulkBuy(countries1, {from: buyer1, value: price1}));
+		await assertThrowsAsync(async () => await sale.bulkBuy(countries1, {from: buyer1, value: bulkPrice1}));
 
 		// give permissions required
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 
 		// sending not enough value to buy/buyTo still fails
-		await assertThrowsAsync(async () => await sale.bulkBuy(countries1, {from: buyer1, value: price1.minus(1)}));
-		await assertThrowsAsync(async () => await sale.bulkBuyTo(buyer2, countries2, {from: buyer1, value: price2.minus(1)}));
+		await assertThrowsAsync(async () => await sale.bulkBuy(countries1, {from: buyer1, value: bulkPrice1.minus(1)}));
+		await assertThrowsAsync(async () => await sale.bulkBuyTo(buyer2, countries2, {from: buyer1, value: bulkPrice2.minus(1)}));
 
 		// check balances
 		const balance0 = await web3.eth.getBalance(beneficiary); // beneficiary balance
@@ -546,8 +558,8 @@ contract('CountrySale', (accounts) => {
 		const balance2 = await web3.eth.getBalance(buyer2); // buyer 2 balance
 
 		// sending enough value succeeds
-		const gas1 = (await sale.bulkBuy(countries1, {from: buyer1, value: price1})).receipt.gasUsed;
-		const gas2 = (await sale.bulkBuyTo(buyer2, countries2, {from: buyer1, value: price2})).receipt.gasUsed;
+		const gas1 = (await sale.bulkBuy(countries1, {from: buyer1, value: bulkPrice1})).receipt.gasUsed;
+		const gas2 = (await sale.bulkBuyTo(buyer2, countries2, {from: buyer1, value: bulkPrice2})).receipt.gasUsed;
 
 		// check created countries existence and ownership
 		for(const id of countries1) {
@@ -560,8 +572,8 @@ contract('CountrySale', (accounts) => {
 		}
 
 		// check that funds are transferred correctly
-		assert(balance0.plus(price1).plus(price2).eq(await web3.eth.getBalance(beneficiary)), "wrong beneficiary balance");
-		assert(balance1.minus(price1).minus(price2).minus(gas1).minus(gas2).eq(await web3.eth.getBalance(buyer1)), "wrong buyer 1 balance");
+		assert(balance0.plus(bulkPrice1).plus(bulkPrice2).eq(await web3.eth.getBalance(beneficiary)), "wrong beneficiary balance");
+		assert(balance1.minus(bulkPrice1).minus(bulkPrice2).minus(gas1).minus(gas2).eq(await web3.eth.getBalance(buyer1)), "wrong buyer 1 balance");
 		assert(balance2.eq(await web3.eth.getBalance(buyer2)), "wrong buyer 2 balance");
 	});
 
@@ -704,6 +716,11 @@ function getNumberOfPlots(...tokenIds) {
 // get price by token ID
 function getPrice(tokenId) {
 	return COUNTRY_PRICE_DATA[tokenId - 1];
+}
+
+// get bulk price for a given array of tokens
+function getBulkPrice(tokenIds) {
+	return tokenIds.reduce((a, b) => a.plus(getPrice(b)), web3.toBigNumber(0));
 }
 
 // auxiliary function to ensure function `fn` throws

@@ -193,17 +193,38 @@ contract CountrySale is AccessControl {
   }
 
   /**
-   * @notice Gets token price this smart contract sells token with.
+   * @notice Gets token price for the token ID
+   *      this sale smart contract operates with.
    * @param _tokenId token ID to query price for
    * @return token price in wei
    */
-  function getPrice(uint16 _tokenId) public constant returns(uint64) {
+  function getPrice(uint8 _tokenId) public constant returns(uint64) {
     // verify that token ID is not zero
     require(_tokenId != 0);
 
     // get country price data from the config and return
     // that will also ensure that price for the given token ID exists
     return priceData[_tokenId - 1];
+  }
+
+  /**
+   * @notice Gets bulk token price (sum of the prices) for the
+   *      token IDs this sale smart contract operates with.
+   * @param tokenIds list (array) of the token IDs to query bulk price for
+   * @return cumulative token price in wei (sum of all given token prices)
+   */
+  function getBulkPrice(uint8[] tokenIds) public constant returns(uint256) {
+    // auxiliary variable to accumulate bulk price sum
+    uint256 bulkPrice = 0;
+
+    // iterate over supplied token IDs
+    for(uint256 i = 0; i < tokenIds.length; i++) {
+      // and accumulate price for each token
+      bulkPrice += getPrice(tokenIds[i]);
+    }
+
+    // return the bulk price (sum of all specified token prices)
+    return bulkPrice;
   }
 
   /**

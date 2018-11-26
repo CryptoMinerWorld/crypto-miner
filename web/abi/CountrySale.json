@@ -467,7 +467,7 @@
       "inputs": [
         {
           "name": "_tokenId",
-          "type": "uint16"
+          "type": "uint8"
         }
       ],
       "name": "getPrice",
@@ -475,6 +475,25 @@
         {
           "name": "",
           "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "tokenIds",
+          "type": "uint8[]"
+        }
+      ],
+      "name": "getBulkPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
         }
       ],
       "payable": false,
@@ -548,5 +567,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-11-07T12:14:44.212Z"
+  "updatedAt": "2018-11-26T08:23:40.730Z"
 }
