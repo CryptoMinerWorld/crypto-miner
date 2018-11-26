@@ -20,7 +20,6 @@ module.exports = async function(deployer, network, accounts) {
 	await printTokenMap(tokenAddress);
 };
 
-/**
  /**
  * Function prints existing tokens (marked with asterisk *)
  * in a user-friendly ASCII way
