@@ -14,36 +14,45 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// deployed sale smart contract address
-	let saleAddress = ""; // mainnet sale address
+	let saleAddress = "0x66d106B2aebF18693177e9FdF72D4088e52943cB"; // MainNet sale address
 	if(network !== "mainet") {
-		saleAddress = "0x63E70723c2D871b032DE07236C17FA03453551e1"; // testnet sale address
+		saleAddress = "0x63E70723c2D871b032DE07236C17FA03453551e1"; // Rinkeby sale address
 	}
 
 	// link to deployed sale contract
 	const sale = Sale.at(saleAddress);
 
-	// 20 coupons starting from country 171
-	const offset = 151;
-	const length = 20;
+	// 20 coupons starting from country 171 (5 plots countries) – for mainnet
+	let offset = 171;
+	let length = 20;
 
-	// generate 20 coupons for the last 20 (5-plots) countries
+	// 40 coupons starting from country 151 - for testnets
+	if(network !== "mainnet") {
+		offset = 151;
+		length = 40;
+	}
+
+	// generate coupons for the countries in the list
 	const couponCodes = [];
+	const couponKeys = [];
 	for(let i = offset; i < offset + length; i++) {
 		let couponCode = await generateCouponCode(i);
 		couponCodes.push(couponCode);
+		couponKeys.push(web3.sha3(couponCode));
 	}
 
 	// print all coupons to be added
 	console.log("coupon codes to add:");
-	for(const couponCode of couponCodes) {
-		console.log(couponCode);
+	for(let i = 0; i < length; i++) {
+		console.log(couponCodes[i] + "\t" + couponKeys[i]);
 	}
 
 	// register created coupons in smart contract
 	for(let i = 0; i < length; i++) {
-		await sale.addCoupon(web3.sha3(couponCodes[i]), i + offset);
-		console.log("added coupon " + couponCodes[i]);
+		await sale.addCoupon(couponKeys[i], i + offset);
+		console.log("added coupon " + couponCodes[i] + " -> " + couponKeys[i]);
 	}
+
 };
 
 // generate a secure random coupon code for country `i`
