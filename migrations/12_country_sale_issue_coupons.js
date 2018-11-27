@@ -15,7 +15,7 @@ module.exports = async function(deployer, network, accounts) {
 
 	// deployed sale smart contract address
 	let saleAddress = "0x66d106B2aebF18693177e9FdF72D4088e52943cB"; // MainNet sale address
-	if(network !== "mainet") {
+	if(network !== "mainnet") {
 		saleAddress = "0x63E70723c2D871b032DE07236C17FA03453551e1"; // Rinkeby sale address
 	}
 
