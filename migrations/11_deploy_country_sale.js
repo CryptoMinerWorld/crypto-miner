@@ -223,7 +223,7 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// deployed country token smart contract addresses
-	let countryAddress = ""; // MainNet country token address
+	let countryAddress = "0xE49F05Fd6DEc46660221a1C1255FfE335bc7fa7a"; // MainNet country token address
 	if(network !== "mainnet") {
 		countryAddress = "0x6AC79cbA4Cf4c07303d30410739b13Ee6914b619"; // Rinkeby country token address
 	}
@@ -238,35 +238,6 @@ module.exports = async function(deployer, network, accounts) {
 
 	// give permissions to sale smart contract to mint tokens
 	await country.addOperator(saleAddress, ROLE_TOKEN_CREATOR);
-
-	// 20 coupons starting from country 171 (5 plots countries) – for mainnet
-	let offset = 171;
-	let length = 20;
-
-	// 40 coupons starting from country 151 - for testnets
-	if(network !== "mainnet") {
-		offset = 151;
-		length = 40;
-	}
-
-	// generate coupons for the countries in the list
-	const couponCodes = [];
-	for(let i = offset; i < offset + length; i++) {
-		let couponCode = await generateCouponCode(i);
-		couponCodes.push(couponCode);
-	}
-
-	// print all coupons to be added
-	console.log("_____c_o_u_p_o_n_____c_o_d_e_s_____t_o_____a_d_d______");
-	for(const couponCode of couponCodes) {
-		console.log(couponCode);
-	}
-
-	// register created coupons in smart contract
-	for(let i = 0; i < length; i++) {
-		await sale.addCoupon(web3.sha3(couponCodes[i]), i + offset);
-		console.log("added coupon " + couponCodes[i]);
-	}
 
 	console.log("______________________________________________________");
 	console.log("country:    " + countryAddress);
