@@ -3,9 +3,6 @@ const ROLE_TOKEN_CREATOR = 0x00040000;
 const Country = artifacts.require("./CountryERC721");
 const Sale = artifacts.require("./CountrySale");
 
-// using secure random generator instead of default Math.random()
-const secureRandomInRange = require("random-number-csprng");
-
 //  prepare country initialization data
 // TODO: load from country_data.js
 const COUNTRY_PRICE_DATA = [
@@ -246,12 +243,3 @@ module.exports = async function(deployer, network, accounts) {
 
 };
 
-// generate a secure random coupon code for country `i`
-async function generateCouponCode(i) {
-	let couponCode = "";
-	for(let j = 0; j < 16; j++) {
-		couponCode += String.fromCharCode(await secureRandomInRange(65, 90));
-	}
-	couponCode += "_" + i;
-	return couponCode;
-}
