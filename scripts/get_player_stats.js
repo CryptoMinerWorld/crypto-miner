@@ -11,12 +11,6 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	let sale2Address = "0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1"; // mainnet
-	if(network !== "mainnet") {
-		sale2Address = "0x10A0F683304B6878E5e70295445Fb03EEB6dEc75"; // rinkeby
-		if(network === "ropsten") {
-			sale2Address = "0x3cf439e50cf3a1147f79ca59a2ad52affd1fa0f0"; // ropsten
-		}
-	}
 
 	const sale2Instance = Sale2.at(sale2Address);
 	console.log(`address, gems, geodes, ref points, refs used, refs available`);

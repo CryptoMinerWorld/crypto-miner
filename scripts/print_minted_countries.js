@@ -204,10 +204,7 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// deployed token smart contract addresses
-	let tokenAddress = ""; // MainNet token address
-	if(network !== "mainnet") {
-		tokenAddress = "0x797AAB879c58b7fd977782d0fAcc8022385C6483"; // Rinkeby token address
-	}
+	let tokenAddress = "0xE49F05Fd6DEc46660221a1C1255FfE335bc7fa7a"; // MainNet token address
 
 	// print the existing token map
 	await printTokenMap(tokenAddress);
