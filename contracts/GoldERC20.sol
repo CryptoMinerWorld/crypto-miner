@@ -192,11 +192,16 @@ contract GoldERC20 is AccessControlLight {
     // non-zero to address check
     require(_to != address(0));
 
-    // verify transaction sender is token owner
-    // or is approved to transfer tokens on behalf of the owner
-    require(_from == msg.sender || transferAllowances[_from][msg.sender] >= _value);
+    // in case of transfer on behalf
+    if(_from != msg.sender) {
+      // verify sender has an allowance to transfer amount of tokens requested
+      require(transferAllowances[_from][msg.sender] >= _value);
 
-    // verify sender has enough tokens to send
+      // decrease the amount of tokens allowed to transfer
+      transferAllowances[_from][msg.sender] -= _value;
+    }
+
+    // verify sender has enough tokens to transfer on behalf
     require(tokenBalances[_from] >= _value);
 
     // target balance overflow check, zero value transfer check
