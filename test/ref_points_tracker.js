@@ -4,7 +4,7 @@ const ROLE_REF_POINTS_ISSUER = 0x00000001;
 // Role ROLE_REF_POINTS_CONSUMER allows increasing `consumed`
 const ROLE_REF_POINTS_CONSUMER = 0x00000002;
 
-// AccessControl smart contract stands for ACL – Access Control List
+// Referral points tracker smart contract
 const Tracker = artifacts.require("./RefPointsTracker.sol");
 
 contract('RefPointsTracker', (accounts) => {
