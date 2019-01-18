@@ -234,7 +234,11 @@ contract GoldERC20 is AccessControlLight {
    * @return true on success, throws otherwise
    */
   function approve(address _spender, uint256 _value) public returns (bool) {
-    // TODO: implement transfer approve logic
+    // perform an operation: write value requested into the storage
+    transferAllowances[msg.sender][_spender] = _value;
+
+    // emit an event
+    emit Approval(msg.sender, _spender, _value);
 
     // operation successful, return true
     return true;
