@@ -93,8 +93,20 @@ contract GoldERC20 is AccessControlLight {
    */
   event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
+  /**
+   * @dev Fired in mint() function
+   * @param _by an address which minted some tokens (transaction sender)
+   * @param _to an address the tokens were minted to
+   * @param _value an amount of tokens minted
+   */
   event Minted(address indexed _by, address indexed _to, uint256 _value);
 
+  /**
+   * @dev Fired in burn() function
+   * @param _by an address which burned some tokens (transaction sender)
+   * @param _from an address the tokens were burnt from
+   * @param _value an amount of tokens burnt
+   */
   event Burnt(address indexed _by, address indexed _from, uint256 _value);
 
   /**
@@ -150,10 +162,8 @@ contract GoldERC20 is AccessControlLight {
    * @return true on success, throws otherwise
    */
   function transfer(address _to, uint256 _value) public returns (bool) {
-    // TODO: implement safe transfer logic
-
-    // operation successful, return true
-    return true;
+    // just delegate call to `transferFrom`
+    return transferFrom(msg.sender, _to, _value);
   }
 
   /**
@@ -179,7 +189,30 @@ contract GoldERC20 is AccessControlLight {
    * @return true on success, throws otherwise
    */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-    // TODO: implement safe transfer on behalf logic
+    // non-zero to address check
+    require(_to != address(0));
+
+    // verify transaction sender is token owner
+    // or is approved to transfer tokens on behalf of the owner
+    require(_from == msg.sender || transferAllowances[_from][msg.sender] >= _value);
+
+    // verify sender has enough tokens to send
+    require(tokenBalances[_from] >= _value);
+
+    // target balance overflow check, zero value transfer check
+    require(tokenBalances[_to] + _value > tokenBalances[_to]);
+
+    // perform the transfer:
+    // decrease token owner (sender) balance
+    tokenBalances[_from] -= _value;
+
+    // increase `_to` address (receiver) balance
+    tokenBalances[_to] += _value;
+
+    // TODO: verify _to is safe to transfer tokens to
+
+    // emit an ERC20 transfer event
+    emit Transfer(_from, _to, _value);
 
     // operation successful, return true
     return true;
