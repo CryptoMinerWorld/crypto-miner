@@ -48,6 +48,12 @@ contract RefPointsTracker is AccessControlLight {
   mapping(address => uint256) public consumed;
 
   /**
+   * @notice Enumeration of all referral points holders
+   * @dev Contains all the addresses which earned referral points
+   */
+  address[] public holders;
+
+  /**
    * @dev Fired in issueTo() function
    * @param _by caller of the function (issuer),
    *      an address with `ROLE_REF_POINTS_ISSUER` permission
@@ -96,6 +102,25 @@ contract RefPointsTracker is AccessControlLight {
   }
 
   /**
+   * @notice Lists all referral points holders addresses
+   * @return an array of referral points holders addresses,
+   *      doesn't contain duplicates
+   */
+  function getAllHolders() public constant returns (address[]) {
+    // read `holders` array and return
+    return holders;
+  }
+
+  /**
+   * @notice Number of all referral points holders
+   * @return length of the referral points holders array
+   */
+  function getNumberOfHolders() public constant returns (uint256) {
+    // read `holders` array length and return
+    return holders.length;
+  }
+
+  /**
    * @notice Issues referral points to a player address
    * @dev Requires sender to have `ROLE_REF_POINTS_ISSUER` permission
    * @param _to an address to issue referral points to
@@ -107,6 +132,12 @@ contract RefPointsTracker is AccessControlLight {
 
     // arithmetic overflow check, non-zero amount check
     require(issued[_to] + _amount > issued[_to]);
+
+    // if `_to` address is new address -
+    if(issued[_to] == 0) {
+      // - track it in `holders` array
+      holders.push(_to);
+    }
 
     // issue referral points requested
     issued[_to] += _amount;

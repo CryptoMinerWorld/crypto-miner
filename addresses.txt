@@ -40,3 +40,5 @@ CountrySale:
 Common Addresses (Not Smart Contracts):
 John's address:   0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6
 Josh's address:   0xD9b74f73d933Fde459766f74400971B29B90c9d2
+Roman's address:  0xEE169DCC689D0C358F68Ce95DEf41646039aC190
+Basil's address:  0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69

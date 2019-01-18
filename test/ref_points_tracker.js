@@ -15,6 +15,8 @@ contract('RefPointsTracker', (accounts) => {
 		assert.equal(0, await tracker.consumed(account0), "non-zero initial value for consumed[account0]");
 		assert.equal(0, await tracker.available(account0), "non-zero initial value for available(account0)");
 		assert.equal(0, await tracker.balanceOf(account0), "non-zero initial value for balanceOf(account0)");
+		assert.equal(0, await tracker.getNumberOfHolders(), "non-zero initial value for getNumberOfHolders()");
+		assert.equal(0, (await tracker.getAllHolders()).length, "non-empty initial value for getAllHolders()");
 	});
 	it("permissions: issuer and consumer are different permissions", async() => {
 		assert(ROLE_REF_POINTS_ISSUER != ROLE_REF_POINTS_CONSUMER, "issuer and consumer permissions are equal");
@@ -105,20 +107,24 @@ contract('RefPointsTracker', (accounts) => {
 		// issue some ref point(s)
 		await issue();
 
-		// verify referral points balances
+		// verify referral points balances and holders array
 		assert.equal(amt, await tracker.issued(player), "incorrect issued value after issuing " + amt + " point(s)");
 		assert.equal(0, await tracker.consumed(player), "incorrect consumed value after issuing  " + amt + " point(s)");
 		assert.equal(amt, await tracker.available(player), "incorrect available value after issuing " + amt + " point(s)");
 		assert.equal(amt, await tracker.balanceOf(player), "incorrect balanceOf value after issuing " + amt + " point(s)");
+		assert.equal(1, await tracker.getNumberOfHolders(), "incorrect number of holders after issuing some points");
+		assert.equal(player, await tracker.holders(0), "incorrect holder at index 0 after issuing some points");
 
 		// consume some ref point(s)
 		await consume();
 
-		// verify referral points balances
+		// verify referral points balances and holders array
 		assert.equal(amt, await tracker.issued(player), "incorrect issued value after consuming " + amt + " point(s)");
 		assert.equal(amt, await tracker.consumed(player), "incorrect consumed value after consuming  " + amt + " point(s)");
 		assert.equal(0, await tracker.available(player), "incorrect available value after consuming " + amt + " point(s)");
 		assert.equal(0, await tracker.balanceOf(player), "incorrect balanceOf value after consuming " + amt + " point(s)");
+		assert.equal(1, await tracker.getNumberOfHolders(), "incorrect number of holders after consuming some points");
+		assert.equal(player, await tracker.holders(0), "incorrect holder at index 0 after consuming some points");
 
 		// consuming is not possible anymore - no points to consume
 		await assertThrowsAsync(consume);
@@ -173,7 +179,9 @@ contract('RefPointsTracker', (accounts) => {
 			assert.equal(0, await tracker.consumed(players[i]), "incorrect consumed value after issuing  " + ams[i] + " point(s)");
 			assert.equal(ams[i], await tracker.available(players[i]), "incorrect available value after issuing " + ams[i] + " point(s)");
 			assert.equal(ams[i], await tracker.balanceOf(players[i]), "incorrect balanceOf value after issuing " + ams[i] + " point(s)");
+			assert.equal(players[i], await tracker.holders(i), "incorrect holder at index " + i + " after issuing some points");
 		}
+		assert.equal(players.length, await tracker.getNumberOfHolders(), "incorrect number of holders after issuing some points");
 
 		// consuming using wrong functions is not possible at any time
 		await assertThrowsAsync(consume1);
@@ -188,7 +196,9 @@ contract('RefPointsTracker', (accounts) => {
 			assert.equal(ams[i], await tracker.consumed(players[i]), "incorrect consumed value after consuming  " + ams[i] + " point(s)");
 			assert.equal(0, await tracker.available(players[i]), "incorrect available value after consuming " + ams[i] + " point(s)");
 			assert.equal(0, await tracker.balanceOf(players[i]), "incorrect balanceOf value after consuming " + ams[i] + " point(s)");
+			assert.equal(players[i], await tracker.holders(i), "incorrect holder at index " + i + " after consuming some points");
 		}
+		assert.equal(players.length, await tracker.getNumberOfHolders(), "incorrect number of holders after consuming some points");
 
 		// consuming is not possible anymore - no points to consume
 		await assertThrowsAsync(consume);
