@@ -93,6 +93,10 @@ contract GoldERC20 is AccessControlLight {
    */
   event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
+  event Minted(address indexed _by, address indexed _to, uint256 _value);
+
+  event Burnt(address indexed _by, address indexed _from, uint256 _value);
+
   /**
    * @notice Total number of tokens tracked by this smart contract
    * @dev Equal to sum of all token balances
@@ -112,6 +116,19 @@ contract GoldERC20 is AccessControlLight {
   function balanceOf(address _owner) public constant returns (uint256) {
     // read the balance from storage and return
     return tokenBalances[_owner];
+  }
+
+  /**
+   * @dev A function to check an amount of tokens owner approved
+   *      to transfer on its behalf by some other address called "spender"
+   * @param _owner an address which approves transferring some tokens on its behalf
+   * @param _spender an address approved to transfer some tokens on behalf
+   * @return an amount of tokens approved address `_spender` can transfer on behalf
+   *      of token owner `_owner`
+   */
+  function allowance(address _owner, address _spender) public constant returns (uint256) {
+    // read the value from storage and return
+    return transferAllowances[_owner][_spender];
   }
 
   /**
@@ -186,16 +203,57 @@ contract GoldERC20 is AccessControlLight {
   }
 
   /**
-   * @dev A function to check an amount of tokens owner approved
-   *      to transfer on its behalf by some other address called "spender"
-   * @param _owner an address which approves transferring some tokens on its behalf
-   * @param _spender an address approved to transfer some tokens on behalf
-   * @return an amount of tokens approved address `_spender` can transfer on behalf
-   *      of token owner `_owner`
+   * @dev Mints (creates) some tokens to address specified
+   * @dev Requires sender to have `ROLE_TOKEN_CREATOR` permission
+   * @param _to an address to mint tokens to
+   * @param _value an amount of tokens to mint (create)
    */
-  function allowance(address _owner, address _spender) public constant returns (uint256) {
-    // read the value from storage and return
-    return transferAllowances[_owner][_spender];
+  function mint(address _to, uint256 _value) public {
+    // check if caller has sufficient permissions to mint tokens
+    require(isSenderInRole(ROLE_TOKEN_CREATOR));
+
+    // increase `_to` address balance
+    tokenBalances[_to] += _value;
+
+    // increase total amount of tokens value
+    tokensTotal += _value;
+
+    // fire ERC20 compliant transfer event
+    emit Transfer(address(0), _to, _value);
+
+    // fire a mint event
+    emit Minted(msg.sender, _to, _value);
+  }
+
+  /**
+   * @dev Burns (destroys) some tokens from the address specified
+   * @dev Requires sender to have `ROLE_TOKEN_DESTROYER` permission
+   * @param _from an address to burn some tokens from
+   * @param _value an amount of tokens to burn (destroy)
+   */
+  function burn(address _from, uint256 _value) public {
+    // check if caller has sufficient permissions to burn tokens
+    require(isSenderInRole(ROLE_TOKEN_DESTROYER));
+
+    // verify `_from` address has enough tokens to destroy
+    // (basically this is a arithmetic overflow check)
+    require(tokenBalances[_from] >= _value);
+
+    // arithmetic overflow check for tokens total
+    // this situation is impossible by design (previous check)
+    assert(tokensTotal >= _value);
+
+    // decrease `_from` address balance
+    tokenBalances[_from] -= _value;
+
+    // decrease total amount of tokens value
+    tokensTotal -= _value;
+
+    // fire ERC20 compliant transfer event
+    emit Transfer(_from, address(0), _value);
+
+    // fire a burn event
+    emit Burnt(msg.sender, _from, _value);
   }
 
 }
