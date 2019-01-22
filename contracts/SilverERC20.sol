@@ -19,6 +19,14 @@ import "./GoldERC20.sol";
  */
 contract SilverERC20 is GoldERC20 {
   /**
+   * @dev Smart contract version
+   * @dev Should be incremented manually in this source code
+   *      each time smart contact source code is changed
+   * @dev Silver also has 0x10000 bit set to distinguish from gold
+   */
+  uint32 public constant TOKEN_VERSION = 0x10001;
+
+  /**
    * @notice ERC20 symbol of that token (short name)
    */
   string public constant symbol = "SLV";

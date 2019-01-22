@@ -10,10 +10,39 @@ const ROLE_TOKEN_CREATOR = 0x00000001;
 // Token destroyer is responsible for destroying tokens
 const ROLE_TOKEN_DESTROYER = 0x00000002;
 
+// token version length
+const TOKEN_VERSION_LENGTH = 0x10000;
+
 // GoldERC20 smart contract
 const Token = artifacts.require("./GoldERC20.sol");
+// Silver smart contract
+const Token1 = artifacts.require("./SilverERC20.sol");
 
 contract('GoldERC20', (accounts) => {
+	it("config: gold and silver tokens are distinguishable", async() => {
+		const tk = await Token.new();
+		const tk1 = await Token1.new();
+
+		const version = await tk.TOKEN_VERSION();
+		const version1 = await tk1.TOKEN_VERSION();
+
+		console.log(version1.toString(10));
+
+		// high token version bits represent Silver (1) / Gold (0) flag
+		const high = version.dividedToIntegerBy(TOKEN_VERSION_LENGTH);
+		const high1 = version1.dividedToIntegerBy(TOKEN_VERSION_LENGTH);
+
+		console.log(high1.toString(10));
+
+		// low token version bits represent token version itself
+		const low = version.modulo(TOKEN_VERSION_LENGTH);
+		const low1 = version1.modulo(TOKEN_VERSION_LENGTH);
+
+		// verify correct Silver/Gold flags
+		assert.equal(0, high, "incorrect high token version bits for Gold token");
+		assert.equal(1, high1, "incorrect high token version bits for Silver token");
+	});
+
 	it("initial state: balances and allowances are zero", async() => {
 		const tk = await Token.new();
 		const account0 = accounts[0];
