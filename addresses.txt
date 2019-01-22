@@ -10,6 +10,8 @@ MintHelper:       0xc3b54e757fD79264828eCBb78f5Bceae7fF118bC
 CountryERC721:    0xE49F05Fd6DEc46660221a1C1255FfE335bc7fa7a
 CountrySale:      0x66d106B2aebF18693177e9FdF72D4088e52943cB
 RefPointsTracker:
+Gold:
+Silver:
 
 
 Rinkeby:
@@ -24,6 +26,8 @@ MintHelper:       0x6AFD5F5F431279B0Cac7f5ff406F13d804b183c9
 CountryERC721:    0x6AC79cbA4Cf4c07303d30410739b13Ee6914b619
 CountrySale:      0x7fdd0Dca19326C59754Fbb7D1eA9b043Df799CF2
 RefPointsTracker: 0xad036EE409a4154c476478F8647Bc9cefb9d504B
+Gold:             0xee58b1422E95fc9253AeAB96c5C6815A4e48434F
+Silver:           0x4FC02A689a0ee5Eeb55c42aad47b5762974205df
 
 
 Ropsten:
@@ -38,6 +42,8 @@ MintHelper:       0xa7dc659dE6e6E6d07841F9B383d5528dDd556FBb
 CountryERC721:
 CountrySale:
 RefPointsTracker:
+Gold:
+Silver:
 
 
 Common Addresses (Not Smart Contracts):
