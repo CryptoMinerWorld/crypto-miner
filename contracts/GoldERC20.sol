@@ -61,6 +61,24 @@ contract GoldERC20 is AccessControlLight {
   mapping(address => mapping(address => uint256)) private transferAllowances;
 
   /**
+   * @notice Enables ERC20 transfers of the tokens
+   *      (transfer by the token owner himself)
+   * @dev Feature FEATURE_TRANSFERS is required to
+   *      call `transfer()` function
+   */
+  uint32 public constant FEATURE_TRANSFERS = 0x00000001;
+
+  /**
+   * @notice Enables ERC20 transfers on behalf
+   *      (transfer by someone else on behalf of token owner)
+   * @dev Feature FEATURE_TRANSFERS_ON_BEHALF is required to
+   *      call `transferFrom()` function
+   * @dev Token owner must call `approve()` first to authorize
+   *      the transfer on behalf
+   */
+  uint32 public constant FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
+
+  /**
    * @notice Token creator is responsible for creating (minting)
    *      tokens to some player address
    * @dev Role ROLE_TOKEN_CREATOR allows minting tokens
@@ -162,6 +180,9 @@ contract GoldERC20 is AccessControlLight {
    * @return true on success, throws otherwise
    */
   function transfer(address _to, uint256 _value) public returns (bool) {
+    // check if token transfers feature is enabled
+    require(isFeatureEnabled(FEATURE_TRANSFERS));
+
     // just delegate call to `transferFrom`
     return transferFrom(msg.sender, _to, _value);
   }
@@ -189,6 +210,11 @@ contract GoldERC20 is AccessControlLight {
    * @return true on success, throws otherwise
    */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    // if `_from` is equal to sender, require transfers feature to be enabled
+    // otherwise require transfers on behalf feature to be enabled
+    require(_from == msg.sender && isFeatureEnabled(FEATURE_TRANSFERS)
+         || _from != msg.sender && isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
+
     // non-zero to address check
     require(_to != address(0));
 
