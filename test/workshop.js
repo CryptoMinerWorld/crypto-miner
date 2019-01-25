@@ -34,14 +34,18 @@ contract('Workshop', (accounts) => {
 		const levelDeltas = [0, 3, 2, 1, 1];
 
 		// define grade upgrade request
-		const gradeTypeDeltas = [4, 5, 3, 1, 0];
+		const gradeDeltas = [4, 5, 3, 1, 0];
 
-		// perform calculation
-		const prices = await workshop.getUpgradePrice(gems, levelDeltas, gradeTypeDeltas);
+		// perform few gem upgrade calculations
+		const silverRequired1 = await workshop.getLevelUpPrice(gems[1], levelDeltas[1]);
+		const goldRequired1 = await workshop.getUpgradePrice(gems[1], gradeDeltas[1]);
+
+		// perform bulk calculation
+		const bulkPrice = await workshop.getBulkUpgradePrice(gems, levelDeltas, gradeDeltas);
 
 		// extract silver and gold required values
-		const silverRequired = prices[0];
-		const goldRequired = prices[1];
+		const bulkSilverRequired = bulkPrice[0];
+		const bulkGoldRequired = bulkPrice[1];
 
 		/*
 		 * Verify calculated values according to the level up and upgrade price table:
@@ -57,11 +61,15 @@ contract('Workshop', (accounts) => {
 		 *      A-AA:   8
 		 *      AA-AAA: 16
 		 *
-		 * Silver: 395 = 0 + (15 + 45 + 135) + (15 + 45) + 5 + 135
-		 * Gold:   76 = (2 + 4 + 8 + 16) + (1 + 2 + 4 + 8 + 16) + (4 + 8 + 16) + 2 + 0
+		 * Silver (1): 195 = 15 + 45 + 135
+		 * Gold (1):   31 = 1 + 2 + 4 + 8 + 16
+		 * Silver (Bulk): 395 = 0 + (15 + 45 + 135) + (15 + 45) + 5 + 135
+		 * Gold (Bulk):   76 = (2 + 4 + 8 + 16) + (1 + 2 + 4 + 8 + 16) + (4 + 8 + 16) + 2 + 0
 		 */
-		assert.equal(395, silverRequired, "wrong silver required value");
-		assert.equal(91, goldRequired, "wrong gold required value")
+		assert.equal(195, silverRequired1, "wrong silver required (1) value");
+		assert.equal(31, goldRequired1, "wrong gold required (1) value");
+		assert.equal(395, bulkSilverRequired, "wrong bulk silver required value");
+		assert.equal(91, bulkGoldRequired, "wrong bulk gold required value")
 	});
 });
 
