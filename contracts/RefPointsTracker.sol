@@ -16,6 +16,13 @@ import "./AccessControlLight.sol";
  */
 contract RefPointsTracker is AccessControlLight {
   /**
+   * @dev Smart contract version
+   * @dev Should be incremented manually in this source code
+   *      each time smart contact source code is changed and deployed
+   */
+  uint32 public constant TRACKER_VERSION = 0x1;
+
+  /**
    * @notice Referral points issuer is responsible for issuing
    *      referral points to a player address
    * @dev Role ROLE_REF_POINTS_ISSUER allows increasing `issued` -
