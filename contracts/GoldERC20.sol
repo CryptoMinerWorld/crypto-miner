@@ -21,7 +21,7 @@ contract GoldERC20 is AccessControlLight {
   /**
    * @dev Smart contract version
    * @dev Should be incremented manually in this source code
-   *      each time smart contact source code is changed
+   *      each time smart contact source code is changed and deployed
    */
   uint32 public constant TOKEN_VERSION = 0x1;
 
