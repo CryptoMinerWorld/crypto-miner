@@ -44,7 +44,7 @@ contract Workshop is AccessControlLight {
    * @dev Expected version of the deployed GoldERC20 instance
    *      this smart contract is designed to work with
    */
-  uint32 public constant GOLD_TOKEN_VERSION_REQUIRED = 0x1;
+  uint32 public constant GOLD_TOKEN_VERSION_REQUIRED = 0x10001;
 
   /**
    * @dev Maximum token level this workshop can level up gem to
@@ -111,7 +111,7 @@ contract Workshop is AccessControlLight {
     // bind smart contract instances
     gemInstance = GemERC721(gemAddress);
     silverInstance = SilverERC20(silverAddress);
-    goldInstance = GoldERC20(goldInstance);
+    goldInstance = GoldERC20(goldAddress);
 
     // verify smart contract versions
     require(gemInstance.TOKEN_VERSION() == GEM_TOKEN_VERSION_REQUIRED);

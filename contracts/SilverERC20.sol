@@ -24,7 +24,7 @@ contract SilverERC20 is GoldERC20 {
    *      each time smart contact source code is changed
    * @dev Silver also has 0x10000 bit set to distinguish from gold
    */
-  uint32 public constant TOKEN_VERSION = 0x10001;
+  uint32 public constant TOKEN_VERSION = 0x1;
 
   /**
    * @notice ERC20 symbol of that token (short name)
