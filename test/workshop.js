@@ -61,7 +61,7 @@ contract('Workshop', (accounts) => {
 		 * Gold:   76 = (2 + 4 + 8 + 16) + (1 + 2 + 4 + 8 + 16) + (4 + 8 + 16) + 2 + 0
 		 */
 		assert.equal(395, silverRequired, "wrong silver required value");
-		assert.equal(76, goldRequired, "wrong gold required value")
+		assert.equal(91, goldRequired, "wrong gold required value")
 	});
 });
 
