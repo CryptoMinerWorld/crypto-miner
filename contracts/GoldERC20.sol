@@ -63,7 +63,7 @@ contract GoldERC20 is AccessControlLight {
   /**
    * @notice Enables ERC20 transfers of the tokens
    *      (transfer by the token owner himself)
-   * @dev Feature FEATURE_TRANSFERS is required to
+   * @dev Feature FEATURE_TRANSFERS must be enabled to
    *      call `transfer()` function
    */
   uint32 public constant FEATURE_TRANSFERS = 0x00000001;
@@ -71,7 +71,7 @@ contract GoldERC20 is AccessControlLight {
   /**
    * @notice Enables ERC20 transfers on behalf
    *      (transfer by someone else on behalf of token owner)
-   * @dev Feature FEATURE_TRANSFERS_ON_BEHALF is required to
+   * @dev Feature FEATURE_TRANSFERS_ON_BEHALF must be enabled to
    *      call `transferFrom()` function
    * @dev Token owner must call `approve()` first to authorize
    *      the transfer on behalf
@@ -280,6 +280,12 @@ contract GoldERC20 is AccessControlLight {
     // check if caller has sufficient permissions to mint tokens
     require(isSenderInRole(ROLE_TOKEN_CREATOR));
 
+    // non-zero recipient address check
+    require(_to != address(0));
+
+    // non-zero mint value check
+    require(_value != 0);
+
     // increase `_to` address balance
     tokenBalances[_to] += _value;
 
@@ -302,6 +308,12 @@ contract GoldERC20 is AccessControlLight {
   function burn(address _from, uint256 _value) public {
     // check if caller has sufficient permissions to burn tokens
     require(isSenderInRole(ROLE_TOKEN_DESTROYER));
+
+    // zero supplier address impossible by design of mint
+    assert(_from != address(0));
+
+    // non-zero burn value check
+    require(_value != 0);
 
     // verify `_from` address has enough tokens to destroy
     // (basically this is a arithmetic overflow check)

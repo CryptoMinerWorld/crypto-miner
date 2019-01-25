@@ -14,37 +14,33 @@ const ROLE_TOKEN_DESTROYER = 0x00000002;
 const TOKEN_VERSION_LENGTH = 0x10000;
 
 // GoldERC20 smart contract
-const Token = artifacts.require("./GoldERC20.sol");
+const Gold = artifacts.require("./GoldERC20.sol");
 // Silver smart contract
-const Token1 = artifacts.require("./SilverERC20.sol");
+const Silver = artifacts.require("./SilverERC20.sol");
 
 contract('GoldERC20', (accounts) => {
 	it("config: gold and silver tokens are distinguishable", async() => {
-		const tk = await Token.new();
-		const tk1 = await Token1.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
 
-		const version = await tk.TOKEN_VERSION();
-		const version1 = await tk1.TOKEN_VERSION();
-
-		console.log(version1.toString(10));
+		const silverVersion = await silver.TOKEN_VERSION();
+		const goldVersion = await gold.TOKEN_VERSION();
 
 		// high token version bits represent Silver (1) / Gold (0) flag
-		const high = version.dividedToIntegerBy(TOKEN_VERSION_LENGTH);
-		const high1 = version1.dividedToIntegerBy(TOKEN_VERSION_LENGTH);
-
-		console.log(high1.toString(10));
+		const silverHigh = silverVersion.dividedToIntegerBy(TOKEN_VERSION_LENGTH);
+		const goldHigh = goldVersion.dividedToIntegerBy(TOKEN_VERSION_LENGTH);
 
 		// low token version bits represent token version itself
-		const low = version.modulo(TOKEN_VERSION_LENGTH);
-		const low1 = version1.modulo(TOKEN_VERSION_LENGTH);
+		const silverLow = silverVersion.modulo(TOKEN_VERSION_LENGTH);
+		const goldLow = goldVersion.modulo(TOKEN_VERSION_LENGTH);
 
 		// verify correct Silver/Gold flags
-		assert.equal(0, high, "incorrect high token version bits for Gold token");
-		assert.equal(1, high1, "incorrect high token version bits for Silver token");
+		assert.equal(0, silverHigh, "incorrect high token version bits for Silver token");
+		assert.equal(1, goldHigh, "incorrect high token version bits for Gold token");
 	});
 
 	it("initial state: balances and allowances are zero", async() => {
-		const tk = await Token.new();
+		const tk = await Gold.new();
 		const account0 = accounts[0];
 		assert.equal(0, await tk.totalSupply(), "non-zero initial value for totalSupply()");
 		assert.equal(0, await tk.balanceOf(account0), "non-zero initial value for balanceOf(account0)");
@@ -55,7 +51,7 @@ contract('GoldERC20', (accounts) => {
 		assert(ROLE_TOKEN_CREATOR != ROLE_TOKEN_DESTROYER, "creator and destroyer permissions are equal");
 	});
 	it("permissions: minting tokens requires ROLE_TOKEN_CREATOR permission", async() => {
-		const tk = await Token.new();
+		const tk = await Gold.new();
 
 		// token creator
 		const creator = accounts[1];
@@ -79,7 +75,7 @@ contract('GoldERC20', (accounts) => {
 		assert.equal(1, await tk.balanceOf(player), "incorrect token balance after minting a token");
 	});
 	it("permissions: burning tokens requires ROLE_TOKEN_DESTROYER permission", async() => {
-		const tk = await Token.new();
+		const tk = await Gold.new();
 
 		// token destroyer
 		const destroyer = accounts[1];
@@ -112,7 +108,7 @@ contract('GoldERC20', (accounts) => {
 		assert(FEATURE_TRANSFERS != FEATURE_TRANSFERS_ON_BEHALF, "transfers and transfers on behalf features are equal");
 	});
 	it("permissions: transfers require FEATURE_TRANSFERS feature to be enabled", async() => {
-		const tk = await Token.new();
+		const tk = await Gold.new();
 
 		// players
 		const player1 = accounts[1];
@@ -148,7 +144,7 @@ contract('GoldERC20', (accounts) => {
 		assert.equal(0, await tk.balanceOf(player2), "non-zero player 2 balance after several transfers");
 	});
 	it("permissions: transfers on behalf require FEATURE_TRANSFERS_ON_BEHALF feature to be enabled", async() => {
-		const tk = await Token.new();
+		const tk = await Gold.new();
 
 		// players
 		const player1 = accounts[1];
@@ -183,7 +179,7 @@ contract('GoldERC20', (accounts) => {
 	});
 
 	it("minting and burning: general flow", async() => {
-		const tk = await Token.new();
+		const tk = await Gold.new();
 
 		// token creator
 		const creator = accounts[1];
@@ -197,9 +193,11 @@ contract('GoldERC20', (accounts) => {
 		// some random amount of tokens
 		const amt = rnd();
 
-		// functions to mint ant burn tokens
-		const mint = async() => await tk.mint(player, amt, {from: creator});
-		const burn = async() => await tk.burn(player, amt, {from: destroyer});
+		// functions to mint and burn tokens
+		const mintTo = async(to, amt) => await tk.mint(to, amt, {from: creator});
+		const mint = async() => await mintTo(player, amt);
+		const burnFrom = async(from, amt) => await tk.burn(from, amt, {from: destroyer});
+		const burn = async() => await burnFrom(player, amt);
 
 		// initial token balance is zero
 		assert.equal(0, await tk.balanceOf(player), "non-zero initial player balance");
@@ -214,8 +212,17 @@ contract('GoldERC20', (accounts) => {
 		// mint some tokens
 		await mint();
 
+		// impossible to mint to zero address
+		await assertThrowsAsync(mintTo, 0, amt);
+
+		// impossible to mint zero value
+		await assertThrowsAsync(mintTo, player, 0);
+
 		// verify token balance
 		assert.equal(amt, await tk.balanceOf(player), "incorrect token balance after minting some tokens");
+
+		// impossible to burn zero value
+		await assertThrowsAsync(burnFrom, player, 0);
 
 		// burning is possible now: there is enough tokens to burn
 		await burn();
@@ -228,7 +235,7 @@ contract('GoldERC20', (accounts) => {
 	});
 
 	it("transfers: transferring tokens", async() => {
-		const tk = await Token.new();
+		const tk = await Gold.new();
 
 		// enable feature: transfers (required)
 		await tk.updateFeatures(FEATURE_TRANSFERS);
@@ -265,7 +272,7 @@ contract('GoldERC20', (accounts) => {
 		assert.equal(amt, await tk.balanceOf(player2), "wrong player 2 balance (1)");
 	});
 	it("transfers: transferring on behalf", async() => {
-		const tk = await Token.new();
+		const tk = await Gold.new();
 
 		// enable feature: transfers on behalf (required)
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
@@ -308,7 +315,7 @@ contract('GoldERC20', (accounts) => {
 	});
 
 	it("transfers: transfer arithmetic check", async() => {
-		const tk = await Token.new();
+		const tk = await Gold.new();
 
 		// enable feature: transfers (required)
 		await tk.updateFeatures(FEATURE_TRANSFERS);
@@ -344,7 +351,7 @@ contract('GoldERC20', (accounts) => {
 		assert.equal(rnd_max, await tk.balanceOf(player2), "wrong player 2 balance after transferring all the tokens");
 	});
 	it("transfers: transfer on behalf arithmetic check", async() => {
-		const tk = await Token.new();
+		const tk = await Gold.new();
 
 		// enable feature: transfers on behalf (required)
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
