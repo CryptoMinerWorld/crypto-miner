@@ -137,7 +137,7 @@ contract Workshop is AccessControlLight {
   /**
    * @notice Calculates amount of silver required to perform level up
    *      of a particular gem by a level delta specified
-   * @dev This function contains same logic as in `levelUpBy()` and can
+   * @dev This function contains same logic as in `upgrade()` and can
    *      be used before calling it externally to check
    *      sender has enough silver to perform the transaction
    * @dev Throws if `tokenId` is invalid (non-existent token)

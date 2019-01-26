@@ -221,6 +221,9 @@ contract('GoldERC20', (accounts) => {
 		// verify token balance
 		assert.equal(amt, await tk.balanceOf(player), "incorrect token balance after minting some tokens");
 
+		// verify total supply
+		assert.equal(amt, await tk.totalSupply(), "incorrect total supply after minting some tokens");
+
 		// impossible to burn zero value
 		await assertThrowsAsync(burnFrom, player, 0);
 
@@ -229,6 +232,9 @@ contract('GoldERC20', (accounts) => {
 
 		// verify token balance
 		assert.equal(0, await tk.balanceOf(player), "incorrect token balance after burning the tokens");
+
+		// verify total supply
+		assert.equal(0, await tk.totalSupply(), "incorrect total supply after burning some tokens");
 
 		// burning cannot be called now again
 		await assertThrowsAsync(burn);

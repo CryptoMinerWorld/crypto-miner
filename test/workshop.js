@@ -1,3 +1,12 @@
+// Level provider is responsible for enabling the workshop
+const ROLE_LEVEL_PROVIDER = 0x00100000;
+
+// Grade provider is responsible for enabling the workshop
+const ROLE_GRADE_PROVIDER = 0x00200000;
+
+// Enables gem leveling up and grade type upgrades
+const FEATURE_UPGRADES_ENABLED = 0x00000001;
+
 // Token destroyer is responsible for destroying tokens
 const ROLE_TOKEN_DESTROYER = 0x00000002;
 
@@ -24,11 +33,11 @@ contract('Workshop', (accounts) => {
 		const gems = [1, 2, 3, 4, 5];
 
 		// create these gems
-		await gem.mint(accounts[0], 1, 1, 0, 1, 1, 1, 2, 1);
-		await gem.mint(accounts[0], 2, 1, 0, 1, 1, 2, 1, 1);
-		await gem.mint(accounts[0], 3, 1, 0, 1, 1, 2, 3, 1);
-		await gem.mint(accounts[0], 4, 1, 0, 1, 1, 1, 2, 1);
-		await gem.mint(accounts[0], 5, 1, 0, 1, 1, 4, 1, 1);
+		await gem.mint(accounts[0], 1, 1, 0, 1, 1, 1, 2, 1); // level: 1, grade: 2 (C)
+		await gem.mint(accounts[0], 2, 1, 0, 1, 1, 2, 1, 1); // level: 2, grade: 1 (D)
+		await gem.mint(accounts[0], 3, 1, 0, 1, 1, 2, 3, 1); // level: 2, grade: 3 (B)
+		await gem.mint(accounts[0], 4, 1, 0, 1, 1, 1, 5, 1); // level: 1, grade: 5 (AA)
+		await gem.mint(accounts[0], 5, 1, 0, 1, 1, 4, 1, 1); // level: 4, grade: 1 (D)
 
 		// define level upgrade request
 		const levelDeltas = [0, 3, 2, 1, 1];
@@ -64,12 +73,157 @@ contract('Workshop', (accounts) => {
 		 * Silver (1): 195 = 15 + 45 + 135
 		 * Gold (1):   31 = 1 + 2 + 4 + 8 + 16
 		 * Silver (Bulk): 395 = 0 + (15 + 45 + 135) + (15 + 45) + 5 + 135
-		 * Gold (Bulk):   76 = (2 + 4 + 8 + 16) + (1 + 2 + 4 + 8 + 16) + (4 + 8 + 16) + 2 + 0
+		 * Gold (Bulk):   76 = (2 + 4 + 8 + 16) + (1 + 2 + 4 + 8 + 16) + (4 + 8 + 16) + 16 + 0
 		 */
 		assert.equal(195, silverRequired1, "wrong silver required (1) value");
 		assert.equal(31, goldRequired1, "wrong gold required (1) value");
 		assert.equal(395, bulkSilverRequired, "wrong bulk silver required value");
-		assert.equal(91, bulkGoldRequired, "wrong bulk gold required value")
+		assert.equal(105, bulkGoldRequired, "wrong bulk gold required value")
+	});
+
+	it("upgrades: performing an upgrade", async() => {
+		// construct workshop dependencies
+		const gem = await Gem.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+
+		// construct workshop itself
+		const workshop = await Workshop.new(gem.address, silver.address, gold.address);
+
+		// mint a gem to level up and upgrade
+		await gem.mint(accounts[0], 1, 1, 0, 1, 1, 1, 1, 1); // level: 1, grade: 2 (C)
+
+		// define level up function
+		const fn1 = async() => await workshop.upgrade(1, 3, 0);
+		// define grade upgrade function
+		const fn2 = async() => await workshop.upgrade(1, 0, 3);
+		// define function which both levels up and upgrades gem
+		const fn3 = async() => await workshop.upgrade(1, 1, 1);
+		// define grade upgrade to upgrade grade by 1
+		const fn4 = async() => await workshop.upgrade(1, 0, 1);
+
+		// enable upgrades on the workshop
+		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
+		// grant a workshop ROLE_TOKEN_DESTROYER role on both silver and gold
+		await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+		// grant the workshop permissions required on the gem smart contract
+		await gem.addOperator(workshop.address, ROLE_LEVEL_PROVIDER);
+		await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
+
+		// we didn't mint any silver / gold – so the workshop won't work
+		await assertThrowsAsync(fn1);
+		await assertThrowsAsync(fn2);
+		await assertThrowsAsync(fn3);
+		await assertThrowsAsync(fn4);
+
+		// mint required silver and gold amounts
+		await silver.mint(accounts[0], 10200);
+		await gold.mint(accounts[0], 1031);
+
+		// disable upgrades on the workshop and verify workshop doesn't work
+		await workshop.updateFeatures(0);
+		// leveling up and upgrades are disabled
+		await assertThrowsAsync(fn1);
+		await assertThrowsAsync(fn2);
+		await assertThrowsAsync(fn3);
+		await assertThrowsAsync(fn4);
+		// enable feature back
+		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
+
+		// revoke silver related permissions
+		await silver.updateRole(workshop.address, 0);
+		// verify silver consuming transactions fail
+		await assertThrowsAsync(fn1);
+		await assertThrowsAsync(fn3);
+		// grant silver related permission back
+		await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+
+		// revoke gold related permissions
+		await gold.updateRole(workshop.address, 0);
+		// verify gold consuming transactions fail
+		await assertThrowsAsync(fn2);
+		await assertThrowsAsync(fn3);
+		await assertThrowsAsync(fn4);
+		// grant gold related permission back
+		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+
+		// revoke level provider role from the workshop and verify leveling up fails
+		await gem.removeRole(workshop.address, ROLE_LEVEL_PROVIDER);
+		// verify level up transaction fails
+		await assertThrowsAsync(fn1);
+		await assertThrowsAsync(fn3);
+		// grant role level provider back
+		await gem.addRole(workshop.address, ROLE_LEVEL_PROVIDER);
+
+		// revoke grade provider role from the workshop and verify upgrades fail
+		await gem.removeRole(workshop.address, ROLE_GRADE_PROVIDER);
+		// verify upgrade transaction fails
+		await assertThrowsAsync(fn2);
+		await assertThrowsAsync(fn3);
+		await assertThrowsAsync(fn4);
+		// grant role grade provider back
+		await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
+
+		// perform a level up
+		await fn1();
+		// verify gem leveled up correctly
+		assert.equal(4, await gem.getLevel(1), "incorrect gem level after successful level up");
+		// verify silver was consumed
+		assert.equal(10135, await silver.balanceOf(accounts[0]), "incorrect silver balance after successful level up");
+		assert.equal(10135, await silver.totalSupply(), "incorrect silver total supply after successful level up");
+
+		// perform grade upgrade
+		await fn2();
+		// verify gem grade was changed correctly
+		assert.equal(4, await gem.getGradeType(1), "incorrect gem grade type after successful upgrade");
+		// TODO: verify grade value
+		// verify gold was consumed
+		assert.equal(1024, await gold.balanceOf(accounts[0]), "incorrect gold balance after successful upgrade");
+		assert.equal(1024, await gold.totalSupply(), "incorrect gold total supply after successful upgrade");
+
+		// due to level and grade constraints leveling up and upgrading by 3 is impossible
+		await assertThrowsAsync(fn1);
+		await assertThrowsAsync(fn2);
+
+		// leveling up and upgrading is still possible by 1 until maximum is reached
+		await fn3();
+		// verify the changes
+		assert.equal(5, await gem.getLevel(1), "incorrect gem level after second level up");
+		assert.equal(5, await gem.getGradeType(1), "incorrect gem grade type after second upgrade");
+		// verify silver and gold was consumed correctly
+		assert.equal(10000, await silver.balanceOf(accounts[0]), "incorrect silver balance after second level up");
+		assert.equal(1016, await gold.balanceOf(accounts[0]), "incorrect gold balance after second upgrade");
+
+		// last successful gem upgrade is possible
+		await fn4();
+		// verify the changes
+		assert.equal(5, await gem.getLevel(1), "incorrect gem level after third level up");
+		assert.equal(6, await gem.getGradeType(1), "incorrect gem grade type after third upgrade");
+		// verify silver and gold was consumed correctly
+		assert.equal(10000, await silver.balanceOf(accounts[0]), "incorrect silver balance after third level up");
+		assert.equal(1000, await gold.balanceOf(accounts[0]), "incorrect gold balance after third` upgrade");
+
+		// the gems is on its maximum level and grade, no upgrades are possible anymore
+		await assertThrowsAsync(fn1);
+		await assertThrowsAsync(fn2);
+		await assertThrowsAsync(fn3);
+		await assertThrowsAsync(fn4);
 	});
 });
 
+// auxiliary function to ensure function `fn` throws
+async function assertThrowsAsync(fn, ...args) {
+	let f = () => {};
+	try {
+		await fn(...args);
+	}
+	catch(e) {
+		f = () => {
+			throw e;
+		};
+	}
+	finally {
+		assert.throws(f);
+	}
+}
