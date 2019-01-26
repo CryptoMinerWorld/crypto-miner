@@ -222,43 +222,8 @@ contract Workshop is AccessControlLight {
     // verify that upgrades are enabled
     require(isFeatureEnabled(FEATURE_UPGRADES_ENABLED));
 
-    // ensure token is owned by the sender, it also ensures token exists
-    require(gemInstance.ownerOf(tokenId) == msg.sender);
-
-    // get amount of silver required to level up the gem
-    uint8 silverRequired = getLevelUpPrice(tokenId, levelDelta);
-
-    // get amount of gold required to upgrade the gem
-    uint8 goldRequired = getUpgradePrice(tokenId, gradeTypeDelta);
-
-    // verify the level up / upgrade operation results
-    // in the gem's level / grade change:
-    // verify at least one of the prices is not zero
-    require(silverRequired != 0 || goldRequired != 0);
-
-    // if level up is requested
-    if(silverRequired != 0) {
-      // burn amount of silver required
-      silverInstance.burn(msg.sender, silverRequired);
-
-      // and perform a level up
-      for(uint256 i = 0; i < levelDelta; i++) {
-        // increment gem level by 1
-        gemInstance.levelUp(tokenId);
-      }
-    }
-
-    // if grade type upgrade is requested
-    if(goldRequired != 0) {
-      // burn amount of gold required
-      goldInstance.burn(msg.sender, goldRequired);
-
-      // perform token grade type upgrade
-      gemInstance.upgradeGrade(tokenId, uint32(gemInstance.getGradeType(tokenId) + gradeTypeDelta) << 24); // TODO: generate random grade value
-    }
-
-    // emit an event
-    emit UpgradeComplete(tokenId, gemInstance.getLevel(tokenId), gemInstance.getGrade(tokenId));
+    // delegate call to `__upgrade`
+    __upgrade(tokenId, levelDelta, gradeTypeDelta);
   }
 
   /**
@@ -351,6 +316,9 @@ contract Workshop is AccessControlLight {
    *      corresponds to an element in tokenIds with the same index
    */
   function bulkUpgrade(uint32[] tokenIds, uint8[] levelDeltas, uint8[] gradeDeltas) public {
+    // verify that upgrades are enabled
+    require(isFeatureEnabled(FEATURE_UPGRADES_ENABLED));
+
     // perform input array lengths validations
     require(tokenIds.length != 0);
     require(tokenIds.length == levelDeltas.length);
@@ -359,9 +327,69 @@ contract Workshop is AccessControlLight {
     // iterate the data and perform an upgrade
     for(uint256 i = 0; i < tokenIds.length; i++) {
       // perform an individual gem upgrade
-      upgrade(tokenIds[i], levelDeltas[i], gradeDeltas[i]);
+      __upgrade(tokenIds[i], levelDeltas[i], gradeDeltas[i]);
     }
   }
 
+  /**
+   * @notice Levels up and/or upgrades a particular gem
+   * @dev Increases gem's level and/or grade type by the values specified
+   * @dev Throws if `tokenId` is invalid (non-existent token)
+   * @dev Throws if `levelDelta` is invalid, i.e. violates
+   *      token level constraints (maximum level)
+   * @dev Throws if `gradeTypeDelta` is invalid, i.e. violates
+   *      token grade constraints (maximum grade)
+   * @dev Throws if `levelDelta` and `gradeTypeDelta` (level delta and
+   *      grade delta combination) result in no level/grade change for the gem
+   *      (ex.: both `levelDelta` and `gradeTypeDelta` are zero)
+   * @dev Requires transaction sender to be an owner of the gem
+   * @dev Throws if token owner (transaction sender) has not enough
+   *      gold and/or silver on the balance
+   * @dev Consumes gold and/or silver on success, amounts can be
+   *      calculated using `getLevelUpPrice()` and `getUpgradePrice()` functions
+   * @dev Private, doesn't check if FEATURE_UPGRADES_ENABLED feature is enabled
+   * @param tokenId ID of the gem to level up / upgrade
+   * @param levelDelta number of levels to increase token level by
+   * @param gradeTypeDelta number of grades to increase token grade by
+   */
+  function __upgrade(uint32 tokenId, uint8 levelDelta, uint8 gradeTypeDelta) private {
+    // ensure token is owned by the sender, it also ensures token exists
+    require(gemInstance.ownerOf(tokenId) == msg.sender);
+
+    // get amount of silver required to level up the gem
+    uint8 silverRequired = getLevelUpPrice(tokenId, levelDelta);
+
+    // get amount of gold required to upgrade the gem
+    uint8 goldRequired = getUpgradePrice(tokenId, gradeTypeDelta);
+
+    // verify the level up / upgrade operation results
+    // in the gem's level / grade change:
+    // verify at least one of the prices is not zero
+    require(silverRequired != 0 || goldRequired != 0);
+
+    // if level up is requested
+    if(silverRequired != 0) {
+      // burn amount of silver required
+      silverInstance.burn(msg.sender, silverRequired);
+
+      // and perform a level up
+      for(uint256 i = 0; i < levelDelta; i++) {
+        // increment gem level by 1
+        gemInstance.levelUp(tokenId);
+      }
+    }
+
+    // if grade type upgrade is requested
+    if(goldRequired != 0) {
+      // burn amount of gold required
+      goldInstance.burn(msg.sender, goldRequired);
+
+      // perform token grade type upgrade
+      gemInstance.upgradeGrade(tokenId, uint32(gemInstance.getGradeType(tokenId) + gradeTypeDelta) << 24); // TODO: generate random grade value
+    }
+
+    // emit an event
+    emit UpgradeComplete(tokenId, gemInstance.getLevel(tokenId), gemInstance.getGrade(tokenId));
+  }
 
 }
