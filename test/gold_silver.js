@@ -239,6 +239,51 @@ contract('GoldERC20', (accounts) => {
 		// burning cannot be called now again
 		await assertThrowsAsync(burn);
 	});
+	it("minting: arithmetic overflow check", async() => {
+		const tk = await Gold.new();
+
+		// token creator
+		const creator = accounts[1];
+
+		// token destroyer
+		const destroyer = accounts[2];
+
+		// players (addresses to mint tokens to)
+		const player1 = accounts[3];
+		const player2 = accounts[4];
+
+		// functions to mint tokens
+		const mint1 = async() => await tk.mint(player1, big_max);
+		const mint2 = async() => await tk.mint(player2, big_max);
+
+		// functions to burn tokens
+		const burn1 = async() => await tk.burn(player1, big_max);
+		const burn2 = async() => await tk.burn(player2, big_max);
+
+		// grant creator and destroyer permission required
+		await tk.updateRole(creator, ROLE_TOKEN_CREATOR);
+		await tk.updateRole(destroyer, ROLE_TOKEN_DESTROYER);
+
+		// mint maximum value of tokens
+		await mint1();
+		// impossible to mint more tokens to the same player:
+		await assertThrowsAsync(mint1);
+		// impossible to mint more tokens to any other player:
+		await assertThrowsAsync(mint2);
+
+		// burn the tokens
+		await burn1();
+		// now we can mint them to some other player
+		await mint2();
+		// but we cannot mint them to first player anymore - overflow
+		await assertThrowsAsync(mint1);
+
+		// after burning the tokens
+		await burn2();
+
+		// total supply is zero again
+		assert.equal(0, await tk.totalSupply(), "non-zero total supply after burning all the tokens");
+	});
 
 	it("transfers: transferring tokens", async() => {
 		const tk = await Gold.new();
@@ -407,8 +452,39 @@ contract('GoldERC20', (accounts) => {
 		// verify final allowance
 		assert.equal(2, await tk.allowance(player1, exchange), "wrong allowance for exchange by player 1 after full transfer");
 	});
+	it("transfers: transfer / transfer on behalf zero value checks", async() => {
+		const tk = await Gold.new();
+
+		// enable feature: transfers on behalf (required)
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+
+		// players
+		const player1 = accounts[1];
+		const player2 = accounts[2];
+
+		// mint maximum tokens to player 1
+		await tk.mint(player1, rnd_max);
+
+		// token transfer function
+		const fn = async(to, amt) => await tk.transfer(to, amt, {from: player1});
+
+		// fix some amount to be sent eventually
+		const amt = rnd();
+
+		// impossible to transfer to zero address or zero amount
+		await assertThrowsAsync(fn, player2, 0);
+		await assertThrowsAsync(fn, 0, amt);
+		// impossible to transfer to the player itself
+		await assertThrowsAsync(fn, player1, amt);
+
+		// successful operation with non-zero values and different address
+		await fn(player2, amt);
+	});
 
 });
+
+// maximum big number value
+const big_max = web3.toBigNumber("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
 
 // maximum random value (exclusive)
 const rnd_max = 4294967296;

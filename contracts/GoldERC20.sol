@@ -218,6 +218,15 @@ contract GoldERC20 is AccessControlLight {
     // non-zero to address check
     require(_to != address(0));
 
+    // sender and recipient cannot be the same
+    require(_from != _to);
+
+    // zero value transfer check
+    require(_value != 0);
+
+    // by design of mint() -
+    // - no need to make arithmetic overflow check on the _value
+
     // in case of transfer on behalf
     if(_from != msg.sender) {
       // verify sender has an allowance to transfer amount of tokens requested
@@ -229,9 +238,6 @@ contract GoldERC20 is AccessControlLight {
 
     // verify sender has enough tokens to transfer on behalf
     require(tokenBalances[_from] >= _value);
-
-    // target balance overflow check, zero value transfer check
-    require(tokenBalances[_to] + _value > tokenBalances[_to]);
 
     // perform the transfer:
     // decrease token owner (sender) balance
@@ -283,8 +289,9 @@ contract GoldERC20 is AccessControlLight {
     // non-zero recipient address check
     require(_to != address(0));
 
-    // non-zero mint value check
-    require(_value != 0);
+    // non-zero _value and arithmetic overflow check on the total supply
+    // this check automatically secures arithmetic overflow on the individual balance
+    require(tokensTotal + _value > tokensTotal);
 
     // increase `_to` address balance
     tokenBalances[_to] += _value;
@@ -309,19 +316,12 @@ contract GoldERC20 is AccessControlLight {
     // check if caller has sufficient permissions to burn tokens
     require(isSenderInRole(ROLE_TOKEN_DESTROYER));
 
-    // zero supplier address impossible by design of mint
-    assert(_from != address(0));
-
     // non-zero burn value check
     require(_value != 0);
 
     // verify `_from` address has enough tokens to destroy
     // (basically this is a arithmetic overflow check)
     require(tokenBalances[_from] >= _value);
-
-    // arithmetic overflow check for tokens total
-    // this situation is impossible by design (previous check)
-    assert(tokensTotal >= _value);
 
     // decrease `_from` address balance
     tokenBalances[_from] -= _value;
