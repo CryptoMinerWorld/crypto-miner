@@ -120,8 +120,9 @@ contract Workshop is AccessControlLight {
     require(gemAddress != address(0));
     require(silverAddress != address(0));
     require(goldAddress != address(0));
-    require(gemAddress != goldAddress);
+    require(gemAddress != silverAddress);
     require(silverAddress != goldAddress);
+    require(goldAddress != gemAddress);
 
     // bind smart contract instances
     gemInstance = GemERC721(gemAddress);

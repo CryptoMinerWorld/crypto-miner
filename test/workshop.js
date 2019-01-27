@@ -10,6 +10,9 @@ const FEATURE_UPGRADES_ENABLED = 0x00000001;
 // Token destroyer is responsible for destroying tokens
 const ROLE_TOKEN_DESTROYER = 0x00000002;
 
+// Enables ERC721 transfers of the tokens
+const FEATURE_TRANSFERS = 0x00000001;
+
 // GemERC721 smart contract
 const Gem = artifacts.require("./GemERC721.sol");
 // Silver smart contract
@@ -20,6 +23,176 @@ const Gold = artifacts.require("./GoldERC20.sol");
 const Workshop = artifacts.require("./Workshop.sol");
 
 contract('Workshop', (accounts) => {
+	it("wrong inputs: constructor", async() => {
+		// construct workshop dependencies
+		const gem = await Gem.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+
+		// define new workshop function
+		const fn = async(a, b, c) => await Workshop.new(a, b, c);
+
+		// zero inputs check
+		await assertThrowsAsync(fn, 0, silver.address, gold.address);
+		await assertThrowsAsync(fn, gem.address, 0, gold.address);
+		await assertThrowsAsync(fn, gem.address, silver.address, 0);
+
+		// all inputs are different
+		await assertThrowsAsync(fn, gem.address, gem.address, gold.address);
+		await assertThrowsAsync(fn, gem.address, silver.address, silver.address);
+		await assertThrowsAsync(fn, gold.address, silver.address, gold.address);
+
+		// verify versions exist and correct
+		await assertThrowsAsync(fn, accounts[1], silver.address, gold.address);
+		await assertThrowsAsync(fn, gem.address, accounts[2], gold.address);
+		await assertThrowsAsync(fn, gem.address, silver.address, accounts[3]);
+	});
+	it("wrong inputs: level up and upgrade prices calculation", async() => {
+		// construct workshop dependencies
+		const gem = await Gem.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+
+		// construct workshop itself
+		const workshop = await Workshop.new(gem.address, silver.address, gold.address);
+
+		// define player account
+		const player = accounts[1];
+
+		// mint a gem to level up and upgrade
+		await gem.mint(player, 1, 1, 0, 1, 1, 3, 3, 1); // level: 3, grade: 3 (C)
+
+		// functions to estimate silver and gold prices
+		const fn1 = async(delta) => await workshop.getLevelUpPrice(1, delta);
+		const fn2 = async(delta) => await workshop.getUpgradePrice(1, delta);
+
+		// functions succeed until maximum level/grade is reached
+		await fn1(1);
+		await fn2(1);
+		await fn1(2);
+		await fn2(2);
+		await assertThrowsAsync(fn1, 3);
+		await fn2(3);
+		await assertThrowsAsync(fn1, 4);
+		await assertThrowsAsync(fn2, 4);
+		// arithmetic overflow checks
+		await assertThrowsAsync(fn1, 254);
+		await assertThrowsAsync(fn2, 254);
+	});
+	it("wrong inputs: bulk upgrade price", async() => {
+		// construct workshop dependencies
+		const gem = await Gem.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+
+		// construct workshop itself
+		const workshop = await Workshop.new(gem.address, silver.address, gold.address);
+
+		// define player account
+		const player = accounts[1];
+
+		// define some gems: ids, initial levels and grades, how much to level up / upgrade
+		const gemIds   = [1, 2, 3, 4, 5]; // gem IDs
+		const levels   = [1, 2, 2, 1, 4]; // initial levels
+		const grades   = [2, 1, 3, 5, 1]; // initial grades
+		const lvlUps   = [0, 3, 2, 1, 0]; // level deltas (how much to increase)
+		const upgrades = [4, 5, 3, 1, 0]; // grade deltas (how much to increase)
+
+		// create the gems
+		for(let i = 0; i < gemIds.length; i++) {
+			await gem.mint(player, gemIds[i], 1, 0, 1, 1, levels[i], grades[i], 1);
+		}
+
+		// bulk upgrade price calculation function
+		const fn = async(a, b, c) => await workshop.getBulkUpgradePrice(a, b, c);
+
+		// test wrong params
+		await assertThrowsAsync(fn, [], lvlUps, upgrades);
+		await assertThrowsAsync(fn, gemIds, [], upgrades);
+		await assertThrowsAsync(fn, gemIds, lvlUps, []);
+		await assertThrowsAsync(fn, gemIds, lvlUps, upgrades);
+
+		// fix lvlUps
+		lvlUps[4] = 1;
+		// and try one more last time - successful
+		await fn(gemIds, lvlUps, upgrades);
+	});
+	it("wrong inputs: bulk upgrade", async() => {
+		// construct workshop dependencies
+		const gem = await Gem.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+
+		// construct workshop itself
+		const workshop = await Workshop.new(gem.address, silver.address, gold.address);
+
+		// define player accounts
+		const player = accounts[1];
+		const player1 = accounts[2];
+
+		// define some gems: ids, initial levels and grades, how much to level up / upgrade
+		const gemIds   = [1, 2, 3, 4, 5]; // gem IDs
+		const levels   = [1, 2, 2, 1, 4]; // initial levels
+		const grades   = [2, 1, 3, 5, 1]; // initial grades
+		const lvlUps   = [0, 3, 2, 1, 0]; // level deltas (how much to increase)
+		const upgrades = [4, 5, 3, 1, 0]; // grade deltas (how much to increase)
+
+		// create the gems
+		for(let i = 0; i < gemIds.length; i++) {
+			await gem.mint(player, gemIds[i], 1, 0, 1, 1, levels[i], grades[i], 1);
+		}
+
+		// bulk upgrade price calculation function
+		const fn = async(a, b, c) => await workshop.bulkUpgrade(a, b, c, {from: player});
+
+		// enable upgrades on the workshop
+		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
+		// grant a workshop ROLE_TOKEN_DESTROYER role on both silver and gold
+		await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+		// grant the workshop permissions required on the gem smart contract
+		await gem.addOperator(workshop.address, ROLE_LEVEL_PROVIDER);
+		await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
+
+		// mint required silver and gold amounts
+		await silver.mint(player, 10395);
+		await gold.mint(player, 10105);
+
+		// test wrong params
+		await assertThrowsAsync(fn, [], lvlUps, upgrades);
+		await assertThrowsAsync(fn, gemIds, [], upgrades);
+		await assertThrowsAsync(fn, gemIds, lvlUps, []);
+		await assertThrowsAsync(fn, gemIds, lvlUps, upgrades);
+
+		// fix lvlUps
+		lvlUps[4] = 1;
+
+		// what if one of the gems belongs to some other player
+		// enable gem transfers
+		await gem.updateFeatures(FEATURE_TRANSFERS);
+		// transfer a gem to some other account
+		await gem.transfer(player1, gemIds[4], {from: player});
+		// try to perform an upgrade
+		await assertThrowsAsync(fn, gemIds, lvlUps, upgrades);
+		// transfer the gem back
+		await gem.transfer(player, gemIds[4], {from: player1});
+
+		// and try one more last time - successful
+		await fn(gemIds, lvlUps, upgrades);
+
+		// verify new levels and grades
+		for(let i = 0; i < gemIds.length; i++) {
+			// verify level at index i
+			assert.equal(levels[i] + lvlUps[i], await gem.getLevel(gemIds[i]), "wrong level at " + i);
+			// verify grade at index i
+			assert.equal(grades[i] + upgrades[i], await gem.getGradeType(gemIds[i]), "wrong grade type at " + i);
+			// TODO: verify grade value
+		}
+
+		// verify silver an gold was consumed correctly
+		assert.equal(10000, await silver.balanceOf(player), "wrong silver balance after bulk level up");
+		assert.equal(10000, await gold.balanceOf(player), "wrong gold balance after bulk upgrade");
+	});
 	it("upgrades: price calculation - general flow", async() => {
 		// construct workshop dependencies
 		const gem = await Gem.new();
@@ -255,8 +428,6 @@ contract('Workshop', (accounts) => {
 		 * Gold:   167 = (2 + 4 + 8 + 16) + (1 + 2 + 4 + 8 + 16) + (4 + 8 + 16) + 16 + 0 + (1 + 2) + 16 + (1 + 2 + 4 + 8) + 4 + (8 + 16)
 		 */
 
-		// enable upgrades on the workshop
-		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
 		// grant a workshop ROLE_TOKEN_DESTROYER role on both silver and gold
 		await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
@@ -268,8 +439,17 @@ contract('Workshop', (accounts) => {
 		await silver.mint(player, 10705);
 		await gold.mint(player, 10167);
 
+		// define bulk upgrade function
+		const fn = async() => await workshop.bulkUpgrade(gemIds, lvlUps, upgrades, {from: player});
+
+		// make sure bulk upgrade requires FEATURE_UPGRADES_ENABLED feature enabled
+		await assertThrowsAsync(fn);
+
+		// enable upgrades on the workshop
+		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
+
 		// perform bulk upgrade
-		await workshop.bulkUpgrade(gemIds, lvlUps, upgrades, {from: player});
+		await fn();
 
 		// verify new levels and grades
 		for(let i = 0; i < gemIds.length; i++) {
