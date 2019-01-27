@@ -691,7 +691,7 @@ contract Presale2 is AccessControl {
   // determines color ID randomly
   function __colorId(uint16 randomness) private constant returns (uint8) {
     // pick random color from array of available colors
-    return colors[Random.__rndVal(randomness, 0xFFFF, 0, colors.length)];
+    return colors[Random.__rndVal(randomness, 0xFFFF, 0, uint64(colors.length))];
   }
 
   // determines grade value randomly
@@ -737,7 +737,7 @@ contract Presale2 is AccessControl {
     require(gems.length > 0);
 
     // generate a random index in range [0, length - n) to rewrite color
-    uint8 index = uint8(Random.__rndVal(randomness, 0xFFFF, 0, gems.length - 1)); // use low 16 bits
+    uint8 index = uint8(Random.__rndVal(randomness, 0xFFFF, 0, uint64(gems.length - 1))); // use low 16 bits
 
     // set the new level
     gems[index].level = levelId;
@@ -761,7 +761,7 @@ contract Presale2 is AccessControl {
     // if maximum grade type is lower then gradeType
     if(maxGrade < gradeType) {
       // generate a random index in range [0, length - n) to rewrite grade type
-      uint8 index = uint8(Random.__rndVal(randomness, 0xFFFF, 0, gems.length - 1)); // use low 16 bits
+      uint8 index = uint8(Random.__rndVal(randomness, 0xFFFF, 0, uint64(gems.length - 1))); // use low 16 bits
 
       // rewrite the grade type in the gems array - set the new grade type
       gems[index].gradeType = gradeType;

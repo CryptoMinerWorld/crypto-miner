@@ -4,6 +4,7 @@ import "./AccessControlLight.sol";
 import "./GemERC721.sol";
 import "./GoldERC20.sol";
 import "./SilverERC20.sol";
+import "./Random.sol";
 
 /**
  * @title Workshop (Gem Upgrade Smart Contract)
@@ -55,6 +56,13 @@ contract Workshop is AccessControlLight {
    * @dev Maximum token grade type this workshop can upgrade a gem to
    */
   uint8 public constant MAXIMUM_GRADE_TYPE = 6;
+
+  /**
+   * @notice Number of different grade values defined for a gem
+   * @dev Gem grade value is reassigned each time grade type increases,
+   *      grade value is generated as non-uniform random in range [0, GRADE_VALUES)
+   */
+  uint24 public constant GRADE_VALUES = 1000000;
 
   /**
    * @notice Enables gem leveling up and grade type upgrades
@@ -386,11 +394,24 @@ contract Workshop is AccessControlLight {
       goldInstance.burn(msg.sender, goldRequired);
 
       // perform token grade type upgrade
-      gemInstance.upgradeGrade(tokenId, uint32(gemInstance.getGradeType(tokenId) + gradeTypeDelta) << 24); // TODO: generate random grade value
+      gemInstance.upgradeGrade(tokenId, uint32(gemInstance.getGradeType(tokenId) + gradeTypeDelta) << 24 | randomGradeValue());
     }
 
     // emit an event
     emit UpgradeComplete(tokenId, gemInstance.getLevel(tokenId), gemInstance.getGrade(tokenId));
+  }
+
+  /**
+   * @notice Function to calculate random grade value when upgrading gem
+   * @dev The random used to build the function on is not secure and can be
+   *      easily manipulated by miners
+   * @dev Chances of getting different grade values are not uniform,
+   *      getting a low grade value is more likely than big one
+   * @return a random number representing grade value in range [0, GRADE_VALUES)
+   */
+  function randomGradeValue() public constant returns(uint24) {
+    // delegate call to `Random.__quadraticRandom` and return
+    return uint24(Random.__quadraticRandom(0, 0, GRADE_VALUES));
   }
 
 }

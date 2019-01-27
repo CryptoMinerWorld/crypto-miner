@@ -52,10 +52,12 @@ contract('GeodeSale: Gas Usage', function(accounts) {
 });
 
 
+// asserts equal with precision of 5%
 function assertEqual(expected, actual, msg) {
 	assertEqualWith(expected, 0.05, actual, msg);
 }
 
+// asserts equal with the precisions defined in leeway
 function assertEqualWith(expected, leeway, actual, msg) {
 	assert(expected * (1 - leeway) < actual && expected * (1 + leeway) > actual, msg);
 }
