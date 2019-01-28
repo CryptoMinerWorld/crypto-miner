@@ -935,12 +935,12 @@ function gradeName(gradeType) {
 
 function calcMiningRate(gradeType, gradeValue) {
 	switch(gradeType) {
-		case 1: return gradeValue / 200000;
-		case 2: return 10 + gradeValue / 200000;
-		case 3: return 20 + gradeValue / 200000;
-		case 4: return 40 + 3 * gradeValue / 200000;
-		case 5: return 100 + gradeValue / 40000;
-		case 6: return 300 + gradeValue / 10000;
+		case 1: return gradeValue / 200000;         //  0 - 5%
+		case 2: return 10 + gradeValue / 200000;    // 10 - 15%
+		case 3: return 20 + gradeValue / 200000;    // 20 - 25%
+		case 4: return 40 + 3 * gradeValue / 200000;// 40 - 55%
+		case 5: return 100 + gradeValue / 40000;    // 100 - 125%
+		case 6: return 300 + gradeValue / 10000;    // 300 - 400%
 	}
 }
 
