@@ -57,10 +57,10 @@ library Random {
     // using `__rawRandom` as a source of randomness,
     uint256 randomness = __rawRandom(seed);
 
-    // calculate first uniformly distributed random, using 64 128 bits of randomness
+    // extract first uniformly distributed random, using 64 bits of randomness
     uint128 p1 = uint64(randomness);
 
-    // calculate second uniformly distributed random, using next 64 bits of randomness
+    // extract second uniformly distributed random, using next 64 bits of randomness
     uint128 p2 = uint64(randomness >> 128);
 
     // calculate the result using `__rndVal`
