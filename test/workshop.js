@@ -184,30 +184,7 @@ contract('Workshop', (accounts) => {
 		await fn(gemIds, lvlUps, upgrades);
 
 		// verify new levels and grades
-		for(let i = 0; i < gemIds.length; i++) {
-			// read level, grade type and grade value as packed data
-			const gemProps = await gem.getProperties(gemIds[i]);
-			// extract level
-			const level = gemProps.dividedToIntegerBy(0x100000000).modulo(0x100);
-			// extract grade type
-			const gradeType = gemProps.dividedToIntegerBy(0x1000000).modulo(0x100);
-			// extract grade value
-			const gradeValue = gemProps.modulo(0x1000000);
-
-			// verify level at index i
-			assert.equal(levels[i] + lvlUps[i], level, "wrong level at " + i);
-			// verify grade at index i
-			assert.equal(grades[i] + upgrades[i], gradeType, "wrong grade type at " + i);
-			// if gem was upgraded
-			if(upgrades[i]) {
-				// verify grade value is not zero and has been changed (not one)
-				assert(gradeValue.gt(1), "wrong grade value at " + i + " after grade change: " + gradeValue.toNumber());
-			}
-			else {
-				// otherwise ensure its grade value was not changed (equal to one)
-				assert.equal(1, gradeValue, "wrong grade value at " + i);
-			}
-		}
+		await verifyGemProperties(gemIds, gem, levels, lvlUps, grades, upgrades);
 
 		// verify silver an gold was consumed correctly
 		assert.equal(10000, await silver.balanceOf(player), "wrong silver balance after bulk level up");
@@ -372,7 +349,8 @@ contract('Workshop', (accounts) => {
 		await fn2();
 		// verify gem grade was changed correctly
 		assert.equal(4, await gem.getGradeType(1), "incorrect gem grade type after successful upgrade");
-		// TODO: verify grade value
+		// verify grade value is not zero and has been changed (not one)
+		assert((await gem.getGradeValue(1)).gt(1), "wrong grade value after upgrade");
 		// verify gold was consumed
 		assert.equal(1024, await gold.balanceOf(player), "incorrect gold balance after successful upgrade");
 		assert.equal(1024, await gold.totalSupply(), "incorrect gold total supply after successful upgrade");
@@ -472,35 +450,42 @@ contract('Workshop', (accounts) => {
 		await fn();
 
 		// verify new levels and grades
-		for(let i = 0; i < gemIds.length; i++) {
-			// read level, grade type and grade value as packed data
-			const gemProps = await gem.getProperties(gemIds[i]);
-			// extract level
-			const level = gemProps.dividedToIntegerBy(0x100000000).modulo(0x100);
-			// extract grade type
-			const gradeType = gemProps.dividedToIntegerBy(0x1000000).modulo(0x100);
-			// extract grade value
-			const gradeValue = gemProps.modulo(0x1000000);
+		await verifyGemProperties(gemIds, gem, levels, lvlUps, grades, upgrades);
 
-			// verify level at index i
-			assert.equal(levels[i] + lvlUps[i], level, "wrong level at " + i);
-			// verify grade at index i
-			assert.equal(grades[i] + upgrades[i], gradeType, "wrong grade type at " + i);
-			// if gem was upgraded
-			if(upgrades[i]) {
-				// verify grade value is not zero and has been changed (not one)
-				assert(gradeValue.gt(1), "wrong grade value at " + i + " after grade change: " + gradeValue.toNumber());
-			}
-			else {
-				// otherwise ensure its grade value was not changed (equal to one)
-				assert.equal(1, gradeValue, "wrong grade value at " + i);
-			}
-		}
 		// verify silver an gold was consumed correctly
 		assert.equal(10000, await silver.balanceOf(player), "wrong silver balance after bulk level up");
 		assert.equal(10000, await gold.balanceOf(player), "wrong gold balance after bulk upgrade");
 	});
 });
+
+// function to be used to verify gem properties after bulk level up/upgrades
+async function verifyGemProperties(gemIds, gem, levels, lvlUps, grades, upgrades) {
+	// iterate and verify
+	for(let i = 0; i < gemIds.length; i++) {
+		// read level, grade type and grade value as packed data
+		const gemProps = await gem.getProperties(gemIds[i]);
+		// extract level
+		const level = gemProps.dividedToIntegerBy(0x100000000).modulo(0x100);
+		// extract grade type
+		const gradeType = gemProps.dividedToIntegerBy(0x1000000).modulo(0x100);
+		// extract grade value
+		const gradeValue = gemProps.modulo(0x1000000);
+
+		// verify level at index i
+		assert.equal(levels[i] + lvlUps[i], level, "wrong level at " + i);
+		// verify grade at index i
+		assert.equal(grades[i] + upgrades[i], gradeType, "wrong grade type at " + i);
+		// if gem was upgraded
+		if(upgrades[i]) {
+			// verify grade value is not zero and has been changed (not one)
+			assert(gradeValue.gt(1), "wrong grade value at " + i + " after grade change: " + gradeValue.toNumber());
+		}
+		else {
+			// otherwise ensure its grade value was not changed (equal to one)
+			assert.equal(1, gradeValue, "wrong grade value at " + i);
+		}
+	}
+}
 
 // auxiliary function to ensure function `fn` throws
 async function assertThrowsAsync(fn, ...args) {
