@@ -17,6 +17,9 @@ const Workshop = artifacts.require("./Workshop.sol");
 // Random Test smart contract helper
 const RandomTest = artifacts.require("./RandomTest.sol");
 
+// using file system to create raw csv data file for quadratic random
+const fs = require('fs');
+
 // A test to check properties of the generated grade values random
 contract('Workshop (Grade Value Randomness)', (accounts) => {
 	it("random: ensure RandomTest and Workshop maximum grade value matches", async() => {
@@ -49,6 +52,9 @@ contract('Workshop (Grade Value Randomness)', (accounts) => {
 
 		// sort the array
 		gradeValues.sort((a, b) => a.minus(b).toNumber());
+
+		// write statistical raw data into the file
+		fs.writeFileSync("./quadratic_random.csv", gradeValues.map((a) => a.toNumber()).join("\n"));
 
 		// calculate the minimum
 		const min = gradeValues[0].toNumber();
