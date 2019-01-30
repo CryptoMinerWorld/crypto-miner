@@ -87,6 +87,12 @@ contract SilverSale is AccessControlLight {
   uint32 public constant LENGTH = 20 days;
 
   /**
+   * @notice Price increase time interval: price increases every 24 hours
+   * @dev This constant is used as `dt` in `linearStepwise` auxiliary function
+   */
+  uint32 public constant PRICE_INCREASE_EVERY = 1 days;
+
+  /**
    * @dev Minimum and maximum amounts of silver each box type can have:
    *      [0] - Silver Box
    *      [1] - Rotund Silver Box
@@ -97,12 +103,13 @@ contract SilverSale is AccessControlLight {
   uint8[] public SILVER_MAX = [30, 90, 120, 200];
 
   /**
-   * @dev Initial prices of the boxes by type:
+   * @dev Initial and final prices of the boxes by type:
    *      [0] - Silver Box
    *      [1] - Rotund Silver Box
    *      [2] - Goldish Silver Box
    */
-  uint16[] public INITIAL_PRICES_FINNEY = [96, 320, 760];
+  uint64[] public INITIAL_PRICES = [96 finney, 320 finney, 760 finney];
+  uint64[] public FINAL_PRICES  = [120 finney, 400 finney, 950 finney];
 
   /**
    * @notice Sale start date, buying silver/gold boxes is not possible
@@ -124,6 +131,9 @@ contract SilverSale is AccessControlLight {
    */
   GoldERC20 public goldInstance;
 
+  /**
+   * @notice An address where the funds from the sale go to
+   */
   address public beneficiary;
 
   /**
@@ -140,10 +150,10 @@ contract SilverSale is AccessControlLight {
     // verify the inputs: mistakes in addresses
     require(silverAddress != address(0));
     require(goldAddress != address(0));
+    require(_beneficiary != address(0));
     require(silverAddress != goldAddress);
-
-    // verify the sale length is not zero
-    require(_offset + LENGTH > now);
+    require(goldAddress != _beneficiary);
+    require(_beneficiary != silverAddress);
 
     // bind smart contract instances
     silverInstance = SilverERC20(silverAddress);
@@ -153,9 +163,9 @@ contract SilverSale is AccessControlLight {
     require(silverInstance.TOKEN_VERSION() == SILVER_TOKEN_VERSION_REQUIRED);
     require(goldInstance.TOKEN_VERSION() == GOLD_TOKEN_VERSION_REQUIRED);
 
-    // set up beneficiary and  sale start
-    offset = _offset;
+    // set up beneficiary and sale start
     beneficiary = _beneficiary;
+    offset = _offset;
   }
 
   /**
@@ -175,7 +185,8 @@ contract SilverSale is AccessControlLight {
     // verify that sale feature is enabled (sale is active)
     require(isFeatureEnabled(FEATURE_SALE_ENABLED));
 
-
+    // verify that the sale has already started
+    require(offset <= now);
   }
 
   /**
@@ -197,10 +208,44 @@ contract SilverSale is AccessControlLight {
     // verify that sale feature is enabled (sale is active)
     require(isFeatureEnabled(FEATURE_SALE_ENABLED));
 
+    // verify that the sale has already started
+    require(offset <= now);
   }
 
-  function getBoxPrice(uint8 boxType) {
+  /**
+   * @notice Calculates current box price of the type specified
+   *      (Silver, Rotund Silver or Goldish Silver)
+   * @param boxType type of the box to query price for:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   */
+  function getBoxPrice(uint8 boxType) public constant returns(uint64) {
+    // box type validation will be performed automatically
+    // when accessing INITIAL_PRICES and FINAL_PRICES arrays
 
+    // verify time constraints, otherwise the result of `linearStepwise`
+    // will be confusing:
+    // if sale didn't start yet
+    if(now < offset) {
+      // return initial price
+      return INITIAL_PRICES[boxType];
+    }
+    // if sale has already ended
+    if(offset + LENGTH < now) {
+      // return final price
+      return FINAL_PRICES[boxType];
+    }
+
+    // delegate call to `linearStepwise` and return
+    return linearStepwise(
+      offset,
+      INITIAL_PRICES[boxType],
+      offset + LENGTH,
+      FINAL_PRICES[boxType],
+      PRICE_INCREASE_EVERY,
+      uint32(now)
+    );
   }
 
   /**

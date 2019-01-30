@@ -6,6 +6,13 @@ const Gold = artifacts.require("./GoldERC20.sol");
 // Silver Box Sale smart contract
 const Sale = artifacts.require("./SilverSale.sol");
 
+// box types
+const BOX_TYPES = ["Silver Box", "Rotund Silver Box", "Goldish Silver Box"];
+
+// initial and final prices of the boxes
+const INITIAL_PRICES = [96000000000000000, 320000000000000000, 760000000000000000];
+const FINAL_PRICES  = [120000000000000000, 400000000000000000, 950000000000000000];
+
 contract('SilverSale', (accounts) => {
 	it("price: verify local price increase formula (JavaScript)", async() => {
 		// define constant function arguments
@@ -101,13 +108,50 @@ contract('SilverSale', (accounts) => {
 		// verify the linear stepwise function (pure)
 		for(let i = 0; i < 20; i++) {
 			// verify the formula
-			assert.deepEqual(
-				linearStepwise(t0, v0, t1, v1, dt, t),
+			assert.equal(
+				linearStepwise(t0, v0, t1, v1, dt, t).toNumber(),
 				await sale.linearStepwise(t0, v0, t1, v1, dt, t),
 				"wrong remote v at index " + i + ", t = " + t
 			);
 			// update time of interest `t`
 			t += Math.round(dt * Math.random());
+		}
+	});
+	it("price: verify current price calculation", async() => {
+		// define silver sale dependencies
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const beneficiary = accounts[1];
+		const offset1 = 3600 + new Date().getTime() / 1000 | 0;
+		const offset2 = -3600 + new Date().getTime() / 1000 | 0;
+		const offset3 = -86400 + new Date().getTime() / 1000 | 0;
+		const offset4 = -1728000 + new Date().getTime() / 1000 | 0;
+
+		// instantiate few silver sales
+		const sale1 = await Sale.new(silver.address, gold.address, beneficiary, offset1);
+		const sale2 = await Sale.new(silver.address, gold.address, beneficiary, offset2);
+		const sale3 = await Sale.new(silver.address, gold.address, beneficiary, offset3);
+		const sale4 = await Sale.new(silver.address, gold.address, beneficiary, offset4);
+
+		// current price function
+		const fn = async(boxType) => await sale1.getBoxPrice(boxType);
+
+		// verify fn throws if box type is incorrect
+		await assertThrowsAsync(fn, 3);
+		// but works correctly otherwise
+		for(let i = 0; i < 3; i++) {
+			assert.equal(INITIAL_PRICES[i], await fn(i), "incorrect initial box price for " + BOX_TYPES[i]);
+		}
+
+		// check some prices for already started sales
+		for(let i = 0; i < 3; i++) {
+			assert.equal(INITIAL_PRICES[i], await sale2.getBoxPrice(i), "incorrect 1st day price for " + BOX_TYPES[i]);
+		}
+		for(let i = 0; i < 3; i++) {
+			assert.equal(INITIAL_PRICES[i] * 1.0125, await sale3.getBoxPrice(i), "incorrect 2nd day price for " + BOX_TYPES[i]);
+		}
+		for(let i = 0; i < 3; i++) {
+			assert.equal(INITIAL_PRICES[i] * 1.25, await sale4.getBoxPrice(i), "incorrect last day price for " + BOX_TYPES[i]);
 		}
 	});
 });
@@ -146,4 +190,20 @@ function linearStepwise(t0, v0, t1, v1, dt, t) {
 	 *
 	 */
 	return v0.plus(v1.minus(v0).times(t.minus(t0).dividedToIntegerBy(dt).times(dt)).dividedToIntegerBy(t1.minus(t0)));
+}
+
+// auxiliary function to ensure function `fn` throws
+async function assertThrowsAsync(fn, ...args) {
+	let f = () => {};
+	try {
+		await fn(...args);
+	}
+	catch(e) {
+		f = () => {
+			throw e;
+		};
+	}
+	finally {
+		assert.throws(f);
+	}
 }
