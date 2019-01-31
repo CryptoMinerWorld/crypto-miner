@@ -98,8 +98,6 @@ contract('SilverSale', (accounts) => {
 		// define constant function arguments
 		const t0 = 1548979200; // February 1, 2019
 		const t1 = 1550707200; // February 21, 2019
-		const v0 = 96000000000000000;
-		const v1 = 120000000000000000;
 		const dt = 86400; // 24 hours
 
 		// time point of interest will be changed in cycle
@@ -107,11 +105,16 @@ contract('SilverSale', (accounts) => {
 
 		// verify the linear stepwise function (pure)
 		for(let i = 0; i < 20; i++) {
+			// get some random box type for evaluation
+			const j = Math.floor(INITIAL_PRICES.length * Math.random());
+			const v0 = INITIAL_PRICES[j];
+			const v1 = FINAL_PRICES[j];
+
 			// verify the formula
 			assert.equal(
 				linearStepwise(t0, v0, t1, v1, dt, t).toNumber(),
 				await sale.linearStepwise(t0, v0, t1, v1, dt, t),
-				"wrong remote v at index " + i + ", t = " + t
+				"wrong remote v for " + BOX_TYPES[j] + ", t = " + t
 			);
 			// update time of interest `t`
 			t += Math.round(dt * Math.random());
@@ -153,6 +156,31 @@ contract('SilverSale', (accounts) => {
 		for(let i = 0; i < 3; i++) {
 			assert.equal(INITIAL_PRICES[i] * 1.25, await sale4.getBoxPrice(i), "incorrect last day price for " + BOX_TYPES[i]);
 		}
+	});
+	it("price: verify bulk price calculation (initial)", async() => {
+		// define silver sale dependencies
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const beneficiary = accounts[1];
+		const offset = new Date().getTime() / 1000 | 0;
+
+		// instantiate silver sale smart contract
+		const sale = await Sale.new(silver.address, gold.address, beneficiary, offset);
+
+		// define bulk price function
+		const fn = async(quantities) => await sale.bulkPrice([0, 1, 2], quantities);
+
+		// fn throws on some wrong inputs
+		await assertThrowsAsync(fn, []);
+		await assertThrowsAsync(fn, [1, 2]);
+		await assertThrowsAsync(fn, [0, 1, 2]);
+		await assertThrowsAsync(fn, [2, 3, 0]);
+		await assertThrowsAsync(fn, [2, 256, 4]);
+
+		// verify few bulk price calculations
+		assert.equal(1176000000000000000, await fn([1, 1, 1]), "wrong bulk price (1)");
+		assert.equal(8920000000000000000, await fn([20, 10, 5]), "wrong bulk price (2)");
+		assert.equal(299880000000000000000, await fn([255, 255, 255]), "wrong bulk price (2)");
 	});
 });
 

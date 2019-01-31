@@ -23,7 +23,7 @@ import "./Random.sol";
  *      there are three kinds of boxes which can be bought:
  *        1. Silver Box
  *        2. Rotund Silver Box
- *        2. Goldish Silver Box
+ *        3. Goldish Silver Box
  * @notice Silver Box contains only silver, amount of silver in the box
  *      is randomized and varies in a range from 20 to 30 pieces
  * @notice Silver Box initial price is 0.096 ETH, final price is 0.12 ETH
@@ -93,23 +93,82 @@ contract SilverSale is AccessControlLight {
   uint32 public constant PRICE_INCREASE_EVERY = 1 days;
 
   /**
-   * @dev Minimum and maximum amounts of silver each box type can have:
-   *      [0] - Silver Box
-   *      [1] - Rotund Silver Box
-   *      [2] - Goldish Silver Box (with gold)
-   *      [3] - Goldish Silver Box (without gold)
+   * @notice Defines Silver Box type to be used
+   *      when buying boxes or estimating box price
    */
-  uint8[] public SILVER_MIN = [20, 70, 100, 150];
-  uint8[] public SILVER_MAX = [30, 90, 120, 200];
+  uint8 public constant BOX_TYPE_SILVER = 0;
 
   /**
-   * @dev Initial and final prices of the boxes by type:
+   * @notice Defines Rotund Silver Box type to be used
+   *      when buying boxes or estimating box price
+   */
+  uint8 public constant BOX_TYPE_ROTUND_SILVER = 1;
+
+  /**
+   * @notice Defines Goldish Silver Box type to be used
+   *      when buying boxes or estimating box price
+   * @dev Internally it is also used to denote Goldish Silver Box
+   *      without gold
+   */
+  uint8 public constant BOX_TYPE_BIG_SILVER = 2;
+
+  /**
+   * @dev Used internally only to denote Goldish Silver Box
+   *      with one piece of gold
+   */
+  uint8 public constant BOX_TYPE_GOLD_SILVER = 3;
+
+  /**
+   * @dev Minimum amounts of silver each box type can have:
+   *      [0] - Silver Box
+   *      [1] - Rotund Silver Box
+   *      [2] - Goldish Silver Box (without gold)
+   *      [3] - Goldish Silver Box (with gold)
+   */
+  uint8[] public SILVER_MIN = [20, 70, 150, 100];
+
+  /**
+   * @dev Maximum amounts of silver each box type can have:
+   *      [0] - Silver Box
+   *      [1] - Rotund Silver Box
+   *      [2] - Goldish Silver Box (without gold)
+   *      [3] - Goldish Silver Box (with gold)
+   */
+  uint8[] public SILVER_MAX = [30, 90, 200, 120];
+
+  /**
+   * @dev Initial prices of the boxes by type:
    *      [0] - Silver Box
    *      [1] - Rotund Silver Box
    *      [2] - Goldish Silver Box
    */
   uint64[] public INITIAL_PRICES = [96 finney, 320 finney, 760 finney];
+
+  /**
+   * @dev Final prices of the boxes by type:
+   *      [0] - Silver Box
+   *      [1] - Rotund Silver Box
+   *      [2] - Goldish Silver Box
+   */
   uint64[] public FINAL_PRICES  = [120 finney, 400 finney, 950 finney];
+
+  /**
+   * @dev Chances of getting one piece of gold in each box type, percent:
+   *      [0] - Silver Box
+   *      [1] - Rotund Silver Box
+   *      [2] - Goldish Silver Box
+   */
+  uint8[] public GOLD_PROB_PERCENT = [0, 0, 42];
+
+  /**
+   * @dev Number of boxes of each type available for sale
+   */
+  uint16[] public BOXES_TO_SELL = [500, 300, 150];
+
+  /**
+   * @dev Number of boxes of each type already sold
+   */
+  uint16[] public boxesSold = [0, 0, 0];
 
   /**
    * @notice Sale start date, buying silver/gold boxes is not possible
@@ -135,6 +194,15 @@ contract SilverSale is AccessControlLight {
    * @notice An address where the funds from the sale go to
    */
   address public beneficiary;
+
+  /**
+   * @dev Fired in buy() and bulkBuy()
+   * @param by address which sent the transaction, spent some value
+   *      and got some silver or/and gold in return
+   * @param silver amount of silver obtained
+   * @param gold amount of gold obtained (zero or one)
+   */
+  event Unboxed(address indexed by, uint24 silver, uint16 gold);
 
   /**
    * @dev Creates a Silver/Gold Sale instance, binding it to
@@ -169,56 +237,233 @@ contract SilverSale is AccessControlLight {
   }
 
   /**
-   * @notice Allows buying several boxes of a single type
+   * @notice Buys several boxes of a single type
    *      (Silver, Rotund Silver, Goldish Silver)
    * @dev Throws if box type is invalid
    * @dev Throws if quantity is invalid (zero)
    * @dev Throws if transaction has not enough value (ETH)
    *      to buy the boxes requested
-   * @param boxType defines a box type, must be one of
+   * @param boxType box type, must be one of
    *      0 – Silver Box
    *      1 - Rotund Silver Box
    *      2 - Goldish Silver Box
-   * @param quantity defines amount of boxes to buy
+   * @param quantity amount of boxes to buy
    */
   function buy(uint8 boxType, uint8 quantity) public payable {
     // verify that sale feature is enabled (sale is active)
     require(isFeatureEnabled(FEATURE_SALE_ENABLED));
 
     // verify that the sale has already started
-    require(offset <= now);
+    require(now >= offset);
+
+    // determine box price
+    uint256 price = getBoxesPrice(boxType, quantity);
+
+    // verify there is enough value in the message to buy the box
+    require(msg.value >= price);
+
+    // verify there is enough boxes of the requested type on sale
+    require(boxesSold[boxType] + quantity < BOXES_TO_SELL[boxType]);
+
+    // update sold boxes counter
+    boxesSold[boxType] += quantity;
+
+    // to assign tuple return value from `__unbox`
+    // we need to define the variables first
+    // maximum value of silver is 255 * 200 = 51000,
+    // which fits into uint16
+    uint16 silver;
+    uint8 gold;
+
+    // evaluate cumulative silver and gold values for all the boxes
+    (silver, gold) = __unbox(boxType, quantity);
+
+    // delegate call to `__mint` to perform actual token minting
+    // beneficiary funds transfer and change transfer back to sender
+    __mint(price, silver, gold);
   }
 
   /**
-   * @notice Allows buying boxes of different types in single transaction
+   * @notice Buys boxes of different types in single transaction
    *      (Silver, Rotund Silver, Goldish Silver)
-   * @dev Throws if `boxTypes` and `quantities` arrays are different in size
+   * @dev Throws if input arrays have different length
+   * @dev Throws if any of the input arrays are empty
+   * @dev Throws if input arrays size is bigger than three (3)
    * @dev Throws if any of the box types specified is invalid
-   * @dev Throws if any of the quantities specified is invalid (zero)
+   * @dev Throws if any of the quantities specified is zero
    * @dev Throws if transaction has not enough value (ETH)
    *      to buy the boxes requested
-   * @param boxTypes defines an array of box types, each box type is one of
+   * @param boxTypes an array of box types, each box type is one of
    *      0 – Silver Box
    *      1 - Rotund Silver Box
    *      2 - Goldish Silver Box
-   * @param quantities defines an array of amount of boxes of each corresponding
-   *      type to buy
+   * @param quantities an array of amounts of boxes for each
+   *      corresponding type to buy
    */
   function bulkBuy(uint8[] boxTypes, uint8[] quantities) public payable {
     // verify that sale feature is enabled (sale is active)
     require(isFeatureEnabled(FEATURE_SALE_ENABLED));
 
     // verify that the sale has already started
-    require(offset <= now);
+    require(now >= offset);
+
+    // determine box price
+    // it also validates the input arrays lengths
+    uint256 price = bulkPrice(boxTypes, quantities);
+
+    // define variables to accumulate silver and gold counters
+    // maximum value of silver is 3 * 255 * 200 = 153000,
+    // which doesn't fit into uint16
+    uint24 silver;
+    uint8 gold;
+
+    // evaluate total cumulative silver and gold values for all the boxes
+    (silver, gold) = __bulkUnbox(boxTypes, quantities);
+
+    // delegate call to `__mint` to perform token minting
+    __mint(price, silver, gold);
+  }
+
+  /**
+   * @dev Auxiliary function to evaluate random amount of silver and gold
+   *      in the box of the given type
+   * @param boxType box type to generate amounts for:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantity amount of boxes of that type to unbox
+   * @return tuple containing random silver and gold amounts
+   *      for the given box type and amount
+   */
+  function __unbox(uint8 boxType, uint8 quantity) private constant returns(uint16 silver, uint8 gold) {
+    // `silver` and `gold` counters to store cumulative
+    // amounts of silver and gold are already defined in
+    // function returns signature, their initial values are zeros
+
+    // each box will be generated randomly
+    for(uint8 i = 0; i < quantity; i++) {
+      // generate some random number based on the given seed
+      uint256 rnd = Random.__rawRandom(i);
+
+      // effective box type will depend on random
+      // if box contains gold the box type will be adjusted
+      uint8 _boxType = boxType;
+
+      // use 32 bits of random to extract a uniform random in range [0, 100)
+      // there is a 42% chance of getting gold in Goldish Silver Box
+      if(Random.__rndVal(rnd, 0xFFFFFFFFFFFFFFFF, 0, 100) < GOLD_PROB_PERCENT[boxType]) {
+        // uniform random in range [0, 100) is lower than 42, we've got gold!
+        // increment gold counter
+        gold++;
+
+        // update box type to `BOX_TYPE_GOLD_SILVER` box type to be used
+        // to access `SILVER_MIN` and `SILVER_MAX` arrays properly (on index 3)
+        _boxType = BOX_TYPE_GOLD_SILVER;
+      }
+
+      // calculate amount of silver based on box type using next 32 bits of random
+      // upper bound in `__rndVal` is exclusive, add 1 to it
+      // to make `SILVER_MAX[boxType]` maximum inclusive
+      // and increment silver counter
+      silver += uint8(
+        Random.__rndVal(
+          rnd >> 64,
+          0xFFFFFFFFFFFFFFFF,
+          SILVER_MIN[_boxType],
+          1 + SILVER_MAX[_boxType] - SILVER_MIN[_boxType]
+        )
+      );
+    }
+
+    // return the values calculated
+    return (silver, gold);
+  }
+
+  /**
+   * @dev Auxiliary function to evaluate random amount of silver and gold
+   *      in the array of boxes of the given types
+   * @dev Unsafe, doesn't validate input arrays to be equal in length,
+   *      and to contain valid data - to be called internally only
+   * @param boxTypes array of box types to generate amounts for, containing:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantities array of amounts of boxes of these types to unbox
+   * @return tuple containing random silver and gold amounts
+   *      for the given box types and amounts
+   */
+  function __bulkUnbox(uint8[] boxTypes, uint8[] quantities) private constant returns(uint24 silver, uint8 gold) {
+    // `silver` and `gold` counters to store cumulative
+    // amounts of silver and gold are already defined in
+    // function returns signature, their initial values are zeros
+
+    // iterate the input arrays and accumulate silver and gold amounts
+    for(uint8 i = 0; i < boxTypes.length; i++) {
+      // to assign tuple return value from `__unbox`
+      // we need to define the variables first
+      // maximum value of silver is 255 * 200 = 51000,
+      // which fits into uint16
+      uint16 _silver;
+      uint8 _gold;
+
+      // evaluate cumulative random based silver and gold values for all the boxes
+      (_silver, _gold) = __unbox(boxTypes[i], quantities[i]);
+
+      // increment bulk cumulative values
+      silver += _silver;
+      gold += _gold;
+    }
+
+    // return the values accumulated
+    return (silver, gold);
+  }
+
+  /**
+   * @dev Auxiliary function to perform silver and gold minting,
+   *      value transfer to beneficiary and change transfer back to sender
+   */
+  function __mint(uint256 price, uint24 silver, uint8 gold) private {
+    // verify message has enough value
+    require(price <= msg.value);
+
+    // call sender gracefully - player
+    address player = msg.sender;
+
+    // calculate the change to send back to player
+    uint256 change = msg.value - price;
+
+    // mint silver required
+    silverInstance.mint(player, silver);
+
+    // mint gold required
+    goldInstance.mint(player, gold);
+
+    // transfer value required to the beneficiary
+    beneficiary.transfer(price);
+
+    // if sender sent more than value required
+    if(change > 0) {
+      // transfer the change back to sender
+      player.transfer(change);
+    }
+
+    // emit an event
+    emit Unboxed(player, silver, gold);
   }
 
   /**
    * @notice Calculates current box price of the type specified
    *      (Silver, Rotund Silver or Goldish Silver)
+   * @dev Calculates silver box price based on the initial,
+   *      final prices and current timestamp (`now`)
+   * @dev Returns initial price if sale didn't start
+   * @dev Returns final price if the sale has already ended
+   * @dev Throws if the box type specified is invalid
    * @param boxType type of the box to query price for:
    *      0 – Silver Box
    *      1 - Rotund Silver Box
    *      2 - Goldish Silver Box
+   * @return current price (in moment `now`) of the box type requested
    */
   function getBoxPrice(uint8 boxType) public constant returns(uint64) {
     // box type validation will be performed automatically
@@ -227,12 +472,12 @@ contract SilverSale is AccessControlLight {
     // verify time constraints, otherwise the result of `linearStepwise`
     // will be confusing:
     // if sale didn't start yet
-    if(now < offset) {
+    if(now <= offset) {
       // return initial price
       return INITIAL_PRICES[boxType];
     }
     // if sale has already ended
-    if(offset + LENGTH < now) {
+    if(now >= offset + LENGTH) {
       // return final price
       return FINAL_PRICES[boxType];
     }
@@ -249,17 +494,83 @@ contract SilverSale is AccessControlLight {
   }
 
   /**
+   * @notice Calculates current box price of the type
+   *      (Silver, Rotund Silver or Goldish Silver) and quantity specified
+   * @dev Calculates price of several silver boxes based on the initial,
+   *      final prices and current timestamp (`now`)
+   * @dev Returns initial price of the boxes if sale didn't start
+   * @dev Returns final price of the boxes if the sale has already ended
+   * @dev Throws if the box type specified is invalid
+   * @dev Throws if quantity (amount of boxes) is zero
+   * @param boxType type of the box to query price for:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantity amount of boxes of that type
+   * @return current price (in moment `now`) of the box type requested
+   */
+  function getBoxesPrice(uint8 boxType, uint8 quantity) public constant returns(uint256) {
+    // verify quantity is not zero
+    require(quantity != 0);
+
+    // delegate call to `getBoxPrice` and multiply by `quantity`
+    return uint256(quantity) * getBoxPrice(boxType);
+  }
+
+  /**
+   * @notice Calculates current price of different boxes of different types
+   *      (Silver, Rotund Silver or Goldish Silver) and quantities specified
+   * @dev Calculates price of different silver boxes based on the initial,
+   *      final prices and current timestamp (`now`)
+   * @dev Returns initial price of the boxes if sale didn't start
+   * @dev Returns final price of the boxes if the sale has already ended
+   * @dev Throws if input arrays have different length
+   * @dev Throws if any of the input arrays are empty
+   * @dev Throws if input arrays size is bigger than three (3)
+   * @dev Throws if any of the box types specified is invalid
+   * @dev Throws if any of the quantities specified is zero
+   * @param boxTypes array of box types to query price for, containing:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantities array of amounts of boxes for each of corresponding types
+   * @return current price (in moment `now`) of the box type requested
+   */
+  function bulkPrice(uint8[] boxTypes, uint8[] quantities) public constant returns(uint256) {
+    // verify input arrays have same lengths
+    require(boxTypes.length == quantities.length);
+
+    // verify input arrays contain some data (non-zero length)
+    require(boxTypes.length != 0);
+
+    // verify input arrays are not too big in length
+    require(boxTypes.length <= BOX_TYPE_GOLD_SILVER); // TODO: use proper constant
+
+    // define variable to accumulate the price
+    uint256 price = 0;
+
+    // iterate over arrays
+    for(uint8 i = 0; i < boxTypes.length; i++) {
+      // and increase the price for pair `i`
+      price += getBoxesPrice(boxTypes[i], quantities[i]);
+    }
+
+    // return accumulated price
+    return price;
+  }
+
+  /**
    * @dev Calculates value `v` at the given point in time `t`,
    *      given that the initial value at the moment 't0' is `v0`
    *      and the final value at the moment `t1` is `v1`
    * @dev The value is changed stepwise linearly in time,
    *      step size is defined by `_dt` (seconds)
-   * @param t0 defines initial moment (unix timestamp)
-   * @param v0 defines initial value
-   * @param t1 defines final moment (unix timestamp)
-   * @param v1 defines final value
-   * @param dt defines time step size (seconds)
-   * @param t defines moment of interest (unix timestamp)
+   * @param t0 initial moment (unix timestamp)
+   * @param v0 initial value
+   * @param t1 final moment (unix timestamp)
+   * @param v1 final value
+   * @param dt time step size (seconds)
+   * @param t moment of interest (unix timestamp)
    * @return value in the moment of interest `t`
    */
   function linearStepwise(
