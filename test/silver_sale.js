@@ -304,9 +304,9 @@ contract('SilverSale', (accounts) => {
 		assert((await silver.balanceOf(player)).gte(2 * silverMin), "not enough silver minted (2)");
 
 		// verify that player balance changed accordingly
-		assert(playerBalance0.minus(price).minus(gasUsed0).eq(web3.eth.getBalance(player)), "incorrect player balance (2)");
+		assert(playerBalance1.minus(price).minus(gasUsed1).eq(web3.eth.getBalance(player)), "incorrect player balance (2)");
 		// verify that beneficiary balance changed accordingly
-		assert(beneficiaryBalance0.plus(price).eq(web3.eth.getBalance(beneficiary)), "incorrect beneficiary balance (2)");
+		assert(beneficiaryBalance1.plus(price).eq(web3.eth.getBalance(beneficiary)), "incorrect beneficiary balance (2)");
 	});
 	it("bulk buy: bulk specific validations", async() => {
 		// define silver sale dependencies
