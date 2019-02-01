@@ -194,7 +194,12 @@ contract SilverSale is AccessControlLight {
   GoldERC20 public goldInstance;
 
   /**
-   * @notice An address where the funds from the sale go to
+   * @notice An address to send 5% of the incoming funds
+   */
+  address public chest;
+
+  /**
+   * @notice An address to send 95% of the incoming funds
    */
   address public beneficiary;
 
@@ -210,31 +215,37 @@ contract SilverSale is AccessControlLight {
   /**
    * @dev Creates a Silver/Gold Sale instance, binding it to
    *      silver (ERC20 token) and gold (ERC20 token) instances specified
-   * @param silverAddress address of the deployed SilverERC20 instance with
+   * @param _silver address of the deployed SilverERC20 instance with
    *      the `TOKEN_VERSION` equal to `SILVER_TOKEN_VERSION_REQUIRED`
-   * @param goldAddress address of the deployed GoldERC20 instance with
+   * @param _gold address of the deployed GoldERC20 instance with
    *      the `TOKEN_VERSION` equal to `GOLD_TOKEN_VERSION_REQUIRED`
+   * @param _chest an address to send 5% of incoming funds to
+   * @param _beneficiary an address to send 95% of incoming funds to
    * @param _offset sale start date as a unix timestamp, the sale lasts
    *      from `offset` (inclusive) to `offset + LENGTH` (exclusive)
    */
-  constructor(address silverAddress, address goldAddress, address _beneficiary, uint32 _offset) public {
+  constructor(address _silver, address _gold, address _chest, address _beneficiary, uint32 _offset) public {
     // verify the inputs: mistakes in addresses
-    require(silverAddress != address(0));
-    require(goldAddress != address(0));
+    require(_silver != address(0));
+    require(_gold != address(0));
+    require(_chest != address(0));
     require(_beneficiary != address(0));
-    require(silverAddress != goldAddress);
-    require(goldAddress != _beneficiary);
-    require(_beneficiary != silverAddress);
+
+    // verify we do not deploy already ended sale
+    // adding one day to the sale length since
+    // final price will be active during last day
+    require(_offset + LENGTH + 1 days > now);
 
     // bind smart contract instances
-    silverInstance = SilverERC20(silverAddress);
-    goldInstance = GoldERC20(goldAddress);
+    silverInstance = SilverERC20(_silver);
+    goldInstance = GoldERC20(_gold);
 
     // verify smart contract versions
     require(silverInstance.TOKEN_VERSION() == SILVER_TOKEN_VERSION_REQUIRED);
     require(goldInstance.TOKEN_VERSION() == GOLD_TOKEN_VERSION_REQUIRED);
 
-    // set up beneficiary and sale start
+    // set up chest vault, beneficiary and sale start
+    chest = _chest;
     beneficiary = _beneficiary;
     offset = _offset;
   }
@@ -445,8 +456,15 @@ contract SilverSale is AccessControlLight {
       goldInstance.mint(player, gold);
     }
 
-    // transfer value required to the beneficiary
-    beneficiary.transfer(price);
+    // transfer 5% to the chest vault
+    // no need to care about rounding since division by 20
+    // doesn't produce continued fractions
+    chest.transfer(price / 20);
+
+    // transfer 95% to the beneficiary
+    // no need to care about rounding since division by 20
+    // doesn't produce continued fractions
+    beneficiary.transfer(price * 19 / 20);
 
     // if sender sent more than value required
     if(change > 0) {

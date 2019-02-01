@@ -58,11 +58,12 @@ contract('SilverSale', (accounts) => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const beneficiary = accounts[1];
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
 
 		// define constant function arguments
 		const t0 = 1548979200; // February 1, 2019
@@ -98,11 +99,12 @@ contract('SilverSale', (accounts) => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const beneficiary = accounts[1];
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
 
 		// define constant function arguments
 		const t0 = 1548979200; // February 1, 2019
@@ -133,17 +135,18 @@ contract('SilverSale', (accounts) => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const beneficiary = accounts[1];
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
 		const offset1 = 3600 + new Date().getTime() / 1000 | 0;
 		const offset2 = -3600 + new Date().getTime() / 1000 | 0;
 		const offset3 = -86400 + new Date().getTime() / 1000 | 0;
 		const offset4 = -1728000 + new Date().getTime() / 1000 | 0;
 
 		// instantiate few silver sales
-		const sale1 = await Sale.new(silver.address, gold.address, beneficiary, offset1);
-		const sale2 = await Sale.new(silver.address, gold.address, beneficiary, offset2);
-		const sale3 = await Sale.new(silver.address, gold.address, beneficiary, offset3);
-		const sale4 = await Sale.new(silver.address, gold.address, beneficiary, offset4);
+		const sale1 = await Sale.new(silver.address, gold.address, chest, beneficiary, offset1);
+		const sale2 = await Sale.new(silver.address, gold.address, chest, beneficiary, offset2);
+		const sale3 = await Sale.new(silver.address, gold.address, chest, beneficiary, offset3);
+		const sale4 = await Sale.new(silver.address, gold.address, chest, beneficiary, offset4);
 
 		// current price function
 		const fn = async(boxType) => await sale1.getBoxPrice(boxType);
@@ -170,11 +173,12 @@ contract('SilverSale', (accounts) => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const beneficiary = accounts[1];
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
 
 		// define bulk price function
 		const fn0 = async(boxTypes, quantities) => await sale.bulkPrice(boxTypes, quantities);
@@ -200,6 +204,7 @@ contract('SilverSale', (accounts) => {
 		const silver = await Silver.new();
 		const gold = await Gold.new();
 		const player = accounts[1];
+		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
@@ -208,7 +213,7 @@ contract('SilverSale', (accounts) => {
 		const beneficiaryBalance = web3.eth.getBalance(beneficiary);
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
 
 		// define a function to buy a Silver Box
 		// when buying 32 goldish boxes, chance of not getting
@@ -254,11 +259,12 @@ contract('SilverSale', (accounts) => {
 		const silver = await Silver.new();
 		const gold = await Gold.new();
 		const player = accounts[1];
+		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
@@ -280,6 +286,7 @@ contract('SilverSale', (accounts) => {
 
 		// save player and beneficiary balances
 		const playerBalance0 = web3.eth.getBalance(player);
+		const chestBalance0 = web3.eth.getBalance(chest);
 		const beneficiaryBalance0 = web3.eth.getBalance(beneficiary);
 
 		// buy 17 Rotund Silver Boxes
@@ -290,12 +297,15 @@ contract('SilverSale', (accounts) => {
 
 		// save new player and beneficiary balances
 		const playerBalance1 = web3.eth.getBalance(player);
+		const chestBalance1 = web3.eth.getBalance(chest);
 		const beneficiaryBalance1 = web3.eth.getBalance(beneficiary);
 
 		// verify that player balance changed accordingly
 		assert(playerBalance0.minus(price).minus(gasUsed0).eq(playerBalance1), "incorrect player balance (1)");
+		// verify that chest balance changed accordingly
+		assert(chestBalance0.plus(price / 20).eq(chestBalance1), "incorrect chest balance (1)");
 		// verify that beneficiary balance changed accordingly
-		assert(beneficiaryBalance0.plus(price).eq(beneficiaryBalance1), "incorrect beneficiary balance (1)");
+		assert(beneficiaryBalance0.plus(price * 19 / 20).eq(beneficiaryBalance1), "incorrect beneficiary balance (1)");
 
 		// buy 17 Rotund Silver Boxes again, sending more value than required
 		const gasUsed1 = (await fn(price + change)).receipt.gasUsed;
@@ -306,18 +316,21 @@ contract('SilverSale', (accounts) => {
 		// verify that player balance changed accordingly
 		assert(playerBalance1.minus(price).minus(gasUsed1).eq(web3.eth.getBalance(player)), "incorrect player balance (2)");
 		// verify that beneficiary balance changed accordingly
-		assert(beneficiaryBalance1.plus(price).eq(web3.eth.getBalance(beneficiary)), "incorrect beneficiary balance (2)");
+		assert(chestBalance1.plus(price / 20).eq(web3.eth.getBalance(chest)), "incorrect chest balance (2)");
+		// verify that beneficiary balance changed accordingly
+		assert(beneficiaryBalance1.plus(price * 19 / 20).eq(web3.eth.getBalance(beneficiary)), "incorrect beneficiary balance (2)");
 	});
 	it("bulk buy: bulk specific validations", async() => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
 		const gold = await Gold.new();
 		const player = accounts[1];
+		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
 
 		// define a function to buy a Silver Box, 57.088 ETH within transaction should be enough
 		const fn = async(boxTypes, quantities) => await sale.bulkBuy(boxTypes, quantities, {from: player, value: 57088000000000000000});
@@ -349,6 +362,7 @@ contract('SilverSale', (accounts) => {
 		const silver = await Silver.new();
 		const gold = await Gold.new();
 		const player = accounts[1];
+		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
@@ -357,7 +371,7 @@ contract('SilverSale', (accounts) => {
 		const beneficiaryBalance = web3.eth.getBalance(beneficiary);
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
 
 		// define a function to buy a Silver Box
 		// when buying 32 goldish boxes, chance of not getting
