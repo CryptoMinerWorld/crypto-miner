@@ -96,13 +96,13 @@ contract SilverSale is AccessControlLight {
    * @notice Defines Silver Box type to be used
    *      when buying boxes or estimating box price
    */
-  uint8 public constant BOX_TYPE_SILVER = 0;
+  //uint8 public constant BOX_TYPE_SILVER = 0;
 
   /**
    * @notice Defines Rotund Silver Box type to be used
    *      when buying boxes or estimating box price
    */
-  uint8 public constant BOX_TYPE_ROTUND_SILVER = 1;
+  //uint8 public constant BOX_TYPE_ROTUND_SILVER = 1;
 
   /**
    * @notice Defines Goldish Silver Box type to be used
@@ -110,13 +110,24 @@ contract SilverSale is AccessControlLight {
    * @dev Internally it is also used to denote Goldish Silver Box
    *      without gold
    */
-  uint8 public constant BOX_TYPE_BIG_SILVER = 2;
+  uint8 public constant BOX_TYPE_GOLDISH_SILVER = 2;
 
   /**
    * @dev Used internally only to denote Goldish Silver Box
    *      with one piece of gold
    */
-  uint8 public constant BOX_TYPE_GOLD_SILVER = 3;
+  //uint8 public constant BOX_TYPE_GOLDISH_SILVER_1 = 3;
+
+  /**
+   * @dev Chances of getting one piece of gold in
+   *      Goldish Silver Box, percent
+   */
+  uint8 public constant GOLD_PROBABILITY = 42; // 42%
+
+  /**
+   * @dev Number of box types defined in smart contract (3)
+   */
+  //uint8 public constant BOX_TYPES = 3;
 
   /**
    * @dev Minimum amounts of silver each box type can have:
@@ -151,14 +162,6 @@ contract SilverSale is AccessControlLight {
    *      [2] - Goldish Silver Box
    */
   uint64[] public FINAL_PRICES  = [120 finney, 400 finney, 950 finney];
-
-  /**
-   * @dev Chances of getting one piece of gold in each box type, percent:
-   *      [0] - Silver Box
-   *      [1] - Rotund Silver Box
-   *      [2] - Goldish Silver Box
-   */
-  uint8[] public GOLD_PROB_PERCENT = [0, 0, 42];
 
   /**
    * @dev Number of boxes of each type available for sale
@@ -351,14 +354,14 @@ contract SilverSale is AccessControlLight {
 
       // use 32 bits of random to extract a uniform random in range [0, 100)
       // there is a 42% chance of getting gold in Goldish Silver Box
-      if(Random.__rndVal(rnd, 0xFFFFFFFFFFFFFFFF, 0, 100) < GOLD_PROB_PERCENT[boxType]) {
+      if(boxType == BOX_TYPE_GOLDISH_SILVER && Random.__rndVal(rnd, 0xFFFFFFFFFFFFFFFF, 0, 100) < GOLD_PROBABILITY) {
         // uniform random in range [0, 100) is lower than 42, we've got gold!
         // increment gold counter
         gold++;
 
         // update box type to `BOX_TYPE_GOLD_SILVER` box type to be used
         // to access `SILVER_MIN` and `SILVER_MAX` arrays properly (on index 3)
-        _boxType = BOX_TYPE_GOLD_SILVER;
+        _boxType++;
       }
 
       // calculate amount of silver based on box type using next 32 bits of random
@@ -544,7 +547,7 @@ contract SilverSale is AccessControlLight {
     require(boxTypes.length != 0);
 
     // verify input arrays are not too big in length
-    require(boxTypes.length <= BOX_TYPE_GOLD_SILVER); // TODO: use proper constant
+    require(boxTypes.length <= INITIAL_PRICES.length);
 
     // define variable to accumulate the price
     uint256 price = 0;
