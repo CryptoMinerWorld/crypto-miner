@@ -435,11 +435,15 @@ contract SilverSale is AccessControlLight {
     // calculate the change to send back to player
     uint256 change = msg.value - price;
 
-    // mint silver required
+    // any box contains silver, no need to check if silver
+    // is not zero – just mint silver required
     silverInstance.mint(player, silver);
 
-    // mint gold required
-    goldInstance.mint(player, gold);
+    // box may not contain gold, check if it does
+    if(gold != 0) {
+      // mint gold required
+      goldInstance.mint(player, gold);
+    }
 
     // transfer value required to the beneficiary
     beneficiary.transfer(price);

@@ -13,6 +13,9 @@ const BOX_TYPES = ["Silver Box", "Rotund Silver Box", "Goldish Silver Box"];
 const INITIAL_PRICES = [96000000000000000, 320000000000000000, 760000000000000000];
 const FINAL_PRICES  = [120000000000000000, 400000000000000000, 950000000000000000];
 
+// Minimum amounts of silver each box type can have
+const SILVER_MIN = [20, 70, 150, 100];
+
 // Enables the silver / gold sale
 const FEATURE_SALE_ENABLED = 0x00000001;
 
@@ -246,6 +249,65 @@ contract('SilverSale', (accounts) => {
 		assert(playerBalance.gt(web3.eth.getBalance(player)), "player balance didn't decrease");
 		assert(beneficiaryBalance.lt(web3.eth.getBalance(beneficiary)), "beneficiary balance didn't increase");
 	});
+	it("buy: validate balances after buying some boxes", async() => {
+		// define silver sale dependencies
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const player = accounts[1];
+		const beneficiary = accounts[8];
+		const offset = -3600 + new Date().getTime() / 1000 | 0;
+
+		// instantiate silver sale smart contract
+		const sale = await Sale.new(silver.address, gold.address, beneficiary, offset);
+
+		// enable all features and permissions required to enable buy
+		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+
+		// define buy properties
+		const boxType = 1;
+		const quantity = 17;
+		const price = INITIAL_PRICES[boxType] * quantity;
+		const silverMin = quantity * SILVER_MIN[boxType];
+		const change = 1000000;
+
+		// define a function to buy some boxes
+		const fn = async(value) => await sale.buy(boxType, quantity, {from: player, value: value});
+
+		// 17 Rotund Silver Boxes cost is 5.44 ETH
+		// sending not enough ETH fails
+		await assertThrowsAsync(fn, price - change);
+
+		// save player and beneficiary balances
+		const playerBalance0 = web3.eth.getBalance(player);
+		const beneficiaryBalance0 = web3.eth.getBalance(beneficiary);
+
+		// buy 17 Rotund Silver Boxes
+		const gasUsed0 = (await fn(price)).receipt.gasUsed;
+
+		// verify silver balance is at least 17 * 70 = 1190
+		assert((await silver.balanceOf(player)).gte(silverMin), "not enough silver minted (1)");
+
+		// save new player and beneficiary balances
+		const playerBalance1 = web3.eth.getBalance(player);
+		const beneficiaryBalance1 = web3.eth.getBalance(beneficiary);
+
+		// verify that player balance changed accordingly
+		assert(playerBalance0.minus(price).minus(gasUsed0).eq(playerBalance1), "incorrect player balance (1)");
+		// verify that beneficiary balance changed accordingly
+		assert(beneficiaryBalance0.plus(price).eq(beneficiaryBalance1), "incorrect beneficiary balance (1)");
+
+		// buy 17 Rotund Silver Boxes again, sending more value than required
+		const gasUsed1 = (await fn(price + change)).receipt.gasUsed;
+
+		// verify silver balance is at least 2 * 17 * 70 = 1190
+		assert((await silver.balanceOf(player)).gte(2 * silverMin), "not enough silver minted (2)");
+
+		// verify that player balance changed accordingly
+		assert(playerBalance0.minus(price).minus(gasUsed0).eq(web3.eth.getBalance(player)), "incorrect player balance (2)");
+		// verify that beneficiary balance changed accordingly
+		assert(beneficiaryBalance0.plus(price).eq(web3.eth.getBalance(beneficiary)), "incorrect beneficiary balance (2)");
+	});
 	it("bulk buy: bulk specific validations", async() => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
@@ -257,8 +319,8 @@ contract('SilverSale', (accounts) => {
 		// instantiate silver sale smart contract
 		const sale = await Sale.new(silver.address, gold.address, beneficiary, offset);
 
-		// define a function to buy a Silver Box, 50 ETH within transaction should be enough
-		const fn = async(boxTypes, quantities) => await sale.bulkBuy(boxTypes, quantities, {from: player, value: 50000000000000000000});
+		// define a function to buy a Silver Box, 57.088 ETH within transaction should be enough
+		const fn = async(boxTypes, quantities) => await sale.bulkBuy(boxTypes, quantities, {from: player, value: 57088000000000000000});
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
@@ -274,7 +336,9 @@ contract('SilverSale', (accounts) => {
 		await assertThrowsAsync(fn, [0, 1, 2, 0], [1, 1, 1, 1]);
 
 		// verify correct parameters work
-		await fn([0, 1, 2], [1, 1, 1]);
+		// when buying 32 goldish boxes, chance of not getting
+		// a single piece of gold is 0.000000026896502 (less than 1 in 10 000 000)
+		await fn([0, 1, 2], [128, 64, 32]);
 
 		// verify there is some silver and gold minted
 		assert((await silver.balanceOf(player)).gt(0), "zero silver player balance");
