@@ -277,7 +277,7 @@ contract SilverSale is AccessControlLight {
     require(msg.value >= price);
 
     // verify there is enough boxes of the requested type on sale
-    require(boxesSold[boxType] + quantity < BOXES_TO_SELL[boxType]);
+    require(boxesSold[boxType] + quantity <= BOXES_TO_SELL[boxType]);
 
     // update sold boxes counter
     boxesSold[boxType] += quantity;

@@ -25,6 +25,10 @@ const ROLE_TOKEN_CREATOR = 0x00000001;
 // maximum possible quantity
 const MAX_QTY = 0xFFFF;
 
+/**
+ * Test verifies price calculation functions, bulk price calculation
+ * functions, buy a box, bulk buy boxes flows for different types of boxes
+ */
 contract('SilverSale', (accounts) => {
 	it("price: verify local price increase formula (JavaScript)", async() => {
 		// define constant function arguments
@@ -256,6 +260,54 @@ contract('SilverSale', (accounts) => {
 		// verify player and beneficiary balances has changed
 		assert(playerBalance.gt(web3.eth.getBalance(player)), "player balance didn't decrease");
 		assert(beneficiaryBalance.lt(web3.eth.getBalance(beneficiary)), "beneficiary balance didn't increase");
+	});
+	it("buy: buying all the boxes", async() => {
+		// define silver sale dependencies
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const player = accounts[1];
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
+		const offset = new Date().getTime() / 1000 | 0;
+
+		// instantiate silver sale smart contract
+		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+
+		// define functions to buy a Silver Boxes
+		const fn1 = async() => await sale.buy(0, 444, {from: player, value: 114000000000000000000});
+		const fn1a = async() => await sale.buy(0, 56, {from: player, value: 114000000000000000000});
+		const fn2 = async() => await sale.buy(1, 222, {from: player, value: 114000000000000000000});
+		const fn2a = async() => await sale.buy(1, 78, {from: player, value: 114000000000000000000});
+		const fn3 = async() => await sale.buy(2, 111, {from: player, value: 114000000000000000000});
+		const fn3a = async() => await sale.buy(2, 39, {from: player, value: 114000000000000000000});
+
+		// enable all features and permissions required to enable buy
+		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+
+		// verify final sale status
+		assert.equal(0, await sale.boxesSold(0), "wrong initial sold counter for Silver Box");
+		assert.equal(0, await sale.boxesSold(1), "wrong initial sold counter for Rotund Silver Box");
+		assert.equal(0, await sale.boxesSold(2), "wrong initial sold counter for Goldish Silver Box");
+
+		// when buying with the functions defined – first call will succeed, second will fail
+		await fn1();
+		await assertThrowsAsync(fn1);
+		await fn2();
+		await assertThrowsAsync(fn2);
+		await fn3();
+		await assertThrowsAsync(fn3);
+
+		// buy rest of the boxes
+		await fn1a();
+		await fn2a();
+		await fn3a();
+
+		// verify final sale status
+		assert.equal(500, await sale.boxesSold(0), "wrong final sold counter for Silver Box");
+		assert.equal(300, await sale.boxesSold(1), "wrong final sold counter for Rotund Silver Box");
+		assert.equal(150, await sale.boxesSold(2), "wrong final sold counter for Goldish Silver Box");
 	});
 	it("buy: validate balances after buying some boxes", async() => {
 		// define silver sale dependencies
