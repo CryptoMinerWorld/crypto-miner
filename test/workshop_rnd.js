@@ -1,4 +1,4 @@
-/*
+/**
  * Test depth defines how many random values will be generated
  * and analyzed to verify grade value random properties
  * Number of randoms to be generated is equal to 2^TEST_DEPTH
@@ -21,7 +21,7 @@ const RandomTest = artifacts.require("./RandomTest.sol");
 const fs = require('fs');
 
 // A test to check properties of the generated grade values random
-contract('Workshop (Grade Value Randomness)', (accounts) => {
+contract('Workshop (RND)', (accounts) => {
 	it("random: ensure RandomTest and Workshop maximum grade value matches", async() => {
 		// construct workshop dependencies
 		const gem = await Gem.new();

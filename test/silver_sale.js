@@ -22,6 +22,9 @@ const FEATURE_SALE_ENABLED = 0x00000001;
 // Token creator is responsible for creating tokens
 const ROLE_TOKEN_CREATOR = 0x00000001;
 
+// maximum possible quantity
+const MAX_QTY = 0xFFFF;
+
 contract('SilverSale', (accounts) => {
 	it("price: verify local price increase formula (JavaScript)", async() => {
 		// define constant function arguments
@@ -189,14 +192,14 @@ contract('SilverSale', (accounts) => {
 		await assertThrowsAsync(fn, [1, 2]);
 		await assertThrowsAsync(fn, [0, 1, 2]);
 		await assertThrowsAsync(fn, [2, 3, 0]);
-		await assertThrowsAsync(fn, [2, 256, 4]);
+		await assertThrowsAsync(fn, [2, MAX_QTY + 1, 4]);
 		await assertThrowsAsync(fn0, [], []);
-		await assertThrowsAsync(fn0, [0, 1, 2, 0], [2, 256, 4, 2]);
+		await assertThrowsAsync(fn0, [0, 1, 2, 0], [2, MAX_QTY + 1, 4, 2]);
 
 		// verify few bulk price calculations
 		assert.equal(1176000000000000000, await fn([1, 1, 1]), "wrong bulk price (1)");
 		assert.equal(8920000000000000000, await fn([20, 10, 5]), "wrong bulk price (2)");
-		assert.equal(299880000000000000000, await fn([255, 255, 255]), "wrong bulk price (2)");
+		assert.equal(77069160000000000000000, await fn([MAX_QTY, MAX_QTY, MAX_QTY]), "wrong bulk price (3)");
 	});
 
 	it("buy: buying few boxes of the same type", async() => {
@@ -345,7 +348,7 @@ contract('SilverSale', (accounts) => {
 		await assertThrowsAsync(fn, [0], [0]);
 		await assertThrowsAsync(fn, [3], [1]);
 		await assertThrowsAsync(fn, [0, 1, 2], [0, 1, 1]);
-		await assertThrowsAsync(fn, [0, 1, 2], [256, 1, 1]);
+		await assertThrowsAsync(fn, [0, 1, 2], [MAX_QTY + 1, 1, 1]);
 		await assertThrowsAsync(fn, [0, 1, 2, 0], [1, 1, 1, 1]);
 
 		// verify correct parameters work

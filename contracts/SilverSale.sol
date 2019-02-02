@@ -210,7 +210,7 @@ contract SilverSale is AccessControlLight {
    * @param silver amount of silver obtained
    * @param gold amount of gold obtained (zero or one)
    */
-  event Unboxed(address indexed by, uint24 silver, uint16 gold);
+  event Unboxed(address indexed by, uint32 silver, uint24 gold);
 
   /**
    * @dev Creates a Silver/Gold Sale instance, binding it to
@@ -263,7 +263,7 @@ contract SilverSale is AccessControlLight {
    *      2 - Goldish Silver Box
    * @param quantity amount of boxes to buy
    */
-  function buy(uint8 boxType, uint8 quantity) public payable {
+  function buy(uint8 boxType, uint16 quantity) public payable {
     // verify that sale feature is enabled (sale is active)
     require(isFeatureEnabled(FEATURE_SALE_ENABLED));
 
@@ -282,15 +282,15 @@ contract SilverSale is AccessControlLight {
     // update sold boxes counter
     boxesSold[boxType] += quantity;
 
-    // to assign tuple return value from `__unbox`
+    // to assign tuple return value from `unbox`
     // we need to define the variables first
     // maximum value of silver is 255 * 200 = 51000,
     // which fits into uint16
-    uint16 silver;
-    uint8 gold;
+    uint24 silver;
+    uint16 gold;
 
     // evaluate cumulative silver and gold values for all the boxes
-    (silver, gold) = __unbox(boxType, quantity);
+    (silver, gold) = unbox(boxType, quantity);
 
     // delegate call to `__mint` to perform actual token minting
     // beneficiary funds transfer and change transfer back to sender
@@ -314,7 +314,7 @@ contract SilverSale is AccessControlLight {
    * @param quantities an array of amounts of boxes for each
    *      corresponding type to buy
    */
-  function bulkBuy(uint8[] boxTypes, uint8[] quantities) public payable {
+  function bulkBuy(uint8[] boxTypes, uint16[] quantities) public payable {
     // verify that sale feature is enabled (sale is active)
     require(isFeatureEnabled(FEATURE_SALE_ENABLED));
 
@@ -328,11 +328,11 @@ contract SilverSale is AccessControlLight {
     // define variables to accumulate silver and gold counters
     // maximum value of silver is 3 * 255 * 200 = 153000,
     // which doesn't fit into uint16
-    uint24 silver;
-    uint8 gold;
+    uint32 silver;
+    uint24 gold;
 
     // evaluate total cumulative silver and gold values for all the boxes
-    (silver, gold) = __bulkUnbox(boxTypes, quantities);
+    (silver, gold) = bulkUnbox(boxTypes, quantities);
 
     // delegate call to `__mint` to perform token minting
     __mint(price, silver, gold);
@@ -341,6 +341,8 @@ contract SilverSale is AccessControlLight {
   /**
    * @dev Auxiliary function to evaluate random amount of silver and gold
    *      in the box of the given type
+   * @dev Doesn't modify storage, left public to be easily tested
+   *      and verified by third parties for random distribution
    * @param boxType box type to generate amounts for:
    *      0 – Silver Box
    *      1 - Rotund Silver Box
@@ -349,13 +351,13 @@ contract SilverSale is AccessControlLight {
    * @return tuple containing random silver and gold amounts
    *      for the given box type and amount
    */
-  function __unbox(uint8 boxType, uint8 quantity) private constant returns(uint16 silver, uint8 gold) {
+  function unbox(uint8 boxType, uint16 quantity) public constant returns(uint24 silver, uint16 gold) {
     // `silver` and `gold` counters to store cumulative
     // amounts of silver and gold are already defined in
     // function returns signature, their initial values are zeros
 
     // each box will be generated randomly
-    for(uint8 i = 0; i < quantity; i++) {
+    for(uint16 i = 0; i < quantity; i++) {
       // generate some random number based on the given seed
       uint256 rnd = Random.__rawRandom(i);
 
@@ -396,8 +398,8 @@ contract SilverSale is AccessControlLight {
   /**
    * @dev Auxiliary function to evaluate random amount of silver and gold
    *      in the array of boxes of the given types
-   * @dev Unsafe, doesn't validate input arrays to be equal in length,
-   *      and to contain valid data - to be called internally only
+   * @dev Doesn't modify storage, left public to be easily tested
+   *      and verified by third parties for random distribution
    * @param boxTypes array of box types to generate amounts for, containing:
    *      0 – Silver Box
    *      1 - Rotund Silver Box
@@ -406,22 +408,22 @@ contract SilverSale is AccessControlLight {
    * @return tuple containing random silver and gold amounts
    *      for the given box types and amounts
    */
-  function __bulkUnbox(uint8[] boxTypes, uint8[] quantities) private constant returns(uint24 silver, uint8 gold) {
+  function bulkUnbox(uint8[] boxTypes, uint16[] quantities) public constant returns(uint32 silver, uint24 gold) {
     // `silver` and `gold` counters to store cumulative
     // amounts of silver and gold are already defined in
     // function returns signature, their initial values are zeros
 
     // iterate the input arrays and accumulate silver and gold amounts
     for(uint8 i = 0; i < boxTypes.length; i++) {
-      // to assign tuple return value from `__unbox`
+      // to assign tuple return value from `unbox`
       // we need to define the variables first
       // maximum value of silver is 255 * 200 = 51000,
       // which fits into uint16
-      uint16 _silver;
-      uint8 _gold;
+      uint24 _silver;
+      uint16 _gold;
 
       // evaluate cumulative random based silver and gold values for all the boxes
-      (_silver, _gold) = __unbox(boxTypes[i], quantities[i]);
+      (_silver, _gold) = unbox(boxTypes[i], quantities[i]);
 
       // increment bulk cumulative values
       silver += _silver;
@@ -435,8 +437,9 @@ contract SilverSale is AccessControlLight {
   /**
    * @dev Auxiliary function to perform silver and gold minting,
    *      value transfer to beneficiary and change transfer back to sender
+   * @dev Unsafe, internal use only, must be kept private at all times
    */
-  function __mint(uint256 price, uint24 silver, uint8 gold) private {
+  function __mint(uint256 price, uint32 silver, uint24 gold) private {
     // verify message has enough value
     require(price <= msg.value);
 
@@ -534,7 +537,7 @@ contract SilverSale is AccessControlLight {
    * @param quantity amount of boxes of that type
    * @return current price (in moment `now`) of the box type requested
    */
-  function getBoxesPrice(uint8 boxType, uint8 quantity) public constant returns(uint256) {
+  function getBoxesPrice(uint8 boxType, uint16 quantity) public constant returns(uint256) {
     // verify quantity is not zero
     require(quantity != 0);
 
@@ -561,7 +564,7 @@ contract SilverSale is AccessControlLight {
    * @param quantities array of amounts of boxes for each of corresponding types
    * @return current price (in moment `now`) of the box type requested
    */
-  function bulkPrice(uint8[] boxTypes, uint8[] quantities) public constant returns(uint256) {
+  function bulkPrice(uint8[] boxTypes, uint16[] quantities) public constant returns(uint256) {
     // verify input arrays have same lengths
     require(boxTypes.length == quantities.length);
 
