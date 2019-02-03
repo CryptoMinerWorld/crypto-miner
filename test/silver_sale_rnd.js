@@ -9,6 +9,8 @@ const TEST_DEPTH = 11;
 const Silver = artifacts.require("./SilverERC20.sol");
 // GoldERC20 smart contract
 const Gold = artifacts.require("./GoldERC20.sol");
+// Referral points tracker smart contract
+const Tracker = artifacts.require("./RefPointsTracker.sol");
 // Silver Box Sale smart contract
 const Sale = artifacts.require("./SilverSale.sol");
 
@@ -35,12 +37,13 @@ contract('SilverSale (RND)', (accounts) => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
@@ -71,12 +74,13 @@ contract('SilverSale (RND)', (accounts) => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);

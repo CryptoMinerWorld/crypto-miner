@@ -3,6 +3,7 @@ pragma solidity 0.4.23;
 import "./AccessControlLight.sol";
 import "./GoldERC20.sol";
 import "./SilverERC20.sol";
+import "./RefPointsTracker.sol";
 import "./Random.sol";
 
 /**
@@ -71,6 +72,12 @@ contract SilverSale is AccessControlLight {
    *      this smart contract is designed to work with
    */
   uint32 public constant GOLD_TOKEN_VERSION_REQUIRED = 0x100;
+
+  /**
+   * @dev Expected version of the deployed RefPointsTracker instance
+   *      this smart contract is designed to work with
+   */
+  uint32 public constant REF_POINTS_TRACKER_VERSION_REQUIRED = 0x1;
 
   /**
    * @notice Enables the silver / gold sale
@@ -174,14 +181,6 @@ contract SilverSale is AccessControlLight {
   uint16[] public boxesSold = [0, 0, 0];
 
   /**
-   * @notice Sale start date, buying silver/gold boxes is not possible
-   *      before the sale begins
-   * @dev Sale start date is stored as a unix timestamp
-   * @dev Sale is active during the time frame: [offset, offset + LENGTH)
-   */
-  uint32 public offset;
-
-  /**
    * @dev GoldERC20 deployed instance to consume silver from, silver of that instance
    *      may be consumed (burnt) from a player in order to level up a gem
    */
@@ -194,6 +193,12 @@ contract SilverSale is AccessControlLight {
   GoldERC20 public goldInstance;
 
   /**
+   * @dev RefPointsTracker deployed instance to issue referral points to
+   *      and to consume referral points from
+   */
+  RefPointsTracker public refPointsTracker;
+
+  /**
    * @notice An address to send 5% of the incoming funds
    */
   address public chest;
@@ -202,6 +207,14 @@ contract SilverSale is AccessControlLight {
    * @notice An address to send 95% of the incoming funds
    */
   address public beneficiary;
+
+  /**
+   * @notice Sale start date, buying silver/gold boxes is not possible
+   *      before the sale begins
+   * @dev Sale start date is stored as a unix timestamp
+   * @dev Sale is active during the time frame: [offset, offset + LENGTH)
+   */
+  uint32 public offset;
 
   /**
    * @dev Fired in buy() and bulkBuy()
@@ -219,15 +232,25 @@ contract SilverSale is AccessControlLight {
    *      the `TOKEN_VERSION` equal to `SILVER_TOKEN_VERSION_REQUIRED`
    * @param _gold address of the deployed GoldERC20 instance with
    *      the `TOKEN_VERSION` equal to `GOLD_TOKEN_VERSION_REQUIRED`
+   * @param _ref address of the deployed RefPointsTracker instance with
+   *      the `TRACKER_VERSION` equal to `REF_POINTS_TRACKER_VERSION_REQUIRED`
    * @param _chest an address to send 5% of incoming funds to
    * @param _beneficiary an address to send 95% of incoming funds to
    * @param _offset sale start date as a unix timestamp, the sale lasts
    *      from `offset` (inclusive) to `offset + LENGTH` (exclusive)
    */
-  constructor(address _silver, address _gold, address _chest, address _beneficiary, uint32 _offset) public {
+  constructor(
+    address _silver,
+    address _gold,
+    address _ref,
+    address _chest,
+    address _beneficiary,
+    uint32 _offset
+  ) public {
     // verify the inputs: mistakes in addresses
     require(_silver != address(0));
     require(_gold != address(0));
+    require(_ref != address(0));
     require(_chest != address(0));
     require(_beneficiary != address(0));
 
@@ -239,10 +262,12 @@ contract SilverSale is AccessControlLight {
     // bind smart contract instances
     silverInstance = SilverERC20(_silver);
     goldInstance = GoldERC20(_gold);
+    refPointsTracker = RefPointsTracker(_ref);
 
     // verify smart contract versions
     require(silverInstance.TOKEN_VERSION() == SILVER_TOKEN_VERSION_REQUIRED);
     require(goldInstance.TOKEN_VERSION() == GOLD_TOKEN_VERSION_REQUIRED);
+    require(refPointsTracker.TRACKER_VERSION() == REF_POINTS_TRACKER_VERSION_REQUIRED);
 
     // set up chest vault, beneficiary and sale start
     chest = _chest;

@@ -2,12 +2,11 @@
 const Silver = artifacts.require("./SilverERC20.sol");
 // GoldERC20 smart contract
 const Gold = artifacts.require("./GoldERC20.sol");
+// Referral points tracker smart contract
+const Tracker = artifacts.require("./RefPointsTracker.sol");
 
 // Silver Box Sale smart contract
 const Sale = artifacts.require("./SilverSale.sol");
-
-// box types
-const BOX_TYPES = ["Silver Box", "Rotund Silver Box", "Goldish Silver Box"];
 
 // initial and final prices of the boxes
 const INITIAL_PRICES = [96000000000000000, 320000000000000000, 760000000000000000];
@@ -26,10 +25,11 @@ contract('SilverSale: Gas Usage', (accounts) => {
 	it("gas: deploying a sale requires 2346881 gas", async() => {
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		const txHash = sale.transactionHash;
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
@@ -44,11 +44,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
@@ -63,11 +64,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
@@ -82,11 +84,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
@@ -102,11 +105,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
@@ -121,11 +125,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
@@ -140,11 +145,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
@@ -160,11 +166,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
@@ -179,11 +186,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
@@ -198,11 +206,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 
 		const silver = await Silver.new();
 		const gold = await Gold.new();
+		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
-		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
