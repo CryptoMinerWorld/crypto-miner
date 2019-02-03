@@ -193,6 +193,9 @@ const COUNTRY_NAMES = [
 	"Liechtenstein"
 ];
 
+// using file system to create raw csv data file
+const fs = require('fs');
+
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
 		console.log("[print minted countries] test network - skipping the migration script");
@@ -206,20 +209,11 @@ module.exports = async function(deployer, network, accounts) {
 	// deployed token smart contract addresses
 	let tokenAddress = "0xE49F05Fd6DEc46660221a1C1255FfE335bc7fa7a"; // MainNet token address
 
-	// print the existing token map
-	await printCountryOwners(tokenAddress);
-};
-
-/**
- * Function prints existing tokens (marked with asterisk *)
- * in a user-friendly ASCII way
- * @param tokenAddress deployed token instance address
- * @returns {Promise<string>} a bitmap where asterisk * stands for existent (minted) token
- *      and dot . stands for non-existent (not minted) token
- */
-async function printCountryOwners(tokenAddress) {
 	// bind token instance
 	const tk = Token.at(tokenAddress);
+
+	// array to accumualte
+	const countries = [];
 
 	// print CSV header
 	console.log("country_id,country_name,owner");
@@ -227,7 +221,20 @@ async function printCountryOwners(tokenAddress) {
 	// print country owners cycle
 	for(let i = 0; i < await tk.getNumberOfCountries(); i++) {
 		const tokenId = i + 1;
-		const owner = await tk.ownerOf(tokenId);
-		console.log(`${tokenId},${COUNTRY_NAMES[i]},${owner}`);
+		countries.push(await tk.ownerOf(tokenId));
+		console.log("%d,%s,%s", tokenId, COUNTRY_NAMES[i], countries[i]);
 	}
-}
+
+	// write raw data into the file
+	fs.writeFileSync("./countries.csv", "country_id,country_name,owner\n" + countries.map((a, i) => (i + 1) + "," + COUNTRY_NAMES[i] + "," + a).join("\n"));
+
+	// remove duplicates from countries array: https://wsvincent.com/javascript-remove-duplicates-array/
+	const owners = [...new Set(countries)];
+
+	// write raw data into the file
+	fs.writeFileSync("./country_owners.csv", owners.join("\n"));
+
+	// log successful finish of the operation
+	console.log("Operation successful. %d countries. %d owners", countries.length, owners.length);
+
+};
