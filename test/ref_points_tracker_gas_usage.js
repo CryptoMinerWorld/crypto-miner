@@ -39,14 +39,14 @@ contract('RefPointsTracker: Gas Usage', (accounts) => {
 
 		assertEqual(541090, gasUsed, "bulk issuing ref points to 10 addresses gas usage mismatch: " + gasUsed);
 	});
-	it("gas: bulk issuing ref points to 100 addresses requires 5064214 gas", async() => {
+	it("gas: bulk issuing ref points to 68 addresses requires 3455978 gas", async() => {
 		const tracker = await Tracker.new();
-		const size = 100;
+		const size = 68;
 		const addresses = Array.from(new Array(size), (x, i) => i + 1);
 		const points = new Array(size).fill(1);
 		const gasUsed = (await tracker.bulkIssue(addresses, points)).receipt.gasUsed;
 
-		assertEqual(5064214, gasUsed, "bulk issuing ref points to 100 addresses gas usage mismatch: " + gasUsed);
+		assertEqual(3455978, gasUsed, "bulk issuing ref points to 68 addresses gas usage mismatch: " + gasUsed);
 	});
 	it("gas: bulk consuming ref points from 10 addresses requires 275936 gas", async() => {
 		const tracker = await Tracker.new();
@@ -58,15 +58,15 @@ contract('RefPointsTracker: Gas Usage', (accounts) => {
 
 		assertEqual(275936, gasUsed, "bulk consuming ref points from 10 addresses gas usage mismatch: " + gasUsed);
 	});
-	it("gas: bulk consuming ref points from 100 addresses requires 2549060 gas", async() => {
+	it("gas: bulk consuming ref points from 37 addresses requires 957796 gas", async() => {
 		const tracker = await Tracker.new();
-		const size = 100;
+		const size = 37;
 		const addresses = Array.from(new Array(size), (x, i) => i + 1);
 		const points = new Array(size).fill(1);
 		await tracker.bulkIssue(addresses, points);
 		const gasUsed = (await tracker.bulkConsume(addresses, points)).receipt.gasUsed;
 
-		assertEqual(2549060, gasUsed, "bulk consuming ref points from 10 addresses gas usage mismatch: " + gasUsed);
+		assertEqual(957796, gasUsed, "bulk consuming ref points from 37 addresses gas usage mismatch: " + gasUsed);
 	});
 	it("gas: bulk adding 10 known addresses requires 519451 gas", async() => {
 		const tracker = await Tracker.new();
@@ -76,13 +76,21 @@ contract('RefPointsTracker: Gas Usage', (accounts) => {
 
 		assertEqual(519451, gasUsed, "bulk adding 10 known addresses gas usage mismatch: " + gasUsed);
 	});
-	it("gas: bulk adding 100 known addresses requires 4852252 gas", async() => {
+	it("gas: bulk adding 65 known addresses requires 3167270 gas", async() => {
 		const tracker = await Tracker.new();
-		const size = 100;
+		const size = 65;
 		const addresses = Array.from(new Array(size), (x, i) => i + 1);
 		const gasUsed = (await tracker.bulkAddKnownAddresses(addresses)).receipt.gasUsed;
 
-		assertEqual(4852252, gasUsed, "bulk adding 100 known addresses gas usage mismatch: " + gasUsed);
+		assertEqual(3167270, gasUsed, "bulk adding 65 known addresses gas usage mismatch: " + gasUsed);
+	});
+	it("gas: bulk adding 211 known addresses requires 10196084 gas", async() => {
+		const tracker = await Tracker.new();
+		const size = 211;
+		const addresses = Array.from(new Array(size), (x, i) => i + 1);
+		const gasUsed = (await tracker.bulkAddKnownAddresses(addresses)).receipt.gasUsed;
+
+		assertEqual(10196084, gasUsed, "bulk adding 211 known addresses gas usage mismatch: " + gasUsed);
 	});
 });
 
