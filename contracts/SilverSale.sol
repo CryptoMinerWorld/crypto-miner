@@ -276,8 +276,19 @@ contract SilverSale is AccessControlLight {
     // verify there is enough value in the message to buy the box
     require(msg.value >= price);
 
-    // verify there is enough boxes of the requested type on sale
-    require(boxesSold[boxType] + quantity <= BOXES_TO_SELL[boxType]);
+    // verify there is enough boxes of the requested type on sale (hard cap)
+    // hard cap is removed in smart contract, will be presented in UI only
+    // require(boxesSold[boxType] + quantity <= BOXES_TO_SELL[boxType]);
+
+    // however, to protect from unnoticed unlimited sale, we still
+    // limit the quantity not to exceed 10% of hard cap in case
+    // when it is already reached
+    require(
+      // in any case we limit maximum buying amount not to exceed the hard cap
+      quantity <= BOXES_TO_SELL[boxType] && boxesSold[boxType] < BOXES_TO_SELL[boxType]
+      // if it is reached we allow transactions not exceeding 10% of hard cap
+      || quantity <= BOXES_TO_SELL[boxType] / 10
+    );
 
     // update sold boxes counter
     boxesSold[boxType] += quantity;

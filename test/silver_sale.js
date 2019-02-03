@@ -16,6 +16,9 @@ const FINAL_PRICES  = [120000000000000000, 400000000000000000, 95000000000000000
 // Minimum amounts of silver each box type can have
 const SILVER_MIN = [20, 70, 150, 100];
 
+// hard cap for each of the box types
+const BOXES_TO_SELL = [500, 300, 150];
+
 // Enables the silver / gold sale
 const FEATURE_SALE_ENABLED = 0x00000001;
 
@@ -273,13 +276,18 @@ contract('SilverSale', (accounts) => {
 		// instantiate silver sale smart contract
 		const sale = await Sale.new(silver.address, gold.address, chest, beneficiary, offset);
 
-		// define functions to buy a Silver Boxes
-		const fn1 = async() => await sale.buy(0, 444, {from: player, value: 114000000000000000000});
-		const fn1a = async() => await sale.buy(0, 56, {from: player, value: 114000000000000000000});
-		const fn2 = async() => await sale.buy(1, 222, {from: player, value: 114000000000000000000});
-		const fn2a = async() => await sale.buy(1, 78, {from: player, value: 114000000000000000000});
-		const fn3 = async() => await sale.buy(2, 111, {from: player, value: 114000000000000000000});
-		const fn3a = async() => await sale.buy(2, 39, {from: player, value: 114000000000000000000});
+		// define general function to buy Silver Boxes
+		const fn = async(boxType, qty) => await sale.buy(boxType, qty, {from: player, value: 114000000000000000000});
+		// function exceeding hard cap
+		const gt100 = async(boxType) => await fn(boxType, BOXES_TO_SELL[boxType] + 1);
+		// function equal to hard cap
+		const eq100 = async(boxType) => await fn(boxType, BOXES_TO_SELL[boxType]);
+		// function exceeding 10% of hard cap
+		const gt10 = async(boxType) => await fn(boxType, BOXES_TO_SELL[boxType] / 10 + 1);
+		// function equal 10% of hard cap
+		const eq10 = async(boxType) => await fn(boxType, BOXES_TO_SELL[boxType] / 10);
+		// function to sum quantity bought
+		const qt = (boxType) => BOXES_TO_SELL[boxType] * 1.2 + 1;
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
@@ -291,23 +299,35 @@ contract('SilverSale', (accounts) => {
 		assert.equal(0, await sale.boxesSold(1), "wrong initial sold counter for Rotund Silver Box");
 		assert.equal(0, await sale.boxesSold(2), "wrong initial sold counter for Goldish Silver Box");
 
-		// when buying with the functions defined – first call will succeed, second will fail
-		await fn1();
-		await assertThrowsAsync(fn1);
-		await fn2();
-		await assertThrowsAsync(fn2);
-		await fn3();
-		await assertThrowsAsync(fn3);
+		// 1) impossible to buy more than hard cap at any time
+		await assertThrowsAsync(gt100, 0);
+		await assertThrowsAsync(gt100, 1);
+		await assertThrowsAsync(gt100, 2);
 
-		// buy rest of the boxes
-		await fn1a();
-		await fn2a();
-		await fn3a();
+		// 2) possible to buy more than 10% of hard cap before it is reached
+		await gt10(0);
+		await gt10(1);
+		await gt10(2);
+
+		// 2a) including 100% of hard cap
+		await eq100(0);
+		await eq100(1);
+		await eq100(2);
+
+		// 3) impossible to buy more than 10% of hard cap after it has been reached
+		await assertThrowsAsync(gt10, 0);
+		await assertThrowsAsync(gt10, 1);
+		await assertThrowsAsync(gt10, 2);
+
+		// 4) it is possible to buy no more than 10% of hard cap at any time
+		await eq10(0);
+		await eq10(1);
+		await eq10(2);
 
 		// verify final sale status
-		assert.equal(500, await sale.boxesSold(0), "wrong final sold counter for Silver Box");
-		assert.equal(300, await sale.boxesSold(1), "wrong final sold counter for Rotund Silver Box");
-		assert.equal(150, await sale.boxesSold(2), "wrong final sold counter for Goldish Silver Box");
+		assert.equal(qt(0), await sale.boxesSold(0), "wrong final sold counter for Silver Box");
+		assert.equal(qt(1), await sale.boxesSold(1), "wrong final sold counter for Rotund Silver Box");
+		assert.equal(qt(2), await sale.boxesSold(2), "wrong final sold counter for Goldish Silver Box");
 	});
 	it("buy: validate balances after buying some boxes", async() => {
 		// define silver sale dependencies
