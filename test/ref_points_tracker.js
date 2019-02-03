@@ -4,6 +4,9 @@ const ROLE_REF_POINTS_ISSUER = 0x00000001;
 // Role ROLE_REF_POINTS_CONSUMER allows increasing `consumed`
 const ROLE_REF_POINTS_CONSUMER = 0x00000002;
 
+// Role ROLE_SELLER allows adding known addresses
+const ROLE_SELLER = 0x00000004;
+
 // Referral points tracker smart contract
 const Tracker = artifacts.require("./RefPointsTracker.sol");
 
@@ -16,10 +19,14 @@ contract('RefPointsTracker', (accounts) => {
 		assert.equal(0, await tracker.available(account0), "non-zero initial value for available(account0)");
 		assert.equal(0, await tracker.balanceOf(account0), "non-zero initial value for balanceOf(account0)");
 		assert.equal(0, await tracker.getNumberOfHolders(), "non-zero initial value for getNumberOfHolders()");
+		assert.equal(0, await tracker.getNumberOfKnownAddresses(), "non-zero initial value for getNumberOfKnownAddresses()");
 		assert.equal(0, (await tracker.getAllHolders()).length, "non-empty initial value for getAllHolders()");
+		assert.equal(0, (await tracker.getAllKnownAddresses()).length, "non-empty initial value for getAllKnownAddresses()");
 	});
-	it("permissions: issuer and consumer are different permissions", async() => {
+	it("permissions: issuer, consumer and seller are different permissions", async() => {
 		assert(ROLE_REF_POINTS_ISSUER != ROLE_REF_POINTS_CONSUMER, "issuer and consumer permissions are equal");
+		assert(ROLE_REF_POINTS_CONSUMER != ROLE_SELLER, "consumer and seller permissions are equal");
+		assert(ROLE_SELLER != ROLE_REF_POINTS_ISSUER, "seller and issuer permissions are equal");
 	});
 	it("permissions: issuing ref points requires ROLE_REF_POINTS_ISSUER permission", async() => {
 		const tracker = await Tracker.new();
@@ -41,7 +48,7 @@ contract('RefPointsTracker', (accounts) => {
 		// grant issuer permission required
 		await tracker.updateRole(issuer, ROLE_REF_POINTS_ISSUER);
 
-		// verify issuer can perform an operation now
+		// verify issuer can perform operations now
 		await fn1();
 		await fn2();
 
@@ -51,7 +58,7 @@ contract('RefPointsTracker', (accounts) => {
 	it("permissions: consuming ref points requires ROLE_REF_POINTS_CONSUMER permission", async() => {
 		const tracker = await Tracker.new();
 
-		// referral points issuer
+		// referral points consumer
 		const consumer = accounts[1];
 
 		// player
@@ -71,12 +78,37 @@ contract('RefPointsTracker', (accounts) => {
 		// grant consumer permission required
 		await tracker.updateRole(consumer, ROLE_REF_POINTS_CONSUMER);
 
-		// verify consumer can perform an operation now
+		// verify consumer can perform operations now
 		await fn1();
 		await fn2();
 
 		// verify consumed referral points increased correctly
 		assert.equal(2, await tracker.consumed(player), "incorrect consumed value after consuming 2 points");
+	});
+	it("permissions: adding known addresses requires ROLE_SELLER permission", async() => {
+		const tracker = await Tracker.new();
+
+		// seller
+		const seller = accounts[1];
+
+		// functions to consume referral points
+		const fn1 = async() => await tracker.addKnownAddress(accounts[0], {from: seller});
+		const fn2 = async() => await tracker.bulkAddKnownAddresses(accounts, {from: seller});
+
+		// originally seller doesn't have required permission
+		await assertThrowsAsync(fn1);
+		await assertThrowsAsync(fn2);
+
+		// grant seller permission required
+		await tracker.updateRole(seller, ROLE_SELLER);
+
+		// verify seller can perform operations now
+		await fn1();
+		await fn2();
+
+		// verify known addresses were tracked correctly
+		assert.equal(accounts.length, await tracker.getNumberOfKnownAddresses(), "wrong number of known addresses");
+		assert(await tracker.knownAddresses(accounts[1]), "known addresses doesn't contain account 1");
 	});
 	it("issuing and consuming: general flow", async() => {
 		const tracker = await Tracker.new();
@@ -250,6 +282,30 @@ contract('RefPointsTracker', (accounts) => {
 		// issuing/consuming zero amounts always fails
 		await assertThrowsAsync(issue0);
 		await assertThrowsAsync(consume0);
+	});
+	it("adding known addresses: bulk flow", async() => {
+		const tracker = await Tracker.new();
+
+		// seller
+		const seller = accounts[1];
+
+		// grant seller permission required
+		await tracker.updateRole(seller, ROLE_SELLER);
+
+		// verify wrong bulk address parameters
+		await assertThrowsAsync(tracker.bulkAddKnownAddresses, [], {from: seller});
+
+		// verify initial state of known addresses
+		assert(!await tracker.knownAddresses(0), 'address "0" is known');
+		assert(!await tracker.knownAddresses(1), 'address "1" is not known');
+
+		// non empty array works good
+		await tracker.bulkAddKnownAddresses([0], {from: seller});
+		await tracker.bulkAddKnownAddresses([0, 1], {from: seller});
+
+		// verify final state of known addresses
+		assert(await tracker.knownAddresses(0), 'address "0" is known');
+		assert(await tracker.knownAddresses(1), 'address "1" is not known');
 	});
 });
 
