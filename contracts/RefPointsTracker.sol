@@ -68,7 +68,7 @@ contract RefPointsTracker is AccessControlLight {
    * @dev These addresses may earn referral points when
    *      referring them in sales
    */
-  mapping(address => bool) public knownAddresses;
+  mapping(address => bool) public isKnown;
 
   /**
    * @notice Enumeration of all referral points holders
@@ -81,7 +81,7 @@ contract RefPointsTracker is AccessControlLight {
    * @dev Contains all the addresses added using `addKnownAddress`
    *      or `addKnownAddresses` functions
    */
-  address[] public allKnownAddresses;
+  address[] public knownAddresses;
 
   /**
    * @dev Fired in issueTo() function
@@ -163,9 +163,9 @@ contract RefPointsTracker is AccessControlLight {
    * @return an array of known addresses,
    *      doesn't contain duplicates
    */
-  function getAllKnownAddresses() public constant returns(address[]) {
-    // read `allKnownAddresses` array and return
-    return allKnownAddresses;
+  function getKnownAddresses() public constant returns(address[]) {
+    // read `knownAddresses` array and return
+    return knownAddresses;
   }
 
   /**
@@ -173,8 +173,8 @@ contract RefPointsTracker is AccessControlLight {
    * @return length of the known addresses array
    */
   function getNumberOfKnownAddresses() public constant returns(uint256) {
-    // read `allKnownAddresses` array length and return
-    return allKnownAddresses.length;
+    // read `knownAddresses` array length and return
+    return knownAddresses.length;
   }
 
   /**
@@ -343,14 +343,14 @@ contract RefPointsTracker is AccessControlLight {
    * @param _address an address which spent some wei (bought something)
    */
   function __addKnownAddress(address _address) private {
-    // if `_address` ia a new address -
-    if(!knownAddresses[_address]) {
-      // - track it in `allKnownAddresses` array
-      allKnownAddresses.push(_address);
-    }
+    // if `_address` is valid (non-zero) and new -
+    if(_address != address(0) && !isKnown[_address]) {
+      // - track it in `knownAddresses` array
+      knownAddresses.push(_address);
 
-    // add known address to `knownAddresses` mapping
-    knownAddresses[_address] = true;
+      // add known address to `isKnown` mapping
+      isKnown[_address] = true;
+    }
 
     // emit an event
     emit KnownAddressAdded(msg.sender, _address);

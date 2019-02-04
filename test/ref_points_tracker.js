@@ -21,7 +21,7 @@ contract('RefPointsTracker', (accounts) => {
 		assert.equal(0, await tracker.getNumberOfHolders(), "non-zero initial value for getNumberOfHolders()");
 		assert.equal(0, await tracker.getNumberOfKnownAddresses(), "non-zero initial value for getNumberOfKnownAddresses()");
 		assert.equal(0, (await tracker.getAllHolders()).length, "non-empty initial value for getAllHolders()");
-		assert.equal(0, (await tracker.getAllKnownAddresses()).length, "non-empty initial value for getAllKnownAddresses()");
+		assert.equal(0, (await tracker.getKnownAddresses()).length, "non-empty initial value for getKnownAddresses()");
 	});
 	it("permissions: issuer, consumer and seller are different permissions", async() => {
 		assert(ROLE_REF_POINTS_ISSUER != ROLE_REF_POINTS_CONSUMER, "issuer and consumer permissions are equal");
@@ -108,7 +108,7 @@ contract('RefPointsTracker', (accounts) => {
 
 		// verify known addresses were tracked correctly
 		assert.equal(accounts.length, await tracker.getNumberOfKnownAddresses(), "wrong number of known addresses");
-		assert(await tracker.knownAddresses(accounts[1]), "known addresses doesn't contain account 1");
+		assert(await tracker.isKnown(accounts[1]), "known addresses doesn't contain account 1");
 	});
 	it("issuing and consuming: general flow", async() => {
 		const tracker = await Tracker.new();
@@ -296,16 +296,16 @@ contract('RefPointsTracker', (accounts) => {
 		await assertThrowsAsync(tracker.bulkAddKnownAddresses, [], {from: seller});
 
 		// verify initial state of known addresses
-		assert(!await tracker.knownAddresses(0), 'address "0" is known');
-		assert(!await tracker.knownAddresses(1), 'address "1" is not known');
+		assert(!await tracker.isKnown(0), 'address "0" is known');
+		assert(!await tracker.isKnown(1), 'address "1" is not known');
 
 		// non empty array works good
 		await tracker.bulkAddKnownAddresses([0], {from: seller});
 		await tracker.bulkAddKnownAddresses([0, 1], {from: seller});
 
 		// verify final state of known addresses
-		assert(await tracker.knownAddresses(0), 'address "0" is known');
-		assert(await tracker.knownAddresses(1), 'address "1" is not known');
+		assert(await tracker.isKnown(0), 'address "0" is known');
+		assert(await tracker.isKnown(1), 'address "1" is not known');
 	});
 });
 

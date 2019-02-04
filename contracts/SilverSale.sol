@@ -77,7 +77,7 @@ contract SilverSale is AccessControlLight {
    * @dev Expected version of the deployed RefPointsTracker instance
    *      this smart contract is designed to work with
    */
-  uint32 public constant REF_POINTS_TRACKER_VERSION_REQUIRED = 0x1;
+  uint32 public constant REF_POINTS_TRACKER_VERSION_REQUIRED = 0x2;
 
   /**
    * @notice Enables the silver / gold sale
@@ -169,6 +169,13 @@ contract SilverSale is AccessControlLight {
    *      [2] - Goldish Silver Box
    */
   uint64[] public FINAL_PRICES  = [120 finney, 400 finney, 950 finney];
+
+  /**
+   * @dev How many referral points are issued to the referred player
+   *      for one box of each type
+   * @dev The referring address gets twice bigger amount of points
+   */
+  uint8[] public REF_POINTS = [1, 4, 10];
 
   /**
    * @dev Number of boxes of each type available for sale
@@ -289,6 +296,31 @@ contract SilverSale is AccessControlLight {
    * @param quantity amount of boxes to buy
    */
   function buy(uint8 boxType, uint16 quantity) public payable {
+    // delegate call to `buyRef` setting `referrer` to zero
+    buyRef(boxType, quantity, address(0));
+  }
+
+  /**
+   * @notice Buys several boxes of a single type
+   *      (Silver, Rotund Silver, Goldish Silver) and allows
+   *      specify a referrer address of the existing buyer
+   * @notice If referrer address is correct (specifies existing buyer)
+   *      and if new buyer is indeed new one (is not an existing buyer)
+   *      then both referrer and referred will get referral points
+   * @dev Throws if box type is invalid
+   * @dev Throws if quantity is invalid (zero)
+   * @dev Throws if transaction has not enough value (ETH)
+   *      to buy the boxes requested
+   * @param boxType box type, must be one of
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantity amount of boxes to buy
+   * @param referrer [optional] referrer address of the player
+   *      who already bought some silver boxes,
+   *      set to zero to specify no referral
+   */
+  function buyRef(uint8 boxType, uint16 quantity, address referrer) public payable {
     // verify that sale feature is enabled (sale is active)
     require(isFeatureEnabled(FEATURE_SALE_ENABLED));
 
@@ -328,6 +360,15 @@ contract SilverSale is AccessControlLight {
     // evaluate cumulative silver and gold values for all the boxes
     (silver, gold) = unbox(boxType, quantity);
 
+    // if referrer address was specified
+    if(referrer != address(0)) {
+      // calculate how many referral points to issue
+      uint16 refPoints = __calcRefPoints(boxType, quantity);
+
+      // issue referral points if applicable - delegate call to `__issueRefPoints`
+      __issueRefPoints(refPoints, referrer);
+    }
+
     // delegate call to `__mint` to perform actual token minting
     // beneficiary funds transfer and change transfer back to sender
     __mint(price, silver, gold);
@@ -351,6 +392,35 @@ contract SilverSale is AccessControlLight {
    *      corresponding type to buy
    */
   function bulkBuy(uint8[] boxTypes, uint16[] quantities) public payable {
+    // delegate call to `bulkBuyRef` setting `referral` to zero
+    bulkBuyRef(boxTypes, quantities, address(0));
+  }
+
+  /**
+   * @notice Buys boxes of different types in single transaction
+   *      (Silver, Rotund Silver, Goldish Silver) and allows
+   *      specify a referrer address of the existing buyer
+   * @notice If referrer address is correct (specifies existing buyer)
+   *      and if new buyer is indeed new one (is not an existing buyer)
+   *      then both referrer and referred will get referral points
+   * @dev Throws if input arrays have different length
+   * @dev Throws if any of the input arrays are empty
+   * @dev Throws if input arrays size is bigger than three (3)
+   * @dev Throws if any of the box types specified is invalid
+   * @dev Throws if any of the quantities specified is zero
+   * @dev Throws if transaction has not enough value (ETH)
+   *      to buy the boxes requested
+   * @param boxTypes an array of box types, each box type is one of
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantities an array of amounts of boxes for each
+   *      corresponding type to buy
+   * @param referrer [optional] referral address of the player
+   *      who already bought some silver boxes,
+   *      set to zero to specify no referral
+   */
+  function bulkBuyRef(uint8[] boxTypes, uint16[] quantities, address referrer) public payable {
     // verify that sale feature is enabled (sale is active)
     require(isFeatureEnabled(FEATURE_SALE_ENABLED));
 
@@ -369,6 +439,15 @@ contract SilverSale is AccessControlLight {
 
     // evaluate total cumulative silver and gold values for all the boxes
     (silver, gold) = bulkUnbox(boxTypes, quantities);
+
+    // if referrer address was specified
+    if(referrer != address(0)) {
+      // calculate how many referral points to issue
+      uint32 refPoints = __bulkCalcRefPoints(boxTypes, quantities);
+
+      // issue referral points if applicable - delegate call to `__issueRefPoints`
+      __issueRefPoints(refPoints, referrer);
+    }
 
     // delegate call to `__mint` to perform token minting
     __mint(price, silver, gold);
@@ -468,51 +547,6 @@ contract SilverSale is AccessControlLight {
 
     // return the values accumulated
     return (silver, gold);
-  }
-
-  /**
-   * @dev Auxiliary function to perform silver and gold minting,
-   *      value transfer to beneficiary and change transfer back to sender
-   * @dev Unsafe, internal use only, must be kept private at all times
-   */
-  function __mint(uint256 price, uint32 silver, uint24 gold) private {
-    // verify message has enough value
-    require(price <= msg.value);
-
-    // call sender gracefully - player
-    address player = msg.sender;
-
-    // calculate the change to send back to player
-    uint256 change = msg.value - price;
-
-    // any box contains silver, no need to check if silver
-    // is not zero – just mint silver required
-    silverInstance.mint(player, silver);
-
-    // box may not contain gold, check if it does
-    if(gold != 0) {
-      // mint gold required
-      goldInstance.mint(player, gold);
-    }
-
-    // transfer 5% to the chest vault
-    // no need to care about rounding since division by 20
-    // doesn't produce continued fractions
-    chest.transfer(price / 20);
-
-    // transfer 95% to the beneficiary
-    // no need to care about rounding since division by 20
-    // doesn't produce continued fractions
-    beneficiary.transfer(price * 19 / 20);
-
-    // if sender sent more than value required
-    if(change > 0) {
-      // transfer the change back to sender
-      player.transfer(change);
-    }
-
-    // emit an event
-    emit Unboxed(player, silver, gold);
   }
 
   /**
@@ -657,5 +691,118 @@ contract SilverSale is AccessControlLight {
     return uint64(v0 + uint128(t - t0) / dt * dt * (v1 - v0) / (t1 - t0));
   }
 
+
+  /**
+   * @dev Auxiliary function to perform silver and gold minting,
+   *      value transfer to beneficiary and change transfer back to sender
+   * @dev Unsafe, internal use only, must be kept private at all times
+   * @param price amount of ETH to be transferred from player (transaction sender)
+   *      to beneficiary and chest accounts
+   * @param silver amount of silver to be minted to player, cannot be zero
+   * @param gold amount of gold to be minted to player, can be zero
+   */
+  function __mint(uint256 price, uint32 silver, uint24 gold) private {
+    // verify message has enough value
+    require(price <= msg.value);
+
+    // call sender gracefully - player
+    address player = msg.sender;
+
+    // any box contains silver, no need to check if silver
+    // is not zero – just mint silver required
+    silverInstance.mint(player, silver);
+
+    // box may not contain gold, check if it does
+    if(gold != 0) {
+      // mint gold required
+      goldInstance.mint(player, gold);
+    }
+
+    // if price is not zero (if this is not referral points spending)
+    if(price != 0) {
+      // calculate the change to send back to player
+      uint256 change = msg.value - price;
+
+      // transfer 5% to the chest vault
+      // no need to care about rounding since division by 20
+      // doesn't produce continued fractions
+      chest.transfer(price / 20);
+
+      // transfer 95% to the beneficiary
+      // no need to care about rounding since division by 20
+      // doesn't produce continued fractions
+      beneficiary.transfer(price * 19 / 20);
+
+      // if sender sent more than value required
+      if(change > 0) {
+        // transfer the change back to sender
+        player.transfer(change);
+      }
+    }
+
+    // emit an event
+    emit Unboxed(player, silver, gold);
+  }
+
+  /**
+   * @dev Auxiliary function to issue referral points both to
+   *      referral and player (transaction sender)
+   * @dev Unsafe, doesn't perform caller validations, must be kept private
+   * @param refPoints how many referral points to issue (to each of the parties)
+   * @param referrer referral address specified by the player
+   */
+  function __issueRefPoints(uint32 refPoints, address referrer) private {
+    // call sender gracefully – referred
+    address referred = msg.sender;
+
+    // verify that referrer address specified is known to ref points tracker
+    // and that the sender address (player) is not known to ref points tracker
+    if(refPointsTracker.isKnown(referrer) && !refPointsTracker.isKnown(referred)) {
+      // referral conditions are met, both addresses earn referral points
+      // issue referral points to referrer
+      refPointsTracker.issueTo(referrer, 2 * refPoints);
+
+      // issue referral points to referred player
+      refPointsTracker.issueTo(referred, refPoints);
+    }
+
+    // player (sender) becomes known to the ref points tracker in any case
+    refPointsTracker.addKnownAddress(referred);
+  }
+
+  /**
+   * @dev Calculates the referral points the referred player gets based on
+   *      the box type and quantity of the boxes he buys
+   * @dev Unsafe, doesn't check data consistency, must be kept private
+   * @param boxType type of the box the player (transaction sender) buys
+   * @param quantity amount of boxes of that type a buyer buys
+   * @return an amount of referral points to issue to referred player
+   */
+  function __calcRefPoints(uint8 boxType, uint16 quantity) private constant returns(uint16) {
+    // read the ref points data, apply quantity and return
+    return REF_POINTS[boxType] * quantity;
+  }
+
+  /**
+   * @dev Calculates the referral points the referred player gets based on
+   *      the box types and quantities of the boxes he buys
+   * @dev Unsafe, doesn't check data consistency, must be kept private
+   * @param boxTypes array of box types the player (transaction sender) buys
+   * @param quantities array of amounts of boxes of corresponding types
+   * @return an amount of referral points to issue to referred player
+   */
+  function __bulkCalcRefPoints(uint8[] boxTypes, uint16[] quantities) private constant returns(uint32) {
+    // variable to accumulate ref points for each of the box types
+    uint32 refPoints = 0;
+
+    // iterate over all the box types and quantities
+    for(uint8 i = 0; i < boxTypes.length; i++) {
+      // and accumulate the ref points value (delegate call to `__calcRefPoints`)
+      refPoints += __calcRefPoints(boxTypes[i], quantities[i]);
+    }
+
+    // return the accumulated value
+    return refPoints;
+  }
 
 }
