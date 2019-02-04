@@ -22,7 +22,7 @@ const ROLE_TOKEN_CREATOR = 0x00000001;
  * within the SilverSale smart contract
  */
 contract('SilverSale: Gas Usage', (accounts) => {
-	it("gas: deploying a sale requires 2346881 gas", async() => {
+	it("gas: deploying a sale requires 2973936 gas", async() => {
 		const silver = await Silver.new();
 		const gold = await Gold.new();
 		const ref = await Tracker.new();
@@ -35,7 +35,7 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(2346881, gasUsed, "deploying SilverSale gas usage mismatch: " + gasUsed);
+		assertEqual(2973936, gasUsed, "deploying SilverSale gas usage mismatch: " + gasUsed);
 	});
 
 	it("gas: buying one Silver Box requires 114704 gas", async() => {
