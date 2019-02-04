@@ -298,14 +298,17 @@ contract('RefPointsTracker', (accounts) => {
 		// verify initial state of known addresses
 		assert(!await tracker.isKnown(0), 'address "0" is known');
 		assert(!await tracker.isKnown(1), 'address "1" is not known');
+		assert(!await tracker.isKnown(2), 'address "2" is not known');
 
 		// non empty array works good
 		await tracker.bulkAddKnownAddresses([0], {from: seller});
 		await tracker.bulkAddKnownAddresses([0, 1], {from: seller});
+		await tracker.bulkAddKnownAddresses([0, 1, 2], {from: seller});
 
 		// verify final state of known addresses
-		assert(await tracker.isKnown(0), 'address "0" is known');
+		assert(!await tracker.isKnown(0), 'address "0" is known');
 		assert(await tracker.isKnown(1), 'address "1" is not known');
+		assert(await tracker.isKnown(2), 'address "2" is not known');
 	});
 });
 

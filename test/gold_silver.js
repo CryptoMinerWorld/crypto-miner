@@ -26,8 +26,9 @@ contract('GoldERC20', (accounts) => {
 		// verify correct Silver/Gold version
 		assert.equal(0, silverVersion.modulo(16), "incorrect low 4 bits for Silver token version");
 		assert.equal(0, goldVersion.modulo(16), "incorrect low 4 bits for Gold token version");
-		assert.equal(0, silverVersion.dividedToIntegerBy(16).modulo(16), "incorrect 8 bits for Silver token version");
 		assert.equal(0, goldVersion.dividedToIntegerBy(16).modulo(16), "incorrect 8 bits for Gold token version");
+		assert.equal(0, silverVersion.dividedToIntegerBy(256), "incorrect high bits for Silver token version");
+		assert.equal(0, goldVersion.dividedToIntegerBy(4096), "incorrect high bits for Gold token version");
 	});
 
 	it("initial state: balances and allowances are zero", async() => {
