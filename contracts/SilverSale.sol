@@ -341,7 +341,7 @@ contract SilverSale is AccessControlLight {
     // determine box price
     uint256 price = getBoxesPrice(boxType, quantity);
 
-    // verify there is enough value in the message to buy the box
+    // verify there is enough value in the message to buy boxes
     require(msg.value >= price);
 
     // perform hard cap validations and update boxes sold counter
@@ -367,9 +367,55 @@ contract SilverSale is AccessControlLight {
       __issueRefPoints(refPoints, referrer);
     }
 
-    // delegate call to `__mint` to perform actual token minting
-    // beneficiary funds transfer and change transfer back to sender
-    __mint(price, silver, gold);
+    // delegate call to `__mint` to perform token minting,
+    // chest and beneficiary funds transfer, change transfer back to sender
+    __mint(price, 0, silver, gold);
+  }
+
+  /**
+   * @notice Gets several boxes of a single type
+   *      (Silver, Rotund Silver, Goldish Silver)
+   *      by spending referral points
+   * @dev Throws if box type is invalid
+   * @dev Throws if quantity is invalid (zero)
+   * @dev Throws if sender has not enough referral points
+   *      to get the boxes requested, see `REF_PRICES`
+   * @param boxType box type, must be one of
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantity amount of boxes to buy
+   */
+  function get(uint8 boxType, uint16 quantity) public {
+    // verify that sale feature is enabled (sale is active)
+    require(isFeatureEnabled(FEATURE_SALE_ENABLED));
+
+    // verify that the sale has already started
+    require(now >= offset);
+
+    // determine box price in referral points
+    uint16 refs = getBoxesPriceRef(boxType, quantity);
+
+    // verify sender (player) has enough points to spend
+    require(ref.balanceOf(msg.sender) >= refs);
+
+    // perform hard cap validations and update boxes sold counter
+    // delegate call to `__updateBoxesSold`
+    __updateBoxesSold(boxType, quantity);
+
+    // to assign tuple return value from `unbox`
+    // we need to define the variables first
+    // maximum value of silver is 255 * 200 = 51000,
+    // which fits into uint16
+    uint24 silver;
+    uint16 gold;
+
+    // evaluate cumulative silver and gold values for all the boxes
+    (silver, gold) = unbox(boxType, quantity);
+
+    // delegate call to `__mint` to perform actual token minting,
+    // specifying "referral spending mode"
+    __mint(0, refs, silver, gold);
   }
 
   /**
@@ -455,6 +501,9 @@ contract SilverSale is AccessControlLight {
     // it also validates the input arrays lengths
     uint256 price = bulkPrice(boxTypes, quantities);
 
+    // verify there is enough value in the message to buy boxes
+    require(msg.value >= price);
+
     // for each type of the box requested
     for(uint8 i = 0; i < boxTypes.length; i++) {
       // perform hard cap validations and update boxes sold counter
@@ -480,8 +529,61 @@ contract SilverSale is AccessControlLight {
       __issueRefPoints(refPoints, referrer);
     }
 
-    // delegate call to `__mint` to perform token minting
-    __mint(price, silver, gold);
+    // delegate call to `__mint` to perform token minting,
+    // chest and beneficiary funds transfer, change transfer back to sender
+    __mint(price, 0, silver, gold);
+  }
+
+  /**
+   * @notice Gets boxes of different types in single transaction
+   *      (Silver, Rotund Silver, Goldish Silver)
+   *      by spending referral points
+   * @dev Throws if input arrays have different length
+   * @dev Throws if any of the input arrays are empty
+   * @dev Throws if input arrays size is bigger than three (3)
+   * @dev Throws if any of the box types specified is invalid
+   * @dev Throws if any of the quantities specified is zero
+   * @dev Throws if sender has not enough referral points
+   *      to get the boxes requested, see `REF_PRICES`
+   * @param boxTypes an array of box types, each box type is one of
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantities an array of amounts of boxes for each
+   *      corresponding type to buy
+   */
+  function bulkGet(uint8[] boxTypes, uint16[] quantities) public {
+    // verify that sale feature is enabled (sale is active)
+    require(isFeatureEnabled(FEATURE_SALE_ENABLED));
+
+    // verify that the sale has already started
+    require(now >= offset);
+
+    // determine box price in referral points
+    uint24 refs = bulkPriceRef(boxTypes, quantities);
+
+    // verify sender (player) has enough points to spend
+    require(ref.balanceOf(msg.sender) >= refs);
+
+    // for each type of the box requested
+    for(uint8 i = 0; i < boxTypes.length; i++) {
+      // perform hard cap validations and update boxes sold counter
+      // delegate call to `__updateBoxesSold`
+      __updateBoxesSold(boxTypes[i], quantities[i]);
+    }
+
+    // define variables to accumulate silver and gold counters
+    // maximum value of silver is 3 * 255 * 200 = 153000,
+    // which doesn't fit into uint16
+    uint32 silver;
+    uint24 gold;
+
+    // evaluate total cumulative silver and gold values for all the boxes
+    (silver, gold) = bulkUnbox(boxTypes, quantities);
+
+    // delegate call to `__mint` to perform token minting,
+    // specifying "referral spending mode"
+    __mint(0, refs, silver, gold);
   }
 
   /**
@@ -785,17 +887,16 @@ contract SilverSale is AccessControlLight {
 
   /**
    * @dev Auxiliary function to perform silver and gold minting,
-   *      value transfer to beneficiary and change transfer back to sender
+   *      value transfer to chest and  beneficiary and change back to sender
+   *      or/and referral points consuming from the balance of the sender
    * @dev Unsafe, internal use only, must be kept private at all times
    * @param price amount of ETH to be transferred from player (transaction sender)
    *      to beneficiary and chest accounts
+   * @param refs amount of referral points to consume
    * @param silver amount of silver to be minted to player, cannot be zero
    * @param gold amount of gold to be minted to player, can be zero
    */
-  function __mint(uint256 price, uint32 silver, uint24 gold) private {
-    // verify message has enough value
-    require(price <= msg.value);
-
+  function __mint(uint256 price, uint24 refs, uint32 silver, uint24 gold) private {
     // call sender gracefully - player
     address player = msg.sender;
 
@@ -829,6 +930,12 @@ contract SilverSale is AccessControlLight {
         // transfer the change back to sender
         player.transfer(change);
       }
+    }
+
+    // if refs is not zero (if this is referral points spending)
+    if(refs != 0) {
+      // consume referral points from the player
+      ref.consumeFrom(player, refs);
     }
 
     // emit an event
