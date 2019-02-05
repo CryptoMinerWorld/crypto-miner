@@ -72,17 +72,12 @@ contract('Workshop (RND)', (accounts) => {
 		console.log("\tmin: %o\n\tmax: %o\n\tavg: %o\n\tmed: %o", min, max, avg, median);
 
 		// verify the distribution properties are correct
-		assertEqual(0, min, maxGrade, "wrong minimum");
-		assertEqual(maxGrade, max, maxGrade, "wrong maximum");
-		assertEqual(maxGrade / 4, avg, maxGrade, "wrong average");
+		assertEqualWith(0, min, 1000, "wrong minimum");
+		assertEqualWith(maxGrade, max, 75000, "wrong maximum");
+		assertEqualWith(maxGrade / 4, avg, 10000, "wrong average");
 	});
 });
 
-
-// asserts equal with precision of 5% of the maximum (absolute value)
-function assertEqual(expected, actual, maximum, msg) {
-	assertEqualWith(expected, actual, maximum * 0.05, msg);
-}
 
 // asserts equal with the precisions defined in leeway (absolute value)
 function assertEqualWith(expected, actual, leeway, msg) {

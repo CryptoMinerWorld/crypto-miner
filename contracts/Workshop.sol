@@ -82,8 +82,8 @@ contract Workshop is AccessControlLight {
    * @dev Prices of the gem grade types D, C, B, A, AA, AAA accordingly
    * @dev An upgrade price from grade i to grade j is calculated
    *      as a difference between grade j price and grade i price
-   * TODO: @dev When upgrading grade value only (for grade AAA only),
-   * TODO:      an upgrade price is calculated as from grade AA to AAA
+   * @dev When upgrading grade value only (for grade AAA only),
+   *      an upgrade price is calculated as from grade AA to AAA
    */
   uint8[] public GRADE_PRICES = [0, 1, 3, 7, 15, 31];
 
@@ -357,6 +357,7 @@ contract Workshop is AccessControlLight {
    * @dev Consumes gold and/or silver on success, amounts can be
    *      calculated using `getLevelUpPrice()` and `getUpgradePrice()` functions
    * @dev Private, doesn't check if FEATURE_UPGRADES_ENABLED feature is enabled
+   * @param seed a seed to be used to generate random grade value
    * @param tokenId ID of the gem to level up / upgrade
    * @param levelDelta number of levels to increase token level by
    * @param gradeTypeDelta number of grades to increase token grade by
@@ -377,7 +378,7 @@ contract Workshop is AccessControlLight {
     require(silverRequired != 0 || goldRequired != 0);
 
     // if level up is requested
-    if(silverRequired != 0) {
+    if(levelDelta != 0) {
       // burn amount of silver required
       silverInstance.burn(msg.sender, silverRequired);
 
@@ -389,25 +390,49 @@ contract Workshop is AccessControlLight {
     }
 
     // if grade type upgrade is requested
-    if(goldRequired != 0) {
-      // burn amount of gold required
-      goldInstance.burn(msg.sender, goldRequired);
+    if(gradeTypeDelta != 0) {
+      // perform regular upgrade – grade type and value
+      __up(seed, tokenId, gradeTypeDelta, goldRequired);
+    }
 
-      // read current grade of the token
-      uint32 grade = gemInstance.getGrade(tokenId);
+    // if both level and grade deltas are zero –
+    if(levelDelta == 0 && gradeTypeDelta == 0) {
+      // - this is a request to perform grade value upgrade
+      // calculate upgrade price as from grade AA to grade AAA
+      goldRequired = GRADE_PRICES[GRADE_PRICES.length - 1] - GRADE_PRICES[GRADE_PRICES.length - 2];
 
-      // extract current grade type and increment it by delta
-      uint8 gradeType = uint8(grade >> 24) + gradeTypeDelta;
-
-      // extract current grade value and generate new one
-      uint24 gradeValue = uint24(Random.__quadraticRandom(seed, uint24(grade), GRADE_VALUES));
-
-      // perform token grade type upgrade
-      gemInstance.upgradeGrade(tokenId, uint32(gradeType) << 24 | gradeValue);
+      // perform grade value only increase
+      __up(seed, tokenId, gradeTypeDelta, goldRequired);
     }
 
     // emit an event
     emit UpgradeComplete(tokenId, gemInstance.getLevel(tokenId), gemInstance.getGrade(tokenId));
+  }
+
+  /**
+   * @dev Auxiliary function to perform gem upgrade, grade type
+   *      may increase or remain the same, grade value will be increased randomly
+   * @dev Unsafe, doesn't make any validations, must be kept private
+   * @param seed a seed to be used to generate random grade value
+   * @param tokenId ID of the gem to upgrade
+   * @param gradeTypeDelta number of grades to increase token grade by
+   * @param goldRequired amount of gold to consume (burn)
+   */
+  function __up(uint256 seed, uint32 tokenId, uint8 gradeTypeDelta, uint8 goldRequired) private {
+    // burn amount of gold required
+    goldInstance.burn(msg.sender, goldRequired);
+
+    // read current grade of the token
+    uint32 grade = gemInstance.getGrade(tokenId);
+
+    // extract current grade type and increment it by delta
+    uint8 gradeType = uint8(grade >> 24) + gradeTypeDelta;
+
+    // extract current grade value and generate new one
+    uint24 gradeValue = uint24(Random.__quadraticRandom(seed, uint24(grade), GRADE_VALUES));
+
+    // perform token grade type upgrade
+    gemInstance.upgradeGrade(tokenId, uint32(gradeType) << 24 | gradeValue);
   }
 
 }
