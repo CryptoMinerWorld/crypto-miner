@@ -263,7 +263,7 @@ contract('Workshop', (accounts) => {
 		const player = accounts[1];
 
 		// mint a gem to level up and upgrade
-		await gem.mint(player, 1, 1, 0, 1, 1, 1, 1, 1); // level: 1, grade: 2 (C)
+		await gem.mint(player, 1, 1, 0, 1, 1, 1, 1, 1); // level: 1, grade: 1 (D)
 
 		// define level up function
 		const fn1 = async() => await workshop.upgrade(1, 3, 0, {from: player});
@@ -345,6 +345,9 @@ contract('Workshop', (accounts) => {
 		assert.equal(10135, await silver.balanceOf(player), "incorrect silver balance after successful level up");
 		assert.equal(10135, await silver.totalSupply(), "incorrect silver total supply after successful level up");
 
+		// save initial gem grade value
+		const grade2 = (await gem.getGradeValue(1)).toNumber();
+
 		// perform grade upgrade
 		await fn2();
 		// verify gem grade was changed correctly
@@ -359,6 +362,9 @@ contract('Workshop', (accounts) => {
 		await assertThrowsAsync(fn1);
 		await assertThrowsAsync(fn2);
 
+		// save next gem grade value
+		const grade3 = (await gem.getGradeValue(1)).toNumber();
+
 		// leveling up and upgrading is still possible by 1 until maximum is reached
 		await fn3();
 		// verify the changes
@@ -367,6 +373,9 @@ contract('Workshop', (accounts) => {
 		// verify silver and gold was consumed correctly
 		assert.equal(10000, await silver.balanceOf(player), "incorrect silver balance after second level up");
 		assert.equal(1016, await gold.balanceOf(player), "incorrect gold balance after second upgrade");
+
+		// save next gem grade value
+		const grade4 = (await gem.getGradeValue(1)).toNumber();
 
 		// last successful gem upgrade is possible
 		await fn4();
@@ -382,6 +391,10 @@ contract('Workshop', (accounts) => {
 		await assertThrowsAsync(fn2);
 		await assertThrowsAsync(fn3);
 		await assertThrowsAsync(fn4);
+
+		// verify gem grade value increases only: grade2 < grade3 < grade4
+		assert(grade2 < grade3, "grade didn't increase! constraint grade2 < grade3 didn't meet");
+		assert(grade3 < grade4, "grade didn't increase! constraint grade3 < grade4 didn't meet");
 	});
 
 	it("upgrades: bulk upgrade", async() => {

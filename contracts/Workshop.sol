@@ -232,7 +232,7 @@ contract Workshop is AccessControlLight {
     require(isFeatureEnabled(FEATURE_UPGRADES_ENABLED));
 
     // delegate call to `__upgrade`
-    __upgrade(tokenId, levelDelta, gradeTypeDelta);
+    __upgrade(0, tokenId, levelDelta, gradeTypeDelta);
   }
 
   /**
@@ -336,7 +336,7 @@ contract Workshop is AccessControlLight {
     // iterate the data and perform an upgrade
     for(uint256 i = 0; i < tokenIds.length; i++) {
       // perform an individual gem upgrade
-      __upgrade(tokenIds[i], levelDeltas[i], gradeDeltas[i]);
+      __upgrade(i, tokenIds[i], levelDeltas[i], gradeDeltas[i]);
     }
   }
 
@@ -361,7 +361,7 @@ contract Workshop is AccessControlLight {
    * @param levelDelta number of levels to increase token level by
    * @param gradeTypeDelta number of grades to increase token grade by
    */
-  function __upgrade(uint32 tokenId, uint8 levelDelta, uint8 gradeTypeDelta) private {
+  function __upgrade(uint256 seed, uint32 tokenId, uint8 levelDelta, uint8 gradeTypeDelta) private {
     // ensure token is owned by the sender, it also ensures token exists
     require(gemInstance.ownerOf(tokenId) == msg.sender);
 
@@ -393,25 +393,21 @@ contract Workshop is AccessControlLight {
       // burn amount of gold required
       goldInstance.burn(msg.sender, goldRequired);
 
+      // read current grade of the token
+      uint32 grade = gemInstance.getGrade(tokenId);
+
+      // extract current grade type and increment it by delta
+      uint8 gradeType = uint8(grade >> 24) + gradeTypeDelta;
+
+      // extract current grade value and generate new one
+      uint24 gradeValue = uint24(Random.__quadraticRandom(seed, uint24(grade), GRADE_VALUES));
+
       // perform token grade type upgrade
-      gemInstance.upgradeGrade(tokenId, uint32(gemInstance.getGradeType(tokenId) + gradeTypeDelta) << 24 | randomGradeValue());
+      gemInstance.upgradeGrade(tokenId, uint32(gradeType) << 24 | gradeValue);
     }
 
     // emit an event
     emit UpgradeComplete(tokenId, gemInstance.getLevel(tokenId), gemInstance.getGrade(tokenId));
-  }
-
-  /**
-   * @notice Function to calculate random grade value when upgrading gem
-   * @dev The random used to build the function on is not secure and can be
-   *      easily manipulated by miners
-   * @dev Chances of getting different grade values are not uniform,
-   *      getting a low grade value is more likely than big one
-   * @return a random number representing grade value in range [0, GRADE_VALUES)
-   */
-  function randomGradeValue() public constant returns(uint24) {
-    // delegate call to `Random.__quadraticRandom` and return
-    return uint24(Random.__quadraticRandom(0, 0, GRADE_VALUES));
   }
 
 }
