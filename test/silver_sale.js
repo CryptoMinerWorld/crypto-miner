@@ -26,7 +26,6 @@ const REF_PRICES = [20, 80, 200];
 const FEATURE_SALE_ENABLED = 0x00000001;
 // Token creator is responsible for creating tokens
 const ROLE_TOKEN_CREATOR = 0x00000001;
-
 // Allows issuing referral points
 const ROLE_REF_POINTS_ISSUER = 0x00000001;
 // Allows consuming referral points

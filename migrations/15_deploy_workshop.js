@@ -34,11 +34,11 @@ module.exports = async function(deployer, network, accounts) {
 	let silverAddress = "";
 	let goldAddress = "";
 
-	// for test network addresses are different
+	// for test networks addresses are different
 	if(network !== "mainnet") {
 		gemAddress = "0x82FF6Bbd7B64f707e704034907d582C7B6E09d97";
-		silverAddress = "0x6198Ddeb9DBd9E369928991cebd1C8B57f4E8BFb";
-		goldAddress = "0xabECC9fd43e8DFFFe1A10b83B70D8c9607608DA8";
+		silverAddress = "0x453BeAB356D103666FCdc437798630D4CD6B3399";
+		goldAddress = "0xe58Bfc8722C6d7Aa9fA52309154BE3a74650e0Be";
 	}
 
 	// deploy workshop

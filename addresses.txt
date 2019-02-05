@@ -14,6 +14,7 @@ RefPointsTracker:
 Silver:
 Gold:
 Workshop:
+SilverSale:
 
 
 Rinkeby:
@@ -28,10 +29,11 @@ MetadataStorage:  0x71A0f651F4c1f9265209436B0f1aC978bbd4382D
 MintHelper:       0x6AFD5F5F431279B0Cac7f5ff406F13d804b183c9
 CountryERC721:    0x6AC79cbA4Cf4c07303d30410739b13Ee6914b619
 CountrySale:      0x7fdd0Dca19326C59754Fbb7D1eA9b043Df799CF2
-RefPointsTracker: 0xad036EE409a4154c476478F8647Bc9cefb9d504B
-Silver:           0x6198Ddeb9DBd9E369928991cebd1C8B57f4E8BFb
-Gold:             0xabECC9fd43e8DFFFe1A10b83B70D8c9607608DA8
-Workshop:         0xfd2121e4aeAa9B32A34a216381AE9D36e582baa4
+RefPointsTracker: 0x83cB6C8A7AB25c1058a3D282Bb8699d631121D25
+Silver:           0x453BeAB356D103666FCdc437798630D4CD6B3399
+Gold:             0xe58Bfc8722C6d7Aa9fA52309154BE3a74650e0Be
+Workshop:         0xF3320711190482b01aF1363619850d3739dBcdCF
+SilverSale:       0xCa6156BF6e76DAEdd2a4D14e351f2bA8D1bE348C
 
 
 Ropsten:
@@ -50,6 +52,7 @@ RefPointsTracker:
 Silver:
 Gold:
 Workshop:
+SilverSale:
 
 
 Common Addresses (Not Smart Contracts):
