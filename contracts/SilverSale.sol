@@ -294,6 +294,113 @@ contract SilverSale is AccessControlLight {
   }
 
   /**
+   * @notice Calculates boxes available on sale
+   * @dev For a given box type determines amount of boxes available
+   *      on sale based on initial `BOXES_TO_SELL` value and
+   *      current amount of boxes sold `boxesSold` value
+   * @dev If boxes sold exceeds initially available amount - returns zero
+   * @param boxType type of the box to calculate ref points for:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @return amount of boxes available on sale
+   */
+  function boxesAvailable(uint8 boxType) public constant returns(uint16) {
+    // return difference between `BOXES_TO_SELL` and `boxesSold` safely,
+    // checking possible arithmetic overflow first
+    return boxesSold[boxType] > BOXES_TO_SELL[boxType]? 0: BOXES_TO_SELL[boxType] - boxesSold[boxType];
+  }
+
+  /**
+   * @dev A convenient way to get information on all the boxes available
+   *      in a single function call
+   * @return an array of available boxes quantities by type
+   */
+  function boxesAvailableArray() public constant returns(uint16[]) {
+    // since there is no required array prepared already, create one
+    uint16[] memory result = new uint16[](boxesSold.length);
+
+    // iterate over each box type
+    for(uint8 i = 0; i < boxesSold.length; i++) {
+      // and fill in the available data based on calculation in `boxesAvailable`
+      result[i] = boxesAvailable(i);
+    }
+
+    // return resulting array from memory
+    return result;
+  }
+
+  /**
+   * @dev A Convenient way to get information on all the boxes sold
+   *      in a single function call
+   * @return an array of sold boxes quantities by type
+   */
+  function boxesSoldArray() public constant returns(uint16[]) {
+    // just return internal contract array
+    return boxesSold;
+  }
+
+  /**
+   * @notice Calculates how many referral points is needed to get
+   *      few boxes of the type (Silver, Rotund Silver or Goldish Silver)
+   *      and quantity specified
+   * @dev Throws if the box type specified is invalid
+   * @dev Throws if quantity (amount of boxes) is zero
+   * @param boxType type of the box to calculate ref points for:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantity amount of boxes of that type
+   * @return amount of referral points required to get the boxes requested
+   */
+  function getBoxesPriceRef(uint8 boxType, uint16 quantity) public constant returns(uint24) {
+    // verify quantity is not zero
+    require(quantity != 0);
+
+    // multiply ref price of a single box by the quantity and return
+    return uint24(quantity) * REF_PRICES[boxType];
+  }
+
+  /**
+   * @notice Calculates how many referral points is needed to get
+   *      different boxes of different types (Silver, Rotund Silver
+   *      or Goldish Silver) and quantities specified
+   * @dev Throws if input arrays have different length
+   * @dev Throws if any of the input arrays are empty
+   * @dev Throws if input arrays size is bigger than three (3)
+   * @dev Throws if any of the box types specified is invalid
+   * @dev Throws if any of the quantities specified is zero
+   * @param boxTypes array of box to calculate ref points for:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantities array of amounts of boxes for each of corresponding types
+   * @return amount of referral points required to get the boxes requested
+   */
+  function bulkPriceRef(uint8[] boxTypes, uint16[] quantities) public constant returns(uint32) {
+    // verify input arrays have same lengths
+    require(boxTypes.length == quantities.length);
+
+    // verify input arrays contain some data (non-zero length)
+    require(boxTypes.length != 0);
+
+    // verify input arrays are not too big in length
+    require(boxTypes.length <= REF_PRICES.length);
+
+    // define variable to accumulate the ref price
+    uint32 refPrice = 0;
+
+    // iterate over arrays
+    for(uint8 i = 0; i < boxTypes.length; i++) {
+      // and increase the ref price for pair `i`
+      refPrice += getBoxesPriceRef(boxTypes[i], quantities[i]);
+    }
+
+    // return accumulated price
+    return refPrice;
+  }
+
+  /**
    * @notice Buys several boxes of a single type
    *      (Silver, Rotund Silver, Goldish Silver)
    * @dev Throws if box type is invalid
@@ -657,6 +764,16 @@ contract SilverSale is AccessControlLight {
   }
 
   /**
+   * @notice Estimates time before next price increase
+   * @dev Price increases every day (`PRICE_INCREASE_EVERY`)
+   * @return number of seconds left before next price increase
+   */
+  function priceIncreaseIn() public constant returns(uint32) {
+    // calculate based on input data, works safe for `_t` before `_offset`
+    return now < offset? offset - uint32(now): (uint32(now) - offset) % PRICE_INCREASE_EVERY;
+  }
+
+  /**
    * @notice Calculates current box price of the type specified
    *      (Silver, Rotund Silver or Goldish Silver)
    * @dev Calculates silver box price based on the initial,
@@ -798,66 +915,6 @@ contract SilverSale is AccessControlLight {
     return uint64(v0 + uint128(t - t0) / dt * dt * (v1 - v0) / (t1 - t0));
   }
 
-  /**
-   * @notice Calculates how many referral points is needed to get
-   *      few boxes of the type (Silver, Rotund Silver or Goldish Silver)
-   *      and quantity specified
-   * @dev Throws if the box type specified is invalid
-   * @dev Throws if quantity (amount of boxes) is zero
-   * @param boxType type of the box to calculate ref points for:
-   *      0 – Silver Box
-   *      1 - Rotund Silver Box
-   *      2 - Goldish Silver Box
-   * @param quantity amount of boxes of that type
-   * @return amount of referral points required to get the boxes requested
-   */
-  function getBoxesPriceRef(uint8 boxType, uint16 quantity) public constant returns(uint24) {
-    // verify quantity is not zero
-    require(quantity != 0);
-
-    // multiply ref price of a single box by the quantity and return
-    return uint24(quantity) * REF_PRICES[boxType];
-  }
-
-  /**
-   * @notice Calculates how many referral points is needed to get
-   *      different boxes of different types (Silver, Rotund Silver
-   *      or Goldish Silver) and quantities specified
-   * @dev Throws if input arrays have different length
-   * @dev Throws if any of the input arrays are empty
-   * @dev Throws if input arrays size is bigger than three (3)
-   * @dev Throws if any of the box types specified is invalid
-   * @dev Throws if any of the quantities specified is zero
-   * @param boxTypes array of box to calculate ref points for:
-   *      0 – Silver Box
-   *      1 - Rotund Silver Box
-   *      2 - Goldish Silver Box
-   * @param quantities array of amounts of boxes for each of corresponding types
-   * @return amount of referral points required to get the boxes requested
-   */
-  function bulkPriceRef(uint8[] boxTypes, uint16[] quantities) public constant returns(uint32) {
-    // verify input arrays have same lengths
-    require(boxTypes.length == quantities.length);
-
-    // verify input arrays contain some data (non-zero length)
-    require(boxTypes.length != 0);
-
-    // verify input arrays are not too big in length
-    require(boxTypes.length <= REF_PRICES.length);
-
-    // define variable to accumulate the ref price
-    uint32 refPrice = 0;
-
-    // iterate over arrays
-    for(uint8 i = 0; i < boxTypes.length; i++) {
-      // and increase the ref price for pair `i`
-      refPrice += getBoxesPriceRef(boxTypes[i], quantities[i]);
-    }
-
-    // return accumulated price
-    return refPrice;
-  }
-
 
   /**
    * @dev Auxiliary function to verify hard cap status and increase
@@ -938,6 +995,9 @@ contract SilverSale is AccessControlLight {
       refPointsTracker.consumeFrom(player, refs);
     }
 
+    // player (sender) becomes known to the ref points tracker
+    refPointsTracker.addKnownAddress(msg.sender);
+
     // emit an event
     emit Unboxed(player, silver, gold);
   }
@@ -955,6 +1015,7 @@ contract SilverSale is AccessControlLight {
 
     // verify that referrer address specified is known to ref points tracker
     // and that the sender address (player) is not known to ref points tracker
+    // it also ensures that referrer is not referred
     if(refPointsTracker.isKnown(referrer) && !refPointsTracker.isKnown(referred)) {
       // referral conditions are met, both addresses earn referral points
       // issue referral points to referrer
@@ -963,9 +1024,6 @@ contract SilverSale is AccessControlLight {
       // issue referral points to referred player
       refPointsTracker.issueTo(referred, refPoints);
     }
-
-    // player (sender) becomes known to the ref points tracker in any case
-    refPointsTracker.addKnownAddress(referred);
   }
 
   /**

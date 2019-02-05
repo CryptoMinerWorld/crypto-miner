@@ -115,11 +115,11 @@ contract('SilverSale (RND)', (accounts) => {
 
 // check if 2 values are equal with a 5% precision
 function assertEqual(expected, actual, msg) {
-	assertEqualWith(expected, 0.05, actual, msg);
+	assertEqualWith(expected, actual, 0.05, msg);
 }
 
 // check if 2 values are equal with the 'leeway' precision
-function assertEqualWith(expected, leeway, actual, msg) {
+function assertEqualWith(expected, actual, leeway, msg) {
 	assert(expected * (1 - leeway) < actual && expected * (1 + leeway) > actual, msg);
 }
 

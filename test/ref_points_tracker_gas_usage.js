@@ -10,43 +10,43 @@ contract('RefPointsTracker: Gas Usage', (accounts) => {
 
 		assertEqual(1027454, gasUsed, "deploying RefPointsTracker gas usage mismatch: " + gasUsed);
 	});
-	it("gas: issuing some ref points requires gas", async() => {
+	it("gas: issuing some ref points requires 88334 gas", async() => {
 		const tracker = await Tracker.new();
 		const gasUsed = (await tracker.issueTo(accounts[1], 1)).receipt.gasUsed;
 
-		assertEqual(88278, gasUsed, "issuing some ref points gas usage mismatch: " + gasUsed);
+		assertEqual(88334, gasUsed, "issuing some ref points gas usage mismatch: " + gasUsed);
 	});
-	it("gas: issuing some additional ref points requires gas", async() => {
+	it("gas: issuing some additional ref points requires 32743 gas", async() => {
 		const tracker = await Tracker.new();
 		await tracker.issueTo(accounts[1], 1);
 		const gasUsed = (await tracker.issueTo(accounts[1], 1)).receipt.gasUsed;
 
 		assertEqual(32743, gasUsed, "issuing some additional ref points gas usage mismatch: " + gasUsed);
 	});
-	it("gas: consuming some ref points requires gas", async() => {
+	it("gas: consuming some ref points requires 48564 gas", async() => {
 		const tracker = await Tracker.new();
 		await tracker.issueTo(accounts[1], 1);
 		const gasUsed = (await tracker.consumeFrom(accounts[1], 1)).receipt.gasUsed;
 
 		assertEqual(48564, gasUsed, "issuing some ref points gas usage mismatch: " + gasUsed);
 	});
-	it("gas: bulk issuing ref points to 10 addresses requires 541090 gas", async() => {
+	it("gas: bulk issuing ref points to 10 addresses requires 541112 gas", async() => {
 		const tracker = await Tracker.new();
 		const size = 10;
 		const addresses = Array.from(new Array(size), (x, i) => i + 1);
 		const points = new Array(size).fill(1);
 		const gasUsed = (await tracker.bulkIssue(addresses, points)).receipt.gasUsed;
 
-		assertEqual(541090, gasUsed, "bulk issuing ref points to 10 addresses gas usage mismatch: " + gasUsed);
+		assertEqual(541112, gasUsed, "bulk issuing ref points to 10 addresses gas usage mismatch: " + gasUsed);
 	});
-	it("gas: bulk issuing ref points to 68 addresses requires 3455978 gas", async() => {
+	it("gas: bulk issuing ref points to 68 addresses requires 3456000 gas", async() => {
 		const tracker = await Tracker.new();
 		const size = 68;
 		const addresses = Array.from(new Array(size), (x, i) => i + 1);
 		const points = new Array(size).fill(1);
 		const gasUsed = (await tracker.bulkIssue(addresses, points)).receipt.gasUsed;
 
-		assertEqual(3455978, gasUsed, "bulk issuing ref points to 68 addresses gas usage mismatch: " + gasUsed);
+		assertEqual(3456000, gasUsed, "bulk issuing ref points to 68 addresses gas usage mismatch: " + gasUsed);
 	});
 	it("gas: bulk consuming ref points from 10 addresses requires 275936 gas", async() => {
 		const tracker = await Tracker.new();
@@ -97,10 +97,10 @@ contract('RefPointsTracker: Gas Usage', (accounts) => {
 
 // asserts equal with precision of 5%
 function assertEqual(expected, actual, msg) {
-	assertEqualWith(expected, 0.05, actual, msg);
+	assertEqualWith(expected, actual, 0.05, msg);
 }
 
 // asserts equal with the precisions defined in leeway
-function assertEqualWith(expected, leeway, actual, msg) {
+function assertEqualWith(expected, actual, leeway, msg) {
 	assert(expected * (1 - leeway) < actual && expected * (1 + leeway) > actual, msg);
 }

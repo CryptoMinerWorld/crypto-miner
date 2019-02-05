@@ -13,16 +13,17 @@ const INITIAL_PRICES = [96000000000000000, 320000000000000000, 76000000000000000
 
 // Enables the silver / gold sale
 const FEATURE_SALE_ENABLED = 0x00000001;
-
 // Token creator is responsible for creating tokens
 const ROLE_TOKEN_CREATOR = 0x00000001;
+// Allows setting an address as known
+const ROLE_SELLER = 0x00000004;
 
 /**
  * Test verifies gas usage for different transactions
  * within the SilverSale smart contract
  */
 contract('SilverSale: Gas Usage', (accounts) => {
-	it("gas: deploying a sale requires 2973936 gas", async() => {
+	it("gas: deploying a sale requires 3743763 gas", async() => {
 		const silver = await Silver.new();
 		const gold = await Gold.new();
 		const ref = await Tracker.new();
@@ -35,10 +36,10 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(2973936, gasUsed, "deploying SilverSale gas usage mismatch: " + gasUsed);
+		assertEqual(3743763, gasUsed, "deploying SilverSale gas usage mismatch: " + gasUsed);
 	});
 
-	it("gas: buying one Silver Box requires 114704 gas", async() => {
+	it("gas: buying one Silver Box requires 182207 gas", async() => {
 		const boxType = 0;
 		const qty = 1;
 
@@ -54,11 +55,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(114704, gasUsed, "buying one Silver Box gas usage mismatch: " + gasUsed);
+		assertEqual(182207, gasUsed, "buying one Silver Box gas usage mismatch: " + gasUsed);
 	});
-	it("gas: buying two Silver Boxes requires 117185 gas", async() => {
+	it("gas: buying two Silver Boxes requires 184685 gas", async() => {
 		const boxType = 0;
 		const qty = 2;
 
@@ -74,11 +76,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(117185, gasUsed, "buying one Silver Box gas usage mismatch: " + gasUsed);
+		assertEqual(184685, gasUsed, "buying two Silver Boxes gas usage mismatch: " + gasUsed);
 	});
-	it("gas: buying 500 Silver Boxes requires 1351293 gas", async() => {
+	it("gas: buying 500 Silver Boxes requires 1418793 gas", async() => {
 		const boxType = 0;
 		const qty = 500;
 
@@ -94,12 +97,13 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(1351293, gasUsed, "buying one Silver Box gas usage mismatch: " + gasUsed);
+		assertEqual(1418793, gasUsed, "buying 500 Silver Boxes gas usage mismatch: " + gasUsed);
 	});
 
-	it("gas: buying one Rotund Silver Box requires 115171 gas", async() => {
+	it("gas: buying one Rotund Silver Box requires 182721 gas", async() => {
 		const boxType = 1;
 		const qty = 1;
 
@@ -115,11 +119,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(115171, gasUsed, "buying one Rotund Silver Box gas usage mismatch: " + gasUsed);
+		assertEqual(182721, gasUsed, "buying one Rotund Silver Box gas usage mismatch: " + gasUsed);
 	});
-	it("gas: buying two Rotund Silver Box requires 117799 gas", async() => {
+	it("gas: buying two Rotund Silver Box requires 185349 gas", async() => {
 		const boxType = 1;
 		const qty = 2;
 
@@ -135,11 +140,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(117799, gasUsed, "buying one Rotund Silver Box gas usage mismatch: " + gasUsed);
+		assertEqual(185349, gasUsed, "buying two Rotund Silver Boxes gas usage mismatch: " + gasUsed);
 	});
-	it("gas: buying 300 Rotund Silver Box requires 901007 gas", async() => {
+	it("gas: buying 300 Rotund Silver Box requires 968557 gas", async() => {
 		const boxType = 1;
 		const qty = 300;
 
@@ -155,12 +161,13 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(901007, gasUsed, "buying one Rotund Silver Box gas usage mismatch: " + gasUsed);
+		assertEqual(968557, gasUsed, "buying 300 Rotund Silver Boxes gas usage mismatch: " + gasUsed);
 	});
 
-	it("gas: buying one Goldish Silver Box requires 115309 or 162755 gas", async() => {
+	it("gas: buying one Goldish Silver Box requires 182859/230305 gas", async() => {
 		const boxType = 2;
 		const qty = 1;
 
@@ -176,11 +183,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertOneOf(115309, 162755, gasUsed, "buying one Goldish Silver Box gas usage mismatch: " + gasUsed);
+		assertOneOf(182859, 230305, gasUsed, "buying one Goldish Silver Box gas usage mismatch: " + gasUsed);
 	});
-	it("gas: buying two Goldish Silver Box requires 118075 or 165521 gas", async() => {
+	it("gas: buying two Goldish Silver Box requires 185625/233071 gas", async() => {
 		const boxType = 2;
 		const qty = 2;
 
@@ -196,11 +204,12 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertOneOf(118075, 165521, gasUsed, "buying one Goldish Silver Box gas usage mismatch: " + gasUsed);
+		assertOneOf(185625, 233071, gasUsed, "buying two Goldish Silver Boxes gas usage mismatch: " + gasUsed);
 	});
-	it("gas: buying 150 Goldish Silver Box requires 575987 gas", async() => {
+	it("gas: buying 150 Goldish Silver Box requires 643537 gas", async() => {
 		const boxType = 2;
 		const qty = 150;
 
@@ -216,15 +225,16 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(575987, gasUsed, "buying one Goldish Silver Box gas usage mismatch: " + gasUsed);
+		assertEqual(643537, gasUsed, "buying 150 Goldish Silver Boxes gas usage mismatch: " + gasUsed);
 	});
 });
 
 // check if one of two values are equal with a 5% precision
 function assertOneOf(expected1, expected2, actual, msg) {
-	assertEqualWith(expected1, expected2, 0.05, actual, msg);
+	assertOneOfWith(expected1, expected2, 0.05, actual, msg);
 }
 
 // check if one of two values are equal with the 'leeway' precision

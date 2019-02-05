@@ -81,10 +81,10 @@ contract('Workshop (RND)', (accounts) => {
 
 // asserts equal with precision of 5% of the maximum (absolute value)
 function assertEqual(expected, actual, maximum, msg) {
-	assertEqualWith(expected, maximum * 0.05, actual, msg);
+	assertEqualWith(expected, actual, maximum * 0.05, msg);
 }
 
 // asserts equal with the precisions defined in leeway (absolute value)
-function assertEqualWith(expected, leeway, actual, msg) {
+function assertEqualWith(expected, actual, leeway, msg) {
 	assert(expected - leeway < actual && expected + leeway > actual, msg);
 }

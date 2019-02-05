@@ -68,7 +68,7 @@ contract RefPointsTracker is AccessControlLight {
    * @dev These addresses may earn referral points when
    *      referring them in sales
    */
-  mapping(address => bool) public isKnown;
+  mapping(address => bool) public known;
 
   /**
    * @notice Enumeration of all referral points holders
@@ -137,6 +137,19 @@ contract RefPointsTracker is AccessControlLight {
   function balanceOf(address owner) public constant returns (uint256) {
     // delegate call to `available`
     return available(owner);
+  }
+
+  /**
+   * @notice Verifies if an address is known to the tracker
+   * @dev Address is known if it was added as known by `ROLE_SELLER`
+   *      or was issued some referral points by `ROLE_REF_POINTS_ISSUER`
+   * @param _address address to query known status for
+   * @return true if address is known (added ot has some ref points issued)
+   */
+  function isKnown(address _address) public constant returns(bool) {
+    // verify if address was added as known or
+    // has some referral points issued, and return
+    return known[_address] || issued[_address] != 0;
   }
 
   /**
@@ -344,16 +357,16 @@ contract RefPointsTracker is AccessControlLight {
    */
   function __addKnownAddress(address _address) private {
     // if `_address` is valid (non-zero) and new -
-    if(_address != address(0) && !isKnown[_address]) {
+    if(_address != address(0) && !isKnown(_address)) {
       // - track it in `knownAddresses` array
       knownAddresses.push(_address);
 
-      // add known address to `isKnown` mapping
-      isKnown[_address] = true;
-    }
+      // add known address to `known` mapping
+      known[_address] = true;
 
-    // emit an event
-    emit KnownAddressAdded(msg.sender, _address);
+      // emit an event
+      emit KnownAddressAdded(msg.sender, _address);
+    }
   }
 
 }
