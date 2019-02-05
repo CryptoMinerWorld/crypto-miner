@@ -394,10 +394,10 @@ contract SilverSale is AccessControlLight {
     require(now >= offset);
 
     // determine box price in referral points
-    uint16 refs = getBoxesPriceRef(boxType, quantity);
+    uint24 refs = getBoxesPriceRef(boxType, quantity);
 
     // verify sender (player) has enough points to spend
-    require(ref.balanceOf(msg.sender) >= refs);
+    require(refPointsTracker.balanceOf(msg.sender) >= refs);
 
     // perform hard cap validations and update boxes sold counter
     // delegate call to `__updateBoxesSold`
@@ -416,32 +416,6 @@ contract SilverSale is AccessControlLight {
     // delegate call to `__mint` to perform actual token minting,
     // specifying "referral spending mode"
     __mint(0, refs, silver, gold);
-  }
-
-  /**
-   * @dev Auxiliary function to verify hard cap status and increase
-   *      `boxesSold` counter based on box type and quantity
-   * @dev Throws if quantity exceeds total initial amount of boxes on sale
-   * @dev Throws if quantity exceeds 10% of total initial amount of boxes
-   *      on sale if hard cap is already reached
-   */
-  function __updateBoxesSold(uint8 boxType, uint16 quantity) private {
-    // verify there is enough boxes of the requested type on sale (hard cap)
-    // hard cap is removed in smart contract, will be presented in UI only
-    // require(boxesSold[boxType] + quantity <= BOXES_TO_SELL[boxType]);
-
-    // however, to protect from unnoticed unlimited sale, we still
-    // limit the quantity not to exceed 10% of hard cap in case
-    // when it is already reached
-    require(
-      // in any case we limit maximum buying amount not to exceed the hard cap
-      quantity <= BOXES_TO_SELL[boxType] && boxesSold[boxType] < BOXES_TO_SELL[boxType]
-      // if it is reached we allow transactions not exceeding 10% of hard cap
-      || quantity <= BOXES_TO_SELL[boxType] / 10
-    );
-
-    // update sold boxes counter
-    boxesSold[boxType] += quantity;
   }
 
   /**
@@ -560,10 +534,10 @@ contract SilverSale is AccessControlLight {
     require(now >= offset);
 
     // determine box price in referral points
-    uint24 refs = bulkPriceRef(boxTypes, quantities);
+    uint32 refs = bulkPriceRef(boxTypes, quantities);
 
     // verify sender (player) has enough points to spend
-    require(ref.balanceOf(msg.sender) >= refs);
+    require(refPointsTracker.balanceOf(msg.sender) >= refs);
 
     // for each type of the box requested
     for(uint8 i = 0; i < boxTypes.length; i++) {
@@ -837,12 +811,12 @@ contract SilverSale is AccessControlLight {
    * @param quantity amount of boxes of that type
    * @return amount of referral points required to get the boxes requested
    */
-  function getBoxesPriceRef(uint8 boxType, uint8 quantity) public constant returns(uint16) {
+  function getBoxesPriceRef(uint8 boxType, uint16 quantity) public constant returns(uint24) {
     // verify quantity is not zero
     require(quantity != 0);
 
     // multiply ref price of a single box by the quantity and return
-    return uint16(quantity) * REF_PRICES[boxType];
+    return uint24(quantity) * REF_PRICES[boxType];
   }
 
   /**
@@ -861,7 +835,7 @@ contract SilverSale is AccessControlLight {
    * @param quantities array of amounts of boxes for each of corresponding types
    * @return amount of referral points required to get the boxes requested
    */
-  function bulkPriceRef(uint8[] boxTypes, uint8[] quantities) public constant returns(uint24) {
+  function bulkPriceRef(uint8[] boxTypes, uint16[] quantities) public constant returns(uint32) {
     // verify input arrays have same lengths
     require(boxTypes.length == quantities.length);
 
@@ -872,7 +846,7 @@ contract SilverSale is AccessControlLight {
     require(boxTypes.length <= REF_PRICES.length);
 
     // define variable to accumulate the ref price
-    uint24 refPrice = 0;
+    uint32 refPrice = 0;
 
     // iterate over arrays
     for(uint8 i = 0; i < boxTypes.length; i++) {
@@ -886,6 +860,32 @@ contract SilverSale is AccessControlLight {
 
 
   /**
+   * @dev Auxiliary function to verify hard cap status and increase
+   *      `boxesSold` counter based on box type and quantity
+   * @dev Throws if quantity exceeds total initial amount of boxes on sale
+   * @dev Throws if quantity exceeds 10% of total initial amount of boxes
+   *      on sale if hard cap is already reached
+   */
+  function __updateBoxesSold(uint8 boxType, uint16 quantity) private {
+    // verify there is enough boxes of the requested type on sale (hard cap)
+    // hard cap is removed in smart contract, will be presented in UI only
+    // require(boxesSold[boxType] + quantity <= BOXES_TO_SELL[boxType]);
+
+    // however, to protect from unnoticed unlimited sale, we still
+    // limit the quantity not to exceed 10% of hard cap in case
+    // when it is already reached
+    require(
+    // in any case we limit maximum buying amount not to exceed the hard cap
+      quantity <= BOXES_TO_SELL[boxType] && boxesSold[boxType] < BOXES_TO_SELL[boxType]
+      // if it is reached we allow transactions not exceeding 10% of hard cap
+      || quantity <= BOXES_TO_SELL[boxType] / 10
+    );
+
+    // update sold boxes counter
+    boxesSold[boxType] += quantity;
+  }
+
+  /**
    * @dev Auxiliary function to perform silver and gold minting,
    *      value transfer to chest and  beneficiary and change back to sender
    *      or/and referral points consuming from the balance of the sender
@@ -896,7 +896,7 @@ contract SilverSale is AccessControlLight {
    * @param silver amount of silver to be minted to player, cannot be zero
    * @param gold amount of gold to be minted to player, can be zero
    */
-  function __mint(uint256 price, uint24 refs, uint32 silver, uint24 gold) private {
+  function __mint(uint256 price, uint32 refs, uint32 silver, uint24 gold) private {
     // call sender gracefully - player
     address player = msg.sender;
 
@@ -935,7 +935,7 @@ contract SilverSale is AccessControlLight {
     // if refs is not zero (if this is referral points spending)
     if(refs != 0) {
       // consume referral points from the player
-      ref.consumeFrom(player, refs);
+      refPointsTracker.consumeFrom(player, refs);
     }
 
     // emit an event
