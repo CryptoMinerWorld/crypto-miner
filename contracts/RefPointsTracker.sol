@@ -213,7 +213,7 @@ contract RefPointsTracker is AccessControlLight {
    * @param _address an address which spent some wei (bought something)
    */
   function addKnownAddress(address _address) public {
-    // check if caller has sufficient permissions to call the callback
+    // check if caller has sufficient permissions to add an address
     require(isSenderInRole(ROLE_SELLER));
 
     // delegate call to `__addKnownAddress`
@@ -281,7 +281,7 @@ contract RefPointsTracker is AccessControlLight {
    * @param _addresses an array of addresses which spent some wei (bought something)
    */
   function bulkAddKnownAddresses(address[] _addresses) public {
-    // check if caller has sufficient permissions to call the callback
+    // check if caller has sufficient permissions to add the addresses
     require(isSenderInRole(ROLE_SELLER));
 
     // verify input array is not empty

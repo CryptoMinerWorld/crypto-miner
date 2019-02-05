@@ -10,24 +10,27 @@ const Sale = artifacts.require("./SilverSale.sol");
 
 // box types
 const BOX_TYPES = ["Silver Box", "Rotund Silver Box", "Goldish Silver Box"];
-
 // initial and final prices of the boxes
 const INITIAL_PRICES = [96000000000000000, 320000000000000000, 760000000000000000];
 const FINAL_PRICES  = [120000000000000000, 400000000000000000, 950000000000000000];
-
 // Minimum amounts of silver each box type can have
 const SILVER_MIN = [20, 70, 150, 100];
-
 // hard cap for each of the box types
 const BOXES_TO_SELL = [500, 300, 150];
 
 // Enables the silver / gold sale
 const FEATURE_SALE_ENABLED = 0x00000001;
-
 // Token creator is responsible for creating tokens
 const ROLE_TOKEN_CREATOR = 0x00000001;
 
-// maximum possible quantity
+// Allows issuing referral points
+const ROLE_REF_POINTS_ISSUER = 0x00000001;
+// Allows consuming referral points
+const ROLE_REF_POINTS_CONSUMER = 0x00000002;
+// Allows setting an address as known
+const ROLE_SELLER = 0x00000004;
+
+// maximum possible quantity of boxes to buy
 const MAX_QTY = 0xFFFF;
 
 /**
@@ -305,13 +308,16 @@ contract('SilverSale', (accounts) => {
 		// verify player and beneficiary balances has changed
 		assert(playerBalance.gt(web3.eth.getBalance(player)), "player balance didn't decrease");
 		assert(beneficiaryBalance.lt(web3.eth.getBalance(beneficiary)), "beneficiary balance didn't increase");
+
+		// verify the boxes sold counter has changed properly
+		assert.equal(32, await sale.boxesSold(2), "incorrect boxes sold counter");
 	});
 	it("buy: buying all the boxes", async() => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
 		const gold = await Gold.new();
 		const ref = await Tracker.new();
-		const player = accounts[1];
+		const player = accounts[2];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
@@ -337,7 +343,7 @@ contract('SilverSale', (accounts) => {
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 
-		// verify final sale status
+		// verify initial sale status
 		assert.equal(0, await sale.boxesSold(0), "wrong initial sold counter for Silver Box");
 		assert.equal(0, await sale.boxesSold(1), "wrong initial sold counter for Rotund Silver Box");
 		assert.equal(0, await sale.boxesSold(2), "wrong initial sold counter for Goldish Silver Box");
@@ -476,6 +482,11 @@ contract('SilverSale', (accounts) => {
 		// verify there is some silver and gold minted
 		assert((await silver.balanceOf(player)).gt(0), "zero silver player balance");
 		assert((await gold.balanceOf(player)).gt(0), "zero gold player balance");
+
+		// verify the boxes sold counters have changed properly
+		assert.equal(128, await sale.boxesSold(0), "incorrect boxes sold counter for " + BOX_TYPES[0]);
+		assert.equal(64, await sale.boxesSold(1), "incorrect boxes sold counter for " + BOX_TYPES[1]);
+		assert.equal(32, await sale.boxesSold(2), "incorrect boxes sold counter for" + BOX_TYPES[2]);
 	});
 	it("bulk buy: bulk boxes of different type", async() => {
 		// define silver sale dependencies
@@ -532,6 +543,127 @@ contract('SilverSale', (accounts) => {
 		// verify player and beneficiary balances has changed
 		assert(playerBalance.gt(web3.eth.getBalance(player)), "player balance didn't decrease");
 		assert(beneficiaryBalance.lt(web3.eth.getBalance(beneficiary)), "beneficiary balance didn't increase");
+
+		// verify the boxes sold counters have changed properly
+		assert.equal(128, await sale.boxesSold(0), "incorrect boxes sold counter for " + BOX_TYPES[0]);
+		assert.equal(64, await sale.boxesSold(1), "incorrect boxes sold counter for " + BOX_TYPES[1]);
+		assert.equal(32, await sale.boxesSold(2), "incorrect boxes sold counter for" + BOX_TYPES[2]);
+	});
+	it("bulk buy: buying all the boxes", async() => {
+		// define silver sale dependencies
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const ref = await Tracker.new();
+		const player = accounts[3];
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
+		const offset = new Date().getTime() / 1000 | 0;
+
+		// instantiate silver sale smart contract
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+
+		// define general function to buy Silver Boxes
+		const fn = async(quantities) => await sale.bulkBuy([0, 1, 2], quantities, {from: player, value: 310776000000000000000});
+		// function exceeding hard cap
+		const gt100 = async() => await fn(BOXES_TO_SELL.map((a) => a + 1));
+		// function equal to hard cap
+		const eq100 = async() => await fn(BOXES_TO_SELL);
+		// function exceeding 10% of hard cap
+		const gt10 = async() => await fn(BOXES_TO_SELL.map((a) => a / 10 + 1));
+		// function equal 10% of hard cap
+		const eq10 = async() => await fn(BOXES_TO_SELL.map((a) => a / 10));
+		// function to sum quantity bought
+		const qt = (boxType) => BOXES_TO_SELL[boxType] * 1.2 + 1;
+
+		// enable all features and permissions required to enable buy
+		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+
+		// verify initial sale status
+		assert.equal(0, await sale.boxesSold(0), "wrong initial sold counter for Silver Box");
+		assert.equal(0, await sale.boxesSold(1), "wrong initial sold counter for Rotund Silver Box");
+		assert.equal(0, await sale.boxesSold(2), "wrong initial sold counter for Goldish Silver Box");
+
+		// 1) impossible to buy more than hard cap at any time
+		await assertThrowsAsync(gt100);
+
+		// 2) possible to buy more than 10% of hard cap before it is reached
+		await gt10();
+
+		// 2a) including 100% of hard cap
+		await eq100();
+
+		// 3) impossible to buy more than 10% of hard cap after it has been reached
+		await assertThrowsAsync(gt10);
+
+		// 4) it is possible to buy no more than 10% of hard cap at any time
+		await eq10();
+
+		// verify final sale status
+		assert.equal(qt(0), await sale.boxesSold(0), "wrong final sold counter for Silver Box");
+		assert.equal(qt(1), await sale.boxesSold(1), "wrong final sold counter for Rotund Silver Box");
+		assert.equal(qt(2), await sale.boxesSold(2), "wrong final sold counter for Goldish Silver Box");
+	});
+
+	it("ref points: issuing referral points", async() => {
+		// define silver sale dependencies
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const ref = await Tracker.new();
+		const referrer = accounts[1];
+		const referred = accounts[2];
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
+		const offset = -3600 + new Date().getTime() / 1000 | 0;
+
+		// instantiate silver sale smart contract
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+
+		// define a function to buy with referral points
+		const fn1 = async() => await sale.buyRef(0, 1, referrer, {from: referrer, value: INITIAL_PRICES[0]});
+		const fn2 = async() => await sale.buyRef(0, 1, referrer, {from: referred, value: INITIAL_PRICES[0]});
+
+		// enable all features and permissions required to enable buy with referral points
+		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_SELLER);
+
+		// verify initial state of the referral points tracker
+		assert(!await ref.isKnown(referrer), "referrer address is known initially");
+		assert(!await ref.isKnown(referred), "referred address is known initially");
+		assert.equal(0, await ref.issued(referrer), "referrer has some issued points initially");
+		assert.equal(0, await ref.issued(referred), "referred has some issued points initially");
+
+		// verify that ROLE_SELLER permission is required
+		await ref.updateRole(sale.address, 0);
+		await assertThrowsAsync(fn1);
+		await ref.updateRole(sale.address, ROLE_SELLER);
+		// and buy one Silver Box by referrer address
+		await fn1();
+
+		// verify intermediary state of referral points tracker
+		assert(await ref.isKnown(referrer), "referrer address is not known after buying a box");
+		assert(! await ref.isKnown(referred), "referred address is known initially (2)");
+		assert.equal(0, await ref.issued(referrer), "referrer has some issued points initially (2)");
+		assert.equal(0, await ref.issued(referred), "referred has some issued points initially (2)");
+
+		// to perform second buy ROLE_REF_POINTS_ISSUER permission is also required
+		await assertThrowsAsync(fn2);
+		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_SELLER);
+		// perform second buy (be referred)
+		await fn2();
+
+		// verify the state of referral points tracker
+		assert(await ref.isKnown(referrer), "referrer address is not known after buying a box (2)");
+		assert(await ref.isKnown(referred), "referred address is not known after buying a box");
+		assert.equal(2, await ref.issued(referrer), "referrer incorrect issued points");
+		assert.equal(1, await ref.issued(referred), "referred incorrect issued points");
+
+		// performing buying one more time doesn't change anything
+		await fn1();
+		await fn2();
 	});
 });
 

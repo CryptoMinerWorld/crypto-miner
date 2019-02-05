@@ -171,6 +171,17 @@ contract SilverSale is AccessControlLight {
   uint64[] public FINAL_PRICES  = [120 finney, 400 finney, 950 finney];
 
   /**
+   * @dev Referral prices of the boxes by type:
+   *      [0] - Silver Box
+   *      [1] - Rotund Silver Box
+   *      [2] - Goldish Silver Box
+   * @dev For example, if referred player buys 20 Silver Boxes
+   *      he gains 20 points (see `REF_POINTS`) and can get
+   *      one additional Silver Box for free (using points)
+   */
+  uint8[] public REF_PRICES = [20, 80, 200];
+
+  /**
    * @dev How many referral points are issued to the referred player
    *      for one box of each type
    * @dev The referring address gets twice bigger amount of points
@@ -333,22 +344,9 @@ contract SilverSale is AccessControlLight {
     // verify there is enough value in the message to buy the box
     require(msg.value >= price);
 
-    // verify there is enough boxes of the requested type on sale (hard cap)
-    // hard cap is removed in smart contract, will be presented in UI only
-    // require(boxesSold[boxType] + quantity <= BOXES_TO_SELL[boxType]);
-
-    // however, to protect from unnoticed unlimited sale, we still
-    // limit the quantity not to exceed 10% of hard cap in case
-    // when it is already reached
-    require(
-      // in any case we limit maximum buying amount not to exceed the hard cap
-      quantity <= BOXES_TO_SELL[boxType] && boxesSold[boxType] < BOXES_TO_SELL[boxType]
-      // if it is reached we allow transactions not exceeding 10% of hard cap
-      || quantity <= BOXES_TO_SELL[boxType] / 10
-    );
-
-    // update sold boxes counter
-    boxesSold[boxType] += quantity;
+    // perform hard cap validations and update boxes sold counter
+    // delegate call to `__updateBoxesSold`
+    __updateBoxesSold(boxType, quantity);
 
     // to assign tuple return value from `unbox`
     // we need to define the variables first
@@ -372,6 +370,32 @@ contract SilverSale is AccessControlLight {
     // delegate call to `__mint` to perform actual token minting
     // beneficiary funds transfer and change transfer back to sender
     __mint(price, silver, gold);
+  }
+
+  /**
+   * @dev Auxiliary function to verify hard cap status and increase
+   *      `boxesSold` counter based on box type and quantity
+   * @dev Throws if quantity exceeds total initial amount of boxes on sale
+   * @dev Throws if quantity exceeds 10% of total initial amount of boxes
+   *      on sale if hard cap is already reached
+   */
+  function __updateBoxesSold(uint8 boxType, uint16 quantity) private {
+    // verify there is enough boxes of the requested type on sale (hard cap)
+    // hard cap is removed in smart contract, will be presented in UI only
+    // require(boxesSold[boxType] + quantity <= BOXES_TO_SELL[boxType]);
+
+    // however, to protect from unnoticed unlimited sale, we still
+    // limit the quantity not to exceed 10% of hard cap in case
+    // when it is already reached
+    require(
+      // in any case we limit maximum buying amount not to exceed the hard cap
+      quantity <= BOXES_TO_SELL[boxType] && boxesSold[boxType] < BOXES_TO_SELL[boxType]
+      // if it is reached we allow transactions not exceeding 10% of hard cap
+      || quantity <= BOXES_TO_SELL[boxType] / 10
+    );
+
+    // update sold boxes counter
+    boxesSold[boxType] += quantity;
   }
 
   /**
@@ -430,6 +454,13 @@ contract SilverSale is AccessControlLight {
     // determine box price
     // it also validates the input arrays lengths
     uint256 price = bulkPrice(boxTypes, quantities);
+
+    // for each type of the box requested
+    for(uint8 i = 0; i < boxTypes.length; i++) {
+      // perform hard cap validations and update boxes sold counter
+      // delegate call to `__updateBoxesSold`
+      __updateBoxesSold(boxTypes[i], quantities[i]);
+    }
 
     // define variables to accumulate silver and gold counters
     // maximum value of silver is 3 * 255 * 200 = 153000,
@@ -605,7 +636,7 @@ contract SilverSale is AccessControlLight {
    *      1 - Rotund Silver Box
    *      2 - Goldish Silver Box
    * @param quantity amount of boxes of that type
-   * @return current price (in moment `now`) of the box type requested
+   * @return current price (in moment `now`) of the boxes requested
    */
   function getBoxesPrice(uint8 boxType, uint16 quantity) public constant returns(uint256) {
     // verify quantity is not zero
@@ -689,6 +720,66 @@ contract SilverSale is AccessControlLight {
      *
      */
     return uint64(v0 + uint128(t - t0) / dt * dt * (v1 - v0) / (t1 - t0));
+  }
+
+  /**
+   * @notice Calculates how many referral points is needed to get
+   *      few boxes of the type (Silver, Rotund Silver or Goldish Silver)
+   *      and quantity specified
+   * @dev Throws if the box type specified is invalid
+   * @dev Throws if quantity (amount of boxes) is zero
+   * @param boxType type of the box to calculate ref points for:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantity amount of boxes of that type
+   * @return amount of referral points required to get the boxes requested
+   */
+  function getBoxesPriceRef(uint8 boxType, uint8 quantity) public constant returns(uint16) {
+    // verify quantity is not zero
+    require(quantity != 0);
+
+    // multiply ref price of a single box by the quantity and return
+    return uint16(quantity) * REF_PRICES[boxType];
+  }
+
+  /**
+   * @notice Calculates how many referral points is needed to get
+   *      different boxes of different types (Silver, Rotund Silver
+   *      or Goldish Silver) and quantities specified
+   * @dev Throws if input arrays have different length
+   * @dev Throws if any of the input arrays are empty
+   * @dev Throws if input arrays size is bigger than three (3)
+   * @dev Throws if any of the box types specified is invalid
+   * @dev Throws if any of the quantities specified is zero
+   * @param boxTypes array of box to calculate ref points for:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param quantities array of amounts of boxes for each of corresponding types
+   * @return amount of referral points required to get the boxes requested
+   */
+  function bulkPriceRef(uint8[] boxTypes, uint8[] quantities) public constant returns(uint24) {
+    // verify input arrays have same lengths
+    require(boxTypes.length == quantities.length);
+
+    // verify input arrays contain some data (non-zero length)
+    require(boxTypes.length != 0);
+
+    // verify input arrays are not too big in length
+    require(boxTypes.length <= REF_PRICES.length);
+
+    // define variable to accumulate the ref price
+    uint24 refPrice = 0;
+
+    // iterate over arrays
+    for(uint8 i = 0; i < boxTypes.length; i++) {
+      // and increase the ref price for pair `i`
+      refPrice += getBoxesPriceRef(boxTypes[i], quantities[i]);
+    }
+
+    // return accumulated price
+    return refPrice;
   }
 
 

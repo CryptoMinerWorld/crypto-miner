@@ -18,6 +18,7 @@ contract('RefPointsTracker', (accounts) => {
 		assert.equal(0, await tracker.consumed(account0), "non-zero initial value for consumed[account0]");
 		assert.equal(0, await tracker.available(account0), "non-zero initial value for available(account0)");
 		assert.equal(0, await tracker.balanceOf(account0), "non-zero initial value for balanceOf(account0)");
+		assert(!await tracker.isKnown(account0), "non-false initial value for isKnown(account0)");
 		assert.equal(0, await tracker.getNumberOfHolders(), "non-zero initial value for getNumberOfHolders()");
 		assert.equal(0, await tracker.getNumberOfKnownAddresses(), "non-zero initial value for getNumberOfKnownAddresses()");
 		assert.equal(0, (await tracker.getAllHolders()).length, "non-empty initial value for getAllHolders()");
