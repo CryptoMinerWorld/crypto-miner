@@ -446,25 +446,6 @@
         {
           "name": "levelDelta",
           "type": "uint8"
-        }
-      ],
-      "name": "getLevelUpPrice",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint8"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "tokenId",
-          "type": "uint32"
         },
         {
           "name": "gradeTypeDelta",
@@ -474,7 +455,11 @@
       "name": "getUpgradePrice",
       "outputs": [
         {
-          "name": "",
+          "name": "silverRequired",
+          "type": "uint8"
+        },
+        {
+          "name": "goldRequired",
           "type": "uint8"
         }
       ],
@@ -556,22 +541,8 @@
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "randomGradeValue",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint24"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-01-28T14:48:05.651Z"
+  "updatedAt": "2019-02-06T07:20:34.871Z"
 }

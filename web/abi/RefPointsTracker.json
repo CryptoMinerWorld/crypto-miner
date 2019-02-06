@@ -3,6 +3,39 @@
   "abi": [
     {
       "constant": true,
+      "inputs": [],
+      "name": "TRACKER_VERSION",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "known",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "",
@@ -28,6 +61,20 @@
         {
           "name": "",
           "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_SELLER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -140,6 +187,25 @@
         {
           "name": "",
           "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "knownAddresses",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
         }
       ],
       "payable": false,
@@ -312,6 +378,23 @@
           "type": "address"
         },
         {
+          "indexed": true,
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "KnownAddressAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
           "indexed": false,
           "name": "_requested",
           "type": "uint256"
@@ -392,6 +475,25 @@
     },
     {
       "constant": true,
+      "inputs": [
+        {
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "isKnown",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [],
       "name": "getAllHolders",
       "outputs": [
@@ -408,6 +510,34 @@
       "constant": true,
       "inputs": [],
       "name": "getNumberOfHolders",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getKnownAddresses",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getNumberOfKnownAddresses",
       "outputs": [
         {
           "name": "",
@@ -458,6 +588,20 @@
       "constant": false,
       "inputs": [
         {
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "addKnownAddress",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
           "name": "_to",
           "type": "address[]"
         },
@@ -489,8 +633,22 @@
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_addresses",
+          "type": "address[]"
+        }
+      ],
+      "name": "bulkAddKnownAddresses",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-01-18T18:35:18.005Z"
+  "updatedAt": "2019-02-06T07:20:34.855Z"
 }
