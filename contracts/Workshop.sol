@@ -144,26 +144,56 @@ contract Workshop is AccessControlLight {
   }
 
   /**
-   * @notice Calculates amount of silver required to perform level up
-   *      of a particular gem by a level delta specified
+   * @notice Calculates amount of silver and gold required to perform
+   *      level up and grade upgrade of a particular gem by
+   *      level and grade type deltas specified
    * @dev This function contains same logic as in `upgrade()` and can
    *      be used before calling it externally to check
-   *      sender has enough silver to perform the transaction
+   *      sender has enough silver and gold to perform the transaction
    * @dev Throws if `tokenId` is invalid (non-existent token)
    * @dev Throws if `levelDelta` is invalid, i.e. violates
    *      token level constraints (maximum level)
+   * @dev Throws if `gradeTypeDelta` is invalid, i.e. violates
+   *      token grade constraints (maximum grade)
    * @dev Doesn't check token ID ownership, assuming it is checked
-   *      when performing a level up transaction itself
-   * @param tokenId a valid token ID to level up
+   *      when performing an upgrade transaction itself
+   * @dev If both `levelDelta` and `gradeTypeDelta` are zeros, assumes
+   *      this is a grade value only upgrade (for grade AAA gems)
+   * @param tokenId a valid token ID to upgrade grade type for
    * @param levelDelta number of levels to increase token level by
-   * @return an amount of silver required to level up the gem
+   * @param gradeTypeDelta number of grades to increase token grade by
+   * @return tuple containing amounts of silver and gold
+   *      required to upgrade the gem
    */
-  function getLevelUpPrice(uint32 tokenId, uint8 levelDelta) public constant returns(uint8) {
+  function getUpgradePrice(
+    uint32 tokenId,
+    uint8 levelDelta,
+    uint8 gradeTypeDelta
+  ) public constant returns(uint8 silverRequired, uint8 goldRequired) {
+    // if both level and grade type deltas are zero
+    if(levelDelta == 0 && gradeTypeDelta == 0) {
+      // this is a grade value only upgrade
+      // calculate upgrade price as from grade AA to grade AAA
+      goldRequired = GRADE_PRICES[GRADE_PRICES.length - 1] - GRADE_PRICES[GRADE_PRICES.length - 2];
+
+      // return the result immediately
+      return (0, goldRequired);
+    }
+
+    // get gem properties which contains both level and grade
+    uint48 properties = gemInstance.getProperties(tokenId);
+
     // get current token level
-    uint8 currentLevel = gemInstance.getLevel(tokenId);
+    uint8 currentLevel = uint8(properties >> 32);
+
+    // get current token grade type
+    uint8 currentGradeType = uint8(properties >> 24);
 
     // calculate new level
     uint8 newLevel = currentLevel + levelDelta;
+
+    // calculate new grade type value
+    uint8 newGradeType = currentGradeType + gradeTypeDelta;
 
     // arithmetic overflow check for level
     require(newLevel >= currentLevel);
@@ -171,40 +201,20 @@ contract Workshop is AccessControlLight {
     // verify maximum level constraint
     require(newLevel <= MAXIMUM_TOKEN_LEVEL);
 
-    // calculate and return the result
-    return LEVEL_PRICES[newLevel - 1] - LEVEL_PRICES[currentLevel - 1];
-  }
-
-  /**
-   * @notice Calculates amount of gold required to perform an upgrade
-   *      of the grade of a particular gem by a grade type delta specified
-   * @dev This function contains same logic as in `upgrade()` and can
-   *      be used before calling it externally to check
-   *      sender has enough gold to perform the transaction
-   * @dev Throws if `tokenId` is invalid (non-existent token)
-   * @dev Throws if `gradeTypeDelta` is invalid, i.e. violates
-   *      token grade constraints (maximum grade)
-   * @dev Doesn't check token ID ownership, assuming it is checked
-   *      when performing an upgrade transaction itself
-   * @param tokenId a valid token ID to upgrade grade type for
-   * @param gradeTypeDelta number of grades to increase token grade by
-   * @return an amount of gold required to upgrade the gem
-   */
-  function getUpgradePrice(uint32 tokenId, uint8 gradeTypeDelta) public constant returns(uint8) {
-    // get current token grade type
-    uint8 currentGradeType = gemInstance.getGradeType(tokenId);
-
-    // calculate new grade type value
-    uint8 newGradeType = currentGradeType + gradeTypeDelta;
-
     // arithmetic overflow check for grade
     require(newGradeType >= currentGradeType);
 
     // verify maximum grade constraint
     require(newGradeType <= MAXIMUM_GRADE_TYPE);
 
-    // calculate and return the result
-    return GRADE_PRICES[newGradeType - 1] - GRADE_PRICES[currentGradeType - 1];
+    // calculate silver value required
+    silverRequired = LEVEL_PRICES[newLevel - 1] - LEVEL_PRICES[currentLevel - 1];
+
+    // calculate gold value required
+    goldRequired = GRADE_PRICES[newGradeType - 1] - GRADE_PRICES[currentGradeType - 1];
+
+    // return the result as tuple
+    return (silverRequired, goldRequired);
   }
 
   /**
@@ -215,9 +225,8 @@ contract Workshop is AccessControlLight {
    *      token level constraints (maximum level)
    * @dev Throws if `gradeTypeDelta` is invalid, i.e. violates
    *      token grade constraints (maximum grade)
-   * @dev Throws if `levelDelta` and `gradeTypeDelta` (level delta and
-   *      grade delta combination) result in no level/grade change for the gem
-   *      (ex.: both `levelDelta` and `gradeTypeDelta` are zero)
+   * @dev If both `levelDelta` and `gradeTypeDelta` are zeros, assumes
+   *      this is a grade value only upgrade (for grade AAA gems)
    * @dev Requires transaction sender to be an owner of the gem
    * @dev Throws if token owner (transaction sender) has not enough
    *      gold and/or silver on the balance
@@ -247,9 +256,8 @@ contract Workshop is AccessControlLight {
    *      which violate token level constraints (maximum level)
    * @dev Throws if `gradeDeltas` contains invalid values, i.e. values
    *      which violate token grade constraints (maximum grade)
-   * @dev Throws if for any token ID in the `tokenIds` array, corresponding
-   *      values in `levelDeltas` and `gradeDeltas` (level delta and
-   *      grade delta combination) result in no level/grade change for the gem
+   * @dev If both `levelDeltas[i]` and `gradeDeltas[i]` are zeros for some `i`,
+   *      assumes this is a grade value only upgrade (for grade AAA gems) for that `i`
    * @dev Doesn't check token ID ownership, assuming it is checked
    *      when performing an upgrade transaction itself
    * @param tokenIds an array of valid token IDs to upgrade
@@ -275,11 +283,13 @@ contract Workshop is AccessControlLight {
 
     // iterate the data, validate it and perform calculation
     for(uint256 i = 0; i < tokenIds.length; i++) {
-      // get amount of silver required to level up the gem
-      uint8 silverDelta = getLevelUpPrice(tokenIds[i], levelDeltas[i]);
+      // to assign tuple return value from `getUpgradePrice`
+      // we need to define the variables first
+      uint8 silverDelta;
+      uint8 goldDelta;
 
-      // get amount of gold required to upgrade the gem
-      uint8 goldDelta = getUpgradePrice(tokenIds[i], gradeDeltas[i]);
+      // get amount of silver and gold required to level up and upgrade the gem
+      (silverDelta, goldDelta) = getUpgradePrice(tokenIds[i], levelDeltas[i], gradeDeltas[i]);
 
       // verify the level up / upgrade operation results
       // in the gem's level / grade change:
@@ -291,8 +301,6 @@ contract Workshop is AccessControlLight {
 
       // calculate fold required value and add it to the cumulative value
       goldRequired += goldDelta;
-
-      // TODO: do we need to implement grade value upgrades for AAA gems?
     }
 
     // return calculated values
@@ -365,12 +373,13 @@ contract Workshop is AccessControlLight {
   function __upgrade(uint256 seed, uint32 tokenId, uint8 levelDelta, uint8 gradeTypeDelta) private {
     // ensure token is owned by the sender, it also ensures token exists
     require(gemInstance.ownerOf(tokenId) == msg.sender);
+    // to assign tuple return value from `getUpgradePrice`
+    // we need to define the variables first
+    uint8 silverRequired;
+    uint8 goldRequired;
 
-    // get amount of silver required to level up the gem
-    uint8 silverRequired = getLevelUpPrice(tokenId, levelDelta);
-
-    // get amount of gold required to upgrade the gem
-    uint8 goldRequired = getUpgradePrice(tokenId, gradeTypeDelta);
+    // get amount of silver and gold required to level up and upgrade the gem
+    (silverRequired, goldRequired) = getUpgradePrice(tokenId, levelDelta, gradeTypeDelta);
 
     // verify the level up / upgrade operation results
     // in the gem's level / grade change:
@@ -389,19 +398,11 @@ contract Workshop is AccessControlLight {
       }
     }
 
-    // if grade type upgrade is requested
-    if(gradeTypeDelta != 0) {
-      // perform regular upgrade – grade type and value
-      __up(seed, tokenId, gradeTypeDelta, goldRequired);
-    }
-
+    // if grade type upgrade is requested or
     // if both level and grade deltas are zero –
-    if(levelDelta == 0 && gradeTypeDelta == 0) {
-      // - this is a request to perform grade value upgrade
-      // calculate upgrade price as from grade AA to grade AAA
-      goldRequired = GRADE_PRICES[GRADE_PRICES.length - 1] - GRADE_PRICES[GRADE_PRICES.length - 2];
-
-      // perform grade value only increase
+    // this will be an upgrade price from grade AA to grade AAA
+    if(gradeTypeDelta != 0 || levelDelta == 0 && gradeTypeDelta == 0) {
+      // perform regular upgrade – grade type and value
       __up(seed, tokenId, gradeTypeDelta, goldRequired);
     }
 
