@@ -3,7 +3,7 @@
  * and analyzed to verify grade value random properties
  * Number of randoms to be generated is equal to 2^TEST_DEPTH
  */
-const TEST_DEPTH = 11;
+const TEST_DEPTH = 10;
 
 // Silver smart contract
 const Silver = artifacts.require("./SilverERC20.sol");

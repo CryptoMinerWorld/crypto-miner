@@ -1,7 +1,9 @@
 pragma solidity 0.4.23;
 
 /**
- * Utility library of inline functions on addresses
+ * @title Address Utils
+ *
+ * @dev Utility library of inline functions on addresses
  */
 library AddressUtils {
 

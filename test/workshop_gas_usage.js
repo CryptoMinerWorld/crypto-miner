@@ -32,7 +32,7 @@ contract('Workshop: Gas Usage', (accounts) => {
 
 		assertEqual(1896069, gasUsed, "deploying Workshop gas usage mismatch: " + gasUsed);
 	});
-	it("gas: leveling up a gem requires 77264 gas", async() => {
+	it("gas: leveling up a gem requires 73182 gas", async() => {
 		const player = accounts[1];
 		const gem = await Gem.new();
 		const silver = await Silver.new();
@@ -45,7 +45,7 @@ contract('Workshop: Gas Usage', (accounts) => {
 		await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 
 		const gasUsed = (await workshop.upgrade(1, 1, 0, {from: player})).receipt.gasUsed;
-		assertEqual(77264, gasUsed, "leveling up a gem gas usage mismatch: " + gasUsed);
+		assertEqual(73182, gasUsed, "leveling up a gem gas usage mismatch: " + gasUsed);
 	});
 	it("gas: leveling up 4 levels requires 112850 gas", async() => {
 		const player = accounts[1];

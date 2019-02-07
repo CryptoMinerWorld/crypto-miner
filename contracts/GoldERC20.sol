@@ -1,6 +1,8 @@
 pragma solidity 0.4.23;
 
 import "./AccessControlLight.sol";
+import "./AddressUtils.sol";
+import "./ERC20Receiver.sol";
 
 /**
  * @title Gold Smart Contract
@@ -40,6 +42,7 @@ contract GoldERC20 is AccessControlLight {
    * @notice ERC20 decimals (number of digits to draw after the dot
    *    in the UI applications (like MetaMask, other wallets and so on)
    */
+  // TODO: do we want to make token divisible (increase decimals)?
   uint8 public constant decimals = 0;
 
   /**
@@ -94,6 +97,13 @@ contract GoldERC20 is AccessControlLight {
    *      (calling `burn` and `burnFrom` functions)
    */
   uint32 public constant ROLE_TOKEN_DESTROYER = 0x00000002;
+
+  /**
+   * @dev Magic value to be returned by ERC20Receiver upon successful reception of token(s)
+   * @dev Equal to `bytes4(keccak256("onERC20Received(address,address,uint256,bytes)"))`,
+   *      which can be also obtained as `ERC20Receiver(0).onERC20Received.selector`
+   */
+  bytes4 private constant ERC20_RECEIVED = 0x4fc35859;
 
   /**
    * @dev Fired in transfer() and transferFrom() functions
@@ -181,10 +191,8 @@ contract GoldERC20 is AccessControlLight {
    * @return true on success, throws otherwise
    */
   function transfer(address _to, uint256 _value) public returns (bool) {
-    // check if token transfers feature is enabled
-    require(isFeatureEnabled(FEATURE_TRANSFERS));
-
-    // just delegate call to `transferFrom`
+    // just delegate call to `transferFrom`,
+    // `FEATURE_TRANSFERS` is verified inside it
     return transferFrom(msg.sender, _to, _value);
   }
 
@@ -211,6 +219,86 @@ contract GoldERC20 is AccessControlLight {
    * @return true on success, throws otherwise
    */
   function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
+    // just delegate call to `safeTransferFrom`, passing empty `_data`,
+    // `FEATURE_TRANSFERS` is verified inside it
+    safeTransferFrom(_from, _to, _value, "");
+
+    // `safeTransferFrom` throws of any error, so
+    // if we're here - it means operation successful,
+    // just return true
+    return true;
+  }
+
+  /**
+   * @notice Transfers some tokens on behalf of address `_from' (token owner)
+   *      to some other address `_to`
+   * @dev Inspired by ERC721 safeTransferFrom, this function allows to
+   *      send arbitrary data to the receiver on successful token transfer
+   * @dev Called by token owner on his own or approved address,
+   *      an address approved earlier by token owner to
+   *      transfer some amount of tokens on its behalf
+   * @dev Throws on any error like
+   *      * incorrect `_value` (zero) or
+   *      * insufficient token balance or
+   *      * incorrect `_to` address:
+   *          * zero address or
+   *          * same as `_from` address (self transfer)
+   *          * smart contract which doesn't support ERC20Receiver interface
+   * @param _from token owner which approved caller (transaction sender)
+   *      to transfer `_value` of tokens on its behalf
+   * @param _to an address to transfer tokens to,
+   *      must be either an external address or a smart contract,
+   *      compliant with the ERC20 standard
+   * @param _value amount of tokens to be transferred, must
+   *      be greater than zero
+   * @param _data [optional] additional data with no specified format,
+   *      sent in onERC20Received call to `_to` in case if its a smart contract
+   * @return true on success, throws otherwise
+   */
+  function safeTransferFrom(address _from, address _to, uint256 _value, bytes _data) public {
+    // first delegate call to `unsafeTransferFrom`
+    // to perform the unsafe token(s) transfer
+    unsafeTransferFrom(_from, _to, _value);
+
+    // after the successful transfer – check if receiver supports
+    // ERC20Receiver and execute a callback handler `onERC20Received`,
+    // reverting whole transaction on any error:
+    // check if receiver `_to` supports ERC20Receiver interface
+    if (AddressUtils.isContract(_to)) {
+      // if `_to` is a contract – execute onERC20Received
+      bytes4 response = ERC20Receiver(_to).onERC20Received(msg.sender, _from, _value, _data);
+
+      // expected response is ERC20_RECEIVED
+      require(response == ERC20_RECEIVED);
+    }
+  }
+
+  /**
+   * @notice Transfers some tokens on behalf of address `_from' (token owner)
+   *      to some other address `_to`
+   * @dev In contrast to `safeTransferFrom` doesn't check recipient
+   *      smart contract to support ERC20 tokens (ERC20Receiver)
+   * @dev Designed to be used by developers when the receiver is known
+   *      to support ERC20 tokens but doesn't implement ERC20Receiver interface
+   * @dev Called by token owner on his own or approved address,
+   *      an address approved earlier by token owner to
+   *      transfer some amount of tokens on its behalf
+   * @dev Throws on any error like
+   *      * incorrect `_value` (zero) or
+   *      * insufficient token balance or
+   *      * incorrect `_to` address:
+   *          * zero address or
+   *          * same as `_from` address (self transfer)
+   * @param _from token owner which approved caller (transaction sender)
+   *      to transfer `_value` of tokens on its behalf
+   * @param _to an address to transfer tokens to,
+   *      must be either an external address or a smart contract,
+   *      compliant with the ERC20 standard
+   * @param _value amount of tokens to be transferred, must
+   *      be greater than zero
+   * @return true on success, throws otherwise
+   */
+  function unsafeTransferFrom(address _from, address _to, uint256 _value) public {
     // if `_from` is equal to sender, require transfers feature to be enabled
     // otherwise require transfers on behalf feature to be enabled
     require(_from == msg.sender && isFeatureEnabled(FEATURE_TRANSFERS)
@@ -247,13 +335,8 @@ contract GoldERC20 is AccessControlLight {
     // increase `_to` address (receiver) balance
     tokenBalances[_to] += _value;
 
-    // TODO: verify _to is safe to transfer tokens to
-
     // emit an ERC20 transfer event
     emit Transfer(_from, _to, _value);
-
-    // operation successful, return true
-    return true;
   }
 
   /**

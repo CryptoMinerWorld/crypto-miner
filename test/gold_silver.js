@@ -14,6 +14,8 @@ const ROLE_TOKEN_DESTROYER = 0x00000002;
 const Gold = artifacts.require("./GoldERC20.sol");
 // Silver smart contract
 const Silver = artifacts.require("./SilverERC20.sol");
+// Dummy ERC20/ERC721 Receiver
+const Receiver = artifacts.require("./DummyReceiver.sol");
 
 contract('GoldERC20', (accounts) => {
 	it("config: gold and silver tokens are distinguishable", async() => {
@@ -170,7 +172,7 @@ contract('GoldERC20', (accounts) => {
 		assert.equal(amt, await tk.balanceOf(player2), "wrong player 2 balance after several transfers");
 	});
 
-	it("minting and burning: general flow", async() => {
+	it("minting and burning: minting, burning, zer-value checks", async() => {
 		const tk = await Gold.new();
 
 		// token creator
@@ -355,6 +357,47 @@ contract('GoldERC20', (accounts) => {
 		await t2();  // transfer
 		assert.equal(0, await tk.balanceOf(player2), "non-zero player 2 balance");
 		assert.equal(amt, await tk.balanceOf(player1), "wrong player 1 balance");
+	});
+
+	it("transfers: safe and unsafe transfers", async() => {
+		// we will be using gold as a main token to operate with
+		const tk = await Gold.new();
+		// silver as an unsafe smart contract which doesn't support ERC20Receiver
+		const unsafeSc = (await Silver.new()).address;
+		// dummy receiver as a safe receiver
+		const safeSc = (await Receiver.new()).address;
+
+		// enable feature: transfers (required)
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+
+		// define some player accounts
+		const player1 = accounts[1];
+		const player2 = accounts[2];
+
+		// mint some tokens to the player
+		await tk.mint(player1, 10);
+
+		// define functions
+		const safe = async(to) => await tk.transfer(to, 1, {from: player1});
+		const unsafe = async(to) => await tk.unsafeTransferFrom(player1, to, 1, {from: player1});
+
+		// both safe and unsafe transfers work with external addresses:
+		await safe(player2);
+		await unsafe(player2);
+
+		// both safe and unsafe transfers work with safe smart contract:
+		await safe(safeSc);
+		await unsafe(safeSc);
+
+		// safe transfer fails with unsafe address
+		await assertThrowsAsync(safe, unsafeSc);
+		// while unsafe transfer is still possible
+		await unsafe(unsafeSc);
+
+		// verify the balances
+		assert.equal(2, await tk.balanceOf(player2), "incorrect player2 balance after 2 successful transfers");
+		assert.equal(2, await tk.balanceOf(safeSc), "incorrect safeSc balance after 1 successful transfer");
+		assert.equal(1, await tk.balanceOf(unsafeSc), "incorrect unsafeSc balance after 1 successful transfer");
 	});
 
 	it("transfers: transfer arithmetic check", async() => {

@@ -839,12 +839,15 @@ contract GemERC721 is AccessControl, ERC165 {
    * @param _from current owner of the token
    * @param _to address to receive the ownership of the token
    * @param _tokenId ID of the token to be transferred
-   * @param _data Additional data with no specified format, sent in call to `_to`
+   * @param _data additional data with no specified format, sent in call to `_to`
    */
   function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes _data) public {
     // delegate call to usual (unsafe) `transferFrom`
     transferFrom(_from, _to, _tokenId);
 
+    // after the successful transfer – check if receiver supports
+    // ERC721Receiver and execute a callback handler `onERC721Received`,
+    // reverting whole transaction on any error:
     // check if receiver `_to` supports ERC721 interface
     if (AddressUtils.isContract(_to)) {
       // if `_to` is a contract – execute onERC721Received

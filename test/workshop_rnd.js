@@ -3,7 +3,7 @@
  * and analyzed to verify grade value random properties
  * Number of randoms to be generated is equal to 2^TEST_DEPTH
  */
-const TEST_DEPTH = 11;
+const TEST_DEPTH = 10;
 
 // GemERC721 smart contract
 const Gem = artifacts.require("./GemERC721.sol");
@@ -54,7 +54,7 @@ contract('Workshop (RND)', (accounts) => {
 		gradeValues.sort((a, b) => a.minus(b).toNumber());
 
 		// write statistical raw data into the file
-		fs.writeFileSync("./quadratic_random.csv", gradeValues.map((a) => a.toNumber()).join("\n"));
+		fs.writeFileSync("./quadratic_random_" + TEST_DEPTH + ".csv", gradeValues.map((a) => a.toNumber()).join("\n"));
 
 		// calculate the minimum
 		const min = gradeValues[0].toNumber();
