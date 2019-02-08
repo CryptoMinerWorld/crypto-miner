@@ -388,13 +388,13 @@ const known_addresses = [
 const Tracker = artifacts.require("./RefPointsTracker.sol");
 
 contract('RefPointsTracker: Gas Usage', (accounts) => {
-	it("gas: deploying RefPointsTracker requires 1027454 gas", async() => {
+	it("gas: deploying RefPointsTracker requires 1091978 gas", async() => {
 		const tracker = await Tracker.new();
 		const txHash = tracker.transactionHash;
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(1027454, gasUsed, "deploying RefPointsTracker gas usage mismatch: " + gasUsed);
+		assertEqual(1091978, gasUsed, "deploying RefPointsTracker gas usage mismatch: " + gasUsed);
 	});
 	it("gas: issuing some ref points requires 88334 gas", async() => {
 		const tracker = await Tracker.new();
