@@ -494,6 +494,29 @@
     },
     {
       "constant": true,
+      "inputs": [
+        {
+          "name": "referrer",
+          "type": "address"
+        },
+        {
+          "name": "referred",
+          "type": "address"
+        }
+      ],
+      "name": "isValid",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [],
       "name": "getAllHolders",
       "outputs": [
@@ -650,5 +673,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-02-06T07:20:34.855Z"
+  "updatedAt": "2019-02-08T11:21:08.624Z"
 }
