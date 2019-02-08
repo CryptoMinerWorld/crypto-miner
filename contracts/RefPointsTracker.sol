@@ -20,7 +20,7 @@ contract RefPointsTracker is AccessControlLight {
    * @dev Should be incremented manually in this source code
    *      each time smart contact source code is changed and deployed
    */
-  uint32 public constant TRACKER_VERSION = 0x2;
+  uint32 public constant TRACKER_VERSION = 0x3;
 
   /**
    * @notice Referral points issuer is responsible for issuing
