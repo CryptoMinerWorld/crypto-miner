@@ -62,22 +62,22 @@ contract SilverSale is AccessControlLight {
   uint32 public constant SALE_VERSION = 0x10;
 
   /**
+   * @dev Expected version of the deployed RefPointsTracker instance
+   *      this smart contract is designed to work with
+   */
+  uint32 public constant REF_POINTS_TRACKER_VERSION_REQUIRED = 0x3;
+
+  /**
    * @dev Expected version of the deployed SilverERC20 instance
    *      this smart contract is designed to work with
    */
-  uint32 public constant SILVER_TOKEN_VERSION_REQUIRED = 0x10;
+  uint32 public constant SILVER_TOKEN_VERSION_REQUIRED = 0x20;
 
   /**
    * @dev Expected version of the deployed GoldERC20 instance
    *      this smart contract is designed to work with
    */
-  uint32 public constant GOLD_TOKEN_VERSION_REQUIRED = 0x100;
-
-  /**
-   * @dev Expected version of the deployed RefPointsTracker instance
-   *      this smart contract is designed to work with
-   */
-  uint32 public constant REF_POINTS_TRACKER_VERSION_REQUIRED = 0x2;
+  uint32 public constant GOLD_TOKEN_VERSION_REQUIRED = 0x200;
 
   /**
    * @notice Enables the silver / gold sale

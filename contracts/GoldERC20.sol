@@ -26,7 +26,7 @@ contract GoldERC20 is AccessControlLight {
    *      each time smart contact source code is changed and deployed
    * @dev To distinguish from other tokens must be multiple of 0x100
    */
-  uint32 public constant TOKEN_VERSION = 0x100;
+  uint32 public constant TOKEN_VERSION = 0x200;
 
   /**
    * @notice ERC20 symbol of that token (short name)
@@ -44,6 +44,13 @@ contract GoldERC20 is AccessControlLight {
    */
   // TODO: do we want to make token divisible (increase decimals)?
   uint8 public constant decimals = 0;
+
+  /**
+   * @notice Based on the value of decimals above, one token unit
+   *      represents native number of tokens which is displayed
+   *      in the UI applications as one (1 or 1.0, 1.00, etc.)
+   */
+  uint256 public constant ONE_UNIT = uint256(10) ** decimals;
 
   /**
    * @notice A record of all the players token balances
@@ -362,11 +369,29 @@ contract GoldERC20 is AccessControlLight {
 
   /**
    * @dev Mints (creates) some tokens to address specified
+   * @dev The value passed is treated as number of units (see `ONE_UNIT`)
+   *      to achieve natural impression on token quantity
    * @dev Requires sender to have `ROLE_TOKEN_CREATOR` permission
    * @param _to an address to mint tokens to
    * @param _value an amount of tokens to mint (create)
    */
   function mint(address _to, uint256 _value) public {
+    // calculate native value, taking into account `decimals`
+    uint256 value = _value * ONE_UNIT;
+
+    // delegate call to native `mintNative`
+    mintNative(_to, value);
+  }
+
+  /**
+   * @dev Mints (creates) some tokens to address specified
+   * @dev The value specified is treated as is without taking
+   *      into account what `decimals` value is
+   * @dev Requires sender to have `ROLE_TOKEN_CREATOR` permission
+   * @param _to an address to mint tokens to
+   * @param _value an amount of tokens to mint (create)
+   */
+  function mintNative(address _to, uint256 _value) public {
     // check if caller has sufficient permissions to mint tokens
     require(isSenderInRole(ROLE_TOKEN_CREATOR));
 
@@ -392,11 +417,29 @@ contract GoldERC20 is AccessControlLight {
 
   /**
    * @dev Burns (destroys) some tokens from the address specified
+   * @dev The value passed is treated as number of units (see `ONE_UNIT`)
+   *      to achieve natural impression on token quantity
    * @dev Requires sender to have `ROLE_TOKEN_DESTROYER` permission
    * @param _from an address to burn some tokens from
    * @param _value an amount of tokens to burn (destroy)
    */
   function burn(address _from, uint256 _value) public {
+    // calculate native value, taking into account `decimals`
+    uint256 value = _value * ONE_UNIT;
+
+    // delegate call to native `burnNative`
+    burnNative(_from, value);
+  }
+
+  /**
+   * @dev Burns (destroys) some tokens from the address specified
+   * @dev The value specified is treated as is without taking
+   *      into account what `decimals` value is
+   * @dev Requires sender to have `ROLE_TOKEN_DESTROYER` permission
+   * @param _from an address to burn some tokens from
+   * @param _value an amount of tokens to burn (destroy)
+   */
+  function burnNative(address _from, uint256 _value) public {
     // check if caller has sufficient permissions to burn tokens
     require(isSenderInRole(ROLE_TOKEN_DESTROYER));
 
