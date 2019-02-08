@@ -19,6 +19,7 @@ contract('RefPointsTracker', (accounts) => {
 		assert.equal(0, await tracker.available(account0), "non-zero initial value for available(account0)");
 		assert.equal(0, await tracker.balanceOf(account0), "non-zero initial value for balanceOf(account0)");
 		assert(!await tracker.isKnown(account0), "non-false initial value for isKnown(account0)");
+		assert(!await tracker.isValid(account0, account0), "non-false value for isValid(account0, account0)");
 		assert.equal(0, await tracker.getNumberOfHolders(), "non-zero initial value for getNumberOfHolders()");
 		assert.equal(0, await tracker.getNumberOfKnownAddresses(), "non-zero initial value for getNumberOfKnownAddresses()");
 		assert.equal(0, (await tracker.getAllHolders()).length, "non-empty initial value for getAllHolders()");
@@ -105,7 +106,13 @@ contract('RefPointsTracker', (accounts) => {
 
 		// verify seller can perform operations now
 		await fn1();
+		// at this point accounts[0] can be a referrer
+		assert(await tracker.isValid(accounts[0], accounts[1]), "account0 is not a valid referrer for account1");
+
+		// bulk add will make all the addresses known
 		await fn2();
+		// but at this point all accounts are already known and cannot have valid referral links
+		assert(!await tracker.isValid(accounts[0], accounts[1]), "account0 is still a valid referrer for account1");
 
 		// verify known addresses were tracked correctly
 		assert.equal(accounts.length, await tracker.getNumberOfKnownAddresses(), "wrong number of known addresses");
@@ -310,6 +317,14 @@ contract('RefPointsTracker', (accounts) => {
 		assert(!await tracker.isKnown(0), 'address "0" is known');
 		assert(await tracker.isKnown(1), 'address "1" is not known');
 		assert(await tracker.isKnown(2), 'address "2" is not known');
+
+		// verify few referral pairs
+		assert(!await tracker.isValid(1, 0), "zero address is a valid referrer");
+		assert(!await tracker.isValid(0, 1), "zero address is a valid referrer");
+		assert(!await tracker.isValid(1, 2), "two known addresses produced valid referral link");
+		assert(!await tracker.isValid(2, 1), "two known addresses produced valid referral link (2)");
+		assert(await tracker.isValid(1, 3), "known and unknown addresses didn't produce valid referral link");
+		assert(!await tracker.isValid(3, 1), "unknown and known addresses produced valid referral link");
 	});
 });
 

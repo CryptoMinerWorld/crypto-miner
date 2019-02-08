@@ -153,6 +153,23 @@ contract RefPointsTracker is AccessControlLight {
   }
 
   /**
+   * @notice Verifies if referrer and referred addresses are valid,
+   *      that is if a referrer can invite given referred
+   * @dev Addresses are treated as valid if referrer is already known to
+   *      the smart contract and referred is not known
+   * @dev Zero referrer address is treated as not valid
+   * @dev Zero referred address is treated as not valid
+   * @param referrer address of the referrer (known address)
+   * @param referred address of the referred (unknown address)
+   * @return true if referrer is known and referred is unknown,
+   *      false otherwise; false if any of the addresses is zero
+   */
+  function isValid(address referrer, address referred) public constant returns(bool) {
+    // perform validation based on two calls to `isKnown` and return
+    return referrer != address(0) && referred != address(0) && isKnown(referrer) && !isKnown(referred);
+  }
+
+  /**
    * @notice Lists all referral points holders addresses
    * @return an array of referral points holders addresses,
    *      doesn't contain duplicates
