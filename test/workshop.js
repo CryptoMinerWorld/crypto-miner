@@ -95,11 +95,11 @@ contract('Workshop', (accounts) => {
 		const player = accounts[1];
 
 		// define some gems: ids, initial levels and grades, how much to level up / upgrade
-		const gemIds   = [1, 2, 3, 4, 5]; // gem IDs
-		const levels   = [1, 2, 2, 1, 4]; // initial levels
-		const grades   = [2, 1, 3, 5, 1]; // initial grades
-		const lvlUps   = [0, 3, 2, 1, 0]; // level deltas (how much to increase)
-		const upgrades = [4, 5, 3, 1, 0]; // grade deltas (how much to increase)
+		const gemIds   = [1, 2, 3, 4, 5, 6]; // gem IDs
+		const levels   = [1, 2, 2, 1, 4, 5]; // initial levels
+		const grades   = [2, 1, 3, 5, 1, 6]; // initial grades
+		const lvlUps   = [0, 3, 2, 1, 0, 0]; // level deltas (how much to increase)
+		const upgrades = [4, 5, 3, 1, 0, 0]; // grade deltas (how much to increase)
 
 		// create the gems
 		for(let i = 0; i < gemIds.length; i++) {
@@ -113,12 +113,16 @@ contract('Workshop', (accounts) => {
 		await assertThrowsAsync(fn, [], lvlUps, upgrades);
 		await assertThrowsAsync(fn, gemIds, [], upgrades);
 		await assertThrowsAsync(fn, gemIds, lvlUps, []);
+		await assertThrowsAsync(fn, gemIds, lvlUps, upgrades);
+
+		// fix lvlUps
+		lvlUps[4] = 1;
 
 		// and try one more last time - successful
 		const bulkPrice = await fn(gemIds, lvlUps, upgrades);
 
 		// verify the result
-		assert.equal(260, bulkPrice[0], "wrong bulk price calculated (silver)");
+		assert.equal(395, bulkPrice[0], "wrong bulk price calculated (silver)");
 		assert.equal(121, bulkPrice[1], "wrong bulk price calculated (gold)");
 	});
 	it("wrong inputs: bulk upgrade", async() => {
@@ -135,11 +139,11 @@ contract('Workshop', (accounts) => {
 		const player1 = accounts[2];
 
 		// define some gems: ids, initial levels and grades, how much to level up / upgrade
-		const gemIds   = [1, 2, 3, 4, 5]; // gem IDs
-		const levels   = [1, 2, 2, 1, 4]; // initial levels
-		const grades   = [2, 1, 3, 5, 1]; // initial grades
-		const lvlUps   = [0, 3, 2, 1, 0]; // level deltas (how much to increase)
-		const upgrades = [4, 5, 3, 1, 0]; // grade deltas (how much to increase)
+		const gemIds   = [1, 2, 3, 4, 5, 6]; // gem IDs
+		const levels   = [1, 2, 2, 1, 4, 5]; // initial levels
+		const grades   = [2, 1, 3, 5, 1, 6]; // initial grades
+		const lvlUps   = [0, 3, 2, 1, 0, 0]; // level deltas (how much to increase)
+		const upgrades = [4, 5, 3, 1, 0, 0]; // grade deltas (how much to increase)
 
 		// create the gems
 		for(let i = 0; i < gemIds.length; i++) {
@@ -159,13 +163,17 @@ contract('Workshop', (accounts) => {
 		await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
 
 		// mint required silver and gold amounts
-		await silver.mint(player, 10260);
+		await silver.mint(player, 10395);
 		await gold.mint(player, 10121);
 
 		// test wrong params
 		await assertThrowsAsync(fn, [], lvlUps, upgrades);
 		await assertThrowsAsync(fn, gemIds, [], upgrades);
 		await assertThrowsAsync(fn, gemIds, lvlUps, []);
+		await assertThrowsAsync(fn, gemIds, lvlUps, upgrades);
+
+		// fix lvlUps
+		lvlUps[4] = 1;
 
 		// what if one of the gems belongs to some other player
 		// enable gem transfers
@@ -200,11 +208,11 @@ contract('Workshop', (accounts) => {
 		const player = accounts[1];
 
 		// define some gems: ids, initial levels and grades, how much to level up / upgrade
-		const gemIds   = [1, 2, 3, 4, 5]; // gem IDs
-		const levels   = [1, 2, 2, 1, 4]; // initial levels
-		const grades   = [2, 1, 3, 5, 1]; // initial grades
-		const lvlUps   = [0, 3, 2, 1, 1]; // level deltas (how much to increase)
-		const upgrades = [4, 5, 3, 1, 0]; // grade deltas (how much to increase)
+		const gemIds   = [1, 2, 3, 4, 5, 6]; // gem IDs
+		const levels   = [1, 2, 2, 1, 4, 5]; // initial levels
+		const grades   = [2, 1, 3, 5, 1, 6]; // initial grades
+		const lvlUps   = [0, 3, 2, 1, 1, 0]; // level deltas (how much to increase)
+		const upgrades = [4, 5, 3, 1, 0, 0]; // grade deltas (how much to increase)
 
 		// create the gems
 		for(let i = 0; i < gemIds.length; i++) {
@@ -215,6 +223,11 @@ contract('Workshop', (accounts) => {
 		const silverGoldRequired1 = await workshop.getUpgradePrice(gemIds[1], lvlUps[1], upgrades[1]);
 		const silverRequired1 = silverGoldRequired1[0];
 		const goldRequired1 = silverGoldRequired1[1];
+
+		// perform few gem upgrade calculations
+		const silverGoldRequired2 = await workshop.getUpgradePrice(gemIds[5], lvlUps[5], upgrades[5]);
+		const silverRequired2 = silverGoldRequired2[0];
+		const goldRequired2 = silverGoldRequired2[1];
 
 		// perform bulk calculation
 		const bulkPrice = await workshop.getBulkUpgradePrice(gemIds, lvlUps, upgrades);
@@ -244,8 +257,10 @@ contract('Workshop', (accounts) => {
 		 */
 		assert.equal(195, silverRequired1, "wrong silver required (1) value");
 		assert.equal(31, goldRequired1, "wrong gold required (1) value");
+		assert.equal(0, silverRequired2, "wrong silver required (2) value");
+		assert.equal(16, goldRequired2, "wrong gold required (2) value");
 		assert.equal(395, bulkSilverRequired, "wrong bulk silver required value");
-		assert.equal(105, bulkGoldRequired, "wrong bulk gold required value")
+		assert.equal(121, bulkGoldRequired, "wrong bulk gold required value")
 	});
 
 	it("upgrades: single gem upgrade", async() => {
@@ -382,7 +397,7 @@ contract('Workshop', (accounts) => {
 		assert.equal(6, await gem.getGradeType(1), "incorrect gem grade type after third upgrade");
 		// verify silver and gold was consumed correctly
 		assert.equal(10000, await silver.balanceOf(player), "incorrect silver balance after third level up");
-		assert.equal(1000, await gold.balanceOf(player), "incorrect gold balance after third` upgrade");
+		assert.equal(1000, await gold.balanceOf(player), "incorrect gold balance after third upgrade");
 
 		// the gems is on its maximum level and grade, no upgrades are possible anymore
 		await assertThrowsAsync(fn1);
@@ -393,6 +408,121 @@ contract('Workshop', (accounts) => {
 		// verify gem grade value increases only: grade2 < grade3 < grade4
 		assert(grade2 < grade3, "grade didn't increase! constraint grade2 < grade3 didn't meet");
 		assert(grade3 < grade4, "grade didn't increase! constraint grade3 < grade4 didn't meet");
+	});
+	it("upgrades: grade value upgrade", async() => {
+		// construct workshop dependencies
+		const gem = await Gem.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+
+		// construct workshop itself
+		const workshop = await Workshop.new(gem.address, silver.address, gold.address);
+
+		// define player account
+		const player = accounts[1];
+
+		// mint a gem to level up and upgrade
+		await gem.mint(player, 1, 1, 0, 1, 1, 1, 1, 1); // level: 1, grade: 1 (D)
+
+		// define gem upgrade function
+		const fn0 = async() => await workshop.upgrade(1, 0, 0, {from: player});
+		const fn1 = async() => await workshop.upgrade(1, 0, 1, {from: player});
+
+		// enable upgrades on the workshop
+		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
+		// grant a workshop ROLE_TOKEN_DESTROYER role on both silver and gold
+		// await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+		// grant the workshop permissions required on the gem smart contract
+		await gem.addOperator(workshop.address, ROLE_GRADE_PROVIDER);
+
+		// mint gold required to perform upgrades
+		await gold.mint(player, 1111);
+
+		// perform an upgrade to maximum grade
+		// D -> C
+		await assertThrowsAsync(fn0);
+		await fn1();
+		// C -> B
+		await assertThrowsAsync(fn0);
+		await fn1();
+		// B -> A
+		await assertThrowsAsync(fn0);
+		await fn1();
+		// A -> AA
+		await assertThrowsAsync(fn0);
+		await fn1();
+		// AA -> AAA
+		await assertThrowsAsync(fn0);
+		await fn1();
+		// perform few grade value only upgrades
+		// AAA+ (1)
+		await assertThrowsAsync(fn1);
+		await fn0();
+		// AAA+ (2)
+		await assertThrowsAsync(fn1);
+		await fn0();
+		// AAA+ (3)
+		await assertThrowsAsync(fn1);
+		await fn0();
+		// AAA+ (4)
+		await assertThrowsAsync(fn1);
+		await fn0();
+		// AAA+ (5)
+		await assertThrowsAsync(fn1);
+		await fn0();
+
+		// total upgrade price is 111 = 1 + 2 + 4 + 8 + 16 + 5 * 16
+		// verify amount of gold consumed
+		assert.equal(1000, await gold.balanceOf(player), "incorrect gold balance after several upgrades");
+		// verify grade type has reached its maximum
+		assert.equal(6, await gem.getGradeType(1), "incorrect grade type after maximum grade upgrade");
+
+		const gradeValue = await gem.getGradeValue(1);
+
+		assert(gradeValue.gt(900000), "grade value is too low after several upgrades");
+		assert(gradeValue.lt(1000000), "grade value exceeded its maximum");
+	});
+	it("upgrades: 20 grade value upgrades", async() => {
+		// construct workshop dependencies
+		const gem = await Gem.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+
+		// construct workshop itself
+		const workshop = await Workshop.new(gem.address, silver.address, gold.address);
+
+		// define player account
+		const player = accounts[1];
+
+		// mint a gem to level up and upgrade
+		await gem.mint(player, 1, 1, 0, 1, 1, 1, 6, 1); // level: 1, grade: 6 (AAA)
+
+		// define gem upgrade function
+		const fn0 = async() => await workshop.upgrade(1, 0, 0, {from: player});
+
+		// enable upgrades on the workshop
+		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
+		// grant a workshop ROLE_TOKEN_DESTROYER role on both silver and gold
+		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+		// grant the workshop permissions required on the gem smart contract
+		await gem.addOperator(workshop.address, ROLE_GRADE_PROVIDER);
+
+		// mint gold required to perform upgrades
+		await gold.mint(player, 320);
+
+		// perform 20 grade value only upgrades
+		for(let i = 0; i < 20; i++) {
+			await fn0();
+		}
+
+		// verify grade type has not exceeded its maximum
+		assert.equal(6, await gem.getGradeType(1), "incorrect grade type after maximum grade upgrade");
+
+		const gradeValue = await gem.getGradeValue(1);
+
+		assert(gradeValue.gt(950000), "grade value is too low after several upgrades");
+		assert(gradeValue.lt(1000000), "grade value exceeded its maximum");
 	});
 
 	it("upgrades: bulk upgrade", async() => {
@@ -409,10 +539,10 @@ contract('Workshop', (accounts) => {
 
 		// define some gems: ids, initial levels and grades, how much to level up / upgrade
 		const gemIds   = [1, 2, 3, 4, 5, 6, 7, 8, 9,10]; // gem IDs
-		const levels   = [1, 2, 2, 1, 4, 1, 5, 2, 1, 3]; // initial levels
-		const grades   = [2, 1, 3, 5, 1, 1, 5, 1, 3, 4]; // initial grades
-		const lvlUps   = [0, 3, 2, 1, 1, 3, 0, 3, 1, 1]; // level deltas (how much to increase)
-		const upgrades = [4, 5, 3, 1, 0, 2, 1, 4, 1, 2]; // grade deltas (how much to increase)
+		const levels   = [1, 2, 2, 1, 4, 5, 1, 2, 1, 3]; // initial levels
+		const grades   = [2, 1, 3, 5, 1, 6, 1, 1, 3, 4]; // initial grades
+		const lvlUps   = [0, 3, 2, 1, 1, 0, 3, 3, 1, 1]; // level deltas (how much to increase)
+		const upgrades = [4, 5, 3, 1, 0, 0, 2, 4, 1, 2]; // grade deltas (how much to increase)
 
 		// create the gems
 		for(let i = 0; i < gemIds.length; i++) {

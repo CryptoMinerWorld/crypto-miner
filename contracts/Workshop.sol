@@ -155,6 +155,9 @@ contract Workshop is AccessControlLight {
    *      token level constraints (maximum level)
    * @dev Throws if `gradeTypeDelta` is invalid, i.e. violates
    *      token grade constraints (maximum grade)
+   * @dev Throws if `levelDelta` and `gradeTypeDelta` (level delta and
+   *      grade delta combination) result in no level/grade change for the gem
+   *      (ex.: both `levelDelta` and `gradeTypeDelta` are zero and gem grade is not AAA)
    * @dev Doesn't check token ID ownership, assuming it is checked
    *      when performing an upgrade transaction itself
    * @dev If both `levelDelta` and `gradeTypeDelta` are zeros, assumes
@@ -170,16 +173,6 @@ contract Workshop is AccessControlLight {
     uint8 levelDelta,
     uint8 gradeTypeDelta
   ) public constant returns(uint8 silverRequired, uint8 goldRequired) {
-    // if both level and grade type deltas are zero
-    if(levelDelta == 0 && gradeTypeDelta == 0) {
-      // this is a grade value only upgrade
-      // calculate upgrade price as from grade AA to grade AAA
-      goldRequired = GRADE_PRICES[GRADE_PRICES.length - 1] - GRADE_PRICES[GRADE_PRICES.length - 2];
-
-      // return the result immediately
-      return (0, goldRequired);
-    }
-
     // get gem properties which contains both level and grade
     uint48 properties = gemInstance.getProperties(tokenId);
 
@@ -207,6 +200,21 @@ contract Workshop is AccessControlLight {
     // verify maximum grade constraint
     require(newGradeType <= MAXIMUM_GRADE_TYPE);
 
+    // ensure the level and grade type deltas are valid, i.e.
+    // either result in level/grade upgrade or the gem is at its
+    // maximum grade type and this is a request to upgrade grade value only
+    require(levelDelta != 0 || gradeTypeDelta != 0 || currentGradeType == MAXIMUM_GRADE_TYPE);
+
+    // if both level and grade type deltas are zero
+    if(levelDelta == 0 && gradeTypeDelta == 0) {
+      // this is a grade value only upgrade
+      // calculate upgrade price as from grade AA to grade AAA
+      goldRequired = GRADE_PRICES[MAXIMUM_GRADE_TYPE - 1] - GRADE_PRICES[MAXIMUM_GRADE_TYPE - 2];
+
+      // return the result immediately
+      return (0, goldRequired);
+    }
+
     // calculate silver value required
     silverRequired = LEVEL_PRICES[newLevel - 1] - LEVEL_PRICES[currentLevel - 1];
 
@@ -225,6 +233,9 @@ contract Workshop is AccessControlLight {
    *      token level constraints (maximum level)
    * @dev Throws if `gradeTypeDelta` is invalid, i.e. violates
    *      token grade constraints (maximum grade)
+   * @dev Throws if `levelDelta` and `gradeTypeDelta` (level delta and
+   *      grade delta combination) result in no level/grade change for the gem
+   *      (ex.: both `levelDelta` and `gradeTypeDelta` are zero and gem grade is not AAA)
    * @dev If both `levelDelta` and `gradeTypeDelta` are zeros, assumes
    *      this is a grade value only upgrade (for grade AAA gems)
    * @dev Requires transaction sender to be an owner of the gem
@@ -256,6 +267,9 @@ contract Workshop is AccessControlLight {
    *      which violate token level constraints (maximum level)
    * @dev Throws if `gradeDeltas` contains invalid values, i.e. values
    *      which violate token grade constraints (maximum grade)
+   * @dev Throws if for any token ID in the `tokenIds` array, corresponding
+   *      values in `levelDeltas` and `gradeDeltas` (level delta and
+   *      grade delta combination) result in no level/grade change for the gem
    * @dev If both `levelDeltas[i]` and `gradeDeltas[i]` are zeros for some `i`,
    *      assumes this is a grade value only upgrade (for grade AAA gems) for that `i`
    * @dev Doesn't check token ID ownership, assuming it is checked
@@ -358,7 +372,7 @@ contract Workshop is AccessControlLight {
    *      token grade constraints (maximum grade)
    * @dev Throws if `levelDelta` and `gradeTypeDelta` (level delta and
    *      grade delta combination) result in no level/grade change for the gem
-   *      (ex.: both `levelDelta` and `gradeTypeDelta` are zero)
+   *      (ex.: both `levelDelta` and `gradeTypeDelta` are zero and gem grade is not AAA)
    * @dev Requires transaction sender to be an owner of the gem
    * @dev Throws if token owner (transaction sender) has not enough
    *      gold and/or silver on the balance
@@ -430,7 +444,7 @@ contract Workshop is AccessControlLight {
     uint8 gradeType = uint8(grade >> 24) + gradeTypeDelta;
 
     // extract current grade value and generate new one
-    uint24 gradeValue = uint24(Random.__quadraticRandom(seed, uint24(grade), GRADE_VALUES));
+    uint24 gradeValue = uint24(Random.__quadraticRandom(seed, uint24(grade), GRADE_VALUES - uint24(grade)));
 
     // perform token grade type upgrade
     gemInstance.upgradeGrade(tokenId, uint32(gradeType) << 24 | gradeValue);
