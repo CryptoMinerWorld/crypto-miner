@@ -59,7 +59,7 @@ contract SilverSale is AccessControlLight {
    *      each time smart contact source code is changed and deployed
    * @dev To distinguish from other sale must be multiple of 0x10
    */
-  uint32 public constant SALE_VERSION = 0x10;
+  uint32 public constant SALE_VERSION = 0x20;
 
   /**
    * @dev Expected version of the deployed RefPointsTracker instance
@@ -199,6 +199,12 @@ contract SilverSale is AccessControlLight {
   uint16[] public boxesSold = [0, 0, 0];
 
   /**
+   * @dev RefPointsTracker deployed instance to issue referral points to
+   *      and to consume referral points from
+   */
+  RefPointsTracker public refPointsTracker;
+
+  /**
    * @dev GoldERC20 deployed instance to consume silver from, silver of that instance
    *      may be consumed (burnt) from a player in order to level up a gem
    */
@@ -209,12 +215,6 @@ contract SilverSale is AccessControlLight {
    *      may be consumed (burnt) from a player in order to upgrade a gem
    */
   GoldERC20 public goldInstance;
-
-  /**
-   * @dev RefPointsTracker deployed instance to issue referral points to
-   *      and to consume referral points from
-   */
-  RefPointsTracker public refPointsTracker;
 
   /**
    * @notice An address to send 5% of the incoming funds
@@ -272,11 +272,6 @@ contract SilverSale is AccessControlLight {
     require(_chest != address(0));
     require(_beneficiary != address(0));
 
-    // verify we do not deploy already ended sale
-    // adding one day to the sale length since
-    // final price will be active during last day
-    require(_offset + LENGTH + 1 days > now);
-
     // bind smart contract instances
     silverInstance = SilverERC20(_silver);
     goldInstance = GoldERC20(_gold);
@@ -291,6 +286,75 @@ contract SilverSale is AccessControlLight {
     chest = _chest;
     beneficiary = _beneficiary;
     offset = _offset;
+
+    // verify we do not deploy already ended sale
+    // adding one day to the sale length since
+    // final price will be active during last day
+    require(saleEndsIn() > 0);
+  }
+
+  /**
+   * @notice Provides a convenient way to get sale related information
+   *      in a single function call
+   * @dev Constructs an array, containing info for each box type:
+   *      * Header (8 bits), containing:
+   *          zero - if an element contains box-specific info
+   *          non-zero - if an element contains general sale info
+   *      For box-specific elements following box-specific information is packed:
+   *        * Box Type ID (8 bits), containing:
+   *            [0] - Silver Box
+   *            [1] - Rotund Silver Box
+   *            [2] - Goldish Silver Box
+   *        * Boxes Available (16 bits), initially equal to `BOXES_TO_SELL`,
+   *            and going down to zero as sale progresses
+   *        * Boxes Sold (16 bits), initially zero and going up to,
+   *            `BOXES_TO_SELL` as sale progresses, may exceed `BOXES_TO_SELL`
+   *        * Boxes Initially Available (16 bits), equal to `BOXES_TO_SELL`
+   *        * Current Box Price (64 bits), initially equal to `INITIAL_PRICES`
+   *            and going up as sale progresses to `FINAL_PRICES`
+   *      For general sale info element following information is packed:
+   *        * Sale Start (32 bits)
+   *        * Sale End (32 bits)
+   *        * Current Time (32 bits)
+   *        * Next Price Increase Time (32 bits)
+   */
+  function getStatus() public constant returns(uint128[]) {
+    // save number of box types into local variable for convenience
+    uint8 n = boxTypesNum();
+
+    // create in-memory an array container to store the result
+    uint128[] memory result = new uint128[](n + 1);
+
+    // first add all boxes-specific info into resulting array
+    // iterate over all the box types
+    for(uint8 i = 0; i < n; i++) {
+      // and pack all corresponding info to the box type `i`
+      result[i] = uint128(i) << 112                 // box type: 0, 1, 2
+                | uint112(boxesAvailable(i)) << 96  // boxes available on sale
+                | uint96(boxesSold[i]) << 80        // boxes already sold
+                | uint80(BOXES_TO_SELL[i]) << 64    // boxes initially available
+                | getBoxPrice(i);                   // current box price
+    }
+
+    // now add all general sale info into the last element of the array
+    result[n]   = uint128(offset) << 96
+                | uint96(saleEndTime()) << 64
+                | uint64(now) << 32
+                | nextPriceIncrease();
+  }
+
+  /**
+   * @notice Number of different box types available on sale (3):
+   *      [0] - Silver Box
+   *      [1] - Rotund Silver Box
+   *      [2] - Goldish Silver Box
+   * @dev Deduces number of box types from `BOXES_TO_SELL` array
+   * @return number of different box types available on sale
+   */
+  function boxTypesNum() public constant returns(uint8) {
+    // deduce number of box types from `BOXES_TO_SELL`
+    // array and return the result
+    return uint8(BOXES_TO_SELL.length);
   }
 
   /**
@@ -312,16 +376,19 @@ contract SilverSale is AccessControlLight {
   }
 
   /**
-   * @dev A convenient way to get information on all the boxes available
+   * @dev Convenient way to get information on all the boxes available
    *      in a single function call
    * @return an array of available boxes quantities by type
    */
   function boxesAvailableArray() public constant returns(uint16[]) {
+    // save number of box types into local variable for convenience
+    uint8 n = boxTypesNum();
+
     // since there is no required array prepared already, create one
-    uint16[] memory result = new uint16[](boxesSold.length);
+    uint16[] memory result = new uint16[](n);
 
     // iterate over each box type
-    for(uint8 i = 0; i < boxesSold.length; i++) {
+    for(uint8 i = 0; i < n; i++) {
       // and fill in the available data based on calculation in `boxesAvailable`
       result[i] = boxesAvailable(i);
     }
@@ -331,13 +398,39 @@ contract SilverSale is AccessControlLight {
   }
 
   /**
-   * @dev A Convenient way to get information on all the boxes sold
+   * @dev Convenient way to get information on all the boxes sold
    *      in a single function call
    * @return an array of sold boxes quantities by type
    */
   function boxesSoldArray() public constant returns(uint16[]) {
     // just return internal contract array
     return boxesSold;
+  }
+
+  /**
+   * @dev Convenient way to get referral points, silver and gold balances
+   *      of a particular address
+   * @param owner an address to query balances for
+   * @return tuple of three elements, containing balances for a given address:
+   *      1. number of available referral points
+   *      2. amount of silver tokens on the balance
+   *      3. amount of gold tokens on the balance
+   */
+  function balanceOf(address owner) public constant returns(uint256, uint256, uint256) {
+    // delegate call to `balanceOf` in RefPointsTracker
+    // to obtain number of available referral points
+    uint256 points = refPointsTracker.balanceOf(owner);
+
+    // delegate call to `balanceOf` in SilverERC20
+    // to obtain amount of silver tokens on the balance
+    uint256 silver = silverInstance.balanceOf(owner);
+
+    // delegate call to `balanceOf` in GoldERC20
+    // to obtain amount of gold tokens on the balance
+    uint256 gold = goldInstance.balanceOf(owner);
+
+    // return balances obtained as a tuple
+    return (points, silver, gold);
   }
 
   /**
@@ -764,13 +857,72 @@ contract SilverSale is AccessControlLight {
   }
 
   /**
-   * @notice Estimates time before next price increase
+   * @notice Calculates time before next price increase
    * @dev Price increases every day (`PRICE_INCREASE_EVERY`)
+   * @dev Sale starts on `offset` timestamp and lasts
+   *      for `LENGTH + 1` days (21 days)
+   * @dev Price increases 20 times during this period,
+   *      first price increase happens 24 hours sale starts, and
+   *      the last price increase happens 24 hours before sale ends
+   * @dev See also `saleEndsIn()`
    * @return number of seconds left before next price increase
    */
   function priceIncreaseIn() public constant returns(uint32) {
-    // calculate based on input data, works safe for `_t` before `_offset`
-    return now < offset? offset - uint32(now): (uint32(now) - offset) % PRICE_INCREASE_EVERY;
+    // get 32-bit `now`, and yes - it will be affected by year 2039 problem
+    uint32 now32 = uint32(now);
+
+    int64 delta = int64(now32) - offset;
+
+    // calculate based on current timestamp and contract settings
+    return uint32(PRICE_INCREASE_EVERY - (delta < 0? delta: delta % PRICE_INCREASE_EVERY));
+  }
+
+  /**
+   * @notice Calculates the next time increase timestamp
+   * @dev Price increases every day (`PRICE_INCREASE_EVERY`)
+   * @dev Sale starts on `offset` timestamp and lasts
+   *      for `LENGTH + 1` days (21 days)
+   * @dev Price increases 20 times during this period,
+   *      first price increase happens 24 hours sale starts, and
+   *      the last price increase happens 24 hours before sale ends
+   * @dev See also `priceIncreaseIn()`, `saleEndsIn()`
+   * @return next price increase date and time as unix timestamp
+   */
+  function nextPriceIncrease() public constant returns(uint32) {
+    // get price increase in value, delegate call to `priceIncreaseIn`,
+    // calculate the resulting timestamp and return
+    return uint32(now) + priceIncreaseIn();
+  }
+
+  /**
+   * @notice Calculates time before the sale ends
+   * @dev Sale starts on `offset` timestamp and lasts
+   *      for `LENGTH + 1` days (21 days)
+   * @dev Price increases 20 times during this period,
+   *      first price increase happens 24 hours sale starts, and
+   *      the last price increase happens 24 hours before sale ends
+   * @dev See also `priceIncreaseIn()`
+   * @return number of seconds left before sale ends
+   */
+  function saleEndsIn() public constant returns(uint32) {
+    // get 32-bit `now`
+    uint32 now32 = uint32(now);
+
+    // get sale end unix timestamp
+    uint32 saleEnd = saleEndTime();
+
+    // calculate based on current timestamp and contract settings
+    return now32 > saleEnd? 0: saleEnd - now32;
+  }
+
+  /**
+   * @notice Calculates sale end time as unix timestamp
+   * @dev Sale goes on for `LENGTH + 1` days from the beginning (`offset`)
+   * @return sale end date and time as a unix timestamp
+   */
+  function saleEndTime() public constant returns(uint32) {
+    // calculate the result based on `offset`, `LENGTH` and return
+    return offset + LENGTH + 1 days;
   }
 
   /**
@@ -813,6 +965,33 @@ contract SilverSale is AccessControlLight {
       PRICE_INCREASE_EVERY,
       uint32(now)
     );
+  }
+
+  /**
+   * @notice Calculates current prices for all box types
+   *      (Silver, Rotund Silver or Goldish Silver)
+   * @dev Calculates all the prices based on the initial,
+   *      final prices and current timestamp (`now`)
+   * @dev Returns initial prices if sale didn't start
+   * @dev Returns final prices if the sale has already ended
+   * @return an array of current prices (in moment `now`)
+   *      for each box type
+   */
+  function getBoxPrices() public constant returns(uint64[]) {
+    // save number of box types into local variable for convenience
+    uint8 n = boxTypesNum();
+
+    // create in-memory array to store box prices for each type
+    uint64[] memory prices = new uint64[](n);
+
+    // iterate over box types
+    for(uint8 i = 0; i < n; i++) {
+      // and set the price of each box by type into resulting array
+      prices[i] = getBoxPrice(i);
+    }
+
+    // return the result
+    return prices;
   }
 
   /**

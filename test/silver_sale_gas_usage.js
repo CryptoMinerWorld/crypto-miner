@@ -23,7 +23,7 @@ const ROLE_SELLER = 0x00000004;
  * within the SilverSale smart contract
  */
 contract('SilverSale: Gas Usage', (accounts) => {
-	it("gas: deploying a sale requires 3743763 gas", async() => {
+	it("gas: deploying a sale requires 4232150 gas", async() => {
 		const silver = await Silver.new();
 		const gold = await Gold.new();
 		const ref = await Tracker.new();
@@ -36,7 +36,7 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(3743763, gasUsed, "deploying SilverSale gas usage mismatch: " + gasUsed);
+		assertEqual(4232150, gasUsed, "deploying SilverSale gas usage mismatch: " + gasUsed);
 	});
 
 	it("gas: buying one Silver Box requires 182207 gas", async() => {

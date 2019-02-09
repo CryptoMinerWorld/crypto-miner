@@ -262,10 +262,10 @@ contract('SilverSale', (accounts) => {
 		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
-		const offset = new Date().getTime() / 1000 | 0;
+		const now = new Date().getTime() / 1000 | 0;
 
 		// function to instantiate silver sale with the desired offset
-		const getSale = async(_offset) => await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset + _offset);
+		const getSale = async(_offset) => await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, now + _offset);
 
 		// get few price increase in functions results
 		const increase0 = (await (await getSale(0)).priceIncreaseIn()).toNumber();
@@ -276,15 +276,24 @@ contract('SilverSale', (accounts) => {
 		const increase3543 = (await (await getSale(-2 * 86400 - 3543)).priceIncreaseIn()).toNumber();
 		const increase54327 = (await (await getSale(-7 * 86400 - 54327)).priceIncreaseIn()).toNumber();
 
+		// expected price increase in values
+		const expected0 = 86400;
+		const expected456 = 86400 + 456;
+		const expected7483836 = 86400 + 7483836;
+		const expected3600 = 86400 - 3600;
+		const expected1 = 86400 - 1;
+		const expected3543 = 86400 - 3543;
+		const expected54327 = 86400 - 54327;
+
 		// verify the calculations
 		const leeway = 5;
-		assertEqualWith(0, increase0, leeway, "incorrect price increase in for offset 0");
-		assertEqualWith(456, increase456, leeway, "incorrect price increase in for offset 456");
-		assertEqualWith(7483836, increase7483836, leeway, "incorrect price increase in for offset 7483836");
-		assertEqualWith(3600, increase3600, leeway, "incorrect price increase in for offset 3600");
-		assertEqualWith(1, increase1, leeway, "incorrect price increase in for offset -86400 - 1");
-		assertEqualWith(3543, increase3543, leeway, "incorrect price increase in for offset -2 * 86400 - 3543");
-		assertEqualWith(54327, increase54327, leeway, "incorrect price increase in for offset -7 * 86400 - 54327");
+		assertEqualWith(expected0, increase0, leeway, "incorrect price increase in for offset 0");
+		assertEqualWith(expected456, increase456, leeway, "incorrect price increase in for offset 456");
+		assertEqualWith(expected7483836, increase7483836, leeway, "incorrect price increase in for offset 7483836");
+		assertEqualWith(expected3600, increase3600, leeway, "incorrect price increase in for offset -3600");
+		assertEqualWith(expected1, increase1, leeway, "incorrect price increase in for offset -86400 - 1");
+		assertEqualWith(expected3543, increase3543, leeway, "incorrect price increase in for offset -2 * 86400 - 3543");
+		assertEqualWith(expected54327, increase54327, leeway, "incorrect price increase in for offset -7 * 86400 - 54327");
 	});
 
 	it("buy: buying few boxes of the same type", async() => {
