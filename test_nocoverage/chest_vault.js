@@ -1,6 +1,6 @@
 const Vault = artifacts.require("./ChestVault");
 
-contract('ChestVault', function(accounts) {
+contract('ChestVault (Time Increase)', function(accounts) {
 	it("chest vault: using the vault", async function() {
 		await assertThrowsAsync(async () => await Vault.new(0, 0));
 		await assertThrowsAsync(async () => await Vault.new(accounts[0], 0));
