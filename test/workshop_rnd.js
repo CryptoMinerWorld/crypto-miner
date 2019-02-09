@@ -73,7 +73,7 @@ contract('Workshop (RND)', (accounts) => {
 
 		// verify the distribution properties are correct
 		assertEqualWith(0, min, 1000, "wrong minimum");
-		assertEqualWith(maxGrade, max, 50000, "wrong maximum");
+		assertEqualWith(maxGrade, max, 100000, "wrong maximum");
 		assertEqualWith(maxGrade / 4, avg, 25000, "wrong average");
 
 		// verify random didn't exceed the bounds
