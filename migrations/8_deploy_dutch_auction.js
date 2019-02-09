@@ -47,7 +47,7 @@ module.exports = async function(deployer, network, accounts) {
 	// allow adding tokens to an auction and buying them
 	await auction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
 
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("token:   " + tokenAddress);
 	console.log("auction: " + auction.address);
 };

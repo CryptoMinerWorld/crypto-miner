@@ -236,7 +236,7 @@ module.exports = async function(deployer, network, accounts) {
 	// give permissions to sale smart contract to mint tokens
 	await country.addOperator(saleAddress, ROLE_TOKEN_CREATOR);
 
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("country:    " + countryAddress);
 	console.log("supply:     " + await country.totalSupply());
 	console.log("sale:       " + saleAddress);

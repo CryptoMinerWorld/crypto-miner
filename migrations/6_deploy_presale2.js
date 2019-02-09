@@ -64,11 +64,11 @@ module.exports = async function(deployer, network, accounts) {
 	// grant permissions to create coupons
 	await sale2.addOperator("0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", ROLE_COUPON_MANAGER); // John
 
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("gem:        " + tokenAddress);
 	console.log("sale:       " + saleAddress);
 	console.log("sale2       " + sale2Address);
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("supply:     " + await gem.totalSupply());
 	console.log("gems:       " + await gem.balanceOf(accounts[0]));
 	console.log("geodes:     " + await sale.geodeBalances(accounts[0]));

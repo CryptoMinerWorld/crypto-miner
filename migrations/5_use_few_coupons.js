@@ -42,10 +42,10 @@ module.exports = async function(deployer, network, accounts) {
 		await gem.removeOperator(saleAddress);
 	}
 
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("gem:        " + tokenAddress);
 	console.log("sale:       " + saleAddress);
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("supply:     " + await gem.totalSupply());
 	console.log("gems:       " + await gem.balanceOf(accounts[0]));
 	console.log("geodes:     " + await sale.geodeBalances(accounts[0]));

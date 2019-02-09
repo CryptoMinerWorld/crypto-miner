@@ -210,7 +210,7 @@ module.exports = async function(deployer, network, accounts) {
 	const country = await Country.deployed();
 	const countryAddress = country.address;
 
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("country:    " + countryAddress);
 	console.log("supply:     " + await country.totalSupply());
 

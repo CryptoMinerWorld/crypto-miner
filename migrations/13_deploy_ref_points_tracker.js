@@ -428,7 +428,7 @@ module.exports = async function(deployer, network, accounts) {
 	const holders = await tracker.getNumberOfHolders();
 	const knownAddresses = await tracker.getNumberOfKnownAddresses();
 
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("tracker:         " + trackerAddress);
 	console.log("holders:         " + holders);
 	console.log("known addresses: " + knownAddresses);

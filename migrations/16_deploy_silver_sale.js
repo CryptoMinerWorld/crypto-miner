@@ -30,9 +30,9 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// dependencies: smart contract addresses and external addresses
+	let refTrackerAddress = "";
 	let silverAddress = "";
 	let goldAddress = "";
-	let refAddress = "";
 	let chest = "";
 	let beneficiary = "";
 	let offset = new Date('2019-92-20T18:00Z').getTime() / 1000 | 0;
@@ -40,21 +40,21 @@ module.exports = async function(deployer, network, accounts) {
 
 	// for test networks addresses are different
 	if(network !== "mainnet") {
-		silverAddress = "0x453BeAB356D103666FCdc437798630D4CD6B3399";
-		goldAddress = "0xe58Bfc8722C6d7Aa9fA52309154BE3a74650e0Be";
-		refAddress = "0x83cB6C8A7AB25c1058a3D282Bb8699d631121D25";
+		refTrackerAddress = "0xB546bb315310A5dD7Dc813c7E15686C242b177D9";
+		silverAddress = "0x659b95eC3A948D25b091c871f51fbb9292Ed2452";
+		goldAddress = "0xAFCf531dBD2D976FB85a02E8356f55cc2cae36EA";
 		chest = "0xEE169DCC689D0C358F68Ce95DEf41646039aC190"; // Roman
 		beneficiary = "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"; // Basil
 		offset = new Date().getTime() / 1000 | 0;
 	}
 
 	// deploy silver sale
-	await deployer.deploy(SilverSale, silverAddress, goldAddress, refAddress, chest, beneficiary, offset);
+	await deployer.deploy(SilverSale, silverAddress, goldAddress, refTrackerAddress, chest, beneficiary, offset);
 
 	// get links to all the deployed instances
 	const silver = SilverERC20.at(silverAddress);
 	const gold = GoldERC20.at(goldAddress);
-	const ref = Ref.at(refAddress);
+	const ref = Ref.at(refTrackerAddress);
 	const sale = await SilverSale.deployed();
 
 	// enable all features and permissions required to enable buy with referral points
@@ -64,10 +64,10 @@ module.exports = async function(deployer, network, accounts) {
 	await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 
 	// deployment successful, print all relevant
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("silver:      " + silverAddress);
 	console.log("gold:        " + goldAddress);
-	console.log("ref tracker: " + refAddress);
+	console.log("ref tracker: " + refTrackerAddress);
 	console.log("chest:       " + chest);
 	console.log("beneficiary: " + beneficiary);
 	console.log("offset:      " + offset);

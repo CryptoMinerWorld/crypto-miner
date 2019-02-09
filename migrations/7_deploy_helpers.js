@@ -48,7 +48,7 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("gem:              " + tokenAddress);
 	console.log("metadata storage: " + storage.address);
 	console.log("mint helper:      " + mintHelper.address);

@@ -44,7 +44,7 @@ module.exports = async function(deployer, network, accounts) {
 	await sale.addOperator("0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", ROLE_COUPON_MANAGER); // John
 	await sale.addOperator("0x391B9254BE4F56dadF57905113Dfb88a3bf8f141", ROLE_COUPON_MANAGER); // Myke
 
-	console.log("___________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("gem:        " + gem.address);
 	console.log("sale:       " + sale.address);
 

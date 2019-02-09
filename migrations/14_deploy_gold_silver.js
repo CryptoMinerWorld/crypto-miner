@@ -47,7 +47,7 @@ module.exports = async function(deployer, network, accounts) {
 	const silverSupply = await silver.totalSupply();
 	const goldSupply = await gold.totalSupply();
 
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("silver:        " + silverAddress);
 	console.log("gold:          " + goldAddress);
 	console.log("silver supply: " + silverSupply.toString(10));

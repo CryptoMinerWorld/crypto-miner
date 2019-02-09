@@ -19,6 +19,6 @@ module.exports = async function(deployer, network, accounts) {
 	const helper = await Helper.deployed();
 
 	// deployment successful, print helper address
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("auction helper: " + helper.address);
 };

@@ -37,8 +37,8 @@ module.exports = async function(deployer, network, accounts) {
 	// for test networks addresses are different
 	if(network !== "mainnet") {
 		gemAddress = "0x82FF6Bbd7B64f707e704034907d582C7B6E09d97";
-		silverAddress = "0x453BeAB356D103666FCdc437798630D4CD6B3399";
-		goldAddress = "0xe58Bfc8722C6d7Aa9fA52309154BE3a74650e0Be";
+		silverAddress = "0x659b95eC3A948D25b091c871f51fbb9292Ed2452";
+		goldAddress = "0xAFCf531dBD2D976FB85a02E8356f55cc2cae36EA";
 	}
 
 	// deploy workshop
@@ -61,7 +61,7 @@ module.exports = async function(deployer, network, accounts) {
 	await gem.addOperator(workshop.address, ROLE_LEVEL_PROVIDER);
 	await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
 
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("gem:      " + gemAddress);
 	console.log("silver:   " + silverAddress);
 	console.log("gold:     " + goldAddress);

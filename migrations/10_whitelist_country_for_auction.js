@@ -32,7 +32,7 @@ module.exports = async function(deployer, network, accounts) {
 	// whitelist country token address
 	await auction.whitelist(countryAddress, true);
 
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("country:    " + countryAddress);
 	console.log("auction:    " + auctionAddress);
 };

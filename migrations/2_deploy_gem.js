@@ -38,7 +38,7 @@ module.exports = async function(deployer, network, accounts) {
 		await gem.removeOperator(saleAddress);
 	}
 
-	console.log("______________________________________________________");
+	console.log("________________________________________________________________________");
 	console.log("gem:        " + tokenAddress);
 	console.log("supply:     " + await gem.totalSupply());
 	console.log("gems:       " + await gem.balanceOf(accounts[0]));
