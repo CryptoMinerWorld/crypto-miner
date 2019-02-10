@@ -35,7 +35,7 @@ module.exports = async function(deployer, network, accounts) {
 	let goldAddress = "";
 	let chest = "";
 	let beneficiary = "";
-	let offset = new Date('2019-92-20T18:00Z').getTime() / 1000 | 0;
+	let offset = 1550772000; // 02/21/2019 @ 6:00pm UTC
 
 
 	// for test networks addresses are different
