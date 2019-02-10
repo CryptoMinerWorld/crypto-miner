@@ -23,14 +23,24 @@ contract DutchAuctionHelper {
    * @param auction DutchAuction instance, providing `owner(address, uint32) => address` interface
    * @param token GemERC721 instance, providing `getPackedCollection(owner) => uint80` interface
    * @param owner address to query tokens for
-   * @return packed tokens collection structure, equal to `GemERC721.getPackedCollection`
+   * @return packed tokens collection structure, containing:
+   *      gem id, 32 bits
+   *      gem color, 8 bits
+   *      gem level, 8 bits
+   *      gem grade type, 8 bits
+   *      gem grade value, 24 bits
+   *      auction start time (unix timestamp), 32 bits
+   *      auction end time (unix timestamp), 32 bits
+   *      starting price (Gwei), 32 bits
+   *      final price (Gwei), 32 bits
+   *      current price (Gwei), 32 bits
    */
-  function getGemCollection(address auction, address token, address owner) public constant returns(uint80[]) {
+  function getGemCollection(address auction, address token, address owner) public constant returns(uint240[]) {
     // get all the tokens available on the auction
     uint80[] memory allAuctionTokens = GemERC721(token).getPackedCollection(auction);
 
     // create an empty array to copy tokens owned by `owner`
-    uint80[] memory ownerTokens = new uint80[](allAuctionTokens.length);
+    uint240[] memory ownerTokens = new uint240[](allAuctionTokens.length);
 
     // counter `k` counts number of the tokens owned by `owner`
     uint80 k = 0;
@@ -39,8 +49,11 @@ contract DutchAuctionHelper {
     for(uint80 i = 0; i < allAuctionTokens.length; i++) {
       // and if the token belongs to `owner` (previous ownership technically)
       if(DutchAuction(auction).owners(token, uint32(allAuctionTokens[i] >> 48)) == owner) {
-        // copy it to a destination array - `ownerTokens`
-        ownerTokens[k++] = allAuctionTokens[i];
+        // feed token packed structure with additional auction data
+        uint224 status = DutchAuction(auction).getTokenSaleStatus(token, uint32(allAuctionTokens[i] >> 48));
+        // drop `t` and `fee` from the packed structure
+        // and copy it to a destination array - `ownerTokens`
+        ownerTokens[k++] = uint240(allAuctionTokens[i]) << 160 | uint160((status >> 160 ) << 96) | uint96(status >> 32);
       }
     }
 
@@ -54,7 +67,7 @@ contract DutchAuctionHelper {
     }
 
     // to cleanup the destination array - create a new one of length `k`
-    uint80[] memory result = new uint80[](k);
+    uint240[] memory result = new uint240[](k);
 
     // iterate over first `k` (non-empty) elements of `ownerTokens`
     for(uint80 j = 0; j < k; j++) {
@@ -73,14 +86,22 @@ contract DutchAuctionHelper {
    * @param auction DutchAuction instance, providing `owner(address, uint32) => address` interface
    * @param token CountryERC721 instance, providing `getPackedCollection(owner) => uint40` interface
    * @param owner address to query tokens for
-   * @return packed tokens collection structure, equal to `CountryERC721.getPackedCollection`
+   * @return packed tokens collection structure, containing:
+   *      country id, 8 bits
+   *      number of plots, 16 bits,
+   *      country tax rate, 16 bits
+   *      auction start time (unix timestamp), 32 bits
+   *      auction end time (unix timestamp), 32 bits
+   *      starting price (Gwei), 32 bits
+   *      final price (Gwei), 32 bits
+   *      current price (Gwei), 32 bits
    */
-  function getCountryCollection(address auction, address token, address owner) public constant returns(uint40[]) {
+  function getCountryCollection(address auction, address token, address owner) public constant returns(uint200[]) {
     // get all the tokens available on the auction
     uint40[] memory allAuctionTokens = CountryERC721(token).getPackedCollection(auction);
 
     // create an empty array to copy tokens owned by `owner`
-    uint40[] memory ownerTokens = new uint40[](allAuctionTokens.length);
+    uint200[] memory ownerTokens = new uint200[](allAuctionTokens.length);
 
     // counter `k` counts number of the tokens owned by `owner`
     uint40 k = 0;
@@ -89,8 +110,11 @@ contract DutchAuctionHelper {
     for(uint80 i = 0; i < allAuctionTokens.length; i++) {
       // and if the token belongs to `owner` (previous ownership technically)
       if(DutchAuction(auction).owners(token, uint8(allAuctionTokens[i] >> 32)) == owner) {
-        // copy it to a destination array - `ownerTokens`
-        ownerTokens[k++] = allAuctionTokens[i];
+        // feed token packed structure with additional auction data
+        uint224 status = DutchAuction(auction).getTokenSaleStatus(token, uint32(allAuctionTokens[i] >> 48));
+        // drop `t` and `fee` from the packed structure
+        // and copy it to a destination array - `ownerTokens`
+        ownerTokens[k++] = uint200(allAuctionTokens[i] << 160) | uint160((status >> 160 ) << 96) | uint96(status >> 32);
       }
     }
 
@@ -104,7 +128,7 @@ contract DutchAuctionHelper {
     }
 
     // to cleanup the destination array - create a new one of length `k`
-    uint40[] memory result = new uint40[](k);
+    uint200[] memory result = new uint200[](k);
 
     // iterate over first `k` (non-empty) elements of `ownerTokens`
     for(uint40 j = 0; j < k; j++) {
