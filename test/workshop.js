@@ -13,6 +13,15 @@ const ROLE_TOKEN_DESTROYER = 0x00000002;
 // Enables ERC721 transfers of the tokens
 const FEATURE_TRANSFERS = 0x00000001;
 
+// Maximum token level
+const MAXIMUM_TOKEN_LEVEL = 5;
+
+// Maximum token grade type
+const MAXIMUM_GRADE_TYPE = 6;
+
+// Maximum token grade value
+const GRADE_VALUES = 1000000;
+
 // GemERC721 smart contract
 const Gem = artifacts.require("./GemERC721.sol");
 // Silver smart contract
@@ -286,6 +295,8 @@ contract('Workshop', (accounts) => {
 		const fn3 = async() => await workshop.upgrade(1, 1, 1, {from: player});
 		// define grade upgrade to upgrade grade by 1
 		const fn4 = async() => await workshop.upgrade(1, 0, 1, {from: player});
+		// define grade value only upgrade function
+		const fn5 = async() => await workshop.upgrade(1, 0, 0, {from: player});
 
 		// enable upgrades on the workshop
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
@@ -350,6 +361,9 @@ contract('Workshop', (accounts) => {
 		// grant role grade provider back
 		await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
 
+		// verify grade value upgrade is not yet available
+		await assertThrowsAsync(fn5);
+
 		// perform a level up
 		await fn1();
 		// verify gem leveled up correctly
@@ -357,6 +371,9 @@ contract('Workshop', (accounts) => {
 		// verify silver was consumed
 		assert.equal(10135, await silver.balanceOf(player), "incorrect silver balance after successful level up");
 		assert.equal(10135, await silver.totalSupply(), "incorrect silver total supply after successful level up");
+
+		// verify grade value upgrade is still not available
+		await assertThrowsAsync(fn5);
 
 		// save initial gem grade value
 		const grade2 = (await gem.getGradeValue(1)).toNumber();
@@ -387,6 +404,9 @@ contract('Workshop', (accounts) => {
 		assert.equal(10000, await silver.balanceOf(player), "incorrect silver balance after second level up");
 		assert.equal(1016, await gold.balanceOf(player), "incorrect gold balance after second upgrade");
 
+		// verify grade value upgrade is still not available
+		await assertThrowsAsync(fn5);
+
 		// save next gem grade value
 		const grade4 = (await gem.getGradeValue(1)).toNumber();
 
@@ -399,15 +419,29 @@ contract('Workshop', (accounts) => {
 		assert.equal(10000, await silver.balanceOf(player), "incorrect silver balance after third level up");
 		assert.equal(1000, await gold.balanceOf(player), "incorrect gold balance after third upgrade");
 
+		// save next gem grade value
+		const grade5 = (await gem.getGradeValue(1)).toNumber();
+
 		// the gems is on its maximum level and grade, no upgrades are possible anymore
 		await assertThrowsAsync(fn1);
 		await assertThrowsAsync(fn2);
 		await assertThrowsAsync(fn3);
 		await assertThrowsAsync(fn4);
 
+		// but grade only upgrade is possible now
+		await fn5();
+		// verify the changes
+		assert.equal(5, await gem.getLevel(1), "incorrect gem level after grade value upgrade");
+		assert.equal(6, await gem.getGradeType(1), "incorrect gem grade type after grade value upgrade");
+		// verify silver and gold was consumed correctly
+		assert.equal(10000, await silver.balanceOf(player), "incorrect silver balance after grade value upgrade");
+		assert.equal(984, await gold.balanceOf(player), "incorrect gold balance after grade value upgrade");
+
 		// verify gem grade value increases only: grade2 < grade3 < grade4
 		assert(grade2 < grade3, "grade didn't increase! constraint grade2 < grade3 didn't meet");
 		assert(grade3 < grade4, "grade didn't increase! constraint grade3 < grade4 didn't meet");
+		assert(grade4 < grade5, "grade didn't increase! constraint grade4 < grade5 didn't meet");
+		assert(grade5 < GRADE_VALUES, "grade value exceeded possible maximum");
 	});
 	it("upgrades: grade value upgrade", async() => {
 		// construct workshop dependencies

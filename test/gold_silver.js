@@ -375,29 +375,41 @@ contract('GoldERC20', (accounts) => {
 		const player2 = accounts[2];
 
 		// mint some tokens to the player
-		await tk.mint(player1, 10);
+		await tk.mint(player1, 20);
 
 		// define functions
 		const safe = async(to) => await tk.transfer(to, 1, {from: player1});
+		const safe2 = async(to) => await tk.transfer(to, 2, {from: player1});
 		const unsafe = async(to) => await tk.unsafeTransferFrom(player1, to, 1, {from: player1});
+		const unsafe2 = async(to) => await tk.unsafeTransferFrom(player1, to, 2, {from: player1});
 
 		// both safe and unsafe transfers work with external addresses:
 		await safe(player2);
+		await safe2(player2);
 		await unsafe(player2);
+		await unsafe2(player2);
 
-		// both safe and unsafe transfers work with safe smart contract:
+		// both safe and unsafe transfers work with safe smart contract -
+		// if value is odd
 		await safe(safeSc);
 		await unsafe(safeSc);
+		// but safe transfer fails if value is even
+		await assertThrowsAsync(safe2, safeSc);
+		// while unsafe does not
+		await unsafe2(safeSc);
 
 		// safe transfer fails with unsafe address
 		await assertThrowsAsync(safe, unsafeSc);
+		await assertThrowsAsync(safe2, unsafeSc);
 		// while unsafe transfer is still possible
 		await unsafe(unsafeSc);
+		await unsafe2(unsafeSc);
 
 		// verify the balances
-		assert.equal(2, await tk.balanceOf(player2), "incorrect player2 balance after 2 successful transfers");
-		assert.equal(2, await tk.balanceOf(safeSc), "incorrect safeSc balance after 1 successful transfer");
-		assert.equal(1, await tk.balanceOf(unsafeSc), "incorrect unsafeSc balance after 1 successful transfer");
+		assert.equal(7, await tk.balanceOf(player1), "incorrect player1 balance after 9 successful transfers");
+		assert.equal(6, await tk.balanceOf(player2), "incorrect player2 balance after 4 successful transfers");
+		assert.equal(4, await tk.balanceOf(safeSc), "incorrect safeSc balance after 3 successful transfers");
+		assert.equal(3, await tk.balanceOf(unsafeSc), "incorrect unsafeSc balance after 2 successful transfers");
 	});
 
 	it("transfers: transfer arithmetic check", async() => {

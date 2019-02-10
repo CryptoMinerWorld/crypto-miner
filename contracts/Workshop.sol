@@ -308,7 +308,8 @@ contract Workshop is AccessControlLight {
       // verify the level up / upgrade operation results
       // in the gem's level / grade change:
       // verify at least one of the prices is not zero
-      require(silverDelta != 0 || goldDelta != 0);
+      // not required anymore – enforced in `getUpgradePrice()`
+      // require(silverDelta != 0 || goldDelta != 0);
 
       // calculate silver required value and add it to cumulative value
       silverRequired += silverDelta;
@@ -398,7 +399,8 @@ contract Workshop is AccessControlLight {
     // verify the level up / upgrade operation results
     // in the gem's level / grade change:
     // verify at least one of the prices is not zero
-    require(silverRequired != 0 || goldRequired != 0);
+    // not required anymore – enforced in `getUpgradePrice()`
+    // require(silverRequired != 0 || goldRequired != 0);
 
     // if level up is requested
     if(levelDelta != 0) {
