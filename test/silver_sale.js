@@ -36,6 +36,10 @@ const ROLE_SELLER = 0x00000004;
 // maximum possible quantity of boxes to buy
 const MAX_QTY = 0xFFFF;
 
+// small value, but not so small to corrupt non BigNumber arithmetic
+// when adding to or subtracting from prices `INITIAL_PRICES` or `FINAL_PRICES`
+const ε = 1000000;
+
 /**
  * Test verifies price calculation functions, bulk price calculation
  * functions, buy a box, bulk buy boxes flows for different types of boxes
@@ -265,7 +269,7 @@ contract('SilverSale', (accounts) => {
 		const now = new Date().getTime() / 1000 | 0;
 
 		// function to instantiate silver sale with the desired offset
-		const getSale = async(_offset) => await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, now + _offset);
+		const getSale = async(offset) => await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, now + offset);
 
 		// get few price increase in functions results
 		const increase0 = (await (await getSale(0)).priceIncreaseIn()).toNumber();
@@ -286,7 +290,7 @@ contract('SilverSale', (accounts) => {
 		const expected54327 = 86400 - 54327;
 
 		// verify the calculations
-		const leeway = 5;
+		const leeway = 15;
 		assertEqualWith(expected0, increase0, leeway, "incorrect price increase in for offset 0");
 		assertEqualWith(expected456, increase456, leeway, "incorrect price increase in for offset 456");
 		assertEqualWith(expected7483836, increase7483836, leeway, "incorrect price increase in for offset 7483836");
@@ -296,6 +300,109 @@ contract('SilverSale', (accounts) => {
 		assertEqualWith(expected54327, increase54327, leeway, "incorrect price increase in for offset -7 * 86400 - 54327");
 	});
 
+	it("buy: impossible to buy boxes before sale starts", async() => {
+		// define silver sale dependencies
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const ref = await Tracker.new();
+		const player = accounts[1];
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
+		const now = new Date().getTime() / 1000 | 0;
+
+		// function to instantiate silver sale with the desired offset
+		const getSale = async(offset) => {
+			const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, now + offset);
+			// enable all features and permissions required to enable buy
+			await sale.updateFeatures(FEATURE_SALE_ENABLED);
+			await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+			await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+			await ref.updateRole(sale.address, ROLE_SELLER);
+			// return the prepared sale instance
+			return sale;
+		};
+
+		// get few instances of the sale – some already started, another didn't yet
+		const saleNow = await getSale(0);
+		const saleFuture = await getSale(15);
+		const salePast = await getSale(-15);
+
+		// define several buy functions
+		const fn0 = async(sale) => await sale.buy(0, 1, {from: player, value: INITIAL_PRICES[0]});
+		const fn1 = async(sale) => await sale.buy(1, 1, {from: player, value: INITIAL_PRICES[1]});
+		const fn2 = async(sale) => await sale.buy(2, 1, {from: player, value: INITIAL_PRICES[2]});
+		const fn3 = async(sale) => await sale.bulkBuy([0, 1, 2], [1, 1, 1], {from: player, value: INITIAL_PRICES.reduce((a, b) => a + b, 0)});
+
+		// verify that only sales which already started work
+		await assertThrowsAsync(fn0, saleFuture);
+		await assertThrowsAsync(fn1, saleFuture);
+		await assertThrowsAsync(fn2, saleFuture);
+		await assertThrowsAsync(fn3, saleFuture);
+		await fn0(saleNow);
+		await fn1(saleNow);
+		await fn2(saleNow);
+		await fn3(saleNow);
+		await fn0(salePast);
+		await fn1(salePast);
+		await fn2(salePast);
+		await fn3(salePast);
+	});
+	it("buy: impossible to buy boxes without supplying enough value", async() => {
+		// define silver sale dependencies
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const ref = await Tracker.new();
+		const player = accounts[1];
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
+		const offset = new Date().getTime() / 1000 | 0;
+
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+
+		// define buy and bulk buy functions
+		const fn1 = async(delta) => await sale.buy(0, 1, {from: player, value: INITIAL_PRICES[0] + delta});
+		const fn2 = async(delta) => await sale.bulkBuy([0], [1], {from: player, value: INITIAL_PRICES[0] + delta});
+
+		// enable all features and permissions required to enable buy
+		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_SELLER);
+
+		// define some small delta amount
+		await assertThrowsAsync(fn1, -ε);
+		await assertThrowsAsync(fn2, -ε);
+		await fn1(ε);
+		await fn2(ε);
+	});
+	it("buy: impossible to buy boxes without `FEATURE_SALE_ENABLED` feature enabled", async() => {
+		// define silver sale dependencies
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const ref = await Tracker.new();
+		const player = accounts[1];
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
+		const offset = new Date().getTime() / 1000 | 0;
+
+		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+
+		// define buy and bulk buy functions
+		const fn1 = async() => await sale.buy(0, 1, {from: player, value: INITIAL_PRICES[0]});
+		const fn2 = async() => await sale.bulkBuy([0], [1], {from: player, value: INITIAL_PRICES[0]});
+
+		// enable all features and permissions required to enable buy
+		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_SELLER);
+
+		// verify `FEATURE_SALE_ENABLED` feature must be enabled
+		await sale.updateFeatures(0);
+		await assertThrowsAsync(fn1);
+		await assertThrowsAsync(fn2);
+		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await fn1();
+		await fn2();
+	});
 	it("buy: buying few boxes of the same type", async() => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
@@ -316,7 +423,7 @@ contract('SilverSale', (accounts) => {
 		// define a function to buy a Silver Box
 		// when buying 32 goldish boxes, chance of not getting
 		// a single piece of gold is 0.000000026896502 (less than 1 in 10 000 000)
-		const fn = async() => await sale.buy(2, 32, {from: player, value: 24320000000000000000});
+		const fn = async() => await sale.buy(2, 32, {from: player, value: 32 * INITIAL_PRICES[2]});
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
@@ -451,14 +558,13 @@ contract('SilverSale', (accounts) => {
 		const quantity = 17;
 		const price = INITIAL_PRICES[boxType] * quantity;
 		const silverMin = quantity * SILVER_MIN[boxType];
-		const change = 1000000;
 
 		// define a function to buy some boxes
 		const fn = async(value) => await sale.buy(boxType, quantity, {from: player, value: value});
 
 		// 17 Rotund Silver Boxes cost is 5.44 ETH
 		// sending not enough ETH fails
-		await assertThrowsAsync(fn, price - change);
+		await assertThrowsAsync(fn, price - ε);
 
 		// save player and beneficiary balances
 		const playerBalance0 = web3.eth.getBalance(player);
@@ -484,7 +590,7 @@ contract('SilverSale', (accounts) => {
 		assert(beneficiaryBalance0.plus(price * 19 / 20).eq(beneficiaryBalance1), "incorrect beneficiary balance (1)");
 
 		// buy 17 Rotund Silver Boxes again, sending more value than required
-		const gasUsed1 = (await fn(price + change)).receipt.gasUsed;
+		const gasUsed1 = (await fn(price + ε)).receipt.gasUsed;
 
 		// verify silver balance is at least 2 * 17 * 70 = 1190
 		assert((await silver.balanceOf(player)).gte(2 * silverMin), "not enough silver minted (2)");
@@ -540,7 +646,7 @@ contract('SilverSale', (accounts) => {
 		assert.equal(64, await sale.boxesSold(1), "incorrect boxes sold counter for " + BOX_TYPES[1]);
 		assert.equal(32, await sale.boxesSold(2), "incorrect boxes sold counter for" + BOX_TYPES[2]);
 	});
-	it("bulk buy: bulk boxes of different type", async() => {
+	it("bulk buy: bulk boxes of different types", async() => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
 		const gold = await Gold.new();
@@ -761,6 +867,7 @@ contract('SilverSale', (accounts) => {
 		await fn1();
 		await fn2();
 	});
+	it("ref points: bulk issuing referral points");
 	it("ref points: getting boxes for points (consuming ref points)", async() => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
@@ -794,8 +901,25 @@ contract('SilverSale', (accounts) => {
 			assert.equal(REF_POINTS[i] * BOXES_TO_SELL[i], await ref.balanceOf(referred[i]), "wrong referred " + i + " balance");
 		}
 
+		// define some functions for referrer to buy some boxes using his points
+		const fn1 = async() => await sale.get(0, 50, {from: referrer}); // 1000 points
+		const fn2 = async() => await sale.get(1, 30, {from: referrer}); // 2400 points
+		const fn3 = async() => await sale.get(2, 15, {from: referrer}); // 3000 points
 
+		// perform getting boxes and check the balances after each get
+		await fn1();
+		assert.equal(5400, await ref.balanceOf(referrer), "wrong referrer ref points balance after getting 50 Silver Boxes");
+		await fn2();
+		assert.equal(3000, await ref.balanceOf(referrer), "wrong referrer ref points balance after getting 30 Rotund Silver Boxes");
+		await fn3();
+		assert.equal(0, await ref.balanceOf(referrer), "wrong referrer ref points balance after getting 15 Goldish Silver Boxes");
+
+		// ensure referrer cannot get more boxes
+		await assertThrowsAsync(fn1);
+		await assertThrowsAsync(fn2);
+		await assertThrowsAsync(fn3);
 	});
+	it("ref points: bulk get boxes for points");
 });
 
 /**
