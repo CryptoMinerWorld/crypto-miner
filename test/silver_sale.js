@@ -895,7 +895,8 @@ contract('SilverSale', (accounts) => {
 		}
 
 		// verify all the balances (boxes and referral points)
-		assert.equal(6400, await ref.balanceOf(referrer), "wrong referrer ref points balance");
+		const balance0 = await sale.balanceOf(referrer);
+		assert.equal(6400, balance0[0], "wrong referrer ref points balance");
 		for(let i = 0; i < BOX_TYPES.length; i++) {
 			assert.equal(0, await sale.boxesAvailable(i), "non-zero boxes left for " + BOX_TYPES[i]);
 			assert.equal(REF_POINTS[i] * BOXES_TO_SELL[i], await ref.balanceOf(referred[i]), "wrong referred " + i + " balance");
@@ -908,11 +909,18 @@ contract('SilverSale', (accounts) => {
 
 		// perform getting boxes and check the balances after each get
 		await fn1();
-		assert.equal(5400, await ref.balanceOf(referrer), "wrong referrer ref points balance after getting 50 Silver Boxes");
+		const balance1 = await sale.balanceOf(referrer);
+		assert.equal(5400, balance1[0], "wrong referrer ref points balance after getting 50 Silver Boxes");
+		assert(balance1[1].gt(balance0[1]), "silver didn't increase after getting 50 Silver Boxes");
 		await fn2();
-		assert.equal(3000, await ref.balanceOf(referrer), "wrong referrer ref points balance after getting 30 Rotund Silver Boxes");
+		const balance2 = await sale.balanceOf(referrer);
+		assert.equal(3000, balance2[0], "wrong referrer ref points balance after getting 30 Rotund Silver Boxes");
+		assert(balance2[1].gt(balance1[1]), "silver didn't increase after getting 30 Rotund Silver Boxes");
 		await fn3();
-		assert.equal(0, await ref.balanceOf(referrer), "wrong referrer ref points balance after getting 15 Goldish Silver Boxes");
+		const balance3 = await sale.balanceOf(referrer);
+		assert.equal(0, balance3[0], "wrong referrer ref points balance after getting 15 Goldish Silver Boxes");
+		assert(balance3[1].gt(balance2[1]), "silver didn't increase after getting 15 Goldish Silver Boxes");
+		assert(balance3[2].gt(balance2[2]), "gold didn't increase after getting 15 Goldish Silver Boxes");
 
 		// ensure referrer cannot get more boxes
 		await assertThrowsAsync(fn1);
