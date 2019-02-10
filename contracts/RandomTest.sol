@@ -55,14 +55,17 @@ contract RandomTest {
    * @param n how many grade values to generate
    * @return an array of grade values of length n
    */
-  function randomGradeValues(uint32 n) public constant returns(uint24[]) {
+  function randomGradeValues(uint32 n, uint32 iterations) public constant returns(uint24[]) {
     // declare a container to store all the generated grades
     uint24[] memory result = new uint24[](n);
 
     // generate amount of random grade values requested
     for(uint32 i = 0; i < n; i++) {
-      // generate random using exactly the same logic as in Workshop.randomGradeValue
-      result[i] = uint24(Random.__quadraticRandom(i, 0, GRADE_VALUES));
+      // perform `iterations` number of iterations
+      for(uint32 j = 0; j < iterations; j++) {
+        // generate random using exactly the same logic as in Workshop.randomGradeValue,
+        result[i] = uint24(Random.__quadraticRandom(i, result[i], GRADE_VALUES - result[i]));
+      }
     }
 
     // return the result

@@ -172,7 +172,7 @@ contract('GoldERC20', (accounts) => {
 		assert.equal(amt, await tk.balanceOf(player2), "wrong player 2 balance after several transfers");
 	});
 
-	it("minting and burning: minting, burning, zer-value checks", async() => {
+	it("minting and burning: minting, burning, zero-value checks", async() => {
 		const tk = await Gold.new();
 
 		// token creator
