@@ -18,9 +18,6 @@ const ACL = artifacts.require("./AccessControlLight.sol");
 
 contract('ACL (Light)', (accounts) => {
 	it("initial state: no features are enabled, only creator has full permissions", async() => {
-		console.log("accounts: %o", accounts.length);
-		console.log("balance: %o", web3.fromWei(web3.eth.getBalance(accounts[0]), "ether").toNumber());
-
 		const ac = await ACL.new();
 		assert(ALL_PERM.eq(await ac.userRoles(accounts[0])), "creator doesn't have full permissions");
 		assert(NO_PERM.eq(await ac.userRoles(accounts[1])), "arbitrary account has some permissions");
