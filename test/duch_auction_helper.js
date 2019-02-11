@@ -347,7 +347,6 @@ function abiPack(tokenId, t0, t1, p0, p1) {
 
 // packs t0, t1, p0, p1 and p into abi-compliant structure
 function pack(t0, t1, p0, p1, p) {
-	console.log("%x", t0, t1, p0, p1, p);
 	const two = web3.toBigNumber(2);
 	return two.pow(128).times(t0)
 		.plus(two.pow(96).times(t1))
