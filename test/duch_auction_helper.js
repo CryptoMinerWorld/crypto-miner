@@ -220,7 +220,7 @@ contract('Dutch Auction Helper', accounts => {
 		await token.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 
 		// mint 200 tokens
-		for(let i = 0; i < 200; i++) {
+		for(let i = 0; i < 2; i++) {
 			await token.mint(
 				accounts[i % 2 + 1], // owner
 				i + 1, // unique token ID
@@ -240,14 +240,15 @@ contract('Dutch Auction Helper', accounts => {
 		// auxiliary constant "2"
 		const two = web3.toBigNumber(2);
 
+		// construct auction parameters
+		const t0 = new Date().getTime() / 1000 | 0;
+		const t1 = t0 + 60;
+		const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
+		const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
+
 		// put them all to an auction
 		for(let i = 0; i < packedOriginal.length; i++) {
-			// construct auction parameters
 			const tokenId = packedOriginal[i].dividedToIntegerBy(two.pow(48));
-			const t0 = new Date().getTime() / 1000 | 0;
-			const t1 = t0 + 60;
-			const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
-			const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
 			const data = abiPack(tokenId, t0, t1, p0, p1);
 
 			// account 1 transfers token to an auction automatically activating it
@@ -260,6 +261,14 @@ contract('Dutch Auction Helper', accounts => {
 		// sort both arrays to compare
 		packedOriginal.sort();
 		packedAuction.sort();
+
+		// pack auction data, prices are in Gwei
+		const auctionData = pack(t0, t1, p0 / 1000000000, p1 / 1000000000, p0 / 1000000000);
+
+		// append additional auction specific data to original collection
+		for(let i = 0; i < packedOriginal.length; i++) {
+			packedOriginal[i] = packedOriginal[i].times(two.pow(160)).plus(auctionData);
+		}
 
 		// compare both arrays
 		assert.deepEqual(packedAuction, packedOriginal, "original and auction arrays differ");
@@ -278,7 +287,7 @@ contract('Dutch Auction Helper', accounts => {
 		await token.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 
 		// mint all the tokens (190)
-		for(let i = 0; i < COUNTRY_DATA.length; i++) {
+		for(let i = 0; i < 2; i++) {
 			await token.mint(
 				accounts[i % 2 + 1], // owner
 				i + 1 // token ID
@@ -291,14 +300,15 @@ contract('Dutch Auction Helper', accounts => {
 		// auxiliary constant "2"
 		const two = web3.toBigNumber(2);
 
+		// construct auction parameters
+		const t0 = new Date().getTime() / 1000 | 0;
+		const t1 = t0 + 60;
+		const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
+		const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
+
 		// put them all to an auction
 		for(let i = 0; i < packedOriginal.length; i++) {
-			// construct auction parameters
 			const tokenId = packedOriginal[i].dividedToIntegerBy(two.pow(32));
-			const t0 = new Date().getTime() / 1000 | 0;
-			const t1 = t0 + 60;
-			const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
-			const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
 			const data = abiPack(tokenId, t0, t1, p0, p1);
 
 			// account 1 transfers token to an auction automatically activating it
@@ -311,6 +321,14 @@ contract('Dutch Auction Helper', accounts => {
 		// sort both arrays to compare
 		packedOriginal.sort();
 		packedAuction.sort();
+
+		// pack auction data, prices are in Gwei
+		const auctionData = pack(t0, t1, p0 / 1000000000, p1 / 1000000000, p0 / 1000000000);
+
+		// append additional auction specific data to original collection
+		for(let i = 0; i < packedOriginal.length; i++) {
+			packedOriginal[i] = packedOriginal[i].times(two.pow(160)).plus(auctionData);
+		}
 
 		// compare both arrays
 		assert.deepEqual(packedAuction, packedOriginal, "original and auction arrays differ");
@@ -325,6 +343,17 @@ function abiPack(tokenId, t0, t1, p0, p1) {
 		.plus(two.pow(160).times(t1))
 		.plus(two.pow(80).times(p0))
 		.plus(p1));
+}
+
+// packs t0, t1, p0, p1 and p into abi-compliant structure
+function pack(t0, t1, p0, p1, p) {
+	console.log("%x", t0, t1, p0, p1, p);
+	const two = web3.toBigNumber(2);
+	return two.pow(128).times(t0)
+		.plus(two.pow(96).times(t1))
+		.plus(two.pow(64).times(p0))
+		.plus(two.pow(32).times(p1))
+		.plus(p);
 }
 
 // converts BigNumber representing Solidity uint256 into String representing Solidity bytes
