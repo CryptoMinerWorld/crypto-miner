@@ -36,13 +36,13 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// write raw data into the file
-	fs.writeFileSync("./geodes.csv", "geode_id,address\n" + geodes.map((a, i) => (i + 1) + "," + a).join("\n"));
+	fs.writeFileSync("./data/geodes.csv", "geode_id,address\n" + geodes.map((a, i) => (i + 1) + "," + a).join("\n"));
 
 	// remove duplicates from geodes array: https://wsvincent.com/javascript-remove-duplicates-array/
 	const owners = [...new Set(geodes)];
 
 	// write statistical raw data into the file
-	fs.writeFileSync("./geode_owners.csv", owners.join("\n"));
+	fs.writeFileSync("./data/geode_owners.csv", owners.join("\n"));
 
 	// log successful finish of the operation
 	console.log("Operation successful. %d geodes. %d owners", geodes.length, owners.length);

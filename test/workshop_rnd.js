@@ -64,7 +64,7 @@ async function generateN(rndTest, n, i, maxGrade) {
 	gradeValues.sort((a, b) => a.minus(b).toNumber());
 
 	// write statistical raw data into the file
-	fs.writeFileSync("./quadratic_random_" + TEST_DEPTH + "_" + i + ".csv", gradeValues.map((a) => a.toNumber()).join("\n"));
+	fs.writeFileSync("./data/quadratic_random_" + TEST_DEPTH + "_" + i + ".csv", gradeValues.map((a) => a.toNumber()).join("\n"));
 
 	// calculate the minimum
 	const min = gradeValues[0].toNumber();

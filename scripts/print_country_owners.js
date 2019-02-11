@@ -226,13 +226,13 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// write raw data into the file
-	fs.writeFileSync("./countries.csv", "country_id,country_name,owner\n" + countries.map((a, i) => (i + 1) + "," + COUNTRY_NAMES[i] + "," + a).join("\n"));
+	fs.writeFileSync("./data/countries.csv", "country_id,country_name,owner\n" + countries.map((a, i) => (i + 1) + "," + COUNTRY_NAMES[i] + "," + a).join("\n"));
 
 	// remove duplicates from countries array: https://wsvincent.com/javascript-remove-duplicates-array/
 	const owners = [...new Set(countries)];
 
 	// write raw data into the file
-	fs.writeFileSync("./country_owners.csv", owners.join("\n"));
+	fs.writeFileSync("./data/country_owners.csv", owners.join("\n"));
 
 	// log successful finish of the operation
 	console.log("Operation successful. %d countries. %d owners", countries.length, owners.length);

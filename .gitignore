@@ -5,6 +5,5 @@ build/
 coverage/
 coverageEnv/
 coverage.json
-package-lock.json
 *.iml
 *.csv
