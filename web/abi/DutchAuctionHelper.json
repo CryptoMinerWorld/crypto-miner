@@ -21,7 +21,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint80[]"
+          "type": "uint240[]"
         }
       ],
       "payable": false,
@@ -48,7 +48,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint40[]"
+          "type": "uint200[]"
         }
       ],
       "payable": false,
@@ -57,5 +57,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-02-09T16:33:01.830Z"
+  "updatedAt": "2019-02-10T16:52:56.874Z"
 }
