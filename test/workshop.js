@@ -159,8 +159,8 @@ contract('Workshop', (accounts) => {
 			await gem.mint(player, gemIds[i], 1, 0, 1, 1, levels[i], grades[i], 1);
 		}
 
-		// bulk upgrade price calculation function
-		const fn = async(a, b, c) => await workshop.bulkUpgrade(a, b, c, {from: player});
+		// bulk upgrade function
+		const fn = async(a, b, c) => await workshop.bulkUpgrade(a, b, c, 65535, 65535, {from: player});
 
 		// enable upgrades on the workshop
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
@@ -238,7 +238,7 @@ contract('Workshop', (accounts) => {
 		const silverRequired2 = silverGoldRequired2[0];
 		const goldRequired2 = silverGoldRequired2[1];
 
-		// perform bulk calculation
+		// perform bulk upgrade price calculation
 		const bulkPrice = await workshop.getBulkUpgradePrice(gemIds, lvlUps, upgrades);
 
 		// extract silver and gold required values
@@ -288,15 +288,15 @@ contract('Workshop', (accounts) => {
 		await gem.mint(player, 1, 1, 0, 1, 1, 1, 1, 1); // level: 1, grade: 1 (D)
 
 		// define level up function
-		const fn1 = async() => await workshop.upgrade(1, 3, 0, {from: player});
+		const fn1 = async() => await workshop.upgrade(1, 3, 0, 255, 255, {from: player});
 		// define grade upgrade function
-		const fn2 = async() => await workshop.upgrade(1, 0, 3, {from: player});
+		const fn2 = async() => await workshop.upgrade(1, 0, 3, 255, 255, {from: player});
 		// define function which both levels up and upgrades gem
-		const fn3 = async() => await workshop.upgrade(1, 1, 1, {from: player});
+		const fn3 = async() => await workshop.upgrade(1, 1, 1, 255, 255, {from: player});
 		// define grade upgrade to upgrade grade by 1
-		const fn4 = async() => await workshop.upgrade(1, 0, 1, {from: player});
+		const fn4 = async() => await workshop.upgrade(1, 0, 1, 255, 255, {from: player});
 		// define grade value only upgrade function
-		const fn5 = async() => await workshop.upgrade(1, 0, 0, {from: player});
+		const fn5 = async() => await workshop.upgrade(1, 0, 0, 255, 255, {from: player});
 
 		// enable upgrades on the workshop
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
@@ -459,8 +459,8 @@ contract('Workshop', (accounts) => {
 		await gem.mint(player, 1, 1, 0, 1, 1, 1, 1, 1); // level: 1, grade: 1 (D)
 
 		// define gem upgrade function
-		const fn0 = async() => await workshop.upgrade(1, 0, 0, {from: player});
-		const fn1 = async() => await workshop.upgrade(1, 0, 1, {from: player});
+		const fn0 = async() => await workshop.upgrade(1, 0, 0, 255, 255, {from: player});
+		const fn1 = async() => await workshop.upgrade(1, 0, 1, 255, 255, {from: player});
 
 		// enable upgrades on the workshop
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
@@ -533,7 +533,7 @@ contract('Workshop', (accounts) => {
 		await gem.mint(player, 1, 1, 0, 1, 1, 1, 6, 1); // level: 1, grade: 6 (AAA)
 
 		// define gem upgrade function
-		const fn0 = async() => await workshop.upgrade(1, 0, 0, {from: player});
+		const fn0 = async() => await workshop.upgrade(1, 0, 0, 255, 255, {from: player});
 
 		// enable upgrades on the workshop
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
@@ -555,8 +555,8 @@ contract('Workshop', (accounts) => {
 
 		const gradeValue = await gem.getGradeValue(1);
 
-		assert(gradeValue.gt(950000), "grade value is too low after several upgrades");
-		assert(gradeValue.lt(1000000), "grade value exceeded its maximum");
+		assert(gradeValue.gt(950000), "grade value is too low after 20 grade value upgrades");
+		assert(gradeValue.lt(1000000), "grade value exceeded its maximum after 20 grade value upgrades");
 	});
 
 	it("upgrades: bulk upgrade", async() => {
@@ -601,6 +601,8 @@ contract('Workshop', (accounts) => {
 		 * Gold:   167 = (2 + 4 + 8 + 16) + (1 + 2 + 4 + 8 + 16) + (4 + 8 + 16) + 16 + 0 + (1 + 2) + 16 + (1 + 2 + 4 + 8) + 4 + (8 + 16)
 		 */
 
+		// enable upgrades on the workshop
+		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
 		// grant a workshop ROLE_TOKEN_DESTROYER role on both silver and gold
 		await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
@@ -613,11 +615,11 @@ contract('Workshop', (accounts) => {
 		await gold.mint(player, 10167);
 
 		// define bulk upgrade function
-		const fn = async() => await workshop.bulkUpgrade(gemIds, lvlUps, upgrades, {from: player});
+		const fn = async() => await workshop.bulkUpgrade(gemIds, lvlUps, upgrades, 65535, 65535, {from: player});
 
 		// make sure bulk upgrade requires FEATURE_UPGRADES_ENABLED feature enabled
+		await workshop.updateFeatures(0);
 		await assertThrowsAsync(fn);
-
 		// enable upgrades on the workshop
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
 
@@ -630,6 +632,80 @@ contract('Workshop', (accounts) => {
 		// verify silver an gold was consumed correctly
 		assert.equal(10000, await silver.balanceOf(player), "wrong silver balance after bulk level up");
 		assert.equal(10000, await gold.balanceOf(player), "wrong gold balance after bulk upgrade");
+	});
+
+	it("upgrades: double spend protection", async() => {
+		// construct workshop dependencies
+		const gem = await Gem.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+
+		// construct workshop itself
+		const workshop = await Workshop.new(gem.address, silver.address, gold.address);
+
+		// define player accounts
+		const player1 = accounts[1];
+		const player2 = accounts[2];
+
+		// mint a gem to player 1 (level 1, grade D)
+		await gem.mint(player1, 1, 1, 0, 1, 1, 1, 1, 1);
+		// define some gems (for player2): ids, initial levels and grades, how much to level up / upgrade
+		const gemIds   = [2, 3, 4]; // gem IDs
+		const levels   = [1, 1, 1]; // initial levels
+		const grades   = [1, 1, 1]; // initial grades
+		const lvlUps   = [1, 1, 0]; // level deltas (how much to increase)
+		const upgrades = [0, 0, 1]; // grade deltas (how much to increase)
+		// mint the gems
+		for(let i = 0; i < gemIds.length; i++) {
+			await gem.mint(player2, gemIds[i], 1, 0, 1, 1, levels[i], grades[i], 1);
+		}
+
+		// calculate upgrade price
+		const price = await workshop.getUpgradePrice(1, 1, 1);
+		// perform bulk upgrade price calculation
+		const bulkPrice = await workshop.getBulkUpgradePrice(gemIds, lvlUps, upgrades);
+
+		// extract silver and gold required values
+		const silverRequired = price[0];
+		const goldRequired = price[1];
+		// extract silver and gold required values
+		const bulkSilverRequired = bulkPrice[0];
+		const bulkGoldRequired = bulkPrice[1];
+
+		// enable upgrades on the workshop
+		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
+		// grant a workshop ROLE_TOKEN_DESTROYER role on both silver and gold
+		await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+		// grant the workshop permissions required on the gem smart contract
+		await gem.addOperator(workshop.address, ROLE_LEVEL_PROVIDER);
+		await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
+
+		// mint required silver and gold amounts - player 1
+		await silver.mint(player1, 10005);
+		await gold.mint(player1, 10001);
+		// mint required silver and gold amounts - player 2
+		await silver.mint(player2, 10010);
+		await gold.mint(player2, 10001);
+
+		// define upgrade function to test double spend
+		const fn1 = async() => await workshop.upgrade(1, 1, 1, silverRequired, goldRequired, {from: player1});
+		// define bulk upgrade function to test double spend
+		const fn2 = async() => await workshop.bulkUpgrade(gemIds, lvlUps, upgrades, bulkSilverRequired, bulkGoldRequired, {from: player2});
+
+		// perform double spend, only 1st transaction may succeed
+		await fn1();
+		await assertThrowsAsync(fn1);
+		// perform double spend, only 1st bulk transaction may succeed
+		await fn2();
+		await assertThrowsAsync(fn2);
+
+		// check silver and gold balances are as expected
+		assert.equal(10000, await silver.balanceOf(player1), "incorrect silver balance after upgrade (double spend)");
+		assert.equal(10000, await gold.balanceOf(player1), "incorrect gold balance after upgrade (double spend)");
+		// check silver and gold balances are as expected
+		assert.equal(10000, await silver.balanceOf(player2), "incorrect silver balance after bulk upgrade (double spend)");
+		assert.equal(10000, await gold.balanceOf(player2), "incorrect gold balance after bulk upgrade (double spend)");
 	});
 });
 

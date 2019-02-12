@@ -2,6 +2,8 @@
  * Test depth defines how many random values will be generated
  * and analyzed to verify grade value random properties
  * Number of randoms to be generated is equal to 2^TEST_DEPTH
+ * Recommended value for coverage: 8
+ * Recommended value for tests: 13
  */
 const TEST_DEPTH = 10;
 
@@ -48,7 +50,8 @@ contract('Workshop (RND)', (accounts) => {
 		const maxGrade = (await rndTest.GRADE_VALUES()).toNumber();
 
 		// call a function to generate n iterations n = [1, 6]
-		for(let i = 0; i < 6; i++) {
+		// `i` is set to 1 speed up test for coverage
+		for(let i = 0; i < 1; i++) {
 			await generateN(rndTest, n, i + 1, maxGrade);
 		}
 	});

@@ -27,7 +27,7 @@ contract Workshop is AccessControlLight {
    * @dev Should be incremented manually in this source code
    *      each time smart contact source code is changed and deployed
    */
-  uint32 public constant WORKSHOP_VERSION = 0x1;
+  uint32 public constant WORKSHOP_VERSION = 0x2;
 
   /**
    * @dev Expected version of the deployed GemERC721 instance
@@ -227,6 +227,11 @@ contract Workshop is AccessControlLight {
 
   /**
    * @notice Levels up and/or upgrades a particular gem
+   * @dev Consumes gold and/or silver on success, amounts can be
+   *      calculated using `getLevelUpPrice()` and `getUpgradePrice()` functions
+   * @dev Throws if at least one of the amounts of silver/gold required to perform
+   *      an upgrade exceeds maximum allowed values `silver` and `gold` authorized
+   *      to be spent by the transaction sender (player)
    * @dev Increases gem's level and/or grade type by the values specified
    * @dev Throws if `tokenId` is invalid (non-existent token)
    * @dev Throws if `levelDelta` is invalid, i.e. violates
@@ -241,18 +246,18 @@ contract Workshop is AccessControlLight {
    * @dev Requires transaction sender to be an owner of the gem
    * @dev Throws if token owner (transaction sender) has not enough
    *      gold and/or silver on the balance
-   * @dev Consumes gold and/or silver on success, amounts can be
-   *      calculated using `getLevelUpPrice()` and `getUpgradePrice()` functions
    * @param tokenId ID of the gem to level up / upgrade
    * @param levelDelta number of levels to increase token level by
    * @param gradeTypeDelta number of grades to increase token grade by
+   * @param silver maximum amount of silver sender authorizes smart contract to consume
+   * @param gold maximum amount of gold sender authorizes smart contract to consume
    */
-  function upgrade(uint32 tokenId, uint8 levelDelta, uint8 gradeTypeDelta) public {
+  function upgrade(uint32 tokenId, uint8 levelDelta, uint8 gradeTypeDelta, uint8 silver, uint8 gold) public {
     // verify that upgrades are enabled
     require(isFeatureEnabled(FEATURE_UPGRADES_ENABLED));
 
     // delegate call to `__upgrade`
-    __upgrade(0, tokenId, levelDelta, gradeTypeDelta);
+    __upgrade(0, tokenId, levelDelta, gradeTypeDelta, silver, gold);
   }
 
   /**
@@ -326,6 +331,11 @@ contract Workshop is AccessControlLight {
    * @notice Levels up and/or upgrades several gems in single transaction (bulk mode)
    * @dev Increases all gem's level and/or grade type in the
    *      array specified by the values specified in corresponding input arrays
+   * @dev Consumes gold and/or silver on success, amounts required can be
+   *      calculated using `getBulkUpgradePrice()` function
+   * @dev Throws if at least one of the amounts of silver/gold required to perform
+   *      an upgrade exceeds maximum allowed values `silver` and `gold` authorized
+   *      to be spent by the transaction sender (player)
    * @dev Throws on empty inputs
    * @dev Throws if input arrays differ in size
    * @dev Throws if `tokenIds` contains invalid token IDs
@@ -339,15 +349,15 @@ contract Workshop is AccessControlLight {
    * @dev Requires transaction sender to be an owner of all the gems
    * @dev Throws if token owner (transaction sender) has not enough
    *      gold and/or silver on the balance
-   * @dev Consumes gold and/or silver on success, amounts can be
-   *      calculated using `getBulkUpgradePrice()` function
    * @param tokenIds an array of valid token IDs to upgrade
    * @param levelDeltas an array of non-zero level deltas, each element
    *      corresponds to an element in tokenIds with the same index
    * @param gradeDeltas an array of non-zero grade deltas, each element
    *      corresponds to an element in tokenIds with the same index
+   * @param silver maximum amount of silver sender authorizes smart contract to consume
+   * @param gold maximum amount of gold sender authorizes smart contract to consume
    */
-  function bulkUpgrade(uint32[] tokenIds, uint8[] levelDeltas, uint8[] gradeDeltas) public {
+  function bulkUpgrade(uint32[] tokenIds, uint8[] levelDeltas, uint8[] gradeDeltas, uint32 silver, uint32 gold) public {
     // verify that upgrades are enabled
     require(isFeatureEnabled(FEATURE_UPGRADES_ENABLED));
 
@@ -359,7 +369,7 @@ contract Workshop is AccessControlLight {
     // iterate the data and perform an upgrade
     for(uint256 i = 0; i < tokenIds.length; i++) {
       // perform an individual gem upgrade
-      __upgrade(i, tokenIds[i], levelDeltas[i], gradeDeltas[i]);
+      __upgrade(i, tokenIds[i], levelDeltas[i], gradeDeltas[i], silver, gold);
     }
   }
 
@@ -384,8 +394,17 @@ contract Workshop is AccessControlLight {
    * @param tokenId ID of the gem to level up / upgrade
    * @param levelDelta number of levels to increase token level by
    * @param gradeTypeDelta number of grades to increase token grade by
+   * @param silver maximum amount of silver sender authorizes smart contract to consume
+   * @param gold maximum amount of gold sender authorizes smart contract to consume
    */
-  function __upgrade(uint256 seed, uint32 tokenId, uint8 levelDelta, uint8 gradeTypeDelta) private {
+  function __upgrade(
+    uint256 seed,
+    uint32 tokenId,
+    uint8 levelDelta,
+    uint8 gradeTypeDelta,
+    uint32 silver,
+    uint32 gold
+  ) private {
     // ensure token is owned by the sender, it also ensures token exists
     require(gemInstance.ownerOf(tokenId) == msg.sender);
     // to assign tuple return value from `getUpgradePrice`
@@ -395,6 +414,9 @@ contract Workshop is AccessControlLight {
 
     // get amount of silver and gold required to level up and upgrade the gem
     (silverRequired, goldRequired) = getUpgradePrice(tokenId, levelDelta, gradeTypeDelta);
+
+    // ensure we don't spend more silver and gold than allowed
+    require(silverRequired <= silver && goldRequired <= gold);
 
     // verify the level up / upgrade operation results
     // in the gem's level / grade change:

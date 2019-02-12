@@ -44,7 +44,7 @@ contract('Workshop: Gas Usage', (accounts) => {
 		await silver.mint(player, 10000);
 		await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 
-		const gasUsed = (await workshop.upgrade(1, 1, 0, {from: player})).receipt.gasUsed;
+		const gasUsed = (await workshop.upgrade(1, 1, 0, 255, 255, {from: player})).receipt.gasUsed;
 		assertEqual(73182, gasUsed, "leveling up a gem gas usage mismatch: " + gasUsed);
 	});
 	it("gas: leveling up 4 levels requires 112850 gas", async() => {
@@ -59,7 +59,7 @@ contract('Workshop: Gas Usage', (accounts) => {
 		await silver.mint(player, 10000);
 		await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 
-		const gasUsed = (await workshop.upgrade(1, 4, 0, {from: player})).receipt.gasUsed;
+		const gasUsed = (await workshop.upgrade(1, 4, 0, 255, 255, {from: player})).receipt.gasUsed;
 		assertEqual(112850, gasUsed, "leveling up 4 levels gas usage mismatch: " + gasUsed);
 	});
 	it("gas: upgrading a gem requires 83547 gas", async() => {
@@ -74,7 +74,7 @@ contract('Workshop: Gas Usage', (accounts) => {
 		await gold.mint(player, 10000);
 		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 
-		const gasUsed = (await workshop.upgrade(1, 0, 1, {from: player})).receipt.gasUsed;
+		const gasUsed = (await workshop.upgrade(1, 0, 1, 255, 255, {from: player})).receipt.gasUsed;
 		assertEqual(83547, gasUsed, "upgrading a gem gas usage mismatch: " + gasUsed);
 	});
 	it("gas: leveling up and upgrading a gem requires 113258 gas", async() => {
@@ -91,7 +91,7 @@ contract('Workshop: Gas Usage', (accounts) => {
 		await gold.mint(player, 10000);
 		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 
-		const gasUsed = (await workshop.upgrade(1, 1, 1, {from: player})).receipt.gasUsed;
+		const gasUsed = (await workshop.upgrade(1, 1, 1, 255, 255, {from: player})).receipt.gasUsed;
 		assertEqual(113258, gasUsed, "leveling up and upgrading a gem gas usage mismatch: " + gasUsed);
 	});
 	it("gas: bulk level up / upgrade of 5 gems requires 661406 gas", async() => {
@@ -117,7 +117,7 @@ contract('Workshop: Gas Usage', (accounts) => {
 		const lvlUps = new Array(bulkSize).fill(4);
 		const upgrades = new Array(bulkSize).fill(5);
 
-		const gasUsed = (await workshop.bulkUpgrade(gemIds, lvlUps, upgrades, {from: player})).receipt.gasUsed;
+		const gasUsed = (await workshop.bulkUpgrade(gemIds, lvlUps, upgrades, 65535, 65535, {from: player})).receipt.gasUsed;
 		assertEqual(661406, gasUsed, "bulk level up / upgrade of " + bulkSize + " gems gas usage mismatch: " + gasUsed);
 	});
 	it("gas: bulk level up / upgrade of 10 gems requires 1300238 gas", async() => {
@@ -144,7 +144,7 @@ contract('Workshop: Gas Usage', (accounts) => {
 		const lvlUps = new Array(bulkSize).fill(4);
 		const upgrades = new Array(bulkSize).fill(5);
 
-		const gasUsed = (await workshop.bulkUpgrade(gemIds, lvlUps, upgrades, {from: player})).receipt.gasUsed;
+		const gasUsed = (await workshop.bulkUpgrade(gemIds, lvlUps, upgrades, 65535, 65535, {from: player})).receipt.gasUsed;
 		assertEqual(1300238, gasUsed, "bulk level up / upgrade of " + bulkSize + " gems gas usage mismatch: " + gasUsed);
 	});
 	it("gas: bulk level up / upgrade of 20 gems requires 2581900 gas", async() => {
@@ -170,7 +170,7 @@ contract('Workshop: Gas Usage', (accounts) => {
 		const lvlUps = new Array(bulkSize).fill(4);
 		const upgrades = new Array(bulkSize).fill(5);
 
-		const gasUsed = (await workshop.bulkUpgrade(gemIds, lvlUps, upgrades, {from: player})).receipt.gasUsed;
+		const gasUsed = (await workshop.bulkUpgrade(gemIds, lvlUps, upgrades, 65535, 65535, {from: player})).receipt.gasUsed;
 		assertEqual(2581900, gasUsed, "bulk level up / upgrade of " + bulkSize + " gems gas usage mismatch: " + gasUsed);
 	});
 });

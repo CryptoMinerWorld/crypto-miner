@@ -481,6 +481,14 @@
         {
           "name": "gradeTypeDelta",
           "type": "uint8"
+        },
+        {
+          "name": "silver",
+          "type": "uint8"
+        },
+        {
+          "name": "gold",
+          "type": "uint8"
         }
       ],
       "name": "upgrade",
@@ -534,6 +542,14 @@
         {
           "name": "gradeDeltas",
           "type": "uint8[]"
+        },
+        {
+          "name": "silver",
+          "type": "uint32"
+        },
+        {
+          "name": "gold",
+          "type": "uint32"
         }
       ],
       "name": "bulkUpgrade",
@@ -544,5 +560,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-02-09T16:39:10.606Z"
+  "updatedAt": "2019-02-12T16:44:14.064Z"
 }
