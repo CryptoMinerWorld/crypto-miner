@@ -219,8 +219,8 @@ contract('Dutch Auction Helper', accounts => {
 		// to list a token in the auction using safeTransferFrom both transfers features may be required
 		await token.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 
-		// mint 200 tokens
-		for(let i = 0; i < 2; i++) {
+		// mint 100 tokens
+		for(let i = 0; i < 100; i++) {
 			await token.mint(
 				accounts[i % 2 + 1], // owner
 				i + 1, // unique token ID
@@ -234,14 +234,14 @@ contract('Dutch Auction Helper', accounts => {
 			);
 		}
 
-		// account1 has 100 tokens
+		// account1 has 50 tokens
 		const packedOriginal = await token.getPackedCollection(accounts[1]);
 
 		// auxiliary constant "2"
 		const two = web3.toBigNumber(2);
 
 		// construct auction parameters
-		const t0 = new Date().getTime() / 1000 | 0;
+		const t0 = 60 + new Date().getTime() / 1000 | 0;
 		const t1 = t0 + 60;
 		const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
 		const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
@@ -258,10 +258,6 @@ contract('Dutch Auction Helper', accounts => {
 		// all account1 100 tokens are on the auction, use helper to obtain them
 		const packedAuction = await helper.getGemCollection(auction.address, token.address, accounts[1]);
 
-		// sort both arrays to compare
-		packedOriginal.sort();
-		packedAuction.sort();
-
 		// pack auction data, prices are in Gwei
 		const auctionData = pack(t0, t1, p0 / 1000000000, p1 / 1000000000, p0 / 1000000000);
 
@@ -269,6 +265,10 @@ contract('Dutch Auction Helper', accounts => {
 		for(let i = 0; i < packedOriginal.length; i++) {
 			packedOriginal[i] = packedOriginal[i].times(two.pow(160)).plus(auctionData);
 		}
+
+		// sort both arrays to compare
+		packedOriginal.sort();
+		packedAuction.sort();
 
 		// compare both arrays
 		assert.deepEqual(packedAuction, packedOriginal, "original and auction arrays differ");
@@ -287,7 +287,7 @@ contract('Dutch Auction Helper', accounts => {
 		await token.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 
 		// mint all the tokens (190)
-		for(let i = 0; i < 2; i++) {
+		for(let i = 0; i < COUNTRY_DATA.length; i++) {
 			await token.mint(
 				accounts[i % 2 + 1], // owner
 				i + 1 // token ID
@@ -301,7 +301,7 @@ contract('Dutch Auction Helper', accounts => {
 		const two = web3.toBigNumber(2);
 
 		// construct auction parameters
-		const t0 = new Date().getTime() / 1000 | 0;
+		const t0 = 60 + new Date().getTime() / 1000 | 0;
 		const t1 = t0 + 60;
 		const p0 = web3.toWei(1, "ether"); // price starts at 1 ether
 		const p1 = web3.toWei(1, "finney"); // and drops to 1 finney
@@ -318,10 +318,6 @@ contract('Dutch Auction Helper', accounts => {
 		// all account1 100 tokens are on the auction, use helper to obtain them
 		const packedAuction = await helper.getCountryCollection(auction.address, token.address, accounts[1]);
 
-		// sort both arrays to compare
-		packedOriginal.sort();
-		packedAuction.sort();
-
 		// pack auction data, prices are in Gwei
 		const auctionData = pack(t0, t1, p0 / 1000000000, p1 / 1000000000, p0 / 1000000000);
 
@@ -329,6 +325,10 @@ contract('Dutch Auction Helper', accounts => {
 		for(let i = 0; i < packedOriginal.length; i++) {
 			packedOriginal[i] = packedOriginal[i].times(two.pow(160)).plus(auctionData);
 		}
+
+		// sort both arrays to compare
+		packedOriginal.sort();
+		packedAuction.sort();
 
 		// compare both arrays
 		assert.deepEqual(packedAuction, packedOriginal, "original and auction arrays differ");
