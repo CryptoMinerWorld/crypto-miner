@@ -285,6 +285,20 @@
     },
     {
       "constant": true,
+      "inputs": [],
+      "name": "FEATURE_GET_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "",
@@ -573,6 +587,18 @@
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "name": "state",
+          "type": "uint192[]"
+        }
+      ],
+      "name": "SaleStateChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "name": "_by",
           "type": "address"
@@ -621,11 +647,11 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "getStatus",
+      "name": "getState",
       "outputs": [
         {
           "name": "",
-          "type": "uint128[]"
+          "type": "uint192[]"
         }
       ],
       "payable": false,
@@ -1013,6 +1039,48 @@
     },
     {
       "constant": true,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        }
+      ],
+      "name": "getNextPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        },
+        {
+          "name": "t",
+          "type": "uint32"
+        }
+      ],
+      "name": "getBoxPriceAt",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [],
       "name": "getBoxPrices",
       "outputs": [
@@ -1112,5 +1180,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-02-09T16:41:55.038Z"
+  "updatedAt": "2019-02-12T18:25:29.642Z"
 }

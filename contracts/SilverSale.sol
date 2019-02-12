@@ -242,13 +242,19 @@ contract SilverSale is AccessControlLight {
   uint32 public offset;
 
   /**
-   * @dev Fired in buy() and bulkBuy()
+   * @dev Fired in buy(), bulkBuy(), get() and bulkGet()
    * @param by address which sent the transaction, spent some value
    *      and got some silver or/and gold in return
    * @param silver amount of silver obtained
    * @param gold amount of gold obtained (zero or one)
    */
   event Unboxed(address indexed by, uint32 silver, uint24 gold);
+
+  /**
+   * @dev Fired in buy(), bulkBuy(), get() and bulkGet()
+   * @param state packed sale state structure as in `getState()`
+   */
+  event SaleStateChanged(uint192[] state);
 
   /**
    * @dev Creates a Silver/Gold Sale instance, binding it to
@@ -305,8 +311,8 @@ contract SilverSale is AccessControlLight {
    *      in a single function call
    * @dev Constructs an array, containing info for each box type:
    *      * Header (8 bits), containing:
-   *          zero - if an element contains box-specific info
-   *          non-zero - if an element contains general sale info
+   *          one - if an element contains box-specific info
+   *          two - if an element contains general sale info
    *      For box-specific elements following box-specific information is packed:
    *        * Box Type ID (8 bits), containing:
    *            [0] - Silver Box
@@ -319,35 +325,47 @@ contract SilverSale is AccessControlLight {
    *        * Boxes Initially Available (16 bits), equal to `BOXES_TO_SELL`
    *        * Current Box Price (64 bits), initially equal to `INITIAL_PRICES`
    *            and going up as sale progresses to `FINAL_PRICES`
+   *        * Next Box Price (64 bits), initially equal to `INITIAL_PRICES`
+   *            and going up as sale progresses to `FINAL_PRICES`
    *      For general sale info element following information is packed:
-   *        * Sale Start (32 bits)
-   *        * Sale End (32 bits)
-   *        * Current Time (32 bits)
-   *        * Next Price Increase Time (32 bits)
+   *        * Sparse Space, zeros, (24 bits)
+   *        * Sale Start, unix timestamp (32 bits)
+   *        * Sale End, unix timestamp (32 bits)
+   *        * Current Time, unix timestamp (32 bits)
+   *        * Next Price Increase Time, unix timestamp (32 bits)
+   *        * Price Increase In, seconds (32 bits)
    */
-  function getStatus() public constant returns(uint128[]) {
+  function getState() public constant returns(uint192[]) {
     // save number of box types into local variable for convenience
     uint8 n = boxTypesNum();
 
     // create in-memory an array container to store the result
-    uint128[] memory result = new uint128[](n + 1);
+    uint192[] memory result = new uint192[](n + 1);
 
     // first add all boxes-specific info into resulting array
     // iterate over all the box types
     for(uint8 i = 0; i < n; i++) {
       // and pack all corresponding info to the box type `i`
-      result[i] = uint128(i) << 112                 // box type: 0, 1, 2
-                | uint112(boxesAvailable(i)) << 96  // boxes available on sale
-                | uint96(boxesSold[i]) << 80        // boxes already sold
-                | uint80(BOXES_TO_SELL[i]) << 64    // boxes initially available
-                | getBoxPrice(i);                   // current box price
+      result[i] = uint192(0x01) << 184              // header - one (8 bits)
+                | uint184(i) << 176                 // box type: 0, 1, 2 (8 bits)
+                | uint176(boxesAvailable(i)) << 160 // boxes available on sale (16 bits)
+                | uint160(boxesSold[i]) << 144      // boxes already sold (16 bits)
+                | uint144(BOXES_TO_SELL[i]) << 128  // boxes initially available (16 bits)
+                | uint128(getBoxPrice(i)) << 64     // current box price (64 bits)
+                | getNextPrice(i);                  // next price (64 bits)
     }
 
     // now add all general sale info into the last element of the array
-    result[n]   = uint128(offset) << 96
-                | uint96(saleEndTime()) << 64
-                | uint64(now) << 32
-                | nextPriceIncrease();
+    result[n]   = uint192(0x02000000) << 184        // header - two (8 bits)
+                // sparse 24 bits
+                | uint160(offset) << 128            // sale start (32 bits)
+                | uint128(saleEndTime()) << 96      // sale end (32 bits)
+                | uint96(now) << 64                 // current time (32 bits)
+                | uint64(nextPriceIncrease()) << 32 // next price increase time (32 bits)
+                | priceIncreaseIn();                // price increase in (32 bits)
+
+    // return the result
+    return result;
   }
 
   /**
@@ -947,18 +965,61 @@ contract SilverSale is AccessControlLight {
    * @return current price (in moment `now`) of the box type requested
    */
   function getBoxPrice(uint8 boxType) public constant returns(uint64) {
+    // delegate call to `getBoxPriceAt` supplying current timestamp
+    return getBoxPriceAt(boxType, uint32(now));
+  }
+
+  /**
+   * @notice Calculates next box price of the type specified
+   *      (Silver, Rotund Silver or Goldish Silver)
+   * @dev Calculates silver box price based on the initial,
+   *      final prices and timestamp one day ('PRICE_INCREASE_EVERY')
+   *      after current (`now`)
+   * @dev Returns initial price if sale didn't start
+   * @dev Returns final price if the sale has already ended
+   * @dev Throws if the box type specified is invalid
+   * @param boxType type of the box to query price for:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @return next price (in one day (`PRICE_INCREASE_EVERY`) after `now`)
+   *      of the box type requested
+   */
+  function getNextPrice(uint8 boxType) public constant returns(uint64) {
+    // delegate call to `getBoxPriceAt` specifying timestamp at
+    // `PRICE_INCREASE_EVERY` (1 day) in the future from `now`
+    return getBoxPriceAt(boxType, uint32(now) + PRICE_INCREASE_EVERY);
+  }
+
+  /**
+   * @notice Calculates box price of the type specified
+   *      (Silver, Rotund Silver or Goldish Silver)
+   *      at some given moment
+   * @dev Calculates silver box price based on the initial,
+   *      final prices and given unix timestamp (`t`)
+   * @dev Returns initial price if `t` is before sale starts
+   * @dev Returns final price if `t` is after sale ends
+   * @dev Throws if the box type specified is invalid
+   * @param boxType type of the box to query price for:
+   *      0 – Silver Box
+   *      1 - Rotund Silver Box
+   *      2 - Goldish Silver Box
+   * @param t unix timestamp of interest
+   * @return current price (in moment `now`) of the box type requested
+   */
+  function getBoxPriceAt(uint8 boxType, uint32 t) public constant returns(uint64) {
     // box type validation will be performed automatically
     // when accessing INITIAL_PRICES and FINAL_PRICES arrays
 
     // verify time constraints, otherwise the result of `linearStepwise`
     // will be confusing:
     // if sale didn't start yet
-    if(now <= offset) {
+    if(t <= offset) {
       // return initial price
       return INITIAL_PRICES[boxType];
     }
     // if sale has already ended
-    if(now >= offset + LENGTH) {
+    if(t >= offset + LENGTH) {
       // return final price
       return FINAL_PRICES[boxType];
     }
@@ -970,7 +1031,7 @@ contract SilverSale is AccessControlLight {
       offset + LENGTH,
       FINAL_PRICES[boxType],
       PRICE_INCREASE_EVERY,
-      uint32(now)
+      t
     );
   }
 
@@ -1118,7 +1179,7 @@ contract SilverSale is AccessControlLight {
     // limit the quantity not to exceed 10% of hard cap in case
     // when it is already reached
     require(
-    // in any case we limit maximum buying amount not to exceed the hard cap
+      // in any case we limit maximum buying amount not to exceed the hard cap
       quantity <= BOXES_TO_SELL[boxType] && boxesSold[boxType] < BOXES_TO_SELL[boxType]
       // if it is reached we allow transactions not exceeding 10% of hard cap
       || quantity <= BOXES_TO_SELL[boxType] / 10
@@ -1184,8 +1245,11 @@ contract SilverSale is AccessControlLight {
     // player (sender) becomes known to the ref points tracker
     refPointsTracker.addKnownAddress(msg.sender);
 
-    // emit an event
+    // emit an player specific unbox event
     emit Unboxed(player, silver, gold);
+
+    // emit general purpose sale state changed event
+    emit SaleStateChanged(getState());
   }
 
   /**

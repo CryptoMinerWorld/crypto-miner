@@ -53,7 +53,7 @@ contract DutchAuctionHelper {
         uint224 status = DutchAuction(auction).getTokenSaleStatus(token, uint32(allAuctionTokens[i] >> 48));
         // drop `t` and `fee` from the packed structure
         // and copy it to a destination array - `ownerTokens`
-        ownerTokens[k++] = uint240(allAuctionTokens[i]) << 160 | uint160((status >> 160 ) << 96) | uint96(status >> 32);
+        ownerTokens[k++] = uint240(allAuctionTokens[i]) << 160 | uint160((status >> 160) << 96) | uint96(status >> 32);
       }
     }
 
@@ -114,7 +114,7 @@ contract DutchAuctionHelper {
         uint224 status = DutchAuction(auction).getTokenSaleStatus(token, uint8(allAuctionTokens[i] >> 32));
         // drop `t` and `fee` from the packed structure
         // and copy it to a destination array - `ownerTokens`
-        ownerTokens[k++] = uint200(allAuctionTokens[i]) << 160 | uint160((status >> 160 ) << 96) | uint96(status >> 32);
+        ownerTokens[k++] = uint200(allAuctionTokens[i]) << 160 | uint160((status >> 160) << 96) | uint96(status >> 32);
       }
     }
 

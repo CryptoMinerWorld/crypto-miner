@@ -447,10 +447,28 @@ contract('SilverSale', (accounts) => {
 		// instantiate silver sale smart contract
 		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
+		// enable all features and permissions required to enable buy
+		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await sale.updateFeatures(FEATURE_GET_ENABLED);
+		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
+
 		// obtain initial status values
 		const status0 = await sale.getStatus();
 		const boxesAvailable0 = await sale.boxesAvailableArray();
 		const boxesSold0 = await sale.boxesSoldArray();
+
+		// buy something
+		await sale.bulkBuy([0, 1, 2], [10, 10, 10], {from: player, value: 10 * INITIAL_PRICES.reduce((a, b) => a + b, 0)});
+
+		// obtain final status values
+		const status1 = await sale.getStatus();
+		const boxesAvailable1 = await sale.boxesAvailableArray();
+		const boxesSold1 = await sale.boxesSoldArray();
+
+		// extract useful data from sale statuses
+		// TODO: finish the test
 	});
 
 	it("buy: impossible to buy boxes before sale starts", async() => {
@@ -1091,7 +1109,7 @@ contract('SilverSale', (accounts) => {
 		// function to instantiate silver sale with the desired offset
 		const getSale = async(offset) => {
 			const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, now + offset);
-			// enable all features and permissions required to enable buy
+			// enable all features and permissions required to enable get
 			await sale.updateFeatures(FEATURE_GET_ENABLED);
 			await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 			await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
