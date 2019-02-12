@@ -27,7 +27,7 @@ import "./Fractions.sol";
  *          `p = p1`
  * @dev Following constraints when adding item for sale must be met:
  *      * t1 > t0: sale starts before it ends
- *      * p0 > p1: start price is higher then end price
+ *      * p0 > p1: start price is higher than end price
  * @dev Following constraints when buying item on sale must be met:
  *      * msg.value >= p: price constraint
  * @dev This implementation operates with an arbitrary ERC721 token as an item,

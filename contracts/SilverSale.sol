@@ -59,7 +59,7 @@ contract SilverSale is AccessControlLight {
    *      each time smart contact source code is changed and deployed
    * @dev To distinguish from other sale must be multiple of 0x10
    */
-  uint32 public constant SALE_VERSION = 0x20;
+  uint32 public constant SALE_VERSION = 0x30;
 
   /**
    * @dev Expected version of the deployed RefPointsTracker instance
@@ -85,6 +85,13 @@ contract SilverSale is AccessControlLight {
    *      call the `buy()` and `bulkBuy()` functions
    */
   uint32 public constant FEATURE_SALE_ENABLED = 0x00000001;
+
+  /**
+   * @notice Enables getting silver / gold for referral points
+   * @dev Feature FEATURE_GET_ENABLED must be enabled to
+   *      call the `get()` and `bulkGet()` functions
+   */
+  uint32 public constant FEATURE_GET_ENABLED = 0x00000002;
 
   /**
    * @notice Duration of the sale;
@@ -587,8 +594,8 @@ contract SilverSale is AccessControlLight {
    * @param quantity amount of boxes to buy
    */
   function get(uint8 boxType, uint16 quantity) public {
-    // verify that sale feature is enabled (sale is active)
-    require(isFeatureEnabled(FEATURE_SALE_ENABLED));
+    // verify that get feature is enabled
+    require(isFeatureEnabled(FEATURE_GET_ENABLED));
 
     // verify that the sale has already started
     require(now >= offset);
@@ -727,8 +734,8 @@ contract SilverSale is AccessControlLight {
    *      corresponding type to buy
    */
   function bulkGet(uint8[] boxTypes, uint16[] quantities) public {
-    // verify that sale feature is enabled (sale is active)
-    require(isFeatureEnabled(FEATURE_SALE_ENABLED));
+    // verify that get feature is enabled
+    require(isFeatureEnabled(FEATURE_GET_ENABLED));
 
     // verify that the sale has already started
     require(now >= offset);
