@@ -434,7 +434,7 @@ contract('SilverSale', (accounts) => {
 		assert.equal(REF_PRICES[0] + REF_PRICES[1] + REF_PRICES[2], await fn3([0, 1, 2]), "wrong bulk ref price for 0, 1, 2");
 	});
 
-	it("buy: verify sale status", async() => {
+	it("buy: verify sale state", async() => {
 		// define silver sale dependencies
 		const silver = await Silver.new();
 		const gold = await Gold.new();
@@ -448,27 +448,113 @@ contract('SilverSale', (accounts) => {
 		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
 
 		// enable all features and permissions required to enable buy
-		await sale.updateFeatures(FEATURE_SALE_ENABLED);
-		await sale.updateFeatures(FEATURE_GET_ENABLED);
+		await sale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 
 		// obtain initial status values
-		const status0 = await sale.getStatus();
+		const state0 = await sale.getState();
 		const boxesAvailable0 = await sale.boxesAvailableArray();
 		const boxesSold0 = await sale.boxesSoldArray();
 
+		// define a constant for a boxes to buy
+		const boxesToBuy = [10, 10, 10];
 		// buy something
-		await sale.bulkBuy([0, 1, 2], [10, 10, 10], {from: player, value: 10 * INITIAL_PRICES.reduce((a, b) => a + b, 0)});
+		await sale.bulkBuy([0, 1, 2], boxesToBuy, {from: player, value: 10 * INITIAL_PRICES.reduce((a, b) => a + b, 0)});
 
 		// obtain final status values
-		const status1 = await sale.getStatus();
+		const state1 = await sale.getState();
 		const boxesAvailable1 = await sale.boxesAvailableArray();
 		const boxesSold1 = await sale.boxesSoldArray();
 
-		// extract useful data from sale statuses
-		// TODO: finish the test
+		// auxiliary constant for bit arithmetic
+		const two = web3.toBigNumber(2);
+
+		// common function to extract header
+		const header = (state) => state.dividedToIntegerBy(two.pow(184)).modulo(256);
+		// define functions to extract general sale data
+		const start = (state) => state.dividedToIntegerBy(two.pow(128)).modulo(two.pow(32));
+		const end = (state) => state.dividedToIntegerBy(two.pow(96)).modulo(two.pow(32));
+		const now = (state) => state.dividedToIntegerBy(two.pow(64)).modulo(two.pow(32));
+		const nextPriceIncreaseTime = (state) => state.dividedToIntegerBy(two.pow(32)).modulo(two.pow(32));
+		const nextPriceIncreaseIn = (state) => state.modulo(two.pow(32));
+		// define functions to extract box-specific data
+		const boxType = (state) => state.dividedToIntegerBy(two.pow(176)).modulo(256);
+		const boxesAvailable = (state) => state.dividedToIntegerBy(two.pow(160)).modulo(65536);
+		const boxesSold = (state) => state.dividedToIntegerBy(two.pow(144)).modulo(65536);
+		const initiallyAvailable = (state) => state.dividedToIntegerBy(two.pow(128)).modulo(65536);
+		const currentPrice = (state) => state.dividedToIntegerBy(two.pow(64)).modulo(two.pow(64));
+		const nextPrice = (state) => state.modulo(two.pow(64));
+
+		// extract general sale date
+		const saleHeader0 = header(state0[BOX_TYPES.length]);
+		const saleHeader1 = header(state1[BOX_TYPES.length]);
+		const saleStart0 = start(state0[BOX_TYPES.length]);
+		const saleStart1 = start(state1[BOX_TYPES.length]);
+		const saleEnd0 = end(state0[BOX_TYPES.length]);
+		const saleEnd1 = end(state1[BOX_TYPES.length]);
+		const saleNow0 = now(state0[BOX_TYPES.length]);
+		const saleNow1 = now(state1[BOX_TYPES.length]);
+		const nextPriceIncreaseTime0 = nextPriceIncreaseTime(state0[BOX_TYPES.length]);
+		const nextPriceIncreaseTime1 = nextPriceIncreaseTime(state1[BOX_TYPES.length]);
+		const nextPriceIncreaseIn0 = nextPriceIncreaseIn(state0[BOX_TYPES.length]);
+		const nextPriceIncreaseIn1 = nextPriceIncreaseIn(state1[BOX_TYPES.length]);
+
+		// verify general sale data
+		assert.equal(2, saleHeader0, "wrong initial sale header 3");
+		assert.equal(2, saleHeader1, "wrong final sale header 3");
+		assert.equal(offset, saleStart0, "wrong initial sale start");
+		assert.equal(offset, saleStart1, "wrong final sale start");
+		assert.equal(offset + 1814400, saleEnd0, "wrong initial sale end");
+		assert.equal(offset + 1814400, saleEnd1, "wrong final sale end");
+		assert(saleNow0.gte(offset), "initial sale now is not within lower bound");
+		assert(saleNow1.gt(offset), "final sale now is not within lower bound");
+		assert(saleNow1.gt(saleNow0), "final sale now is not bigger than initial");
+		assert.equal(offset + 86400, nextPriceIncreaseTime0, "wrong initial next price increase time");
+		assert.equal(offset + 86400, nextPriceIncreaseTime1, "wrong final next price increase time");
+		assert.equal(offset + 86400 - saleNow0, nextPriceIncreaseIn0, "wrong initial next price increase in");
+		assert.equal(offset + 86400 - saleNow1, nextPriceIncreaseIn1, "wrong final next price increase in");
+
+		// extract and verify box-specific data from sale statuses
+		for(let i = 0; i < BOX_TYPES.length; i++) {
+			// extract the data
+			const header0 = header(state0[i]);
+			const header1 = header(state1[i]);
+			const boxType0 = boxType(state0[i]);
+			const boxType1 = boxType(state1[i]);
+			const available0 = boxesAvailable(state0[i]);
+			const available1 = boxesAvailable(state1[i]);
+			const sold0 = boxesSold(state0[i]);
+			const sold1 = boxesSold(state1[i]);
+			const initiallyAvailable0 = initiallyAvailable(state0[i]);
+			const initiallyAvailable1 = initiallyAvailable(state1[i]);
+			const currentPrice0 = currentPrice(state0[i]);
+			const currentPrice1 = currentPrice(state1[i]);
+			const nextPrice0 = nextPrice(state0[i]);
+			const nextPrice1 = nextPrice(state1[i]);
+
+			// verify the data
+			assert.equal(1, header0, "wrong initial sale header " + i);
+			assert.equal(1, header1, "wrong final sale header " + i);
+			assert.equal(i, boxType0, "wrong initial box type at " + i);
+			assert.equal(i, boxType1, "wrong final box type at " + i);
+			assert.equal(BOXES_TO_SELL[i], available0, "wrong initial boxes available at " + i);
+			assert.equal(BOXES_TO_SELL[i], boxesAvailable0[i], "wrong initial boxes available arr at " + i);
+			assert.equal(BOXES_TO_SELL[i] - boxesToBuy[i], available1, "wrong initial boxes available at " + i);
+			assert.equal(BOXES_TO_SELL[i] - boxesToBuy[i], boxesAvailable1[i], "wrong final boxes available arr at " + i);
+			assert.equal(0, sold0, "wrong initial boxes sold at " + i);
+			assert.equal(0, boxesSold0[i], "wrong initial boxes sold arr at " + i);
+			assert.equal(boxesToBuy[i], sold1, "wrong final boxes sold at " + i);
+			assert.equal(boxesToBuy[i], boxesSold1[i], "wrong final boxes sold arr at " + i);
+			assert.equal(BOXES_TO_SELL[i], initiallyAvailable0, "wrong initial BOXES_TO_SELL at " + i);
+			assert.equal(BOXES_TO_SELL[i], initiallyAvailable1, "wrong final BOXES_TO_SELL at " + i);
+			assert.equal(INITIAL_PRICES[i], currentPrice0, "wrong initial current price at " + i);
+			assert.equal(INITIAL_PRICES[i], currentPrice1, "wrong final current price at " + i);
+			assert.equal(INITIAL_PRICES[i] * 1.0125, nextPrice0, "wrong initial next price at " + i);
+			assert.equal(INITIAL_PRICES[i] * 1.0125, nextPrice1, "wrong final next price at " + i);
+		}
+
 	});
 
 	it("buy: impossible to buy boxes before sale starts", async() => {

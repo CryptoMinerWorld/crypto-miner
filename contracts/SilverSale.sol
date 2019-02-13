@@ -356,7 +356,7 @@ contract SilverSale is AccessControlLight {
     }
 
     // now add all general sale info into the last element of the array
-    result[n]   = uint192(0x02000000) << 184        // header - two (8 bits)
+    result[n]   = uint192(0x02000000) << 160        // header - two (8 bits)
                 // sparse 24 bits
                 | uint160(offset) << 128            // sale start (32 bits)
                 | uint128(saleEndTime()) << 96      // sale end (32 bits)
@@ -1243,7 +1243,7 @@ contract SilverSale is AccessControlLight {
     }
 
     // player (sender) becomes known to the ref points tracker
-    refPointsTracker.addKnownAddress(msg.sender);
+    refPointsTracker.addKnownAddress(player);
 
     // emit an player specific unbox event
     emit Unboxed(player, silver, gold);
