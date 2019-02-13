@@ -48,7 +48,7 @@ contract DutchAuctionHelper {
     // iterate over all the tokens on the auction
     for(uint80 i = 0; i < allAuctionTokens.length; i++) {
       // and if the token belongs to `owner` (previous ownership technically)
-      if(DutchAuction(auction).owners(token, uint32(allAuctionTokens[i] >> 48)) == owner) {
+      if(owner == address(0) || DutchAuction(auction).owners(token, uint32(allAuctionTokens[i] >> 48)) == owner) {
         // feed token packed structure with additional auction data
         uint224 status = DutchAuction(auction).getTokenSaleStatus(token, uint32(allAuctionTokens[i] >> 48));
         // drop `t` and `fee` from the packed structure
@@ -109,7 +109,7 @@ contract DutchAuctionHelper {
     // iterate over all the tokens on the auction
     for(uint80 i = 0; i < allAuctionTokens.length; i++) {
       // and if the token belongs to `owner` (previous ownership technically)
-      if(DutchAuction(auction).owners(token, uint8(allAuctionTokens[i] >> 32)) == owner) {
+      if(owner == address(0) || DutchAuction(auction).owners(token, uint8(allAuctionTokens[i] >> 32)) == owner) {
         // feed token packed structure with additional auction data
         uint224 status = DutchAuction(auction).getTokenSaleStatus(token, uint8(allAuctionTokens[i] >> 32));
         // drop `t` and `fee` from the packed structure
