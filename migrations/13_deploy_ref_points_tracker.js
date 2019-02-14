@@ -429,11 +429,10 @@ module.exports = async function(deployer, network, accounts) {
 	const knownAddresses = await tracker.getNumberOfKnownAddresses();
 
 	console.log("________________________________________________________________________");
-	console.log("tracker:         " + trackerAddress);
-	console.log("holders:         " + holders);
-	console.log("known addresses: " + knownAddresses);
-	console.log("issued total:    " + points_issued.reduce((a, b) => a + b, 0));
-	console.log("consumed total:  " + points_consumed.reduce((a, b) => a + b, 0));
-
+	console.log("tracker:         %s", trackerAddress);
+	console.log("holders:         %d", holders);
+	console.log("known addresses: %s", knownAddresses);
+	console.log("issued total:    %d", points_issued.reduce((a, b) => a + b, 0));
+	console.log("consumed total:  %d", points_consumed.reduce((a, b) => a + b, 0));
 };
 

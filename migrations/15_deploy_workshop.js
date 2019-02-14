@@ -37,33 +37,37 @@ module.exports = async function(deployer, network, accounts) {
 	// for test networks addresses are different
 	if(network !== "mainnet") {
 		gemAddress = "0x82FF6Bbd7B64f707e704034907d582C7B6E09d97";
-		silverAddress = "0x659b95eC3A948D25b091c871f51fbb9292Ed2452";
-		goldAddress = "0xAFCf531dBD2D976FB85a02E8356f55cc2cae36EA";
+		silverAddress = "0x901C62b3194C6c460B303537Ab3F39e80f933d48";
+		goldAddress = "0x6c4BC3179A2B28f641ae15DD55419240bB61e1A6";
 	}
 
 	// deploy workshop
 	await deployer.deploy(Workshop, gemAddress, silverAddress, goldAddress);
-
-	// get links to all the deployed instances
-	const gem = GemERC721.at(gemAddress);
-	const silver = SilverERC20.at(silverAddress);
-	const gold = GoldERC20.at(goldAddress);
 	const workshop = await Workshop.deployed();
 
-	// enable upgrades on the workshop
-	await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
+	// for test networks set all the permissions automatically
+	if(network !== "mainnet") {
+		// get links to all the deployed instances
+		const gem = GemERC721.at(gemAddress);
+		const silver = SilverERC20.at(silverAddress);
+		const gold = GoldERC20.at(goldAddress);
 
-	// grant a workshop ROLE_TOKEN_DESTROYER role on both silver and gold
-	await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
-	await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+		// enable upgrades on the workshop
+		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
 
-	// grant workshop permission to act as a level and grade provider on the gem
-	await gem.addOperator(workshop.address, ROLE_LEVEL_PROVIDER);
-	await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
+		// grant a workshop ROLE_TOKEN_DESTROYER role on both silver and gold
+		await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
+		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 
+		// grant workshop permission to act as a level and grade provider on the gem
+		await gem.addOperator(workshop.address, ROLE_LEVEL_PROVIDER);
+		await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
+	}
+
+	// deployment successful, print all relevant info to the log
 	console.log("________________________________________________________________________");
-	console.log("gem:      " + gemAddress);
-	console.log("silver:   " + silverAddress);
-	console.log("gold:     " + goldAddress);
-	console.log("workshop: " + workshop.address);
+	console.log("gem:      %s", gemAddress);
+	console.log("silver:   %s", silverAddress);
+	console.log("gold:     %s", goldAddress);
+	console.log("workshop: %s", workshop.address);
 };

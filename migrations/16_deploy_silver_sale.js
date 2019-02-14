@@ -40,36 +40,39 @@ module.exports = async function(deployer, network, accounts) {
 
 	// for test networks addresses are different
 	if(network !== "mainnet") {
-		refTrackerAddress = "0xB546bb315310A5dD7Dc813c7E15686C242b177D9";
-		silverAddress = "0x659b95eC3A948D25b091c871f51fbb9292Ed2452";
-		goldAddress = "0xAFCf531dBD2D976FB85a02E8356f55cc2cae36EA";
+		refTrackerAddress = "0x1F85f59eC94725E75B8CfDe50da3e47Bf3605B13";
+		silverAddress = "0x901C62b3194C6c460B303537Ab3F39e80f933d48";
+		goldAddress = "0x6c4BC3179A2B28f641ae15DD55419240bB61e1A6";
 		chest = "0xEE169DCC689D0C358F68Ce95DEf41646039aC190"; // Roman
 		beneficiary = "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"; // Basil
-		offset = new Date().getTime() / 1000 | 0;
+		offset = 1550152800; // 02/14/2019 @ 1:00pm UTC
 	}
 
 	// deploy silver sale
 	await deployer.deploy(SilverSale, silverAddress, goldAddress, refTrackerAddress, chest, beneficiary, offset);
-
-	// get links to all the deployed instances
-	const silver = SilverERC20.at(silverAddress);
-	const gold = GoldERC20.at(goldAddress);
-	const ref = Ref.at(refTrackerAddress);
 	const sale = await SilverSale.deployed();
 
-	// enable all features and permissions required to enable buy with referral points
-	await sale.updateFeatures(FEATURE_SALE_ENABLED);
-	await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-	await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-	await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
+	// for test networks set all the permissions automatically
+	if(network !== "mainnet") {
+		// get links to all the deployed instances
+		const silver = SilverERC20.at(silverAddress);
+		const gold = GoldERC20.at(goldAddress);
+		const ref = Ref.at(refTrackerAddress);
 
-	// deployment successful, print all relevant
+		// enable all features and permissions required to enable buy with referral points
+		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
+	}
+
+	// deployment successful, print all relevant info to the log
 	console.log("________________________________________________________________________");
-	console.log("silver:      " + silverAddress);
-	console.log("gold:        " + goldAddress);
-	console.log("ref tracker: " + refTrackerAddress);
-	console.log("chest:       " + chest);
-	console.log("beneficiary: " + beneficiary);
-	console.log("offset:      " + offset);
-	console.log("silver sale: " + sale.address);
+	console.log("silver:      %s", silverAddress);
+	console.log("gold:        %s", goldAddress);
+	console.log("ref tracker: %s", refTrackerAddress);
+	console.log("chest:       %s", chest);
+	console.log("beneficiary: %s", beneficiary);
+	console.log("offset:      %s (%d)", new Date(offset * 1000), offset);
+	console.log("silver sale: %s", sale.address);
 };

@@ -44,12 +44,12 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// total supply values (for mainnet should be zero)
-	const silverSupply = await silver.totalSupply();
-	const goldSupply = await gold.totalSupply();
+	const silverSupply = (await silver.totalSupply()).dividedToIntegerBy(await silver.ONE_UNIT());
+	const goldSupply = (await gold.totalSupply()).dividedToIntegerBy(await gold.ONE_UNIT());
 
 	console.log("________________________________________________________________________");
-	console.log("silver:        " + silverAddress);
-	console.log("gold:          " + goldAddress);
-	console.log("silver supply: " + silverSupply.toString(10));
-	console.log("gold supply:   " + goldSupply.toString(10));
+	console.log("silver:        %s", silverAddress);
+	console.log("gold:          %s", goldAddress);
+	console.log("silver supply: %d units", silverSupply.toNumber());
+	console.log("gold supply:   %d units", goldSupply.toNumber());
 };
