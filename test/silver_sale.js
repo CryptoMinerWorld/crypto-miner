@@ -509,8 +509,8 @@ contract('SilverSale', (accounts) => {
 		assert.equal(offset + 1814400, saleEnd0, "wrong initial sale end");
 		assert.equal(offset + 1814400, saleEnd1, "wrong final sale end");
 		assert(saleNow0.gte(offset), "initial sale now is not within lower bound");
-		assert(saleNow1.gt(offset), "final sale now is not within lower bound");
-		assert(saleNow1.gt(saleNow0), "final sale now is not bigger than initial");
+		assert(saleNow1.gte(offset), "final sale now is not within lower bound");
+		assert(saleNow1.gte(saleNow0), "final sale now is not bigger than initial");
 		assert.equal(offset + 86400, nextPriceIncreaseTime0, "wrong initial next price increase time");
 		assert.equal(offset + 86400, nextPriceIncreaseTime1, "wrong final next price increase time");
 		assert.equal(offset + 86400 - saleNow0, nextPriceIncreaseIn0, "wrong initial next price increase in");

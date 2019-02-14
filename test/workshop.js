@@ -201,8 +201,8 @@ contract('Workshop', (accounts) => {
 		await verifyGemProperties(gemIds, gem, levels, lvlUps, grades, upgrades);
 
 		// verify silver an gold was consumed correctly
-		assert.equal(10000, await silver.balanceOf(player), "wrong silver balance after bulk level up");
-		assert.equal(10000, await gold.balanceOf(player), "wrong gold balance after bulk upgrade");
+		assert.equal(10000 * 1000, await silver.balanceOf(player), "wrong silver balance after bulk level up");
+		assert.equal(10000 * 1000, await gold.balanceOf(player), "wrong gold balance after bulk upgrade");
 	});
 	it("upgrades: price calculation - general flow", async() => {
 		// construct workshop dependencies
@@ -369,8 +369,8 @@ contract('Workshop', (accounts) => {
 		// verify gem leveled up correctly
 		assert.equal(4, await gem.getLevel(1), "incorrect gem level after successful level up");
 		// verify silver was consumed
-		assert.equal(10135, await silver.balanceOf(player), "incorrect silver balance after successful level up");
-		assert.equal(10135, await silver.totalSupply(), "incorrect silver total supply after successful level up");
+		assert.equal(10135 * 1000, await silver.balanceOf(player), "incorrect silver balance after successful level up");
+		assert.equal(10135 * 1000, await silver.totalSupply(), "incorrect silver total supply after successful level up");
 
 		// verify grade value upgrade is still not available
 		await assertThrowsAsync(fn5);
@@ -385,8 +385,8 @@ contract('Workshop', (accounts) => {
 		// verify grade value is not zero and has been changed (not one)
 		assert((await gem.getGradeValue(1)).gt(1), "wrong grade value after upgrade");
 		// verify gold was consumed
-		assert.equal(1024, await gold.balanceOf(player), "incorrect gold balance after successful upgrade");
-		assert.equal(1024, await gold.totalSupply(), "incorrect gold total supply after successful upgrade");
+		assert.equal(1024 * 1000, await gold.balanceOf(player), "incorrect gold balance after successful upgrade");
+		assert.equal(1024 * 1000, await gold.totalSupply(), "incorrect gold total supply after successful upgrade");
 
 		// due to level and grade constraints leveling up and upgrading by 3 is impossible
 		await assertThrowsAsync(fn1);
@@ -401,8 +401,8 @@ contract('Workshop', (accounts) => {
 		assert.equal(5, await gem.getLevel(1), "incorrect gem level after second level up");
 		assert.equal(5, await gem.getGradeType(1), "incorrect gem grade type after second upgrade");
 		// verify silver and gold was consumed correctly
-		assert.equal(10000, await silver.balanceOf(player), "incorrect silver balance after second level up");
-		assert.equal(1016, await gold.balanceOf(player), "incorrect gold balance after second upgrade");
+		assert.equal(10000 * 1000, await silver.balanceOf(player), "incorrect silver balance after second level up");
+		assert.equal(1016 * 1000, await gold.balanceOf(player), "incorrect gold balance after second upgrade");
 
 		// verify grade value upgrade is still not available
 		await assertThrowsAsync(fn5);
@@ -416,8 +416,8 @@ contract('Workshop', (accounts) => {
 		assert.equal(5, await gem.getLevel(1), "incorrect gem level after third level up");
 		assert.equal(6, await gem.getGradeType(1), "incorrect gem grade type after third upgrade");
 		// verify silver and gold was consumed correctly
-		assert.equal(10000, await silver.balanceOf(player), "incorrect silver balance after third level up");
-		assert.equal(1000, await gold.balanceOf(player), "incorrect gold balance after third upgrade");
+		assert.equal(10000 * 1000, await silver.balanceOf(player), "incorrect silver balance after third level up");
+		assert.equal(1000 * 1000, await gold.balanceOf(player), "incorrect gold balance after third upgrade");
 
 		// save next gem grade value
 		const grade5 = (await gem.getGradeValue(1)).toNumber();
@@ -434,8 +434,8 @@ contract('Workshop', (accounts) => {
 		assert.equal(5, await gem.getLevel(1), "incorrect gem level after grade value upgrade");
 		assert.equal(6, await gem.getGradeType(1), "incorrect gem grade type after grade value upgrade");
 		// verify silver and gold was consumed correctly
-		assert.equal(10000, await silver.balanceOf(player), "incorrect silver balance after grade value upgrade");
-		assert.equal(984, await gold.balanceOf(player), "incorrect gold balance after grade value upgrade");
+		assert.equal(10000 * 1000, await silver.balanceOf(player), "incorrect silver balance after grade value upgrade");
+		assert.equal(984 * 1000, await gold.balanceOf(player), "incorrect gold balance after grade value upgrade");
 
 		// verify gem grade value increases only: grade2 < grade3 < grade4
 		assert(grade2 < grade3, "grade didn't increase! constraint grade2 < grade3 didn't meet");
@@ -508,7 +508,7 @@ contract('Workshop', (accounts) => {
 
 		// total upgrade price is 111 = 1 + 2 + 4 + 8 + 16 + 5 * 16
 		// verify amount of gold consumed
-		assert.equal(1000, await gold.balanceOf(player), "incorrect gold balance after several upgrades");
+		assert.equal(1000 * 1000, await gold.balanceOf(player), "incorrect gold balance after several upgrades");
 		// verify grade type has reached its maximum
 		assert.equal(6, await gem.getGradeType(1), "incorrect grade type after maximum grade upgrade");
 
@@ -630,8 +630,8 @@ contract('Workshop', (accounts) => {
 		await verifyGemProperties(gemIds, gem, levels, lvlUps, grades, upgrades);
 
 		// verify silver an gold was consumed correctly
-		assert.equal(10000, await silver.balanceOf(player), "wrong silver balance after bulk level up");
-		assert.equal(10000, await gold.balanceOf(player), "wrong gold balance after bulk upgrade");
+		assert.equal(10000 * 1000, await silver.balanceOf(player), "wrong silver balance after bulk level up");
+		assert.equal(10000 * 1000, await gold.balanceOf(player), "wrong gold balance after bulk upgrade");
 	});
 
 	it("upgrades: double spend protection", async() => {
@@ -701,11 +701,11 @@ contract('Workshop', (accounts) => {
 		await assertThrowsAsync(fn2);
 
 		// check silver and gold balances are as expected
-		assert.equal(10000, await silver.balanceOf(player1), "incorrect silver balance after upgrade (double spend)");
-		assert.equal(10000, await gold.balanceOf(player1), "incorrect gold balance after upgrade (double spend)");
+		assert.equal(10000 * 1000, await silver.balanceOf(player1), "incorrect silver balance after upgrade (double spend)");
+		assert.equal(10000 * 1000, await gold.balanceOf(player1), "incorrect gold balance after upgrade (double spend)");
 		// check silver and gold balances are as expected
-		assert.equal(10000, await silver.balanceOf(player2), "incorrect silver balance after bulk upgrade (double spend)");
-		assert.equal(10000, await gold.balanceOf(player2), "incorrect gold balance after bulk upgrade (double spend)");
+		assert.equal(10000 * 1000, await silver.balanceOf(player2), "incorrect silver balance after bulk upgrade (double spend)");
+		assert.equal(10000 * 1000, await gold.balanceOf(player2), "incorrect gold balance after bulk upgrade (double spend)");
 	});
 });
 

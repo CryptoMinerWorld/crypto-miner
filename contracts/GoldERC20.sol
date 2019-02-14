@@ -26,7 +26,7 @@ contract GoldERC20 is AccessControlLight {
    *      each time smart contact source code is changed and deployed
    * @dev To distinguish from other tokens must be multiple of 0x100
    */
-  uint32 public constant TOKEN_VERSION = 0x200;
+  uint32 public constant TOKEN_VERSION = 0x300;
 
   /**
    * @notice ERC20 symbol of that token (short name)
@@ -42,8 +42,7 @@ contract GoldERC20 is AccessControlLight {
    * @notice ERC20 decimals (number of digits to draw after the dot
    *    in the UI applications (like MetaMask, other wallets and so on)
    */
-  // TODO: do we want to make token divisible (increase decimals)?
-  uint8 public constant decimals = 0;
+  uint8 public constant decimals = 3;
 
   /**
    * @notice Based on the value of decimals above, one token unit
@@ -379,6 +378,9 @@ contract GoldERC20 is AccessControlLight {
     // calculate native value, taking into account `decimals`
     uint256 value = _value * ONE_UNIT;
 
+    // arithmetic overflow and non-zero value check
+    require(value > _value);
+
     // delegate call to native `mintNative`
     mintNative(_to, value);
   }
@@ -426,6 +428,9 @@ contract GoldERC20 is AccessControlLight {
   function burn(address _from, uint256 _value) public {
     // calculate native value, taking into account `decimals`
     uint256 value = _value * ONE_UNIT;
+
+    // arithmetic overflow and non-zero value check
+    require(value > _value);
 
     // delegate call to native `burnNative`
     burnNative(_from, value);

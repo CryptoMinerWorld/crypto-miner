@@ -8,13 +8,13 @@ const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
 const Gold = artifacts.require("./GoldERC20.sol");
 
 contract('GoldERC20: Gas Usage', (accounts) => {
-	it("gas: deploying GoldERC20 requires 997237 gas", async() => {
+	it("gas: deploying GoldERC20 requires 1048208 gas", async() => {
 		const tk = await Gold.new();
 		const txHash = tk.transactionHash;
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(997237, gasUsed, "deploying GoldERC20 gas usage mismatch: " + gasUsed);
+		assertEqual(1048208, gasUsed, "deploying GoldERC20 gas usage mismatch: " + gasUsed);
 	});
 	it("gas: minting some tokens requires 68429 gas", async() => {
 		const tk = await Gold.new();

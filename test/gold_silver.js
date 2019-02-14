@@ -54,7 +54,7 @@ contract('GoldERC20', (accounts) => {
 		const player = accounts[2];
 
 		// function to mint tokens
-		const fn = async() => await tk.mint(player, 1, {from: creator});
+		const fn = async() => await tk.mintNative(player, 1, {from: creator});
 
 		// originally creator doesn't have required permission
 		await assertThrowsAsync(fn);
@@ -83,9 +83,6 @@ contract('GoldERC20', (accounts) => {
 		// mint a token to be burnt first
 		await tk.mint(player, 1);
 
-		// verify initial token balance is correct
-		assert.equal(1, await tk.balanceOf(player), "incorrect initial token balance");
-
 		// originally destroyer doesn't have required permission
 		await assertThrowsAsync(fn);
 
@@ -110,7 +107,7 @@ contract('GoldERC20', (accounts) => {
 
 		// mint some tokens
 		const amt = rnd();
-		await tk.mint(player1, amt);
+		await tk.mintNative(player1, amt);
 
 		// transfer functions
 		const fn1 = async() => await tk.transfer(player2, amt, {from: player1});
@@ -149,7 +146,7 @@ contract('GoldERC20', (accounts) => {
 
 		// mint some tokens
 		const amt = rnd();
-		await tk.mint(player1, amt);
+		await tk.mintNative(player1, amt);
 
 		// grant an exchange permissions to perform transfers on behalf
 		await tk.approve(exchange, amt * 10, {from: player1});
@@ -188,9 +185,9 @@ contract('GoldERC20', (accounts) => {
 		const amt = rnd();
 
 		// functions to mint and burn tokens
-		const mintTo = async(to, amt) => await tk.mint(to, amt, {from: creator});
+		const mintTo = async(to, amt) => await tk.mintNative(to, amt, {from: creator});
 		const mint = async() => await mintTo(player, amt);
-		const burnFrom = async(from, amt) => await tk.burn(from, amt, {from: destroyer});
+		const burnFrom = async(from, amt) => await tk.burnNative(from, amt, {from: destroyer});
 		const burn = async() => await burnFrom(player, amt);
 
 		// initial token balance is zero
@@ -247,17 +244,21 @@ contract('GoldERC20', (accounts) => {
 		const player2 = accounts[4];
 
 		// functions to mint tokens
-		const mint1 = async() => await tk.mint(player1, big_max);
-		const mint2 = async() => await tk.mint(player2, big_max);
+		const mint0 = async() => await tk.mint(player1, big_max);
+		const mint1 = async() => await tk.mintNative(player1, big_max);
+		const mint2 = async() => await tk.mintNative(player2, big_max);
 
 		// functions to burn tokens
-		const burn1 = async() => await tk.burn(player1, big_max);
-		const burn2 = async() => await tk.burn(player2, big_max);
+		const burn0 = async() => await tk.burn(player1, big_max);
+		const burn1 = async() => await tk.burnNative(player1, big_max);
+		const burn2 = async() => await tk.burnNative(player2, big_max);
 
 		// grant creator and destroyer permission required
 		await tk.updateRole(creator, ROLE_TOKEN_CREATOR);
 		await tk.updateRole(destroyer, ROLE_TOKEN_DESTROYER);
 
+		// mint0 always overflows
+		await assertThrowsAsync(mint0);
 		// mint maximum value of tokens
 		await mint1();
 		// impossible to mint more tokens to the same player:
@@ -265,6 +266,8 @@ contract('GoldERC20', (accounts) => {
 		// impossible to mint more tokens to any other player:
 		await assertThrowsAsync(mint2);
 
+		// burn0 always overflows
+		await assertThrowsAsync(burn0);
 		// burn the tokens
 		await burn1();
 		// now we can mint them to some other player
@@ -291,7 +294,7 @@ contract('GoldERC20', (accounts) => {
 
 		// mint some tokens
 		const amt = rnd();
-		await tk.mint(player1, amt);
+		await tk.mintNative(player1, amt);
 
 		// transfer functions: player1 -> player2 and player2 -> player1
 		const fn1 = async() => await tk.transfer(player2, amt, {from: player1});
@@ -331,7 +334,7 @@ contract('GoldERC20', (accounts) => {
 
 		// mint some tokens
 		const amt = rnd();
-		await tk.mint(player1, amt);
+		await tk.mintNative(player1, amt);
 
 		// transfer functions: player1 -> player2 and player2 -> player1
 		const t1 = async() => await tk.transferFrom(player1, player2, amt, {from: exchange});
@@ -375,7 +378,7 @@ contract('GoldERC20', (accounts) => {
 		const player2 = accounts[2];
 
 		// mint some tokens to the player
-		await tk.mint(player1, 20);
+		await tk.mintNative(player1, 20);
 
 		// define functions
 		const safe = async(to) => await tk.transfer(to, 1, {from: player1});
@@ -424,7 +427,7 @@ contract('GoldERC20', (accounts) => {
 
 		// mint maximum tokens to player 1
 		const amt = rnd();
-		await tk.mint(player1, rnd_max);
+		await tk.mintNative(player1, rnd_max);
 
 		// verify initial amounts
 		assert.equal(rnd_max, await tk.balanceOf(player1), "wrong player 1 initial balance");
@@ -463,7 +466,7 @@ contract('GoldERC20', (accounts) => {
 
 		// mint maximum tokens to player 1
 		const amt = rnd();
-		await tk.mint(player1, rnd_max);
+		await tk.mintNative(player1, rnd_max);
 
 		// approve all the gems
 		await tk.approve(exchange, rnd_max + 2, {from: player1});
@@ -510,7 +513,7 @@ contract('GoldERC20', (accounts) => {
 		const player2 = accounts[2];
 
 		// mint maximum tokens to player 1
-		await tk.mint(player1, rnd_max);
+		await tk.mintNative(player1, rnd_max);
 
 		// token transfer function
 		const fn = async(to, amt) => await tk.transfer(to, amt, {from: player1});

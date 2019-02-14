@@ -71,13 +71,13 @@ contract SilverSale is AccessControlLight {
    * @dev Expected version of the deployed SilverERC20 instance
    *      this smart contract is designed to work with
    */
-  uint32 public constant SILVER_TOKEN_VERSION_REQUIRED = 0x20;
+  uint32 public constant SILVER_TOKEN_VERSION_REQUIRED = 0x30;
 
   /**
    * @dev Expected version of the deployed GoldERC20 instance
    *      this smart contract is designed to work with
    */
-  uint32 public constant GOLD_TOKEN_VERSION_REQUIRED = 0x200;
+  uint32 public constant GOLD_TOKEN_VERSION_REQUIRED = 0x300;
 
   /**
    * @notice Enables the silver / gold sale

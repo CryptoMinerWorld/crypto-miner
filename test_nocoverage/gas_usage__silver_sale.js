@@ -39,7 +39,7 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		assertEqual(4232150, gasUsed, "deploying SilverSale gas usage mismatch: " + gasUsed);
 	});
 
-	it("gas: buying one Silver Box requires 182207 gas", async() => {
+	it("gas: buying one Silver Box requires 217582 gas", async() => {
 		const boxType = 0;
 		const qty = 1;
 
@@ -58,9 +58,9 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(182207, gasUsed, "buying one Silver Box gas usage mismatch: " + gasUsed);
+		assertEqual(217582, gasUsed, "buying one Silver Box gas usage mismatch: " + gasUsed);
 	});
-	it("gas: buying two Silver Boxes requires 184685 gas", async() => {
+	it("gas: buying two Silver Boxes requires 220060 gas", async() => {
 		const boxType = 0;
 		const qty = 2;
 
@@ -79,7 +79,7 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(184685, gasUsed, "buying two Silver Boxes gas usage mismatch: " + gasUsed);
+		assertEqual(220060, gasUsed, "buying two Silver Boxes gas usage mismatch: " + gasUsed);
 	});
 	it("gas: buying 500 Silver Boxes requires 1418793 gas", async() => {
 		const boxType = 0;
@@ -103,7 +103,7 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		assertEqual(1418793, gasUsed, "buying 500 Silver Boxes gas usage mismatch: " + gasUsed);
 	});
 
-	it("gas: buying one Rotund Silver Box requires 182721 gas", async() => {
+	it("gas: buying one Rotund Silver Box requires 218096 gas", async() => {
 		const boxType = 1;
 		const qty = 1;
 
@@ -122,9 +122,9 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(182721, gasUsed, "buying one Rotund Silver Box gas usage mismatch: " + gasUsed);
+		assertEqual(218096, gasUsed, "buying one Rotund Silver Box gas usage mismatch: " + gasUsed);
 	});
-	it("gas: buying two Rotund Silver Box requires 185349 gas", async() => {
+	it("gas: buying two Rotund Silver Box requires 220724 gas", async() => {
 		const boxType = 1;
 		const qty = 2;
 
@@ -143,7 +143,7 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(185349, gasUsed, "buying two Rotund Silver Boxes gas usage mismatch: " + gasUsed);
+		assertEqual(220724, gasUsed, "buying two Rotund Silver Boxes gas usage mismatch: " + gasUsed);
 	});
 	it("gas: buying 300 Rotund Silver Box requires 968557 gas", async() => {
 		const boxType = 1;
@@ -167,7 +167,7 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		assertEqual(968557, gasUsed, "buying 300 Rotund Silver Boxes gas usage mismatch: " + gasUsed);
 	});
 
-	it("gas: buying one Goldish Silver Box requires 182859/230305 gas", async() => {
+	it("gas: buying one Goldish Silver Box requires 182859/265772 gas", async() => {
 		const boxType = 2;
 		const qty = 1;
 
@@ -186,9 +186,9 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertOneOf(182859, 230305, gasUsed, "buying one Goldish Silver Box gas usage mismatch: " + gasUsed);
+		assertOneOf(182859, 265772, gasUsed, "buying one Goldish Silver Box gas usage mismatch: " + gasUsed);
 	});
-	it("gas: buying two Goldish Silver Box requires 185625/233071 gas", async() => {
+	it("gas: buying two Goldish Silver Box requires 221000/268538 gas", async() => {
 		const boxType = 2;
 		const qty = 2;
 
@@ -207,9 +207,9 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertOneOf(185625, 233071, gasUsed, "buying two Goldish Silver Boxes gas usage mismatch: " + gasUsed);
+		assertOneOf(221000, 268538, gasUsed, "buying two Goldish Silver Boxes gas usage mismatch: " + gasUsed);
 	});
-	it("gas: buying 150 Goldish Silver Box requires 643537 gas", async() => {
+	it("gas: buying 150 Goldish Silver Box requires 679094 gas", async() => {
 		const boxType = 2;
 		const qty = 150;
 
@@ -228,7 +228,7 @@ contract('SilverSale: Gas Usage', (accounts) => {
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		const gasUsed = (await sale.buy(boxType, qty, {from: player, value: qty * INITIAL_PRICES[boxType]})).receipt.gasUsed;
-		assertEqual(643537, gasUsed, "buying 150 Goldish Silver Boxes gas usage mismatch: " + gasUsed);
+		assertEqual(679094, gasUsed, "buying 150 Goldish Silver Boxes gas usage mismatch: " + gasUsed);
 	});
 });
 
