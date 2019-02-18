@@ -36,7 +36,31 @@ contract MintHelper is AccessControl {
     require(tokenInstance.supportsInterface(0x5b5e139f)); // ERC721 metadata
   }
 
-  // call this function to create next auction gem
+  /**
+   * @notice A function to create next auction gem
+   * @param color an integer, defining the gem color:
+   *      [1] Garnet (January)
+   *      [2] Amethyst (February)
+   *      [3] Aquamarine (March)
+   *      [4] Diamond (April)
+   *      [5] Emerald (May)
+   *      [6] Pearl (June)
+   *      [7] Ruby (July)
+   *      [8] Peridot (August)
+   *      [9] Sapphire (September)
+   *      [10] Opal (October)
+   *      [11] Topaz (November)
+   *      [12] Turquoise (December)
+   * @param level an integer, defining gem level in range [1, 5]
+   * @param gradeType an integer, defining gem grade type:
+   *      [1] D
+   *      [2] C
+   *      [3] B
+   *      [4] A
+   *      [5] AA
+   *      [6] AAA
+   * @param gradeValue an integer, defning grade value in range [0, 1000000)
+   */
   function mint(uint8 color, uint8 level, uint8 gradeType, uint24 gradeValue) public {
     // check sender's permission
     require(__isSenderInRole(MINT_OPERATOR));
