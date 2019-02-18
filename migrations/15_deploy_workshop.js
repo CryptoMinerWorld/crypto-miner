@@ -60,8 +60,7 @@ module.exports = async function(deployer, network, accounts) {
 		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 
 		// grant workshop permission to act as a level and grade provider on the gem
-		await gem.addOperator(workshop.address, ROLE_LEVEL_PROVIDER);
-		await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
+		await gem.addOperator(workshop.address, ROLE_LEVEL_PROVIDER | ROLE_GRADE_PROVIDER);
 	}
 
 	// deployment successful, print all relevant info to the log
