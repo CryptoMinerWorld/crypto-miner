@@ -31,8 +31,8 @@ module.exports = async function(deployer, network, accounts) {
 	// deployed gem instance address
 	let gemAddress = "0xeAe9d154dA7a1cD05076dB1B83233f3213a95e4F";
 	// deployed silver and gold smart contract addresses
-	let silverAddress = "";
-	let goldAddress = "";
+	let silverAddress = "0x5eAb0Ea7AC3cC27f785D8e3fABA56b034aa56208";
+	let goldAddress = "0x4e55C62f4e2ca19B22c2156273F5900e124B9acD";
 
 	// for test networks addresses are different
 	if(network !== "mainnet") {

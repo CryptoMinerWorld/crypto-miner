@@ -30,11 +30,11 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// dependencies: smart contract addresses and external addresses
-	let refTrackerAddress = "";
-	let silverAddress = "";
-	let goldAddress = "";
-	let chest = "";
-	let beneficiary = "";
+	let refTrackerAddress = "0xD06d436763a3207a24A3EE393541f924d9b323fd";
+	let silverAddress = "0x5eAb0Ea7AC3cC27f785D8e3fABA56b034aa56208";
+	let goldAddress = "0x4e55C62f4e2ca19B22c2156273F5900e124B9acD";
+	let chest = "0xC352f692F55dEf49f0B736Ec1F7CA0F862eabD23"; // MainNet Founder's Chest (MultiSig)
+	let beneficiary = "0xe0123204873fD29A29aEf3f99FaF1b1c45fe3B1E"; // MainNet MultiSig
 	let offset = 1550772000; // 02/21/2019 @ 6:00pm UTC
 
 
