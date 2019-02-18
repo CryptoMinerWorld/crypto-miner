@@ -1,4 +1,5 @@
 # Gems in a Existence
+`// 4916 gems`
 
 ## Presale 0 – Mainnet Testing
 `[0x10001 - 0x10013] // [65537 - 65555] // 19 gems`
@@ -10,10 +11,10 @@
 `[0x1101 - 0x113F] // [4353 - 4415] // 63 gems`
 
 ## Presale 2
-`[0x116A9 - 0x1228D+] // [71337 - 74381+] // 3044+ gems`
+`[0x116A9 - 0x12290] // [71337 - 74384] // 3048 gems`
 
 ### Free Gems in Presale 2
-`[0x1140 - 0x117C+] // [4416 - 4476+] // 61+ gems`
+`[0x1140 - 0x117F] // [4416 - 4479] // 64 gems`
 
-## Dutch Auction Gems
-`[0x10014]`
+## Manually Minted (Special Gems)
+`[0xF001 - 0xF012] // [61441 - 61458] // 18 gems`
