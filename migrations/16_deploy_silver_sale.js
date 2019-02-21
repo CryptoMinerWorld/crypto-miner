@@ -1,5 +1,7 @@
 // Enables the silver / gold sale
 const FEATURE_SALE_ENABLED = 0x00000001;
+// Enables getting silver / gold for referral points
+const FEATURE_GET_ENABLED = 0x00000002;
 // Token creator is responsible for creating tokens
 const ROLE_TOKEN_CREATOR = 0x00000001;
 // Allows issuing referral points
@@ -60,7 +62,7 @@ module.exports = async function(deployer, network, accounts) {
 		const ref = Ref.at(refTrackerAddress);
 
 		// enable all features and permissions required to enable buy with referral points
-		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await sale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
