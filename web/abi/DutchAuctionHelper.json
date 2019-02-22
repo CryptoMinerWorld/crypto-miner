@@ -54,8 +54,109 @@
       "payable": false,
       "stateMutability": "view",
       "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "auction",
+          "type": "address"
+        },
+        {
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "name": "tokenId",
+          "type": "uint32"
+        }
+      ],
+      "name": "getTokenSaleStatus",
+      "outputs": [
+        {
+          "name": "t0",
+          "type": "uint32"
+        },
+        {
+          "name": "t1",
+          "type": "uint32"
+        },
+        {
+          "name": "t",
+          "type": "uint32"
+        },
+        {
+          "name": "p0",
+          "type": "uint128"
+        },
+        {
+          "name": "p1",
+          "type": "uint128"
+        },
+        {
+          "name": "p",
+          "type": "uint128"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_t0",
+          "type": "uint32"
+        },
+        {
+          "name": "_t1",
+          "type": "uint32"
+        },
+        {
+          "name": "_t",
+          "type": "uint32"
+        },
+        {
+          "name": "_p0",
+          "type": "uint128"
+        },
+        {
+          "name": "_p1",
+          "type": "uint128"
+        }
+      ],
+      "name": "price",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint128"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "p",
+          "type": "uint128"
+        }
+      ],
+      "name": "ceil1000000000",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint128"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-02-10T16:52:56.874Z"
+  "updatedAt": "2019-02-22T07:21:25.188Z"
 }

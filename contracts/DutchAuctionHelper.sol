@@ -17,6 +17,9 @@ import "./CountryERC721.sol";
  * @author Basil Gorin
  */
 contract DutchAuctionHelper {
+  /// @dev 1 Gwei = 1000000000
+  uint80 private constant GWEI = 1000000000;
+
   /**
    * @dev Similarly to `GemERC721.getPackedCollection`, returns packed collection
    *      of tokens for a particular owner
@@ -140,4 +143,107 @@ contract DutchAuctionHelper {
     return result;
   }
 
+
+  /**
+   * @dev Returns item sale status parameters as a tupple of six elements
+   * @dev Arithmetic overflow fixed version of `DutchAuction.getTokenSaleStatus` function
+   * @dev The data returned:
+   *      [0] t0  auction start time (unix timestamp)
+   *      [1] t1  auction end time (unix timestamp)
+   *      [2] t   current time (unix timestamp)
+   *      [3] p0  starting price (wei)
+   *      [4] p1  final price (wei)
+   *      [5] p   current price (wei)
+   * @param auction DutchAuction instance, providing `items(address, uint32)` interface
+   * @param token ERC721 deployed instance address
+   * @param tokenId id of the item
+   * @return a tuple containing all auction status for a particular ERC721 item
+   */
+  function getTokenSaleStatus(
+    address auction,
+    address token,
+    uint32 tokenId
+  ) constant public returns(
+    uint32 t0,
+    uint32 t1,
+    uint32 t,
+    uint128 p0,
+    uint128 p1,
+    uint128 p
+  ) {
+    // get the link to deployed DutchAuction instance
+    DutchAuction auctionInstance = DutchAuction(auction);
+
+    // check if token is on sale,
+    if(!auctionInstance.isTokenOnSale(token, tokenId)) {
+      // return zeros if token is not on sale
+      return (0, 0, 0, 0, 0, 0);
+    }
+
+    // read item into memory from the auction
+    // prepare the variables to be used in tuple
+    // p0 and p1 are already defined in function return declaration
+    // while _t0 and _t1 are new 48 bits temporary integers
+    uint48 _t0;
+    uint48 _t1;
+    // delegate call to `auctionInstance.items`
+    (_t0, _t1, p0, p1) = auctionInstance.items(token, tokenId);
+
+    // truncate t0 and t1 to fit into 32 bits
+    t0 = uint32(_t0);
+    t1 = uint32(_t1);
+
+    // calculate and assign the rest of the data required
+    t = uint32(now);
+    p = price(t0, t1, t, p0, p1); // in wei
+
+    // return the data calculated as a tuple
+    return (t0, t1, t, p0, p1, p);
+  }
+
+  /**
+   * @dev Calculates auction price in the given moment for the sale parameters given.
+   * @dev Doesn't check the `_t0 < _t1` and `_p0 > _p1` constraints.
+   *      It is in caller responsibility to ensure them otherwise result is not correct.
+   * @dev The result is rounded down to be a multiple of 1 Gwei
+   * @param _t0 auction start time
+   * @param _t1 auction end time
+   * @param _t time of interest / time to query the price for
+   * @param _p0 initial price
+   * @param _p1 final price
+   * @return price in time `t` according to formula `p = p0 - (t - t0) * (p0 - p1) / (t1 - t0)`
+   */
+  function price(uint32 _t0, uint32 _t1, uint32 _t, uint128 _p0, uint128 _p1) public pure returns(uint128) {
+    // if current time `t` is lower then start time `t0`
+    if(_t < _t0) {
+      // return initial price `p0`
+      return _p0;
+    }
+    // if current time `t` is greater then end time `t1`
+    if(_t > _t1) {
+      // return the final price `p0`
+      return _p1;
+    }
+
+    // otherwise calculate the price
+
+    // convert all numbers into uint256 to get rid of possible arithmetic overflow
+    uint256 t0 = uint256(_t0);
+    uint256 t1 = uint256(_t1);
+    uint256 t  = uint256(_t);
+    uint256 p0 = uint256(_p0);
+    uint256 p1 = uint256(_p1);
+
+    // apply formula, round down to be multiple of 1 Gwei and return
+    return ceil1000000000(uint128(p0 - (t - t0) * (p0 - p1) / (t1 - t0)));
+  }
+
+  /**
+   * @dev Auxiliary function to round down price to be multiple of 1 Gwei (1000000000)
+   * @param p price in wei
+   * @return price in wei, rounded down to be multiple of 1 Gwei (1000000000)
+   */
+  function ceil1000000000(uint128 p) public pure returns(uint128) {
+    return p / GWEI * GWEI;
+  }
 }
