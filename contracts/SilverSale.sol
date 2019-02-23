@@ -258,6 +258,7 @@ contract SilverSale is AccessControlLight {
 
   /**
    * @dev Creates a Silver/Gold Sale instance, binding it to
+   *      referral points tracker, chest, beneficiary,
    *      silver (ERC20 token) and gold (ERC20 token) instances specified
    * @param _silver address of the deployed SilverERC20 instance with
    *      the `TOKEN_VERSION` equal to `SILVER_TOKEN_VERSION_REQUIRED`
@@ -301,8 +302,6 @@ contract SilverSale is AccessControlLight {
     offset = _offset;
 
     // verify we do not deploy already ended sale
-    // adding one day to the sale length since
-    // final price will be active during last day
     require(saleEndsIn() > 0);
   }
 
@@ -946,7 +945,10 @@ contract SilverSale is AccessControlLight {
    * @return sale end date and time as a unix timestamp
    */
   function saleEndTime() public constant returns(uint32) {
-    // calculate the result based on `offset`, `LENGTH` and return
+    // calculate the result based on `offset`, `LENGTH`,
+    // adding one day to the sale length since
+    // final price will be active during last day
+    // and return
     return offset + LENGTH + 1 days;
   }
 

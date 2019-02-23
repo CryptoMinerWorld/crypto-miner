@@ -16,6 +16,7 @@ Silver:             0x5eAb0Ea7AC3cC27f785D8e3fABA56b034aa56208
 Gold:               0x4e55C62f4e2ca19B22c2156273F5900e124B9acD
 Workshop:           0x0B6AF5187a37EE7C183C1803EB27e9cF6044519F
 SilverSale:         0x8D060AB4F2543A3b785Ba724bCfC2cEE47031E09
+SilverCoupons:
 
 
 Rinkeby:
@@ -36,6 +37,7 @@ Silver:             0x901C62b3194C6c460B303537Ab3F39e80f933d48
 Gold:               0x6c4BC3179A2B28f641ae15DD55419240bB61e1A6
 Workshop:           0x1BD8308642609A1302Ce5B6Eb3ab384C200032FE
 SilverSale:         0xD40bad88C363A123ca14FA7376Ce836Cf015fbbf
+SilverCoupons:      0x6D4B36e347C271432b3F338f2e08De5d638acf62
 
 
 Ropsten:
@@ -56,6 +58,7 @@ Silver:
 Gold:
 Workshop:
 SilverSale:
+SilverCoupons:
 
 
 Common Addresses (EOAs):
