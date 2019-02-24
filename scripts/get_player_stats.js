@@ -13,7 +13,7 @@ module.exports = async function(deployer, network, accounts) {
 	let sale2Address = "0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1"; // mainnet
 
 	const sale2Instance = Sale2.at(sale2Address);
-	console.log(`address, gems, geodes, ref points, refs used, refs available`);
+	console.log("address,gems,geodes,ref points,refs used,refs available");
 	const uint64 = web3.toBigNumber("0x10000000000000000");
 	let i = 0, addr;
 	while((addr = await sale2Instance.referralPointsHolders(i++)) != '0x') {
@@ -23,6 +23,6 @@ module.exports = async function(deployer, network, accounts) {
 		const usedPoints = totalPoints.minus(availablePoints);
 		const geodes = packed.dividedToIntegerBy(uint64).modulo(0x10000);
 		const gems = packed.dividedToIntegerBy(uint64).dividedToIntegerBy(0x10000);
-		console.log(`${addr}, ${gems}, ${geodes}, ${totalPoints}, ${usedPoints}, ${availablePoints}`);
+		console.log(`${addr},${gems},${geodes},${totalPoints},${usedPoints},${availablePoints}`);
 	}
 };

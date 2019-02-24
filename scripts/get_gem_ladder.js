@@ -20,7 +20,7 @@ module.exports = async function(deployer, network, accounts) {
 	const n = await tk.totalSupply();
 
 	// print CSV header
-	console.log(`i, id, color, level, grade type, grade value, owner`);
+	console.log("i,id,color,level,grade type,grade value,owner");
 
 	// iterate over all the existing gems
 	for(let i = 0; i < n; i++) {
@@ -40,6 +40,6 @@ module.exports = async function(deployer, network, accounts) {
 		const owner = await tk.ownerOf(id);
 
 		// log the data
-		console.log(`${i + 1}, ${id}, ${color}, ${level}, ${gradeType}, ${gradeValue}, ${owner}`);
+		console.log(`${i + 1},${id},${color},${level},${gradeType},${gradeValue},${owner}`);
 	}
 };
