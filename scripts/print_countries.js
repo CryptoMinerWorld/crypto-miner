@@ -1,4 +1,5 @@
-const Token = artifacts.require("./CountryERC721");
+// Country Extension extends Country ERC721 smart contract
+const CountryExt = artifacts.require("./CountryExt");
 
 const COUNTRY_NAMES = [
 	"Russia",
@@ -196,6 +197,19 @@ const COUNTRY_NAMES = [
 // using file system to create raw csv data file
 const fs = require('fs');
 
+/**
+ * Extend String prototype by adding toAddress function
+ * @return {String} a valid address string of 0x01234567890ABCDEF01234567890ABCDEF012345
+ */
+web3.BigNumber.prototype.toAddress = function() {
+	let s = this.toString(16);
+	while(s.length < 40) {
+		s = `0${s}`;
+	}
+	return `0x${s}`;
+};
+
+// script reads and prints country data
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
 		console.log("[print minted countries] test network - skipping the migration script");
@@ -206,33 +220,51 @@ module.exports = async function(deployer, network, accounts) {
 		return;
 	}
 
-	// deployed token smart contract addresses
-	let tokenAddress = "0xE49F05Fd6DEc46660221a1C1255FfE335bc7fa7a"; // MainNet token address
+	// deployed country extension addresses
+	let extensionAddress = "0xE437EA3dE16503f3d32D0Eb93c872d6C142A1944"; // MainNet extension address
 
 	// bind token instance
-	const tk = Token.at(tokenAddress);
+	const extension = CountryExt.at(extensionAddress);
 
-	// array to accumualte
+	// array to accumulate country data
 	const countries = [];
 
 	// print CSV header
-	console.log("country_id,country_name,owner");
+	console.log("country_id,country_name,plots,tax,owner");
 
 	// print country owners cycle
-	for(let i = 0; i < await tk.getNumberOfCountries(); i++) {
-		const tokenId = i + 1;
-		countries.push(await tk.ownerOf(tokenId));
-		console.log("%d,%s,%s", tokenId, COUNTRY_NAMES[i], countries[i]);
+	const r = await extension.getAllCountriesPacked();
+	const two = web3.toBigNumber(2);
+	for(let i = 0; i < r.length; i++) {
+		const countryId = i + 1;
+		const countryName = COUNTRY_NAMES[i];
+		const plots = r[i].dividedToIntegerBy(two.pow(176));
+		const taxN = r[i].dividedToIntegerBy(two.pow(168)).modulo(256);
+		const taxD = r[i].dividedToIntegerBy(two.pow(160)).modulo(256);
+		const ownerAddress = r[i].modulo(two.pow(160));
+		const owner = ownerAddress.gt(0)? ownerAddress.toAddress(): "";
+		console.log("%d,%s,%d,%d/%d,%s", countryId, countryName, plots, taxN, taxD, owner);
+		countries.push({
+			id: countryId,
+			name: countryName,
+			plots: plots,
+			taxN: taxN,
+			taxD: taxD,
+			owner: owner
+		});
 	}
 
+	// prepare csv data for output
+	const csvData = countries.map((a, i) => `${a.id},${a.name},${a.plots},${a.taxN}/${a.taxD},0x${a.owner}`).join("\n");
+
 	// write raw data into the file
-	fs.writeFileSync("./data/countries.csv", "country_id,country_name,owner\n" + countries.map((a, i) => (i + 1) + "," + COUNTRY_NAMES[i] + "," + a).join("\n"));
+	fs.writeFileSync("./data/countries.csv", `country_id,country_name,plots,tax,owner\n${csvData}`);
 
 	// remove duplicates from countries array: https://wsvincent.com/javascript-remove-duplicates-array/
-	const owners = [...new Set(countries)];
+	const owners = [...new Set(countries.map((a, i) => a.owner))];
 
 	// write raw data into the file
-	fs.writeFileSync("./data/country_owners.csv", owners.join("\n"));
+	fs.writeFileSync("./data/country_owners.csv", owners.filter(a => a).join("\n"));
 
 	// log successful finish of the operation
 	console.log("Operation successful. %d countries. %d owners", countries.length, owners.length);
