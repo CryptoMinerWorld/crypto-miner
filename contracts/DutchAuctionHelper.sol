@@ -38,7 +38,7 @@ contract DutchAuctionHelper {
    *      final price (Gwei), 32 bits
    *      current price (Gwei), 32 bits
    */
-  function getGemCollection(address auction, address token, address owner) public constant returns(uint240[]) {
+  function getGemCollectionByOwner(address auction, address token, address owner) public constant returns(uint240[]) {
     // get all the tokens available on the auction
     uint80[] memory allAuctionTokens = GemERC721(token).getPackedCollection(auction);
 
@@ -51,7 +51,7 @@ contract DutchAuctionHelper {
     // iterate over all the tokens on the auction
     for(uint80 i = 0; i < allAuctionTokens.length; i++) {
       // and if the token belongs to `owner` (previous ownership technically)
-      if(owner == address(0) || DutchAuction(auction).owners(token, uint32(allAuctionTokens[i] >> 48)) == owner) {
+      if(DutchAuction(auction).owners(token, uint32(allAuctionTokens[i] >> 48)) == owner) {
         // feed token packed structure with additional auction data
         uint224 status = DutchAuction(auction).getTokenSaleStatus(token, uint32(allAuctionTokens[i] >> 48));
         // drop `t` and `fee` from the packed structure
@@ -82,6 +82,50 @@ contract DutchAuctionHelper {
     return result;
   }
 
+  /**
+   * @dev Similarly to `GemERC721.getPackedCollection`, returns packed collection
+   *      of all the tokens being sold currently on the auction
+   * @param auction DutchAuction instance, providing `owner(address, uint32) => address` interface
+   * @param token GemERC721 instance, providing `getPackedCollection(owner) => uint80` interface
+   * @return packed tokens collection structure, containing:
+   *      if array index is even:
+   *        gem id, 32 bits
+   *        gem color, 8 bits
+   *        gem level, 8 bits
+   *        gem grade type, 8 bits
+   *        gem grade value, 24 bits
+   *        auction start time (unix timestamp), 32 bits
+   *        auction end time (unix timestamp), 32 bits
+   *        starting price (Gwei), 32 bits
+   *        final price (Gwei), 32 bits
+   *        current price (Gwei), 32 bits
+   *      if an array index is odd:
+   *        gem owner address
+   */
+  function getAllGems(address auction, address token) public constant returns(uint240[]) {
+    // get all the tokens available on the auction
+    uint80[] memory packed = GemERC721(token).getPackedCollection(auction);
+
+    // create an empty array to copy tokens extending the properties
+    uint240[] memory extended = new uint240[](2 * packed.length);
+
+    // iterate over all the tokens on the auction
+    for(uint80 i = 0; i < packed.length; i++) {
+      // extract tokenId
+      uint32 tokenId = uint32(packed[i] >> 48);
+      // feed token packed structure with additional auction data
+      uint224 status = DutchAuction(auction).getTokenSaleStatus(token, tokenId);
+      // drop `t` and `fee` from the packed structure
+      // and copy it to a destination array - `ownerTokens`
+      extended[2 * i] = uint240(packed[i]) << 160 | uint160((status >> 160) << 96) | uint96(status >> 32);
+      // add owner address to the resulting array
+      extended[2 * i + 1] = uint160(GemERC721(token).ownerOf(tokenId));
+    }
+
+    // return the result
+    return extended;
+  }
+
 
   /**
    * @dev Similarly to `CountryERC721.getPackedCollection`, returns packed collection
@@ -99,7 +143,7 @@ contract DutchAuctionHelper {
    *      final price (Gwei), 32 bits
    *      current price (Gwei), 32 bits
    */
-  function getCountryCollection(address auction, address token, address owner) public constant returns(uint200[]) {
+  function getCountryCollectionByOwner(address auction, address token, address owner) public constant returns(uint200[]) {
     // get all the tokens available on the auction
     uint40[] memory allAuctionTokens = CountryERC721(token).getPackedCollection(auction);
 
@@ -112,7 +156,7 @@ contract DutchAuctionHelper {
     // iterate over all the tokens on the auction
     for(uint80 i = 0; i < allAuctionTokens.length; i++) {
       // and if the token belongs to `owner` (previous ownership technically)
-      if(owner == address(0) || DutchAuction(auction).owners(token, uint8(allAuctionTokens[i] >> 32)) == owner) {
+      if(DutchAuction(auction).owners(token, uint8(allAuctionTokens[i] >> 32)) == owner) {
         // feed token packed structure with additional auction data
         uint224 status = DutchAuction(auction).getTokenSaleStatus(token, uint8(allAuctionTokens[i] >> 32));
         // drop `t` and `fee` from the packed structure
@@ -141,6 +185,48 @@ contract DutchAuctionHelper {
 
     // we're done, return the result
     return result;
+  }
+
+  /**
+   * @dev Similarly to `CountryERC721.getPackedCollection`, returns packed collection
+   *      of all the tokens being sold currently on the auction
+   * @param auction DutchAuction instance, providing `owner(address, uint32) => address` interface
+   * @param token CountryERC721 instance, providing `getPackedCollection(owner) => uint40` interface
+   * @return packed tokens collection structure, containing:
+   *      if array index is even:
+   *        country id, 8 bits
+   *        number of plots, 16 bits,
+   *        country tax rate, 16 bits
+   *        auction start time (unix timestamp), 32 bits
+   *        auction end time (unix timestamp), 32 bits
+   *        starting price (Gwei), 32 bits
+   *        final price (Gwei), 32 bits
+   *        current price (Gwei), 32 bits
+   *      if an array index is odd:
+   *        country owner address
+   */
+  function getAllCountries(address auction, address token) public constant returns(uint200[]) {
+    // get all the tokens available on the auction
+    uint40[] memory packed = CountryERC721(token).getPackedCollection(auction);
+
+    // create an empty array to copy tokens extending the properties
+    uint200[] memory extended = new uint200[](2 * packed.length);
+
+    // iterate over all the tokens on the auction
+    for(uint80 i = 0; i < packed.length; i++) {
+      // extract tokenId
+      uint8 tokenId = uint8(packed[i] >> 32);
+      // feed token packed structure with additional auction data
+      uint224 status = DutchAuction(auction).getTokenSaleStatus(token, uint8(packed[i] >> 32));
+      // drop `t` and `fee` from the packed structure
+      // and copy it to a destination array - `ownerTokens`
+      extended[2 * i] = uint200(packed[i]) << 160 | uint160((status >> 160) << 96) | uint96(status >> 32);
+      // add owner address to the resulting array
+      extended[2 * i + 1] = uint160(CountryERC721(token).ownerOf(tokenId));
+    }
+
+    // return the result
+    return extended;
   }
 
 
