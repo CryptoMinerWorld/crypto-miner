@@ -17,7 +17,7 @@ Silver:             0x5eAb0Ea7AC3cC27f785D8e3fABA56b034aa56208
 Gold:               0x4e55C62f4e2ca19B22c2156273F5900e124B9acD
 Workshop:           0x0B6AF5187a37EE7C183C1803EB27e9cF6044519F
 SilverSale:         0x8D060AB4F2543A3b785Ba724bCfC2cEE47031E09
-SilverCoupons:
+SilverCoupons:      0x7b936e20D8da4088D5085DbB86C5ca8ceea1231e
 
 
 Rinkeby:

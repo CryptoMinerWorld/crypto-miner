@@ -52,7 +52,7 @@ module.exports = async function(deployer, network, accounts) {
 	await deployer.deploy(SilverCoupons, silverAddress, goldAddress, refTrackerAddress, silverSaleAddress);
 	const coupons = await SilverCoupons.deployed();
 
-	// for test networks addresses are different
+	// by default we enable all the permissions only on test networks
 	if(network !== "mainnet") {
 		// get links to the deployed instances
 		const ref = Ref.at(refTrackerAddress);
