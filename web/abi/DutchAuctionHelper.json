@@ -17,11 +17,57 @@
           "type": "address"
         }
       ],
-      "name": "getGemCollection",
+      "name": "getGemCollectionByOwner",
       "outputs": [
         {
           "name": "",
           "type": "uint240[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "auction",
+          "type": "address"
+        },
+        {
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "getAllGems",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint240[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "auction",
+          "type": "address"
+        },
+        {
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "getCountryCollectionByOwner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint200[]"
         }
       ],
       "payable": false,
@@ -44,7 +90,7 @@
           "type": "address"
         }
       ],
-      "name": "getCountryCollection",
+      "name": "getCountryCollectionByOwner",
       "outputs": [
         {
           "name": "",
@@ -158,5 +204,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-02-22T07:21:25.188Z"
+  "updatedAt": "2019-02-27T15:48:22.845Z"
 }
