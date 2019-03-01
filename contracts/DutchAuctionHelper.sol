@@ -118,7 +118,7 @@ contract DutchAuctionHelper {
       // drop `t` and `fee` from the packed structure
       // and copy it to a destination array - `ownerTokens`
       extended[2 * i] = uint240(packed[i]) << 160 | uint160((status >> 160) << 96) | uint96(status >> 32);
-      // add owner address to the resulting array
+      // add previous owner address to the resulting array
       extended[2 * i + 1] = uint160(DutchAuction(auction).owners(token, tokenId));
     }
 
@@ -221,7 +221,7 @@ contract DutchAuctionHelper {
       // drop `t` and `fee` from the packed structure
       // and copy it to a destination array - `ownerTokens`
       extended[2 * i] = uint200(packed[i]) << 160 | uint160((status >> 160) << 96) | uint96(status >> 32);
-      // add owner address to the resulting array
+      // add previous owner address to the resulting array
       extended[2 * i + 1] = uint160(DutchAuction(auction).owners(token, tokenId));
     }
 
