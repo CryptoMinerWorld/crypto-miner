@@ -119,7 +119,7 @@ contract DutchAuctionHelper {
       // and copy it to a destination array - `ownerTokens`
       extended[2 * i] = uint240(packed[i]) << 160 | uint160((status >> 160) << 96) | uint96(status >> 32);
       // add owner address to the resulting array
-      extended[2 * i + 1] = uint160(GemERC721(token).ownerOf(tokenId));
+      extended[2 * i + 1] = uint160(DutchAuction(auction).owners(token, tokenId));
     }
 
     // return the result
@@ -222,7 +222,7 @@ contract DutchAuctionHelper {
       // and copy it to a destination array - `ownerTokens`
       extended[2 * i] = uint200(packed[i]) << 160 | uint160((status >> 160) << 96) | uint96(status >> 32);
       // add owner address to the resulting array
-      extended[2 * i + 1] = uint160(CountryERC721(token).ownerOf(tokenId));
+      extended[2 * i + 1] = uint160(DutchAuction(auction).owners(token, tokenId));
     }
 
     // return the result
