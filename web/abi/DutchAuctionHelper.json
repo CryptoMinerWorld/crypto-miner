@@ -61,6 +61,10 @@
         {
           "name": "token",
           "type": "address"
+        },
+        {
+          "name": "owner",
+          "type": "address"
         }
       ],
       "name": "getCountryCollectionByOwner",
@@ -84,13 +88,9 @@
         {
           "name": "token",
           "type": "address"
-        },
-        {
-          "name": "owner",
-          "type": "address"
         }
       ],
-      "name": "getCountryCollectionByOwner",
+      "name": "getAllCountries",
       "outputs": [
         {
           "name": "",
@@ -142,6 +142,10 @@
         {
           "name": "p",
           "type": "uint128"
+        },
+        {
+          "name": "owner",
+          "type": "address"
         }
       ],
       "payable": false,
@@ -204,5 +208,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-02-27T15:48:22.845Z"
+  "updatedAt": "2019-03-04T14:12:40.325Z"
 }
