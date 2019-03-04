@@ -255,7 +255,8 @@ contract DutchAuctionHelper {
     uint32 t,
     uint128 p0,
     uint128 p1,
-    uint128 p
+    uint128 p,
+    address owner
   ) {
     // get the link to deployed DutchAuction instance
     DutchAuction auctionInstance = DutchAuction(auction);
@@ -263,7 +264,7 @@ contract DutchAuctionHelper {
     // check if token is on sale,
     if(!auctionInstance.isTokenOnSale(token, tokenId)) {
       // return zeros if token is not on sale
-      return (0, 0, 0, 0, 0, 0);
+      return (0, 0, 0, 0, 0, 0, address(0));
     }
 
     // read item into memory from the auction
@@ -283,8 +284,11 @@ contract DutchAuctionHelper {
     t = uint32(now);
     p = price(t0, t1, t, p0, p1); // in wei
 
+    // finally, get the owner
+    owner = auctionInstance.owners(token, tokenId);
+
     // return the data calculated as a tuple
-    return (t0, t1, t, p0, p1, p);
+    return (t0, t1, t, p0, p1, p, owner);
   }
 
   /**
