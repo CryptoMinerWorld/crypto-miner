@@ -156,6 +156,33 @@
       "constant": true,
       "inputs": [
         {
+          "name": "auction",
+          "type": "address"
+        },
+        {
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "name": "tokenId",
+          "type": "uint32"
+        }
+      ],
+      "name": "getSaleStatusPacked",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint160"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
           "name": "_t0",
           "type": "uint32"
         },
@@ -208,5 +235,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-03-04T14:12:40.325Z"
+  "updatedAt": "2019-03-04T16:41:00.375Z"
 }
