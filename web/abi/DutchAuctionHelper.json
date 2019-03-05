@@ -21,7 +21,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint240[]"
+          "type": "uint256[]"
         }
       ],
       "payable": false,
@@ -44,7 +44,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint240[]"
+          "type": "uint256[]"
         }
       ],
       "payable": false,
@@ -71,7 +71,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint200[]"
+          "type": "uint224[]"
         }
       ],
       "payable": false,
@@ -94,7 +94,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint200[]"
+          "type": "uint224[]"
         }
       ],
       "payable": false,
@@ -172,7 +172,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint160"
+          "type": "uint184"
         }
       ],
       "payable": false,
@@ -235,5 +235,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-03-04T16:41:00.375Z"
+  "updatedAt": "2019-03-05T12:07:29.321Z"
 }
