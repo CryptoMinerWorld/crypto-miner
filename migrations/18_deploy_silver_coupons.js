@@ -45,7 +45,7 @@ module.exports = async function(deployer, network, accounts) {
 		refTrackerAddress = "0x1F85f59eC94725E75B8CfDe50da3e47Bf3605B13";
 		silverAddress = "0x901C62b3194C6c460B303537Ab3F39e80f933d48";
 		goldAddress = "0x6c4BC3179A2B28f641ae15DD55419240bB61e1A6";
-		silverSaleAddress = "0xD40bad88C363A123ca14FA7376Ce836Cf015fbbf";
+		silverSaleAddress = "0x36391d55755997Ea529D27Dc49a75138A14eb293";
 	}
 
 	// deploy silver coupons

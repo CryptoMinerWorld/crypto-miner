@@ -47,7 +47,7 @@ module.exports = async function(deployer, network, accounts) {
 		goldAddress = "0x6c4BC3179A2B28f641ae15DD55419240bB61e1A6";
 		chest = "0xEE169DCC689D0C358F68Ce95DEf41646039aC190"; // Roman
 		beneficiary = "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69"; // Basil
-		offset = 1550152800; // 02/14/2019 @ 2:00pm UTC
+		offset = 1551916800; // 03/07/2019 @ 0:00am UTC
 	}
 
 	// deploy silver sale
