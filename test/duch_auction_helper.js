@@ -263,7 +263,7 @@ contract('Dutch Auction Helper', accounts => {
 
 		// append additional auction specific data to original collection
 		for(let i = 0; i < packedOriginal.length; i++) {
-			packedOriginal[i] = packedOriginal[i].times(two.pow(160)).plus(auctionData);
+			packedOriginal[i] = packedOriginal[i].times(two.pow(184)).plus(auctionData);
 		}
 
 		// sort both arrays to compare
@@ -323,7 +323,7 @@ contract('Dutch Auction Helper', accounts => {
 
 		// append additional auction specific data to original collection
 		for(let i = 0; i < packedOriginal.length; i++) {
-			packedOriginal[i] = packedOriginal[i].times(two.pow(160)).plus(auctionData);
+			packedOriginal[i] = packedOriginal[i].times(two.pow(184)).plus(auctionData);
 		}
 
 		// sort both arrays to compare
@@ -348,10 +348,10 @@ function abiPack(tokenId, t0, t1, p0, p1) {
 // packs t0, t1, p0, p1 and p into abi-compliant structure
 function pack(t0, t1, p0, p1, p) {
 	const two = web3.toBigNumber(2);
-	return two.pow(128).times(t0)
-		.plus(two.pow(96).times(t1))
-		.plus(two.pow(64).times(p0))
-		.plus(two.pow(32).times(p1))
+	return two.pow(152).times(t0)
+		.plus(two.pow(120).times(t1))
+		.plus(two.pow(80).times(p0))
+		.plus(two.pow(40).times(p1))
 		.plus(p);
 }
 
