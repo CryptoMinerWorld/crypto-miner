@@ -256,7 +256,7 @@ contract('Dutch Auction Helper', accounts => {
 		}
 
 		// all account1 100 tokens are on the auction, use helper to obtain them
-		const packedAuction = await helper.getGemCollection(auction.address, token.address, accounts[1]);
+		const packedAuction = await helper.getGemCollectionByOwner(auction.address, token.address, accounts[1]);
 
 		// pack auction data, prices are in Gwei
 		const auctionData = pack(t0, t1, p0 / 1000000000, p1 / 1000000000, p0 / 1000000000);
@@ -316,7 +316,7 @@ contract('Dutch Auction Helper', accounts => {
 		}
 
 		// all account1 100 tokens are on the auction, use helper to obtain them
-		const packedAuction = await helper.getCountryCollection(auction.address, token.address, accounts[1]);
+		const packedAuction = await helper.getCountryCollectionByOwner(auction.address, token.address, accounts[1]);
 
 		// pack auction data, prices are in Gwei
 		const auctionData = pack(t0, t1, p0 / 1000000000, p1 / 1000000000, p0 / 1000000000);
