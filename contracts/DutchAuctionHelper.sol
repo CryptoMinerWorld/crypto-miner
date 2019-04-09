@@ -293,9 +293,9 @@ contract DutchAuctionHelper {
    *      [0] t0  auction start time (unix timestamp), 32 bits
    *      [1] t1  auction end time (unix timestamp), 32 bits
    *      [2] t   current time (unix timestamp), 32 bits
-   *      [3] p0  starting price (Gwei), 32 bits
-   *      [4] p1  final price (Gwei), 32 bits
-   *      [5] p   current price (Gwei), 32 bits
+   *      [3] p0  starting price (Gwei), 40 bits
+   *      [4] p1  final price (Gwei), 40 bits
+   *      [5] p   current price (Gwei), 40 bits
    * @param auction DutchAuction instance, providing `items(address, uint32)` interface
    * @param token ERC721 deployed instance address
    * @param tokenId id of the item

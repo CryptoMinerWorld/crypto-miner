@@ -43,7 +43,10 @@ contract ERC165 {
    * @dev private method for registering an interface
    */
   function _registerInterface(bytes4 _interfaceId) internal {
+    // verify interface id is valid
     require(_interfaceId != 0xffffffff);
+
+    // register the interface
     supportedInterfaces[_interfaceId] = true;
   }
 }
