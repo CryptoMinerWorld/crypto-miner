@@ -748,9 +748,6 @@ contract GemERC721 is AccessControl, ERC165 {
 
     // delegate call to `__mint`
     __mint(to, tokenId, plotId, depth, gemNum, color, level, gradeType, gradeValue);
-
-    // fire ERC20 transfer event
-    emit Transfer(address(0), to, tokenId, 1);
   }
 
   /**

@@ -1,8 +1,9 @@
 pragma solidity 0.4.23;
 
 /**
- * Library for working with strings, primarily converting
- * between strings and integer types
+ * @title String Utils Library
+ * @dev Library for working with strings, primarily converting
+ *      between strings and integer types
  */
 library StringUtils {
   /**
@@ -84,7 +85,7 @@ library StringUtils {
       // if digit is greater then 10,
       // fix the 0x3A-0x40 gap of punctuation marks
       // (7 characters in ASCII table)
-      if(digit > 10) {
+      if(digit >= 10) {
         // jump through the gap
         ascii += 7;
       }
