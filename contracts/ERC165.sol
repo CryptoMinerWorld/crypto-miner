@@ -17,7 +17,7 @@ contract ERC165 {
 
   /**
    * @dev A contract implementing SupportsInterfaceWithLookup
-   * implement ERC165 itself
+   *      implement ERC165 itself
    */
   constructor() public {
     // register itself in a lookup table

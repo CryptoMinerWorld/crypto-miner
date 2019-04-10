@@ -233,11 +233,11 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   uint32 public constant ROLE_TOKEN_CREATOR = 0x00000001;
 
   /**
-   * @notice Token state provider is responsible for various features of the game,
+   * @notice State provider is responsible for various features of the game,
    *      including token locking (required to enabling mining protocol)
    * @dev Allows modifying token's state
    */
-  uint32 public constant ROLE_TOKEN_STATE_PROVIDER = 0x00000004;
+  uint32 public constant ROLE_STATE_PROVIDER = 0x00000004;
 
   /**
    * @notice Transfer lock provider is responsible for various features of the game,
@@ -247,10 +247,10 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   uint32 public constant ROLE_TRANSFER_LOCK_PROVIDER = 0x00000008;
 
   /**
-   * @notice Token offset provider is responsible for enabling mining protocol
+   * @notice Offset provider is responsible for enabling mining protocol
    * @dev Allows increasing token's offset - current mining block index
    */
-  uint32 public constant ROLE_TOKEN_OFFSET_PROVIDER = 0x00000010;
+  uint32 public constant ROLE_OFFSET_PROVIDER = 0x00000010;
 
   /**
    * @dev Magic value to be returned upon successful reception of ERC721 token (NFT)
@@ -300,8 +300,8 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
 
   /**
    * @dev Fired in setState()
-   * @param _by token state provider
-   *      (an address having `ROLE_TOKEN_STATE_PROVIDER` permission)
+   * @param _by state provider
+   *      (an address having `ROLE_STATE_PROVIDER` permission)
    *      which modified token `_tokenId` state
    * @param _owner owner of the token `_tokenId`
    * @param _tokenId id of the token whose state was modified
@@ -333,7 +333,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   /**
    * @dev Fired in mineTo() and mineBy()
    * @param _by offset provider who performed the mining
-   *      (an address having the `ROLE_TOKEN_OFFSET_PROVIDER` permission)
+   *      (an address having the `ROLE_OFFSET_PROVIDER` permission)
    * @param _owner owner of the token `_tokenId`
    * @param _tokenId id of the token whose offset was modified
    * @param _from old offset
@@ -467,6 +467,8 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @dev Gets number of tiers this plot has
    *      - 2 for Antarctica, 5 for the rest of the World
    * @param _tokenId ID of the token to query number of tiers for
+   * @return number of tiers this plot has,
+   *      either 2 (Antarctica) or 5 (rest of the World)
    */
   function getNumberOfTiers(uint256 _tokenId) public constant returns (uint8) {
     // validate token existence
@@ -486,33 +488,19 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @dev Passing index equal to zero returns Tier 1 offset,
    *      which is equal to zero by design
    * @param _tokenId ID of the token to query depth for
-   * @param tier one-based tier index to query depth for
+   * @param k one-based tier index to query depth for
+   * @return depth of the (k)th tier in blocks
    */
-  function getTierDepth(uint256 _tokenId, uint8 tier) public constant returns (uint8) {
+  function getTierDepth(uint256 _tokenId, uint8 k) public constant returns (uint8) {
     // get number of tiers for the given token
     // also validates token existence
     uint8 numberOfTiers = getNumberOfTiers(_tokenId);
 
     // ensure requested tier exists
-    require(tier <= numberOfTiers);
+    require(k <= numberOfTiers);
 
     // extract requested tier depth data from tier structure and return
-    return uint8(tokens[_tokenId].tiers >> (6 - tier) * 8);
-  }
-
-  /**
-   * @dev Gets token offset (a.k.a. depth)
-   *      - current mined depth (initially zero)
-   * @dev Throws if token doesn't exist
-   * @param _tokenId ID of the token to get offset for
-   * @return token offset – current mined depth value
-   */
-  function getOffset(uint256 _tokenId) public constant returns(uint8) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // extract the offset value from the tiers and return
-    return uint8(tokens[_tokenId].tiers);
+    return uint8(tokens[_tokenId].tiers >> (6 - k) * 8);
   }
 
   /**
@@ -532,15 +520,43 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   }
 
   /**
+   * @dev Gets the offset modified date of a token
+   * @param _tokenId ID of the token to get offset modified date for
+   * @return token offset modification date as a unix timestamp
+   */
+  function getOffsetModified(uint256 _tokenId) public constant returns (uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's offset modified date from storage and return
+    return tokens[_tokenId].offsetModified;
+  }
+
+  /**
+   * @dev Gets token offset (a.k.a. depth)
+   *      - current mined depth (initially zero)
+   * @dev Throws if token doesn't exist
+   * @param _tokenId ID of the token to get offset for
+   * @return token offset – current mined depth value
+   */
+  function getOffset(uint256 _tokenId) public constant returns(uint8) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // extract the offset value from the tiers and return
+    return uint8(tokens[_tokenId].tiers);
+  }
+
+  /**
    * @dev Mines the token to the depth specified
    * @dev Requires depth to be bigger than current offset
-   * @dev Requires sender to have `ROLE_TOKEN_OFFSET_PROVIDER` permission
+   * @dev Requires sender to have `ROLE_OFFSET_PROVIDER` permission
    * @dev _tokenId ID of the token to mine
    * @dev depth absolute depth value to mine to, greater than current depth
    */
   function mineTo(uint256 _tokenId, uint8 depth) public {
-    // check that the call is made by a token state provider
-    require(isSenderInRole(ROLE_TOKEN_OFFSET_PROVIDER));
+    // check that the call is made by a offset provider
+    require(isSenderInRole(ROLE_OFFSET_PROVIDER));
 
     // validate token existence
     require(exists(_tokenId));
@@ -555,7 +571,8 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
     require(depth > offset && depth <= length);
 
     // perform mining, update the offset
-    tokens[_tokenId].tiers &= 0xFFFFFFFFFFFFFF00 | depth;
+    tokens[_tokenId].tiers &= 0xFFFFFFFFFFFFFF00;
+    tokens[_tokenId].tiers |= depth;
 
     // update the offset modification date
     tokens[_tokenId].offsetModified = uint32(now);
@@ -567,13 +584,13 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   /**
    * @dev Mines the token by the depth delta specified
    * @dev Requires depth delta to be positive value
-   * @dev Requires sender to have `ROLE_TOKEN_OFFSET_PROVIDER` permission
+   * @dev Requires sender to have `ROLE_OFFSET_PROVIDER` permission
    * @dev _tokenId ID of the token to mine
    * @dev depth depth delta value to mine by, greater than zero
    */
   function mineBy(uint256 _tokenId, uint8 depth) public {
-    // check that the call is made by a token state provider
-    require(isSenderInRole(ROLE_TOKEN_OFFSET_PROVIDER));
+    // check that the call is made by a offset provider
+    require(isSenderInRole(ROLE_OFFSET_PROVIDER));
 
     // validate token existence
     require(exists(_tokenId));
@@ -601,7 +618,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   /**
    * @dev Gets the state modified date of a token
    * @param _tokenId ID of the token to get state modified date for
-   * @return token state modification date
+   * @return token state modification date as a unix timestamp
    */
   function getStateModified(uint256 _tokenId) public constant returns(uint32) {
     // validate token existence
@@ -640,13 +657,13 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
 
   /**
    * @dev Modifies the state of a token
-   * @dev Requires sender to have `ROLE_TOKEN_STATE_PROVIDER` permission
+   * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
    * @param _tokenId ID of the token to set state for
    * @param newState new state to set for the token
    */
   function setState(uint256 _tokenId, uint128 newState) public {
-    // check that the call is made by a token state provider
-    require(isSenderInRole(ROLE_TOKEN_STATE_PROVIDER));
+    // check that the call is made by a state provider
+    require(isSenderInRole(ROLE_STATE_PROVIDER));
 
     // check that token to set state for exists
     require(exists(_tokenId));
@@ -670,7 +687,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   /**
    * @dev Gets the creation time of a token
    * @param _tokenId ID of the token to get creation time for
-   * @return a token creation time
+   * @return a token creation time as a unix timestamp
    */
   function getCreationTime(uint256 _tokenId) public constant returns(uint32) {
     // validate token existence
@@ -683,7 +700,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   /**
    * @dev Gets the ownership modified time of a token
    * @param _tokenId ID of the token to get ownership modified time for
-   * @return a token ownership modified time
+   * @return a token ownership modified time as a unix timestamp
    */
   function getOwnershipModified(uint256 _tokenId) public constant returns(uint32) {
     // validate token existence
@@ -1228,11 +1245,23 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
     // 2 (Antarctica) or 5 (Rest of the World) elements
     require(n == 2 || n == 5);
 
-    // validate tiers structure
-    for(uint8 i = 1; i < n; i++) {
+    // ensure tier1 offset is zero
+    require(uint8(_tiers >> 48) == 0);
+
+    // validate tiers structure – first n layers
+    for(uint8 i = 0; i < n; i++) {
       // (n)th tier offset must be greater than (n-1)th tier offset
-      require(uint8(_tiers << (i - 1) * 8) <= uint8(_tiers << i * 8));
+      require(uint8(_tiers >> (6 - i) * 8) < uint8(_tiers >> (5 - i) * 8));
     }
+
+    // validate tiers structure – sparse 5 - n layers
+    for(uint8 j = n; j < 5; j++) {
+      // (n)th tier offset must be equal to 2nd tier offset
+      require(uint8(_tiers >> (6 - n) * 8) == uint8(_tiers >> (5 - j) * 8));
+    }
+
+    // verify initial offset is zero
+    require(uint8(_tiers) == 0);
 
     // ensure that token with such ID doesn't exist
     require(!exists(_tokenId));
