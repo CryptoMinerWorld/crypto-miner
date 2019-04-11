@@ -41,6 +41,9 @@ const ROLE_TRANSFER_LOCK_PROVIDER = 0x00000008;
 // Allows modifying token's offset
 const ROLE_OFFSET_PROVIDER = 0x00000010;
 
+// default depth of the land plot
+const DEPTH = 100;
+
 // some token to work with
 const token0 = 1; // first land plot in Antarctica
 const token1 = 16777217; // first land plot in Russia
@@ -48,10 +51,10 @@ const layers0 = [
 	2,
 	0,
 	35 + (Math.floor(Math.random() * 11) - 5),
-	100,
-	100,
-	100,
-	100,
+	DEPTH,
+	DEPTH,
+	DEPTH,
+	DEPTH,
 	0
 ];
 const layers1 = [
@@ -59,16 +62,13 @@ const layers1 = [
 	0,
 	35 + (Math.floor(Math.random() * 11) - 5),
 	65 + (Math.floor(Math.random() * 11) - 5),
-	85 + (Math.floor(Math.random() * 11) - 4),
-	95 + (Math.floor(Math.random() * 11) - 3),
-	100,
+	85 + (Math.floor(Math.random() * 9) - 4),
+	95 + (Math.floor(Math.random() * 7) - 3),
+	DEPTH,
 	0
 ];
 const tiers0 = tiers(layers0);
 const tiers1 = tiers(layers1);
-
-console.log(`token0: ${token0} => ${layers0}`);
-console.log(`token1: ${token1} => ${layers1}`);
 
 // auxiliary BigNumber 2
 const two = web3.toBigNumber(2);
@@ -124,9 +124,10 @@ contract('PlotERC721', (accounts) => {
 		const getTiers = async() => await tk.getTiers(token1);
 		const getNumberOfTiers = async() => await tk.getNumberOfTiers(token1);
 		const getTierDepth = async() => await tk.getTierDepth(token1, 4);
+		const getDepth = async() => await tk.getDepth(token1);
 		const getOffsetModified = async() => await tk.getOffsetModified(token1);
 		const getOffset = async() => await tk.getOffset(token1);
-		const getDepth = async() => await tk.getDepth(token1);
+		const isFullyMined = async() => await tk.isFullyMined(token1);
 		const getStateModified = async() => await tk.getStateModified(token1);
 		const getState = async() => await tk.getState(token1);
 		const isTransferable = async() => await tk.isTransferable(token1);
@@ -143,9 +144,10 @@ contract('PlotERC721', (accounts) => {
 		await assertThrowsAsync(getTiers);
 		await assertThrowsAsync(getNumberOfTiers);
 		await assertThrowsAsync(getTierDepth);
+		await assertThrowsAsync(getDepth);
 		await assertThrowsAsync(getOffsetModified);
 		await assertThrowsAsync(getOffset);
-		await assertThrowsAsync(getDepth);
+		await assertThrowsAsync(isFullyMined);
 		await assertThrowsAsync(getStateModified);
 		await assertThrowsAsync(getState);
 		await assertThrowsAsync(isTransferable);
@@ -165,9 +167,10 @@ contract('PlotERC721', (accounts) => {
 		await getTiers();
 		await getNumberOfTiers();
 		await getTierDepth();
+		await getDepth();
 		await getOffsetModified();
 		await getOffset();
-		await getDepth();
+		await isFullyMined();
 		await getStateModified();
 		await getState();
 		await isTransferable();
@@ -198,9 +201,10 @@ contract('PlotERC721', (accounts) => {
 		assert.equal(0, await tk.getTierDepth(token1, 0), "token1 has wrong tier0 depth");
 		assert.equal(2, await tk.getNumberOfTiers(token0), "token0 has wrong number of tiers");
 		assert.equal(5, await tk.getNumberOfTiers(token1), "token1 has wrong number of tiers");
+		assert.equal(DEPTH, await tk.getDepth(token0), "token0 has wrong depth");
 		assert.equal(0, await tk.getOffsetModified(token0), "token0 has non-zero offsetModified");
 		assert.equal(0, await tk.getOffset(token0), "token0 has wrong offset");
-		assert.equal(100, await tk.getDepth(token0), "token0 has wrong depth");
+		assert(!await tk.isFullyMined(token0), "token0 is fully mined");
 		assert.equal(0, await tk.getStateModified(token0), "token0 has non-zero stateModified");
 		assert.equal(1, await tk.getState(token0), "token0 has wrong state");
 		assert(await tk.isTransferable(token0), "token0 is not transferable");
@@ -817,17 +821,17 @@ contract('PlotERC721', (accounts) => {
 		await assertThrowsAsync(tk.mint, 0, token1, tiers1);
 		await assertThrowsAsync(tk.mint, account1, 0, tiers1);
 		for(let i = 0; i < 5; i++) {
-			await assertThrowsAsync(tk.mint, account1, token1, tiers([i, 0, 35, 65, 85, 95, 100, 0]));
+			await assertThrowsAsync(tk.mint, account1, token1, tiers([i, 0, 35, 65, 85, 95, DEPTH, 0]));
 		}
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([5, 1, 35, 65, 85, 95, 100, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([5, 0, 35, 65, 85, 95, 100, 1]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([5, 0, 35, 35, 85, 95, 100, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 1, 35, 100, 100, 100, 100, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, 100, 100, 100, 100, 1]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, 100, 100, 100, 99, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, 100, 100, 99, 100, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, 100, 99, 100, 100, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, 99, 100, 100, 100, 0]));
+		await assertThrowsAsync(tk.mint, account1, token1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
+		await assertThrowsAsync(tk.mint, account1, token1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
+		await assertThrowsAsync(tk.mint, account1, token1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
+		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
+		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
+		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH - 1, 0]));
+		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH - 1, DEPTH, 0]));
+		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, DEPTH, DEPTH - 1, DEPTH, DEPTH, 0]));
+		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, DEPTH - 1, DEPTH, DEPTH, DEPTH, 0]));
 
 		// valid inputs
 		await tk.mint(account1, token0, tiers0);
@@ -879,7 +883,7 @@ contract('PlotERC721', (accounts) => {
 		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
 	});
 
-	it("mining to: mine to token and check", async() => {
+	it("mining: mine to token and check", async() => {
 		// analogue to smart contract deployment
 		const tk = await Token.new();
 
@@ -907,8 +911,7 @@ contract('PlotERC721', (accounts) => {
 		// verify offset modification date
 		assert(await tk.getOffsetModified(token1) > now, "wrong token1 offset modification date");
 	});
-
-	it("mining by: mine by token and check", async() => {
+	it("mining: mine by token and check", async() => {
 		// analogue to smart contract deployment
 		const tk = await Token.new();
 
@@ -935,6 +938,32 @@ contract('PlotERC721', (accounts) => {
 
 		// verify offset modification date
 		assert(await tk.getOffsetModified(token1) > now, "wrong token1 offset modification date");
+	});
+	it("mining: all the way to the bottom", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// create two tokens
+		await tk.mint(accounts[1], token0, tiers0);
+		await tk.mint(accounts[1], token1, tiers1);
+
+		// perform several random mines to reach the very bottom of both tokens
+		for(let offset = 0, delta; offset < DEPTH; offset += delta) {
+			delta = Math.min(Math.floor(Math.random() * DEPTH), DEPTH - offset);
+			await tk.mineBy(token0, delta);
+			await tk.mineTo(token1, offset + delta);
+		}
+
+		// ensure mining is not possible anymore
+		await assertThrowsAsync(tk.mineBy, token0, 1);
+		await assertThrowsAsync(tk.mineTo, token1, DEPTH);
+		await assertThrowsAsync(tk.mineTo, token1, DEPTH + 1);
+
+		// verify both tokens are fully mined
+		assert(await tk.isFullyMined(token0), "token0 is not fully mined");
+		assert(await tk.isFullyMined(token1), "token1 is not fully mined");
+		assert.equal(DEPTH, await tk.getOffset(token0), "token0 offset is different from DEPTH");
+		assert.equal(DEPTH, await tk.getOffset(token1), "token1 offset is different from DEPTH");
 	});
 
 	it("modifying state: modify token state and check", async() => {

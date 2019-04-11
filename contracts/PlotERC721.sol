@@ -494,10 +494,10 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   function getTierDepth(uint256 _tokenId, uint8 k) public constant returns (uint8) {
     // get number of tiers for the given token
     // also validates token existence
-    uint8 numberOfTiers = getNumberOfTiers(_tokenId);
+    uint8 n = getNumberOfTiers(_tokenId);
 
     // ensure requested tier exists
-    require(k <= numberOfTiers);
+    require(k <= n);
 
     // extract requested tier depth data from tier structure and return
     return uint8(tokens[_tokenId].tiers >> (6 - k) * 8);
@@ -513,10 +513,10 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   function getDepth(uint256 _tokenId) public constant returns (uint8) {
     // get number of tiers for the given token
     // also validates token existence
-    uint8 numberOfTiers = getNumberOfTiers(_tokenId);
+    uint8 n = getNumberOfTiers(_tokenId);
 
-    // extract tier 5 value from the tiers and return
-    return uint8(tokens[_tokenId].tiers >> (6 - numberOfTiers) * 8);
+    // extract last tier value from the tiers and return
+    return uint8(tokens[_tokenId].tiers >> (6 - n) * 8);
   }
 
   /**
@@ -545,6 +545,19 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
 
     // extract the offset value from the tiers and return
     return uint8(tokens[_tokenId].tiers);
+  }
+
+  /**
+   * @dev Verifies if token is fully mined that is
+   *      its offset is equal to the depth
+   * @param _tokenId ID of the token to check
+   * @return true if token is fully mined, false otherwise
+   */
+  function isFullyMined(uint256 _tokenId) public constant returns(bool) {
+    // get the offset value, depth value and compare them
+    // checks token existence under the hood when delegating
+    // calls to `getOffset` and `getDepth`
+    return getOffset(_tokenId) >= getDepth(_tokenId);
   }
 
   /**
