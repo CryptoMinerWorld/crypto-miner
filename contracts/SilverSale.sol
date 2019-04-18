@@ -15,10 +15,10 @@ import "./Random.sol";
  * @notice Sale prices are not fixed and increase over time:
  *      the price goes up by 1.25% every 24 hours
  *
- * @notice The sale happens in strict time frame, it is impossible to buy a
- *      box before the sale starts and after it ends
+ * @notice The sale happens in an open time frame with a strict start
+ *      but no strict end, it is impossible to buy a box before the sale starts
  *
- * @notice Sale lasts for 20 days (480 hours)
+ * @notice Sale lasts for 20 days (480 hours). During this time the price decreases.
  *
  * @notice Sell mechanism is implemented through the loot box mechanism:
  *      there are three kinds of boxes which can be bought:
