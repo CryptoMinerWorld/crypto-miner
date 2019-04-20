@@ -212,14 +212,12 @@ contract SilverSale is AccessControlLight {
   RefPointsTracker public refPointsTracker;
 
   /**
-   * @dev GoldERC20 deployed instance to consume silver from, silver of that instance
-   *      may be consumed (burnt) from a player in order to level up a gem
+   * @dev SilverERC20 deployed instance to mint silver
    */
   SilverERC20 public silverInstance;
 
   /**
-   * @dev GoldERC20 deployed instance to consume gold from, gold of that instance
-   *      may be consumed (burnt) from a player in order to upgrade a gem
+   * @dev GoldERC20 deployed instance to mint gold
    */
   GoldERC20 public goldInstance;
 

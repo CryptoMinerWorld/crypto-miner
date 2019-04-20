@@ -221,7 +221,7 @@ contract SilverCoupons is AccessControlLight {
     refPointsTracker.addKnownAddress(msg.sender);
 
     // emit an event
-    emit CouponConsumed(msg.sender, key, boxType, 0, 0);
+    emit CouponConsumed(msg.sender, key, boxType, silver, gold);
   }
 
   /**

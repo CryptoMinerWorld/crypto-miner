@@ -17,10 +17,10 @@ module.exports = async function(deployer, network, accounts) {
 	// MainNet Geode presale2 address (Antarctica)
 	const presale2Address = "0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1";
 
-	// create presale2 instance which is linked to presale1 instance
+	// get link to presale2 instance which is linked to presale1 instance
 	const presale2 = Sale2.at(presale2Address);
 
-	// determine amount of geodes in Presale 1
+	// determine amount of geodes in both presales
 	const nextGeode = (await presale2.nextGeode()).toNumber();
 
 	// accumulate geode owners in this array
