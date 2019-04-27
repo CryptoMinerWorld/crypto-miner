@@ -26,16 +26,6 @@ module.exports = async function(deployer, network, accounts) {
 	if(network !== "mainnet") {
 		// enable transfers and transfers on behalf
 		await plot.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
-
-		// mint some plots
-		for(let i = 0; i < 10; i++) {
-			await plot.mint("0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", 3 * i + 1, genTiers0()); // John
-			await plot.mint("0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", 3 * i + 16777217, genTiers1());
-			await plot.mint("0xEE169DCC689D0C358F68Ce95DEf41646039aC190", 3 * i + 2, genTiers0()); // Roman
-			await plot.mint("0xEE169DCC689D0C358F68Ce95DEf41646039aC190", 3 * i + 16777218, genTiers1());
-			await plot.mint("0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69", 3 * i + 3, genTiers0()); // Basil
-			await plot.mint("0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69", 3 * i + 16777219, genTiers1());
-		}
 	}
 
 	console.log("________________________________________________________________________");
