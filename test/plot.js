@@ -99,9 +99,10 @@ contract('PlotERC721', (accounts) => {
 		assert(!await tk.exists(token1), "token 1 already exists initially");
 
 		// create one token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// verify same values to be equal one
+		assert.equal(1, (await tk.getAllTokens()).length, "empty all tokens collection");
 		assert.equal(1, (await tk.getPackedCollection(account1)).length, "empty packed collection for account1");
 		assert.equal(1, (await tk.getCollection(account1)).length, "empty token collection for account1");
 		assert.equal(1, await tk.totalSupply(), "zero token total supply");
@@ -160,7 +161,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrowsAsync(tokenURI);
 
 		// create one token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// now the functions which throw should not throw anymore
 		await getPacked();
@@ -191,8 +192,8 @@ contract('PlotERC721', (accounts) => {
 		const account1 = accounts[1];
 
 		// create two tokens
-		await tk.mint(account1, token0, tiers0);
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 0, tiers0);
+		await tk.mint(account1, 1, tiers1);
 
 		// verify simple (non-packed) getters
 		assert(tiers0.eq(await tk.getTiers(token0)), "token0 has wrong tiers struct");
@@ -227,6 +228,7 @@ contract('PlotERC721', (accounts) => {
 		}
 
 		// complex and packed getters
+		assert.deepEqual([web3.toBigNumber(token0), web3.toBigNumber(token1)], await tk.getAllTokens(), "wrong all tokens collection");
 		assert.deepEqual([web3.toBigNumber(token0), web3.toBigNumber(token1)], await tk.getCollection(account1), "wrong token collection for account1");
 
 		// calculate token0 and token1 packed structures
@@ -264,7 +266,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrowsAsync(transfer2);
 
 		// create one token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// wrong inputs check
 		await assertThrowsAsync(tk.transfer, 0, token1, {from: account1});
@@ -314,7 +316,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrowsAsync(transfer2);
 
 		// create one token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// transferring someone's else token throws
 		await assertThrowsAsync(transfer2);
@@ -367,7 +369,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrowsAsync(transfer2);
 
 		// create one token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// transferring someone's else token throws
 		await assertThrowsAsync(transfer2);
@@ -422,7 +424,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrowsAsync(approve1);
 
 		// create a token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// wrong inputs check
 		await assertThrowsAsync(tk.approve, 0, token1, {from: account1});
@@ -508,7 +510,7 @@ contract('PlotERC721', (accounts) => {
 		const intruder = accounts[5]; // someone who pretends to be an operator
 
 		// create a token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// approve an operator for account 1
 		await tk.setApprovalForAll(operator, true, {from: account1});
@@ -562,7 +564,7 @@ contract('PlotERC721', (accounts) => {
 		const intruder = accounts[5]; // someone who pretends to be an operator
 
 		// create a token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// define approval functions
 		const approve1 = async(account) => await tk.approve(account, token1, {from: account1});
@@ -632,7 +634,7 @@ contract('PlotERC721', (accounts) => {
 		const intruder = accounts[5]; // someone who pretends to be an operator
 
 		// create a token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// define approval function
 		const approve = async(owner, operator) => await tk.approve(operator, token1, {from: owner});
@@ -706,7 +708,7 @@ contract('PlotERC721', (accounts) => {
 		const account1 = accounts[1];
 
 		// define a function to check
-		const fn = async() => await tk.mint(account1, token1, tiers1, {from: account1});
+		const fn = async() => await tk.mint(account1, 1, tiers1, {from: account1});
 
 		// ensure function fails if account has no role required
 		await assertThrowsAsync(fn);
@@ -725,7 +727,7 @@ contract('PlotERC721', (accounts) => {
 		const account1 = accounts[1];
 
 		// mint some token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// define a function to check
 		const fn = async() => await tk.mineTo(token1, 1, {from: account1});
@@ -747,7 +749,7 @@ contract('PlotERC721', (accounts) => {
 		const account1 = accounts[1];
 
 		// mint some token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// define a function to check
 		const fn = async() => await tk.mineBy(token1, 1, {from: account1});
@@ -769,7 +771,7 @@ contract('PlotERC721', (accounts) => {
 		const account1 = accounts[1];
 
 		// mint some token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// define a function to check
 		const fn = async() => await tk.setState(token1, 0, {from: account1});
@@ -817,31 +819,30 @@ contract('PlotERC721', (accounts) => {
 		const account1 = accounts[1];
 
 		// wrong input parameters fail
-		await assertThrowsAsync(tk.mint, tk.address, token1, tiers1);
-		await assertThrowsAsync(tk.mint, 0, token1, tiers1);
-		await assertThrowsAsync(tk.mint, account1, 0, tiers1);
+		await assertThrowsAsync(tk.mint, tk.address, 1, tiers1);
+		await assertThrowsAsync(tk.mint, 0, 1, tiers1);
 		for(let i = 0; i < 5; i++) {
-			await assertThrowsAsync(tk.mint, account1, token1, tiers([i, 0, 35, 65, 85, 95, DEPTH, 0]));
+			await assertThrowsAsync(tk.mint, account1, 1, tiers([i, 0, 35, 65, 85, 95, DEPTH, 0]));
 		}
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH - 1, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH - 1, DEPTH, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, DEPTH, DEPTH - 1, DEPTH, DEPTH, 0]));
-		await assertThrowsAsync(tk.mint, account1, token1, tiers([2, 0, 35, DEPTH - 1, DEPTH, DEPTH, DEPTH, 0]));
+		await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
+		await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
+		await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
+		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
+		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
+		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH - 1, 0]));
+		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH - 1, DEPTH, 0]));
+		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH - 1, DEPTH, DEPTH, 0]));
+		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH - 1, DEPTH, DEPTH, DEPTH, 0]));
 
 		// valid inputs
-		await tk.mint(account1, token0, tiers0);
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 0, tiers0);
+		await tk.mint(account1, 1, tiers1);
 
-		// double mint fails
-		await assertThrowsAsync(tk.mint, account1, token0, tiers0);
-		await assertThrowsAsync(tk.mint, account1, token0, tiers1);
-		await assertThrowsAsync(tk.mint, account1, token1, tiers0);
-		await assertThrowsAsync(tk.mint, account1, token1, tiers1);
+		// minting in same country is still possible
+		await tk.mint(account1, 0, tiers0);
+		await tk.mint(account1, 1, tiers1);
+		await tk.mint(account1, 1, tiers0);
+		await tk.mint(account1, 0, tiers1);
 	});
 
 	it("transfer locking: impossible to transfer locked token", async() => {
@@ -859,7 +860,7 @@ contract('PlotERC721', (accounts) => {
 		const transfer1 = async() => await tk.transfer(account2, token1, {from: account1});
 
 		// create one token
-		await tk.mint(account1, token1, tiers1);
+		await tk.mint(account1, 1, tiers1);
 
 		// set token transfer lock to 1
 		await tk.setTransferLock(1);
@@ -894,7 +895,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrowsAsync(mineTo);
 
 		// create one token
-		await tk.mint(accounts[1], token1, tiers1);
+		await tk.mint(accounts[1], 1, tiers1);
 
 		// first time mining to succeeds
 		await mineTo();
@@ -922,7 +923,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrowsAsync(mineBy);
 
 		// create one token
-		await tk.mint(accounts[1], token1, tiers1);
+		await tk.mint(accounts[1], 1, tiers1);
 
 		// first time mining by succeeds
 		await mineBy();
@@ -944,8 +945,8 @@ contract('PlotERC721', (accounts) => {
 		const tk = await Token.new();
 
 		// create two tokens
-		await tk.mint(accounts[1], token0, tiers0);
-		await tk.mint(accounts[1], token1, tiers1);
+		await tk.mint(accounts[1], 0, tiers0);
+		await tk.mint(accounts[1], 1, tiers1);
 
 		// perform several random mines to reach the very bottom of both tokens
 		for(let offset = 0, delta; offset < DEPTH; offset += delta) {
@@ -980,7 +981,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrowsAsync(setState);
 
 		// create one token
-		await tk.mint(accounts[1], token1, tiers1);
+		await tk.mint(accounts[1], 1, tiers1);
 
 		// first time setting a state succeeds
 		await setState();

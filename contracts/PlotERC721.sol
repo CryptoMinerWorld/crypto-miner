@@ -44,7 +44,8 @@ import "./ERC721Receiver.sol";
  *      attributes (mostly immutable by their nature) and state variables (mutable)
  *
  * @dev Token ID consists of 32 bits, high 8 bits represent a country id
- *      (see CountryERC721) this token belongs to
+ *      (see CountryERC721) this token belongs to, low 24 bits represent
+ *      an index number of the token within a country
  *
  * @dev Contains information about tier structure (how many blocks of each tier exists),
  *      current mining state (how many blocks is already mined, is block in mining state
@@ -159,6 +160,13 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
      */
     address owner;
   }
+
+
+  /**
+   * @dev Auxiliary data structure to keep track of how many tokens
+   *      was minted for each country ID (high 8 bits of the token ID)
+   */
+  mapping(uint8 => uint24) minted;
 
 
   /**
@@ -400,10 +408,19 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   }
 
   /**
+   * @dev Allows to fetch all existing (minted) token IDs
+   * @return an ordered unsorted list of all existing token IDs
+   */
+  function getAllTokens() public constant returns(uint32[]) {
+    // read an array of all the minted tokens and return
+    return allTokens;
+  }
+
+  /**
    * @dev Allows to fetch collection of tokens, including internal token data
    *       in a single function, useful when connecting to external node like INFURA
    * @dev Each element in the collection contains
-   *      token ID (32 bits)m
+   *      token ID (32 bits)
    *      tiers (64 bits)
    *      state (32 low bits)
    * @param owner an address to query a collection for
@@ -446,6 +463,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
     // read a collection from mapping and return
     return collections[owner];
   }
+
 
   /**
    * @dev Gets token `tiers`, a packed data structure containing
@@ -628,6 +646,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
     emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset, offset + depth);
   }
 
+
   /**
    * @dev Gets the state modified date of a token
    * @param _tokenId ID of the token to get state modified date for
@@ -751,10 +770,11 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
 
 
   /**
-   * @dev Creates new token with token ID specified and
-   *      assigns an ownership `_to` for this token
+   * @dev Creates new token with token ID derived from the country ID
+   *      and assigns an ownership `_to` for this token
    * @param _to an address to assign created token ownership to
-   * @param _tokenId ID of the token to create
+   * @param _countryId ID of the country to mint token in,
+   *     high 8 bits of the token ID will be set to that number
    * @param _tiers tiers structure of the token to create, containing
    *      1. Number of tiers this plot contains (8 bits)
    *        - 2 for Antarctica or 5 for the rest of the World
@@ -762,13 +782,14 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    *        - 6 elements, 8 bits each
    *      3. Current mining block index (8 bits)
    *        - must be zero
+   * @return generated token ID
    */
-  function mint(address _to, uint32 _tokenId, uint64 _tiers) public {
+  function mint(address _to, uint8 _countryId, uint64 _tiers) public returns(uint32 _tokenId) {
     // check if caller has sufficient permissions to mint a token
     require(isSenderInRole(ROLE_TOKEN_CREATOR));
 
     // delegate call to `__mint`
-    __mint(_to, _tokenId, _tiers);
+    _tokenId = __mint(_to, _countryId, _tiers);
 
     // fire Minted event
     emit Minted(msg.sender, _to, _tokenId);
@@ -776,6 +797,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
     // fire ERC20/ERC721 transfer event
     emit Transfer(address(0), _to, _tokenId);
   }
+
 
   /**
    * @notice Total number of existing tokens (tracked by this contract)
@@ -1233,30 +1255,42 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   }
 
   /**
-   * @dev Creates new token with token ID specified and
-   *      assigns an ownership `_to` for this token
+   * @dev Creates new token with token ID derived from the country ID
+   *      and assigns an ownership `_to` for this token
    * @dev Unsafe: doesn't check if caller has enough permissions to execute the call,
    *      checks only that the token doesn't exist yet
    * @dev Must be kept private at all times
    * @param _to an address to mint token to (first owner of the token)
-   * @param _tokenId ID of the token to mint, by convention
-   *     high 8 bits of the ID represent a country
+   * @param _countryId ID of the country to mint token in,
+   *     high 8 bits of the token ID will be set to that number
    * @param _tiers tiers structure of the token
+   * @return generated token ID
    */
-  function __mint(address _to, uint32 _tokenId, uint64 _tiers) private {
+  function __mint(address _to, uint8 _countryId, uint64 _tiers) private returns(uint32 _tokenId) {
     // validate destination address
     require(_to != address(0));
     require(_to != address(this));
 
-    // verify token ID is not zero
-    require(_tokenId != 0);
+    // increment minted mapping counter
+    minted[_countryId]++;
+
+    // verify we didn't overflow
+    require(minted[_countryId] != 0);
+
+    // derive token ID from `minted` mapping
+    _tokenId = uint32(_countryId) << 24 | minted[_countryId];
+
+    // ensure that token with such ID doesn't exist
+    require(!exists(_tokenId));
 
     // extract number of tiers this plot contains
     uint8 n = uint8(_tiers >> 56);
 
     // ensure tiers array contains exactly
     // 2 (Antarctica) or 5 (Rest of the World) elements
-    require(n == 2 || n == 5);
+    // Update: as for the latest requirement, tiers structure
+    // can be less strict and allows any number of tiers from 1 to 5
+    require(n >= 1 && n <= 5);
 
     // ensure tier1 offset is zero
     require(uint8(_tiers >> 48) == 0);
@@ -1275,9 +1309,6 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
 
     // verify initial offset is zero
     require(uint8(_tiers) == 0);
-
-    // ensure that token with such ID doesn't exist
-    require(!exists(_tokenId));
 
     // create new token in memory
     LandPlot memory token = LandPlot({
