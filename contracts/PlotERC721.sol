@@ -780,7 +780,13 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    *      1. Number of tiers this plot contains (8 bits)
    *        - 2 for Antarctica or 5 for the rest of the World
    *      2. Tier structure of the plot (48 bits)
-   *        - 6 elements, 8 bits each
+   *         6 elements, 8 bits each:
+   *          - Tier 1 offset (start of Tier 1), usually zero
+   *          - Tier 2 offset (start of Tier 2 / end of Tier 1)
+   *          - Tier 3 offset (start of Tier 3 / end of Tier 2)
+   *          - Tier 4 offset (start of Tier 4 / end of Tier 3)
+   *          - Tier 5 offset (start of Tier 5 / end of Tier 4)
+   *          - End of Tier 5 (block depth)
    *      3. Current mining block index (8 bits)
    *        - must be zero
    * @return generated token ID
