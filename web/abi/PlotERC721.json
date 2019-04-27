@@ -36,6 +36,25 @@
     },
     {
       "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "name": "minted",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [],
       "name": "InterfaceId_ERC165",
       "outputs": [
@@ -115,7 +134,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint32"
+          "type": "uint24"
         }
       ],
       "payable": false,
@@ -200,7 +219,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint32"
+          "type": "uint24"
         }
       ],
       "payable": false,
@@ -560,7 +579,7 @@
         {
           "indexed": true,
           "name": "_tokenId",
-          "type": "uint32"
+          "type": "uint256"
         }
       ],
       "name": "Minted",
@@ -726,6 +745,20 @@
     },
     {
       "constant": true,
+      "inputs": [],
+      "name": "getAllTokens",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint24[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "owner",
@@ -736,7 +769,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint128[]"
+          "type": "uint96[]"
         }
       ],
       "payable": false,
@@ -755,7 +788,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint32[]"
+          "type": "uint24[]"
         }
       ],
       "payable": false,
@@ -1070,8 +1103,8 @@
           "type": "address"
         },
         {
-          "name": "_tokenId",
-          "type": "uint32"
+          "name": "_countryId",
+          "type": "uint8"
         },
         {
           "name": "_tiers",
@@ -1079,7 +1112,12 @@
         }
       ],
       "name": "mint",
-      "outputs": [],
+      "outputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint24"
+        }
+      ],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1398,5 +1436,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-04-11T16:16:48.964Z"
+  "updatedAt": "2019-04-27T14:06:20.380Z"
 }
