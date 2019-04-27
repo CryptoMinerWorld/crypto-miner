@@ -46,7 +46,7 @@ const DEPTH = 100;
 
 // some token to work with
 const token0 = 1; // first land plot in Antarctica
-const token1 = 16777217; // first land plot in Russia
+const token1 = 65537; // first land plot in Russia
 const layers0 = [
 	2,
 	0,
@@ -96,6 +96,7 @@ contract('PlotERC721', (accounts) => {
 		assert.equal(0, (await tk.getCollection(account1)).length, "non-empty initial token collection for account1");
 		assert.equal(0, await tk.totalSupply(), "non-zero initial token total supply");
 		assert.equal(0, await tk.balanceOf(account1), "non-zero initial balance for account1");
+		assert.equal(0, await tk.minted(1), "non-zero initial counter for minted tokens");
 		assert(!await tk.exists(token1), "token 1 already exists initially");
 
 		// create one token
@@ -107,6 +108,7 @@ contract('PlotERC721', (accounts) => {
 		assert.equal(1, (await tk.getCollection(account1)).length, "empty token collection for account1");
 		assert.equal(1, await tk.totalSupply(), "zero token total supply");
 		assert.equal(1, await tk.balanceOf(account1), "zero balance for account1");
+		assert.equal(1, await tk.minted(1), "zero counter for minted tokens");
 		assert(await tk.exists(token1), "token doesn't exist after minting");
 
 		// balance of zero address fails
@@ -232,8 +234,8 @@ contract('PlotERC721', (accounts) => {
 		assert.deepEqual([web3.toBigNumber(token0), web3.toBigNumber(token1)], await tk.getCollection(account1), "wrong token collection for account1");
 
 		// calculate token0 and token1 packed structures
-		const packed0 = two.pow(64).times(token0).plus(tiers0).times(two.pow(32)).plus(1);
-		const packed1 = two.pow(64).times(token1).plus(tiers1).times(two.pow(32)).plus(1);
+		const packed0 = two.pow(64).times(token0).plus(tiers0).times(two.pow(8)).plus(1);
+		const packed1 = two.pow(64).times(token1).plus(tiers1).times(two.pow(8)).plus(1);
 		// calculate token1 extended packed structure
 		const fullPacked1 = [
 			tiers1.times(two.pow(32)).plus(0).times(two.pow(128)).plus(1).times(two.pow(32)).plus(0),

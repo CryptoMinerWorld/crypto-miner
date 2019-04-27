@@ -274,10 +274,8 @@ contract('PlotSale', (accounts) => {
 		const m0 = await web3.eth.getBalance(m);
 		const b0 = await web3.eth.getBalance(b);
 
-		// buy n plots in Russia
-		const n = 40;
-		const gasUsed = (await s.buy(1, n, 0, {from: p, value: n * SALE_PRICE})).receipt.gasUsed;
-		console.log(`\t${gasUsed} gas used when buying ${n} plots`);
+		// buy one plot in Russia
+		const gasUsed = (await s.buy(1, 1, 0, {from: p, value: SALE_PRICE})).receipt.gasUsed;
 
 		// save new balances of the participants
 		const p1 = await web3.eth.getBalance(p);
@@ -286,19 +284,15 @@ contract('PlotSale', (accounts) => {
 		const b1 = await web3.eth.getBalance(b);
 
 		// verify player got n tokens
-		assert.equal(n, await t.balanceOf(p), "wrong player token balance");
-
+		assert.equal(1, await t.balanceOf(p), "wrong player token balance");
 		// verify player balance decreased properly
-		assert.equal(n * SALE_PRICE, p0.minus(p1).minus(gasUsed), "wrong player balance");
-
+		assert.equal(SALE_PRICE, p0.minus(p1).minus(gasUsed), "wrong player balance");
 		// verify world chest balance increased properly
-		assert.equal(n / 5 * SALE_PRICE, w1.minus(w0), "wrong world chest balance");
-
+		assert.equal(SALE_PRICE / 5, w1.minus(w0), "wrong world chest balance");
 		// verify monthly chest balance increased properly
-		assert.equal(n / 20 * SALE_PRICE, m1.minus(m0), "wrong monthly chest balance");
-
+		assert.equal(SALE_PRICE / 20, m1.minus(m0), "wrong monthly chest balance");
 		// verify beneficiary account balance increased properly
-		assert.equal(n / 4 * 3 * SALE_PRICE, b1.minus(b0), "wrong beneficiary balance");
+		assert.equal(SALE_PRICE / 4 * 3, b1.minus(b0), "wrong beneficiary balance");
 	});
 	it("buy: ETH flow (owned country)", async() => {
 		// define plot sale dependencies
@@ -332,10 +326,8 @@ contract('PlotSale', (accounts) => {
 		const b0 = await web3.eth.getBalance(b);
 		const p0 = await web3.eth.getBalance(p);
 
-		// buy n plots in Russia
-		const n = 40;
-		const gasUsed = (await s.buy(1, n, 0, {from: p, value: n * SALE_PRICE})).receipt.gasUsed;
-		console.log(`\t${gasUsed} gas used when buying ${n} plots`);
+		// buy one plot in Russia
+		const gasUsed = (await s.buy(1, 1, 0, {from: p, value: SALE_PRICE})).receipt.gasUsed;
 
 		// save new balances of the participants
 		const w1 = await web3.eth.getBalance(w);
@@ -345,17 +337,17 @@ contract('PlotSale', (accounts) => {
 		const p1 = await web3.eth.getBalance(p);
 
 		// verify player got n tokens
-		assert.equal(n, await t.balanceOf(p), "wrong player token balance");
+		assert.equal(1, await t.balanceOf(p), "wrong player token balance");
 		// verify player balance decreased properly
-		assert.equal(n * SALE_PRICE, p0.minus(p1).minus(gasUsed), "wrong player balance");
+		assert.equal(SALE_PRICE, p0.minus(p1).minus(gasUsed), "wrong player balance");
 		// verify world chest balance increased properly
-		assert.equal(n / 5 * SALE_PRICE, w1.minus(w0), "wrong world chest balance");
+		assert.equal(SALE_PRICE / 5, w1.minus(w0), "wrong world chest balance");
 		// verify monthly chest balance increased properly
-		assert.equal(n / 20 * SALE_PRICE, m1.minus(m0), "wrong monthly chest balance");
+		assert.equal(SALE_PRICE / 20, m1.minus(m0), "wrong monthly chest balance");
 		// verify country owner balance increased properly
-		assert.equal(n / 10 * SALE_PRICE, o1.minus(o0), "wrong country owner balance (PlotSale.balanceOf)");
+		assert.equal(SALE_PRICE / 10, o1.minus(o0), "wrong country owner balance (PlotSale.balanceOf)");
 		// verify beneficiary account balance increased properly
-		assert.equal(n / 20 * 13 * SALE_PRICE, b1.minus(b0), "wrong beneficiary balance");
+		assert.equal(SALE_PRICE / 20 * 13, b1.minus(b0), "wrong beneficiary balance");
 
 
 		// save real balance of the country owner
@@ -366,7 +358,7 @@ contract('PlotSale', (accounts) => {
 		const _o1 = await web3.eth.getBalance(o);
 
 		// verify country owner real balance increased properly
-		assert.equal(n / 10 * SALE_PRICE, _o1.minus(_o0).plus(_gasUsed), "wrong country owner balance");
+		assert.equal(SALE_PRICE / 10, _o1.minus(_o0).plus(_gasUsed), "wrong country owner balance");
 	});
 	it("buy: referral points flow", async() => {
 		// define plot sale dependencies
@@ -393,16 +385,21 @@ contract('PlotSale', (accounts) => {
 		// grant sale a permission to add known addresses into ref tracker
 		await r.updateRole(s.address, ROLE_REF_POINTS_ISSUER | ROLE_SELLER);
 
+		// define convenient reusable buying function
+		const buy = async (n, a, b) => {
+			await s.buy(1, n, b, {from: a, value: n * SALE_PRICE + Math.floor(Math.random() * SALE_PRICE)});
+		};
+
 		// player 1 buys a plot and becomes a referrer
-		await s.buy(1, 1, 0, {from: p1, value: SALE_PRICE});
+		await buy(1, p1, 0);
 		// player 2 buys 4 plots referring to player 1 - it's not enough to get points
-		await s.buy(1, 4, p1, {from: p2, value: 4 * SALE_PRICE});
+		await buy(4, p2, p1);
 		// player 3 buys 5 plots referring to player 2 – both get referral points
-		await s.buy(1, 5, p2, {from: p3, value: 5 * SALE_PRICE});
+		await buy(5, p3, p2);
 		// player 4 buys few plots - not enough to get referral points
-		await s.buy(1, 1, p1, {from: p4, value: SALE_PRICE});
+		await buy(1, p4, p1);
 		// player 5 buys 9 plots referring to player 4 - both get referral points
-		await s.buy(1, 9, p4, {from: p5, value: 9 * SALE_PRICE});
+		await buy(9, p5, p4);
 
 		// verify referral points balances
 		assert.equal(0, await r.balanceOf(p1), "wrong player 1 ref points balance");

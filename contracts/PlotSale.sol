@@ -128,17 +128,6 @@ contract PlotSale is AccessControlLight {
   uint32 public saleStartUTC;
 
   /**
-   * @dev Total amount of plots sold, initially zero, increases when plots are sold
-   */
-  uint32 public sold;
-
-  /**
-   * @dev Mapping to store number of sold plots for each country
-   * @dev Maps Country ID => Number of Plots Sold
-   */
-  mapping(uint8 => uint16) public soldByCountry;
-
-  /**
    * @dev Mapping to store country balances – an amount of wei each country
    *      accumulated as a country sale tax
    * @dev Country owner may withdraw that balance
@@ -151,7 +140,7 @@ contract PlotSale is AccessControlLight {
    * @param _by an address which has bought a land plot
    * @param _tokenId ID of the plot bought
    */
-  event PlotBought(address indexed _by, uint32 _tokenId);
+  event PlotBought(address indexed _by, uint24 _tokenId);
 
   /**
    * @dev Fired in `buy()`, `withdraw()` and `withdrawFrom()`
@@ -231,19 +220,19 @@ contract PlotSale is AccessControlLight {
     require(isFeatureEnabled(FEATURE_SALE_ENABLED));
 
     // verify that sale has already started
-    require(now >= soldBy);
+    require(now >= saleStartUTC);
 
     // verify country ID is valid
-    require(countryId != 0 && countryId < countryInstance.getNumberOfCountries() + 1);
+    require(countryId != 0 && countryId <= countryInstance.getNumberOfCountries());
 
     // save current sold by country value, we'll use it heavily
-    uint16 soldBy = soldByCountry[countryId];
-
-    // verify that specified country has enough plots available on sale
-    require(soldBy + n < countryInstance.countryData(countryId - 1));
+    uint16 minted = plotInstance.minted(countryId);
 
     // arithmetic overflow and non-zero `n` check
-    require(soldBy + n > soldBy);
+    require(minted + n > minted);
+
+    // verify that specified country has enough plots available on sale
+    require(minted + n <= countryInstance.countryData(countryId - 1));
 
     // calculate the price of the buying transaction
     // maximum value for `SALE_PRICE * n` is 5.1 ETH for `n = 255`,
@@ -252,12 +241,6 @@ contract PlotSale is AccessControlLight {
 
     // verify transaction has enough value supplied
     require(msg.value >= price);
-
-    // update sold plots counter for the country
-    soldByCountry[countryId] += n;
-
-    // update total sold plots counter
-    sold += n;
 
     // transfer 20% to the world chest
     worldChest.transfer(price / 5);
@@ -284,7 +267,7 @@ contract PlotSale is AccessControlLight {
     beneficiary.transfer(price - price / 4 - tax);
 
     // mint tokens required - delegate to `__mint`
-    __mint(msg.sender, countryId, soldBy + 1, n);
+    __mint(msg.sender, countryId, n);
 
     // issue referral points – if applicable - delegate call to `__issueRefPoints`
     __issueRefPoints(n / 5, referrer);
@@ -408,20 +391,16 @@ contract PlotSale is AccessControlLight {
    * @dev Auxiliary function used to mint `length` tokens to `to`
    * @param to an address to mint tokens to
    * @param countryId ID of the country the tokens belong to
-   * @param offset ID of the first token to mint
-   * @param length number of tokens to mint
+   * @param n number of tokens to mint
    */
-  function __mint(address to, uint8 countryId, uint16 offset, uint8 length) private {
+  function __mint(address to, uint8 countryId, uint8 n) private {
     // we're going to mint `length` tokens
-    for(uint8 i = 0; i < length; i++) {
+    for(uint8 i = 0; i < n; i++) {
       // TODO: generate randomized tiers structure
       uint64 tiers = 0x05002341555F6400;
 
-      // determine tokenId, pack it into 32 bits
-      uint32 tokenId = uint32(countryId) << 24 | offset + i;
-
-      // delegate call to `PlotERC721.mint`
-      plotInstance.mint(to, tokenId, tiers);
+      // delegate call to `PlotERC721.mint` and get generated token ID
+      uint24 tokenId = plotInstance.mint(to, countryId, tiers);
 
       // emit an event
       emit PlotBought(to, tokenId);

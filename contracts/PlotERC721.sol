@@ -40,11 +40,11 @@ import "./ERC721Receiver.sol";
  *      can spawn an item (silver, gold, artifacts, gems, keys, chests, etc.)
  *
  * @dev A plot is an ERC721 non-fungible token, which maps Token ID -
- *      a 32 bit number - to a set of plot properties -
+ *      a 24 bit number - to a set of plot properties -
  *      attributes (mostly immutable by their nature) and state variables (mutable)
  *
- * @dev Token ID consists of 32 bits, high 8 bits represent a country id
- *      (see CountryERC721) this token belongs to, low 24 bits represent
+ * @dev Token ID consists of 24 bits, high 8 bits represent a country id
+ *      (see CountryERC721) this token belongs to, low 16 bits represent
  *      an index number of the token within a country
  *
  * @dev Contains information about tier structure (how many blocks of each tier exists),
@@ -144,6 +144,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
      * @dev Token index within an owner's collection of tokens
      * @dev Changes when token is being transferred (token ownership changes)
      * @dev May change if some other token of the same owner is transferred
+     * @dev Only low 24 bits are used
      */
     uint32 index;
 
@@ -166,7 +167,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @dev Auxiliary data structure to keep track of how many tokens
    *      was minted for each country ID (high 8 bits of the token ID)
    */
-  mapping(uint8 => uint24) minted;
+  mapping(uint8 => uint16) public minted;
 
 
   /**
@@ -198,7 +199,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    *      as a length of each collection in the mapping
    * @dev ERC20 balances[owner] is equal to collections[owner].length
    */
-  mapping(address => uint32[]) public collections;
+  mapping(address => uint24[]) public collections;
 
   /**
    * @dev Array with all token ids, used for enumeration
@@ -206,7 +207,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    *      as a length of this collection
    * @dev ERC20 totalSupply() is equal to allTokens.length
    */
-  uint32[] public allTokens;
+  uint24[] public allTokens;
 
   /**
    * @dev The data in token's state may contain lock(s)
@@ -304,7 +305,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @param _to an address which received created token (first owner)
    * @param _tokenId ID of the newly created token
    */
-  event Minted(address indexed _by, address indexed _to, uint32 indexed _tokenId);
+  event Minted(address indexed _by, address indexed _to, uint256 indexed _tokenId);
 
   /**
    * @dev Fired in setState()
@@ -378,7 +379,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    *
    *      Second integer (low bits) contains (from higher to lower bits order):
    *          creationTime, 32 bits
-   *          index, 32 bits
+   *          index, 32 bits (only low 24 bits are used)
    *          ownershipModified, 32 bits
    *          owner, 160 bits
    * @dev Throws if token doesn't exist
@@ -411,7 +412,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @dev Allows to fetch all existing (minted) token IDs
    * @return an ordered unsorted list of all existing token IDs
    */
-  function getAllTokens() public constant returns(uint32[]) {
+  function getAllTokens() public constant returns(uint24[]) {
     // read an array of all the minted tokens and return
     return allTokens;
   }
@@ -420,32 +421,32 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @dev Allows to fetch collection of tokens, including internal token data
    *       in a single function, useful when connecting to external node like INFURA
    * @dev Each element in the collection contains
-   *      token ID (32 bits)
+   *      token ID (24 bits)
    *      tiers (64 bits)
-   *      state (32 low bits)
+   *      state (8 low bits)
    * @param owner an address to query a collection for
    * @return an ordered unsorted list of packed token data
    */
-  function getPackedCollection(address owner) public constant returns (uint128[]) {
+  function getPackedCollection(address owner) public constant returns (uint96[]) {
     // get an array of token IDs owned by an `owner` address
-    uint32[] memory tokenIds = getCollection(owner);
+    uint24[] memory tokenIds = getCollection(owner);
 
     // how many tokens are there in a collection
-    uint32 balance = uint32(tokenIds.length);
+    uint24 balance = uint24(tokenIds.length);
 
     // data container to store the result
-    uint128[] memory result = new uint128[](balance);
+    uint96[] memory result = new uint96[](balance);
 
     // fetch token info one by one and pack into structure
     for(uint32 i = 0; i < balance; i++) {
       // token ID to work with
-      uint32 tokenId = tokenIds[i];
+      uint24 tokenId = tokenIds[i];
 
       // read token data structure from the storage
       LandPlot memory plot = tokens[tokenId];
 
       // pack the data
-      result[i] = uint128(tokenId) << 96 | uint96(plot.tiers) << 32 | uint32(plot.state);
+      result[i] = uint96(tokenId) << 72 | uint72(plot.tiers) << 8 | uint8(plot.state);
     }
 
     // return the packed data structure
@@ -459,7 +460,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @param owner an address to query a collection for
    * @return an ordered unsorted list of token IDs
    */
-  function getCollection(address owner) public constant returns(uint32[]) {
+  function getCollection(address owner) public constant returns(uint24[]) {
     // read a collection from mapping and return
     return collections[owner];
   }
@@ -784,7 +785,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    *        - must be zero
    * @return generated token ID
    */
-  function mint(address _to, uint8 _countryId, uint64 _tiers) public returns(uint32 _tokenId) {
+  function mint(address _to, uint8 _countryId, uint64 _tiers) public returns(uint24 _tokenId) {
     // check if caller has sufficient permissions to mint a token
     require(isSenderInRole(ROLE_TOKEN_CREATOR));
 
@@ -1207,8 +1208,8 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @param _tokenId ID of the token to move
    */
   function __move(address _from, address _to, uint256 _tokenId) private {
-    // cast token ID to uint32 space
-    uint32 tokenId = uint32(_tokenId);
+    // cast token ID to uint24 space
+    uint24 tokenId = uint24(_tokenId);
 
     // overflow check, failure impossible by design of mint()
     assert(tokenId == _tokenId);
@@ -1217,20 +1218,20 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
     LandPlot storage token = tokens[tokenId];
 
     // get a reference to the collection where token is now
-    uint32[] storage source = collections[_from];
+    uint24[] storage source = collections[_from];
 
     // get a reference to the collection where token goes to
-    uint32[] storage destination = collections[_to];
+    uint24[] storage destination = collections[_to];
 
     // collection `source` cannot be empty, by design of transfer functions
     assert(source.length != 0);
 
     // index of the token within collection `source`
-    uint32 i = token.index;
+    uint24 i = uint24(token.index); // we use only low 24 bits of the index
 
     // we put the last token in the collection `source` to the position released
     // get an ID of the last token in `source`
-    uint32 sourceId = source[source.length - 1];
+    uint24 sourceId = source[source.length - 1];
 
     // update last token index to point to proper place in the collection `source`
     tokens[sourceId].index = i;
@@ -1242,7 +1243,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
     source.length--;
 
     // update token index according to position in new collection `destination`
-    token.index = uint32(destination.length);
+    token.index = uint24(destination.length);
 
     // update token owner
     token.owner = _to;
@@ -1266,7 +1267,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @param _tiers tiers structure of the token
    * @return generated token ID
    */
-  function __mint(address _to, uint8 _countryId, uint64 _tiers) private returns(uint32 _tokenId) {
+  function __mint(address _to, uint8 _countryId, uint64 _tiers) private returns(uint24 _tokenId) {
     // validate destination address
     require(_to != address(0));
     require(_to != address(this));
@@ -1278,7 +1279,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
     require(minted[_countryId] != 0);
 
     // derive token ID from `minted` mapping
-    _tokenId = uint32(_countryId) << 24 | minted[_countryId];
+    _tokenId = uint24(_countryId) << 16 | minted[_countryId];
 
     // ensure that token with such ID doesn't exist
     require(!exists(_tokenId));
@@ -1317,7 +1318,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
       state: 1,
       stateModified: 0,
       creationTime: uint32(now),
-      index: uint32(collections[_to].length),
+      index: uint24(collections[_to].length),
       ownershipModified: 0,
       owner: _to
     });
