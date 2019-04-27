@@ -536,7 +536,7 @@ contract SilverSale is AccessControlLight {
   /**
    * @notice Buys several boxes of a single type
    *      (Silver, Rotund Silver, Goldish Silver) and allows
-   *      specify a referrer address of the existing buyer
+   *      to specify a referrer address of the existing buyer
    * @notice If referrer address is correct (specifies existing buyer)
    *      and if new buyer is indeed new one (is not an existing buyer)
    *      then both referrer and referred will get referral points
