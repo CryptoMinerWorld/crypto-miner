@@ -36,7 +36,7 @@ module.exports = async function(deployer, network, accounts) {
 	if(network !== "mainnet") {
 		refTrackerAddress = "0x1F85f59eC94725E75B8CfDe50da3e47Bf3605B13";
 		countryAddress = "0x6AC79cbA4Cf4c07303d30410739b13Ee6914b619";
-		plotAddress = "0xB06F3Db96aC3ab3e1A7FdFD5b6d5Da2bda84c112";
+		plotAddress = "0xd2d1B1FE416E72aDddf6C70f1E16b3bfc90e510f";
 		worldChest = "0x2281f7Dc57011dA1668eA9460BB40340dB89e29e"; // Basil [1]
 		monthlyChest = "0x5446c218245a9440Ac3B03eda826260a9198C7a9"; // Basil [2]
 		beneficiary = "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69";  // Basil
