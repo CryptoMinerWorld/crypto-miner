@@ -97,6 +97,12 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
      * @dev Packed data structure, containing
      *      1. Number of tiers this plot contains (8 bits)
      *      2. Tier structure of the plot (48 bits)
+     *          - Tier 1 offset (start of Tier 1), usually zero, 8 bits
+     *          - Tier 2 offset (start of Tier 2 / end of Tier 1), 8 bits
+     *          - Tier 3 offset (start of Tier 3 / end of Tier 2), 8 bits
+     *          - Tier 4 offset (start of Tier 4 / end of Tier 3), 8 bits
+     *          - Tier 5 offset (start of Tier 5 / end of Tier 4), 8 bits
+     *          - End of Tier 5 (block depth), 8 bits
      *      3. Current mining block index (8 bits)
      * @dev Number of tiers is:
      *        two for Antarctica,
@@ -470,6 +476,12 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @dev Gets token `tiers`, a packed data structure containing
    *      1. Number of tiers this plot contains (8 bits)
    *      2. Tier structure of the plot (48 bits)
+   *          - Tier 1 offset (start of Tier 1), usually zero, 8 bits
+   *          - Tier 2 offset (start of Tier 2 / end of Tier 1), 8 bits
+   *          - Tier 3 offset (start of Tier 3 / end of Tier 2), 8 bits
+   *          - Tier 4 offset (start of Tier 4 / end of Tier 3), 8 bits
+   *          - Tier 5 offset (start of Tier 5 / end of Tier 4), 8 bits
+   *          - End of Tier 5 (block depth), 8 bits
    *      3. Current mining block index (8 bits)
    * @param _tokenId ID of the token to get tiers for
    * @return token tiers packed data structure
