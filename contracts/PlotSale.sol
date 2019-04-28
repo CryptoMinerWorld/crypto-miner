@@ -62,7 +62,7 @@ contract PlotSale is AccessControlLight {
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant PLOT_UID_REQUIRED = 0xb02d092715657ae6b84a2b0eeefce965cd27491cc0108cb42196c04e0039ceac;
+  uint256 public constant PLOT_UID_REQUIRED = 0x429c5993d58398640c80b2d9ff7667713a4d472cb2c3beda544c8d19e1ac1d54;
 
   /**
    * @notice Enables world land plot sale

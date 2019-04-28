@@ -66,7 +66,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0xb02d092715657ae6b84a2b0eeefce965cd27491cc0108cb42196c04e0039ceac;
+  uint256 public constant TOKEN_UID = 0x429c5993d58398640c80b2d9ff7667713a4d472cb2c3beda544c8d19e1ac1d54;
 
   /**
    * @dev ERC20 compliant token symbol
@@ -222,8 +222,16 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @dev The token is locked if it contains any bits
    *      from the `transferLock` in its `state` set
    */
-  uint128 public transferLock;
+  uint128 public transferLock = DEFAULT_MINING_BIT;
 
+  /**
+   * @dev Default bitmask indicating that the plot is being `mined`
+   * @dev Consists of a single bit at position 1 – binary 1
+   * @dev The bit meaning in gem's `state` is as follows:
+   *      0: not mining
+   *      1: mining
+   */
+  uint64 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
 
   /**
    * @notice The 'transfers' feature supports regular token transfers
@@ -1333,7 +1341,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
     LandPlot memory token = LandPlot({
       tiers: 0xFFFFFFFFFFFFFF00 & _tiers, // erase initial offset
       offsetModified: 0,
-      state: 1,
+      state: 0,
       stateModified: 0,
       creationTime: uint32(now),
       index: uint24(collections[_to].length),
