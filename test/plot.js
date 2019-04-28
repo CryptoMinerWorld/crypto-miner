@@ -209,7 +209,7 @@ contract('PlotERC721', (accounts) => {
 		assert.equal(0, await tk.getOffset(token0), "token0 has wrong offset");
 		assert(!await tk.isFullyMined(token0), "token0 is fully mined");
 		assert.equal(0, await tk.getStateModified(token0), "token0 has non-zero stateModified");
-		assert.equal(1, await tk.getState(token0), "token0 has wrong state");
+		assert.equal(0, await tk.getState(token0), "token0 has wrong state");
 		assert(await tk.isTransferable(token0), "token0 is not transferable");
 		assert(await tk.getCreationTime(token0) > now, "wrong token0 creation date");
 		assert.equal(0, await tk.getOwnershipModified(token0), "token0 has non-zero ownershipModified");
@@ -234,11 +234,11 @@ contract('PlotERC721', (accounts) => {
 		assert.deepEqual([web3.toBigNumber(token0), web3.toBigNumber(token1)], await tk.getCollection(account1), "wrong token collection for account1");
 
 		// calculate token0 and token1 packed structures
-		const packed0 = two.pow(64).times(token0).plus(tiers0).times(two.pow(8)).plus(1);
-		const packed1 = two.pow(64).times(token1).plus(tiers1).times(two.pow(8)).plus(1);
+		const packed0 = two.pow(64).times(token0).plus(tiers0).times(two.pow(8)).plus(0); // zero stands for token state
+		const packed1 = two.pow(64).times(token1).plus(tiers1).times(two.pow(8)).plus(0); // zero stands for token state
 		// calculate token1 extended packed structure
 		const fullPacked1 = [
-			tiers1.times(two.pow(32)).plus(0).times(two.pow(128)).plus(1).times(two.pow(32)).plus(0),
+			tiers1.times(two.pow(32)).plus(0).times(two.pow(128)).plus(0).times(two.pow(32)).plus(0),
 			(await tk.getCreationTime(token1)).times(two.pow(32)).plus(1).times(two.pow(32)).plus(0).times(two.pow(160)).plus(web3.toBigNumber(account1))
 		];
 
@@ -776,7 +776,7 @@ contract('PlotERC721', (accounts) => {
 		await tk.mint(account1, 1, tiers1);
 
 		// define a function to check
-		const fn = async() => await tk.setState(token1, 0, {from: account1});
+		const fn = async() => await tk.setState(token1, 1, {from: account1});
 
 		// ensure function fails if account has no role required
 		await assertThrowsAsync(fn);
@@ -864,8 +864,11 @@ contract('PlotERC721', (accounts) => {
 		// create one token
 		await tk.mint(account1, 1, tiers1);
 
-		// set token transfer lock to 1
-		await tk.setTransferLock(1);
+		// set token state to 2
+		await tk.setState(token1, 2);
+
+		// set token transfer lock to 2 as well
+		await tk.setTransferLock(2);
 
 		// ensure token cannot be transferred
 		assert(!await tk.isTransferable(token1), "token1 is still transferable");
@@ -873,8 +876,8 @@ contract('PlotERC721', (accounts) => {
 		// locked token (state & transferLock != 0) cannot be transferred
 		await assertThrowsAsync(transfer1);
 
-		// set token transfer lock to 2
-		await tk.setTransferLock(2);
+		// set token transfer lock to 4
+		await tk.setTransferLock(4);
 
 		// ensure token can be transferred
 		assert(await tk.isTransferable(token1), "token1 is not transferable");
