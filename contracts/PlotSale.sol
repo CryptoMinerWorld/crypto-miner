@@ -189,7 +189,6 @@ contract PlotSale is AccessControlLight {
     countryInstance = CountryERC721(_country);
     plotInstance = PlotERC721(_plot);
 
-    // verify versions
     // verify smart contract versions
     require(refPointsTracker.TRACKER_VERSION() == REF_TRACKER_UID_REQUIRED);
     require(countryInstance.TOKEN_VERSION() == COUNTRY_UID_REQUIRED);
