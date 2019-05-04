@@ -138,11 +138,11 @@ contract GemERC721 is AccessControl, ERC165 {
 
   /// @dev Default bitmask indicating that the gem is `mining`
   /// @dev Consists of a single bit at position 1 – binary 1
-  /// @dev The bit meaning in gem's `state` is as follows:
+  /// @dev The bit meaning in token's `state` is as follows:
   ///      0: not mining
   ///      1: mining
   uint64 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
-  
+
   /// @notice Exchange is responsible for trading tokens on behalf of token holders
   /// @dev Role ROLE_EXCHANGE allows executing transfer on behalf of token holders
   /// @dev Not used

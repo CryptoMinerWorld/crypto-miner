@@ -4,6 +4,8 @@ pragma solidity 0.4.23;
  * @dev Access control module provides an API to check
  *      if specific operation is permitted globally and
  *      if particular user's has a permission to execute it
+ * @dev Deprecated. Use AccessControlLight which provides the
+ *      same functionality but uses less gas on deployment
  */
 contract AccessControl {
   /// @notice Role manager is responsible for assigning the roles
