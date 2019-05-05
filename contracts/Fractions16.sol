@@ -1,11 +1,15 @@
 pragma solidity 0.4.23;
 
 /**
+ * @title Fractions 16-bit Library
+ *
  * @notice Library for working with fractions.
  * @notice A fraction is represented by two numbers - nominator and denominator.
  * @dev A fraction is represented as uint16,
  *      higher 8 bits representing nominator
  *      and lower 8 bits representing denominator
+ *
+ * @author Basil Gorin
  */
 library Fractions16 {
   /**
@@ -96,6 +100,7 @@ library Fractions16 {
    * @return nominator
    */
   function getNominator(uint16 f) internal pure returns(uint8) {
+    // return high 8 bits
     return uint8(f >> 8);
   }
 
@@ -105,6 +110,7 @@ library Fractions16 {
    * @return denominator
    */
   function getDenominator(uint16 f) internal pure returns(uint8) {
+    // return low 8 bits
     return uint8(f);
   }
 

@@ -1,5 +1,8 @@
 pragma solidity 0.4.23;
 
+/**
+ * @dev Deprecated. Use Fractions16/Fractions32 instead
+ */
 library Fractions {
   /// @dev 32-bit structure representing proper fraction
   struct Fraction {
