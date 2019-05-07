@@ -227,11 +227,11 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
   /**
    * @dev Default bitmask indicating that the plot is being `mined`
    * @dev Consists of a single bit at position 1 – binary 1
-   * @dev The bit meaning in gem's `state` is as follows:
+   * @dev The bit meaning in token's `state` is as follows:
    *      0: not mining
    *      1: mining
    */
-  uint64 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
+  uint128 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
 
   /**
    * @notice The 'transfers' feature supports regular token transfers
