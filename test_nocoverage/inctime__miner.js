@@ -114,7 +114,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		// create a high grade low level gem
 		await gem.mint(accounts[0], 1, 1, 0, 1, 1, 1, 6, 999999);
 
-		// rewind 7 minutes forward to accumulate enough resting energy
+		// rewind 13 minutes forward to accumulate enough resting energy
 		for(let i = 0; i < 52; i++) {
 			await increaseTime(15);
 		}
@@ -131,10 +131,12 @@ contract('Miner (Time Increase)', (accounts) => {
 		// verify gem level allows to mine only one block
 		assert.equal(1, await miner.levelAllowsToMineTo(1, 1), "wrong level allows to mine to");
 		assert.equal(1, await miner.levelAllowsToMineBy(1, 1), "wrong level allows to mine by");
+		// verify energetic properties of the gem and mining rate
 		assert.equal(13, await miner.energeticAgeOf(1), "wrong energetic age of");
 		assert.equal(7, await miner.restingEnergyOf(1), "wrong resting energy of");
 		assert.equal(499999900, await miner.miningRateOf(1), "wrong mining rate of a gem");
 		assert.equal(34, await miner.effectiveRestingEnergyOf(1), "wrong effective resting energy of a gem");
+		// verify plot structure
 		assert.equal(1, await plot.getTierDepth(1, 1), "wrong tier 1 depth");
 
 		// bind gem to a plot, it should release immediately (resting energy mining)
@@ -148,6 +150,54 @@ contract('Miner (Time Increase)', (accounts) => {
 
 		// verify plot is mined by one block
 		assert.equal(1, await plot.getOffset(1), "wrong plot offset after mining");
+	});
+
+	it("mining: evaluating plot offset", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// grant miner permissions to modify gem's state
+		await gem.addOperator(miner.address, ROLE_STATE_PROVIDER_GEM);
+		// grant miner permission(s) to update plot
+		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
+
+		// create plot in Antarctica
+		await plot.mint(accounts[0], 0, web3.toBigNumber("0x0200236464646400"));
+		// create a high grade high level gem
+		await gem.mint(accounts[0], 1, 1, 0, 1, 1, 5, 6, 999999);
+
+		// bind gem to a plot
+		await miner.bind(1, 1, 0);
+
+		// initially evaluate returns zero
+		assert.equal(0, await miner.evaluate(1), "non-zero evaluated offset");
+
+		// rewind 7 minutes forward to mine one block
+		for(let i = 0; i < 28; i++) {
+			await increaseTime(15);
+		}
+
+		// evaluate now should return 1 block
+		assert.equal(1, await miner.evaluate(1), "wrong evaluated offset");
 	});
 });
 

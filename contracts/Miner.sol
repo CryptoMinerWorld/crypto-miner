@@ -181,6 +181,44 @@ contract Miner is AccessControlLight {
 
 
   /**
+   * @dev Auxiliary data structure used in `miningPlots` mapping to
+   *      store information about gems and artifacts bound tto mine
+   *      a particular plot of land
+   * @dev Additionally it stores address of the player who initiated
+   *      the `bind()` transaction and its unix timestamp
+   */
+  struct MiningData {
+    /**
+     * @dev ID of the gem which is mining the plot,
+     *      the gem is locked when mining
+     */
+    uint32 gemId;
+
+    /**
+     * @dev ID of the artifact which is mining the plot,
+     *      the artifact is locked when mining
+     */
+    uint16 artifactId;
+
+    /**
+     * @dev A player, an address who initiated `bind()` transaction
+     */
+    address player;
+
+    /**
+     * @dev Unix timestamp of the `bind()` transaction
+     */
+    uint32 bound;
+  }
+
+  /**
+   * @dev Mapping to store mining information that is which
+   *      gems and artifacts mine which plots
+   * @dev See `MiningData` data structure for more details
+   */
+  mapping(uint24 => MiningData) miningPlots;
+
+  /**
    * @dev A bitmask indicating locked state of the ERC721 token
    * @dev Consists of a single bit at position 1 – binary 1
    * @dev The bit meaning in token's `state` is as follows:
@@ -278,65 +316,34 @@ contract Miner is AccessControlLight {
    *      properties during mining process
    */
   function bind(uint24 plotId, uint32 gemId, uint16 artifactId) public {
-    // call sender gracefully – `player`
-    address player = msg.sender;
-
-    // verify all the tokens passed belong to player,
+    // verify all the tokens passed belong to sender,
     // verifies token existence under the hood
-    require(plotInstance.ownerOf(plotId) == player);
-    require(gemInstance.ownerOf(gemId) == player);
-    //require(artifactId == 0 || artifactInstance.ownerOf(artifactId) == player); // TODO: uncomment
+    require(plotInstance.ownerOf(plotId) == msg.sender);
+    require(gemInstance.ownerOf(gemId) == msg.sender);
+    //require(artifactId == 0 || artifactInstance.ownerOf(artifactId) == msg.sender); // TODO: uncomment
 
     // verify all tokens are not in a locked state
     require(plotInstance.getState(plotId) & DEFAULT_MINING_BIT == 0);
     require(gemInstance.getState(gemId) & DEFAULT_MINING_BIT == 0);
     //require(artifactId == 0 || artifactInstance.getState(artifactId) & DEFAULT_MINING_BIT == 0); // TODO: uncomment
 
-    // determine current plot offset
-    uint8 offset = plotInstance.getOffset(plotId);
-
     // determine maximum depth this gem can mine to (by level)
     uint8 maxOffset = levelAllowsToMineTo(gemId, plotId);
-
-    // verify the gem can mine that plot
-    require(offset < maxOffset);
 
     // determine gem's effective resting energy, taking into account its grade
     uint32 energy = effectiveRestingEnergyOf(gemId);
 
-    // in case when energy is not zero, we perform initial mining
+    // define variable to store new plot offset
+    uint8 offset;
+
+    // delegate call to `evaluateWith`
+    (offset, energy) = evaluateWith(plotId, maxOffset, energy);
+
+    // in case when offset has increased, we perform initial mining
     // in the same transaction
-    if(energy != 0) {
-      // iterate over all tiers
-      for(uint8 i = 1; i <= plotInstance.getNumberOfTiers(plotId); i++) {
-        // determine tier offset
-        uint8 tierDepth = plotInstance.getTierDepth(plotId, i);
-
-        // if current tier depth is bigger than offset – we mine
-        if(offset < tierDepth) {
-          // determine how deep we can mine in that tier
-          uint8 canMineTo = offset + energyToBlocks(i, energy);
-
-          // we are not crossing the tier though
-          uint8 willMineTo = uint8(Math.min(canMineTo, tierDepth));
-
-          // determine how much energy is consumed and decrease energy
-          energy -= blocksToEnergy(i, willMineTo - offset);
-
-          // update offset
-          offset = willMineTo;
-
-          // if we don't have enough energy to mine deeper
-          // or gem level doesn't allow to mine deeper
-          if(offset >= maxOffset || canMineTo <= tierDepth) {
-            // we're done, exit the loop
-            break;
-          }
-        }
-      }
-
+    if(offset > plotInstance.getOffset(plotId)) {
       // update plot's offset
-      //plotInstance.mineTo(plotId, offset);
+      plotInstance.mineTo(plotId, offset);
 
       // save unused resting energy into gem's state
       gemInstance.setState(gemId, uint48(energy) << 16);
@@ -355,6 +362,14 @@ contract Miner is AccessControlLight {
       gemInstance.setState(gemId, gemInstance.getState(gemId) | DEFAULT_MINING_BIT);
       // lock artifact if any, also erasing everything in its state
       // artifactInstance.setState(artifactId, DEFAULT_MINING_BIT);
+
+      // store mining information in the internal mapping
+      miningPlots[plotId] = MiningData({
+        gemId: gemId,
+        artifactId: artifactId,
+        player: msg.sender,
+        bound: uint32(now)
+      });
 
       // emit en event
       emit Bound(msg.sender, plotId, gemId, artifactId);
@@ -402,7 +417,92 @@ contract Miner is AccessControlLight {
    * @return evaluated current mining block index for the given land plot
    */
   function evaluate(uint24 plotId) public constant returns(uint8) {
-    // TODO: implement
+    // verify plot is locked
+    // verifies token existence under the hood
+    require(plotInstance.getState(plotId) & DEFAULT_MINING_BIT != 0);
+
+    // load binding data
+    MiningData memory m = miningPlots[plotId];
+
+    // ensure binding data entry exists
+    require(m.bound != 0);
+
+    // determine maximum depth this gem can mine to (by level)
+    uint8 maxOffset = levelAllowsToMineTo(m.gemId, plotId);
+
+    // determine gem's effective mining energy
+    uint32 energy = effectiveMiningEnergyOf(m.gemId);
+
+    // define variable to store new plot offset
+    uint8 offset;
+
+    // delegate call to `evaluateWith`
+    (offset, energy) = evaluateWith(plotId, maxOffset, energy);
+
+    // return calculated offset
+    return offset;
+  }
+
+  /**
+   * @notice Evaluates current state of the plot without performing a transaction
+   * @dev Doesn't update land plot state in the distributed ledger
+   * @dev Used internally by `release()` and `update()` to calculate state of the plot
+   * @dev May be used by frontend to display current mining state close to realtime
+   * @param plotId ID of the land plot to evaluate current state for
+   * @param maxOffset maximum offset the gem can mine to
+   * @param initialEnergy available energy to be spent by the gem
+   * @return a tuple containing:
+   *      offset – evaluated current mining block index for the given land plot
+   *      energy - energy left after mining
+   */
+  function evaluateWith(
+    uint24 plotId,
+    uint8 maxOffset,
+    uint32 initialEnergy
+  ) private constant returns(
+    uint8 offset,
+    uint32 energy
+  ) {
+    // determine current plot offset, this will also be returned
+    offset = plotInstance.getOffset(plotId);
+
+    // verify the gem can mine that plot
+    require(offset < maxOffset);
+
+    // init return energy value with an input one
+    energy = initialEnergy;
+
+    // in case when energy is not zero, we perform initial mining
+    // in the same transaction
+    if(energy != 0) {
+      // iterate over all tiers
+      for(uint8 i = 1; i <= plotInstance.getNumberOfTiers(plotId); i++) {
+        // determine tier offset
+        uint8 tierDepth = plotInstance.getTierDepth(plotId, i);
+
+        // if current tier depth is bigger than offset – we mine
+        if(offset < tierDepth) {
+          // determine how deep we can mine in that tier
+          uint8 canMineTo = offset + energyToBlocks(i, energy);
+
+          // we are not crossing the tier though
+          uint8 willMineTo = uint8(Math.min(canMineTo, tierDepth));
+
+          // determine how much energy is consumed and decrease energy
+          energy -= blocksToEnergy(i, willMineTo - offset);
+
+          // update offset
+          offset = willMineTo;
+
+          // if we don't have enough energy to mine deeper
+          // or gem level doesn't allow to mine deeper
+          if(offset >= maxOffset || canMineTo <= tierDepth) {
+            // we're done, exit the loop
+            break;
+          }
+        }
+      }
+    }
   }
 
   /**
