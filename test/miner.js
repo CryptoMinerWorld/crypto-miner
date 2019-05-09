@@ -11,11 +11,6 @@ const ChestKey = artifacts.require("./ChestKeyERC20.sol");
 // Miner smart contract itself
 const Miner = artifacts.require("./Miner.sol");
 
-// permissions required by miner on the plot
-const ROLE_STATE_PROVIDER = 0x00000004;
-const ROLE_OFFSET_PROVIDER = 0x00000010;
-const ROLE_STATE_PROVIDER_GEM = 0x00400000;
-
 // Miner smart contract tests
 contract('Miner', (accounts) => {
 	it("deployment: verify deployment routine", async() => {
@@ -163,10 +158,12 @@ contract('Miner', (accounts) => {
 		// create a plot in Antarctica
 		await plot.mint(accounts[0], 0, web3.toBigNumber("0x0200236464646400"));
 
+		// enable mining feature on the miner
+		await miner.updateFeatures(0x00000001); // miner feature
 		// grant miner permissions to modify gem's state
-		await gem.addOperator(miner.address, ROLE_STATE_PROVIDER_GEM);
+		await gem.addOperator(miner.address, 0x00400000); // state provider
 		// grant miner permission(s) to update plot
-		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
+		await plot.updateRole(miner.address, 0x00000014); // state provider, offset provider
 
 		// verify initially states are zeros and tokens are transferable
 		assert.equal(0, await gem.getState(1), "non-zero gem's state");

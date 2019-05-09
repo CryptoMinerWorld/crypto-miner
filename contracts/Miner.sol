@@ -109,6 +109,37 @@ contract Miner is AccessControlLight {
   uint256 public constant CHEST_KEY_UID_REQUIRED = 0xbf1ea2fd198dbe93f19827f1e3144b045734667c5483124adc3715df6ce853f6;
 
   /**
+   * @dev Auxiliary data structure used in `miningPlots` mapping to
+   *      store information about gems and artifacts bound tto mine
+   *      a particular plot of land
+   * @dev Additionally it stores address of the player who initiated
+   *      the `bind()` transaction and its unix timestamp
+   */
+  struct MiningData {
+    /**
+     * @dev ID of the gem which is mining the plot,
+     *      the gem is locked when mining
+     */
+    uint32 gemId;
+
+    /**
+     * @dev ID of the artifact which is mining the plot,
+     *      the artifact is locked when mining
+     */
+    uint16 artifactId;
+
+    /**
+     * @dev A player, an address who initiated `bind()` transaction
+     */
+    address player;
+
+    /**
+     * @dev Unix timestamp of the `bind()` transaction
+     */
+    uint32 bound;
+  }
+
+  /**
    * @dev GemERC721 deployed instance,
    *      tokens of that instance can be read, minted, locked and unlocked
    *
@@ -179,42 +210,31 @@ contract Miner is AccessControlLight {
 
 
   /**
-   * @dev Auxiliary data structure used in `miningPlots` mapping to
-   *      store information about gems and artifacts bound tto mine
-   *      a particular plot of land
-   * @dev Additionally it stores address of the player who initiated
-   *      the `bind()` transaction and its unix timestamp
-   */
-  struct MiningData {
-    /**
-     * @dev ID of the gem which is mining the plot,
-     *      the gem is locked when mining
-     */
-    uint32 gemId;
-
-    /**
-     * @dev ID of the artifact which is mining the plot,
-     *      the artifact is locked when mining
-     */
-    uint16 artifactId;
-
-    /**
-     * @dev A player, an address who initiated `bind()` transaction
-     */
-    address player;
-
-    /**
-     * @dev Unix timestamp of the `bind()` transaction
-     */
-    uint32 bound;
-  }
-
-  /**
    * @dev Mapping to store mining information that is which
    *      gems and artifacts mine which plots
    * @dev See `MiningData` data structure for more details
    */
   mapping(uint24 => MiningData) miningPlots;
+
+  /**
+   * @dev How many minutes of mining (resting) energy it takes
+   *      to mine block of land depending on the tier number
+   * @dev Array is zero-indexed, index 0 corresponds to Tier 1,
+   *      index 4 corresponds to Tier 5
+   */
+  uint16[] public MINUTES_TO_MINE = [30, 240, 720, 1440, 2880];
+
+  /**
+   * @notice Enables mining, that is the main feature of miner
+   * @dev Required for `bind()` function to work properly
+   */
+  uint32 public constant FEATURE_MINING_ENABLED = 0x00000001;
+
+  /**
+   * @dev Enables updating and releasing the gem/plot/artifact on behalf
+   * @dev Allows to call `update()` and `release()` on behalf of someone else
+   */
+  uint32 public constant ROLE_MINING_OPERATOR = 0x00000001;
 
   /**
    * @dev A bitmask indicating locked state of the ERC721 token
@@ -229,14 +249,6 @@ contract Miner is AccessControlLight {
    * @dev A mask used to erase `DEFAULT_MINING_BIT`
    */
   uint8 public constant ERASE_MINING_BIT = 0xFF ^ DEFAULT_MINING_BIT;
-
-  /**
-   * @dev How many minutes of mining (resting) energy it takes
-   *      to mine block of land depending on the tier number
-   * @dev Array is zero-indexed, index 0 corresponds to Tier 1,
-   *      index 4 corresponds to Tier 5
-   */
-  uint16[] public MINUTES_TO_MINE = [30, 240, 720, 1440, 2880];
 
   /**
    * @dev May be fired in `bind()`
@@ -347,6 +359,9 @@ contract Miner is AccessControlLight {
    *      properties during mining process
    */
   function bind(uint24 plotId, uint32 gemId, uint16 artifactId) public {
+    // verify mining feature is enabled
+    require(isFeatureEnabled(FEATURE_MINING_ENABLED));
+
     // verify all the tokens passed belong to sender,
     // verifies token existence under the hood
     require(plotInstance.ownerOf(plotId) == msg.sender);
@@ -423,6 +438,10 @@ contract Miner is AccessControlLight {
    * @param plotId ID of the land plot to stop mining
    */
   function release(uint24 plotId) public {
+    // verify sender is owner of the plot or mining operator
+    // verifies plot existence under the hood
+    require(plotInstance.ownerOf(plotId) == msg.sender || isSenderInRole(ROLE_MINING_OPERATOR));
+
     // evaluate the plot
     uint8 offset = evaluate(plotId);
 
@@ -466,6 +485,10 @@ contract Miner is AccessControlLight {
    * @param plotId ID of the land plot to update state for
    */
   function update(uint24 plotId) public {
+    // verify sender is owner of the plot or mining operator
+    // verifies plot existence under the hood
+    require(plotInstance.ownerOf(plotId) == msg.sender || isSenderInRole(ROLE_MINING_OPERATOR));
+
     // evaluate the plot
     uint8 offset = evaluate(plotId);
 

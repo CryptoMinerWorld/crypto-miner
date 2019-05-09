@@ -18,6 +18,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "FEATURE_MINING_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "chestKeyInstance",
       "outputs": [
         {
@@ -173,6 +187,20 @@
         {
           "name": "",
           "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_MINING_OPERATOR",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -930,5 +958,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-05-09T08:55:38.603Z"
+  "updatedAt": "2019-05-09T10:40:32.630Z"
 }
