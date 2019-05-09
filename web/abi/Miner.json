@@ -17,6 +17,37 @@
     },
     {
       "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "name": "miningPlots",
+      "outputs": [
+        {
+          "name": "gemId",
+          "type": "uint32"
+        },
+        {
+          "name": "artifactId",
+          "type": "uint16"
+        },
+        {
+          "name": "player",
+          "type": "address"
+        },
+        {
+          "name": "bound",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [],
       "name": "FEATURE_MINING_ENABLED",
       "outputs": [
@@ -712,6 +743,44 @@
       "constant": true,
       "inputs": [
         {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "getBoundGemId",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "getBoundArtifactId",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
           "name": "gemId",
           "type": "uint32"
         },
@@ -958,5 +1027,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-05-09T10:40:32.630Z"
+  "updatedAt": "2019-05-09T21:09:16.963Z"
 }

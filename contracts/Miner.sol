@@ -56,7 +56,7 @@ contract Miner is AccessControlLight {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x8efa3734774da9ddb6fa72666081cc4446bae6e3fd60bfb806961a11cdda45a0;
+  uint256 public constant MINER_UID = 0x4f941a224b86d3b5ab9e822cdac3d7ddcd77ddb1a15dce0946a4d623b1fea40b;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
@@ -214,7 +214,7 @@ contract Miner is AccessControlLight {
    *      gems and artifacts mine which plots
    * @dev See `MiningData` data structure for more details
    */
-  mapping(uint24 => MiningData) miningPlots;
+  mapping(uint24 => MiningData) public miningPlots;
 
   /**
    * @dev How many minutes of mining (resting) energy it takes
@@ -673,6 +673,38 @@ contract Miner is AccessControlLight {
   }
 */
 
+
+  /**
+   * @dev Finds a gem bound to a particular plot
+   * @param plotId ID of the plot to query bound gem for
+   * @return ID of the bound gem
+   */
+  function getBoundGemId(uint24 plotId) public constant returns(uint32) {
+    // load binding data
+    MiningData memory m = miningPlots[plotId];
+
+    // ensure binding data entry exists
+    require(m.bound != 0);
+
+    // return the result
+    return m.gemId;
+  }
+
+  /**
+   * @dev Finds a gem bound to a particular plot
+   * @param plotId ID of the plot to query bound gem for
+   * @return ID of the bound gem
+   */
+  function getBoundArtifactId(uint24 plotId) public constant returns(uint32) {
+    // load binding data
+    MiningData memory m = miningPlots[plotId];
+
+    // ensure binding data entry exists
+    require(m.bound != 0);
+
+    // return the result
+    return m.artifactId;
+  }
 
   /**
    * @notice Determines how many blocks can particular gem mine on a particular plot
