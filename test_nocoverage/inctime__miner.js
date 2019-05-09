@@ -199,6 +199,77 @@ contract('Miner (Time Increase)', (accounts) => {
 		// evaluate now should return 1 block
 		assert.equal(1, await miner.evaluate(1), "wrong evaluated offset");
 	});
+
+	it("mining: updating plot offset and releasing", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// grant miner permissions to modify gem's state
+		await gem.addOperator(miner.address, ROLE_STATE_PROVIDER_GEM);
+		// grant miner permission(s) to update plot
+		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
+
+		// create plot in Antarctica
+		await plot.mint(accounts[0], 0, web3.toBigNumber("0x0200236464646400"));
+		// create a high grade high level gem
+		await gem.mint(accounts[0], 1, 1, 0, 1, 1, 5, 6, 999999);
+
+		// bind gem to a plot
+		await miner.bind(1, 1, 0);
+
+		// initially update fails
+		await assertThrowsAsync(miner.update, 1);
+
+		// rewind 7 minutes forward to mine one block
+		for(let i = 0; i < 28; i++) {
+			await increaseTime(15);
+		}
+
+		// update succeeds now by mining one block
+		await miner.update(1);
+		// second call fails - nothing to update
+		await assertThrowsAsync(miner.update, 1);
+
+		// verify plot is mined by one block
+		assert.equal(1, await plot.getOffset(1), "wrong plot offset after mining");
+
+		// verify all the tokens are still in a locked state
+		assert((await gem.getState(1)).modulo(2) > 0, "gem is still transferable");
+		assert(await plot.getState(1) > 0, "wrong plot's state");
+		assert(!await plot.isTransferable(1), "plot is still transferable");
+
+		// release
+		await miner.release(1);
+		// releasing unlocked token fails
+		await assertThrowsAsync(miner.release, 1);
+
+		// verify all the tokens are unlocked
+		assert.equal(0, (await gem.getState(1)).modulo(2), "gem is not transferable after releasing it");
+		assert.equal(0, await plot.getState(1) > 0, "non-zero plot's state after releasing it");
+		assert(await plot.isTransferable(1), "plot is not transferable after releasing it");
+
+		// verify plot is mined by one block
+		assert.equal(1, await plot.getOffset(1), "wrong plot offset after releasing");
+	})
 });
 
 // a function to calculate resting energy of the gem based on its energetic age

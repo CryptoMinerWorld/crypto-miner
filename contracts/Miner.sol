@@ -228,6 +228,11 @@ contract Miner is AccessControlLight {
   uint8 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
 
   /**
+   * @dev A mask used to erase `DEFAULT_MINING_BIT`
+   */
+  uint8 public constant ERASE_MINING_BIT = 0xFF ^ DEFAULT_MINING_BIT;
+
+  /**
    * @dev How many minutes of mining (resting) energy it takes
    *      to mine block of land depending on the tier number
    * @dev Array is zero-indexed, index 0 corresponds to Tier 1,
@@ -235,11 +240,39 @@ contract Miner is AccessControlLight {
    */
   uint16[] public MINUTES_TO_MINE = [30, 240, 720, 1440, 2880];
 
-  // TODO: add events
+  /**
+   * @dev May be fired in `bind()`
+   * @param _by an address which executed transaction, usually player, owner of the gem
+   * @param gemId ID of the gem whose energy was consumed
+   * @param energyLeft how much energy has left
+   */
   event RestingEnergyConsumed(address indexed _by, uint32 indexed gemId, uint32 energyLeft);
+
+  /**
+   * @dev May be fired in `bind()`
+   * @param _by an address which executed transaction, usually owner of the tokens
+   * @param plotId ID of the plot to mine (bound)
+   * @param gemId ID of the gem which mines the plot (bound)
+   * @param artifactId ID of the artifact used (bound)
+   */
   event Bound(address indexed _by, uint24 indexed plotId, uint32 indexed gemId, uint16 artifactId);
-  event Updated();
-  event Released();
+
+  /**
+   * @dev May be fired in `bind()` and `release()`. Fired in `update()`
+   * @param _by an address which executed transaction, usually owner of the plot
+   * @param plotId ID of the plot which was mined
+   * @param offset mined depth for the plot
+   */
+  event Updated(address indexed _by, uint24 indexed plotId, uint8 offset);
+
+  /**
+   * @dev Fired in `release()`
+   * @param _by an address which executed transaction, usually owner of the tokens
+   * @param plotId ID of the plot released
+   * @param gemId ID of the gem released
+   * @param artifactId ID of the artifact released
+   */
+  event Released(address indexed _by, uint24 indexed plotId, uint32 indexed gemId, uint16 artifactId);
 
   /**
    * @dev Creates a Miner instance, binding it to GemERC721, PlotERC721,
@@ -350,8 +383,11 @@ contract Miner is AccessControlLight {
 
       // TODO: loot processing
 
-      // emit an event
+      // emit an energy consumed event
       emit RestingEnergyConsumed(msg.sender, gemId, energy);
+
+      // emit plot updated event
+      emit Updated(msg.sender, plotId, offset);
     }
 
     // if gem's level allows to mine deeper,
@@ -389,7 +425,34 @@ contract Miner is AccessControlLight {
    * @param plotId ID of the land plot to stop mining
    */
   function release(uint24 plotId) public {
-    // TODO: implement
+    // evaluate the plot
+    uint8 offset = evaluate(plotId);
+
+    // if offset changed
+    if(offset != plotInstance.getOffset(plotId)) {
+      // update plot's offset
+      plotInstance.mineTo(plotId, offset);
+
+      // emit an event
+      emit Updated(msg.sender, plotId, offset);
+    }
+
+    // release tokens involved
+    // load binding data
+    MiningData memory m = miningPlots[plotId];
+
+    // unlock the plot, erasing everything else in its state
+    plotInstance.setState(plotId, 0);
+    // unlock the gem, keeping saved resting energy value
+    gemInstance.setState(m.gemId, gemInstance.getState(m.gemId) & ERASE_MINING_BIT);
+    // unlock artifact if any, also erasing everything in its state
+    // artifactInstance.setState(m.artifactId, 0);
+
+    // erase mining information in the internal mapping
+    delete miningPlots[plotId];
+
+    // emit en event
+    emit Released(msg.sender, plotId, m.gemId, m.artifactId);
   }
 
   /**
@@ -405,7 +468,17 @@ contract Miner is AccessControlLight {
    * @param plotId ID of the land plot to update state for
    */
   function update(uint24 plotId) public {
-    // TODO: implement
+    // evaluate the plot
+    uint8 offset = evaluate(plotId);
+
+    // update plot's offset
+    plotInstance.mineTo(plotId, offset);
+
+    // update gem's state to erase energy, keeping it locked
+    gemInstance.setState(miningPlots[plotId].gemId, DEFAULT_MINING_BIT);
+
+    // emit an event
+    emit Updated(msg.sender, plotId, offset);
   }
 
   /**
@@ -461,7 +534,7 @@ contract Miner is AccessControlLight {
     uint32 initialEnergy
   ) private constant returns(
     uint8 offset,
-    uint32 energy
+    uint32 energyLeft
   ) {
     // determine current plot offset, this will also be returned
     offset = plotInstance.getOffset(plotId);
@@ -470,11 +543,11 @@ contract Miner is AccessControlLight {
     require(offset < maxOffset);
 
     // init return energy value with an input one
-    energy = initialEnergy;
+    energyLeft = initialEnergy;
 
     // in case when energy is not zero, we perform initial mining
     // in the same transaction
-    if(energy != 0) {
+    if(energyLeft != 0) {
       // iterate over all tiers
       for(uint8 i = 1; i <= plotInstance.getNumberOfTiers(plotId); i++) {
         // determine tier offset
@@ -483,13 +556,13 @@ contract Miner is AccessControlLight {
         // if current tier depth is bigger than offset – we mine
         if(offset < tierDepth) {
           // determine how deep we can mine in that tier
-          uint8 canMineTo = offset + energyToBlocks(i, energy);
+          uint8 canMineTo = offset + energyToBlocks(i, energyLeft);
 
           // we are not crossing the tier though
           uint8 willMineTo = uint8(Math.min(canMineTo, tierDepth));
 
           // determine how much energy is consumed and decrease energy
-          energy -= blocksToEnergy(i, willMineTo - offset);
+          energyLeft -= blocksToEnergy(i, willMineTo - offset);
 
           // update offset
           offset = willMineTo;
@@ -521,9 +594,11 @@ contract Miner is AccessControlLight {
    * @param artifactIds an array of IDs of the artifacts to affect the gems
    *      properties during mining process
    */
+/*
   function bulkBind(uint24[] plotIds, uint32[] gemIds, uint16[] artifactIds) public {
     // TODO: implement
   }
+*/
 
   /**
    * @notice Releases several gems and artifacts (if any) bound earlier
@@ -538,9 +613,11 @@ contract Miner is AccessControlLight {
    *      (was not bound previously using `bind()` or `bulkBind()`)
    * @param plotIds an array of IDs of the land plots to stop mining
    */
+/*
   function bulkRelease(uint24[] plotIds) public {
     // TODO: implement
   }
+*/
 
   /**
    * @notice Updates several plots states without releasing gems and artifacts (if any)
@@ -555,9 +632,11 @@ contract Miner is AccessControlLight {
    *      (was not bound previously using `bind()` or `bulkBind()`)
    * @param plotIds an array of IDs of the land plots to update states for
    */
+/*
   function bulkUpdate(uint24[] plotIds) public {
     // TODO: implement
   }
+*/
 
   /**
    * @notice Evaluates current state of several plots without performing a transaction
@@ -567,9 +646,11 @@ contract Miner is AccessControlLight {
    * @param plotIds an array of IDs of the land plots to evaluate current states for
    * @return an array of evaluated current mining block indexes for the given land plots array
    */
+/*
   function bulkEvaluate(uint24[] plotIds) public constant returns(uint8[]) {
     // TODO: implement
   }
+*/
 
 
   /**
