@@ -5,6 +5,9 @@ import "./GemERC721.sol";
 import "./PlotERC721.sol";
 import "./SilverERC20.sol";
 import "./GoldERC20.sol";
+import "./ArtifactERC20.sol";
+import "./FoundersKeyERC20.sol";
+import "./ChestKeyERC20.sol";
 import "./Math.sol";
 
 /**
@@ -90,23 +93,20 @@ contract Miner is AccessControlLight {
    * @dev Expected version (UID) of the deployed ArtifactERC20 instance
    *      this smart contract is designed to work with
    */
-  // TODO: this value should be defined later, after ArtifactERC20 smart contract is released
   // TODO: this may be completely removed after ArtifactERC721 release
-  uint256 public constant ARTIFACT_ERC20_UID_REQUIRED = 0x00000000000000000000000000000000000000000000000000000000000000000;
+  uint256 public constant ARTIFACT_ERC20_UID_REQUIRED = 0xfe81d4b23218a9d32950b26fad0ab9d50928ece566126c1d1bf0c1bfe2666da6;
 
   /**
    * @dev Expected version (UID) of the deployed FoundersKeyERC20 instance
    *      this smart contract is designed to work with
    */
-  // TODO: this value should be defined later, after FoundersKeyERC20 smart contract is released
-  uint256 public constant FOUNDERS_KEY_UID_REQUIRED = 0x0000000000000000000000000000000000000000000000000000000000000000;
+  uint256 public constant FOUNDERS_KEY_UID_REQUIRED = 0x70221dffd5103663ba8bf65a43517466ba616c4937710b99c7f003a7ae99fbc7;
 
   /**
    * @dev Expected version (UID) of the deployed ChestKeyERC20 instance
    *      this smart contract is designed to work with
    */
-  // TODO: this value should be defined later, after ChestKeyERC20 smart contract is released
-  uint256 public constant CHEST_KEY_UID_REQUIRED = 0x0000000000000000000000000000000000000000000000000000000000000000;
+  uint256 public constant CHEST_KEY_UID_REQUIRED = 0xbf1ea2fd198dbe93f19827f1e3144b045734667c5483124adc3715df6ce853f6;
 
   /**
    * @dev GemERC721 deployed instance,
@@ -158,8 +158,8 @@ contract Miner is AccessControlLight {
    *
    * @dev Miner should have `GoldERC20.ROLE_TOKEN_CREATOR` permission to mint tokens
    */
-  // TODO: uncomment when ready, may be removed when ArtifactERC721 is ready
-  //ArtifactERC20 public artifactErc20Instance;
+  // TODO: to be removed when ArtifactERC721 is ready
+  ArtifactERC20 public artifactErc20Instance;
 
   /**
    * @dev FoundersKeyERC20 deployed instance,
@@ -167,8 +167,7 @@ contract Miner is AccessControlLight {
    *
    * @dev Miner should have `FoundersKeyERC20.ROLE_TOKEN_CREATOR` permission to mint tokens
    */
-  // TODO: uncomment when ready
-  //FoundersKeyERC20 public foundersKeyInstance;
+  FoundersKeyERC20 public foundersKeyInstance;
 
   /**
    * @dev ChestKeyERC20 deployed instance,
@@ -176,8 +175,7 @@ contract Miner is AccessControlLight {
    *
    * @dev Miner should have `ChestKeyERC20.ROLE_TOKEN_CREATOR` permission to mint tokens
    */
-  // TODO: uncomment when ready
-  //ChestKeyERC20 public chestKeyInstance;
+  ChestKeyERC20 public chestKeyInstance;
 
 
   /**
@@ -321,9 +319,9 @@ contract Miner is AccessControlLight {
     //artifactInstance = ArtifactERC721(_artifact); // TODO: uncomment
     silverInstance = SilverERC20(_silver);
     goldInstance = GoldERC20(_gold);
-    //artifactErc20Instance = ArtifactERC20(_artifactErc20); // TODO: uncomment
-    //foundersKeyInstance = FoundersKeyERC20(_foundersKey); // TODO: uncomment
-    //chestKeyInstance = ChestKeyERC20(_chestKey); // TODO: uncomment
+    artifactErc20Instance = ArtifactERC20(_artifactErc20);
+    foundersKeyInstance = FoundersKeyERC20(_foundersKey);
+    chestKeyInstance = ChestKeyERC20(_chestKey);
 
     // verify smart contract versions
     require(gemInstance.TOKEN_VERSION() == GEM_UID_REQUIRED);
@@ -331,9 +329,9 @@ contract Miner is AccessControlLight {
     //require(artifactInstance.TOKEN_UID() == ARTIFACT_UID_REQUIRED); // TODO: uncomment
     require(silverInstance.TOKEN_VERSION() == SILVER_UID_REQUIRED);
     require(goldInstance.TOKEN_VERSION() == GOLD_UID_REQUIRED);
-    //require(artifactErc20Instance.TOKEN_UID() == ARTIFACT_ERC20_UID_REQUIRED); // TODO: uncomment
-    //require(foundersKeyInstance.TOKEN_UID() == FOUNDERS_KEY_UID_REQUIRED); // TODO: uncomment
-    //require(chestKeyInstance.TOKEN_UID() == CHEST_KEY_UID_REQUIRED); // TODO: uncomment
+    require(artifactErc20Instance.TOKEN_UID() == ARTIFACT_ERC20_UID_REQUIRED);
+    require(foundersKeyInstance.TOKEN_UID() == FOUNDERS_KEY_UID_REQUIRED);
+    require(chestKeyInstance.TOKEN_UID() == CHEST_KEY_UID_REQUIRED);
   }
 
   /**

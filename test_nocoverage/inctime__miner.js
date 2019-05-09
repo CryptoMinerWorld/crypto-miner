@@ -4,9 +4,9 @@ const Plot = artifacts.require("./PlotERC721.sol");
 const Artifact = artifacts.require("./PlotERC721.sol"); // TODO
 const Silver = artifacts.require("./SilverERC20.sol");
 const Gold = artifacts.require("./GoldERC20.sol");
-const ArtifactERC20 = artifacts.require("./GoldERC20.sol"); // TODO
-const FoundersKey = artifacts.require("./GoldERC20.sol"); // TODO
-const ChestKey = artifacts.require("./GoldERC20.sol"); // TODO
+const ArtifactERC20 = artifacts.require("./ArtifactERC20.sol");
+const FoundersKey = artifacts.require("./FoundersKeyERC20.sol");
+const ChestKey = artifacts.require("./ChestKeyERC20.sol");
 
 // Miner smart contract itself
 const Miner = artifacts.require("./Miner.sol");

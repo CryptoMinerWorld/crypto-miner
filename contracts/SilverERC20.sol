@@ -3,7 +3,7 @@ pragma solidity 0.4.23;
 import "./GoldERC20.sol";
 
 /**
- * @title Silver Smart Contract
+ * @title Silver ERC20 Token
  *
  * @notice Silver is a transferable fungible entity (ERC20 token)
  *      used to "pay" for in game services like gem upgrades, etc.

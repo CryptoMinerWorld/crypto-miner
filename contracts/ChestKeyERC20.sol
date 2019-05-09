@@ -5,51 +5,43 @@ import "./AddressUtils.sol";
 import "./ERC20Receiver.sol";
 
 /**
- * @title Gold ERC20 Token
+ * @title Chest Key ERC20 Token
  *
- * @notice Gold is a transferable fungible entity (ERC20 token)
- *      used to "pay" for in game services like gem upgrades, etc.
- * @notice Gold is a part of Gold/Silver system, which allows to
- *      upgrade gems (level, grade, etc.)
+ * @notice Chest Key is a transferable fungible entity (ERC20 token)
+ *      used to open monthly and world chests
+ * @notice Chest Key is a part of the mining process and Chest System.
+ *      Keys may by found in plots of land (see PlotERC721) only when mining
  *
- * @dev Gold is mintable and burnable entity,
+ * @dev Chest Key is mintable and burnable entity,
  *      meaning it can be created or destroyed by the authorized addresses
  * @dev An address authorized can mint/burn its own tokens (own balance) as well
  *      as tokens owned by another address (additional permission level required)
  *
  * @author Basil Gorin
  */
-contract GoldERC20 is AccessControlLight {
+contract ChestKeyERC20 is AccessControlLight {
   /**
-   * @dev Smart contract version
-   * @dev Should be incremented manually in this source code
-   *      each time smart contact source code is changed and deployed
-   * @dev To distinguish from other tokens must be multiple of 0x100
+   * @dev Smart contract unique identifier, a random number
+   * @dev Should be regenerated each time smart contact source code is changed
+   * @dev Generated using https://www.random.org/bytes/
    */
-  uint32 public constant TOKEN_VERSION = 0x300;
+  uint256 public constant TOKEN_UID = 0xbf1ea2fd198dbe93f19827f1e3144b045734667c5483124adc3715df6ce853f6;
 
   /**
    * @notice ERC20 symbol of that token (short name)
    */
-  string public constant symbol = "GLD";
+  string public constant symbol = "KEY";
 
   /**
    * @notice ERC20 name of the token (long name)
    */
-  string public constant name = "GOLD - CryptoMiner World";
+  string public constant name = "CHEST KEY - CryptoMiner World";
 
   /**
    * @notice ERC20 decimals (number of digits to draw after the dot
    *    in the UI applications (like MetaMask, other wallets and so on)
    */
-  uint8 public constant decimals = 3;
-
-  /**
-   * @notice Based on the value of decimals above, one token unit
-   *      represents native number of tokens which is displayed
-   *      in the UI applications as one (1 or 1.0, 1.00, etc.)
-   */
-  uint256 public constant ONE_UNIT = uint256(10) ** decimals;
+  uint8 public constant decimals = 0;
 
   /**
    * @notice A record of all the players token balances
@@ -308,7 +300,7 @@ contract GoldERC20 is AccessControlLight {
     // if `_from` is equal to sender, require transfers feature to be enabled
     // otherwise require transfers on behalf feature to be enabled
     require(_from == msg.sender && isFeatureEnabled(FEATURE_TRANSFERS)
-         || _from != msg.sender && isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
+    || _from != msg.sender && isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
 
     // non-zero to address check
     require(_to != address(0));
@@ -368,32 +360,11 @@ contract GoldERC20 is AccessControlLight {
 
   /**
    * @dev Mints (creates) some tokens to address specified
-   * @dev The value passed is treated as number of units (see `ONE_UNIT`)
-   *      to achieve natural impression on token quantity
    * @dev Requires sender to have `ROLE_TOKEN_CREATOR` permission
    * @param _to an address to mint tokens to
    * @param _value an amount of tokens to mint (create)
    */
   function mint(address _to, uint256 _value) public {
-    // calculate native value, taking into account `decimals`
-    uint256 value = _value * ONE_UNIT;
-
-    // arithmetic overflow and non-zero value check
-    require(value > _value);
-
-    // delegate call to native `mintNative`
-    mintNative(_to, value);
-  }
-
-  /**
-   * @dev Mints (creates) some tokens to address specified
-   * @dev The value specified is treated as is without taking
-   *      into account what `decimals` value is
-   * @dev Requires sender to have `ROLE_TOKEN_CREATOR` permission
-   * @param _to an address to mint tokens to
-   * @param _value an amount of tokens to mint (create)
-   */
-  function mintNative(address _to, uint256 _value) public {
     // check if caller has sufficient permissions to mint tokens
     require(isSenderInRole(ROLE_TOKEN_CREATOR));
 
@@ -419,32 +390,11 @@ contract GoldERC20 is AccessControlLight {
 
   /**
    * @dev Burns (destroys) some tokens from the address specified
-   * @dev The value passed is treated as number of units (see `ONE_UNIT`)
-   *      to achieve natural impression on token quantity
    * @dev Requires sender to have `ROLE_TOKEN_DESTROYER` permission
    * @param _from an address to burn some tokens from
    * @param _value an amount of tokens to burn (destroy)
    */
   function burn(address _from, uint256 _value) public {
-    // calculate native value, taking into account `decimals`
-    uint256 value = _value * ONE_UNIT;
-
-    // arithmetic overflow and non-zero value check
-    require(value > _value);
-
-    // delegate call to native `burnNative`
-    burnNative(_from, value);
-  }
-
-  /**
-   * @dev Burns (destroys) some tokens from the address specified
-   * @dev The value specified is treated as is without taking
-   *      into account what `decimals` value is
-   * @dev Requires sender to have `ROLE_TOKEN_DESTROYER` permission
-   * @param _from an address to burn some tokens from
-   * @param _value an amount of tokens to burn (destroy)
-   */
-  function burnNative(address _from, uint256 _value) public {
     // check if caller has sufficient permissions to burn tokens
     require(isSenderInRole(ROLE_TOKEN_DESTROYER));
 
