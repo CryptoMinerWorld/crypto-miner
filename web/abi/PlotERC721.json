@@ -295,6 +295,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "DEFAULT_MINING_BIT",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint128"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "ROLE_STATE_PROVIDER",
       "outputs": [
         {
@@ -1436,5 +1450,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-04-27T14:06:20.380Z"
+  "updatedAt": "2019-05-09T08:55:38.611Z"
 }

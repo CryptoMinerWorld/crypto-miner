@@ -1,47 +1,14 @@
 {
-  "contractName": "PlotSale",
+  "contractName": "ChestKeyERC20",
   "abi": [
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "uint8"
-        }
-      ],
-      "name": "balancesByCountry",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
       "inputs": [],
-      "name": "refPointsTracker",
+      "name": "name",
       "outputs": [
         {
           "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "ROLE_WITHDRAW_MANAGER",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
+          "type": "string"
         }
       ],
       "payable": false,
@@ -65,39 +32,11 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "beneficiary",
+      "name": "decimals",
       "outputs": [
         {
           "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "COUNTRY_UID_REQUIRED",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "worldChest",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
+          "type": "uint8"
         }
       ],
       "payable": false,
@@ -145,7 +84,7 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "REF_TRACKER_UID_REQUIRED",
+      "name": "TOKEN_UID",
       "outputs": [
         {
           "name": "",
@@ -159,49 +98,7 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "SALE_PRICE",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint64"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "monthlyChest",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "PLOT_UID_REQUIRED",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "FEATURE_SALE_ENABLED",
+      "name": "ROLE_TOKEN_CREATOR",
       "outputs": [
         {
           "name": "",
@@ -215,11 +112,25 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "plotInstance",
+      "name": "FEATURE_TRANSFERS_ON_BEHALF",
       "outputs": [
         {
           "name": "",
-          "type": "address"
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
         }
       ],
       "payable": false,
@@ -247,11 +158,11 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "SALE_UID",
+      "name": "FEATURE_TRANSFERS",
       "outputs": [
         {
           "name": "",
-          "type": "uint256"
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -282,20 +193,6 @@
       "type": "function"
     },
     {
-      "constant": true,
-      "inputs": [],
-      "name": "countryInstance",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "constant": false,
       "inputs": [
         {
@@ -312,7 +209,7 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "saleStartUTC",
+      "name": "ROLE_TOKEN_DESTROYER",
       "outputs": [
         {
           "name": "",
@@ -370,39 +267,48 @@
       "type": "function"
     },
     {
+      "anonymous": false,
       "inputs": [
         {
-          "name": "_ref",
+          "indexed": true,
+          "name": "_from",
           "type": "address"
         },
         {
-          "name": "_country",
+          "indexed": true,
+          "name": "_to",
           "type": "address"
         },
         {
-          "name": "_plot",
-          "type": "address"
-        },
-        {
-          "name": "_worldChest",
-          "type": "address"
-        },
-        {
-          "name": "_monthlyChest",
-          "type": "address"
-        },
-        {
-          "name": "_beneficiary",
-          "type": "address"
-        },
-        {
-          "name": "_saleStartUTC",
-          "type": "uint32"
+          "indexed": false,
+          "name": "_value",
+          "type": "uint256"
         }
       ],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "constructor"
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
     },
     {
       "anonymous": false,
@@ -413,12 +319,17 @@
           "type": "address"
         },
         {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
           "indexed": false,
-          "name": "_tokenId",
-          "type": "uint24"
+          "name": "_value",
+          "type": "uint256"
         }
       ],
-      "name": "PlotBought",
+      "name": "Minted",
       "type": "event"
     },
     {
@@ -426,26 +337,21 @@
       "inputs": [
         {
           "indexed": true,
-          "name": "countryId",
-          "type": "uint8"
+          "name": "_by",
+          "type": "address"
         },
         {
           "indexed": true,
-          "name": "owner",
+          "name": "_from",
           "type": "address"
         },
         {
           "indexed": false,
-          "name": "oldValue",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "newValue",
+          "name": "_value",
           "type": "uint256"
         }
       ],
-      "name": "CountryBalanceUpdated",
+      "name": "Burnt",
       "type": "event"
     },
     {
@@ -498,32 +404,24 @@
       "type": "event"
     },
     {
-      "constant": false,
-      "inputs": [
+      "constant": true,
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
         {
-          "name": "countryId",
-          "type": "uint8"
-        },
-        {
-          "name": "n",
-          "type": "uint8"
-        },
-        {
-          "name": "referrer",
-          "type": "address"
+          "name": "",
+          "type": "uint256"
         }
       ],
-      "name": "buy",
-      "outputs": [],
-      "payable": true,
-      "stateMutability": "payable",
+      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
       "constant": true,
       "inputs": [
         {
-          "name": "owner",
+          "name": "_owner",
           "type": "address"
         }
       ],
@@ -539,14 +437,99 @@
       "type": "function"
     },
     {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "name": "_spender",
+          "type": "address"
+        }
+      ],
+      "name": "allowance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "constant": false,
       "inputs": [
         {
-          "name": "countryId",
-          "type": "uint8"
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
         }
       ],
-      "name": "withdrawFrom",
+      "name": "transfer",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "safeTransferFrom",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -556,11 +539,78 @@
       "constant": false,
       "inputs": [
         {
-          "name": "owner",
+          "name": "_from",
           "type": "address"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
         }
       ],
-      "name": "withdraw",
+      "name": "unsafeTransferFrom",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_spender",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "mint",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -568,5 +618,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-05-09T08:55:38.620Z"
+  "updatedAt": "2019-05-09T08:55:38.547Z"
 }

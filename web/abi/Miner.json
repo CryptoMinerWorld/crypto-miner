@@ -1,0 +1,934 @@
+{
+  "contractName": "Miner",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "foundersKeyInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "chestKeyInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FOUNDERS_KEY_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ARTIFACT_ERC20_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ERASE_MINING_BIT",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MINER_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "gemInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ARTIFACT_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "DEFAULT_MINING_BIT",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "PLOT_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "GOLD_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "GEM_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "plotInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "goldInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "MINUTES_TO_MINE",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isOperatorInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "silverInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "artifactErc20Instance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "SILVER_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "CHEST_KEY_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_gem",
+          "type": "address"
+        },
+        {
+          "name": "_plot",
+          "type": "address"
+        },
+        {
+          "name": "_artifact",
+          "type": "address"
+        },
+        {
+          "name": "_silver",
+          "type": "address"
+        },
+        {
+          "name": "_gold",
+          "type": "address"
+        },
+        {
+          "name": "_artifactErc20",
+          "type": "address"
+        },
+        {
+          "name": "_foundersKey",
+          "type": "address"
+        },
+        {
+          "name": "_chestKey",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "gemId",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "energyLeft",
+          "type": "uint32"
+        }
+      ],
+      "name": "RestingEnergyConsumed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "plotId",
+          "type": "uint24"
+        },
+        {
+          "indexed": true,
+          "name": "gemId",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "artifactId",
+          "type": "uint16"
+        }
+      ],
+      "name": "Bound",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "plotId",
+          "type": "uint24"
+        },
+        {
+          "indexed": false,
+          "name": "offset",
+          "type": "uint8"
+        }
+      ],
+      "name": "Updated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "plotId",
+          "type": "uint24"
+        },
+        {
+          "indexed": true,
+          "name": "gemId",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "artifactId",
+          "type": "uint16"
+        }
+      ],
+      "name": "Released",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "FeaturesUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        },
+        {
+          "name": "gemId",
+          "type": "uint32"
+        },
+        {
+          "name": "artifactId",
+          "type": "uint16"
+        }
+      ],
+      "name": "bind",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "release",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "update",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "evaluate",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint32"
+        },
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "levelAllowsToMineBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint32"
+        },
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "levelAllowsToMineTo",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "tier",
+          "type": "uint8"
+        },
+        {
+          "name": "n",
+          "type": "uint8"
+        }
+      ],
+      "name": "blocksToEnergy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "tier",
+          "type": "uint8"
+        },
+        {
+          "name": "energy",
+          "type": "uint32"
+        }
+      ],
+      "name": "energyToBlocks",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint32"
+        }
+      ],
+      "name": "effectiveMiningEnergyOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint32"
+        }
+      ],
+      "name": "effectiveRestingEnergyOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "energy",
+          "type": "uint32"
+        },
+        {
+          "name": "grade",
+          "type": "uint32"
+        }
+      ],
+      "name": "effectiveEnergy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint32"
+        }
+      ],
+      "name": "miningRateOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "grade",
+          "type": "uint32"
+        }
+      ],
+      "name": "miningRate",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint32"
+        }
+      ],
+      "name": "restingEnergyOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "energeticAge",
+          "type": "uint32"
+        }
+      ],
+      "name": "restingEnergy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint32"
+        }
+      ],
+      "name": "energeticAgeOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2019-05-09T08:55:38.603Z"
+}
