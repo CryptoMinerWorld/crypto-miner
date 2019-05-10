@@ -789,30 +789,7 @@
           "type": "uint24"
         }
       ],
-      "name": "levelAllowsToMineBy",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint8"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "gemId",
-          "type": "uint32"
-        },
-        {
-          "name": "plotId",
-          "type": "uint24"
-        }
-      ],
-      "name": "levelAllowsToMineTo",
+      "name": "gemMinesTo",
       "outputs": [
         {
           "name": "",
@@ -1027,5 +1004,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-05-09T21:09:16.963Z"
+  "updatedAt": "2019-05-10T13:43:17.590Z"
 }

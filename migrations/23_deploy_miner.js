@@ -29,13 +29,13 @@ module.exports = async function(deployer, network, accounts) {
 	// for test network addresses are different
 	if(network !== "mainnet") {
 		gemAddress = "0x82FF6Bbd7B64f707e704034907d582C7B6E09d97";
-		plotAddress = "0xd2d1B1FE416E72aDddf6C70f1E16b3bfc90e510f";
+		plotAddress = "0xE723149a90951F343523b008cae605eC1205cC16";
 		artifactAddress = "0x1"; // TODO
 		silverAddress = "0x901C62b3194C6c460B303537Ab3F39e80f933d48";
 		goldAddress = "0x6c4BC3179A2B28f641ae15DD55419240bB61e1A6";
-		artifact20Address = "0xd320AE7AB4Da96157ed8090F69dE13120BC92DE8";
-		foundersKeyAddress = "0x668B9A40f01B699fE1bd4256A8da74cD77423be3";
-		chestKeyAddress = "0x2739e57f3552d816625ab82b4a55E3A07b48bE12";
+		artifact20Address = "0x37C5D9A33ce8f924115bDDc3B751a5D28B1c3358";
+		foundersKeyAddress = "0x5BB38ec2C5bebAe9b13188b9cFdF4cd7a24d3b94";
+		chestKeyAddress = "0x61CB4B77B6c039D3b4F9797Ea97e42d43555A3fe";
 	}
 
 	// create links to instances for access control
