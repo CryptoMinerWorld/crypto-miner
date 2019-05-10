@@ -126,8 +126,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		assert(await plot.isTransferable(1), "plot is not transferable");
 
 		// verify gem level allows to mine only one block
-		assert.equal(1, await miner.levelAllowsToMineTo(1, 1), "wrong level allows to mine to");
-		assert.equal(1, await miner.levelAllowsToMineBy(1, 1), "wrong level allows to mine by");
+		assert.equal(1, await miner.gemMinesTo(1, 1), "wrong gem mines to calc");
 		// verify energetic properties of the gem and mining rate
 		assert.equal(13, await miner.energeticAgeOf(1), "wrong energetic age of");
 		assert.equal(7, await miner.restingEnergyOf(1), "wrong resting energy of");

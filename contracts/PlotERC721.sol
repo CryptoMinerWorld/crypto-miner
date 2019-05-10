@@ -2,6 +2,7 @@ pragma solidity 0.4.23;
 
 import "./AddressUtils.sol";
 import "./StringUtils.sol";
+import "./TierMath.sol";
 import "./AccessControlLight.sol";
 import "./ERC165.sol";
 import "./ERC721Interfaces.sol";
@@ -66,7 +67,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0x429c5993d58398640c80b2d9ff7667713a4d472cb2c3beda544c8d19e1ac1d54;
+  uint256 public constant TOKEN_UID = 0x216c71f30bc2bf96dd0dfeae5cf098bfe9e0da295785ebe16a6696b0d997afec;
 
   /**
    * @dev ERC20 compliant token symbol
@@ -510,11 +511,12 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    *      either 2 (Antarctica) or 5 (rest of the World)
    */
   function getNumberOfTiers(uint256 _tokenId) public constant returns (uint8) {
-    // validate token existence
-    require(exists(_tokenId));
+    // get token's tiers data structure
+    // verifies token existence under the hood
+    uint64 tiers = getTiers(_tokenId);
 
-    // extract number of tiers value from the tiers data structure and return
-    return uint8(tokens[_tokenId].tiers >> 56);
+    // use TierMath library to perform the operation
+    return TierMath.getNumberOfTiers(tiers);
   }
 
   /**
@@ -531,15 +533,12 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @return depth of the (k)th tier in blocks
    */
   function getTierDepth(uint256 _tokenId, uint8 k) public constant returns (uint8) {
-    // get number of tiers for the given token
-    // also validates token existence
-    uint8 n = getNumberOfTiers(_tokenId);
+    // get token's tiers data structure
+    // verifies token existence under the hood
+    uint64 tiers = getTiers(_tokenId);
 
-    // ensure requested tier exists
-    require(k <= n);
-
-    // extract requested tier depth data from tier structure and return
-    return uint8(tokens[_tokenId].tiers >> (6 - k) * 8);
+    // use TierMath library to perform the operation
+    return TierMath.getTierDepth(tiers, k);
   }
 
   /**
@@ -550,12 +549,12 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @return token depth – the maximum depth value
    */
   function getDepth(uint256 _tokenId) public constant returns (uint8) {
-    // get number of tiers for the given token
-    // also validates token existence
-    uint8 n = getNumberOfTiers(_tokenId);
+    // get token's tiers data structure
+    // verifies token existence under the hood
+    uint64 tiers = getTiers(_tokenId);
 
-    // extract last tier value from the tiers and return
-    return uint8(tokens[_tokenId].tiers >> (6 - n) * 8);
+    // use TierMath library to perform the operation
+    return TierMath.getDepth(tiers);
   }
 
   /**
@@ -579,11 +578,12 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @return token offset – current mined depth value
    */
   function getOffset(uint256 _tokenId) public constant returns(uint8) {
-    // validate token existence
-    require(exists(_tokenId));
+    // get token's tiers data structure
+    // verifies token existence under the hood
+    uint64 tiers = getTiers(_tokenId);
 
-    // extract the offset value from the tiers and return
-    return uint8(tokens[_tokenId].tiers);
+    // use TierMath library to perform the operation
+    return TierMath.getOffset(tiers);
   }
 
   /**
@@ -593,10 +593,12 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @return true if token is fully mined, false otherwise
    */
   function isFullyMined(uint256 _tokenId) public constant returns(bool) {
-    // get the offset value, depth value and compare them
-    // checks token existence under the hood when delegating
-    // calls to `getOffset` and `getDepth`
-    return getOffset(_tokenId) >= getDepth(_tokenId);
+    // get token's tiers data structure
+    // verifies token existence under the hood
+    uint64 tiers = getTiers(_tokenId);
+
+    // use TierMath library to perform the operation
+    return TierMath.isFullyMined(tiers);
   }
 
   /**

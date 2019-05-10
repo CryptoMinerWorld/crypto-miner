@@ -112,22 +112,16 @@ contract('Miner', (accounts) => {
 
 		// verify how deep can gems mine these plots
 		// with the top level gem
-		assert.equal(100, await miner.levelAllowsToMineTo(1, 1), "wrong mine to calc for (1, 1)");
-		assert.equal(100, await miner.levelAllowsToMineBy(1, 1), "wrong mine by calc for (1, 1)");
-		assert.equal(100, await miner.levelAllowsToMineTo(1, 0x10001), "wrong mine to calc for (1, 0x10001)");
-		assert.equal(100, await miner.levelAllowsToMineBy(1, 0x10001), "wrong mine by calc for (1, 0x10001)");
+		assert.equal(100, await miner.gemMinesTo(1, 1), "wrong mines to calc for (1, 1)");
+		assert.equal(100, await miner.gemMinesTo(1, 0x10001), "wrong mine to calc for (1, 0x10001)");
 
 		// with the mid level gem
-		assert.equal(100, await miner.levelAllowsToMineTo(2, 1), "wrong mine to calc for (2, 1)");
-		assert.equal(100, await miner.levelAllowsToMineBy(2, 1), "wrong mine by calc for (2, 1)");
-		assert.equal(85, await miner.levelAllowsToMineTo(2, 0x10001), "wrong mine to calc for (2, 0x10001)");
-		assert.equal(85, await miner.levelAllowsToMineBy(2, 0x10001), "wrong mine by calc for (2, 0x10001)");
+		assert.equal(100, await miner.gemMinesTo(2, 1), "wrong mines to calc for (2, 1)");
+		assert.equal(85, await miner.gemMinesTo(2, 0x10001), "wrong mine to calc for (2, 0x10001)");
 
 		// with the low level gem
-		assert.equal(35, await miner.levelAllowsToMineTo(3, 1), "wrong mine to calc for (3, 1)");
-		assert.equal(35, await miner.levelAllowsToMineBy(3, 1), "wrong mine by calc for (3, 1)");
-		assert.equal(35, await miner.levelAllowsToMineTo(3, 0x10001), "wrong mine to calc for (3, 0x10001)");
-		assert.equal(35, await miner.levelAllowsToMineBy(3, 0x10001), "wrong mine by calc for (3, 0x10001)");
+		assert.equal(35, await miner.gemMinesTo(3, 1), "wrong mines to calc for (3, 1)");
+		assert.equal(35, await miner.gemMinesTo(3, 0x10001), "wrong mine to calc for (3, 0x10001)");
 	});
 
 	it("mining: binding gem to a plot", async() => {

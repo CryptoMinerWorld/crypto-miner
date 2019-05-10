@@ -9,6 +9,7 @@ import "./ArtifactERC20.sol";
 import "./FoundersKeyERC20.sol";
 import "./ChestKeyERC20.sol";
 import "./Math.sol";
+import "./TierMath.sol";
 
 /**
  * @title Miner
@@ -68,7 +69,7 @@ contract Miner is AccessControlLight {
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant PLOT_UID_REQUIRED = 0x429c5993d58398640c80b2d9ff7667713a4d472cb2c3beda544c8d19e1ac1d54;
+  uint256 public constant PLOT_UID_REQUIRED = 0x216c71f30bc2bf96dd0dfeae5cf098bfe9e0da295785ebe16a6696b0d997afec;
 
   /**
    * @dev Expected version (UID) of the deployed ArtifactERC721 instance
@@ -373,8 +374,14 @@ contract Miner is AccessControlLight {
     require(gemInstance.getState(gemId) & DEFAULT_MINING_BIT == 0);
     //require(artifactId == 0 || artifactInstance.getState(artifactId) & DEFAULT_MINING_BIT == 0); // TODO: uncomment
 
+    // read tiers structure of the plot
+    uint64 tiers = plotInstance.getTiers(plotId);
+
+    // read level data of the gem
+    uint8 level = gemInstance.getLevel(gemId);
+
     // determine maximum depth this gem can mine to (by level)
-    uint8 maxOffset = levelAllowsToMineTo(gemId, plotId);
+    uint8 maxOffset = TierMath.getTierDepthOrMined(tiers, level);
 
     // determine gem's effective resting energy, taking into account its grade
     uint32 energy = effectiveRestingEnergyOf(gemId);
@@ -383,7 +390,7 @@ contract Miner is AccessControlLight {
     uint8 offset;
 
     // delegate call to `evaluateWith`
-    (offset, energy) = evaluateWith(plotId, maxOffset, energy);
+    (offset, energy) = evaluateWith(tiers, maxOffset, energy);
 
     // in case when offset has increased, we perform initial mining
     // in the same transaction
@@ -521,8 +528,14 @@ contract Miner is AccessControlLight {
     // ensure binding data entry exists
     require(m.bound != 0);
 
+    // read tiers structure of the plot
+    uint64 tiers = plotInstance.getTiers(plotId);
+
+    // read level data of the gem
+    uint8 level = gemInstance.getLevel(m.gemId);
+
     // determine maximum depth this gem can mine to (by level)
-    uint8 maxOffset = levelAllowsToMineTo(m.gemId, plotId);
+    uint8 maxOffset = TierMath.getTierDepthOrMined(tiers, level);
 
     // determine gem's effective mining energy
     uint32 energy = effectiveMiningEnergyOf(m.gemId);
@@ -531,7 +544,7 @@ contract Miner is AccessControlLight {
     uint8 offset;
 
     // delegate call to `evaluateWith`
-    (offset, energy) = evaluateWith(plotId, maxOffset, energy);
+    (offset, energy) = evaluateWith(tiers, maxOffset, energy);
 
     // return calculated offset
     return offset;
@@ -542,7 +555,7 @@ contract Miner is AccessControlLight {
    * @dev Doesn't update land plot state in the distributed ledger
    * @dev Used internally by `release()` and `update()` to calculate state of the plot
    * @dev May be used by frontend to display current mining state close to realtime
-   * @param plotId ID of the land plot to evaluate current state for
+   * @param tiers tiers data structure of the land plot to evaluate current state for
    * @param maxOffset maximum offset the gem can mine to
    * @param initialEnergy available energy to be spent by the gem
    * @return a tuple containing:
@@ -550,7 +563,7 @@ contract Miner is AccessControlLight {
    *      energy - energy left after mining
    */
   function evaluateWith(
-    uint24 plotId,
+    uint64 tiers,
     uint8 maxOffset,
     uint32 initialEnergy
   ) private constant returns(
@@ -558,7 +571,7 @@ contract Miner is AccessControlLight {
     uint32 energyLeft
   ) {
     // determine current plot offset, this will also be returned
-    offset = plotInstance.getOffset(plotId);
+    offset = TierMath.getOffset(tiers);
 
     // verify the gem can mine that plot
     require(offset < maxOffset);
@@ -570,9 +583,9 @@ contract Miner is AccessControlLight {
     // in the same transaction
     if(energyLeft != 0) {
       // iterate over all tiers
-      for(uint8 i = 1; i <= plotInstance.getNumberOfTiers(plotId); i++) {
+      for(uint8 i = 1; i <= TierMath.getNumberOfTiers(tiers); i++) {
         // determine tier offset
-        uint8 tierDepth = plotInstance.getTierDepth(plotId, i);
+        uint8 tierDepth = TierMath.getTierDepth(tiers, i);
 
         // if current tier depth is bigger than offset – we mine
         if(offset < tierDepth) {
@@ -707,23 +720,6 @@ contract Miner is AccessControlLight {
   }
 
   /**
-   * @notice Determines how many blocks can particular gem mine on a particular plot
-   * @dev This function verifies current plot offset and based on the gem's level
-   *      and plot's offset determines how many blocks this gem can mine deeper
-   * @dev Zero return value means that the gem cannot mine deeper, which in turn
-   *      means that either the gem level doesn't allow to mine deeper
-   *      or that the plot is already fully mined
-   * @dev Throws if the gem or plot specified doesn't exist
-   * @param gemId ID of the gem to use
-   * @param plotId ID of the plot to mine
-   * @return number of blocks the gem can mine, zero if it cannot mine more
-   */
-  function levelAllowsToMineBy(uint32 gemId, uint24 plotId) public constant returns(uint8) {
-    // delegate call to `getOffset` and `canMineTo` and return the difference
-    return levelAllowsToMineTo(gemId, plotId) - plotInstance.getOffset(plotId);
-  }
-
-  /**
    * @notice Determines how deep can particular gem mine on a particular plot
    * @dev This function verifies current plot offset and based on the gem's level
    *      and plot's offset determines how deep this gem can mine
@@ -732,35 +728,9 @@ contract Miner is AccessControlLight {
    * @param plotId ID of the plot to mine
    * @return number of blocks the gem can mine, zero if it cannot mine more
    */
-  function levelAllowsToMineTo(uint32 gemId, uint24 plotId) public constant returns(uint8) {
-    // get plot offset
-    uint8 offset = plotInstance.getOffset(plotId);
-
-    // verify if plot is already mined
-    if(plotInstance.isFullyMined(plotId)) {
-      // we cannot go deeper in that case
-      return offset;
-    }
-
-    // read the gem's level
-    uint8 level = gemInstance.getLevel(gemId);
-
-    // read number of tiers the plot has
-    uint8 n = plotInstance.getNumberOfTiers(plotId);
-
-    // if level is lower then number of tiers the plot has
-    if(level < n) {
-      // we cannot fully mine that plot,
-      // we can go through only to tier number `level`
-      // it is possible, however, that we already got deeper,
-      // so we need to consider current offset as well
-      return uint8(Math.max(plotInstance.getTierDepth(plotId, level), offset));
-    }
-    // otherwise, if the level is big enough
-    else {
-      // we can mine fully down to the bottom
-      return plotInstance.getDepth(plotId);
-    }
+  function gemMinesTo(uint32 gemId, uint24 plotId) public constant returns(uint8) {
+    // delegate call to `levelAllowsToMineTo`
+    return TierMath.getTierDepthOrMined(plotInstance.getTiers(plotId), gemInstance.getLevel(gemId));
   }
 
   /**
