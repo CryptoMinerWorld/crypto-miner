@@ -48,6 +48,186 @@ contract('Miner', (accounts) => {
 		//assert.equal(chestKey.address, await miner.chestKeyInstance(), "wrong chest key instance address");
 	});
 
+	it("loot: loot generator check tier 1", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// process 1,000 blocks in tier 1
+		const loot = await miner.genLoot(1, 1000, false, new Array(9));
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
+		assert.equal(0, loot[2], "level 3 gem(s) present");
+		assert.equal(0, loot[3], "level 4 gem(s) present");
+		assert.equal(0, loot[4], "level 5 gem(s) present");
+		assert(loot[5] > 0, "no silver");
+		assert.equal(0, loot[6], "gold present");
+		assert.equal(0, loot[7], "artifact(s) present");
+		assert.equal(0, loot[8], "key(s) present");
+	});
+
+	it("loot: loot generator check tier 2", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// process 1,000 blocks in tier 2
+		const loot = await miner.genLoot(2, 1000, false, new Array(9));
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
+		assert(loot[2] > 0, "no level 3 gems");
+		assert.equal(0, loot[3], "level 4 gem(s) present");
+		assert.equal(0, loot[4], "level 5 gem(s) present");
+		assert(loot[5] > 0, "no silver");
+		assert.equal(0, loot[6], "gold present");
+		// assert(loot[7] > 0, "no artifact(s)"); // artifact may be present or not
+		assert.equal(0, loot[8], "key(s) present");
+	});
+
+	it("loot: loot generator check tier 3", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// process 1,000 blocks in tier 3
+		const loot = await miner.genLoot(3, 1000, false, new Array(9));
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
+		assert(loot[2] > 0, "no level 3 gems");
+		// assert(loot[3] > 0, "no level 4 gems"); // level 4 gem(s) may be present or not
+		assert.equal(0, loot[4], "level 5 gem(s) present");
+		assert(loot[5] > 0, "no silver");
+		// assert(loot[6] > 0, "no gold"); // gold may be present or not
+		// assert(loot[7] > 0, "no artifact(s)"); // artifact may be present or not
+		assert.equal(0, loot[8], "key(s) present");
+	});
+
+	it("loot: loot generator check tier 4", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// process 1,000 blocks in tier 4
+		const loot = await miner.genLoot(4, 1000, false, new Array(9));
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
+		assert(loot[2] > 0, "no level 3 gems");
+		assert(loot[3] > 0, "no level 4 gems");
+		assert.equal(0, loot[4], "level 5 gem(s) present");
+		assert(loot[5] > 0, "no silver");
+		// assert(loot[6] > 0, "no gold"); // gold may be present or not
+		assert(loot[7] > 0, "no artifact(s) present");
+		assert.equal(0, loot[8], "key(s) present");
+	});
+
+	it("loot: loot generator check tier 5", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// process 10,000 blocks in tier 5
+		const loot = await miner.genLoot(5, 10000, false, new Array(9));
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
+		assert(loot[2] > 0, "no level 3 gems");
+		assert(loot[3] > 0, "no level 4 gems");
+		assert(loot[4] > 0, "no level 5 gems");
+		assert(loot[5] > 0, "no silver");
+		assert(loot[6] > 0, "no gold");
+		assert(loot[7] > 0, "no artifact(s)");
+		assert(loot[8] > 0, "no key(s)");
+	});
+
 	it("mining: mining properties of the new gem(s)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();

@@ -10,6 +10,7 @@ import "./FoundersKeyERC20.sol";
 import "./ChestKeyERC20.sol";
 import "./Math.sol";
 import "./TierMath.sol";
+import "./Random.sol";
 
 /**
  * @title Miner
@@ -286,6 +287,32 @@ contract Miner is AccessControlLight {
   event Released(address indexed _by, uint24 indexed plotId, uint32 indexed gemId, uint16 artifactId);
 
   /**
+   * @dev Fired in `update()`
+   * @param _by an address which executed transaction and obtained the loot
+   * @param gems1 level 1 gems minted
+   * @param gems2 level 2 gems minted
+   * @param gems3 level 3 gems minted
+   * @param gems4 level 4 gems minted
+   * @param gems5 level 5 gems minted
+   * @param silver silver minted
+   * @param gold gold minted
+   * @param artifacts artifacts minted
+   * @param keys keys minted
+   */
+  event Loot(
+    address indexed _by,
+    uint16 gems1,
+    uint16 gems2,
+    uint16 gems3,
+    uint16 gems4,
+    uint16 gems5,
+    uint16 silver,
+    uint16 gold,
+    uint16 artifacts,
+    uint16 keys
+  );
+
+  /**
    * @dev Creates a Miner instance, binding it to GemERC721, PlotERC721,
    *      ArtifactERC721, SilverERC20, GoldERC20, ArtifactERC20,
    *      FoundersKeyERC20, ChestKeyERC20 token instances specified
@@ -394,20 +421,15 @@ contract Miner is AccessControlLight {
 
     // in case when offset has increased, we perform initial mining
     // in the same transaction
-    if(offset > plotInstance.getOffset(plotId)) {
-      // update plot's offset
-      plotInstance.mineTo(plotId, offset);
-
+    if(offset > TierMath.getOffset(tiers)) {
       // save unused resting energy into gem's state
       gemInstance.setState(gemId, uint48(energy) << 16);
 
-      // TODO: loot processing
+      // delegate call to `__mine` to update plot and mint loot
+      __mine(plotId, offset);
 
       // emit an energy consumed event
       emit RestingEnergyConsumed(msg.sender, gemId, energy);
-
-      // emit plot updated event
-      emit Updated(msg.sender, plotId, offset);
     }
 
     // if gem's level allows to mine deeper,
@@ -454,11 +476,8 @@ contract Miner is AccessControlLight {
 
     // if offset changed
     if(offset != plotInstance.getOffset(plotId)) {
-      // update plot's offset
-      plotInstance.mineTo(plotId, offset);
-
-      // emit an event
-      emit Updated(msg.sender, plotId, offset);
+      // delegate call to `__mine` to update plot and mint loot
+      __mine(plotId, offset);
     }
 
     // release tokens involved
@@ -499,14 +518,11 @@ contract Miner is AccessControlLight {
     // evaluate the plot
     uint8 offset = evaluate(plotId);
 
-    // update plot's offset
-    plotInstance.mineTo(plotId, offset);
-
     // update gem's state to erase energy, keeping it locked
     gemInstance.setState(miningPlots[plotId].gemId, DEFAULT_MINING_BIT);
 
-    // emit an event
-    emit Updated(msg.sender, plotId, offset);
+    // delegate call to `__mine` to update plot and mint loot
+    __mine(plotId, offset);
   }
 
   /**
@@ -608,6 +624,274 @@ contract Miner is AccessControlLight {
             break;
           }
         }
+      }
+    }
+  }
+
+  /**
+   * @dev Auxiliary function which performs mining of the plot
+   * @dev Unsafe, must be kept private at all times
+   * @param plotId ID of the plot to mine
+   * @param offset depth to mine the plot to,
+   *      must be bigger than current plot depth
+   */
+  function __mine(uint24 plotId, uint8 offset) private {
+    // get tiers structure of the plot
+    uint64 tiers = plotInstance.getTiers(plotId);
+
+    // extract current offset
+    uint8 offset0 = TierMath.getOffset(tiers);
+
+    // ensure new offset is bigger than initial one
+    require(offset0 < offset);
+
+    // packed structure to accumulate results
+    uint16[] memory loot = new uint16[](9);
+
+    // get indexes of first and last tiers
+    uint8 tier0 = TierMath.getTierIndex(tiers, offset0);
+    uint8 tier1 = TierMath.getTierIndex(tiers, offset);
+
+    // if we do not cross tiers
+    if(tier0 == tier1) {
+      // just process current tier according to offsets
+      genLoot(tier0, offset - offset0, offset + 1 >= TierMath.getDepth(tiers), loot);
+    }
+    // otherwise, if we cross one or more tiers
+    else {
+      // process first tier
+      genLoot(tier0, TierMath.getTierDepth(tiers, tier0 + 1), false, loot);
+
+      // process middle tiers
+      for(uint8 i = tier0 + 1; i <= tier1 - 1; i++) {
+        // process full tier `i`
+        genLoot(i, TierMath.getTierDepth(tiers, i - i) - TierMath.getTierDepth(tiers, i), false, loot);
+      }
+
+      // process last tier
+      genLoot(tier1, TierMath.getTierDepth(tiers, tier1 - 1), offset + 1 >= TierMath.getDepth(tiers), loot);
+    }
+
+    // loot processing - delegate call to `processLoot`
+    __processLoot(loot);
+
+    // update plot's offset
+    plotInstance.mineTo(plotId, offset);
+
+    // emit an event
+    emit Updated(msg.sender, plotId, offset);
+  }
+
+  /**
+   * @dev Auxiliary function to mint the loot defined in input array:
+   *      index 0: gems level 1
+   *      index 1: gems level 2
+   *      index 2: gems level 3
+   *      index 3: gems level 4
+   *      index 4: gems level 5
+   *      index 5: silver
+   *      index 6: gold
+   *      index 7: artifacts
+   *      index 8: keys
+   * @dev The loot is minted to transaction sender
+   * @dev Unsafe, must be kept private at all times
+   * @param loot an array defining the loot as described above
+   */
+  function __processLoot(uint16[] memory loot) private {
+    // mint gems level 1
+    __mintGems(1, loot[0]);
+    // mint gems level 2
+    __mintGems(2, loot[1]);
+    // mint gems level 3
+    __mintGems(3, loot[2]);
+    // mint gems level 4
+    __mintGems(4, loot[3]);
+    // mint gems level 5
+    __mintGems(5, loot[4]);
+    // mint silver
+    silverInstance.mint(msg.sender, loot[5]);
+    // mint gold
+    goldInstance.mint(msg.sender, loot[6]);
+    // mint artifacts
+    artifactErc20Instance.mint(msg.sender, loot[7]);
+    // mint keys
+    chestKeyInstance.mint(msg.sender, loot[8]); // TODO: enable founder's plot
+
+    // emit an event
+    emit Loot(msg.sender, loot[0], loot[1], loot[2], loot[3], loot[4], loot[5], loot[6], loot[7], loot[8]);
+  }
+
+  /**
+   * @dev Auxiliary function to mint gems
+   * @dev The loot is minted to transaction sender
+   * @dev Unsafe, must be kept private at all times
+   * @param level level of the gems to mint
+   * @param n number of gems to mint
+   */
+  function __mintGems(uint8 level, uint16 n) private {
+    // TODO: implement gems minting
+  }
+
+  /**
+   * @dev Auxiliary function to generate loot when mining `n` blocks in tier `k`
+   * @dev Loot data is accumulated in `loot` array, containing:
+   *      index 0: gems level 1
+   *      index 1: gems level 2
+   *      index 2: gems level 3
+   *      index 3: gems level 4
+   *      index 4: gems level 5
+   *      index 5: silver
+   *      index 6: gold
+   *      index 7: artifacts
+   *      index 8: keys
+   * @param k one-based tier index to process loot for
+   * @param n number of blocks to process for tier specified
+   * @param bos bottom of stack indicator, true if plot is fully mined
+   * @param loot an array containing loot information
+   */
+  function genLoot(uint8 k, uint16 n, bool bos, uint16[] memory loot) public constant returns(uint16[]) {
+    // for each block out of `n` blocks in tier `k`
+    // we need to generate up to 11 random numbers,
+    // with the precision up to 0.01%, that is 10^-4
+
+    // for tier 1
+    if(k == 1) {
+      // gem (lvl 1): 1.2%
+      loot[0] += rndEval(0, 120, n);
+      // gem (lvl 2): 0.4%
+      loot[1] += rndEval(n, 40, n);
+      // silver (1pc): 9%
+      loot[5] += rndEval(2 * n, 900, n);
+      // silver (5pcs): 0.5%
+      loot[5] += 5 * rndEval(3 * n, 50, n);
+      // silver (15pcs): 0.1%
+      loot[5] += 15 * rndEval(4 * n, 10, n);
+    }
+    // for tier 2
+    else if(k == 2) {
+      // gem (lvl 1): 1.9%
+      loot[0] += rndEval(0, 190, n);
+      // gem (lvl 2): 0.8%
+      loot[1] += rndEval(n, 80, n);
+      // gem (lvl 3): 0.2%
+      loot[2] += rndEval(2 * n, 20, n);
+      // silver (1pc): 12%
+      loot[5] += rndEval(3 * n, 1200, n);
+      // silver (5pcs): 1%
+      loot[5] += 5 * rndEval(4 * n, 100, n);
+      // silver (15pcs): 0.2%
+      loot[5] += 15 * rndEval(5 * n, 20, n);
+      // artifact: 0.01%
+      loot[7] += rndEval(6 * n, n, 1);
+    }
+    // for tier 3
+    else if(k == 3) {
+      // gem (lvl 1): 1.1%
+      loot[0] += rndEval(0, 110, n);
+      // gem (lvl 2): 1.3%
+      loot[1] += rndEval(n, 130, n);
+      // gem (lvl 3): 0.6%
+      loot[2] += rndEval(2 * n, 60, n);
+      // gem (lvl 4): 0.04%
+      loot[3] += rndEval(3 * n, 4, n);
+      // silver (1): 4%
+      loot[5] += rndEval(4 * n, 400, n);
+      // silver (5): 4%
+      loot[5] += 5 * rndEval(5 * n, 400, n);
+      // silver (15): 0.6%
+      loot[5] += 15 * rndEval(6 * n, 60, n);
+      // gold (1): 0.01%
+      loot[6] += rndEval(7 * n, n, 1);
+      // artifact: 0.04%
+      loot[7] += rndEval(8 * n, 4, n);
+    }
+    // for tier 4
+    else if(k == 4) {
+      // gem (lvl 1): 0.6%
+      loot[0] += rndEval(0, 60, n);
+      // gem (lvl 2): 1%
+      loot[1] += rndEval(n, 100, n);
+      // gem (lvl 3): 2.2%
+      loot[2] += rndEval(2 * n, 220, n);
+      // gem (lvl 4): 0.12%
+      loot[3] += rndEval(3 * n, 12, n);
+      // silver (1): 3%
+      loot[5] += rndEval(4 * n, 300, n);
+      // silver (5): 5%
+      loot[5] += 5 * rndEval(5 * n, 500, n);
+      // silver (15): 1.2%
+      loot[5] += 15 * rndEval(6 * n, 120, n);
+      // gold (1): 0.02%
+      loot[6] += rndEval(7 * n, 2, n);
+      // artifact: 0.13%
+      loot[7] += rndEval(8 * n, 13, n);
+    }
+    // for tier 5
+    else if(k == 5) {
+      // gem (lvl 1): 0.4%
+      loot[0] += rndEval(0, 40, n);
+      // gem (lvl 2): 1.2%
+      loot[1] += rndEval(n, 120, n);
+      // gem (lvl 3): 3.7%
+      loot[2] += rndEval(2 * n, 370, n);
+      // gem (lvl 4): 0.5%
+      loot[3] += rndEval(3 * n, 50, n);
+      // gem (lvl 5): 0.04%
+      loot[4] += rndEval(4 * n, 4, n);
+      // silver (1): 2%
+      loot[5] += rndEval(5 * n, 200, n);
+      // silver (5): 7%
+      loot[5] += 5 * rndEval(6 * n, 700, n);
+      // silver (15): 5%
+      loot[5] += 15 * rndEval(7 * n, 500, n);
+      // gold (1): 0.05%
+      loot[6] += rndEval(8 * n, 5, n);
+      // artifact: 0.4%
+      loot[7] += rndEval(9 * n, 40, n);
+      // key: 0.02%
+      loot[8] += rndEval(10 * n, 2, n);
+    }
+    // any other tier is invalid
+    else {
+      // throw an exception
+      require(false);
+    }
+
+    // for bottom of the stack
+    if(bos) {
+      // TODO: implement
+      // gem (lvl 1): 1%
+      // gem (lvl 2): 7%
+      // gem (lvl 3): 14%
+      // gem (lvl 4): 8.5%
+      // gem (lvl 5): 2%
+      // silver (1): none
+      // silver (5): 40.37%
+      // silver (15): 26%
+      // gold (1): 0.3%
+      // artifact: 0.8%
+      // key: 0.03%
+    }
+
+    // return the loot
+    return loot;
+  }
+
+  /**
+   * @dev Auxiliary function to calculate amount of successful experiments
+   *      in `n` iterations with the `p` probability each
+   * @param seedOffset seed offset to be used for random generation, there
+   *      will be `n` of seeds used [seedOffset, seedOffset + n)
+   * @param p probability of successful event in bp (basis point, ‱)
+   * @param n number of experiments to launch
+   */
+  function rndEval(uint16 seedOffset, uint16 p, uint16 n) public constant returns(uint16 amount) {
+    // we perform `iterations` number of iterations
+    for(uint16 i = 0; i < n; i++) {
+      // for each iteration we check if we've got a probability hit
+      if(Random.__randomValue(seedOffset + i, 0, 10000) < p) {
+        // and if yes we increase the counter
+        amount++;
       }
     }
   }

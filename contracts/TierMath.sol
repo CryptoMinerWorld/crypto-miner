@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity 0.4.23;
 
 /**
  * @title Tier Math Library
@@ -91,6 +91,29 @@ library TierMath {
 
     // return the greatest of two
     return depth < offset? offset: depth;
+  }
+
+  /**
+   * @dev Gets tier index by block index (offset)
+   * @param tiers tiers data structure to evaluate
+   * @param offset block offset to query tier index for
+   * @return one-based tier index
+   */
+  function getTierIndex(uint64 tiers, uint8 offset) internal pure returns (uint8) {
+    // get number of tiers for the given tiers structure
+    uint8 n = getNumberOfTiers(tiers);
+
+    // iterate over all tiers in the plot
+    for(uint8 i = 1; i <= n; i++) {
+      // check if offset is within current tier bounds
+      if(getTierDepth(tiers, i - 1) <= offset && offset < getTierDepth(tiers, i)) {
+        // and return the index
+        return i;
+      }
+    }
+
+    // if index was not found return maximum tier index
+    return n;
   }
 
   /**
