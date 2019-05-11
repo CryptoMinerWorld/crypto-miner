@@ -673,7 +673,8 @@ contract Miner is AccessControlLight {
     }
 
     // loot processing - delegate call to `processLoot`
-    __processLoot(loot);
+    // plots in Antarctica have zero country ID (high 8 bits)
+    __processLoot(loot, plotId >> 16 == 0);
 
     // update plot's offset
     plotInstance.mineTo(plotId, offset);
@@ -697,7 +698,7 @@ contract Miner is AccessControlLight {
    * @dev Unsafe, must be kept private at all times
    * @param loot an array defining the loot as described above
    */
-  function __processLoot(uint16[] memory loot) private {
+  function __processLoot(uint16[] memory loot, bool antarctica) private {
     // mint gems level 1
     __mintGems(1, loot[0]);
     // mint gems level 2
@@ -715,7 +716,14 @@ contract Miner is AccessControlLight {
     // mint artifacts
     artifactErc20Instance.mint(msg.sender, loot[7]);
     // mint keys
-    chestKeyInstance.mint(msg.sender, loot[8]); // TODO: enable founder's plot
+    if(antarctica) {
+      // for Antarctica we mint founder's chest keys
+      foundersKeyInstance.mint(msg.sender, loot[8]);
+    }
+    else {
+      // for the rest of the World - regular chest keys
+      chestKeyInstance.mint(msg.sender, loot[8]);
+    }
 
     // emit an event
     emit Loot(msg.sender, loot[0], loot[1], loot[2], loot[3], loot[4], loot[5], loot[6], loot[7], loot[8]);
