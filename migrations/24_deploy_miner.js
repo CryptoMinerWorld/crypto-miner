@@ -18,6 +18,7 @@ module.exports = async function(deployer, network, accounts) {
 
 	// define miner dependencies
 	let gemAddress = "0xeAe9d154dA7a1cD05076dB1B83233f3213a95e4F";
+	let gemExtAddress = "";
 	let plotAddress = "";
 	let artifactAddress = "";
 	let silverAddress = "0x5eAb0Ea7AC3cC27f785D8e3fABA56b034aa56208";
@@ -29,6 +30,7 @@ module.exports = async function(deployer, network, accounts) {
 	// for test network addresses are different
 	if(network !== "mainnet") {
 		gemAddress = "0x82FF6Bbd7B64f707e704034907d582C7B6E09d97";
+		gemExtAddress = "0x907C6A3fe243031f366e79c9479626a407890ACD";
 		plotAddress = "0xE723149a90951F343523b008cae605eC1205cC16";
 		artifactAddress = "0x1"; // TODO
 		silverAddress = "0x901C62b3194C6c460B303537Ab3F39e80f933d48";
@@ -40,6 +42,7 @@ module.exports = async function(deployer, network, accounts) {
 
 	// create links to instances for access control
 	const gemControl = AccessControl.at(gemAddress);
+	const gemExtControl = AccessControlLight.at(gemExtAddress);
 	const plotControl = AccessControlLight.at(plotAddress);
 	// const artifactControl = AccessControlLight.at(artifactAddress); // TODO:
 	const silverControl = AccessControlLight.at(silverAddress);
@@ -52,6 +55,7 @@ module.exports = async function(deployer, network, accounts) {
 	await deployer.deploy(
 		Miner,
 		gemAddress,
+		gemExtAddress,
 		plotAddress,
 		artifactAddress,
 		silverAddress,
@@ -67,6 +71,7 @@ module.exports = async function(deployer, network, accounts) {
 	if(network !== "mainnet") {
 		// give miner all the permissions required
 		await gemControl.addOperator(minerAddress, 0x00440000); // state provider, token creator
+		await gemExtControl.updateRole(minerAddress, 0x00000003); // next ID inc, extension writer
 		await plotControl.updateRole(minerAddress, 0x00000014); // state provider, offset provider
 		// await artifactControl.updateRole(); // TODO
 		await silverControl.updateRole(minerAddress, 0x00000001); // token creator

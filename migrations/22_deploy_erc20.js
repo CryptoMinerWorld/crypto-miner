@@ -11,7 +11,7 @@ const FEATURE_TRANSFERS = 0x00000001;
 // Enables ERC20 transfers on behalf (transfer by someone else on behalf of token owner)
 const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
 
-// Artifact ERC20 Token Deployment
+// Artifact ERC20 Token, Founder's Chest Key ERC20 Token, Chest Key ERC20 Token Deployments
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
 		console.log("[deploy erc20] test network - skipping the migration script");
