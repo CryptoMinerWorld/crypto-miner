@@ -53,13 +53,14 @@ import "./Random.sol";
  *
  * @author Basil Gorin
  */
+// TODO: deployment gas usage exceeds 4,500,000!
 contract Miner is AccessControlLight {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x4f941a224b86d3b5ab9e822cdac3d7ddcd77ddb1a15dce0946a4d623b1fea40b;
+  uint256 public constant MINER_UID = 0xb96e87e6b91c9d6cc34a588dc6b461822f6ef3cd4726a448513cabc14a95d269;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
@@ -71,7 +72,7 @@ contract Miner is AccessControlLight {
    * @dev Expected version (UID) of the deployed GemExtension instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_EXT_UID_REQUIRED = 0x079e4e892a230815b1574cc742f7aaaee5444f909654b7e5acad916431393971;
+  uint256 public constant GEM_EXT_UID_REQUIRED = 0x5907e0ef0cc11bd9c3b6f14fe92523435d27e8da304e24c1918ab0d37f9fb096;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
@@ -254,6 +255,12 @@ contract Miner is AccessControlLight {
   uint32 public constant ROLE_MINING_OPERATOR = 0x00000001;
 
   /**
+   * @dev Enables rollback functionality
+   * @dev Allows to call `rollback()` function
+   */
+  uint32 public constant ROLE_ROLLBACK_OPERATOR = 0x00000002;
+
+  /**
    * @dev A bitmask indicating locked state of the ERC721 token
    * @dev Consists of a single bit at position 1 – binary 1
    * @dev The bit meaning in token's `state` is as follows:
@@ -300,6 +307,15 @@ contract Miner is AccessControlLight {
    * @param artifactId ID of the artifact released
    */
   event Released(address indexed _by, uint24 indexed plotId, uint32 indexed gemId, uint16 artifactId);
+
+  /**
+   * @dev Fired in `rollback()`
+   * @param _by an address which executed transaction, rollback operator
+   * @param plotId ID of the plot released
+   * @param gemId ID of the gem released
+   * @param artifactId ID of the artifact released
+   */
+  event Rollback(address indexed _by, uint24 indexed plotId, uint32 indexed gemId, uint16 artifactId);
 
   /**
    * @dev Fired in `update()`
@@ -505,9 +521,9 @@ contract Miner is AccessControlLight {
 
     // unlock the plot, erasing everything else in its state
     plotInstance.setState(plotId, 0);
-    // unlock the gem, keeping saved resting energy value
+    // unlock the gem, erasing everything else in its state
     gemInstance.setState(m.gemId, 0);
-    // unlock artifact if any, also erasing everything in its state
+    // unlock artifact if any, erasing everything in its state
     // artifactInstance.setState(m.artifactId, 0);
 
     // erase mining information in the internal mapping
@@ -547,6 +563,33 @@ contract Miner is AccessControlLight {
 
     // delegate call to `__mine` to update plot and mint loot
     __mine(plotId, offset);
+  }
+
+  /**
+   * @dev Service function to unlock plot and associated gem and artifact if any
+   * @dev Reverts the mining (doesn't update plot)
+   * @dev May be executed only by rollback operator
+   * @param plotId ID of the plot to unlock
+   */
+  function rollback(uint24 plotId) public {
+    // ensure function is called by rollback operator
+    require(isSenderInRole(ROLE_ROLLBACK_OPERATOR));
+
+    // load binding data
+    MiningData memory m = miningPlots[plotId];
+
+    // unlock the plot, erasing everything else in its state
+    plotInstance.setState(plotId, 0);
+    // unlock the gem, erasing everything else in its state
+    gemInstance.setState(m.gemId, 0);
+    // unlock artifact if any, erasing everything in its state
+    // artifactInstance.setState(m.artifactId, 0);
+
+    // erase mining information in the internal mapping
+    delete miningPlots[plotId];
+
+    // emit an event
+    emit Rollback(msg.sender, plotId, m.gemId, m.artifactId);
   }
 
   /**
@@ -776,17 +819,50 @@ contract Miner is AccessControlLight {
    * @param depth block depth where the gem was found
    */
   function __mintGems(uint8 level, uint16 n, uint24 plotId, uint16 depth) private {
+    // we're about to mint `n` gems
     for(uint16 i = 0; i < n; i++) {
+      // to generate grade type we need some random first
+      uint256 gradeTypeRnd = Random.__randomValue(0x10000 + i, 0, 10000);
+
+      // define variable to store grade type
+      uint8 gradeType;
+
+      // grade D: 50%
+      if(gradeTypeRnd < 5000) {
+        gradeType = 1;
+      }
+      // grade C: 37%
+      else if(gradeTypeRnd < 8700) {
+        gradeType = 2;
+      }
+      // grade B: 10%
+      else if(gradeTypeRnd < 9700) {
+        gradeType = 3;
+      }
+      // grade A: 2.5%
+      else if(gradeTypeRnd < 9950) {
+        gradeType = 4;
+      }
+      // grade A: 0.49%
+      else if(gradeTypeRnd < 9999) {
+        gradeType = 5;
+      }
+      // grade AAA: 0.01%
+      else {
+        gradeType = 6;
+      }
+
+      // mint the gem with randomized properties
       gemInstance.mint(
         msg.sender,
         gemExt.incrementId(),
         plotId,
         depth,
         i,
-        1, // TODO: color
+        gemExt.randomColor(0x10100 + i),
         level,
-        1, // TODO: grade type
-        1 // TODO: grade value
+        gradeType,
+        uint24(Random.__randomValue(0x10200 + i, 0, 1000000))
       );
     }
   }
@@ -918,18 +994,57 @@ contract Miner is AccessControlLight {
 
     // for bottom of the stack
     if(bos) {
-      // TODO: implement
-      // gem (lvl 1): 1%
-      // gem (lvl 2): 7%
-      // gem (lvl 3): 14%
-      // gem (lvl 4): 8.5%
-      // gem (lvl 5): 2%
-      // silver (1): none
-      // silver (5): 40.37%
-      // silver (15): 26%
-      // gold (1): 0.3%
-      // artifact: 0.8%
-      // key: 0.03%
+      // determine how many items we get
+      uint256 items = Random.__randomValue(11 * n, 2, 5);
+
+      // generate that amount of items
+      for(uint8 i = 0; i < items; i++) {
+        // generate random value in range [0, 10000)
+        uint256 rnd10000 = Random.__randomValue(11 * n + 1 + i, 0, 10000);
+
+        // generate loot according to the probabilities
+        // gem (lvl 1): 1%
+        if(rnd10000 < 100) {
+          loot[0]++;
+        }
+        // gem (lvl 2): 7%
+        else if(rnd10000 < 800) {
+          loot[1]++;
+        }
+        // gem (lvl 3): 14%
+        else if(rnd10000 < 2200) {
+          loot[2]++;
+        }
+        // gem (lvl 4): 8.5%
+        else if(rnd10000 < 3050) {
+          loot[3]++;
+        }
+        // gem (lvl 5): 2%
+        else if(rnd10000 < 3250) {
+          loot[4]++;
+        }
+        // silver (1): none
+        // silver (5): 40.37%
+        else if(rnd10000 < 7287) {
+          loot[5] += 5;
+        }
+        // silver (15): 26%
+        else if(rnd10000 < 9887) {
+          loot[5] += 15;
+        }
+        // gold (1): 0.3%
+        else if(rnd10000 < 9917) {
+          loot[6]++;
+        }
+        // artifact: 0.8%
+        else if(rnd10000 < 9997) {
+          loot[7]++;
+        }
+        // key: 0.03%
+        else {
+          loot[8]++;
+        }
+      }
     }
 
     // return the loot

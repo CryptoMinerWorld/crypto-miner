@@ -268,7 +268,6 @@ contract('Miner (Time Increase)', (accounts) => {
 		await miner.bind(1, 1, 0);
 
 
-		console.log(1);
 		// initially update fails
 		await assertThrowsAsync(miner.update, 1);
 
@@ -280,7 +279,6 @@ contract('Miner (Time Increase)', (accounts) => {
 		// update succeeds now by mining one block
 		await miner.update(1);
 		// second call fails - nothing to update
-		console.log(2);
 		await assertThrowsAsync(miner.update, 1);
 
 		// verify plot is mined by one block
@@ -294,7 +292,6 @@ contract('Miner (Time Increase)', (accounts) => {
 		// release
 		await miner.release(1);
 		// releasing unlocked token fails
-		console.log(3);
 		await assertThrowsAsync(miner.release, 1);
 
 		// verify all the tokens are unlocked

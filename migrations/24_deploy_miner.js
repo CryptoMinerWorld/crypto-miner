@@ -30,7 +30,7 @@ module.exports = async function(deployer, network, accounts) {
 	// for test network addresses are different
 	if(network !== "mainnet") {
 		gemAddress = "0x82FF6Bbd7B64f707e704034907d582C7B6E09d97";
-		gemExtAddress = "0x907C6A3fe243031f366e79c9479626a407890ACD";
+		gemExtAddress = "0xFDF0B794a1558cf51fCa41D4a03B220F386e9348";
 		plotAddress = "0xE723149a90951F343523b008cae605eC1205cC16";
 		artifactAddress = "0x1"; // TODO
 		silverAddress = "0x901C62b3194C6c460B303537Ab3F39e80f933d48";

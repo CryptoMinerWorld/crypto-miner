@@ -1,6 +1,7 @@
 pragma solidity 0.4.23;
 
 import "./AccessControlLight.sol";
+import "./Random.sol";
 
 /**
  * @title Gem ERC721 Token Extension
@@ -16,7 +17,7 @@ contract GemExtension is AccessControlLight {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant EXTENSION_UID = 0x079e4e892a230815b1574cc742f7aaaee5444f909654b7e5acad916431393971;
+  uint256 public constant EXTENSION_UID = 0x5907e0ef0cc11bd9c3b6f14fe92523435d27e8da304e24c1918ab0d37f9fb096;
 
   /**
    * @dev Next ID Inc is responsible for incrementing `nextId`,
@@ -29,6 +30,16 @@ contract GemExtension is AccessControlLight {
    *      permission allows to call `write`
    */
   uint32 public constant ROLE_EXT_WRITER = 0x00000002;
+
+  /**
+   * @dev Color provider may change the `availableColors` array
+   */
+  uint32 public constant ROLE_COLOR_PROVIDER = 0x00000004;
+
+  /**
+   * @dev Gem colors available in the system
+   */
+  uint8[] public availableColors = [1, 2, 5, 6, 7, 9, 10];
 
   /**
    * @dev Next token (gem) ID
@@ -90,6 +101,39 @@ contract GemExtension is AccessControlLight {
    * @param length how many bits to read
    */
   function read(uint256 _tokenId, uint8 offset, uint8 length) public constant returns(uint256 value) {
+    // read from required position required length of bits and return
     return length == 0? ext256[_tokenId] >> offset: ext256[_tokenId] >> offset & ((uint256(1) << length) - 1);
+  }
+
+  /**
+   * @dev Updates `availableColors` array
+   * @dev Requires sender to have `ROLE_COLOR_PROVIDER` permission
+   * @param colors array of available colors to set
+   */
+  function setAvailableColors(uint8[] colors) public {
+    // ensure sender has permission to set colors
+    require(isSenderInRole(ROLE_COLOR_PROVIDER));
+
+    // set `availableColors` array
+    availableColors = colors;
+  }
+
+  /**
+   * @dev Picks random color from `availableColors` array
+   * @param seed seed to be used in random number generator
+   * @return gem color, an integer [1, 12]
+   */
+  function randomColor(uint256 seed) public constant returns(uint8) {
+    // generate random index and return random number from the array
+    return availableColors[Random.__randomValue(seed, 0, uint8(availableColors.length))];
+  }
+
+  /**
+   * @dev Getter for an entire `availableColors` array
+   * @return array of available colors - `availableColors`
+   */
+  function getAvailableColors() public constant returns(uint8[]) {
+    // just return an array as is
+    return availableColors;
   }
 }

@@ -311,6 +311,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "ROLE_ROLLBACK_OPERATOR",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "plotInstance",
       "outputs": [
         {
@@ -662,6 +676,33 @@
           "type": "address"
         },
         {
+          "indexed": true,
+          "name": "plotId",
+          "type": "uint24"
+        },
+        {
+          "indexed": true,
+          "name": "gemId",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "artifactId",
+          "type": "uint16"
+        }
+      ],
+      "name": "Rollback",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
           "indexed": false,
           "name": "gems1",
           "type": "uint16"
@@ -804,6 +845,20 @@
         }
       ],
       "name": "update",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "rollback",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -1151,5 +1206,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-05-12T10:02:01.138Z"
+  "updatedAt": "2019-05-12T16:06:21.567Z"
 }
