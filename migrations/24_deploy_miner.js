@@ -40,17 +40,6 @@ module.exports = async function(deployer, network, accounts) {
 		chestKeyAddress = "0x61CB4B77B6c039D3b4F9797Ea97e42d43555A3fe";
 	}
 
-	// create links to instances for access control
-	const gemControl = AccessControl.at(gemAddress);
-	const gemExtControl = AccessControlLight.at(gemExtAddress);
-	const plotControl = AccessControlLight.at(plotAddress);
-	// const artifactControl = AccessControlLight.at(artifactAddress); // TODO:
-	const silverControl = AccessControlLight.at(silverAddress);
-	const goldControl = AccessControlLight.at(goldAddress);
-	const artifact20Control = AccessControlLight.at(artifact20Address);
-	const foundersKeyControl = AccessControlLight.at(foundersKeyAddress);
-	const chestKeyControl = AccessControlLight.at(chestKeyAddress);
-
 	// deploy Miner smart contract
 	await deployer.deploy(
 		Miner,
@@ -69,6 +58,17 @@ module.exports = async function(deployer, network, accounts) {
 
 	// for test networks:
 	if(network !== "mainnet") {
+		// create links to instances for access control
+		const gemControl = AccessControl.at(gemAddress);
+		const gemExtControl = AccessControlLight.at(gemExtAddress);
+		const plotControl = AccessControlLight.at(plotAddress);
+		// const artifactControl = AccessControlLight.at(artifactAddress); // TODO:
+		const silverControl = AccessControlLight.at(silverAddress);
+		const goldControl = AccessControlLight.at(goldAddress);
+		const artifact20Control = AccessControlLight.at(artifact20Address);
+		const foundersKeyControl = AccessControlLight.at(foundersKeyAddress);
+		const chestKeyControl = AccessControlLight.at(chestKeyAddress);
+
 		// give miner all the permissions required
 		await gemControl.addOperator(minerAddress, 0x00440000); // state provider, token creator
 		await gemExtControl.updateRole(minerAddress, 0x00000003); // next ID inc, extension writer
