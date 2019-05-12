@@ -301,7 +301,7 @@ contract('Miner (Time Increase)', (accounts) => {
 
 		// verify plot is mined by one block
 		assert.equal(1, await plot.getOffset(1), "wrong plot offset after releasing");
-	})
+	});
 });
 
 // a function to calculate resting energy of the gem based on its energetic age
