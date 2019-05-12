@@ -220,12 +220,8 @@ contract('PlotERC721', (accounts) => {
 		assert.equal("http://cryptominerworld.com/plot/0x" + token1.toString(16).toUpperCase(), await tk.tokenURI(token1), "wrong token1 URI");
 
 		// validate tiers structure
-		for(let i = 1; i <= 2; i++) {
+		for(let i = 1; i <= 5; i++) {
 			assert.equal(layers0[i + 1], await tk.getTierDepth(token0, i), `token0 has wrong tier${i} depth`);
-			assert.equal(layers1[i + 1], await tk.getTierDepth(token1, i), `token1 has wrong tier${i} depth`);
-		}
-		for(let i = 3; i <= 5; i++) {
-			await assertThrowsAsync(await tk.getTierDepth, token0, i);
 			assert.equal(layers1[i + 1], await tk.getTierDepth(token1, i), `token1 has wrong tier${i} depth`);
 		}
 

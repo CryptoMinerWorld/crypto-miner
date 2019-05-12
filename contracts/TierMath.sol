@@ -54,7 +54,8 @@ library TierMath {
    *      Tier 5: Obsidian - non-Antarctica only
    * @dev Passing index equal to zero returns Tier 1 offset,
    *      which is equal to zero by design
-   * @dev Throws if index is too big (bigger than number of tiers)
+   * @dev If index is too big (bigger than number of tiers),
+   *      plot depth will be returned - see `getDepth` function
    * @param tiers tiers data structure to extract depth from
    * @param k one-based tier index to query depth for
    * @return depth of the (k)th tier in blocks
@@ -63,8 +64,8 @@ library TierMath {
     // get number of tiers for the given tiers structure
     uint8 n = getNumberOfTiers(tiers);
 
-    // ensure requested tier exists
-    require(k <= n);
+    // ensure requested tier exists, set it to `n` if not
+    k = k < n? k: n;
 
     // extract requested tier depth data from tier structure and return
     return uint8(tiers >> (6 - k) * 8);
@@ -80,11 +81,8 @@ library TierMath {
    * @return depth of the (k)th tier in blocks or current offset if its bigger
    */
   function getTierDepthOrMined(uint64 tiers, uint8 k) internal pure returns (uint8) {
-    // get number of tiers for the given tiers structure
-    uint8 n = getNumberOfTiers(tiers);
-
-    // get tier depth safely, taking into account `k` can be big
-    uint8 depth = getTierDepth(tiers, k < n? k: n);
+    // get tier depth (safely, taking into account `k` can be big)
+    uint8 depth = getTierDepth(tiers, k);
 
     // get tiers offset
     uint8 offset = getOffset(tiers);
@@ -152,4 +150,15 @@ library TierMath {
     return getOffset(tiers) >= getDepth(tiers);
   }
 
+  /**
+   * @dev Verifies if tier offset points to the bottom of the stack
+   *      of the tier structure specified
+   * @param tiers tiers data structure to check
+   * @param offset block offset to check if it points to the bottom of the stack
+   * @return true if offset points to the bottom of the stack
+   */
+  function isBottomOfStack(uint64 tiers, uint8 offset) internal pure returns(bool) {
+    // compare offset and depth
+    return offset >= getDepth(tiers);
+  }
 }

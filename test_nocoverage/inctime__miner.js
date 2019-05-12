@@ -1,5 +1,6 @@
 // Miner smart contract dependencies
 const Gem = artifacts.require("./GemERC721.sol");
+const GemExt = artifacts.require("./GemExtension.sol");
 const Plot = artifacts.require("./PlotERC721.sol");
 const Artifact = artifacts.require("./PlotERC721.sol"); // TODO
 const Silver = artifacts.require("./SilverERC20.sol");
@@ -16,6 +17,7 @@ contract('Miner (Time Increase)', (accounts) => {
 	it("mining: mining properties of the 25 min old gem(s)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
+		const ext = await GemExt.new();
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -27,6 +29,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		// deploy miner smart contract itself
 		const miner = await Miner.new(
 			gem.address,
+			ext.address,
 			plot.address,
 			artifact.address,
 			silver.address,
@@ -79,6 +82,7 @@ contract('Miner (Time Increase)', (accounts) => {
 	it("mining: mining with resting energy only (bind without locking)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
+		const ext = await GemExt.new();
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -90,6 +94,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		// deploy miner smart contract itself
 		const miner = await Miner.new(
 			gem.address,
+			ext.address,
 			plot.address,
 			artifact.address,
 			silver.address,
@@ -101,10 +106,22 @@ contract('Miner (Time Increase)', (accounts) => {
 
 		// enable mining feature on the miner
 		await miner.updateFeatures(0x00000001); // miner feature
-		// grant miner permissions to modify gem's state
-		await gem.addOperator(miner.address, 0x00400000); // state provider
+		// grant miner permissions to modify gem's state and mint gems
+		await gem.addOperator(miner.address, 0x00440000); // state provider, token creator
+		// grant miner permissions(s) to increment gem ID counter
+		await ext.updateRole(miner.address, 0x00000003); // next ID inc, extension writer
 		// grant miner permission(s) to update plot
 		await plot.updateRole(miner.address, 0x00000014); // state provider, offset provider
+		// grant miner permission(s) to mint silver
+		await silver.updateRole(miner.address, 0x00000001); // token creator
+		// grant miner permission(s) to mint gold
+		await gold.updateRole(miner.address, 0x00000001); // token creator
+		// grant miner permission(s) to mint artifacts
+		await artifactErc20.updateRole(miner.address, 0x00000001); // token creator
+		// grant miner permission(s) to mint founder's chest keys
+		await foundersKey.updateRole(miner.address, 0x00000001); // token creator
+		// grant miner permission(s) to mint chest keys
+		await chestKey.updateRole(miner.address, 0x00000001); // token creator
 
 		// create plot in Antarctica with only 1 block of snow and 99 blocks of ice
 		await plot.mint(accounts[0], 0, web3.toBigNumber("0x0200016464646400"));
@@ -121,7 +138,6 @@ contract('Miner (Time Increase)', (accounts) => {
 
 		// verify initially states are zeros and tokens are transferable
 		assert.equal(0, await gem.getState(1), "non-zero gem's state");
-		assert.equal(0, (await gem.getState(1)).modulo(2), "gem is not transferable");
 		assert.equal(0, await plot.getState(1), "non-zero plot's state");
 		assert(await plot.isTransferable(1), "plot is not transferable");
 
@@ -139,8 +155,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		await miner.bind(1, 1, 0);
 
 		// verify all the tokens are still not locked
-		assert(await gem.getState(1) > 0, "wrong gem's state");
-		assert.equal(0, (await gem.getState(1)).modulo(2), "gem is not transferable after mining");
+		assert.equal(0, await gem.getState(1), "non-zero gem's state after mining");
 		assert.equal(0, await plot.getState(1) > 0, "non-zero plot's state after mining");
 		assert(await plot.isTransferable(1), "plot is not transferable after mining");
 
@@ -151,6 +166,7 @@ contract('Miner (Time Increase)', (accounts) => {
 	it("mining: evaluating plot offset", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
+		const ext = await GemExt.new();
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -162,6 +178,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		// deploy miner smart contract itself
 		const miner = await Miner.new(
 			gem.address,
+			ext.address,
 			plot.address,
 			artifact.address,
 			silver.address,
@@ -201,6 +218,7 @@ contract('Miner (Time Increase)', (accounts) => {
 	it("mining: updating plot offset and releasing", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
+		const ext = await GemExt.new();
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -212,6 +230,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		// deploy miner smart contract itself
 		const miner = await Miner.new(
 			gem.address,
+			ext.address,
 			plot.address,
 			artifact.address,
 			silver.address,
@@ -223,10 +242,22 @@ contract('Miner (Time Increase)', (accounts) => {
 
 		// enable mining feature on the miner
 		await miner.updateFeatures(0x00000001); // miner feature
-		// grant miner permissions to modify gem's state
-		await gem.addOperator(miner.address, 0x00400000); // state provider
+		// grant miner permissions to modify gem's state and mint gems
+		await gem.addOperator(miner.address, 0x00440000); // state provider, token creator
+		// grant miner permissions(s) to increment gem ID counter
+		await ext.updateRole(miner.address, 0x00000003); // next ID inc, extension writer
 		// grant miner permission(s) to update plot
 		await plot.updateRole(miner.address, 0x00000014); // state provider, offset provider
+		// grant miner permission(s) to mint silver
+		await silver.updateRole(miner.address, 0x00000001); // token creator
+		// grant miner permission(s) to mint gold
+		await gold.updateRole(miner.address, 0x00000001); // token creator
+		// grant miner permission(s) to mint artifacts
+		await artifactErc20.updateRole(miner.address, 0x00000001); // token creator
+		// grant miner permission(s) to mint founder's chest keys
+		await foundersKey.updateRole(miner.address, 0x00000001); // token creator
+		// grant miner permission(s) to mint chest keys
+		await chestKey.updateRole(miner.address, 0x00000001); // token creator
 
 		// create plot in Antarctica
 		await plot.mint(accounts[0], 0, web3.toBigNumber("0x0200236464646400"));
@@ -236,6 +267,8 @@ contract('Miner (Time Increase)', (accounts) => {
 		// bind gem to a plot
 		await miner.bind(1, 1, 0);
 
+
+		console.log(1);
 		// initially update fails
 		await assertThrowsAsync(miner.update, 1);
 
@@ -247,6 +280,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		// update succeeds now by mining one block
 		await miner.update(1);
 		// second call fails - nothing to update
+		console.log(2);
 		await assertThrowsAsync(miner.update, 1);
 
 		// verify plot is mined by one block
@@ -260,6 +294,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		// release
 		await miner.release(1);
 		// releasing unlocked token fails
+		console.log(3);
 		await assertThrowsAsync(miner.release, 1);
 
 		// verify all the tokens are unlocked

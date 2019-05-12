@@ -2,6 +2,7 @@ pragma solidity 0.4.23;
 
 import "./AccessControlLight.sol";
 import "./GemERC721.sol";
+import "./GemExtension.sol";
 import "./PlotERC721.sol";
 import "./SilverERC20.sol";
 import "./GoldERC20.sol";
@@ -65,6 +66,12 @@ contract Miner is AccessControlLight {
    *      this smart contract is designed to work with
    */
   uint256 public constant GEM_UID_REQUIRED = 0x0000000000000000000000000000000000000000000000000000000000000003;
+
+  /**
+   * @dev Expected version (UID) of the deployed GemExtension instance
+   *      this smart contract is designed to work with
+   */
+  uint256 public constant GEM_EXT_UID_REQUIRED = 0x079e4e892a230815b1574cc742f7aaaee5444f909654b7e5acad916431393971;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
@@ -149,6 +156,14 @@ contract Miner is AccessControlLight {
    * @dev Miner should have `GemERC721.ROLE_STATE_PROVIDER` permission lock/unlock tokens
    */
   GemERC721 public gemInstance;
+
+  /**
+   * @dev GemERC721 Extension deployed instance, extends GemERC721 instance
+   *
+   * @dev Miner should have `GemExtension.ROLE_NEXT_ID_INC` permission
+   *      to increment token ID sequence counter
+   */
+  GemExtension public gemExt;
 
   /**
    * @dev PlotERC721 deployed instance,
@@ -335,6 +350,7 @@ contract Miner is AccessControlLight {
    */
   constructor(
     address _gem,
+    address _gemExt,
     address _plot,
     address _artifact,
     address _silver,
@@ -345,6 +361,7 @@ contract Miner is AccessControlLight {
   ) public {
     // check input addresses for zero values
     require(_gem != address(0));
+    require(_gemExt != address(0));
     require(_plot != address(0));
     require(_artifact != address(0));
     require(_silver != address(0));
@@ -355,6 +372,7 @@ contract Miner is AccessControlLight {
 
     // bind smart contract instances
     gemInstance = GemERC721(_gem);
+    gemExt = GemExtension(_gemExt);
     plotInstance = PlotERC721(_plot);
     //artifactInstance = ArtifactERC721(_artifact); // TODO: uncomment
     silverInstance = SilverERC20(_silver);
@@ -365,6 +383,7 @@ contract Miner is AccessControlLight {
 
     // verify smart contract versions
     require(gemInstance.TOKEN_VERSION() == GEM_UID_REQUIRED);
+    require(gemExt.EXTENSION_UID() == GEM_EXT_UID_REQUIRED);
     require(plotInstance.TOKEN_UID() == PLOT_UID_REQUIRED);
     //require(artifactInstance.TOKEN_UID() == ARTIFACT_UID_REQUIRED); // TODO: uncomment
     require(silverInstance.TOKEN_VERSION() == SILVER_UID_REQUIRED);
@@ -422,8 +441,8 @@ contract Miner is AccessControlLight {
     // in case when offset has increased, we perform initial mining
     // in the same transaction
     if(offset > TierMath.getOffset(tiers)) {
-      // save unused resting energy into gem's state
-      gemInstance.setState(gemId, uint48(energy) << 16);
+      // save unused resting energy into gem's extension
+      gemExt.write(gemId, energy, 0, 32);
 
       // delegate call to `__mine` to update plot and mint loot
       __mine(plotId, offset);
@@ -436,8 +455,8 @@ contract Miner is AccessControlLight {
     if(offset < maxOffset) {
       // lock the plot, erasing everything else in its state
       plotInstance.setState(plotId, DEFAULT_MINING_BIT);
-      // lock the gem, keeping saved resting energy value
-      gemInstance.setState(gemId, gemInstance.getState(gemId) | DEFAULT_MINING_BIT);
+      // lock the gem, erasing everything else in its state
+      gemInstance.setState(gemId, DEFAULT_MINING_BIT);
       // lock artifact if any, also erasing everything in its state
       // artifactInstance.setState(artifactId, DEFAULT_MINING_BIT);
 
@@ -487,7 +506,7 @@ contract Miner is AccessControlLight {
     // unlock the plot, erasing everything else in its state
     plotInstance.setState(plotId, 0);
     // unlock the gem, keeping saved resting energy value
-    gemInstance.setState(m.gemId, gemInstance.getState(m.gemId) & ERASE_MINING_BIT);
+    gemInstance.setState(m.gemId, 0);
     // unlock artifact if any, also erasing everything in its state
     // artifactInstance.setState(m.artifactId, 0);
 
@@ -518,8 +537,13 @@ contract Miner is AccessControlLight {
     // evaluate the plot
     uint8 offset = evaluate(plotId);
 
-    // update gem's state to erase energy, keeping it locked
-    gemInstance.setState(miningPlots[plotId].gemId, DEFAULT_MINING_BIT);
+    // load binding data
+    MiningData memory m = miningPlots[plotId];
+
+    // erase gem's energy by updating extension
+    gemExt.write(m.gemId, 0, 0, 32);
+    // keeping it locked and updating state change date
+    gemInstance.setState(m.gemId, DEFAULT_MINING_BIT);
 
     // delegate call to `__mine` to update plot and mint loot
     __mine(plotId, offset);
@@ -655,26 +679,25 @@ contract Miner is AccessControlLight {
     // if we do not cross tiers
     if(tier0 == tier1) {
       // just process current tier according to offsets
-      genLoot(tier0, offset - offset0, offset + 1 >= TierMath.getDepth(tiers), loot);
+      loot = genLoot(tier0, offset - offset0, TierMath.isBottomOfStack(tiers, offset), loot);
     }
     // otherwise, if we cross one or more tiers
     else {
       // process first tier
-      genLoot(tier0, TierMath.getTierDepth(tiers, tier0 + 1), false, loot);
+      loot = genLoot(tier0, TierMath.getTierDepth(tiers, tier0 + 1) - offset0, false, loot);
 
       // process middle tiers
       for(uint8 i = tier0 + 1; i <= tier1 - 1; i++) {
         // process full tier `i`
-        genLoot(i, TierMath.getTierDepth(tiers, i - i) - TierMath.getTierDepth(tiers, i), false, loot);
+        loot = genLoot(i, TierMath.getTierDepth(tiers, i - i) - TierMath.getTierDepth(tiers, i), false, loot);
       }
 
       // process last tier
-      genLoot(tier1, TierMath.getTierDepth(tiers, tier1 - 1), offset + 1 >= TierMath.getDepth(tiers), loot);
+      loot = genLoot(tier1, offset - TierMath.getTierDepth(tiers, tier1 - 1), TierMath.isBottomOfStack(tiers, offset), loot);
     }
 
     // loot processing - delegate call to `processLoot`
-    // plots in Antarctica have zero country ID (high 8 bits)
-    __processLoot(loot, plotId >> 16 == 0);
+    __processLoot(loot, plotId, tiers);
 
     // update plot's offset
     plotInstance.mineTo(plotId, offset);
@@ -697,32 +720,46 @@ contract Miner is AccessControlLight {
    * @dev The loot is minted to transaction sender
    * @dev Unsafe, must be kept private at all times
    * @param loot an array defining the loot as described above
+   * @param plotId ID of the plot the gem is found in
+   * @param tiers tiers structure of the plot
    */
-  function __processLoot(uint16[] memory loot, bool antarctica) private {
-    // mint gems level 1
-    __mintGems(1, loot[0]);
-    // mint gems level 2
-    __mintGems(2, loot[1]);
-    // mint gems level 3
-    __mintGems(3, loot[2]);
-    // mint gems level 4
-    __mintGems(4, loot[3]);
-    // mint gems level 5
-    __mintGems(5, loot[4]);
-    // mint silver
-    silverInstance.mint(msg.sender, loot[5]);
-    // mint gold
-    goldInstance.mint(msg.sender, loot[6]);
-    // mint artifacts
-    artifactErc20Instance.mint(msg.sender, loot[7]);
-    // mint keys
-    if(antarctica) {
-      // for Antarctica we mint founder's chest keys
-      foundersKeyInstance.mint(msg.sender, loot[8]);
+  function __processLoot(uint16[] memory loot, uint24 plotId, uint64 tiers) private {
+    // mint gems level 1, 2, 3, 4, 5
+    for(uint8 i = 0; i < 5; i++) {
+      // mint gems level `i`
+      __mintGems(i + 1, loot[i], plotId, TierMath.getTierDepth(tiers, i + 1));
     }
-    else {
-      // for the rest of the World - regular chest keys
-      chestKeyInstance.mint(msg.sender, loot[8]);
+
+    // if there is silver to mint
+    if(loot[5] != 0) {
+      // mint silver
+      silverInstance.mint(msg.sender, loot[5]);
+    }
+
+    // if there is gold to mint
+    if(loot[6] != 0) {
+      // mint gold
+      goldInstance.mint(msg.sender, loot[6]);
+    }
+
+    // if there are artifacts to mint
+    if(loot[7] != 0) {
+      // mint artifacts
+      artifactErc20Instance.mint(msg.sender, loot[7]);
+    }
+
+    // if there are keys to mint
+    if(loot[8] != 0) {
+      // mint keys
+      // plots in Antarctica have zero country ID (high 8 bits)
+      if(plotId >> 16 == 0) {
+        // for Antarctica we mint founder's chest keys
+        foundersKeyInstance.mint(msg.sender, loot[8]);
+      }
+      else {
+        // for the rest of the World - regular chest keys
+        chestKeyInstance.mint(msg.sender, loot[8]);
+      }
     }
 
     // emit an event
@@ -735,9 +772,23 @@ contract Miner is AccessControlLight {
    * @dev Unsafe, must be kept private at all times
    * @param level level of the gems to mint
    * @param n number of gems to mint
+   * @param plotId ID of the plot the gem is found in
+   * @param depth block depth where the gem was found
    */
-  function __mintGems(uint8 level, uint16 n) private {
-    // TODO: implement gems minting
+  function __mintGems(uint8 level, uint16 n, uint24 plotId, uint16 depth) private {
+    for(uint16 i = 0; i < n; i++) {
+      gemInstance.mint(
+        msg.sender,
+        gemExt.incrementId(),
+        plotId,
+        depth,
+        i,
+        1, // TODO: color
+        level,
+        1, // TODO: grade type
+        1 // TODO: grade value
+      );
+    }
   }
 
   /**

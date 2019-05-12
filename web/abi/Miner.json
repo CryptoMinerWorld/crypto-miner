@@ -133,7 +133,35 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "gemExt",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "MINER_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "GEM_EXT_UID_REQUIRED",
       "outputs": [
         {
           "name": "",
@@ -491,6 +519,10 @@
           "type": "address"
         },
         {
+          "name": "_gemExt",
+          "type": "address"
+        },
+        {
           "name": "_plot",
           "type": "address"
         },
@@ -631,6 +663,63 @@
         },
         {
           "indexed": false,
+          "name": "gems1",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "name": "gems2",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "name": "gems3",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "name": "gems4",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "name": "gems5",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "name": "silver",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "name": "gold",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "name": "artifacts",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "name": "keys",
+          "type": "uint16"
+        }
+      ],
+      "name": "Loot",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
           "name": "_requested",
           "type": "uint256"
         },
@@ -733,6 +822,64 @@
         {
           "name": "",
           "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "k",
+          "type": "uint8"
+        },
+        {
+          "name": "n",
+          "type": "uint16"
+        },
+        {
+          "name": "bos",
+          "type": "bool"
+        },
+        {
+          "name": "loot",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "genLoot",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "seedOffset",
+          "type": "uint16"
+        },
+        {
+          "name": "p",
+          "type": "uint16"
+        },
+        {
+          "name": "n",
+          "type": "uint16"
+        }
+      ],
+      "name": "rndEval",
+      "outputs": [
+        {
+          "name": "amount",
+          "type": "uint16"
         }
       ],
       "payable": false,
@@ -1004,5 +1151,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-05-10T13:43:17.590Z"
+  "updatedAt": "2019-05-12T10:02:01.138Z"
 }

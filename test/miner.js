@@ -1,5 +1,6 @@
 // Miner smart contract dependencies
 const Gem = artifacts.require("./GemERC721.sol");
+const GemExt = artifacts.require("./GemExtension.sol");
 const Plot = artifacts.require("./PlotERC721.sol");
 const Artifact = artifacts.require("./PlotERC721.sol"); // TODO
 const Silver = artifacts.require("./SilverERC20.sol");
@@ -16,6 +17,7 @@ contract('Miner', (accounts) => {
 	it("deployment: verify deployment routine", async() => {
 		// define miner dependencies
 		const g = await Gem.new();
+		const x = await GemExt.new();
 		const p = await Plot.new();
 		const a = await Artifact.new();
 		const s = await Silver.new();
@@ -25,17 +27,18 @@ contract('Miner', (accounts) => {
 		const c = await ChestKey.new();
 
 		// verify wrong constructor parameters fail
-		await assertThrowsAsync(Miner.new, 0, p.address, a.address, s.address, o.address, e.address, f.address, c.address);
-		await assertThrowsAsync(Miner.new, g.address, 0, a.address, s.address, o.address, e.address, f.address, c.address);
-		await assertThrowsAsync(Miner.new, g.address, p.address, 0, s.address, o.address, e.address, f.address, c.address);
-		await assertThrowsAsync(Miner.new, g.address, p.address, a.address, 0, o.address, e.address, f.address, c.address);
-		await assertThrowsAsync(Miner.new, g.address, p.address, a.address, s.address, 0, e.address, f.address, c.address);
-		await assertThrowsAsync(Miner.new, g.address, p.address, a.address, s.address, o.address, 0, f.address, c.address);
-		await assertThrowsAsync(Miner.new, g.address, p.address, a.address, s.address, o.address, e.address, 0, c.address);
-		await assertThrowsAsync(Miner.new, g.address, p.address, a.address, s.address, o.address, e.address, f.address, 0);
+		await assertThrows(Miner.new, 0, x.address, p.address, a.address, s.address, o.address, e.address, f.address, c.address);
+		await assertThrows(Miner.new, g.address, 0, p.address, a.address, s.address, o.address, e.address, f.address, c.address);
+		await assertThrows(Miner.new, g.address, x.address, 0, a.address, s.address, o.address, e.address, f.address, c.address);
+		await assertThrows(Miner.new, g.address, x.address, p.address, 0, s.address, o.address, e.address, f.address, c.address);
+		await assertThrows(Miner.new, g.address, x.address, p.address, a.address, 0, o.address, e.address, f.address, c.address);
+		await assertThrows(Miner.new, g.address, x.address, p.address, a.address, s.address, 0, e.address, f.address, c.address);
+		await assertThrows(Miner.new, g.address, x.address, p.address, a.address, s.address, o.address, 0, f.address, c.address);
+		await assertThrows(Miner.new, g.address, x.address, p.address, a.address, s.address, o.address, e.address, 0, c.address);
+		await assertThrows(Miner.new, g.address, x.address, p.address, a.address, s.address, o.address, e.address, f.address, 0);
 
 		// deploy miner smart contract itself
-		const miner = await Miner.new(g.address, p.address, a.address, s.address, o.address, e.address, f.address, c.address);
+		const miner = await Miner.new(g.address, x.address, p.address, a.address, s.address, o.address, e.address, f.address, c.address);
 
 		// verify the setup
 		assert.equal(g.address, await miner.gemInstance(), "wrong gem instance address");
@@ -51,6 +54,7 @@ contract('Miner', (accounts) => {
 	it("loot: loot generator check tier 1", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
+		const ext = await GemExt.new();
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -62,6 +66,7 @@ contract('Miner', (accounts) => {
 		// deploy miner smart contract itself
 		const miner = await Miner.new(
 			gem.address,
+			ext.address,
 			plot.address,
 			artifact.address,
 			silver.address,
@@ -87,6 +92,7 @@ contract('Miner', (accounts) => {
 	it("loot: loot generator check tier 2", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
+		const ext = await GemExt.new();
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -98,6 +104,7 @@ contract('Miner', (accounts) => {
 		// deploy miner smart contract itself
 		const miner = await Miner.new(
 			gem.address,
+			ext.address,
 			plot.address,
 			artifact.address,
 			silver.address,
@@ -123,6 +130,7 @@ contract('Miner', (accounts) => {
 	it("loot: loot generator check tier 3", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
+		const ext = await GemExt.new();
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -134,6 +142,7 @@ contract('Miner', (accounts) => {
 		// deploy miner smart contract itself
 		const miner = await Miner.new(
 			gem.address,
+			ext.address,
 			plot.address,
 			artifact.address,
 			silver.address,
@@ -159,6 +168,7 @@ contract('Miner', (accounts) => {
 	it("loot: loot generator check tier 4", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
+		const ext = await GemExt.new();
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -170,6 +180,7 @@ contract('Miner', (accounts) => {
 		// deploy miner smart contract itself
 		const miner = await Miner.new(
 			gem.address,
+			ext.address,
 			plot.address,
 			artifact.address,
 			silver.address,
@@ -195,6 +206,7 @@ contract('Miner', (accounts) => {
 	it("loot: loot generator check tier 5", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
+		const ext = await GemExt.new();
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -206,6 +218,7 @@ contract('Miner', (accounts) => {
 		// deploy miner smart contract itself
 		const miner = await Miner.new(
 			gem.address,
+			ext.address,
 			plot.address,
 			artifact.address,
 			silver.address,
@@ -231,6 +244,7 @@ contract('Miner', (accounts) => {
 	it("mining: mining properties of the new gem(s)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
+		const ext = await GemExt.new();
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -242,6 +256,7 @@ contract('Miner', (accounts) => {
 		// deploy miner smart contract itself
 		const miner = await Miner.new(
 			gem.address,
+			ext.address,
 			plot.address,
 			artifact.address,
 			silver.address,
@@ -307,6 +322,7 @@ contract('Miner', (accounts) => {
 	it("mining: binding gem to a plot", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
+		const ext = await GemExt.new();
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -318,6 +334,7 @@ contract('Miner', (accounts) => {
 		// deploy miner smart contract itself
 		const miner = await Miner.new(
 			gem.address,
+			ext.address,
 			plot.address,
 			artifact.address,
 			silver.address,
@@ -357,7 +374,7 @@ contract('Miner', (accounts) => {
 });
 
 // auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
+async function assertThrows(fn, ...args) {
 	let f = () => {};
 	try {
 		await fn(...args);
