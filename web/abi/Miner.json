@@ -676,33 +676,6 @@
           "type": "address"
         },
         {
-          "indexed": true,
-          "name": "plotId",
-          "type": "uint24"
-        },
-        {
-          "indexed": true,
-          "name": "gemId",
-          "type": "uint32"
-        },
-        {
-          "indexed": false,
-          "name": "artifactId",
-          "type": "uint16"
-        }
-      ],
-      "name": "Rollback",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "name": "_by",
-          "type": "address"
-        },
-        {
           "indexed": false,
           "name": "gems1",
           "type": "uint16"

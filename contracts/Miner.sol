@@ -309,15 +309,6 @@ contract Miner is AccessControlLight {
   event Released(address indexed _by, uint24 indexed plotId, uint32 indexed gemId, uint16 artifactId);
 
   /**
-   * @dev Fired in `rollback()`
-   * @param _by an address which executed transaction, rollback operator
-   * @param plotId ID of the plot released
-   * @param gemId ID of the gem released
-   * @param artifactId ID of the artifact released
-   */
-  event Rollback(address indexed _by, uint24 indexed plotId, uint32 indexed gemId, uint16 artifactId);
-
-  /**
    * @dev Fired in `update()`
    * @param _by an address which executed transaction and obtained the loot
    * @param gems1 level 1 gems minted
@@ -457,11 +448,13 @@ contract Miner is AccessControlLight {
     // in case when offset has increased, we perform initial mining
     // in the same transaction
     if(offset > TierMath.getOffset(tiers)) {
-      // save unused resting energy into gem's extension
-      gemExt.write(gemId, energy, 0, 32);
-
       // delegate call to `__mine` to update plot and mint loot
       __mine(plotId, offset);
+
+      // save unused resting energy into gem's extension
+      gemExt.write(gemId, energy, 0, 32);
+      // keeping it unlocked and updating state change date
+      gemInstance.setState(gemId, 0);
 
       // emit an energy consumed event
       emit RestingEnergyConsumed(msg.sender, gemId, energy);
@@ -515,22 +508,8 @@ contract Miner is AccessControlLight {
       __mine(plotId, offset);
     }
 
-    // release tokens involved
-    // load binding data
-    MiningData memory m = miningPlots[plotId];
-
-    // unlock the plot, erasing everything else in its state
-    plotInstance.setState(plotId, 0);
-    // unlock the gem, erasing everything else in its state
-    gemInstance.setState(m.gemId, 0);
-    // unlock artifact if any, erasing everything in its state
-    // artifactInstance.setState(m.artifactId, 0);
-
-    // erase mining information in the internal mapping
-    delete miningPlots[plotId];
-
-    // emit en event
-    emit Released(msg.sender, plotId, m.gemId, m.artifactId);
+    // unlock the tokens - delegate call to `__unlock`
+    __unlock(plotId);
   }
 
   /**
@@ -553,16 +532,24 @@ contract Miner is AccessControlLight {
     // evaluate the plot
     uint8 offset = evaluate(plotId);
 
-    // load binding data
-    MiningData memory m = miningPlots[plotId];
-
-    // erase gem's energy by updating extension
-    gemExt.write(m.gemId, 0, 0, 32);
-    // keeping it locked and updating state change date
-    gemInstance.setState(m.gemId, DEFAULT_MINING_BIT);
-
     // delegate call to `__mine` to update plot and mint loot
     __mine(plotId, offset);
+
+    // if plot is fully mined now
+    if(plotInstance.isFullyMined(plotId)) {
+      // unlock the tokens - delegate call to `__unlock`
+      __unlock(plotId);
+    }
+    // if plot still can be mined do not unlock
+    else {
+      // load binding data
+      MiningData memory m = miningPlots[plotId];
+
+      // erase gem's energy by updating extension
+      gemExt.write(m.gemId, 0, 0, 32);
+      // keeping it locked and updating state change date
+      gemInstance.setState(m.gemId, DEFAULT_MINING_BIT);
+    }
   }
 
   /**
@@ -575,6 +562,16 @@ contract Miner is AccessControlLight {
     // ensure function is called by rollback operator
     require(isSenderInRole(ROLE_ROLLBACK_OPERATOR));
 
+    // unlock the tokens - delegate call to `__unlock`
+    __unlock(plotId);
+  }
+
+  /**
+   * @dev Auxiliary function to release plot and all bound tokens
+   * @dev Unsafe, must be kept private
+   * @param plotId ID of the plot to unlock
+   */
+  function __unlock(uint24 plotId) private {
     // load binding data
     MiningData memory m = miningPlots[plotId];
 
@@ -588,8 +585,8 @@ contract Miner is AccessControlLight {
     // erase mining information in the internal mapping
     delete miningPlots[plotId];
 
-    // emit an event
-    emit Rollback(msg.sender, plotId, m.gemId, m.artifactId);
+    // emit en event
+    emit Released(msg.sender, plotId, m.gemId, m.artifactId);
   }
 
   /**
