@@ -295,9 +295,17 @@ contract Miner is AccessControlLight {
    * @dev May be fired in `bind()` and `release()`. Fired in `update()`
    * @param _by an address which executed transaction, usually owner of the plot
    * @param plotId ID of the plot which was mined
-   * @param offset mined depth for the plot
+   * @param offsetFrom initial depth for the plot
+   * @param offsetTo mined depth for the plot
+   * @param loot an array containing loot
    */
-  event Updated(address indexed _by, uint24 indexed plotId, uint8 offset);
+  event Updated(
+    address indexed _by,
+    uint24 indexed plotId,
+    uint8 offsetFrom,
+    uint8 offsetTo,
+    uint16[] loot
+  );
 
   /**
    * @dev Fired in `release()`
@@ -308,31 +316,6 @@ contract Miner is AccessControlLight {
    */
   event Released(address indexed _by, uint24 indexed plotId, uint32 indexed gemId, uint16 artifactId);
 
-  /**
-   * @dev Fired in `update()`
-   * @param _by an address which executed transaction and obtained the loot
-   * @param gems1 level 1 gems minted
-   * @param gems2 level 2 gems minted
-   * @param gems3 level 3 gems minted
-   * @param gems4 level 4 gems minted
-   * @param gems5 level 5 gems minted
-   * @param silver silver minted
-   * @param gold gold minted
-   * @param artifacts artifacts minted
-   * @param keys keys minted
-   */
-  event Loot(
-    address indexed _by,
-    uint16 gems1,
-    uint16 gems2,
-    uint16 gems3,
-    uint16 gems4,
-    uint16 gems5,
-    uint16 silver,
-    uint16 gold,
-    uint16 artifacts,
-    uint16 keys
-  );
 
   /**
    * @dev Creates a Miner instance, binding it to GemERC721, PlotERC721,
@@ -743,7 +726,7 @@ contract Miner is AccessControlLight {
     plotInstance.mineTo(plotId, offset);
 
     // emit an event
-    emit Updated(msg.sender, plotId, offset);
+    emit Updated(msg.sender, plotId, offset0, offset, loot);
   }
 
   /**
@@ -801,9 +784,6 @@ contract Miner is AccessControlLight {
         chestKeyInstance.mint(msg.sender, loot[8]);
       }
     }
-
-    // emit an event
-    emit Loot(msg.sender, loot[0], loot[1], loot[2], loot[3], loot[4], loot[5], loot[6], loot[7], loot[8]);
   }
 
   /**
