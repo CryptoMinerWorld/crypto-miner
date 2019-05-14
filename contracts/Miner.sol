@@ -580,7 +580,7 @@ contract Miner is AccessControlLight {
    * @param plotId ID of the land plot to evaluate current state for
    * @return evaluated current mining block index for the given land plot
    */
-  function evaluate(uint24 plotId) public constant returns(uint8) {
+  function evaluate(uint24 plotId) public constant returns(uint8 offset) {
     // verify plot is locked
     // verifies token existence under the hood
     require(plotInstance.getState(plotId) & DEFAULT_MINING_BIT != 0);
@@ -603,13 +603,10 @@ contract Miner is AccessControlLight {
     // determine gem's effective mining energy
     uint32 energy = effectiveMiningEnergyOf(m.gemId);
 
-    // define variable to store new plot offset
-    uint8 offset;
-
     // delegate call to `evaluateWith`
     (offset, energy) = evaluateWith(tiers, maxOffset, energy);
 
-    // return calculated offset
+    // calculated offset returned automatically
     return offset;
   }
 
@@ -1063,11 +1060,20 @@ contract Miner is AccessControlLight {
    * @param artifactIds an array of IDs of the artifacts to affect the gems
    *      properties during mining process
    */
-/*
   function bulkBind(uint24[] plotIds, uint32[] gemIds, uint16[] artifactIds) public {
-    // TODO: implement
+    // verify arrays have same lengths
+    require(plotIds.length == gemIds.length);
+    require(plotIds.length == artifactIds.length);
+
+    // ensure arrays are not zero sized
+    require(plotIds.length != 0);
+
+    // simply iterate over each element
+    for(uint32 i = 0; i < plotIds.length; i++) {
+      // delegate call to `bind`
+      bind(plotIds[i], gemIds[i], artifactIds[i]);
+    }
   }
-*/
 
   /**
    * @notice Releases several gems and artifacts (if any) bound earlier
@@ -1076,17 +1082,23 @@ contract Miner is AccessControlLight {
    * @dev Saves updated land plots states into distributed ledger and may
    *      produce (mint) some new tokens (silver, gold, etc.)
    * @dev Unlocks all the tokens involved (previously bound)
+   * @dev Throws if array specified is zero-sized
    * @dev Throws if any of the land plot tokens specified
    *      doesn't exist or doesn't belong to transaction sender
    * @dev Throws if any of the land plots specified is not in mining state
    *      (was not bound previously using `bind()` or `bulkBind()`)
    * @param plotIds an array of IDs of the land plots to stop mining
    */
-/*
   function bulkRelease(uint24[] plotIds) public {
-    // TODO: implement
+    // ensure arrays are not zero sized
+    require(plotIds.length != 0);
+
+    // simply iterate over each element
+    for(uint32 i = 0; i < plotIds.length; i++) {
+      // delegate call to `release`
+      release(plotIds[i]);
+    }
   }
-*/
 
   /**
    * @notice Updates several plots states without releasing gems and artifacts (if any)
@@ -1095,31 +1107,51 @@ contract Miner is AccessControlLight {
    * @dev Saves updated land plots states into distributed ledger and may
    *      produce (mint) some new tokens (silver, gold, etc.)
    * @dev All the tokens involved (previously bound) remain in a locked state
+   * @dev Throws if array specified is zero-sized
    * @dev Throws if any of the land plot tokens specified
    *      doesn't exist or doesn't belong to transaction sender
    * @dev Throws if any of the land plots specified is not in mining state
    *      (was not bound previously using `bind()` or `bulkBind()`)
    * @param plotIds an array of IDs of the land plots to update states for
    */
-/*
   function bulkUpdate(uint24[] plotIds) public {
-    // TODO: implement
+    // ensure arrays are not zero sized
+    require(plotIds.length != 0);
+
+    // simply iterate over each element
+    for(uint32 i = 0; i < plotIds.length; i++) {
+      // delegate call to `update`
+      update(plotIds[i]);
+    }
   }
-*/
 
   /**
    * @notice Evaluates current state of several plots without performing a transaction
    * @dev Bulk version of the `evaluate()` function
    * @dev Doesn't update land plots states in the distributed ledger
    * @dev May be used by frontend to display current mining state close to realtime
+   * @dev Throws if array specified is zero-sized
+   * @dev Throws if any of the land plots specified is not in mining state
+   *      (was not bound previously using `bind()` or `bulkBind()`)
    * @param plotIds an array of IDs of the land plots to evaluate current states for
    * @return an array of evaluated current mining block indexes for the given land plots array
    */
-/*
-  function bulkEvaluate(uint24[] plotIds) public constant returns(uint8[]) {
-    // TODO: implement
+  function bulkEvaluate(uint24[] plotIds) public constant returns(uint8[] offsets) {
+    // ensure arrays are not zero sized
+    require(plotIds.length != 0);
+
+    // allocate memory for the array
+    offsets = new uint8[](plotIds.length);
+
+    // simply iterate over each element
+    for(uint32 i = 0; i < plotIds.length; i++) {
+      // delegate call to `evaluate`
+      offsets[i] = evaluate(plotIds[i]);
+    }
+
+    // offsets array is returned automatically
+    return offsets;
   }
-*/
 
 
   /**
