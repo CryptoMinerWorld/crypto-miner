@@ -633,8 +633,18 @@
         },
         {
           "indexed": false,
-          "name": "offset",
+          "name": "offsetFrom",
           "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "offsetTo",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "loot",
+          "type": "uint16[]"
         }
       ],
       "name": "Updated",
@@ -665,63 +675,6 @@
         }
       ],
       "name": "Released",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "name": "_by",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "name": "gems1",
-          "type": "uint16"
-        },
-        {
-          "indexed": false,
-          "name": "gems2",
-          "type": "uint16"
-        },
-        {
-          "indexed": false,
-          "name": "gems3",
-          "type": "uint16"
-        },
-        {
-          "indexed": false,
-          "name": "gems4",
-          "type": "uint16"
-        },
-        {
-          "indexed": false,
-          "name": "gems5",
-          "type": "uint16"
-        },
-        {
-          "indexed": false,
-          "name": "silver",
-          "type": "uint16"
-        },
-        {
-          "indexed": false,
-          "name": "gold",
-          "type": "uint16"
-        },
-        {
-          "indexed": false,
-          "name": "artifacts",
-          "type": "uint16"
-        },
-        {
-          "indexed": false,
-          "name": "keys",
-          "type": "uint16"
-        }
-      ],
-      "name": "Loot",
       "type": "event"
     },
     {
@@ -848,7 +801,7 @@
       "name": "evaluate",
       "outputs": [
         {
-          "name": "",
+          "name": "offset",
           "type": "uint8"
         }
       ],
@@ -908,6 +861,75 @@
         {
           "name": "amount",
           "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotIds",
+          "type": "uint24[]"
+        },
+        {
+          "name": "gemIds",
+          "type": "uint32[]"
+        },
+        {
+          "name": "artifactIds",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "bulkBind",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "bulkRelease",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "bulkUpdate",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "plotIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "bulkEvaluate",
+      "outputs": [
+        {
+          "name": "offsets",
+          "type": "uint8[]"
         }
       ],
       "payable": false,
@@ -1179,5 +1201,5 @@
     }
   ],
   "schemaVersion": "2.0.0",
-  "updatedAt": "2019-05-12T16:06:21.567Z"
+  "updatedAt": "2019-05-14T13:12:17.800Z"
 }
