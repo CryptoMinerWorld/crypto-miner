@@ -73,7 +73,7 @@ contract GemExtension is AccessControlLight {
    */
   function write(uint256 _tokenId, uint256 value, uint8 offset, uint8 length) public {
     // ensure sender has permission to write to `ext256`
-    require(isSenderInRole(ROLE_NEXT_ID_INC));
+    require(isSenderInRole(ROLE_EXT_WRITER));
 
     // create value mask
     uint256 valueMask = length == 0? // if length is zero its same as 256, which is full mask
@@ -108,11 +108,15 @@ contract GemExtension is AccessControlLight {
   /**
    * @dev Updates `availableColors` array
    * @dev Requires sender to have `ROLE_COLOR_PROVIDER` permission
+   * @dev Requires input array not to be empty
    * @param colors array of available colors to set
    */
   function setAvailableColors(uint8[] colors) public {
     // ensure sender has permission to set colors
     require(isSenderInRole(ROLE_COLOR_PROVIDER));
+
+    // ensure array is not empty
+    require(colors.length != 0);
 
     // set `availableColors` array
     availableColors = colors;
