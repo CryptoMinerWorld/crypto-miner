@@ -52,6 +52,29 @@ contract('PlotSale', (accounts) => {
 		assert.equal(SALE_PRICE, await s.SALE_PRICE(), "wrong SALE_PRICE value");
 	});
 
+	it("integrity: tiers generation randomized function constraints", async() => {
+		// define plot sale dependencies
+		const r = await Tracker.new(); // ref tracker
+		const c = await Country.new(COUNTRY_DATA); // country ERC721
+		const t = await Plot.new(); // plot ERC721
+		const w = accounts[10]; // world chest
+		const m = accounts[11]; // monthly chest
+		const b = accounts[13]; // beneficiary
+		const u = -60 + new Date().getTime() / 1000 | 0; // offset, sale start time
+
+		// instantiate plot sale smart contract
+		const s = await Sale.new(r.address, c.address, t.address, w, m, b, u);
+
+		// auxiliary variable 2 as BigNumber
+		const two = web3.toBigNumber(2);
+
+		// generate randomized tier structure
+		const tiers = await s.random5Tiers(0);
+		assert.equal(5, tiers.dividedToIntegerBy(two.pow(56)).modulo(256), "wrong number of tiers");
+		assert.equal(0, tiers.dividedToIntegerBy(two.pow(48)).modulo(256), "wrong tier1 offset");
+		assert.equal(0, tiers.modulo(256), "wrong initial offset");
+	});
+
 	it("buy: ETH flow", async() => {
 		// define plot sale dependencies
 		const r = await Tracker.new(); // ref tracker

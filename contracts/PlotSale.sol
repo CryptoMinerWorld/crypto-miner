@@ -4,6 +4,8 @@ import "./AccessControlLight.sol";
 import "./RefPointsTracker.sol";
 import "./PlotERC721.sol";
 import "./CountryERC721.sol";
+import "./TierMath.sol";
+import "./Random.sol";
 
 /**
  * @title World Land Plot Sale
@@ -44,7 +46,7 @@ contract PlotSale is AccessControlLight {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant SALE_UID = 0x0c42e0d5ff604c6947cbcbdbb6ea1e21bddaae02939228c8cec4c73b9e1a1ad7;
+  uint256 public constant SALE_UID = 0x0a40d894a35fc577fd19196f8abb2efe24eed6c63f53711469d4678763fca63f;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
@@ -395,8 +397,9 @@ contract PlotSale is AccessControlLight {
   function __mint(address to, uint8 countryId, uint8 n) private {
     // we're going to mint `length` tokens
     for(uint8 i = 0; i < n; i++) {
-      // TODO: generate randomized tiers structure
-      uint64 tiers = 0x05002341555F6400;
+      // generate randomized tiers structure
+      // delegate call to `random5Tiers`
+      uint64 tiers = random5Tiers(7 * i);
 
       // delegate call to `PlotERC721.mint` and get generated token ID
       uint24 tokenId = plotInstance.mint(to, countryId, tiers);
@@ -433,4 +436,93 @@ contract PlotSale is AccessControlLight {
     refPointsTracker.addKnownAddress(referred);
   }
 
+  /**
+   * @dev Auxiliary function to generate randomized tier structure
+   *      of five tiers (non-Antarctica - rest of the World)
+   * @dev Function generates random 256-bit number 7 times, which
+   *      should be taken into account when using it in cycle
+   *      and supplying seed offset which should increase at least by 7
+   *      in each cycle call
+   * @param seedOffset initial seed to use for random generation
+   * @return randomized tiers structure consisting of five tiers
+   */
+  function random5Tiers(uint256 seedOffset) public constant returns(uint64 tiers) {
+    // variable to store some randomness to work with
+    uint256 rnd;
+
+    // variables to store tiers lengths
+    uint8 offset1; // Tier 1 length, equal to its depth
+    uint8 offset2; // Tier 2 length
+    uint8 offset3; // Tier 3 length
+    uint8 offset4; // Tier 4 length
+    uint8 offset5; // Tier 5 length
+
+    // we are generating 100 blocks of land
+    for(uint8 i = 0; i < 100; i++) {
+      // each 16 iterations starting from iteration 0
+      if(i % 16 == 0) {
+        // generate new randomness to work with
+        rnd = Random.__rawRandom(seedOffset + i / 16);
+      }
+
+      // generate random value in the [0, 100) range
+      uint8 rnd100 = uint8(Random.__rndVal(rnd >> 16 * i, 0xFFFF, 0, 100));
+
+      // depending on the value generated add to corresponding tier length
+      // tier 1: first 35 blocks
+      if(rnd100 < 35) {
+        offset1++;
+        offset2++;
+        offset3++;
+        offset4++;
+        offset5++;
+      }
+      // tier 2: next 30 blocks
+      else if(rnd100 < 65) {
+        offset2++;
+        offset3++;
+        offset4++;
+        offset5++;
+      }
+      // tier 3: next 20 blocks
+      else if(rnd100 < 85) {
+        offset3++;
+        offset4++;
+        offset5++;
+      }
+      // tier 4: next 10 blocks
+      else if(rnd100 < 95) {
+        offset4++;
+        offset5++;
+      }
+      // tier 5: next 5 blocks
+      else {
+        offset5++;
+      }
+    }
+
+    // pack all the data and return
+    return TierMath.pack(5, 0, offset1, offset2, offset3, offset4, offset5, 0);
+  }
+
+  /**
+   * @dev Auxiliary function to generate `n` randomized tier structures
+   *      of five tiers (non-Antarctica - rest of the World)
+   * @param seedOffset initial seed to use for random generation
+   * @param n number of tiers structures to generate
+   * @return an array of randomized tiers structures consisting of five tiers each
+   */
+  function random5TiersArray(uint256 seedOffset, uint32 n) public constant returns(uint64[]) {
+    // allocate memory for the result
+    uint64[] memory tiers = new uint64[](n);
+
+    // generate requested amount of tiers
+    for(uint32 i = 0; i < n; i++) {
+      // generate structure - delegate call to `random5Tiers`
+      tiers[i] = random5Tiers(seedOffset + 7 * i);
+    }
+
+    // return the result
+    return tiers;
+  }
 }
