@@ -46,7 +46,7 @@ contract PlotSale is AccessControlLight {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant SALE_UID = 0x0a40d894a35fc577fd19196f8abb2efe24eed6c63f53711469d4678763fca63f;
+  uint256 public constant SALE_UID = 0x5eeacd09e14096f308e79c617131ae6b2644f2f5fb98872e5a328471fd5d1246;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
@@ -81,12 +81,26 @@ contract PlotSale is AccessControlLight {
   uint32 public constant FEATURE_GET_ENABLED = 0x00000002;
 
   /**
+   * @notice Enables using coupons i.e. exchanging them for tokens
+   * @dev Feature FEATURE_USING_COUPONS_ENABLED must be enabled to
+   *      call the `useCoupon()` function
+   */
+  uint32 public constant FEATURE_USING_COUPONS_ENABLED = 0x00000004;
+
+  /**
    * @notice Withdraw manager is allowed to withdraw a balance for country owner
    *      and may be used, for example, to allow free withdrawals (no gas fee)
    * @notice Withdraw manager can transfer the funds to no one except the funds owner
    * @dev Role `ROLE_WITHDRAW_MANAGER` is required to call `withdrawTo` function
    */
   uint32 public constant ROLE_WITHDRAW_MANAGER = 0x00000001;
+
+  /**
+   * @notice Coupon creator is responsible for adding and removing coupons
+   * @dev Role ROLE_COUPON_CREATOR allows adding and removing coupons
+   *      (calling `addCoupon()` and removeCoupon() functions)
+   */
+  uint32 public constant ROLE_COUPON_MANAGER = 0x00000002;
 
   /**
    * @notice Price of a single token. When buying several tokens
@@ -109,6 +123,13 @@ contract PlotSale is AccessControlLight {
    * @dev Used to issue land plots for free (for coupons and referral points)
    */
   uint8 public constant BERMUDA_COUNTRY_ID = 255;
+
+  /**
+   * @dev Coupon storage, maps keccak256 hash of the coupon code to
+   *      the number of tokens coupon allows to obtain
+   * @dev sha3(code) => n (number of tokens)
+   */
+  mapping(uint256 => uint8) coupons;
 
   /**
    * @dev RefPointsTracker deployed instance to issue referral points to
@@ -174,6 +195,29 @@ contract PlotSale is AccessControlLight {
    * @param newValue new country balance in wei
    */
   event CountryBalanceUpdated(uint8 indexed countryId, address indexed owner, uint256 oldValue, uint256 newValue);
+
+  /**
+   * @dev Fired in updateCoupon()
+   * @param _by coupon manager who added the coupon
+   * @param key keccak256 hash of the coupon code added
+   * @param n amount of land plots coupon allows to retrieve
+   */
+  event CouponUpdated(address indexed _by, uint256 indexed key, uint8 n);
+
+  /**
+   * @dev Fired in removeCoupon()
+   * @param _by coupon manager who removed the coupon
+   * @param key keccak256 hash of the coupon code removed
+   */
+  event CouponRemoved(address indexed _by, uint256 indexed key);
+
+  /**
+   * @dev Fired in useCoupon()
+   * @param _by an address (player) who used the coupon
+   * @param key keccak256 hash of the coupon code used
+   * @param n amount of land plots retrieved
+   */
+  event CouponConsumed(address indexed _by, uint256 indexed key, uint8 n);
 
   /**
    * @dev Creates a World Land Plot Sale instance, binding it to
@@ -442,6 +486,124 @@ contract PlotSale is AccessControlLight {
     // perform the withdrawal
     owner.transfer(amount);
   }
+
+
+  /**
+   * @notice Allows validating a coupon, returns an amount
+   *      of tokens this coupon allows to obtain
+   * @param code coupon code to validate
+   * @return amount of tokens this coupon allows to obtain
+   *      or zero if coupon is not valid
+   */
+  function isCouponValid(string code) public constant returns(uint8) {
+    // calculate the key to fetch the coupon
+    uint256 key = uint256(keccak256(code));
+
+    // get amount of land plots this coupon allows to obtain and return
+    // invalid coupon produces zero result
+    return coupons[key];
+  }
+
+  /**
+   * @notice Allows using a coupon, mints land plots if coupon is valid
+   * @dev The plots are minted in Bermuda Triangle (Country ID 255)
+   * @dev Maximum number of plots to be issued in Bermuda Triangle is 65,535
+   * @dev Throws if coupon is invalid, `FEATURE_USING_COUPONS_ENABLED` is not enabled
+    *     or if the silver sale this smart contract is bound to already finished
+   * @param code coupon code to use
+   */
+  function useCoupon(string code) public returns(uint24 tokenId) {
+    // check using coupons feature is enabled
+    require(isFeatureEnabled(FEATURE_USING_COUPONS_ENABLED));
+
+    // calculate the key to fetch the coupon
+    uint256 key = uint256(keccak256(code));
+
+    // get amount of plots corresponding to this coupon
+    uint8 n = coupons[key];
+
+    // remove the coupon from storage
+    delete coupons[key];
+
+    // generate randomized tiers structure
+    // delegate call to `random5Tiers`
+    uint64 tiers = random5Tiers(0);
+
+    // delegate call to `PlotERC721.mint` and get generated token ID
+    // 255 is a country ID for Bermuda Triangle
+    // token ID will be returned automatically
+    tokenId = plotInstance.mint(msg.sender, BERMUDA_COUNTRY_ID, tiers);
+
+    // player (sender) becomes known to the ref points tracker
+    refPointsTracker.addKnownAddress(msg.sender);
+
+    // emit an event
+    emit CouponConsumed(msg.sender, key, n);
+  }
+
+  /**
+   * @notice Allows adding, removing and updating coupons to obtain free tokens
+   * @dev Requires sender to have `ROLE_COUPON_MANAGER` permission
+   * @dev Throws if removing non-existing coupon
+   * @dev When updating an existing coupon requires new value for
+   *      free tokens to be different from the old one
+   * @param key coupon code hash
+   * @param n amount of tokens this coupon allows to retrieve;
+   *      use zero value to remove the coupon, non-zero value to add/update a coupon
+   */
+  function updateCoupon(uint256 key, uint8 n) public {
+    // check sender has permissions to create a coupon
+    require(isSenderInRole(ROLE_COUPON_MANAGER));
+
+    // ensure operation makes a change to a storage
+    require(coupons[key] != n);
+
+    // delegate call to `__updateCoupon`
+    __updateCoupon(key, n);
+  }
+
+  /**
+   * @notice Allows adding coupons for free tokens retrieval
+   * @dev Requires sender to have `ROLE_COUPON_MANAGER` permission
+   * @dev Overwrites the coupons if they already exist
+   * @param keys array of coupon codes hashes (keccak256)
+   * @param n amount of tokens these coupons allows to retrieve;
+   *      use zero value to remove the coupons, non-zero value to add/update them
+   */
+  function bulkUpdateCoupons(uint256[] keys, uint8 n) public {
+    // check sender has permissions to create a coupon
+    require(isSenderInRole(ROLE_COUPON_MANAGER));
+
+    // iterate over the keys array
+    for(uint256 i = 0; i < keys.length; i++) {
+      // delegate call to `__updateCoupon`
+      __updateCoupon(keys[i], n);
+    }
+  }
+
+  /**
+   * @dev Updates the `coupons` mapping without any validations
+   *      on inputs and permissions of the sender and
+   *      emits an event based on the `n` value passed
+   * @dev Unsafe, must be kept private at all times
+   * @param key coupon code hash (`coupons` mapping key)
+   * @param n amount of tokens (`coupons` mapping value)
+   */
+  function __updateCoupon(uint256 key, uint8 n) private {
+    // modify a coupon (add/update/delete)
+    coupons[key] = n;
+
+    // depending on the `n` value, two types of the event can be emitted
+    if(n != 0) {
+      // emit an add/update event if `n` is not zero
+      emit CouponUpdated(msg.sender, key, n);
+    }
+    else {
+      // emit a delete event otherwise
+      emit CouponRemoved(msg.sender, key);
+    }
+  }
+
 
   /**
    * @dev Auxiliary function used to mint `length` tokens to `to`
