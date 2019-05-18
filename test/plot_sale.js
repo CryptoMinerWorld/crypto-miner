@@ -2,9 +2,13 @@
 const Tracker = artifacts.require("./RefPointsTracker.sol");
 const Country = artifacts.require("./CountryERC721.sol");
 const Plot = artifacts.require("./PlotERC721.sol");
-
 // World Plot Sale itself
 const Sale = artifacts.require("./PlotSale.sol");
+
+// Plot Antarctica dependencies
+const FoundersPlotsMock = artifacts.require("./FoundersPlotsMock.sol");
+// Plot Antarctica itself
+const Antarctica = artifacts.require("./PlotAntarctica.sol");
 
 // features and roles to be used
 const FEATURE_SALE_ENABLED = 0x00000001;
@@ -52,7 +56,7 @@ contract('PlotSale', (accounts) => {
 		assert.equal(SALE_PRICE, await s.SALE_PRICE(), "wrong SALE_PRICE value");
 	});
 
-	it("integrity: tiers generation randomized function constraints", async() => {
+	it("integrity: tiers5 generation randomized function constraints", async() => {
 		// define plot sale dependencies
 		const r = await Tracker.new(); // ref tracker
 		const c = await Country.new(COUNTRY_DATA); // country ERC721
@@ -71,6 +75,23 @@ contract('PlotSale', (accounts) => {
 		// generate randomized tier structure
 		const tiers = await s.random5Tiers(0);
 		assert.equal(5, tiers.dividedToIntegerBy(two.pow(56)).modulo(256), "wrong number of tiers");
+		assert.equal(0, tiers.dividedToIntegerBy(two.pow(48)).modulo(256), "wrong tier1 offset");
+		assert.equal(0, tiers.modulo(256), "wrong initial offset");
+	});
+	it("integrity: tiers2 generation randomized function constraints", async() => {
+		// define plot Antarctica dependencies
+		const m = await FoundersPlotsMock.new(); // Founders Plots Mock simulates Presale2
+		const t = await Plot.new(); // plot ERC721
+
+		// instantiate plot Antarctica smart contract
+		const s = await Antarctica.new(m.address, t.address);
+
+		// auxiliary variable 2 as BigNumber
+		const two = web3.toBigNumber(2);
+
+		// generate randomized tier structure
+		const tiers = await s.random2Tiers(0);
+		assert.equal(2, tiers.dividedToIntegerBy(two.pow(56)).modulo(256), "wrong number of tiers");
 		assert.equal(0, tiers.dividedToIntegerBy(two.pow(48)).modulo(256), "wrong tier1 offset");
 		assert.equal(0, tiers.modulo(256), "wrong initial offset");
 	});
