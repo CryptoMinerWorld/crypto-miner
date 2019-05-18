@@ -4,14 +4,7 @@ const Plot = artifacts.require("./PlotERC721.sol");
 // Plot Antarctica itself
 const Antarctica = artifacts.require("./PlotAntarctica.sol");
 
-
-// one token price
-const SALE_PRICE = 20000000000000000;
-
-// import country data
-import {COUNTRY_DATA} from "../data/country_data";
-
-// PlotSale related tests
+// PlotAntarctica related tests
 contract('PlotAntarctica', (accounts) => {
 	it("deployment: verify deployment routine", async() => {
 		// define plot Antarctica dependencies
