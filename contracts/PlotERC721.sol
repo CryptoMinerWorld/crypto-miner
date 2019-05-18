@@ -608,31 +608,30 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @dev _tokenId ID of the token to mine
    * @dev depth absolute depth value to mine to, greater than current depth
    */
-  function mineTo(uint256 _tokenId, uint8 depth) public {
+  function mineTo(uint256 _tokenId, uint8 offset) public {
     // check that the call is made by a offset provider
     require(isSenderInRole(ROLE_OFFSET_PROVIDER));
 
     // validate token existence
     require(exists(_tokenId));
 
-    // get current offset value
-    uint8 offset = uint8(tokens[_tokenId].tiers);
+    // extract tiers structure
+    uint64 tiers = tokens[_tokenId].tiers;
 
-    // get token length value
-    uint8 length = uint8(tokens[_tokenId].tiers >> 8);
+    // extract current offset value
+    uint8 offset0 = TierMath.getOffset(tiers);
 
-    // ensure we're getting deeper, but not deeper than maximum depth
-    require(depth > offset && depth <= length);
+    // ensure we're getting deeper
+    require(offset > offset0);
 
     // perform mining, update the offset
-    tokens[_tokenId].tiers &= 0xFFFFFFFFFFFFFF00;
-    tokens[_tokenId].tiers |= depth;
+    tokens[_tokenId].tiers = TierMath.updateOffset(tiers, offset);
 
     // update the offset modification date
     tokens[_tokenId].offsetModified = uint32(now);
 
     // emit an event
-    emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset, depth);
+    emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset0, offset);
   }
 
   /**
@@ -642,31 +641,30 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
    * @dev _tokenId ID of the token to mine
    * @dev depth depth delta value to mine by, greater than zero
    */
-  function mineBy(uint256 _tokenId, uint8 depth) public {
+  function mineBy(uint256 _tokenId, uint8 by) public {
     // check that the call is made by a offset provider
     require(isSenderInRole(ROLE_OFFSET_PROVIDER));
 
     // validate token existence
     require(exists(_tokenId));
 
-    // get current offset value
-    uint8 offset = uint8(tokens[_tokenId].tiers);
+    // extract tiers structure
+    uint64 tiers = tokens[_tokenId].tiers;
 
-    // get token length value
-    uint8 length = uint8(tokens[_tokenId].tiers >> 8);
+    // extract current offset value
+    uint8 offset0 = TierMath.getOffset(tiers);
 
-    // ensure we're getting deeper, but not deeper than maximum depth,
-    // also performing arithmetic overflow check
-    require(depth > 0 && depth + offset > offset && depth + offset <= length);
+    // ensure we're getting deeper
+    require(by + offset0 > offset0);
 
     // perform mining, increase the offset
-    tokens[_tokenId].tiers += depth;
+    tokens[_tokenId].tiers = TierMath.increaseOffset(tiers, by);
 
     // update the offset modification date
     tokens[_tokenId].offsetModified = uint32(now);
 
     // emit an event
-    emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset, offset + depth);
+    emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset0, offset0 + by);
   }
 
 
@@ -1313,21 +1311,20 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
     require(!exists(_tokenId));
 
     // extract number of tiers this plot contains
-    uint8 n = uint8(_tiers >> 56);
+    uint8 n = TierMath.getNumberOfTiers(_tiers);
 
     // ensure tiers array contains exactly
     // 2 (Antarctica) or 5 (Rest of the World) elements
-    // Update: as for the latest requirement, tiers structure
-    // can be less strict and allows any number of tiers from 1 to 5
-    require(n >= 1 && n <= 5);
+    require(n == 2 || n == 5);
 
     // ensure tier1 offset is zero
-    require(uint8(_tiers >> 48) == 0);
+    // not required - ensured by the 0xFF00FFFFFFFFFF00 mask (see below)
+    // require(TierMath.getTierDepth(_tiers, 0) == 0);
 
     // validate tiers structure – first n layers
     for(uint8 i = 0; i < n; i++) {
-      // (n)th tier offset must be greater than (n-1)th tier offset
-      require(uint8(_tiers >> (6 - i) * 8) < uint8(_tiers >> (5 - i) * 8));
+      // (n)th tier offset must be greater than or equal to (n-1)th tier offset
+      require(uint8(_tiers >> (6 - i) * 8) <= uint8(_tiers >> (5 - i) * 8));
     }
 
     // validate tiers structure – sparse 5 - n layers
@@ -1337,11 +1334,12 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
     }
 
     // verify initial offset is zero
-    require(uint8(_tiers) == 0);
+    // not required - ensured by the 0xFF00FFFFFFFFFF00 mask (see below)
+    // require(TierMath.getOffset(_tiers) == 0);
 
     // create new token in memory
     LandPlot memory token = LandPlot({
-      tiers: 0xFFFFFFFFFFFFFF00 & _tiers, // erase initial offset
+      tiers: 0xFF00FFFFFFFFFF00 & _tiers, // erase tier1 offset and initial offsets
       offsetModified: 0,
       state: 0,
       stateModified: 0,

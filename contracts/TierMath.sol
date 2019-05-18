@@ -161,4 +161,136 @@ library TierMath {
     // compare offset and depth
     return offset >= getDepth(tiers);
   }
+
+  /**
+   * @dev Updates an offset of the tiers structure provided
+   * @dev Doesn't change the input, result is returned as a new tiers structure
+   * @dev Requires offset not to exceed tiers structure depth, see `getDepth()`
+   * @param tiers tiers structure to modify offset for
+   * @param offset new offset
+   * @return modified tiers structure equal to input but with updated offset
+   */
+  function updateOffset(uint64 tiers, uint8 offset) internal pure returns(uint64) {
+    // ensure new offset is not bigger than depth
+    require(offset <= getDepth(tiers));
+
+    // update the offset (low 8 bits of tiers structure) and return
+    return tiers & 0xFFFFFFFFFFFFFF00 | offset;
+  }
+
+  /**
+   * @dev Increases an offset of the tiers structure provided
+   * @dev Doesn't change the input, result is returned as a new tiers structure
+   * @dev Requires new offset not to exceed tiers structure depth, see `getDepth()`
+   * @param tiers tiers structure to modify offset for
+   * @param by value to increase offset by
+   * @return modified tiers structure equal to input but with increased offset
+   */
+  function increaseOffset(uint64 tiers, uint8 by) internal pure returns(uint64) {
+    // arithmetic overflow check
+    require(getOffset(tiers) + by >= by);
+
+    // ensure new offset is not bigger than depth
+    require(getOffset(tiers) + by <= getDepth(tiers));
+
+    // update the offset (low 8 bits of tiers structure) and return
+    return tiers + by;
+  }
+
+  /**
+   * @dev Auxiliary function to pack tiers structure data
+   * @param n number of tiers, 2 for Antarctica, 5 for the rest of the World
+   * @param offset0 - Tier 1 offset (start of Tier 1), usually zero
+   * @param offset1 - Tier 2 offset (start of Tier 2 / end of Tier 1)
+   * @param offset2 - Tier 3 offset (start of Tier 3 / end of Tier 2)
+   * @param offset3 - Tier 4 offset (start of Tier 4 / end of Tier 3)
+   * @param offset4 - Tier 5 offset (start of Tier 5 / end of Tier 4)
+   * @param offset5 - End of Tier 5 (block depth)
+   * @param offset - Current mining block index
+   * @return tiers data structure, containing
+   *      1. Number of tiers the plot contains (8 bits)
+   *        - 2 for Antarctica or 5 for the rest of the World
+   *      2. Tier structure of the plot (48 bits)
+   *         6 elements, 8 bits each:
+   *          - Tier 1 offset (start of Tier 1), usually zero
+   *          - Tier 2 offset (start of Tier 2 / end of Tier 1)
+   *          - Tier 3 offset (start of Tier 3 / end of Tier 2)
+   *          - Tier 4 offset (start of Tier 4 / end of Tier 3)
+   *          - Tier 5 offset (start of Tier 5 / end of Tier 4)
+   *          - End of Tier 5 (block depth)
+   *      3. Current mining block index (8 bits)
+   *        - initially zero, increases when mining
+   */
+  function pack(
+    uint8 n,
+    uint8 offset0,
+    uint8 offset1,
+    uint8 offset2,
+    uint8 offset3,
+    uint8 offset4,
+    uint8 offset5,
+    uint8 offset
+  ) internal pure returns(uint64 tiers) {
+    // taking into account stack depth (15),
+    // pack the data value by value
+    // initialize with n
+    tiers = uint64(n) << 56;
+    // and continue packing values one by one
+    tiers |= uint56(offset0) << 48;
+    tiers |= uint48(offset1) << 40;
+    tiers |= uint40(offset2) << 32;
+    tiers |= uint32(offset3) << 24;
+    tiers |= uint24(offset4) << 16;
+    tiers |= uint16(offset5) << 8;
+    tiers |= offset;
+    // result will be returned automatically
+  }
+
+  /**
+   * @dev Auxiliary function to unpack tiers data structure
+   * @param tiers tiers data structure, containing
+   *      1. Number of tiers the plot contains (8 bits)
+   *        - 2 for Antarctica or 5 for the rest of the World
+   *      2. Tier structure of the plot (48 bits)
+   *         6 elements, 8 bits each:
+   *          - Tier 1 offset (start of Tier 1), usually zero
+   *          - Tier 2 offset (start of Tier 2 / end of Tier 1)
+   *          - Tier 3 offset (start of Tier 3 / end of Tier 2)
+   *          - Tier 4 offset (start of Tier 4 / end of Tier 3)
+   *          - Tier 5 offset (start of Tier 5 / end of Tier 4)
+   *          - End of Tier 5 (block depth)
+   *      3. Current mining block index (8 bits)
+   *        - initially zero, increases when mining
+   * @return tuple containing
+   *      n number of tiers, 2 for Antarctica, 5 for the rest of the World
+   *      offset0 - Tier 1 offset (start of Tier 1), usually zero
+   *      offset1 - Tier 2 offset (start of Tier 2 / end of Tier 1)
+   *      offset2 - Tier 3 offset (start of Tier 3 / end of Tier 2)
+   *      offset3 - Tier 4 offset (start of Tier 4 / end of Tier 3)
+   *      offset4 - Tier 5 offset (start of Tier 5 / end of Tier 4)
+   *      offset5 - End of Tier 5 (block depth)
+   *      offset - Current mining block index
+   */
+  function unpack(uint64 tiers) internal pure returns(
+    uint8 n,
+    uint8 offset0,
+    uint8 offset1,
+    uint8 offset2,
+    uint8 offset3,
+    uint8 offset4,
+    uint8 offset5,
+    uint8 offset
+  ) {
+    // extract all the required fields,
+    // they will be returned automatically
+    n = uint8(tiers >> 56);
+    offset0 = uint8(tiers >> 48);
+    offset1 = uint8(tiers >> 40);
+    offset2 = uint8(tiers >> 32);
+    offset3 = uint8(tiers >> 24);
+    offset4 = uint8(tiers >> 16);
+    offset5 = uint8(tiers >> 8);
+    offset = uint8(tiers);
+  }
+
 }

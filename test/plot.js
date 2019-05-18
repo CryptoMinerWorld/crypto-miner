@@ -822,11 +822,11 @@ contract('PlotERC721', (accounts) => {
 		for(let i = 0; i < 5; i++) {
 			await assertThrowsAsync(tk.mint, account1, 1, tiers([i, 0, 35, 65, 85, 95, DEPTH, 0]));
 		}
-		await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
-		await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
-		await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
-		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
-		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
+		//await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
+		//await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
+		//await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
+		//await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
+		//await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
 		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH - 1, 0]));
 		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH - 1, DEPTH, 0]));
 		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH - 1, DEPTH, DEPTH, 0]));
