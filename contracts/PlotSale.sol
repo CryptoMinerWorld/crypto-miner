@@ -74,6 +74,13 @@ contract PlotSale is AccessControlLight {
   uint32 public constant FEATURE_SALE_ENABLED = 0x00000001;
 
   /**
+   * @notice Enables getting tokens for referral points
+   * @dev Feature FEATURE_GET_ENABLED must be enabled to
+   *      call the `get()` function
+   */
+  uint32 public constant FEATURE_GET_ENABLED = 0x00000002;
+
+  /**
    * @notice Withdraw manager is allowed to withdraw a balance for country owner
    *      and may be used, for example, to allow free withdrawals (no gas fee)
    * @notice Withdraw manager can transfer the funds to no one except the funds owner
@@ -85,9 +92,23 @@ contract PlotSale is AccessControlLight {
    * @notice Price of a single token. When buying several tokens
    *      the price is multiplied by the amount to be bought
    * @dev Note: maximum uint64 value is
-   *      0xFFFFFFFFFFFFFFFF = 18446744073709551615 ≈ 18.44 ETH
+   *      0xFFFFFFFFFFFFFFFF = 18,446,744,073,709,551,615 ≈ 18.44 ETH
    */
   uint64 public constant SALE_PRICE = 20 finney;
+
+  /**
+   * @notice Price of a single token if buying for referral points.
+   *      When buying several tokens the price is multiplied by the amount to be bought
+   * @dev Note: maximum uint16 value is
+   *      0xFFFF = 65,535
+   */
+  uint16 public constant REF_POINTS_PRICE = 4;
+
+  /**
+   * @dev Bermuda Triangle Country ID, virtual country, doesn't exist in CountryERC721
+   * @dev Used to issue land plots for free (for coupons and referral points)
+   */
+  uint8 public constant BERMUDA_COUNTRY_ID = 255;
 
   /**
    * @dev RefPointsTracker deployed instance to issue referral points to
@@ -138,11 +159,11 @@ contract PlotSale is AccessControlLight {
   mapping(uint8 => uint256) public balancesByCountry;
 
   /**
-   * @dev Fired in `buy()`
+   * @dev Fired in `buy()` and `get()`
    * @param _by an address which has bought a land plot
    * @param _tokenId ID of the plot bought
    */
-  event PlotBought(address indexed _by, uint24 _tokenId);
+  event PlotIssued(address indexed _by, uint24 _tokenId);
 
   /**
    * @dev Fired in `buy()`, `withdraw()` and `withdrawFrom()`
@@ -287,6 +308,40 @@ contract PlotSale is AccessControlLight {
   }
 
   /**
+   * @notice Issues several land plots in/from a Bermuda Triangle
+   *      in exchange for referral points
+   * @dev Issues `n` land plots in a Bermuda Triangle (Country ID 255)
+   * @dev Requires sender to have enough referral points to get `n` land plots
+   * @dev Maximum number of plots to be issued in Bermuda Triangle is 65,535
+   * @param n amount of land plots to issue
+   */
+  function get(uint8 n) public {
+    // verify that using referral points is enabled
+    require(isFeatureEnabled(FEATURE_GET_ENABLED));
+
+    // verify that sale has already started
+    require(now >= saleStartUTC);
+
+    // save current sold by country value, we'll use it heavily
+    uint16 minted = plotInstance.minted(BERMUDA_COUNTRY_ID);
+
+    // arithmetic overflow and non-zero `n` check
+    require(minted + n > minted);
+
+    // calculate number of referral points required
+    // maximum value for `REF_POINTS_PRICE * n` is 1020 for `n = 255`,
+    // which is in safe bounds for uint16
+    uint16 price = REF_POINTS_PRICE * n;
+
+    // consume referral points required
+    // verifies sender has enough referral points under the hood
+    refPointsTracker.consumeFrom(msg.sender, price);
+
+    // mint tokens required - delegate to `__mint`
+    __mint(msg.sender, BERMUDA_COUNTRY_ID, n);
+  }
+
+  /**
    * @notice Calculates country owner's balance available for withdrawal
    * @dev Sums all the country balances for the given owner
    * @param owner an address of a country(ies) owner to query balance for
@@ -405,7 +460,7 @@ contract PlotSale is AccessControlLight {
       uint24 tokenId = plotInstance.mint(to, countryId, tiers);
 
       // emit an event
-      emit PlotBought(to, tokenId);
+      emit PlotIssued(to, tokenId);
     }
   }
 
