@@ -32,19 +32,12 @@ import "./Random.sol";
  *
  * @dev Following tokens may be minted (token can be found in the land plot when mining):
  *      - GemERC721
- *          can be found usually close to last block of land // TODO: clarify
  *      - ArtifactERC721
- *          can be found usually close to last block of land // TODO: clarify
  *      - SilverERC20
- *          can be found usually close to last block of land // TODO: clarify
  *      - GoldERC20
- *          can be found usually close to last block of land // TODO: clarify
  *      - ArtifactERC20 // TODO: to be removed after ArtifactERC721 release
- *          can be found usually close to last block of land // TODO: clarify
  *      - FoundersKeyERC20
- *          can be found only after mining the last block of land in Antarctica
  *      - ChestKeyERC20
- *          can be found only after mining the last block of land
  *
  * @dev Following tokens may be locked or unlocked (tokens are locked when mining):
  *      - GemERC721
@@ -1042,6 +1035,9 @@ contract Miner is AccessControlLight {
         amount++;
       }
     }
+
+    // return the result
+    return amount;
   }
 
   /**
@@ -1360,6 +1356,9 @@ contract Miner is AccessControlLight {
     // grade is not one of D, C, B, A, AA, AAA
     // throw an exception
     require(false);
+
+    // return fallback default value equal to one
+    return 100000000;
   }
 
   /**
