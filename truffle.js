@@ -7,7 +7,7 @@ const NonceTrackerSubprovider = require("web3-provider-engine/subproviders/nonce
 require('babel-register');
 require('babel-polyfill');
 
-import {mnemonic1, infura_key, mnemonic3, mnemonic4} from "./keys";
+const keys = require("./keys.js");
 
 module.exports = {
 	// See <http://truffleframework.com/docs/advanced/configuration>
@@ -18,8 +18,8 @@ module.exports = {
 		mainnet: {
 			provider: function () {
 				const wallet = new HDWalletProvider(
-					mnemonic1, // create 12 words: https://metamask.io/
-					"https://mainnet.infura.io/v3/" + infura_key // create a key: https://infura.io/
+					keys.mnemonic1, // create 12 words: https://metamask.io/
+					"https://mainnet.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
 				const nonceTracker = new NonceTrackerSubprovider();
 				wallet.engine._providers.unshift(nonceTracker);
@@ -36,8 +36,8 @@ module.exports = {
 		development: {
 			provider: function () {
 				const wallet = new HDWalletProvider(
-					mnemonic3, // create 12 words: https://metamask.io/
-					"https://rinkeby.infura.io/v3/" + infura_key // create a key: https://infura.io/
+					keys.mnemonic3, // create 12 words: https://metamask.io/
+					"https://rinkeby.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
 				const nonceTracker = new NonceTrackerSubprovider();
 				wallet.engine._providers.unshift(nonceTracker);
@@ -54,8 +54,8 @@ module.exports = {
 		ropsten: {
 			provider: function () {
 				const wallet = new HDWalletProvider(
-					mnemonic4, // create 12 words: https://metamask.io/
-					"https://ropsten.infura.io/v3/" + infura_key // create a key: https://infura.io/
+					keys.mnemonic4, // create 12 words: https://metamask.io/
+					"https://ropsten.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
 				const nonceTracker = new NonceTrackerSubprovider();
 				wallet.engine._providers.unshift(nonceTracker);
