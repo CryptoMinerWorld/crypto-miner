@@ -1,19 +1,19 @@
 const Vault = artifacts.require("./ChestVault");
 
 contract('ChestVault (Time Increase)', function(accounts) {
-	it("chest vault: using the vault", async function() {
-		await assertThrows(async () => await Vault.new(0, 0));
-		await assertThrows(async () => await Vault.new(accounts[0], 0));
-		await assertThrows(async () => await Vault.new(0, accounts[1]));
-		await assertThrows(async () => await Vault.new(accounts[0], accounts[0]));
+	it("chest vault: using the vault", async() => {
+		await assertThrows(async() => await Vault.new(0, 0));
+		await assertThrows(async() => await Vault.new(accounts[0], 0));
+		await assertThrows(async() => await Vault.new(0, accounts[1]));
+		await assertThrows(async() => await Vault.new(accounts[0], accounts[0]));
 		const vault = await Vault.new(accounts[0], accounts[1]);
 
 		const acc3_balance = await web3.eth.getBalance(accounts[3]);
 		const investment = web3.toWei(1, "ether");
 
-		const fn0 = async () => await vault.withdraw(accounts[3]);
-		const fn1 = async () => await vault.withdraw(accounts[3], {from: accounts[1]});
-		const fn2 = async () => await vault.withdraw(accounts[3], {from: accounts[2]});
+		const fn0 = async() => await vault.withdraw(accounts[3]);
+		const fn1 = async() => await vault.withdraw(accounts[3], {from: accounts[1]});
+		const fn2 = async() => await vault.withdraw(accounts[3], {from: accounts[2]});
 		const r0 = async() => await vault.revoke();
 		const r1 = async() => await vault.revoke({from: accounts[1]});
 		const r2 = async() => await vault.revoke({from: accounts[2]});

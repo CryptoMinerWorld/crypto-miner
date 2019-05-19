@@ -8,7 +8,7 @@ const FEATURE_TRANSFERS = 0x00000001;
 const tokenId = 1;
 
 contract("PlotERC721: Gas Usage", (accounts) => {
-	it("PlotERC721: deploying a SC requires 3249360 gas", async () => {
+	it("gas: deploying a SC requires 3249360 gas", async() => {
 		const tk = await Token.new();
 		const txHash = tk.transactionHash;
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
@@ -17,14 +17,14 @@ contract("PlotERC721: Gas Usage", (accounts) => {
 		assertEqual(3249360, gasUsed, "deploying SC gas usage mismatch: " + gasUsed);
 	});
 
-	it("PlotERC721: minting a token requires 187583 gas", async () => {
+	it("gas: minting a token requires 187583 gas", async() => {
 		const tk = await Token.new();
 		const gasUsed = (await tk.mint(accounts[0], tokenId, web3.toBigNumber("0x05002341555F6400"))).receipt.gasUsed;
 
 		assertEqual(187583, gasUsed, "minting a token gas usage mismatch: " + gasUsed);
 	});
 
-	it("PlotERC721: transferring a token requires 72113 gas", async () => {
+	it("gas: transferring a token requires 72113 gas", async() => {
 		const tk = await Token.new();
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		await tk.mint(accounts[0], tokenId, web3.toBigNumber("0x05002341555F6400"));
@@ -33,7 +33,7 @@ contract("PlotERC721: Gas Usage", (accounts) => {
 		assertEqual(72113, gasUsed, "transferring a token gas usage mismatch: " + gasUsed);
 	});
 
-	it("PlotERC721: mining a plot by 1 block requires 33352 gas", async() => {
+	it("gas: mining a plot by 1 block requires 33352 gas", async() => {
 		const tk = await Token.new();
 		await tk.mint(accounts[0], tokenId, web3.toBigNumber("0x05002341555F6400"));
 		const gasUsed = (await tk.mineBy(tokenId, 1)).receipt.gasUsed;
@@ -41,7 +41,7 @@ contract("PlotERC721: Gas Usage", (accounts) => {
 		assertEqual(33352, gasUsed, "mining a plot by 1 block gas usage mismatch: " + gasUsed);
 	});
 
-	it("PlotERC721: mining a plot to block 1 requires 32230 gas", async() => {
+	it("gas: mining a plot to block 1 requires 32230 gas", async() => {
 		const tk = await Token.new();
 		await tk.mint(accounts[0], tokenId, web3.toBigNumber("0x05002341555F6400"));
 		const gasUsed = (await tk.mineTo(tokenId, 1)).receipt.gasUsed;

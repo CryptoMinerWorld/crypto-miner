@@ -34,7 +34,7 @@ const P1 = web3.toWei(1, "szabo");
 contract('Dutch Auction: Gas Usage', accounts => {
 	// 189724 - without optimizer
 	// 181021 - with optimizer
-	it("auction: putting up for sale - approve() + addNow() - consumes 181021 gas", async () => {
+	it("gas: putting up for sale - approve() + addNow() - consumes 181021 gas", async() => {
 		const tk = await Token.new();
 		const auction = await Auction.new();
 
@@ -62,7 +62,7 @@ contract('Dutch Auction: Gas Usage', accounts => {
 	});
 	// 151604 - without optimizer
 	// 142385 - with optimizer
-	it("auction: putting up for sale - safeTransferFrom() - consumes 142385 gas", async () => {
+	it("gas: putting up for sale - safeTransferFrom() - consumes 142385 gas", async() => {
 		const tk = await Token.new();
 		const auction = await Auction.new();
 
@@ -100,7 +100,7 @@ contract('Dutch Auction: Gas Usage', accounts => {
 	});
 	// 95394 - without optimizer
 	// 65502 - with optimizer
-	it("auction: buying on an auction before it starts - consumes 65502 gas", async () => {
+	it("gas: buying on an auction before it starts - consumes 65502 gas", async() => {
 		const tk = await Token.new();
 		const auction = await Auction.new();
 
@@ -135,7 +135,7 @@ contract('Dutch Auction: Gas Usage', accounts => {
 	});
 	// 95432 - without optimizer
 	// 65502 - with optimizer
-	it("auction: buying on an auction after it ends - consumes 65502 gas", async () => {
+	it("gas: buying on an auction after it ends - consumes 65502 gas", async() => {
 		const tk = await Token.new();
 		const auction = await Auction.new();
 
@@ -170,7 +170,7 @@ contract('Dutch Auction: Gas Usage', accounts => {
 	});
 	// 103176 - without optimizer
 	// 76324 - with optimizer
-	it("auction: buying on an auction in the middle - consumes 76324 gas", async () => {
+	it("gas: buying on an auction in the middle - consumes 76324 gas", async() => {
 		const tk = await Token.new();
 		const auction = await Auction.new();
 
@@ -205,7 +205,7 @@ contract('Dutch Auction: Gas Usage', accounts => {
 	});
 	// 82008 - without optimizer
 	// 57692 - with optimizer
-	it("auction: removing from an auction - consumes 57692 gas", async () => {
+	it("gas: removing from an auction - consumes 57692 gas", async() => {
 		const tk = await Token.new();
 		const auction = await Auction.new();
 

@@ -11,7 +11,7 @@ import {COUNTRY_DATA, COUNTRY_PRICE_DATA} from "../data/country_data";
 const tokenId = 117;
 
 contract("CountrySale: Gas Usage", (accounts) => {
-	it("CountryERC721: deploying a country requires 4360176 gas", async () => {
+	it("gas: deploying a country requires 4360176 gas", async() => {
 		const tk = await Token.new(COUNTRY_DATA);
 		const txHash = tk.transactionHash;
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
@@ -20,14 +20,14 @@ contract("CountrySale: Gas Usage", (accounts) => {
 		assertEqual(4360176, gasUsed, "deploying CountryERC721 gas usage mismatch: " + gasUsed);
 	});
 
-	it("CountryERC721: minting a country requires 165560 gas", async () => {
+	it("gas: minting a country requires 165560 gas", async() => {
 		const tk = await Token.new(COUNTRY_DATA);
 		const gasUsed = (await tk.mint(accounts[0], tokenId)).receipt.gasUsed;
 
 		assertEqual(165560, gasUsed, "minting a country gas usage mismatch: " + gasUsed);
 	});
 
-	it("CountryERC721: transferring a country requires 72017 gas", async () => {
+	it("gas: transferring a country requires 72017 gas", async() => {
 		const tk = await Token.new(COUNTRY_DATA);
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		await tk.mint(accounts[0], tokenId);
@@ -36,7 +36,7 @@ contract("CountrySale: Gas Usage", (accounts) => {
 		assertEqual(72017, gasUsed, "transferring a country gas usage mismatch: " + gasUsed);
 	});
 
-	it("CountrySale: deploying a country sale requires 3165563 gas", async () => {
+	it("gas: deploying a country sale requires 3165563 gas", async() => {
 		const tk = await Token.new(COUNTRY_DATA);
 		const sale = await Sale.new(tk.address, accounts[0], COUNTRY_PRICE_DATA);
 		const txHash = sale.transactionHash;
@@ -46,7 +46,7 @@ contract("CountrySale: Gas Usage", (accounts) => {
 		assertEqual(3165563, gasUsed, "deploying CountrySale gas usage mismatch: " + gasUsed);
 	});
 
-	it("CountrySale: buying a country requires 184086 gas", async () => {
+	it("gas: buying a country requires 184086 gas", async() => {
 		const tk = await Token.new(COUNTRY_DATA);
 		const sale = await Sale.new(tk.address, accounts[0], COUNTRY_PRICE_DATA);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
@@ -55,7 +55,7 @@ contract("CountrySale: Gas Usage", (accounts) => {
 		assertEqual(184086, gasUsed, "buying a country gas usage mismatch: " + gasUsed);
 	});
 
-	it("CountrySale: buying 5 countries requires 541798 gas", async () => {
+	it("gas: buying 5 countries requires 541798 gas", async() => {
 		const tk = await Token.new(COUNTRY_DATA);
 		const sale = await Sale.new(tk.address, accounts[0], COUNTRY_PRICE_DATA);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);

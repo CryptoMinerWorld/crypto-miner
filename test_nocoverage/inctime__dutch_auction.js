@@ -35,7 +35,7 @@ const P1 = web3.toWei(1, "szabo");
 
 contract('Dutch Auction (Time Increase)', accounts => {
 
-	it("auction: token sale status", async () => {
+	it("auction: token sale status", async() => {
 		const tk = await Token.new();
 		const auction = await Auction.new();
 
@@ -105,7 +105,7 @@ contract('Dutch Auction (Time Increase)', accounts => {
 		assert.equal(p1_Gwei.dividedToIntegerBy(20), fee2, "wrong final fee (not 5%)");
 	});
 
-	it("auction: selling, buying, adding, removing lifecycle", async () => {
+	it("auction: selling, buying, adding, removing lifecycle", async() => {
 		const tk = await Token.new();
 		const auction = await Auction.new();
 
@@ -141,8 +141,8 @@ contract('Dutch Auction (Time Increase)', accounts => {
 		assert.equal(p0, await auction.getCurrentPrice(tk.address, token0x401), "wrong initial price for token 0x401");
 
 		// check few transactions are not possible with wrong parameters
-		await assertThrows(async () => await auction.getCurrentPrice(tk.address, 0x402));
-		await assertThrows(async () => await auction.buy(tk.address, 0x402, {from: accounts[2], value: p0}));
+		await assertThrows(async() => await auction.getCurrentPrice(tk.address, 0x402));
+		await assertThrows(async() => await auction.buy(tk.address, 0x402, {from: accounts[2], value: p0}));
 
 		// skip one second for auction to start
 		await increaseTime(offset);
