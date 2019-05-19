@@ -81,7 +81,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		// grant sale a permission to add known addresses into ref tracker
 		await r.updateRole(s.address, 0x00000004); // seller
 
-		// buy one plot in Russia - no country owner
+		// buy 10 plots in Russia - no country owner
 		const gasUsed = (await s.buy(1, 10, 0, {from: p, value: 10 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
@@ -108,7 +108,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		// grant sale a permission to add known addresses into ref tracker
 		await r.updateRole(s.address, 0x00000004); // seller
 
-		// buy one plot in Russia - no country owner
+		// buy 25 plots in Russia - no country owner
 		const gasUsed = (await s.buy(1, 25, 0, {from: p, value: 25 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
@@ -135,7 +135,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		// grant sale a permission to add known addresses into ref tracker
 		await r.updateRole(s.address, 0x00000004); // seller
 
-		// buy one plot in Russia - no country owner
+		// buy 45 plots in Russia - no country owner
 		const gasUsed = (await s.buy(1, 45, 0, {from: p, value: 45 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
@@ -198,7 +198,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		// grant sale a permission to add known addresses into ref tracker
 		await r.updateRole(s.address, 0x00000004); // seller
 
-		// buy one plot in Russia - owned country
+		// buy 10 plots in Russia - owned country
 		const gasUsed = (await s.buy(1, 10, 0, {from: p, value: 10 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
@@ -229,7 +229,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		// grant sale a permission to add known addresses into ref tracker
 		await r.updateRole(s.address, 0x00000004); // seller
 
-		// buy one plot in Russia - owned country
+		// buy 25 plots in Russia - owned country
 		const gasUsed = (await s.buy(1, 25, 0, {from: p, value: 25 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
@@ -260,7 +260,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		// grant sale a permission to add known addresses into ref tracker
 		await r.updateRole(s.address, 0x00000004); // seller
 
-		// buy one plot in Russia - owned country
+		// buy 45 plots in Russia - owned country
 		const gasUsed = (await s.buy(1, 45, 0, {from: p, value: 45 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
@@ -321,7 +321,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		// grant sale a permission to consumer referral points
 		await r.updateRole(s.address, 0x00000002); // ref points consumer
 
-		// get one plot for referral points
+		// get 10 plots for referral points
 		const gasUsed = (await s.get(10, {from: p})).receipt.gasUsed;
 
 		// confirm gas usage result
@@ -351,7 +351,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		// grant sale a permission to consumer referral points
 		await r.updateRole(s.address, 0x00000002); // ref points consumer
 
-		// get one plot for referral points
+		// get 25 plots for referral points
 		const gasUsed = (await s.get(25, {from: p})).receipt.gasUsed;
 
 		// confirm gas usage result
@@ -381,11 +381,132 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		// grant sale a permission to consumer referral points
 		await r.updateRole(s.address, 0x00000002); // ref points consumer
 
-		// get one plot for referral points
+		// get 45 plots for referral points
 		const gasUsed = (await s.get(45, {from: p})).receipt.gasUsed;
 
 		// confirm gas usage result
 		assertEqual(7491597, gasUsed, "getting 45 plots for ref points gas usage mismatch: " + gasUsed);
+	});
+
+	it("gas: getting one plot for coupon requires 317,945 gas", async() => {
+		// define plot sale dependencies
+		const r = await Tracker.new(); // ref tracker
+		const c = await Country.new(COUNTRY_DATA); // country ERC721
+		const t = await Plot.new(); // plot ERC721
+		const w = accounts[10]; // world chest
+		const m = accounts[11]; // monthly chest
+		const b = accounts[13]; // beneficiary
+		const u = -60 + new Date().getTime() / 1000 | 0; // offset, sale start time
+		// define a player account to buy tokens from
+		const p = accounts[1]; // player
+
+		// instantiate plot sale smart contract
+		const s = await Sale.new(r.address, c.address, t.address, w, m, b, u);
+		// enable using coupons feature
+		await s.updateFeatures(0x00000004); // using coupons enabled feature
+		// grant sale a permission to mint tokens on PlotERC721
+		await t.updateRole(s.address, 0x00000001); // token creator
+		// grant sale a permission to add known addresses into ref tracker
+		await r.updateRole(s.address, 0x00000004); // seller
+
+		// add a coupon
+		await s.updateCoupon(web3.sha3("coupon"), 1);
+
+		// get plot(s) for coupon
+		const gasUsed = (await s.useCoupon("coupon", {from: p})).receipt.gasUsed;
+
+		// confirm gas usage result
+		assertEqual(317945, gasUsed, "getting one plot for coupon gas usage mismatch: " + gasUsed);
+	});
+	it("gas: getting ten plots for coupon requires 1,768,325 gas", async() => {
+		// define plot sale dependencies
+		const r = await Tracker.new(); // ref tracker
+		const c = await Country.new(COUNTRY_DATA); // country ERC721
+		const t = await Plot.new(); // plot ERC721
+		const w = accounts[10]; // world chest
+		const m = accounts[11]; // monthly chest
+		const b = accounts[13]; // beneficiary
+		const u = -60 + new Date().getTime() / 1000 | 0; // offset, sale start time
+		// define a player account to buy tokens from
+		const p = accounts[1]; // player
+
+		// instantiate plot sale smart contract
+		const s = await Sale.new(r.address, c.address, t.address, w, m, b, u);
+		// enable using coupons feature
+		await s.updateFeatures(0x00000004); // using coupons enabled feature
+		// grant sale a permission to mint tokens on PlotERC721
+		await t.updateRole(s.address, 0x00000001); // token creator
+		// grant sale a permission to add known addresses into ref tracker
+		await r.updateRole(s.address, 0x00000004); // seller
+
+		// add a coupon
+		await s.updateCoupon(web3.sha3("coupon"), 10);
+
+		// get plot(s) for coupon
+		const gasUsed = (await s.useCoupon("coupon", {from: p})).receipt.gasUsed;
+
+		// confirm gas usage result
+		assertEqual(1768325, gasUsed, "getting ten plots for coupon gas usage mismatch: " + gasUsed);
+	});
+	it("gas: getting 25 plots for coupon requires 4,245,317 gas", async() => {
+		// define plot sale dependencies
+		const r = await Tracker.new(); // ref tracker
+		const c = await Country.new(COUNTRY_DATA); // country ERC721
+		const t = await Plot.new(); // plot ERC721
+		const w = accounts[10]; // world chest
+		const m = accounts[11]; // monthly chest
+		const b = accounts[13]; // beneficiary
+		const u = -60 + new Date().getTime() / 1000 | 0; // offset, sale start time
+		// define a player account to buy tokens from
+		const p = accounts[1]; // player
+
+		// instantiate plot sale smart contract
+		const s = await Sale.new(r.address, c.address, t.address, w, m, b, u);
+		// enable using coupons feature
+		await s.updateFeatures(0x00000004); // using coupons enabled feature
+		// grant sale a permission to mint tokens on PlotERC721
+		await t.updateRole(s.address, 0x00000001); // token creator
+		// grant sale a permission to add known addresses into ref tracker
+		await r.updateRole(s.address, 0x00000004); // seller
+
+		// add a coupon
+		await s.updateCoupon(web3.sha3("coupon"), 25);
+
+		// get plot(s) for coupon
+		const gasUsed = (await s.useCoupon("coupon", {from: p})).receipt.gasUsed;
+
+		// confirm gas usage result
+		assertEqual(4245317, gasUsed, "getting 25 plots for coupon gas usage mismatch: " + gasUsed);
+	});
+	it("gas: getting 45 plots for coupon requires 7,528,047 gas", async() => {
+		// define plot sale dependencies
+		const r = await Tracker.new(); // ref tracker
+		const c = await Country.new(COUNTRY_DATA); // country ERC721
+		const t = await Plot.new(); // plot ERC721
+		const w = accounts[10]; // world chest
+		const m = accounts[11]; // monthly chest
+		const b = accounts[13]; // beneficiary
+		const u = -60 + new Date().getTime() / 1000 | 0; // offset, sale start time
+		// define a player account to buy tokens from
+		const p = accounts[1]; // player
+
+		// instantiate plot sale smart contract
+		const s = await Sale.new(r.address, c.address, t.address, w, m, b, u);
+		// enable using coupons feature
+		await s.updateFeatures(0x00000004); // using coupons enabled feature
+		// grant sale a permission to mint tokens on PlotERC721
+		await t.updateRole(s.address, 0x00000001); // token creator
+		// grant sale a permission to add known addresses into ref tracker
+		await r.updateRole(s.address, 0x00000004); // seller
+
+		// add a coupon
+		await s.updateCoupon(web3.sha3("coupon"), 45);
+
+		// get plot(s) for coupon
+		const gasUsed = (await s.useCoupon("coupon", {from: p})).receipt.gasUsed;
+
+		// confirm gas usage result
+		assertEqual(7528047, gasUsed, "getting 45 plots for coupon gas usage mismatch: " + gasUsed);
 	});
 });
 
