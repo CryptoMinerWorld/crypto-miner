@@ -38,7 +38,7 @@ module.exports = {
 		development: {
 			provider: function () {
 				const wallet = new HDWalletProvider(
-					keys.mnemonic3, // create 12 words: https://metamask.io/
+					keys.mnemonic4, // create 12 words: https://metamask.io/
 					"https://rinkeby.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
 				const nonceTracker = new NonceTrackerSubprovider();
@@ -56,7 +56,7 @@ module.exports = {
 		ropsten: {
 			provider: function () {
 				const wallet = new HDWalletProvider(
-					keys.mnemonic4, // create 12 words: https://metamask.io/
+					keys.mnemonic3, // create 12 words: https://metamask.io/
 					"https://ropsten.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
 				const nonceTracker = new NonceTrackerSubprovider();
