@@ -26,9 +26,9 @@ contract('RefPointsTracker', (accounts) => {
 		assert.equal(0, (await tracker.getKnownAddresses()).length, "non-empty initial value for getKnownAddresses()");
 	});
 	it("permissions: issuer, consumer and seller are different permissions", async() => {
-		assert(ROLE_REF_POINTS_ISSUER != ROLE_REF_POINTS_CONSUMER, "issuer and consumer permissions are equal");
-		assert(ROLE_REF_POINTS_CONSUMER != ROLE_SELLER, "consumer and seller permissions are equal");
-		assert(ROLE_SELLER != ROLE_REF_POINTS_ISSUER, "seller and issuer permissions are equal");
+		assert(ROLE_REF_POINTS_ISSUER !== ROLE_REF_POINTS_CONSUMER, "issuer and consumer permissions are equal");
+		assert(ROLE_REF_POINTS_CONSUMER !== ROLE_SELLER, "consumer and seller permissions are equal");
+		assert(ROLE_SELLER !== ROLE_REF_POINTS_ISSUER, "seller and issuer permissions are equal");
 	});
 	it("permissions: issuing ref points requires ROLE_REF_POINTS_ISSUER permission", async() => {
 		const tracker = await Tracker.new();
@@ -44,8 +44,8 @@ contract('RefPointsTracker', (accounts) => {
 		const fn2 = async() => await tracker.bulkIssue([player], [1], {from: issuer});
 
 		// originally issuer doesn't have required permission
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
 
 		// grant issuer permission required
 		await tracker.updateRole(issuer, ROLE_REF_POINTS_ISSUER);
@@ -74,8 +74,8 @@ contract('RefPointsTracker', (accounts) => {
 		const fn2 = async() => await tracker.bulkConsume([player], [1], {from: consumer});
 
 		// originally consumer doesn't have required permission
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
 
 		// grant consumer permission required
 		await tracker.updateRole(consumer, ROLE_REF_POINTS_CONSUMER);
@@ -98,8 +98,8 @@ contract('RefPointsTracker', (accounts) => {
 		const fn2 = async() => await tracker.bulkAddKnownAddresses(accounts, {from: seller});
 
 		// originally seller doesn't have required permission
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
 
 		// grant seller permission required
 		await tracker.updateRole(seller, ROLE_SELLER);
@@ -142,7 +142,7 @@ contract('RefPointsTracker', (accounts) => {
 		const consume = async() => await tracker.consumeFrom(player, amt, {from: consumer});
 
 		// consuming is not possible initially - no points to consume
-		await assertThrowsAsync(consume);
+		await assertThrows(consume);
 
 		// issue some ref point(s)
 		await issue();
@@ -167,7 +167,7 @@ contract('RefPointsTracker', (accounts) => {
 		assert.equal(player, await tracker.holders(0), "incorrect holder at index 0 after consuming some points");
 
 		// consuming is not possible anymore - no points to consume
-		await assertThrowsAsync(consume);
+		await assertThrows(consume);
 	});
 	it("issuing and consuming: bulk flow", async() => {
 		const tracker = await Tracker.new();
@@ -204,11 +204,11 @@ contract('RefPointsTracker', (accounts) => {
 		const consume2 = async() => await tracker.bulkConsume([players[0]], ams, {from: consumer});
 
 		// consuming is not possible initially - no points to consume
-		await assertThrowsAsync(consume);
+		await assertThrows(consume);
 
 		// issuing using wrong functions is not possible at any time
-		await assertThrowsAsync(issue1);
-		await assertThrowsAsync(issue2);
+		await assertThrows(issue1);
+		await assertThrows(issue2);
 
 		// issue some ref point(s)
 		await issue();
@@ -224,8 +224,8 @@ contract('RefPointsTracker', (accounts) => {
 		assert.equal(players.length, await tracker.getNumberOfHolders(), "incorrect number of holders after issuing some points");
 
 		// consuming using wrong functions is not possible at any time
-		await assertThrowsAsync(consume1);
-		await assertThrowsAsync(consume2);
+		await assertThrows(consume1);
+		await assertThrows(consume2);
 
 		// consume some ref point(s)
 		await consume();
@@ -241,7 +241,7 @@ contract('RefPointsTracker', (accounts) => {
 		assert.equal(players.length, await tracker.getNumberOfHolders(), "incorrect number of holders after consuming some points");
 
 		// consuming is not possible anymore - no points to consume
-		await assertThrowsAsync(consume);
+		await assertThrows(consume);
 	});
 	it("issuing and consuming: arithmetic overflow checks", async() => {
 		const tracker = await Tracker.new();
@@ -273,13 +273,13 @@ contract('RefPointsTracker', (accounts) => {
 		await issue();
 
 		// second issuing leads to arithmetic overflow
-		await assertThrowsAsync(issue);
+		await assertThrows(issue);
 
 		// first time consuming works
 		await consume();
 
 		// second consuming leads to arithmetic overflow
-		await assertThrowsAsync(consume);
+		await assertThrows(consume);
 
 		// verify referral points balances
 		assert(bigAmount.eq(await tracker.issued(player)), "incorrect issued value after consuming big amount of point(s)");
@@ -288,8 +288,8 @@ contract('RefPointsTracker', (accounts) => {
 		assert.equal(0, await tracker.balanceOf(player), "incorrect balanceOf value after consuming big amount of point(s)");
 
 		// issuing/consuming zero amounts always fails
-		await assertThrowsAsync(issue0);
-		await assertThrowsAsync(consume0);
+		await assertThrows(issue0);
+		await assertThrows(consume0);
 	});
 	it("adding known addresses: bulk flow", async() => {
 		const tracker = await Tracker.new();
@@ -301,7 +301,7 @@ contract('RefPointsTracker', (accounts) => {
 		await tracker.updateRole(seller, ROLE_SELLER);
 
 		// verify wrong bulk address parameters
-		await assertThrowsAsync(tracker.bulkAddKnownAddresses, [], {from: seller});
+		await assertThrows(tracker.bulkAddKnownAddresses, [], {from: seller});
 
 		// verify initial state of known addresses
 		assert(!await tracker.isKnown(0), 'address "0" is known');
@@ -333,18 +333,6 @@ function rnd() {
 	return Math.round(Math.random() * 4294967296);
 }
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(...args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

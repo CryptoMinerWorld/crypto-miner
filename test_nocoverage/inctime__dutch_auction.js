@@ -141,8 +141,8 @@ contract('Dutch Auction (Time Increase)', accounts => {
 		assert.equal(p0, await auction.getCurrentPrice(tk.address, token0x401), "wrong initial price for token 0x401");
 
 		// check few transactions are not possible with wrong parameters
-		await assertThrowsAsync(async () => await auction.getCurrentPrice(tk.address, 0x402));
-		await assertThrowsAsync(async () => await auction.buy(tk.address, 0x402, {from: accounts[2], value: p0}));
+		await assertThrows(async () => await auction.getCurrentPrice(tk.address, 0x402));
+		await assertThrows(async () => await auction.buy(tk.address, 0x402, {from: accounts[2], value: p0}));
 
 		// skip one second for auction to start
 		await increaseTime(offset);
@@ -211,22 +211,6 @@ contract('Dutch Auction (Time Increase)', accounts => {
 
 });
 
-
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
-
 async function increaseTime(delta) {
 	await web3.currentProvider.send({
 		jsonrpc: "2.0",
@@ -242,3 +226,6 @@ async function increaseTime(delta) {
 	});
 }
 
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

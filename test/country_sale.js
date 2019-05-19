@@ -41,27 +41,27 @@ contract('CountrySale', (accounts) => {
 		const price1a = price1.plus(1);
 
 		const tk = await Token.new(COUNTRY_DATA);
-		await assertThrowsAsync(async () => await Sale.new(0, beneficiary, COUNTRY_PRICE_DATA));
-		await assertThrowsAsync(async () => await Sale.new(tk.address, 0, COUNTRY_PRICE_DATA));
-		await assertThrowsAsync(async () => await Sale.new(tk.address, tk.address, COUNTRY_PRICE_DATA));
-		await assertThrowsAsync(async () => await Sale.new(beneficiary, beneficiary, COUNTRY_PRICE_DATA));
-		await assertThrowsAsync(async () => await Sale.new(tk.address, beneficiary, COUNTRY_PRICE_DATA.slice().push(1)));
+		await assertThrows(async () => await Sale.new(0, beneficiary, COUNTRY_PRICE_DATA));
+		await assertThrows(async () => await Sale.new(tk.address, 0, COUNTRY_PRICE_DATA));
+		await assertThrows(async () => await Sale.new(tk.address, tk.address, COUNTRY_PRICE_DATA));
+		await assertThrows(async () => await Sale.new(beneficiary, beneficiary, COUNTRY_PRICE_DATA));
+		await assertThrows(async () => await Sale.new(tk.address, beneficiary, COUNTRY_PRICE_DATA.slice().push(1)));
 		const sale = await Sale.new(tk.address, beneficiary, COUNTRY_PRICE_DATA);
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 
-		await assertThrowsAsync(async () => await sale.buyTo(token1, 0, {value: price1a}));
-		await assertThrowsAsync(async () => await sale.buyTo(token1, sale.address, {value: price1a}));
-		await assertThrowsAsync(async () => await sale.buyTo(token1, tk.address, {value: price1a}));
+		await assertThrows(async () => await sale.buyTo(token1, 0, {value: price1a}));
+		await assertThrows(async () => await sale.buyTo(token1, sale.address, {value: price1a}));
+		await assertThrows(async () => await sale.buyTo(token1, tk.address, {value: price1a}));
 		await sale.buyTo(token1, buyer1, {value: price1a});
-		await assertThrowsAsync(async () => await sale.buyTo(token1, buyer1, {value: price1a}));
+		await assertThrows(async () => await sale.buyTo(token1, buyer1, {value: price1a}));
 
-		await assertThrowsAsync(async () => await sale.getPrice(0));
+		await assertThrows(async () => await sale.getPrice(0));
 		await sale.getPrice(token1);
 
-		await assertThrowsAsync(async () => await sale.getBulkPrice([0]));
+		await assertThrows(async () => await sale.getBulkPrice([0]));
 		await sale.getBulkPrice([token1]);
 
-		await assertThrowsAsync(async () => await sale.removeCoupon(1));
+		await assertThrows(async () => await sale.removeCoupon(1));
 	});
 
 	it("buy: country buy flow", async() => {
@@ -86,20 +86,20 @@ contract('CountrySale', (accounts) => {
 
 		// buy 2 countries
 		// sale requires permission to mint tokens, without it transaction fails
-		await assertThrowsAsync(async () => await sale.buy(token1, {from: buyer1, value: price1}));
+		await assertThrows(async () => await sale.buy(token1, {from: buyer1, value: price1}));
 
 		// give permissions required
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 
 		// sending not enough value to buy/buyTo still fails
-		await assertThrowsAsync(async () => await sale.buy(token1, {from: buyer1, value: price1.minus(1)}));
-		await assertThrowsAsync(async () => await sale.buyTo(token2, buyer2, {from: buyer1, value: price2.minus(1)}));
-		await assertThrowsAsync(async () => await sale.bulkBuy([token3], {from: buyer1, value: price3.minus(1)}));
+		await assertThrows(async () => await sale.buy(token1, {from: buyer1, value: price1.minus(1)}));
+		await assertThrows(async () => await sale.buyTo(token2, buyer2, {from: buyer1, value: price2.minus(1)}));
+		await assertThrows(async () => await sale.bulkBuy([token3], {from: buyer1, value: price3.minus(1)}));
 
 		// impossible to buy country out of country price range
-		await assertThrowsAsync(async () => await sale.buy(token171, {from: buyer1, value: price171}));
-		await assertThrowsAsync(async () => await sale.buyTo(token171, buyer2, {from: buyer1, value: price171}));
-		await assertThrowsAsync(async () => await sale.bulkBuy([token171], {from: buyer1, value: price171}));
+		await assertThrows(async () => await sale.buy(token171, {from: buyer1, value: price171}));
+		await assertThrows(async () => await sale.buyTo(token171, buyer2, {from: buyer1, value: price171}));
+		await assertThrows(async () => await sale.bulkBuy([token171], {from: buyer1, value: price171}));
 
 		// check balances
 		const balance0 = await web3.eth.getBalance(beneficiary); // beneficiary balance
@@ -151,14 +151,14 @@ contract('CountrySale', (accounts) => {
 
 		// buy 2 groups of countries
 		// sale requires permission to mint tokens, without it transaction fails
-		await assertThrowsAsync(async () => await sale.bulkBuy(countries1, {from: buyer1, value: bulkPrice1}));
+		await assertThrows(async () => await sale.bulkBuy(countries1, {from: buyer1, value: bulkPrice1}));
 
 		// give permissions required
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
 
 		// sending not enough value to buy/buyTo still fails
-		await assertThrowsAsync(async () => await sale.bulkBuy(countries1, {from: buyer1, value: bulkPrice1.minus(1)}));
-		await assertThrowsAsync(async () => await sale.bulkBuyTo(buyer2, countries2, {from: buyer1, value: bulkPrice2.minus(1)}));
+		await assertThrows(async () => await sale.bulkBuy(countries1, {from: buyer1, value: bulkPrice1.minus(1)}));
+		await assertThrows(async () => await sale.bulkBuyTo(buyer2, countries2, {from: buyer1, value: bulkPrice2.minus(1)}));
 
 		// check balances
 		const balance0 = await web3.eth.getBalance(beneficiary); // beneficiary balance
@@ -206,16 +206,16 @@ contract('CountrySale', (accounts) => {
 		await sale.addCoupon(couponKey171, token171);
 
 		// ensure they cannot be added once again
-		await assertThrowsAsync(async () => await sale.addCoupon(couponKey1, token1));
-		await assertThrowsAsync(async () => await sale.addCoupon(couponKey171, token171));
+		await assertThrows(async () => await sale.addCoupon(couponKey1, token1));
+		await assertThrows(async () => await sale.addCoupon(couponKey171, token171));
 
 		// ensure added coupons exist and are valid
 		assert.equal(token1, await sale.isCouponValid(couponCode1), "invalid coupon 1");
 		assert.equal(token171, await sale.isCouponValid(couponCode171), "invalid coupon 171");
 
 		// sale doesn't have permission to mint countries - coupon cannot be used
-		await assertThrowsAsync(async () => await sale.useCoupon(couponCode1, {from: player1}));
-		await assertThrowsAsync(async () => await sale.useCoupon(couponCode171, {from: player1}));
+		await assertThrows(async () => await sale.useCoupon(couponCode1, {from: player1}));
+		await assertThrows(async () => await sale.useCoupon(couponCode171, {from: player1}));
 
 		// give permissions required
 		await tk.addOperator(sale.address, ROLE_TOKEN_CREATOR);
@@ -227,7 +227,7 @@ contract('CountrySale', (accounts) => {
 		assert.equal(0, await sale.isCouponValid(couponCode1), "coupon is still valid while it should not");
 
 		// ensure removed coupon 1 cannot be used
-		await assertThrowsAsync(async () => await ale.useCoupon(couponCode1, {from: player1}));
+		await assertThrows(async () => await ale.useCoupon(couponCode1, {from: player1}));
 
 		// add the coupon 1 again
 		await sale.addCoupon(couponKey1, token1);
@@ -250,7 +250,7 @@ contract('CountrySale', (accounts) => {
 		assert.equal(0, await sale.isCouponValid(couponCode1), "coupon is still valid");
 
 		// ensure coupon cannot be used twice
-		await assertThrowsAsync(async () => await sale.useCoupon(couponCode1, {from: player2}));
+		await assertThrows(async () => await sale.useCoupon(couponCode1, {from: player2}));
 
 		// redefine the coupon 1
 		await sale.removeCoupon(couponKey1);
@@ -331,18 +331,6 @@ function getBulkPrice(tokenIds) {
 	return tokenIds.reduce((a, b) => a.plus(getPrice(b)), web3.toBigNumber(0));
 }
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

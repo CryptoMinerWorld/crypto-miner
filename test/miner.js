@@ -183,18 +183,6 @@ contract('Miner', (accounts) => {
 	});
 });
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrows(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(...args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

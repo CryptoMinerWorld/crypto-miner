@@ -180,37 +180,26 @@ contract('Presale', function(accounts) {
 		assert.equal(10, await sale.colors(1), "wrong initial color at index 0");
 		assert.equal(1, await sale.colors(2), "wrong initial color at index 0");
 		assert.equal(2, await sale.colors(3), "wrong initial color at index 0");
-		await assertThrowsAsync(async function() {await sale.colors(4);});
-		await assertThrowsAsync(async function() {await sale.colors(5);});
+		await assertThrows(async function() {await sale.colors(4);});
+		await assertThrows(async function() {await sale.colors(5);});
 
 		const fn1 = async () => await sale.addColor(5);
 		const fn1a = async () => await sale.addColor(6);
 		const fn2 = async () => await sale.addColor(5, {from: accounts[1]});
 		const fn2a = async () => await sale.addColor(6, {from: accounts[1]});
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(fn2a);
+		await assertThrows(fn2);
+		await assertThrows(fn2a);
 		await fn1();
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		await fn1a();
-		await assertThrowsAsync(fn1a);
+		await assertThrows(fn1a);
 
 		assert.equal(5, await sale.colors(4), "wrong color at index 4");
 		assert.equal(6, await sale.colors(5), "wrong color at index 4");
-		await assertThrowsAsync(async function() {await sale.colors(6);});
+		await assertThrows(async function() {await sale.colors(6);});
 	});
 });
 
-async function assertThrowsAsync(fn) {
-	let f = function() {};
-	try {
-		await fn();
-	}
-	catch(e) {
-		f = function() {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

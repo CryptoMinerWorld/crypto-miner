@@ -56,7 +56,7 @@ contract('GoldERC20', (accounts) => {
 		const fn = async() => await tk.mintNative(player, 1, {from: creator});
 
 		// originally creator doesn't have required permission
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 
 		// grant creator permission required
 		await tk.updateRole(creator, ROLE_TOKEN_CREATOR);
@@ -83,7 +83,7 @@ contract('GoldERC20', (accounts) => {
 		await tk.mint(player, 1);
 
 		// originally destroyer doesn't have required permission
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 
 		// grant destroyer permission required
 		await tk.updateRole(destroyer, ROLE_TOKEN_DESTROYER);
@@ -115,10 +115,10 @@ contract('GoldERC20', (accounts) => {
 		const fn2f = async() => await tk.transferFrom(player2, player1, amt, {from: player2});
 
 		// transfers don't work without feature required
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(fn1f);
-		await assertThrowsAsync(fn2f);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
+		await assertThrows(fn1f);
+		await assertThrows(fn2f);
 
 		// enable feature required
 		await tk.updateFeatures(FEATURE_TRANSFERS);
@@ -155,7 +155,7 @@ contract('GoldERC20', (accounts) => {
 		const fn = async() => await tk.transferFrom(player1, player2, amt, {from: exchange});
 
 		// transfer on behalf doesn't work without feature required
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 
 		// enable feature required
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
@@ -197,16 +197,16 @@ contract('GoldERC20', (accounts) => {
 		await tk.updateRole(destroyer, ROLE_TOKEN_DESTROYER);
 
 		// burn cannot be called initially since there is not enough tokens to burn
-		await assertThrowsAsync(burn);
+		await assertThrows(burn);
 
 		// mint some tokens
 		await mint();
 
 		// impossible to mint to zero address
-		await assertThrowsAsync(mintTo, 0, amt);
+		await assertThrows(mintTo, 0, amt);
 
 		// impossible to mint zero value
-		await assertThrowsAsync(mintTo, player, 0);
+		await assertThrows(mintTo, player, 0);
 
 		// verify token balance
 		assert.equal(amt, await tk.balanceOf(player), "incorrect token balance after minting some tokens");
@@ -215,7 +215,7 @@ contract('GoldERC20', (accounts) => {
 		assert.equal(amt, await tk.totalSupply(), "incorrect total supply after minting some tokens");
 
 		// impossible to burn zero value
-		await assertThrowsAsync(burnFrom, player, 0);
+		await assertThrows(burnFrom, player, 0);
 
 		// burning is possible now: there is enough tokens to burn
 		await burn();
@@ -227,7 +227,7 @@ contract('GoldERC20', (accounts) => {
 		assert.equal(0, await tk.totalSupply(), "incorrect total supply after burning some tokens");
 
 		// burning cannot be called now again
-		await assertThrowsAsync(burn);
+		await assertThrows(burn);
 	});
 	it("minting: arithmetic overflow check", async() => {
 		const tk = await Gold.new();
@@ -257,22 +257,22 @@ contract('GoldERC20', (accounts) => {
 		await tk.updateRole(destroyer, ROLE_TOKEN_DESTROYER);
 
 		// mint0 always overflows
-		await assertThrowsAsync(mint0);
+		await assertThrows(mint0);
 		// mint maximum value of tokens
 		await mint1();
 		// impossible to mint more tokens to the same player:
-		await assertThrowsAsync(mint1);
+		await assertThrows(mint1);
 		// impossible to mint more tokens to any other player:
-		await assertThrowsAsync(mint2);
+		await assertThrows(mint2);
 
 		// burn0 always overflows
-		await assertThrowsAsync(burn0);
+		await assertThrows(burn0);
 		// burn the tokens
 		await burn1();
 		// now we can mint them to some other player
 		await mint2();
 		// but we cannot mint them to first player anymore - overflow
-		await assertThrowsAsync(mint1);
+		await assertThrows(mint1);
 
 		// after burning the tokens
 		await burn2();
@@ -301,19 +301,19 @@ contract('GoldERC20', (accounts) => {
 
 		// perform the transfers, incorrect and correct, check balances after each transfer:
 		// player 1 -> player 2
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn2);
 		await fn1();
 		assert.equal(0, await tk.balanceOf(player1), "non-zero player 1 balance");
 		assert.equal(amt, await tk.balanceOf(player2), "wrong player 2 balance");
 
 		// player 2 -> player 1
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		await fn2();
 		assert.equal(0, await tk.balanceOf(player2), "non-zero player 2 balance");
 		assert.equal(amt, await tk.balanceOf(player1), "wrong player 1 balance");
 
 		// player 1 -> player 2 again
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn2);
 		await fn1();
 		assert.equal(0, await tk.balanceOf(player1), "non-zero player 1 balance (1)");
 		assert.equal(amt, await tk.balanceOf(player2), "wrong player 2 balance (1)");
@@ -345,16 +345,16 @@ contract('GoldERC20', (accounts) => {
 
 		// perform the transfers, incorrect and correct, check balances after each transfer:
 		// player 1 -> player 2
-		await assertThrowsAsync(t1); // not approved
-		await assertThrowsAsync(t2); // zero balance
+		await assertThrows(t1); // not approved
+		await assertThrows(t2); // zero balance
 		await ap1(); // approve
 		await t1();  // transfer
 		assert.equal(0, await tk.balanceOf(player1), "non-zero player 1 balance");
 		assert.equal(amt, await tk.balanceOf(player2), "wrong player 2 balance");
 
 		// player 2 -> player 1
-		await assertThrowsAsync(t1); // zero balance
-		await assertThrowsAsync(t2); // not approved
+		await assertThrows(t1); // zero balance
+		await assertThrows(t2); // not approved
 		await ap2(); // approve
 		await t2();  // transfer
 		assert.equal(0, await tk.balanceOf(player2), "non-zero player 2 balance");
@@ -396,13 +396,13 @@ contract('GoldERC20', (accounts) => {
 		await safe(safeSc);
 		await unsafe(safeSc);
 		// but safe transfer fails if value is even
-		await assertThrowsAsync(safe2, safeSc);
+		await assertThrows(safe2, safeSc);
 		// while unsafe does not
 		await unsafe2(safeSc);
 
 		// safe transfer fails with unsafe address
-		await assertThrowsAsync(safe, unsafeSc);
-		await assertThrowsAsync(safe2, unsafeSc);
+		await assertThrows(safe, unsafeSc);
+		await assertThrows(safe2, unsafeSc);
 		// while unsafe transfer is still possible
 		await unsafe(unsafeSc);
 		await unsafe2(unsafeSc);
@@ -443,7 +443,7 @@ contract('GoldERC20', (accounts) => {
 		assert.equal(amt, await tk.balanceOf(player2), "wrong player 2 balance after transferring some tokens");
 
 		// transfer all the rest of the tokens
-		await assertThrowsAsync(fn, rnd_max - amt + 1); // too much
+		await assertThrows(fn, rnd_max - amt + 1); // too much
 		await fn(rnd_max - amt);
 
 		// verify the math works correctly
@@ -491,7 +491,7 @@ contract('GoldERC20', (accounts) => {
 		assert.equal(amt, await tk.balanceOf(player2), "wrong player 2 balance after transferring some tokens");
 
 		// transfer all the rest of the tokens
-		await assertThrowsAsync(fn, rnd_max - amt + 1); // too much
+		await assertThrows(fn, rnd_max - amt + 1); // too much
 		await fn(rnd_max - amt);
 
 		// verify the math works correctly
@@ -521,10 +521,10 @@ contract('GoldERC20', (accounts) => {
 		const amt = rnd();
 
 		// impossible to transfer to zero address or zero amount
-		await assertThrowsAsync(fn, player2, 0);
-		await assertThrowsAsync(fn, 0, amt);
+		await assertThrows(fn, player2, 0);
+		await assertThrows(fn, 0, amt);
 		// impossible to transfer to the player itself
-		await assertThrowsAsync(fn, player1, amt);
+		await assertThrows(fn, player1, amt);
 
 		// successful operation with non-zero values and different address
 		await fn(player2, amt);
@@ -543,18 +543,6 @@ function rnd() {
 	return Math.round(Math.random() * rnd_max);
 }
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(...args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

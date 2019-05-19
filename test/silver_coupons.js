@@ -59,8 +59,8 @@ contract('SilverCoupons', (accounts) => {
 		const fn2 = async() => await coupons.removeCoupon(key, {from: manager});
 
 		// first verify the permissions
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
 		await coupons.updateRole(manager, ROLE_COUPON_MANAGER);
 
 		// add this code into the coupons
@@ -73,7 +73,7 @@ contract('SilverCoupons', (accounts) => {
 
 		// verify removing coupon permissions
 		await coupons.updateRole(manager, 0);
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn2);
 		await coupons.updateRole(manager, ROLE_COUPON_MANAGER);
 
 		// remove the coupon
@@ -119,19 +119,19 @@ contract('SilverCoupons', (accounts) => {
 
 		// ensure all the permissions and features are required to use a coupon
 		await coupons.updateFeatures(0);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await coupons.updateFeatures(FEATURE_USING_COUPONS_ENABLED);
 		await silver.updateRole(coupons.address, 0);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await silver.updateRole(coupons.address, ROLE_TOKEN_CREATOR);
 		await ref.updateRole(coupons.address, 0);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await ref.updateRole(coupons.address, ROLE_SELLER);
 
 		// now use the coupon
 		await fn();
 		// cannot double spend the coupon
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 
 		// verify silver appeared on the player balance
 		assert((await silver.balanceOf(player)).gte(SILVER_MIN[0]), "silver balance is too low after using the coupon");
@@ -199,18 +199,6 @@ async function generateCouponCode(boxType) {
 	return couponCode;
 }
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(...args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

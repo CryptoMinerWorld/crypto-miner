@@ -45,19 +45,19 @@ contract('Workshop', (accounts) => {
 		const fn = async(a, b, c) => await Workshop.new(a, b, c);
 
 		// zero inputs check
-		await assertThrowsAsync(fn, 0, silver.address, gold.address);
-		await assertThrowsAsync(fn, gem.address, 0, gold.address);
-		await assertThrowsAsync(fn, gem.address, silver.address, 0);
+		await assertThrows(fn, 0, silver.address, gold.address);
+		await assertThrows(fn, gem.address, 0, gold.address);
+		await assertThrows(fn, gem.address, silver.address, 0);
 
 		// all inputs are different
-		await assertThrowsAsync(fn, gem.address, gem.address, gold.address);
-		await assertThrowsAsync(fn, gem.address, silver.address, silver.address);
-		await assertThrowsAsync(fn, gold.address, silver.address, gold.address);
+		await assertThrows(fn, gem.address, gem.address, gold.address);
+		await assertThrows(fn, gem.address, silver.address, silver.address);
+		await assertThrows(fn, gold.address, silver.address, gold.address);
 
 		// verify versions exist and correct
-		await assertThrowsAsync(fn, accounts[1], silver.address, gold.address);
-		await assertThrowsAsync(fn, gem.address, accounts[2], gold.address);
-		await assertThrowsAsync(fn, gem.address, silver.address, accounts[3]);
+		await assertThrows(fn, accounts[1], silver.address, gold.address);
+		await assertThrows(fn, gem.address, accounts[2], gold.address);
+		await assertThrows(fn, gem.address, silver.address, accounts[3]);
 	});
 	it("wrong inputs: level up and upgrade prices calculation", async() => {
 		// construct workshop dependencies
@@ -83,13 +83,13 @@ contract('Workshop', (accounts) => {
 		await fn2(1);
 		await fn1(2);
 		await fn2(2);
-		await assertThrowsAsync(fn1, 3);
+		await assertThrows(fn1, 3);
 		await fn2(3);
-		await assertThrowsAsync(fn1, 4);
-		await assertThrowsAsync(fn2, 4);
+		await assertThrows(fn1, 4);
+		await assertThrows(fn2, 4);
 		// arithmetic overflow checks
-		await assertThrowsAsync(fn1, 254);
-		await assertThrowsAsync(fn2, 254);
+		await assertThrows(fn1, 254);
+		await assertThrows(fn2, 254);
 	});
 	it("wrong inputs: bulk upgrade price", async() => {
 		// construct workshop dependencies
@@ -119,10 +119,10 @@ contract('Workshop', (accounts) => {
 		const fn = async(a, b, c) => await workshop.getBulkUpgradePrice(a, b, c);
 
 		// test wrong params
-		await assertThrowsAsync(fn, [], lvlUps, upgrades);
-		await assertThrowsAsync(fn, gemIds, [], upgrades);
-		await assertThrowsAsync(fn, gemIds, lvlUps, []);
-		await assertThrowsAsync(fn, gemIds, lvlUps, upgrades);
+		await assertThrows(fn, [], lvlUps, upgrades);
+		await assertThrows(fn, gemIds, [], upgrades);
+		await assertThrows(fn, gemIds, lvlUps, []);
+		await assertThrows(fn, gemIds, lvlUps, upgrades);
 
 		// fix lvlUps
 		lvlUps[4] = 1;
@@ -176,10 +176,10 @@ contract('Workshop', (accounts) => {
 		await gold.mint(player, 10121);
 
 		// test wrong params
-		await assertThrowsAsync(fn, [], lvlUps, upgrades);
-		await assertThrowsAsync(fn, gemIds, [], upgrades);
-		await assertThrowsAsync(fn, gemIds, lvlUps, []);
-		await assertThrowsAsync(fn, gemIds, lvlUps, upgrades);
+		await assertThrows(fn, [], lvlUps, upgrades);
+		await assertThrows(fn, gemIds, [], upgrades);
+		await assertThrows(fn, gemIds, lvlUps, []);
+		await assertThrows(fn, gemIds, lvlUps, upgrades);
 
 		// fix lvlUps
 		lvlUps[4] = 1;
@@ -190,7 +190,7 @@ contract('Workshop', (accounts) => {
 		// transfer a gem to some other account
 		await gem.transfer(player1, gemIds[4], {from: player});
 		// try to perform an upgrade
-		await assertThrowsAsync(fn, gemIds, lvlUps, upgrades);
+		await assertThrows(fn, gemIds, lvlUps, upgrades);
 		// transfer the gem back
 		await gem.transfer(player, gemIds[4], {from: player1});
 
@@ -308,10 +308,10 @@ contract('Workshop', (accounts) => {
 		await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
 
 		// we didn't mint any silver / gold – so the workshop won't work
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(fn3);
-		await assertThrowsAsync(fn4);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
+		await assertThrows(fn3);
+		await assertThrows(fn4);
 
 		// mint required silver and gold amounts
 		await silver.mint(player, 10200);
@@ -320,49 +320,49 @@ contract('Workshop', (accounts) => {
 		// disable upgrades on the workshop and verify workshop doesn't work
 		await workshop.updateFeatures(0);
 		// leveling up and upgrades are disabled
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(fn3);
-		await assertThrowsAsync(fn4);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
+		await assertThrows(fn3);
+		await assertThrows(fn4);
 		// enable feature back
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
 
 		// revoke silver related permissions
 		await silver.updateRole(workshop.address, 0);
 		// verify silver consuming transactions fail
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn3);
+		await assertThrows(fn1);
+		await assertThrows(fn3);
 		// grant silver related permission back
 		await silver.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 
 		// revoke gold related permissions
 		await gold.updateRole(workshop.address, 0);
 		// verify gold consuming transactions fail
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(fn3);
-		await assertThrowsAsync(fn4);
+		await assertThrows(fn2);
+		await assertThrows(fn3);
+		await assertThrows(fn4);
 		// grant gold related permission back
 		await gold.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 
 		// revoke level provider role from the workshop and verify leveling up fails
 		await gem.removeRole(workshop.address, ROLE_LEVEL_PROVIDER);
 		// verify level up transaction fails
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn3);
+		await assertThrows(fn1);
+		await assertThrows(fn3);
 		// grant role level provider back
 		await gem.addRole(workshop.address, ROLE_LEVEL_PROVIDER);
 
 		// revoke grade provider role from the workshop and verify upgrades fail
 		await gem.removeRole(workshop.address, ROLE_GRADE_PROVIDER);
 		// verify upgrade transaction fails
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(fn3);
-		await assertThrowsAsync(fn4);
+		await assertThrows(fn2);
+		await assertThrows(fn3);
+		await assertThrows(fn4);
 		// grant role grade provider back
 		await gem.addRole(workshop.address, ROLE_GRADE_PROVIDER);
 
 		// verify grade value upgrade is not yet available
-		await assertThrowsAsync(fn5);
+		await assertThrows(fn5);
 
 		// perform a level up
 		await fn1();
@@ -373,7 +373,7 @@ contract('Workshop', (accounts) => {
 		assert.equal(10135 * 1000, await silver.totalSupply(), "incorrect silver total supply after successful level up");
 
 		// verify grade value upgrade is still not available
-		await assertThrowsAsync(fn5);
+		await assertThrows(fn5);
 
 		// save initial gem grade value
 		const grade2 = (await gem.getGradeValue(1)).toNumber();
@@ -389,8 +389,8 @@ contract('Workshop', (accounts) => {
 		assert.equal(1024 * 1000, await gold.totalSupply(), "incorrect gold total supply after successful upgrade");
 
 		// due to level and grade constraints leveling up and upgrading by 3 is impossible
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
 
 		// save next gem grade value
 		const grade3 = (await gem.getGradeValue(1)).toNumber();
@@ -405,7 +405,7 @@ contract('Workshop', (accounts) => {
 		assert.equal(1016 * 1000, await gold.balanceOf(player), "incorrect gold balance after second upgrade");
 
 		// verify grade value upgrade is still not available
-		await assertThrowsAsync(fn5);
+		await assertThrows(fn5);
 
 		// save next gem grade value
 		const grade4 = (await gem.getGradeValue(1)).toNumber();
@@ -423,10 +423,10 @@ contract('Workshop', (accounts) => {
 		const grade5 = (await gem.getGradeValue(1)).toNumber();
 
 		// the gems is on its maximum level and grade, no upgrades are possible anymore
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(fn3);
-		await assertThrowsAsync(fn4);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
+		await assertThrows(fn3);
+		await assertThrows(fn4);
 
 		// but grade only upgrade is possible now
 		await fn5();
@@ -475,35 +475,35 @@ contract('Workshop', (accounts) => {
 
 		// perform an upgrade to maximum grade
 		// D -> C
-		await assertThrowsAsync(fn0);
+		await assertThrows(fn0);
 		await fn1();
 		// C -> B
-		await assertThrowsAsync(fn0);
+		await assertThrows(fn0);
 		await fn1();
 		// B -> A
-		await assertThrowsAsync(fn0);
+		await assertThrows(fn0);
 		await fn1();
 		// A -> AA
-		await assertThrowsAsync(fn0);
+		await assertThrows(fn0);
 		await fn1();
 		// AA -> AAA
-		await assertThrowsAsync(fn0);
+		await assertThrows(fn0);
 		await fn1();
 		// perform few grade value only upgrades
 		// AAA+ (1)
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		await fn0();
 		// AAA+ (2)
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		await fn0();
 		// AAA+ (3)
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		await fn0();
 		// AAA+ (4)
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		await fn0();
 		// AAA+ (5)
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		await fn0();
 
 		// total upgrade price is 111 = 1 + 2 + 4 + 8 + 16 + 5 * 16
@@ -619,7 +619,7 @@ contract('Workshop', (accounts) => {
 
 		// make sure bulk upgrade requires FEATURE_UPGRADES_ENABLED feature enabled
 		await workshop.updateFeatures(0);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		// enable upgrades on the workshop
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
 
@@ -695,10 +695,10 @@ contract('Workshop', (accounts) => {
 
 		// perform double spend, only 1st transaction may succeed
 		await fn1();
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		// perform double spend, only 1st bulk transaction may succeed
 		await fn2();
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn2);
 
 		// check silver and gold balances are as expected
 		assert.equal(10000 * 1000, await silver.balanceOf(player1), "incorrect silver balance after upgrade (double spend)");
@@ -738,18 +738,6 @@ async function verifyGemProperties(gemIds, gem, levels, lvlUps, grades, upgrades
 	}
 }
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(...args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

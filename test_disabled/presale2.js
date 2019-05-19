@@ -67,7 +67,7 @@ contract('Presale2', accounts => {
 		const gemsInGeode = (await sale2.GEMS_IN_GEODE()).toNumber();
 		price1 = await sale2.currentPrice();
 		price10 = price1.times(10);
-		await assertThrowsAsync(async () => await sale2.getGeodes(2, 0, {from: accounts[15], value: price1}));
+		await assertThrows(async () => await sale2.getGeodes(2, 0, {from: accounts[15], value: price1}));
 
 		console.log("    buying single geode with no referral");
 		await sale2.getGeodes(1, 0, {from: accounts[15], value: price1});
@@ -141,21 +141,6 @@ contract('Presale2', accounts => {
 	});
 });
 
-async function assertThrowsAsync(fn) {
-	let f = function() {};
-	try {
-		await fn();
-	}
-	catch(e) {
-		f = function() {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
-
 async function increaseTime(delta) {
 	await web3.currentProvider.send({
 		jsonrpc: "2.0",
@@ -170,3 +155,7 @@ async function increaseTime(delta) {
 		id: new Date().getSeconds()
 	});
 }
+
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

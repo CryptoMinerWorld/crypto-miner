@@ -39,30 +39,30 @@ contract('CountryERC721', (accounts) => {
 		assert.equal(0, await tk.balanceOf(accounts[0]), "wrong initial balanceOf() value");
 
 		// balanceOf(0) throws:
-		await assertThrowsAsync(async () => await tk.balanceOf(0));
+		await assertThrows(async () => await tk.balanceOf(0));
 
 		// check the token map
 		assert.equal(0, await tk.tokenMap(), "wrong initial token map");
 
 		// ensure it is not possible to get token at index 0
-		await assertThrowsAsync(async () => await tk.tokenByIndex(0));
-		await assertThrowsAsync(async () => await tk.tokenOfOwnerByIndex(accounts[0], 0));
+		await assertThrows(async () => await tk.tokenByIndex(0));
+		await assertThrows(async () => await tk.tokenOfOwnerByIndex(accounts[0], 0));
 	});
 
 	it("mint: creating a token", async () => {
 		const tk = await Token.new(COUNTRY_DATA);
 
 		// minting with invalid parameters
-		await assertThrowsAsync(async() => await tk.mint(0, token1));
-		await assertThrowsAsync(async() => await tk.mint(tk.address, token1));
+		await assertThrows(async() => await tk.mint(0, token1));
+		await assertThrows(async() => await tk.mint(tk.address, token1));
 
 		// mint token 1 with correct params
 		await tk.mint(accounts[0], token1);
 
 		// check its impossible to mint with incorrect params
-		await assertThrowsAsync(async () => await tk.mint(accounts[0], 0));
-		await assertThrowsAsync(async () => await tk.mint(accounts[0], 191));
-		await assertThrowsAsync(async () => await tk.mint(accounts[1], token2, {from: accounts[1]}));
+		await assertThrows(async () => await tk.mint(accounts[0], 0));
+		await assertThrows(async () => await tk.mint(accounts[0], 191));
+		await assertThrows(async () => await tk.mint(accounts[1], token2, {from: accounts[1]}));
 
 		// ensure total supply is 1
 		assert.equal(1, await tk.totalSupply(), "wrong totalSupply value after minting a token");
@@ -92,11 +92,11 @@ contract('CountryERC721', (accounts) => {
 		const calculateTaxValueFor = async() => await tk.calculateTaxValueFor(token1, 100);
 
 		// initially all functions throw
-		await assertThrowsAsync(getPacked);
-		await assertThrowsAsync(getNumberOfPlots);
-		await assertThrowsAsync(getTax);
-		await assertThrowsAsync(getTaxPercent);
-		await assertThrowsAsync(calculateTaxValueFor);
+		await assertThrows(getPacked);
+		await assertThrows(getNumberOfPlots);
+		await assertThrows(getTax);
+		await assertThrows(getTaxPercent);
+		await assertThrows(calculateTaxValueFor);
 
 		await tk.mint(accounts[0], token1);
 
@@ -161,10 +161,10 @@ contract('CountryERC721', (accounts) => {
 		const updateTaxRate = async () => await tk.updateTaxRate(token1, 1, 15);
 		const updateMaxTaxChangeFreq = async () => await tk.updateMaxTaxChangeFreq(0);
 
-		await assertThrowsAsync(updateTaxRate);
+		await assertThrows(updateTaxRate);
 		await tk.updateFeatures(FEATURE_ALLOW_TAX_UPDATE);
 		await updateTaxRate();
-		await assertThrowsAsync(updateTaxRate);
+		await assertThrows(updateTaxRate);
 		await updateMaxTaxChangeFreq();
 		await updateTaxRate();
 
@@ -209,15 +209,15 @@ contract('CountryERC721', (accounts) => {
 		const tk = await Token.new(COUNTRY_DATA);
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		const fn = async () => await tk.transfer(accounts[1], token1);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await tk.updateFeatures(0);
 		await tk.mint(accounts[0], token1);
 		assert.equal(1, await tk.balanceOf(accounts[0]), accounts[0] + " wrong balance before token transfer");
 		assert.equal(0, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await tk.updateFeatures(FEATURE_TRANSFERS);
-		await assertThrowsAsync(async () => await tk.transfer(0x0, token1));
-		await assertThrowsAsync(async () => await tk.transfer(accounts[0], token1));
+		await assertThrows(async () => await tk.transfer(0x0, token1));
+		await assertThrows(async () => await tk.transfer(accounts[0], token1));
 		await fn();
 		assert.equal(0, await tk.balanceOf(accounts[0]), accounts[0] + " wrong balance after token transfer");
 		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
@@ -230,19 +230,19 @@ contract('CountryERC721', (accounts) => {
 		await tk.mint(accounts[1], token1);
 		await tk.mint(accounts[0], token2);
 		const fn1 = async () => await tk.transferFrom(accounts[1], accounts[2], token1);
-		await assertThrowsAsync(async () => await tk.approve(accounts[0], token1));
-		await assertThrowsAsync(async () => await tk.approve(accounts[0], token2));
-		await assertThrowsAsync(fn1);
+		await assertThrows(async () => await tk.approve(accounts[0], token1));
+		await assertThrows(async () => await tk.approve(accounts[0], token2));
+		await assertThrows(fn1);
 		await tk.approve(accounts[0], token1, {from: accounts[1]});
 		await tk.revokeApproval(token1, {from: accounts[1]});
-		await assertThrowsAsync(async () => await tk.revokeApproval(token1, {from: accounts[1]}));
+		await assertThrows(async () => await tk.revokeApproval(token1, {from: accounts[1]}));
 		await tk.approve(accounts[0], token1, {from: accounts[1]});
 		await fn1();
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR);
 		const fn = async () => await tk.transferFrom(accounts[0], accounts[1], token2);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		await fn();
 		assert.equal(accounts[1], await tk.ownerOf(token2), "wrong token token2 owner after transfer on behalf");
@@ -261,8 +261,8 @@ contract('CountryERC721', (accounts) => {
 		const another = await Token.new(COUNTRY_DATA);
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS);
 		await tk.mint(accounts[0], token1);
-		await assertThrowsAsync(async () => await tk.safeTransferFrom(accounts[0], another.address, token1, ""));
-		await assertThrowsAsync(async () => await tk.safeTransferFrom(accounts[0], tk.address, token1, ""));
+		await assertThrows(async () => await tk.safeTransferFrom(accounts[0], another.address, token1, ""));
+		await assertThrows(async () => await tk.safeTransferFrom(accounts[0], tk.address, token1, ""));
 		assert.equal(accounts[0], await tk.ownerOf(token1), "card token1 has wrong owner after bad attempt to transfer it");
 		await tk.safeTransferFrom(accounts[0], accounts[1], token1, "");
 		assert.equal(accounts[1], await tk.ownerOf(token1), "token token1 has wrong owner after safely transferring it");
@@ -274,8 +274,8 @@ contract('CountryERC721', (accounts) => {
 		await tk.mint(accounts[0], token1);
 		await tk.mint(accounts[0], token2);
 		await tk.mint(accounts[0], token3);
-		await assertThrowsAsync(async () => await tk.approve(0x0, 0x0));
-		await assertThrowsAsync(async () => await tk.approve(accounts[0], token1));
+		await assertThrows(async () => await tk.approve(0x0, 0x0));
+		await assertThrows(async () => await tk.approve(accounts[0], token1));
 		await tk.approve(accounts[1], token1);
 		await tk.approve(accounts[1], token2);
 		assert.equal(accounts[1], await tk.getApproved(token1), "wrong approved operator for token token1");
@@ -289,8 +289,8 @@ contract('CountryERC721', (accounts) => {
 		await tk.mint(accounts[0], token1);
 		await tk.mint(accounts[0], token2);
 		await tk.mint(accounts[0], token3);
-		await assertThrowsAsync(async () => await tk.setApprovalForAll(0x0, true));
-		await assertThrowsAsync(async () => await tk.setApprovalForAll(accounts[0], true));
+		await assertThrows(async () => await tk.setApprovalForAll(0x0, true));
+		await assertThrows(async () => await tk.setApprovalForAll(accounts[0], true));
 		await tk.setApprovalForAll(accounts[1], true);
 		await tk.transferFrom(accounts[0], accounts[1], token1, {from: accounts[1]});
 		await tk.transferFrom(accounts[0], accounts[1], token2, {from: accounts[1]});
@@ -302,19 +302,5 @@ contract('CountryERC721', (accounts) => {
 });
 
 
-
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

@@ -17,8 +17,8 @@ contract('CouponSale', function(accounts) {
 		const fn1 = async () => await sale.addCoupon(couponKey, 3, {from: accounts[1]});
 		const fn2 = async () => await sale.removeCoupon(couponKey, {from: accounts[1]});
 
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
 		await sale.addOperator(accounts[1], ROLE_COUPON_MANAGER);
 
 		await fn1();
@@ -38,7 +38,7 @@ contract('CouponSale', function(accounts) {
 		const couponKey = web3.sha3(couponCode);
 
 		const fn = async () => await sale.useCoupon(couponCode, {from: accounts[1]});
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await sale.addCoupon(couponKey, 3);
 		await fn();
 		assert.equal(3, await tk.balanceOf(accounts[1]), "wrong token balance after using a coupon");
@@ -46,21 +46,10 @@ contract('CouponSale', function(accounts) {
 		await fn();
 		assert.equal(4, await tk.balanceOf(accounts[1]), "wrong token balance after using a coupon");
 
-		await assertThrowsAsync(async function() {await sale.addCoupon(couponKey, 2);});
+		await assertThrows(async function() {await sale.addCoupon(couponKey, 2);});
 	});
 });
 
-async function assertThrowsAsync(fn) {
-	let f = function() {};
-	try {
-		await fn();
-	}
-	catch(e) {
-		f = function() {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

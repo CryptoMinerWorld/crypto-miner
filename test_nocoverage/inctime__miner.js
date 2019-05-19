@@ -269,7 +269,7 @@ contract('Miner (Time Increase)', (accounts) => {
 
 
 		// initially update fails
-		await assertThrowsAsync(miner.update, 1);
+		await assertThrows(miner.update, 1);
 
 		// rewind 7 minutes forward to mine one block
 		for(let i = 0; i < 28; i++) {
@@ -279,7 +279,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		// update succeeds now by mining one block
 		await miner.update(1);
 		// second call fails - nothing to update
-		await assertThrowsAsync(miner.update, 1);
+		await assertThrows(miner.update, 1);
 
 		// verify plot is mined by one block
 		assert.equal(1, await plot.getOffset(1), "wrong plot offset after mining");
@@ -292,7 +292,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		// release
 		await miner.release(1);
 		// releasing unlocked token fails
-		await assertThrowsAsync(miner.release, 1);
+		await assertThrows(miner.release, 1);
 
 		// verify all the tokens are unlocked
 		assert.equal(0, (await gem.getState(1)).modulo(2), "gem is not transferable after releasing it");
@@ -313,22 +313,6 @@ function restingEnergy(a) {
 	);
 }
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(...args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
-
 // auxiliary function to increase EVM time
 async function increaseTime(delta) {
 	await web3.currentProvider.send({
@@ -345,3 +329,6 @@ async function increaseTime(delta) {
 	});
 }
 
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

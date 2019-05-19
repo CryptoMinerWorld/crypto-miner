@@ -68,15 +68,15 @@ contract('SilverSale', (accounts) => {
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// bad constructor parameters doesn't work
-		await assertThrowsAsync(Sale.new, 0, gold.address, ref.address, chest, beneficiary, offset);
-		await assertThrowsAsync(Sale.new, silver.address, 0, ref.address, chest, beneficiary, offset);
-		await assertThrowsAsync(Sale.new, silver.address, gold.address, 0, chest, beneficiary, offset);
-		await assertThrowsAsync(Sale.new, silver.address, gold.address, ref.address, 0, beneficiary, offset);
-		await assertThrowsAsync(Sale.new, silver.address, gold.address, ref.address, chest, 0, offset);
-		await assertThrowsAsync(Sale.new, silver.address, gold.address, ref.address, chest, beneficiary, 0);
-		await assertThrowsAsync(Sale.new, accounts[0], gold.address, ref.address, chest, beneficiary, offset);
-		await assertThrowsAsync(Sale.new, silver.address, accounts[0], ref.address, chest, beneficiary, offset);
-		await assertThrowsAsync(Sale.new, silver.address, gold.address, accounts[0], chest, beneficiary, offset);
+		await assertThrows(Sale.new, 0, gold.address, ref.address, chest, beneficiary, offset);
+		await assertThrows(Sale.new, silver.address, 0, ref.address, chest, beneficiary, offset);
+		await assertThrows(Sale.new, silver.address, gold.address, 0, chest, beneficiary, offset);
+		await assertThrows(Sale.new, silver.address, gold.address, ref.address, 0, beneficiary, offset);
+		await assertThrows(Sale.new, silver.address, gold.address, ref.address, chest, 0, offset);
+		await assertThrows(Sale.new, silver.address, gold.address, ref.address, chest, beneficiary, 0);
+		await assertThrows(Sale.new, accounts[0], gold.address, ref.address, chest, beneficiary, offset);
+		await assertThrows(Sale.new, silver.address, accounts[0], ref.address, chest, beneficiary, offset);
+		await assertThrows(Sale.new, silver.address, gold.address, accounts[0], chest, beneficiary, offset);
 
 		// instantiate silver sale smart contract
 		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
@@ -231,7 +231,7 @@ contract('SilverSale', (accounts) => {
 		const fn = async(boxType) => await sale1.getBoxPrice(boxType);
 
 		// verify fn throws if box type is incorrect
-		await assertThrowsAsync(fn, 3);
+		await assertThrows(fn, 3);
 		// but works correctly otherwise
 		for(let i = 0; i < 3; i++) {
 			assert.equal(INITIAL_PRICES[i], await fn(i), "incorrect initial box price for " + BOX_TYPES[i]);
@@ -269,13 +269,13 @@ contract('SilverSale', (accounts) => {
 		const fn = async(quantity) => await fn0([0, 1, 2], quantity);
 
 		// fn throws on some wrong inputs
-		await assertThrowsAsync(fn, []);
-		await assertThrowsAsync(fn, [1, 2]);
-		await assertThrowsAsync(fn, [0, 1, 2]);
-		await assertThrowsAsync(fn, [2, 3, 0]);
-		await assertThrowsAsync(fn, [2, MAX_QTY + 1, 4]);
-		await assertThrowsAsync(fn0, [], []);
-		await assertThrowsAsync(fn0, [0, 1, 2, 0], [2, MAX_QTY + 1, 4, 2]);
+		await assertThrows(fn, []);
+		await assertThrows(fn, [1, 2]);
+		await assertThrows(fn, [0, 1, 2]);
+		await assertThrows(fn, [2, 3, 0]);
+		await assertThrows(fn, [2, MAX_QTY + 1, 4]);
+		await assertThrows(fn0, [], []);
+		await assertThrows(fn0, [0, 1, 2, 0], [2, MAX_QTY + 1, 4, 2]);
 
 		// verify few bulk price calculations
 		assert.equal(1176000000000000000, await fn([1, 1, 1]), "wrong bulk price (1)");
@@ -383,12 +383,12 @@ contract('SilverSale', (accounts) => {
 
 		// ensure functions throw on wrong inputs and don't throw on correct
 		for(let i = 0; i < BOX_TYPES.length; i++) {
-			await assertThrowsAsync(fn1, i, 0);
-			await assertThrowsAsync(fn2, i, 0);
-			await assertThrowsAsync(fn3, i, 0);
-			await assertThrowsAsync(fn1, i, 65536);
-			await assertThrowsAsync(fn2, i, 65536);
-			await assertThrowsAsync(fn3, i, 65536);
+			await assertThrows(fn1, i, 0);
+			await assertThrows(fn2, i, 0);
+			await assertThrows(fn3, i, 0);
+			await assertThrows(fn1, i, 65536);
+			await assertThrows(fn2, i, 65536);
+			await assertThrows(fn3, i, 65536);
 			await fn1(i, 1);
 			await fn2(i, 1);
 			await fn3(i, 1);
@@ -396,11 +396,11 @@ contract('SilverSale', (accounts) => {
 			await fn2(i, 65535);
 			await fn3(i, 65535);
 		}
-		await assertThrowsAsync(fn4, [], []);
-		await assertThrowsAsync(fn4, [0], []);
-		await assertThrowsAsync(fn4, [], [1]);
-		await assertThrowsAsync(fn4, [0, 1], [1]);
-		await assertThrowsAsync(fn4, [0, 1, 2, 0], [1, 1, 1, 1]);
+		await assertThrows(fn4, [], []);
+		await assertThrows(fn4, [0], []);
+		await assertThrows(fn4, [], [1]);
+		await assertThrows(fn4, [0, 1], [1]);
+		await assertThrows(fn4, [0, 1, 2, 0], [1, 1, 1, 1]);
 		await fn4([0, 0, 1], [1, 1, 1]);
 		await fn4([0, 1, 2], [3, 4, 5]);
 		await fn4([0, 1, 2], [65535, 65535, 65535]);
@@ -591,10 +591,10 @@ contract('SilverSale', (accounts) => {
 		const fn3 = async(sale) => await sale.bulkBuy([0, 1, 2], [1, 1, 1], {from: player, value: INITIAL_PRICES.reduce((a, b) => a + b, 0)});
 
 		// verify that only sales which already started work
-		await assertThrowsAsync(fn0, saleFuture);
-		await assertThrowsAsync(fn1, saleFuture);
-		await assertThrowsAsync(fn2, saleFuture);
-		await assertThrowsAsync(fn3, saleFuture);
+		await assertThrows(fn0, saleFuture);
+		await assertThrows(fn1, saleFuture);
+		await assertThrows(fn2, saleFuture);
+		await assertThrows(fn3, saleFuture);
 		await fn0(saleNow);
 		await fn1(saleNow);
 		await fn2(saleNow);
@@ -627,8 +627,8 @@ contract('SilverSale', (accounts) => {
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		// define some small delta amount
-		await assertThrowsAsync(fn1, -ε);
-		await assertThrowsAsync(fn2, -ε);
+		await assertThrows(fn1, -ε);
+		await assertThrows(fn2, -ε);
 		await fn1(ε);
 		await fn2(ε);
 	});
@@ -655,8 +655,8 @@ contract('SilverSale', (accounts) => {
 
 		// verify `FEATURE_SALE_ENABLED` feature must be enabled
 		await sale.updateFeatures(0);
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await fn1();
 		await fn2();
@@ -694,22 +694,22 @@ contract('SilverSale', (accounts) => {
 
 		// disable FEATURE_SALE_ENABLED, ensure fn fails and enable back
 		await sale.updateFeatures(0);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 
 		// revoke ROLE_TOKEN_CREATOR from silver, ensure fn fails and grant back
 		await silver.updateRole(sale.address, 0);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 
 		// revoke ROLE_TOKEN_CREATOR from gold, ensure fn fails and grant back
 		await gold.updateRole(sale.address, 0);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 
 		// revoke ROLE_SELLER from ref points tracker, ensure fn fails and grant back
 		await ref.updateRole(sale.address, 0);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		// all the permissions are granted, features enabled: execute the fn
@@ -764,9 +764,9 @@ contract('SilverSale', (accounts) => {
 		assert.equal(0, await sale.boxesSold(2), "wrong initial sold counter for Goldish Silver Box");
 
 		// 1) impossible to buy more than hard cap at any time
-		await assertThrowsAsync(gt100, 0);
-		await assertThrowsAsync(gt100, 1);
-		await assertThrowsAsync(gt100, 2);
+		await assertThrows(gt100, 0);
+		await assertThrows(gt100, 1);
+		await assertThrows(gt100, 2);
 
 		// 2) possible to buy more than 10% of hard cap before it is reached
 		await gt10(0);
@@ -779,9 +779,9 @@ contract('SilverSale', (accounts) => {
 		await eq100(2);
 
 		// 3) impossible to buy more than 10% of hard cap after it has been reached
-		await assertThrowsAsync(gt10, 0);
-		await assertThrowsAsync(gt10, 1);
-		await assertThrowsAsync(gt10, 2);
+		await assertThrows(gt10, 0);
+		await assertThrows(gt10, 1);
+		await assertThrows(gt10, 2);
 
 		// 4) it is possible to buy no more than 10% of hard cap at any time
 		await eq10(0);
@@ -822,7 +822,7 @@ contract('SilverSale', (accounts) => {
 
 		// 17 Rotund Silver Boxes cost is 5.44 ETH
 		// sending not enough ETH fails
-		await assertThrowsAsync(fn, price - ε);
+		await assertThrows(fn, price - ε);
 
 		// save player and beneficiary balances
 		const playerBalance0 = web3.eth.getBalance(player);
@@ -883,12 +883,12 @@ contract('SilverSale', (accounts) => {
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		// verify wrong parameters don't work
-		await assertThrowsAsync(fn, [], []);
-		await assertThrowsAsync(fn, [0], [0]);
-		await assertThrowsAsync(fn, [3], [1]);
-		await assertThrowsAsync(fn, [0, 1, 2], [0, 1, 1]);
-		await assertThrowsAsync(fn, [0, 1, 2], [MAX_QTY + 1, 1, 1]);
-		await assertThrowsAsync(fn, [0, 1, 2, 0], [1, 1, 1, 1]);
+		await assertThrows(fn, [], []);
+		await assertThrows(fn, [0], [0]);
+		await assertThrows(fn, [3], [1]);
+		await assertThrows(fn, [0, 1, 2], [0, 1, 1]);
+		await assertThrows(fn, [0, 1, 2], [MAX_QTY + 1, 1, 1]);
+		await assertThrows(fn, [0, 1, 2, 0], [1, 1, 1, 1]);
 
 		// verify correct parameters work
 		// when buying 32 goldish boxes, chance of not getting
@@ -937,17 +937,17 @@ contract('SilverSale', (accounts) => {
 
 		// disable FEATURE_SALE_ENABLED, ensure fn fails and enable back
 		await sale.updateFeatures(0);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 
 		// revoke ROLE_TOKEN_CREATOR from silver, ensure fn fails and grant back
 		await silver.updateRole(sale.address, 0);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 
 		// revoke ROLE_TOKEN_CREATOR from gold, ensure fn fails and grant back
 		await gold.updateRole(sale.address, 0);
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 
 		// all the permissions are granted, features enabled: execute the fn
@@ -1004,7 +1004,7 @@ contract('SilverSale', (accounts) => {
 		assert.equal(0, await sale.boxesSold(2), "wrong initial sold counter for Goldish Silver Box");
 
 		// 1) impossible to buy more than hard cap at any time
-		await assertThrowsAsync(gt100);
+		await assertThrows(gt100);
 
 		// 2) possible to buy more than 10% of hard cap before it is reached
 		await gt10();
@@ -1013,7 +1013,7 @@ contract('SilverSale', (accounts) => {
 		await eq100();
 
 		// 3) impossible to buy more than 10% of hard cap after it has been reached
-		await assertThrowsAsync(gt10);
+		await assertThrows(gt10);
 
 		// 4) it is possible to buy no more than 10% of hard cap at any time
 		await eq10();
@@ -1097,7 +1097,7 @@ contract('SilverSale', (accounts) => {
 
 		// verify that ROLE_SELLER permission is required
 		await ref.updateRole(sale.address, 0);
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		await ref.updateRole(sale.address, ROLE_SELLER);
 		// and buy one Silver Box by referrer address
 		await fn1();
@@ -1109,7 +1109,7 @@ contract('SilverSale', (accounts) => {
 		assert.equal(0, await ref.issued(referred), "referred has some issued points initially (2)");
 
 		// to perform second buy ROLE_REF_POINTS_ISSUER permission is also required
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn2);
 		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_SELLER);
 		// perform second buy (be referred)
 		await fn2();
@@ -1155,7 +1155,7 @@ contract('SilverSale', (accounts) => {
 
 		// verify that ROLE_SELLER permission is required
 		await ref.updateRole(sale.address, 0);
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		await ref.updateRole(sale.address, ROLE_SELLER);
 		// and buy one Silver Box by referrer address
 		await fn1();
@@ -1167,7 +1167,7 @@ contract('SilverSale', (accounts) => {
 		assert.equal(0, await ref.issued(referred), "referred has some issued points initially (2)");
 
 		// to perform second buy ROLE_REF_POINTS_ISSUER permission is also required
-		await assertThrowsAsync(fn2);
+		await assertThrows(fn2);
 		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_SELLER);
 		// perform second buy (be referred)
 		await fn2();
@@ -1219,10 +1219,10 @@ contract('SilverSale', (accounts) => {
 		await ref.issueTo(player, 6400);
 
 		// verify consuming is possible only for the sales which already started
-		await assertThrowsAsync(fn0, saleFuture);
-		await assertThrowsAsync(fn1, saleFuture);
-		await assertThrowsAsync(fn2, saleFuture);
-		await assertThrowsAsync(fn3, saleFuture);
+		await assertThrows(fn0, saleFuture);
+		await assertThrows(fn1, saleFuture);
+		await assertThrows(fn2, saleFuture);
+		await assertThrows(fn3, saleFuture);
 		await fn0(saleNow);
 		await fn1(saleNow);
 		await fn2(saleNow);
@@ -1278,7 +1278,7 @@ contract('SilverSale', (accounts) => {
 		const fn3 = async() => await sale.get(2, 15, {from: referrer}); // 3000 points
 
 		// verify `FEATURE_GET_ENABLED` is required
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		await sale.updateFeatures(FEATURE_GET_ENABLED);
 
 		// perform getting boxes and check the balances after each get
@@ -1297,9 +1297,9 @@ contract('SilverSale', (accounts) => {
 		assert(balance3[2].gt(balance2[2]), "gold didn't increase after getting 15 Goldish Silver Boxes");
 
 		// ensure referrer cannot get more boxes
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(fn3);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
+		await assertThrows(fn3);
 	});
 	it("ref points: bulk get boxes for points", async() => {
 		// define silver sale dependencies
@@ -1333,7 +1333,7 @@ contract('SilverSale', (accounts) => {
 		const balance0 = await sale.balanceOf(referrer);
 
 		// verify `FEATURE_GET_ENABLED` is required
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 		await sale.updateFeatures(FEATURE_GET_ENABLED);
 
 		// perform getting boxes and check the balances after each get
@@ -1344,7 +1344,7 @@ contract('SilverSale', (accounts) => {
 		assert(balance1[2].gt(balance0[2]), "gold didn't increase after getting 50, 30, 15 boxes");
 
 		// ensure referrer cannot get more boxes
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 	});
 });
 
@@ -1384,23 +1384,11 @@ function linearStepwise(t0, v0, t1, v1, dt, t) {
 	return v0.plus(v1.minus(v0).times(t.minus(t0).dividedToIntegerBy(dt).times(dt)).dividedToIntegerBy(t1.minus(t0)));
 }
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(...args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
-
 // asserts equal with the precisions defined in leeway (absolute value)
 function assertEqualWith(expected, actual, leeway, msg) {
 	assert(expected - leeway < actual && expected + leeway > actual, msg);
 }
+
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

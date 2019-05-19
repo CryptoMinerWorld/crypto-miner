@@ -30,12 +30,12 @@ contract('PlotSale', (accounts) => {
 		const u = new Date().getTime() / 1000 | 0; // offset, sale start time
 
 		// verify wrong constructor parameters fail
-		await assertThrowsAsync(Sale.new, 0, c.address, t.address, w, m, b, u);
-		await assertThrowsAsync(Sale.new, r.address, 0, t.address, w, m, b, u);
-		await assertThrowsAsync(Sale.new, r.address, c.address, 0, w, m, b, u);
-		await assertThrowsAsync(Sale.new, r.address, c.address, t.address, 0, m, b, u);
-		await assertThrowsAsync(Sale.new, r.address, c.address, t.address, w, 0, b, u);
-		await assertThrowsAsync(Sale.new, r.address, c.address, t.address, w, m, 0, u);
+		await assertThrows(Sale.new, 0, c.address, t.address, w, m, b, u);
+		await assertThrows(Sale.new, r.address, 0, t.address, w, m, b, u);
+		await assertThrows(Sale.new, r.address, c.address, 0, w, m, b, u);
+		await assertThrows(Sale.new, r.address, c.address, t.address, 0, m, b, u);
+		await assertThrows(Sale.new, r.address, c.address, t.address, w, 0, b, u);
+		await assertThrows(Sale.new, r.address, c.address, t.address, w, m, 0, u);
 
 		// instantiate plot sale smart contract
 		const s = await Sale.new(r.address, c.address, t.address, w, m, b, u);
@@ -238,18 +238,5 @@ contract('PlotSale', (accounts) => {
 
 });
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(...args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

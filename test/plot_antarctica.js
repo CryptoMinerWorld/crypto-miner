@@ -12,10 +12,10 @@ contract('PlotAntarctica', (accounts) => {
 		const t = await Plot.new(); // plot ERC721
 
 		// verify wrong constructor parameters fail
-		await assertThrowsAsync(Antarctica.new, 0, t.address);
-		await assertThrowsAsync(Antarctica.new, m.address, 0);
-		await assertThrowsAsync(Antarctica.new, accounts[0], t.address);
-		await assertThrowsAsync(Antarctica.new, m.address, accounts[0]);
+		await assertThrows(Antarctica.new, 0, t.address);
+		await assertThrows(Antarctica.new, m.address, 0);
+		await assertThrows(Antarctica.new, accounts[0], t.address);
+		await assertThrows(Antarctica.new, m.address, accounts[0]);
 
 		// instantiate plot Antarctica smart contract
 		const s = await Antarctica.new(m.address, t.address);
@@ -47,18 +47,5 @@ contract('PlotAntarctica', (accounts) => {
 
 });
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(...args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

@@ -35,8 +35,8 @@ contract('ACL (Light)', (accounts) => {
 		const removeFeature1 = async() => await ac.updateFeatures(NO_PERM, {from: operator});
 
 		// operator must have a permission to update features
-		await assertThrowsAsync(addFeature1);
-		await assertThrowsAsync(removeFeature1);
+		await assertThrows(addFeature1);
+		await assertThrows(removeFeature1);
 
 		// give operator permission to update features
 		await ac.updateRole(operator, ROLE_FEATURE_MANAGER | SOME_PERM);
@@ -97,8 +97,8 @@ contract('ACL (Light)', (accounts) => {
 		const removeRole1 = async() => await ac.updateRole(account, NO_PERM, {from: operator});
 
 		// operator must have a permission to update roles
-		await assertThrowsAsync(addRole1);
-		await assertThrowsAsync(removeRole1);
+		await assertThrows(addRole1);
+		await assertThrows(removeRole1);
 
 		// give operator permission to update some roles
 		await ac.updateRole(operator, ROLE_ROLE_MANAGER | SOME_PERM);
@@ -163,18 +163,6 @@ contract('ACL (Light)', (accounts) => {
 	});
 });
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(...args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

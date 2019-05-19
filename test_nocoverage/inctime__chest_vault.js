@@ -2,10 +2,10 @@ const Vault = artifacts.require("./ChestVault");
 
 contract('ChestVault (Time Increase)', function(accounts) {
 	it("chest vault: using the vault", async function() {
-		await assertThrowsAsync(async () => await Vault.new(0, 0));
-		await assertThrowsAsync(async () => await Vault.new(accounts[0], 0));
-		await assertThrowsAsync(async () => await Vault.new(0, accounts[1]));
-		await assertThrowsAsync(async () => await Vault.new(accounts[0], accounts[0]));
+		await assertThrows(async () => await Vault.new(0, 0));
+		await assertThrows(async () => await Vault.new(accounts[0], 0));
+		await assertThrows(async () => await Vault.new(0, accounts[1]));
+		await assertThrows(async () => await Vault.new(accounts[0], accounts[0]));
 		const vault = await Vault.new(accounts[0], accounts[1]);
 
 		const acc3_balance = await web3.eth.getBalance(accounts[3]);
@@ -18,42 +18,42 @@ contract('ChestVault (Time Increase)', function(accounts) {
 		const r1 = async() => await vault.revoke({from: accounts[1]});
 		const r2 = async() => await vault.revoke({from: accounts[2]});
 
-		await assertThrowsAsync(fn0);
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(r0);
-		await assertThrowsAsync(r1);
-		await assertThrowsAsync(r2);
+		await assertThrows(fn0);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
+		await assertThrows(r0);
+		await assertThrows(r1);
+		await assertThrows(r2);
 
 		await web3.eth.sendTransaction({from: accounts[0], to: vault.address, value: investment});
 		assert.equal(investment, await web3.eth.getBalance(vault.address), "wrong vault balance after transferring 1 ether");
 
-		await assertThrowsAsync(fn0);
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(r0);
-		await assertThrowsAsync(r1);
-		await assertThrowsAsync(r2);
+		await assertThrows(fn0);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
+		await assertThrows(r0);
+		await assertThrows(r1);
+		await assertThrows(r2);
 
 		await increaseTime(7862400); // 91 day in seconds
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(r2);
+		await assertThrows(fn2);
+		await assertThrows(r2);
 		await fn0();
-		await assertThrowsAsync(fn0);
+		await assertThrows(fn0);
 		await r0();
-		await assertThrowsAsync(r0);
+		await assertThrows(r0);
 		await fn1();
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 		await r1();
-		await assertThrowsAsync(r1);
+		await assertThrows(r1);
 		await fn0();
 		await fn1();
-		await assertThrowsAsync(fn0);
-		await assertThrowsAsync(fn1);
-		await assertThrowsAsync(fn2);
-		await assertThrowsAsync(r0);
-		await assertThrowsAsync(r1);
-		await assertThrowsAsync(r2);
+		await assertThrows(fn0);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
+		await assertThrows(r0);
+		await assertThrows(r1);
+		await assertThrows(r2);
 
 		const acc3_balance1 = await web3.eth.getBalance(accounts[3]);
 		const acc3_expected = acc3_balance.plus(investment);
@@ -61,21 +61,6 @@ contract('ChestVault (Time Increase)', function(accounts) {
 		assert(acc3_expected.eq(acc3_balance1), "wrong accounts[3] balance after funds withdrawal to it");
 	});
 });
-
-async function assertThrowsAsync(fn) {
-	let f = function() {};
-	try {
-		await fn();
-	}
-	catch(e) {
-		f = function() {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
 
 const increaseTime = function(duration) {
 	const id = Date.now();
@@ -99,3 +84,7 @@ const increaseTime = function(duration) {
 		})
 	})
 };
+
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

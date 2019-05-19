@@ -21,16 +21,16 @@ contract('MintHelper', accounts => {
 		assert.equal("bar", await m.read(0, "foo"), "wrong default value for key 'foo'");
 
 		// try to read illegal data
-		await assertThrowsAsync(async () => await m.read(0, "bar"));
-		await assertThrowsAsync(async () => await m.read(1, "foo"));
+		await assertThrows(async () => await m.read(0, "bar"));
+		await assertThrows(async () => await m.read(1, "foo"));
 
 		// write some illegal data
-		await assertThrowsAsync(async () => await m.write(0, "foo", "bar"));
-		await assertThrowsAsync(async () => await m.write(1, "foo", "bar"));
+		await assertThrows(async () => await m.write(0, "foo", "bar"));
+		await assertThrows(async () => await m.write(1, "foo", "bar"));
 
 		// delete some illegal data
-		await assertThrowsAsync(async () => await m.del(0, "foo"));
-		await assertThrowsAsync(async () => await m.del(1, "foo"));
+		await assertThrows(async () => await m.del(0, "foo"));
+		await assertThrows(async () => await m.del(1, "foo"));
 
 		// create this token (1)
 		await tk.mint(accounts[0], 1, 0, 0, 0, 1, 1, 1, 1);
@@ -75,12 +75,12 @@ contract('MintHelper', accounts => {
 		const tk = await Token.new();
 		// create a metadata storage
 		const m = await Metadata.new(tk.address);
-		await assertThrowsAsync(async () => await Metadata.new(0));
-		await assertThrowsAsync(async () => await Metadata.new(accounts[0]));
+		await assertThrows(async () => await Metadata.new(0));
+		await assertThrows(async () => await Metadata.new(accounts[0]));
 		// create mint helper
 		const h = await MintHelper.new(tk.address);
-		await assertThrowsAsync(async () => await MintHelper.new(0));
-		await assertThrowsAsync(async () => await MintHelper.new(accounts[0]));
+		await assertThrows(async () => await MintHelper.new(0));
+		await assertThrows(async () => await MintHelper.new(accounts[0]));
 
 		// bind metadata functions
 		const w0 = async () => await m.write(0xF001, "color", "red", {from: accounts[0]});
@@ -89,10 +89,10 @@ contract('MintHelper', accounts => {
 		const d1 = async () => await m.del(0xF001, "color", {from: accounts[1]});
 
 		// initially all the function above will fail - no gem exists
-		await assertThrowsAsync(w0);
-		await assertThrowsAsync(w1);
-		await assertThrowsAsync(d0);
-		await assertThrowsAsync(d1);
+		await assertThrows(w0);
+		await assertThrows(w1);
+		await assertThrows(d0);
+		await assertThrows(d1);
 
 		// grant mint permission
 		await tk.addOperator(h.address, ROLE_TOKEN_CREATOR);
@@ -102,8 +102,8 @@ contract('MintHelper', accounts => {
 		// w0 and d0 should work now while w1 and d1 still doesn't have a permission
 		await w0();
 		await d0();
-		await assertThrowsAsync(w1);
-		await assertThrowsAsync(d1);
+		await assertThrows(w1);
+		await assertThrows(d1);
 
 		// grant the permission
 		await m.addOperator(accounts[1], METADATA_OPERATOR);
@@ -157,17 +157,17 @@ contract('MintHelper', accounts => {
 		assert.equal("red", await m.read(0xF001, "background-color"), "wrong background-color for token 0xF001");
 
 		// ensure it is impossible to bind metadata for non-existent token
-		await assertThrowsAsync(async () => await m.write(0xF000, "background-color", "red"));
+		await assertThrows(async () => await m.write(0xF000, "background-color", "red"));
 
 		// ensure it is impossible to mint tokens with wrong properties
 		await h.mint(1, 1, 1, 1); // just check that OK params are really OK
-		await assertThrowsAsync(async () => await h.mint(0, 1, 1, 1));
-		await assertThrowsAsync(async () => await h.mint(13, 1, 1, 1));
-		await assertThrowsAsync(async () => await h.mint(1, 0, 1, 1));
-		await assertThrowsAsync(async () => await h.mint(1, 6, 1, 1));
-		await assertThrowsAsync(async () => await h.mint(1, 1, 0, 1));
-		await assertThrowsAsync(async () => await h.mint(1, 1, 7, 1));
-		await assertThrowsAsync(async () => await h.mint(1, 1, 1, 1000000));
+		await assertThrows(async () => await h.mint(0, 1, 1, 1));
+		await assertThrows(async () => await h.mint(13, 1, 1, 1));
+		await assertThrows(async () => await h.mint(1, 0, 1, 1));
+		await assertThrows(async () => await h.mint(1, 6, 1, 1));
+		await assertThrows(async () => await h.mint(1, 1, 0, 1));
+		await assertThrows(async () => await h.mint(1, 1, 7, 1));
+		await assertThrows(async () => await h.mint(1, 1, 1, 1000000));
 	});
 	it("mint helper: permissions check", async () => {
 		// create a token instance
@@ -180,15 +180,15 @@ contract('MintHelper', accounts => {
 		const fn1 = async () => await h.mint(1, 1, 1, 1, {from: accounts[1]});
 
 		// 1 try to mint without contract grant permission - should fail
-		await assertThrowsAsync(fn0);
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn0);
+		await assertThrows(fn1);
 
 		// grant mint permission
 		await tk.addOperator(h.address, ROLE_TOKEN_CREATOR);
 
 		// now fn0 should succeed while fn1 still fails - account[1] doesn't have permission on the helper
 		await fn0();
-		await assertThrowsAsync(fn1);
+		await assertThrows(fn1);
 
 		// grant the permission to account[1] on the helper
 		await h.addOperator(accounts[1], MINT_OPERATOR);
@@ -199,18 +199,6 @@ contract('MintHelper', accounts => {
 	});
 });
 
-async function assertThrowsAsync(fn) {
-	let f = () => {};
-	try {
-		await fn();
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
 
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

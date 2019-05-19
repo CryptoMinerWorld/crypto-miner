@@ -54,37 +54,37 @@ contract('Dutch Auction', accounts => {
 		await tk.approve(auction.address, token0x401, {from: accounts[1]});
 
 		// adding token to an auction - wrong parameters
-		await assertThrowsAsync(async () => await auction.addWith(0, token0x401, now, now + 60, P0, P1));
-		await assertThrowsAsync(async () => await auction.addWith(accounts[0], token0x401, now, now + 60, P0, P1));
-		await assertThrowsAsync(async () => await auction.addWith(tk.address, token0x401, now, now + 60, P1, P0));
-		await assertThrowsAsync(async () => await auction.addWith(tk.address, token0x401, now, now, P0, P1));
-		await assertThrowsAsync(async () => await auction.addNow(tk.address, token0x401, 0, P0, P1));
-		await assertThrowsAsync(async () => await auction.addNow(tk.address, token0x401, 60, P1, P0));
-		await assertThrowsAsync(async () => await auction.addWith(tk.address, token0x401, now - 60, now, P0, P1));
-		await assertThrowsAsync(async () => await auction.addWith(tk.address, token0x401, 0, now + 60, P0, P1));
-		await assertThrowsAsync(async () => await auction.addNow(tk.address, 0, 60, P0, P1));
-		await assertThrowsAsync(async () => await auction.addNow(tk.address, token0x401, 60, P0 / 1000, P1 / 1000));
-		await assertThrowsAsync(async () => await auction.addNow(tk.address, token0x401, 60, P0 + 17, P1));
-		await assertThrowsAsync(async () => await auction.addNow(tk.address, token0x401, 60, P0, P1 + 17));
+		await assertThrows(async () => await auction.addWith(0, token0x401, now, now + 60, P0, P1));
+		await assertThrows(async () => await auction.addWith(accounts[0], token0x401, now, now + 60, P0, P1));
+		await assertThrows(async () => await auction.addWith(tk.address, token0x401, now, now + 60, P1, P0));
+		await assertThrows(async () => await auction.addWith(tk.address, token0x401, now, now, P0, P1));
+		await assertThrows(async () => await auction.addNow(tk.address, token0x401, 0, P0, P1));
+		await assertThrows(async () => await auction.addNow(tk.address, token0x401, 60, P1, P0));
+		await assertThrows(async () => await auction.addWith(tk.address, token0x401, now - 60, now, P0, P1));
+		await assertThrows(async () => await auction.addWith(tk.address, token0x401, 0, now + 60, P0, P1));
+		await assertThrows(async () => await auction.addNow(tk.address, 0, 60, P0, P1));
+		await assertThrows(async () => await auction.addNow(tk.address, token0x401, 60, P0 / 1000, P1 / 1000));
+		await assertThrows(async () => await auction.addNow(tk.address, token0x401, 60, P0 + 17, P1));
+		await assertThrows(async () => await auction.addNow(tk.address, token0x401, 60, P0, P1 + 17));
 
 		// few wrong whitelisting attempts
-		await assertThrowsAsync(async () => await auction.whitelist(tk.address, true, {from: accounts[1]}));
-		await assertThrowsAsync(async () => await auction.whitelist(0, true));
-		await assertThrowsAsync(async () => await auction.whitelist(auction.address, true));
+		await assertThrows(async () => await auction.whitelist(tk.address, true, {from: accounts[1]}));
+		await assertThrows(async () => await auction.whitelist(0, true));
+		await assertThrows(async () => await auction.whitelist(auction.address, true));
 
 		// remove token from whitelist
 		await auction.whitelist(tk.address, false);
 
 		// try to add it with no whitelisting
 		const f = async () => await auction.addWith(tk.address, token0x401, now, now + 60, P0, P1);
-		await assertThrowsAsync(f);
+		await assertThrows(f);
 
 		// put token back to whitelist
 		await auction.whitelist(tk.address, true);
 
 		// try to add id without a feature required
 		await auction.updateFeatures(0);
-		await assertThrowsAsync(f);
+		await assertThrows(f);
 
 		// put the feature back
 		await auction.updateFeatures(FEATURE_ADD);
@@ -95,8 +95,8 @@ contract('Dutch Auction', accounts => {
 		assert(await auction.isTokenOnSale(tk.address, token0x401), "token 0x401 is not on sale after adding it");
 
 		// remove with wrong parameters - wrong parameters
-		await assertThrowsAsync(async () => await auction.remove(tk.address, 0x402));
-		await assertThrowsAsync(async () => await auction.remove(tk.address, token0x401, {from: accounts[2]}));
+		await assertThrows(async () => await auction.remove(tk.address, 0x402));
+		await assertThrows(async () => await auction.remove(tk.address, token0x401, {from: accounts[2]}));
 		// removing token from an auction - correct parameters
 		await auction.remove(tk.address, token0x401, {from: accounts[1]});
 
@@ -121,9 +121,9 @@ contract('Dutch Auction', accounts => {
 		await mint0x401(tk, accounts);
 
 		// adding/removing is not possible without features set
-		await assertThrowsAsync(f, 0);
-		await assertThrowsAsync(f, 1);
-		await assertThrowsAsync(f, 2);
+		await assertThrows(f, 0);
+		await assertThrows(f, 1);
+		await assertThrows(f, 2);
 
 		// to list a token in the auction it must be whitelisted
 		await auction.whitelist(tk.address, true);
@@ -131,9 +131,9 @@ contract('Dutch Auction', accounts => {
 		await auction.updateFeatures(FEATURE_ADD);
 
 		// adding/removing is still not possible
-		await assertThrowsAsync(f, 0);
-		await assertThrowsAsync(f, 1);
-		await assertThrowsAsync(f, 2);
+		await assertThrows(f, 0);
+		await assertThrows(f, 1);
+		await assertThrows(f, 2);
 
 		// to list a token in the auction transfers on behalf feature is required
 		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
@@ -143,7 +143,7 @@ contract('Dutch Auction', accounts => {
 		// account 1 is owner and can operate
 		await f(1);
 		// account 2 cannot operate
-		await assertThrowsAsync(f, 2);
+		await assertThrows(f, 2);
 
 		// granting account 2 ROLE_AUCTION_MANAGER permission allows it to operate
 		await auction.addOperator(accounts[2], ROLE_AUCTION_MANAGER);
@@ -369,9 +369,9 @@ contract('Dutch Auction', accounts => {
 		const f3 = async () => await auction.setFeeAndBeneficiary(1, 100, accounts[0], accounts[0], {from: accounts[3]});
 
 		// transaction fee and beneficiary cannot be set without a permission
-		await assertThrowsAsync(f1);
-		await assertThrowsAsync(f2);
-		await assertThrowsAsync(f3);
+		await assertThrows(f1);
+		await assertThrows(f2);
+		await assertThrows(f3);
 
 		// grant account 3 role ROLE_FEE_MANAGER required
 		await auction.addOperator(accounts[3], ROLE_FEE_MANAGER);
@@ -496,17 +496,6 @@ function toBytes(uint256) {
 	return "0x" + s;
 }
 
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";

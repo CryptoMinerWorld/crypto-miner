@@ -8,13 +8,13 @@ const FEATURE_TRANSFERS = 0x00000001;
 const tokenId = 1;
 
 contract("PlotERC721: Gas Usage", (accounts) => {
-	it("PlotERC721: deploying a SM requires 3249360 gas", async () => {
+	it("PlotERC721: deploying a SC requires 3249360 gas", async () => {
 		const tk = await Token.new();
 		const txHash = tk.transactionHash;
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(3249360, gasUsed, "deploying SM gas usage mismatch: " + gasUsed);
+		assertEqual(3249360, gasUsed, "deploying SC gas usage mismatch: " + gasUsed);
 	});
 
 	it("PlotERC721: minting a token requires 187583 gas", async () => {

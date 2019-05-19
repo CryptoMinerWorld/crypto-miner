@@ -112,7 +112,7 @@ contract('PlotERC721', (accounts) => {
 		assert(await tk.exists(token1), "token doesn't exist after minting");
 
 		// balance of zero address fails
-		await assertThrowsAsync(tk.balanceOf, 0);
+		await assertThrows(tk.balanceOf, 0);
 	});
 
 	it("initial state: throwable functions", async() => {
@@ -143,24 +143,24 @@ contract('PlotERC721', (accounts) => {
 		const tokenURI = async() => await tk.tokenURI(token1);
 
 		// check all these functions throw
-		await assertThrowsAsync(getPacked);
-		await assertThrowsAsync(getTiers);
-		await assertThrowsAsync(getNumberOfTiers);
-		await assertThrowsAsync(getTierDepth);
-		await assertThrowsAsync(getDepth);
-		await assertThrowsAsync(getOffsetModified);
-		await assertThrowsAsync(getOffset);
-		await assertThrowsAsync(isFullyMined);
-		await assertThrowsAsync(getStateModified);
-		await assertThrowsAsync(getState);
-		await assertThrowsAsync(isTransferable);
-		await assertThrowsAsync(getCreationTime);
-		await assertThrowsAsync(getOwnershipModified);
-		await assertThrowsAsync(tokenByIndex);
-		await assertThrowsAsync(tokenOfOwnerByIndex);
-		await assertThrowsAsync(ownerOf);
-		await assertThrowsAsync(getApproved);
-		await assertThrowsAsync(tokenURI);
+		await assertThrows(getPacked);
+		await assertThrows(getTiers);
+		await assertThrows(getNumberOfTiers);
+		await assertThrows(getTierDepth);
+		await assertThrows(getDepth);
+		await assertThrows(getOffsetModified);
+		await assertThrows(getOffset);
+		await assertThrows(isFullyMined);
+		await assertThrows(getStateModified);
+		await assertThrows(getState);
+		await assertThrows(isTransferable);
+		await assertThrows(getCreationTime);
+		await assertThrows(getOwnershipModified);
+		await assertThrows(tokenByIndex);
+		await assertThrows(tokenOfOwnerByIndex);
+		await assertThrows(ownerOf);
+		await assertThrows(getApproved);
+		await assertThrows(tokenURI);
 
 		// create one token
 		await tk.mint(account1, 1, tiers1);
@@ -260,18 +260,18 @@ contract('PlotERC721', (accounts) => {
 		const transfer2 = async() => await tk.transfer(account3, token1, {from: account2});
 
 		// initially transfer fails (no token minted)
-		await assertThrowsAsync(transfer1);
-		await assertThrowsAsync(transfer2);
+		await assertThrows(transfer1);
+		await assertThrows(transfer2);
 
 		// create one token
 		await tk.mint(account1, 1, tiers1);
 
 		// wrong inputs check
-		await assertThrowsAsync(tk.transfer, 0, token1, {from: account1});
-		await assertThrowsAsync(tk.transfer, account1, token1, {from: account1});
+		await assertThrows(tk.transfer, 0, token1, {from: account1});
+		await assertThrows(tk.transfer, account1, token1, {from: account1});
 
 		// transferring someone's else token throws
-		await assertThrowsAsync(transfer2);
+		await assertThrows(transfer2);
 		// once token is minted it can be transferred by its owner
 		await transfer1();
 		// verify token ownership
@@ -282,7 +282,7 @@ contract('PlotERC721', (accounts) => {
 		// disable transfers
 		await tk.updateFeatures(0);
 		// ensure transfer will fail now
-		await assertThrowsAsync(transfer2);
+		await assertThrows(transfer2);
 		// enable transfers back
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		// transfer token to account3
@@ -310,14 +310,14 @@ contract('PlotERC721', (accounts) => {
 		const transfer2 = async() => await tk.transferFrom(account2, account3, token1, {from: account2});
 
 		// initially transfer fails (no token minted)
-		await assertThrowsAsync(transfer1);
-		await assertThrowsAsync(transfer2);
+		await assertThrows(transfer1);
+		await assertThrows(transfer2);
 
 		// create one token
 		await tk.mint(account1, 1, tiers1);
 
 		// transferring someone's else token throws
-		await assertThrowsAsync(transfer2);
+		await assertThrows(transfer2);
 		// once token is minted it can be transferred by its owner
 		await transfer1();
 		// verify token ownership
@@ -328,7 +328,7 @@ contract('PlotERC721', (accounts) => {
 		// disable transfers, leaving transfers on behalf enabled
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
 		// ensure transfer will fail now
-		await assertThrowsAsync(transfer2);
+		await assertThrows(transfer2);
 		// enable transfers back
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		// transfer token to account3
@@ -363,16 +363,16 @@ contract('PlotERC721', (accounts) => {
 		const unsafeTransfer2 = async() => await tk.safeTransferFrom(account2, blackHole, token1, {from: account2});
 
 		// initially transfer fails (no token minted)
-		await assertThrowsAsync(transfer1);
-		await assertThrowsAsync(transfer2);
+		await assertThrows(transfer1);
+		await assertThrows(transfer2);
 
 		// create one token
 		await tk.mint(account1, 1, tiers1);
 
 		// transferring someone's else token throws
-		await assertThrowsAsync(transfer2);
+		await assertThrows(transfer2);
 		// unsafe transfer will always fail
-		await assertThrowsAsync(unsafeTransfer1);
+		await assertThrows(unsafeTransfer1);
 		// token can be transferred safely by its owner
 		await transfer1();
 		// verify token ownership
@@ -383,11 +383,11 @@ contract('PlotERC721', (accounts) => {
 		// disable transfers, leaving transfers on behalf enabled
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
 		// ensure transfer will fail now
-		await assertThrowsAsync(transfer2);
+		await assertThrows(transfer2);
 		// enable transfers back
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		// unsafe transfer will always fail
-		await assertThrowsAsync(unsafeTransfer2);
+		await assertThrows(unsafeTransfer2);
 		// transfer token to account3
 		await transfer2();
 		// verify token ownership
@@ -419,26 +419,26 @@ contract('PlotERC721', (accounts) => {
 		const revoke2 = async() => await tk.revokeApproval(token1, {from: account2});
 
 		// impossible to approve non-existent token
-		await assertThrowsAsync(approve1);
+		await assertThrows(approve1);
 
 		// create a token
 		await tk.mint(account1, 1, tiers1);
 
 		// wrong inputs check
-		await assertThrowsAsync(tk.approve, 0, token1, {from: account1});
-		await assertThrowsAsync(tk.approve, account1, token1, {from: account1});
+		await assertThrows(tk.approve, 0, token1, {from: account1});
+		await assertThrows(tk.approve, account1, token1, {from: account1});
 
 		// impossible to approve token which belongs to someone else
-		await assertThrowsAsync(approve2);
+		await assertThrows(approve2);
 		// impossible to revoke a non-existent approval
-		await assertThrowsAsync(revoke1);
+		await assertThrows(revoke1);
 		// approve own token
 		await approve1();
 		// verify approval state
 		assert.equal(operator, await tk.getApproved(token1), "token1 is not approved");
 
 		// impossible to revoke approval on the token which belongs to someone else
-		await assertThrowsAsync(revoke2);
+		await assertThrows(revoke2);
 		// revoke an approval
 		await revoke1();
 		// verify approval state
@@ -454,16 +454,16 @@ contract('PlotERC721', (accounts) => {
 		assert.equal(0, await tk.getApproved(token1), "token1 is approval is not erased");
 
 		// impossible to approve token which belongs to someone else
-		await assertThrowsAsync(approve1);
+		await assertThrows(approve1);
 		// impossible to revoke a non-existent approval
-		await assertThrowsAsync(revoke2);
+		await assertThrows(revoke2);
 		// approve the token
 		await approve2();
 		// verify approval state
 		assert.equal(operator, await tk.getApproved(token1), "token1 is not approved (2)");
 
 		// impossible to revoke approval on the token which belongs to someone else
-		await assertThrowsAsync(revoke1);
+		await assertThrows(revoke1);
 		// revoke an approval
 		await revoke2();
 		// verify approval state
@@ -479,8 +479,8 @@ contract('PlotERC721', (accounts) => {
 		const operator = accounts[4]; // approved operator
 
 		// wrong inputs check
-		await assertThrowsAsync(tk.setApprovalForAll, 0, true, {from: account1});
-		await assertThrowsAsync(tk.setApprovalForAll, account1, true, {from: account1});
+		await assertThrows(tk.setApprovalForAll, 0, true, {from: account1});
+		await assertThrows(tk.setApprovalForAll, account1, true, {from: account1});
 
 		// approve an operator for account 1
 		await tk.setApprovalForAll(operator, true, {from: account1});
@@ -518,11 +518,11 @@ contract('PlotERC721', (accounts) => {
 		const transfer2 = async(account) => await tk.transferFrom(account2, account3, token1, {from: account});
 
 		// intruder cannot perform transfer on behalf
-		await assertThrowsAsync(transfer1, intruder);
+		await assertThrows(transfer1, intruder);
 		// nor intruder neither operator cannot transfer token
 		// which doesn't belong to an owner specified
-		await assertThrowsAsync(transfer2, intruder);
-		await assertThrowsAsync(transfer2, operator);
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
 		// operator can make a transfer
 		await transfer1(operator);
 		// verify token ownership
@@ -531,14 +531,14 @@ contract('PlotERC721', (accounts) => {
 		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
 
 		// account 2 didn't get any approval to an operator
-		await assertThrowsAsync(transfer2, intruder);
-		await assertThrowsAsync(transfer2, operator);
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
 
 		// approve an operator for account 2
 		await tk.setApprovalForAll(operator, true, {from: account2});
 
 		// intruder cannot perform the transfer
-		await assertThrowsAsync(transfer1, intruder);
+		await assertThrows(transfer1, intruder);
 		// and operator can
 		await transfer2(operator);
 		// verify token ownership
@@ -576,11 +576,11 @@ contract('PlotERC721', (accounts) => {
 		const transfer2 = async(account) => await tk.transferFrom(account2, account3, token1, {from: account});
 
 		// intruder cannot perform transfer on behalf
-		await assertThrowsAsync(transfer1, intruder);
+		await assertThrows(transfer1, intruder);
 		// nor intruder neither operator cannot transfer token
 		// which doesn't belong to an owner specified
-		await assertThrowsAsync(transfer2, intruder);
-		await assertThrowsAsync(transfer2, operator);
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
 		// operator can make a transfer
 		await transfer1(operator);
 		// verify token ownership
@@ -589,22 +589,22 @@ contract('PlotERC721', (accounts) => {
 		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
 
 		// approval is erased after the transfer, transfer on behalf is impossible
-		await assertThrowsAsync(transfer2, intruder);
-		await assertThrowsAsync(transfer2, operator);
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
 
 		// first token owner cannot approve transfers anymore
-		await assertThrowsAsync(approve1, intruder);
+		await assertThrows(approve1, intruder);
 		// but token owner can
 		await approve2(operator);
 		// disable transfers on behalf, leaving transfers enabled
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		// ensure transfer will fail now
-		await assertThrowsAsync(transfer2, intruder);
-		await assertThrowsAsync(transfer2, operator);
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
 		// enable transfers back
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
 		// intruder cannot perform the transfer
-		await assertThrowsAsync(transfer1, intruder);
+		await assertThrows(transfer1, intruder);
 		// and operator can
 		await transfer2(operator);
 		// verify token ownership
@@ -648,13 +648,13 @@ contract('PlotERC721', (accounts) => {
 		const unsafeTransfer2 = async(account) => await tk.safeTransferFrom(account2, blackHole, token1, {from: account});
 
 		// unsafe transfer will always fail
-		await assertThrowsAsync(unsafeTransfer1, operator);
+		await assertThrows(unsafeTransfer1, operator);
 		// intruder cannot perform transfer on behalf
-		await assertThrowsAsync(transfer1, intruder);
+		await assertThrows(transfer1, intruder);
 		// nor intruder neither operator cannot transfer token
 		// which doesn't belong to an owner specified
-		await assertThrowsAsync(transfer2, intruder);
-		await assertThrowsAsync(transfer2, operator);
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
 		// operator can make a transfer
 		await transfer1(operator);
 		// verify token ownership
@@ -663,24 +663,24 @@ contract('PlotERC721', (accounts) => {
 		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
 
 		// operator is erased after the transfer, transfer on behalf is impossible
-		await assertThrowsAsync(transfer2, intruder);
-		await assertThrowsAsync(transfer2, operator);
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
 
 		// first token owner cannot approve transfers anymore
-		await assertThrowsAsync(approve, account1, intruder);
+		await assertThrows(approve, account1, intruder);
 		// but token owner can
 		await approve(account2, operator);
 		// disable transfers on behalf, leaving transfers enabled
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		// ensure transfer will fail now
-		await assertThrowsAsync(transfer2, intruder);
-		await assertThrowsAsync(transfer2, operator);
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
 		// enable transfers back
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
 		// unsafe transfer will always fail
-		await assertThrowsAsync(unsafeTransfer2, operator);
+		await assertThrows(unsafeTransfer2, operator);
 		// intruder cannot perform the transfer
-		await assertThrowsAsync(transfer1, intruder);
+		await assertThrows(transfer1, intruder);
 		// and operator can
 		await transfer2(operator);
 		// verify token ownership
@@ -709,7 +709,7 @@ contract('PlotERC721', (accounts) => {
 		const fn = async() => await tk.mint(account1, 1, tiers1, {from: account1});
 
 		// ensure function fails if account has no role required
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 
 		// give a permission required to the account
 		await tk.updateRole(account1, ROLE_TOKEN_CREATOR);
@@ -731,7 +731,7 @@ contract('PlotERC721', (accounts) => {
 		const fn = async() => await tk.mineTo(token1, 1, {from: account1});
 
 		// ensure function fails if account has no role required
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 
 		// give a permission required to the account
 		await tk.updateRole(account1, ROLE_OFFSET_PROVIDER);
@@ -753,7 +753,7 @@ contract('PlotERC721', (accounts) => {
 		const fn = async() => await tk.mineBy(token1, 1, {from: account1});
 
 		// ensure function fails if account has no role required
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 
 		// give a permission required to the account
 		await tk.updateRole(account1, ROLE_OFFSET_PROVIDER);
@@ -775,7 +775,7 @@ contract('PlotERC721', (accounts) => {
 		const fn = async() => await tk.setState(token1, 1, {from: account1});
 
 		// ensure function fails if account has no role required
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 
 		// give a permission required to the account
 		await tk.updateRole(account1, ROLE_STATE_PROVIDER);
@@ -797,7 +797,7 @@ contract('PlotERC721', (accounts) => {
 		const fn = async() => await tk.setTransferLock(lock, {from: account1});
 
 		// ensure function fails if account has no role required
-		await assertThrowsAsync(fn);
+		await assertThrows(fn);
 
 		// give a permission required to the account
 		await tk.updateRole(account1, ROLE_TRANSFER_LOCK_PROVIDER);
@@ -817,20 +817,20 @@ contract('PlotERC721', (accounts) => {
 		const account1 = accounts[1];
 
 		// wrong input parameters fail
-		await assertThrowsAsync(tk.mint, tk.address, 1, tiers1);
-		await assertThrowsAsync(tk.mint, 0, 1, tiers1);
+		await assertThrows(tk.mint, tk.address, 1, tiers1);
+		await assertThrows(tk.mint, 0, 1, tiers1);
 		for(let i = 0; i < 5; i++) {
-			await assertThrowsAsync(tk.mint, account1, 1, tiers([i, 0, 35, 65, 85, 95, DEPTH, 0]));
+			await assertThrows(tk.mint, account1, 1, tiers([i, 0, 35, 65, 85, 95, DEPTH, 0]));
 		}
-		//await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
-		//await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
-		//await assertThrowsAsync(tk.mint, account1, 1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
-		//await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
-		//await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
-		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH - 1, 0]));
-		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH - 1, DEPTH, 0]));
-		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH - 1, DEPTH, DEPTH, 0]));
-		await assertThrowsAsync(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH - 1, DEPTH, DEPTH, DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH - 1, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH - 1, DEPTH, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH - 1, DEPTH, DEPTH, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH - 1, DEPTH, DEPTH, DEPTH, 0]));
 
 		// valid inputs
 		await tk.mint(account1, 0, tiers0);
@@ -870,7 +870,7 @@ contract('PlotERC721', (accounts) => {
 		assert(!await tk.isTransferable(token1), "token1 is still transferable");
 
 		// locked token (state & transferLock != 0) cannot be transferred
-		await assertThrowsAsync(transfer1);
+		await assertThrows(transfer1);
 
 		// set token transfer lock to 4
 		await tk.setTransferLock(4);
@@ -893,7 +893,7 @@ contract('PlotERC721', (accounts) => {
 		const mineTo = async() => await tk.mineTo(token1, 1);
 
 		// impossible to mine non-existent token
-		await assertThrowsAsync(mineTo);
+		await assertThrows(mineTo);
 
 		// create one token
 		await tk.mint(accounts[1], 1, tiers1);
@@ -902,10 +902,10 @@ contract('PlotERC721', (accounts) => {
 		await mineTo();
 
 		// next time mining to fails (offset 1 already reached)
-		await assertThrowsAsync(mineTo);
+		await assertThrows(mineTo);
 
 		// decreasing token offset is also impossible
-		await assertThrowsAsync(tk.mineTo, token1, 0);
+		await assertThrows(tk.mineTo, token1, 0);
 
 		// verify new offset
 		assert.equal(1, await tk.getOffset(token1), "wrong token1 offset");
@@ -921,7 +921,7 @@ contract('PlotERC721', (accounts) => {
 		const mineBy = async() => await tk.mineBy(token1, 55);
 
 		// impossible to mine non-existent token
-		await assertThrowsAsync(mineBy);
+		await assertThrows(mineBy);
 
 		// create one token
 		await tk.mint(accounts[1], 1, tiers1);
@@ -930,10 +930,10 @@ contract('PlotERC721', (accounts) => {
 		await mineBy();
 
 		// next time mining by fails (token is already mined to depth 55 and cannot go to 110)
-		await assertThrowsAsync(mineBy);
+		await assertThrows(mineBy);
 
 		// mining by zero is also impossible
-		await assertThrowsAsync(tk.mineBy, token1, 0);
+		await assertThrows(tk.mineBy, token1, 0);
 
 		// verify new offset
 		assert.equal(55, await tk.getOffset(token1), "wrong token1 offset");
@@ -957,9 +957,9 @@ contract('PlotERC721', (accounts) => {
 		}
 
 		// ensure mining is not possible anymore
-		await assertThrowsAsync(tk.mineBy, token0, 1);
-		await assertThrowsAsync(tk.mineTo, token1, DEPTH);
-		await assertThrowsAsync(tk.mineTo, token1, DEPTH + 1);
+		await assertThrows(tk.mineBy, token0, 1);
+		await assertThrows(tk.mineTo, token1, DEPTH);
+		await assertThrows(tk.mineTo, token1, DEPTH + 1);
 
 		// verify both tokens are fully mined
 		assert(await tk.isFullyMined(token0), "token0 is not fully mined");
@@ -979,7 +979,7 @@ contract('PlotERC721', (accounts) => {
 		const setState = async() => await tk.setState(token1, state);
 
 		// impossible to set state for non-existent token
-		await assertThrowsAsync(setState);
+		await assertThrows(setState);
 
 		// create one token
 		await tk.mint(accounts[1], 1, tiers1);
@@ -988,7 +988,7 @@ contract('PlotERC721', (accounts) => {
 		await setState();
 
 		// next time setting a state fails (token state is already set)
-		await assertThrowsAsync(setState);
+		await assertThrows(setState);
 
 		// verify new state
 		assert.equal(state, await tk.getState(token1), "wrong token1 state");
@@ -1011,7 +1011,7 @@ contract('PlotERC721', (accounts) => {
 		await setLock();
 
 		// next time setting a lock fails (lock is already set)
-		await assertThrowsAsync(setLock);
+		await assertThrows(setLock);
 
 		// verify new transfer lock
 		assert.equal(lock, await tk.transferLock(), "wrong transfer lock");
@@ -1041,18 +1041,5 @@ function tiers(layers) {
 	return result;
 }
 
-// auxiliary function to ensure function `fn` throws
-async function assertThrowsAsync(fn, ...args) {
-	let f = () => {};
-	try {
-		await fn(...args);
-	}
-	catch(e) {
-		f = () => {
-			throw e;
-		};
-	}
-	finally {
-		assert.throws(f);
-	}
-}
+// import auxiliary function to ensure function `fn` throws
+import {assertThrows} from "../scripts/shared_functions";
