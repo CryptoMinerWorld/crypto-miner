@@ -1,3 +1,4 @@
+// World Plot Sale dependencies
 const Tracker = artifacts.require("./RefPointsTracker.sol");
 const Country = artifacts.require("./CountryERC721.sol");
 const Plot = artifacts.require("./PlotERC721.sol");
@@ -134,6 +135,127 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		const gasUsed = (await s.buy(1, 45, 0, {from: p, value: 45 * SALE_PRICE})).receipt.gasUsed;
 
 		assertEqual(7570425, gasUsed, "buying 45 plots gas usage mismatch: " + gasUsed);
+	});
+
+	it("gas: buying one plot from owned country requires 390,146 gas", async() => {
+		// define plot sale dependencies
+		const r = await Tracker.new(); // ref tracker
+		const c = await Country.new(COUNTRY_DATA); // country ERC721
+		const t = await Plot.new(); // plot ERC721
+		const w = accounts[10]; // world chest
+		const m = accounts[11]; // monthly chest
+		const o = accounts[12]; // country owner account
+		const b = accounts[13]; // beneficiary
+		const u = -60 + new Date().getTime() / 1000 | 0; // offset, sale start time
+		// define a player account to buy tokens from
+		const p = accounts[1]; // player
+
+		// give Russia to some account
+		await c.mint(o, 1);
+
+		// instantiate plot sale smart contract
+		const s = await Sale.new(r.address, c.address, t.address, w, m, b, u);
+		// enable buying plots feature
+		await s.updateFeatures(0x00000001); // sale enabled feature
+		// grant sale a permission to mint tokens on PlotERC721
+		await t.updateRole(s.address, 0x00000001); // token creator
+		// grant sale a permission to add known addresses into ref tracker
+		await r.updateRole(s.address, 0x00000004); // seller
+
+		// buy one plot in Russia - owned country
+		const gasUsed = (await s.buy(1, 1, 0, {from: p, value: SALE_PRICE})).receipt.gasUsed;
+
+		assertEqual(390146, gasUsed, "buying one plot from owned country gas usage mismatch: " + gasUsed);
+	});
+	it("gas: buying ten plots from owned country requires 1,842,624 gas", async() => {
+		// define plot sale dependencies
+		const r = await Tracker.new(); // ref tracker
+		const c = await Country.new(COUNTRY_DATA); // country ERC721
+		const t = await Plot.new(); // plot ERC721
+		const w = accounts[10]; // world chest
+		const m = accounts[11]; // monthly chest
+		const o = accounts[12]; // country owner account
+		const b = accounts[13]; // beneficiary
+		const u = -60 + new Date().getTime() / 1000 | 0; // offset, sale start time
+		// define a player account to buy tokens from
+		const p = accounts[1]; // player
+
+		// give Russia to some account
+		await c.mint(o, 1);
+
+		// instantiate plot sale smart contract
+		const s = await Sale.new(r.address, c.address, t.address, w, m, b, u);
+		// enable buying plots feature
+		await s.updateFeatures(0x00000001); // sale enabled feature
+		// grant sale a permission to mint tokens on PlotERC721
+		await t.updateRole(s.address, 0x00000001); // token creator
+		// grant sale a permission to add known addresses into ref tracker
+		await r.updateRole(s.address, 0x00000004); // seller
+
+		// buy one plot in Russia - owned country
+		const gasUsed = (await s.buy(1, 10, 0, {from: p, value: 10 * SALE_PRICE})).receipt.gasUsed;
+
+		assertEqual(1842624, gasUsed, "buying ten plots from owned country gas usage mismatch: " + gasUsed);
+	});
+	it("gas: buying 25 plots from owned country requires 4,319,904 gas", async() => {
+		// define plot sale dependencies
+		const r = await Tracker.new(); // ref tracker
+		const c = await Country.new(COUNTRY_DATA); // country ERC721
+		const t = await Plot.new(); // plot ERC721
+		const w = accounts[10]; // world chest
+		const m = accounts[11]; // monthly chest
+		const o = accounts[12]; // country owner account
+		const b = accounts[13]; // beneficiary
+		const u = -60 + new Date().getTime() / 1000 | 0; // offset, sale start time
+		// define a player account to buy tokens from
+		const p = accounts[1]; // player
+
+		// give Russia to some account
+		await c.mint(o, 1);
+
+		// instantiate plot sale smart contract
+		const s = await Sale.new(r.address, c.address, t.address, w, m, b, u);
+		// enable buying plots feature
+		await s.updateFeatures(0x00000001); // sale enabled feature
+		// grant sale a permission to mint tokens on PlotERC721
+		await t.updateRole(s.address, 0x00000001); // token creator
+		// grant sale a permission to add known addresses into ref tracker
+		await r.updateRole(s.address, 0x00000004); // seller
+
+		// buy one plot in Russia - owned country
+		const gasUsed = (await s.buy(1, 25, 0, {from: p, value: 25 * SALE_PRICE})).receipt.gasUsed;
+
+		assertEqual(4319904, gasUsed, "buying 25 plots from owned country gas usage mismatch: " + gasUsed);
+	});
+	it("gas: buying 45 plots from owned country requires 7,601,604 gas", async() => {
+		// define plot sale dependencies
+		const r = await Tracker.new(); // ref tracker
+		const c = await Country.new(COUNTRY_DATA); // country ERC721
+		const t = await Plot.new(); // plot ERC721
+		const w = accounts[10]; // world chest
+		const m = accounts[11]; // monthly chest
+		const o = accounts[12]; // country owner account
+		const b = accounts[13]; // beneficiary
+		const u = -60 + new Date().getTime() / 1000 | 0; // offset, sale start time
+		// define a player account to buy tokens from
+		const p = accounts[1]; // player
+
+		// give Russia to some account
+		await c.mint(o, 1);
+
+		// instantiate plot sale smart contract
+		const s = await Sale.new(r.address, c.address, t.address, w, m, b, u);
+		// enable buying plots feature
+		await s.updateFeatures(0x00000001); // sale enabled feature
+		// grant sale a permission to mint tokens on PlotERC721
+		await t.updateRole(s.address, 0x00000001); // token creator
+		// grant sale a permission to add known addresses into ref tracker
+		await r.updateRole(s.address, 0x00000004); // seller
+
+		// buy one plot in Russia - owned country
+		const gasUsed = (await s.buy(1, 45, 0, {from: p, value: 45 * SALE_PRICE})).receipt.gasUsed;
+
+		assertEqual(7601604, gasUsed, "buying 45 plots from owned country gas usage mismatch: " + gasUsed);
 	});
 });
 
