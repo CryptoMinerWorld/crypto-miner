@@ -2,7 +2,12 @@ const Gem = artifacts.require("./GemERC721.sol");
 
 contract('GemERC721: Gas Usage', (accounts) => {
 	it("gas: deploying GemERC721 requires ? gas");
-	it("gas: minting a gem requires ? gas");
+	it("gas: minting a gem requires 208526 gas", async() => {
+		const player = accounts[1];
+		const gem = await Gem.new();
+		const gasUsed = (await gem.mint(player, 1, 1, 0, 1, 1, 1, 1, 1)).receipt.gasUsed;
+		assertEqual(208526, gasUsed, "minting a gem usage mismatch: " + gasUsed);
+	});
 	it("gas: leveling up a gem requires ? gas");
 	it("gas: upgrading a gem requires ? gas");
 	it("gas: updating gem state requires 32987 gas", async() => {
