@@ -4,9 +4,11 @@ const HDWalletProvider = require("truffle-hdwallet-provider");
 // https://ethereum.stackexchange.com/questions/44349/truffle-infura-on-mainnet-nonce-too-low-error
 const NonceTrackerSubprovider = require("web3-provider-engine/subproviders/nonce-tracker");
 
+// babel imports is required to allow ECMAScript 6 imports in tests
 require('babel-register');
 require('babel-polyfill');
 
+// private keys storage
 const keys = require("./keys.js");
 
 module.exports = {
