@@ -29,7 +29,7 @@ contract('PlotAntarctica: Gas Usage', (accounts) => {
 
 		// instantiate plot Antarctica smart contract
 		const s = await Antarctica.new(m.address, t.address);
-		// enable buying plots feature
+		// enable getting plots feature
 		await s.updateFeatures(0x00000001); // get enabled feature
 		// grant sale a permission to mint tokens on PlotERC721
 		await t.updateRole(s.address, 0x00000001); // token creator
@@ -48,7 +48,7 @@ contract('PlotAntarctica: Gas Usage', (accounts) => {
 
 		// instantiate plot Antarctica smart contract
 		const s = await Antarctica.new(m.address, t.address);
-		// enable buying plots feature
+		// enable getting plots feature
 		await s.updateFeatures(0x00000001); // get enabled feature
 		// grant sale a permission to mint tokens on PlotERC721
 		await t.updateRole(s.address, 0x00000001); // token creator
@@ -67,7 +67,7 @@ contract('PlotAntarctica: Gas Usage', (accounts) => {
 
 		// instantiate plot Antarctica smart contract
 		const s = await Antarctica.new(m.address, t.address);
-		// enable buying plots feature
+		// enable getting plots feature
 		await s.updateFeatures(0x00000001); // get enabled feature
 		// grant sale a permission to mint tokens on PlotERC721
 		await t.updateRole(s.address, 0x00000001); // token creator
