@@ -1339,6 +1339,7 @@ contract PlotERC721 is AccessControlLight, ERC165, ERC721Interfaces {
 
     // create new token in memory
     LandPlot memory token = LandPlot({
+      // TODO: consider removing this mask - it's not a plot business what is its initial state
       tiers: 0xFF00FFFFFFFFFF00 & _tiers, // erase tier1 offset and initial offsets
       offsetModified: 0,
       state: 0,

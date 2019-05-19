@@ -12,9 +12,15 @@ const ChestKey = artifacts.require("./ChestKeyERC20.sol");
 // Miner smart contract itself
 const Miner = artifacts.require("./Miner.sol");
 
-// Miner smart contract tests
-contract('Miner RND', (accounts) => {
-	it("loot: loot generator check tier 1", async() => {
+// CSV file headers
+const CSV_HEADER = "tier,blocks,gems1,gems2,gems3,gems4,gems5,silver,gold,artifacts,keys";
+
+// test depth - number of blocks
+const BLOCKS = 10000;
+
+// Loot Generator tests - raw blocks
+contract('Loot Generator RND', (accounts) => {
+	it("rnd: loot generator check tier 1", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();
@@ -39,8 +45,15 @@ contract('Miner RND', (accounts) => {
 			chestKey.address
 		);
 
-		// process 2,000 blocks in tier 1
-		const loot = await miner.genLoot(1, 2000, false, new Array(9));
+		// gen loot for 10,000 blocks in tier 1
+		const loot = await miner.genLoot(1, BLOCKS, false, new Array(9));
+
+		// CSV file data
+		const csv_data = `1,${BLOCKS},${loot.join(",")}`;
+		// write statistical raw data into the file
+		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
+
+		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
 		assert(loot[1] > 0, "no level 2 gems");
 		assert.equal(0, loot[2], "level 3 gem(s) present");
@@ -52,7 +65,7 @@ contract('Miner RND', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("loot: loot generator check tier 2", async() => {
+	it("rnd: loot generator check tier 2", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();
@@ -77,8 +90,15 @@ contract('Miner RND', (accounts) => {
 			chestKey.address
 		);
 
-		// process 10,000 blocks in tier 2
-		const loot = await miner.genLoot(2, 10000, false, new Array(9));
+		// gen loot for 10,000 blocks in tier 2
+		const loot = await miner.genLoot(2, BLOCKS, false, new Array(9));
+
+		// CSV file data
+		const csv_data = `2,${BLOCKS},${loot.join(",")}`;
+		// write statistical raw data into the file
+		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
+
+		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
@@ -90,7 +110,7 @@ contract('Miner RND', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("loot: loot generator check tier 3", async() => {
+	it("rnd: loot generator check tier 3", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();
@@ -115,8 +135,15 @@ contract('Miner RND', (accounts) => {
 			chestKey.address
 		);
 
-		// process 10,000 blocks in tier 3
-		const loot = await miner.genLoot(3, 10000, false, new Array(9));
+		// gen loot for 10,000 blocks in tier 3
+		const loot = await miner.genLoot(3, BLOCKS, false, new Array(9));
+
+		// CSV file data
+		const csv_data = `3,${BLOCKS},${loot.join(",")}`;
+		// write statistical raw data into the file
+		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
+
+		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
@@ -128,7 +155,7 @@ contract('Miner RND', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("loot: loot generator check tier 4", async() => {
+	it("rnd: loot generator check tier 4", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();
@@ -153,8 +180,15 @@ contract('Miner RND', (accounts) => {
 			chestKey.address
 		);
 
-		// process 10,000 blocks in tier 4
-		const loot = await miner.genLoot(4, 10000, false, new Array(9));
+		// gen loot for 10,000 blocks in tier 4
+		const loot = await miner.genLoot(4, BLOCKS, false, new Array(9));
+
+		// CSV file data
+		const csv_data = `4,${BLOCKS},${loot.join(",")}`;
+		// write statistical raw data into the file
+		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
+
+		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
@@ -166,7 +200,7 @@ contract('Miner RND', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("loot: loot generator check tier 5", async() => {
+	it("rnd: loot generator check tier 5", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();
@@ -191,8 +225,15 @@ contract('Miner RND', (accounts) => {
 			chestKey.address
 		);
 
-		// process 10,000 blocks in tier 5
-		const loot = await miner.genLoot(5, 10000, false, new Array(9));
+		// gen loot for 10,000 blocks in tier 5
+		const loot = await miner.genLoot(5, BLOCKS, false, new Array(9));
+
+		// CSV file data
+		const csv_data = `5,${BLOCKS},${loot.join(",")}`;
+		// write statistical raw data into the file
+		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
+
+		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
@@ -204,3 +245,7 @@ contract('Miner RND', (accounts) => {
 		assert(loot[8] > 0, "no key(s)");
 	});
 });
+
+
+// import function to write CSV data
+import {write_csv} from "../scripts/shared_functions";

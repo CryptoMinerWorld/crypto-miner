@@ -16,12 +16,9 @@ import {COUNTRY_DATA} from "../data/country_data";
 // auxiliary variable 2 as BigNumber
 const two = web3.toBigNumber(2);
 
-// using file system to create raw csv data file for tiers structure
-const fs = require('fs');
-
-// PlotSale RND related tests
-contract('PlotSale RND', (accounts) => {
-	it("randomization: tiers2 (Antarctica) structure randomization", async() => {
+// Tiers randomized structure related tests
+contract('Tiers RND', (accounts) => {
+	it("rnd: tiers2 (Antarctica) structure randomization", async() => {
 		// define plot Antarctica dependencies
 		const m = await FoundersPlotsMock.new(); // Founders Plots Mock simulates Presale2
 		const t = await Plot.new(); // plot ERC721
@@ -44,10 +41,12 @@ contract('PlotSale RND', (accounts) => {
 		}).join("\n");
 
 		// write statistical raw data into the file
-		fs.writeFileSync("./data/tiers2_structure.csv", `${csv_header}\n${csv_data}`);
+		write_csv("./data/tiers2_structure.csv", csv_header, csv_data);
+
+		// TODO: verify some statistics constraints
 	});
 
-	it("randomization: tiers5 structure randomization", async() => {
+	it("rnd: tiers5 structure randomization", async() => {
 		// define plot sale dependencies
 		const r = await Tracker.new(); // ref tracker
 		const c = await Country.new(COUNTRY_DATA); // country ERC721
@@ -75,6 +74,12 @@ contract('PlotSale RND', (accounts) => {
 		}).join("\n");
 
 		// write statistical raw data into the file
-		fs.writeFileSync("./data/tiers5_structure.csv", `${csv_header}\n${csv_data}`);
+		write_csv("./data/tiers5_structure.csv", csv_header, csv_data);
+
+		// TODO: verify some statistics constraints
 	});
 });
+
+
+// import function to write CSV data
+import {write_csv} from "../scripts/shared_functions";

@@ -383,6 +383,9 @@ contract PlotSale is AccessControlLight {
 
     // mint tokens required - delegate to `__mint`
     __mint(msg.sender, BERMUDA_COUNTRY_ID, n);
+
+    // no need to add known address since address having
+    // referral points is known already
   }
 
   /**
@@ -512,9 +515,12 @@ contract PlotSale is AccessControlLight {
     *     or if the silver sale this smart contract is bound to already finished
    * @param code coupon code to use
    */
-  function useCoupon(string code) public returns(uint24 tokenId) {
+  function useCoupon(string code) public {
     // check using coupons feature is enabled
     require(isFeatureEnabled(FEATURE_USING_COUPONS_ENABLED));
+
+    // verify that sale has already started
+    require(now >= saleStartUTC);
 
     // calculate the key to fetch the coupon
     uint256 key = uint256(keccak256(code));
@@ -522,17 +528,14 @@ contract PlotSale is AccessControlLight {
     // get amount of plots corresponding to this coupon
     uint8 n = coupons[key];
 
+    // require a valid coupon
+    require(n != 0);
+
     // remove the coupon from storage
     delete coupons[key];
 
-    // generate randomized tiers structure
-    // delegate call to `random5Tiers`
-    uint64 tiers = random5Tiers(0);
-
-    // delegate call to `PlotERC721.mint` and get generated token ID
-    // 255 is a country ID for Bermuda Triangle
-    // token ID will be returned automatically
-    tokenId = plotInstance.mint(msg.sender, BERMUDA_COUNTRY_ID, tiers);
+    // mint tokens required - delegate to `__mint`
+    __mint(msg.sender, BERMUDA_COUNTRY_ID, n);
 
     // player (sender) becomes known to the ref points tracker
     refPointsTracker.addKnownAddress(msg.sender);
