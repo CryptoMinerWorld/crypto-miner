@@ -60,7 +60,11 @@ contract('Loot Generator RND', (accounts) => {
 		// write statistical raw data into the file
 		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
 
-		// TODO: verify some statistics constraints
+		// verify some statistics constraints
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
+		assert(loot[2] > 0, "no level 3 gems");
+		assert(loot[5] > 0, "no silver");
 	});
 
 	it("rnd: loot generator check – Rest of the World", async() => {
@@ -109,7 +113,11 @@ contract('Loot Generator RND', (accounts) => {
 		// write statistical raw data into the file
 		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
 
-		// TODO: verify some statistics constraints
+		// verify some statistics constraints
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
+		assert(loot[2] > 0, "no level 3 gems");
+		assert(loot[5] > 0, "no silver");
 	});
 });
 
