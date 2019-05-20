@@ -103,7 +103,7 @@ contract AccessControlLight {
    * @param required desired set of permissions operator would like to have
    * @return resulting set of permissions this operator can set
    */
-  function evaluateBy(address operator, uint256 actual, uint256 required) public constant returns(uint256) {
+  function evaluateBy(address operator, uint256 actual, uint256 required) public view returns(uint256) {
     // read operator's permissions
     uint256 p = userRoles[operator];
 
