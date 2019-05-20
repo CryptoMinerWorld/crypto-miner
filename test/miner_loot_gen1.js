@@ -19,8 +19,8 @@ const CSV_HEADER = "tier,blocks,gems1,gems2,gems3,gems4,gems5,silver,gold,artifa
 const BLOCKS = 10000;
 
 // Loot Generator tests - raw blocks
-contract('Loot Generator RND', (accounts) => {
-	it("rnd: loot generator check tier 1", async() => {
+contract('Loot Gen (RAW)', (accounts) => {
+	it("rnd: loot generator - tier 1", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();
@@ -65,7 +65,7 @@ contract('Loot Generator RND', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("rnd: loot generator check tier 2", async() => {
+	it("rnd: loot generator - tier 2", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();
@@ -110,7 +110,7 @@ contract('Loot Generator RND', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("rnd: loot generator check tier 3", async() => {
+	it("rnd: loot generator - tier 3", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();
@@ -155,7 +155,7 @@ contract('Loot Generator RND', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("rnd: loot generator check tier 4", async() => {
+	it("rnd: loot generator - tier 4", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();
@@ -200,7 +200,7 @@ contract('Loot Generator RND', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("rnd: loot generator check tier 5", async() => {
+	it("rnd: loot generator - tier 5", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();

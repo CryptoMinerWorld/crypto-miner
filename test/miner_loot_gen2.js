@@ -19,8 +19,8 @@ const CSV_HEADER = "tiers,plots,gems1,gems2,gems3,gems4,gems5,silver,gold,artifa
 const PLOTS = 100;
 
 // Loot Generator tests - plot simulation
-contract('Loot Generator RND', (accounts) => {
-	it("rnd: loot generator check – Antarctica", async() => {
+contract('Loot Gen', (accounts) => {
+	it("rnd: loot generator – Antarctica", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();
@@ -67,7 +67,7 @@ contract('Loot Generator RND', (accounts) => {
 		assert(loot[5] > 0, "no silver");
 	});
 
-	it("rnd: loot generator check – Rest of the World", async() => {
+	it("rnd: loot generator – Rest of the World", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const ext = await GemExt.new();
@@ -119,6 +119,61 @@ contract('Loot Generator RND', (accounts) => {
 		assert(loot[2] > 0, "no level 3 gems");
 		assert(loot[5] > 0, "no silver");
 	});
+
+	it("rnd: loot mining – Antarctica", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const ext = await GemExt.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// define player account
+		const player = accounts[0];
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			ext.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// enable mining feature on the miner
+		await miner.updateFeatures(0x00000001); // miner feature
+		// grant miner permissions to modify gem's state
+		await gem.addOperator(miner.address, 0x00400000); // state provider
+		// grant miner permission(s) to update plot
+		await plot.updateRole(miner.address, 0x00000014); // state provider, offset provider
+
+		// mint 100 plots in Antarctica
+		for(let i = 0; i < PLOTS; i++) {
+			// ID of the minted plot is `i + 1`
+			await plot.mint(player, 0, 0x0200236464646400);
+		}
+
+		// mint 100 high grade gems to mine plots
+		for(let i = 0; i < PLOTS; i++) {
+			// ID of the minted plot is `i + 1`
+			// TODO: consider minting super big grade value
+			await gem.mint(player, i + 1, 0, 0, i + 1, 1, 5, 6, 999999);
+		}
+
+		// bind gems to plots
+
+
+	});
+
+
 });
 
 
