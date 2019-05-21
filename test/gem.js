@@ -145,7 +145,7 @@ contract('GemERC721', function(accounts) {
 		const tk = await Token.new();
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
-		await tk.safeTransferFrom(accounts[0], accounts[1], 0x401, web3.utils.utf8ToHex(""));
+		await tk.safeTransferFrom(accounts[0], accounts[1], 0x401);
 		assert.equal(accounts[1], await tk.ownerOf(0x401), "token 0x401 has wrong owner after safely transferring it");
 	});
 	it("safeTransferFrom: impossible to safe transfer to a smart contract", async function() {
@@ -153,10 +153,10 @@ contract('GemERC721', function(accounts) {
 		const another = await Token.new();
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
-		await assertThrows(async function() {await tk.safeTransferFrom(accounts[0], another.address, 0x401, web3.utils.utf8ToHex(""));});
-		await assertThrows(async function() {await tk.safeTransferFrom(accounts[0], tk.address, 0x401, web3.utils.utf8ToHex(""));});
+		await assertThrows(async function() {await tk.safeTransferFrom(accounts[0], another.address, 0x401);});
+		await assertThrows(async function() {await tk.safeTransferFrom(accounts[0], tk.address, 0x401);});
 		assert.equal(accounts[0], await tk.ownerOf(0x401), "card 0x401 has wrong owner after bad attempt to transfer it");
-		await tk.safeTransferFrom(accounts[0], accounts[1], 0x401, web3.utils.utf8ToHex(""));
+		await tk.safeTransferFrom(accounts[0], accounts[1], 0x401);
 		assert.equal(accounts[1], await tk.ownerOf(0x401), "token 0x401 has wrong owner after safely transferring it");
 	});
 

@@ -15,7 +15,7 @@ const ROLE_SELLER = 0x00000004;
 const SALE_PRICE = 20000000000000000;
 
 // import country data
-import {COUNTRY_DATA} from "../data/country_data";
+import {COUNTRY_DATA} from "../data_legacy/country_data";
 
 // PlotSale related tests
 contract('PlotSale', (accounts) => {

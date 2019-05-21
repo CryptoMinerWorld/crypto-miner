@@ -6,7 +6,7 @@ const Token = artifacts.require("./CountryERC721.sol");
 const Sale = artifacts.require("./CountrySale.sol");
 
 // import country data
-import {COUNTRY_DATA, COUNTRY_PRICE_DATA} from "../data/country_data";
+import {COUNTRY_DATA, COUNTRY_PRICE_DATA} from "../data_legacy/country_data";
 
 const tokenId = 117;
 

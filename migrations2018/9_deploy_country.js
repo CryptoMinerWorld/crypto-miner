@@ -1,7 +1,7 @@
 const Country = artifacts.require("./CountryERC721");
 
 // import country data
-import {COUNTRY_DATA} from "../data/country_data";
+import {COUNTRY_DATA} from "../data_legacy/country_data";
 
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {

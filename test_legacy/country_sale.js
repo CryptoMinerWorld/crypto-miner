@@ -9,7 +9,7 @@ const Sale = artifacts.require("./CountrySale.sol");
 const secureRandomInRange = require("random-number-csprng");
 
 // import country data
-import {COUNTRY_DATA, COUNTRY_PRICE_DATA, TOTAL_PRICE} from "../data/country_data";
+import {COUNTRY_DATA, COUNTRY_PRICE_DATA, TOTAL_PRICE} from "../data_legacy/country_data";
 
 // default token IDs to work with (countries to buy)
 const token1 = 1;

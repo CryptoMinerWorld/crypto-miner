@@ -11,7 +11,7 @@ const FoundersPlotsMock = artifacts.require("./FoundersPlotsMock.sol");
 const Antarctica = artifacts.require("./PlotAntarctica.sol");
 
 // import country data
-import {COUNTRY_DATA} from "../data/country_data";
+import {COUNTRY_DATA} from "../data_legacy/country_data";
 
 // auxiliary variable 2 as BigNumber
 const two = web3.toBigNumber(2);

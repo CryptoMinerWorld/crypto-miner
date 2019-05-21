@@ -6,7 +6,7 @@ const Plot = artifacts.require("./PlotERC721.sol");
 const Sale = artifacts.require("./PlotSale.sol");
 
 // World Plot Sale dependencies
-import {COUNTRY_DATA} from "../data/country_data";
+import {COUNTRY_DATA} from "../data_legacy/country_data";
 
 // one token price
 const SALE_PRICE = 20000000000000000;

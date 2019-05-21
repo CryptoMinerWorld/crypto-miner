@@ -1,12 +1,12 @@
+const Token = artifacts.require("./CountryERC721.sol");
+
 const FEATURE_TRANSFERS = 0x00000001;
 const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
 const FEATURE_ALLOW_TAX_UPDATE = 0x00000004;
 const ROLE_TOKEN_CREATOR = 0x00040000;
 
-const Token = artifacts.require("./CountryERC721.sol");
-
 // import country data
-import {COUNTRY_DATA, TOTAL_PLOTS} from "../data_legacy/country_data";
+import {COUNTRY_DATA, TOTAL_PLOTS} from "../data/country_data";
 
 // default token ID to work with
 const token1 = 1;
@@ -14,7 +14,7 @@ const token2 = 2;
 const token3 = 3;
 
 // auxiliary constant "2"
-const two = web3.toBigNumber(2);
+const two = web3.utils.toBN(2);
 
 contract('CountryERC721', (accounts) => {
 	it("config: total number of plots", async() => {
@@ -101,9 +101,9 @@ contract('CountryERC721', (accounts) => {
 		await tk.mint(accounts[0], token1);
 
 		// check data integrity
-		assert(two.pow(16).times(COUNTRY_DATA[0]).plus(0x010A).eq(await getPacked()), "token 1 has wrong packed attributes");
+		assert(two.pow(web3.utils.toBN(16)).mul(web3.utils.toBN(COUNTRY_DATA[0])).add(web3.utils.toBN(0x010A)).eq(await getPacked()), "token 1 has wrong packed attributes");
 		assert.equal(COUNTRY_DATA[0], await getNumberOfPlots(), "token 1 has wrong number of plots");
-		assert.deepEqual([web3.toBigNumber(1), web3.toBigNumber(10)], await getTax(), "token 1 has wrong tax");
+		assert.deepEqual({0: web3.utils.toBN(1), 1: web3.utils.toBN(10)}, await getTax(), "token 1 has wrong tax");
 		assert.equal(10, await getTaxPercent(), "token 1 has wrong tax percent");
 		assert.equal(10, await calculateTaxValueFor(), "token 1 calculated tax value is wrong");
 
@@ -123,12 +123,12 @@ contract('CountryERC721', (accounts) => {
 		const tokens = [187, 115, 39];
 
 		// expected will hold the expected token bitmap value
-		let expected = web3.toBigNumber(0);
+		const expected = web3.utils.toBN(0);
 
 		// mint several tokens and calculate the expected bitmap
 		for(const token of tokens) {
 			await tk.mint(accounts[0], token);
-			expected = expected.plus(two.pow(token - 1));
+			expected.iadd(two.pow(web3.utils.toBN(token - 1)));
 		}
 
 		// read the token bit map
@@ -198,10 +198,10 @@ contract('CountryERC721', (accounts) => {
 		// construct expected packed struct for tokens0
 		const expectedPacked0 = [];
 		for(const token of tokens0) {
-			expectedPacked0.push(two.pow(32).times(token).plus(two.pow(16).times(COUNTRY_DATA[token - 1])).plus(256).plus(10));
+			expectedPacked0.push(two.pow(web3.utils.toBN(32)).mul(web3.utils.toBN(token)).add(two.pow(web3.utils.toBN(16)).mul(web3.utils.toBN(COUNTRY_DATA[token - 1]))).add(web3.utils.toBN(256)).add(web3.utils.toBN(10)));
 		}
 
-		assert.deepEqual(expectedPacked0, await tk.getPackedCollection(accounts[0]), "wrong token packed collection for account 0");
+		assert.deepEqual(expectedPacked0.map(a => a.toString(16)), (await tk.getPackedCollection(accounts[0])).map(a => a.toString(16)), "wrong token packed collection for account 0");
 	});
 
 
@@ -253,7 +253,7 @@ contract('CountryERC721', (accounts) => {
 		const tk = await Token.new(COUNTRY_DATA);
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS);
 		await tk.mint(accounts[0], token1);
-		await tk.safeTransferFrom(accounts[0], accounts[1], token1, "");
+		await tk.safeTransferFrom(accounts[0], accounts[1], token1);
 		assert.equal(accounts[1], await tk.ownerOf(token1), "token token1 has wrong owner after safely transferring it");
 	});
 	it("safeTransferFrom: impossible to safe transfer to a smart contract", async () => {
@@ -261,10 +261,10 @@ contract('CountryERC721', (accounts) => {
 		const another = await Token.new(COUNTRY_DATA);
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS);
 		await tk.mint(accounts[0], token1);
-		await assertThrows(async () => await tk.safeTransferFrom(accounts[0], another.address, token1, ""));
-		await assertThrows(async () => await tk.safeTransferFrom(accounts[0], tk.address, token1, ""));
+		await assertThrows(async () => await tk.safeTransferFrom(accounts[0], another.address, token1));
+		await assertThrows(async () => await tk.safeTransferFrom(accounts[0], tk.address, token1));
 		assert.equal(accounts[0], await tk.ownerOf(token1), "card token1 has wrong owner after bad attempt to transfer it");
-		await tk.safeTransferFrom(accounts[0], accounts[1], token1, "");
+		await tk.safeTransferFrom(accounts[0], accounts[1], token1);
 		assert.equal(accounts[1], await tk.ownerOf(token1), "token token1 has wrong owner after safely transferring it");
 	});
 

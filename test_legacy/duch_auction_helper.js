@@ -12,7 +12,7 @@ const Auction = artifacts.require("./DutchAuction");
 const Helper = artifacts.require("./DutchAuctionHelper");
 
 // import country data
-import {COUNTRY_DATA} from "../data/country_data";
+import {COUNTRY_DATA} from "../data_legacy/country_data";
 
 contract('Dutch Auction Helper', accounts => {
 	it("helper: verifying gem collection on auction", async() => {
