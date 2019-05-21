@@ -76,6 +76,7 @@ const two = web3.utils.toBN(2);
 // timestamp right before the test begins
 const now = new Date().getTime() / 1000 | 0;
 
+// tests for Plot ERC721 token
 contract('PlotERC721', (accounts) => {
 	it("initial state: initial zero values, supported interfaces", async() => {
 		// analogue to smart contract deployment

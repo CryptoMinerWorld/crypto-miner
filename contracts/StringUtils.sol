@@ -123,7 +123,7 @@ library StringUtils {
    * @return concatenation result s1 + s2
    */
   function concat(string memory s1, string memory s2) internal pure returns (string memory s) {
-    return string(abi.encodePacked(s1, s2));
+    // an old way of string concatenation (Solidity 0.4) is commented out
 /*
     // convert s1 into buffer 1
     bytes memory buf1 = bytes(s1);
@@ -145,5 +145,8 @@ library StringUtils {
     // construct string and return
     return string(buf);
 */
+
+    // simply use built in function
+    return string(abi.encodePacked(s1, s2));
   }
 }

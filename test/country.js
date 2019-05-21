@@ -16,6 +16,7 @@ const token3 = 3;
 // auxiliary constant "2"
 const two = web3.utils.toBN(2);
 
+// tests for Country ERC721 token
 contract('CountryERC721', (accounts) => {
 	it("config: total number of plots", async() => {
 		const expectedTotal = 500000;

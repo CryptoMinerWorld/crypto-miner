@@ -1,3 +1,4 @@
+// test verifies some of the testrpc (ganache) configuration
 contract("TestRPC Config", (accounts) => {
 	it("account balances", async() => {
 		console.log("\t%d accounts:", accounts.length);

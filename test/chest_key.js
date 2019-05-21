@@ -1,3 +1,8 @@
+// ChestKeyERC20 smart contract
+const Token = artifacts.require("./ChestKeyERC20.sol");
+// Dummy ERC20/ERC721 Receiver
+const Receiver = artifacts.require("./DummyReceiver.sol");
+
 // Enables ERC20 transfers of the tokens
 const FEATURE_TRANSFERS = 0x00000001;
 // Enables ERC20 transfers on behalf
@@ -7,11 +12,6 @@ const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
 const ROLE_TOKEN_CREATOR = 0x00000001;
 // Token destroyer is responsible for destroying tokens
 const ROLE_TOKEN_DESTROYER = 0x00000002;
-
-// ChestKeyERC20 smart contract
-const Token = artifacts.require("./ChestKeyERC20.sol");
-// Dummy ERC20/ERC721 Receiver
-const Receiver = artifacts.require("./DummyReceiver.sol");
 
 // tests for ChestKeyERC20 token
 contract('ChestKeyERC20', (accounts) => {

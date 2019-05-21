@@ -13,6 +13,7 @@ const NO_PERM = web3.utils.toBN("0x0");
 // Bitmask representing some arbitrary permission
 const SOME_PERM = web3.utils.toBN("0x1");
 
+// tests for Access Control smart contract
 contract('Access Control', (accounts) => {
 	it("initial state: no features are enabled, only creator has full permissions", async() => {
 		const ac = await ACL.new();
