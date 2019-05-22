@@ -1,10 +1,12 @@
-pragma solidity 0.4.23;
+pragma solidity 0.5.8;
 
 /**
  * @title Fractions 16-bit Library
  *
  * @notice Library for working with fractions.
+ *
  * @notice A fraction is represented by two numbers - nominator and denominator.
+ *
  * @dev A fraction is represented as uint16,
  *      higher 8 bits representing nominator
  *      and lower 8 bits representing denominator

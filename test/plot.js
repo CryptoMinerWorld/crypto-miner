@@ -218,7 +218,7 @@ contract('PlotERC721', (accounts) => {
 		assert.equal(token0, await tk.tokenOfOwnerByIndex(account1, 0), "wrong token ID at index 0 owned by account1");
 		assert.equal(account1, await tk.ownerOf(token0), "wrong owner of token0");
 		assert.equal(0, await tk.getApproved(token0), "token0 should not be approved yet");
-		assert.equal("http://cryptominerworld.com/plot/0x" + token1.toString(16).toUpperCase(), await tk.tokenURI(token1), "wrong token1 URI");
+		assert.equal("http://cryptominerworld.com/plot/" + token1.toString(10), await tk.tokenURI(token1), "wrong token1 URI");
 
 		// validate tiers structure
 		for(let i = 1; i <= 5; i++) {
@@ -988,8 +988,8 @@ contract('PlotERC721', (accounts) => {
 		// first time setting a state succeeds
 		await setState();
 
-		// next time setting a state fails (token state is already set)
-		await assertThrows(setState);
+		// next time setting a state succeeds again - state modification date only
+		await setState();
 
 		// verify new state
 		assert.equal(state, await tk.getState(token1), "wrong token1 state");
@@ -1009,10 +1009,14 @@ contract('PlotERC721', (accounts) => {
 		const setLock = async() => await tk.setTransferLock(lock);
 
 		// first time setting a lock succeeds
-		await setLock();
+		const gasUsed1 = (await setLock()).receipt.gasUsed;
 
-		// next time setting a lock fails (lock is already set)
-		await assertThrows(setLock);
+		// next time setting a lock succeeds again,
+		// but doesn't modify storage, so the gas consumption is low
+		const gasUsed2 = (await setLock()).receipt.gasUsed;
+
+		// verify gas consumption is at least 5,000 lower
+		assert(gasUsed1 - gasUsed2 >= 5000, "wrong gas consumption difference");
 
 		// verify new transfer lock
 		assert.equal(lock, await tk.transferLock(), "wrong transfer lock");

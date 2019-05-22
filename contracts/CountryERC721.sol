@@ -1,13 +1,16 @@
 pragma solidity 0.5.8;
 
-import "./AccessControl.sol";
-import "./ERC721Receiver.sol";
-import "./ERC165.sol";
 import "./AddressUtils.sol";
 import "./StringUtils.sol";
-import "./Fractions16.sol";
+import "./Fractions8.sol";
+import "./AccessControl.sol";
+import "./ERC165.sol";
+import "./ERC721Interfaces.sol";
+import "./ERC721Receiver.sol";
 
 /**
+ * @title Country ERC721 Token
+ *
  * @notice Country is unique tradable entity. Non-fungible.
  * @dev A country is an ERC721 non-fungible token, which maps Token ID,
  *      a 8 bit number in range [1, 192] to a set of country properties -
@@ -16,10 +19,7 @@ import "./Fractions16.sol";
  *      its not possible to destroy a country.
  * @dev Up to 192 countries are defined during contract deployment and initialization.
  */
-contract CountryERC721 is AccessControl, ERC165 {
-  /// @dev Using library Fractions for fraction math
-  using Fractions16 for uint16;
-
+contract CountryERC721 is AccessControl, ERC165, ERC721Interfaces {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
@@ -27,184 +27,249 @@ contract CountryERC721 is AccessControl, ERC165 {
    */
   uint256 public constant TOKEN_UID = 0x487e7af2a810b59da545d840b09a1fa474d482fc2a7c22ed553d6f5a2030b53c;
 
-  /// @dev ERC20 compliant token symbol
+  /**
+   * @dev ERC20 compliant token symbol
+   */
   string public constant symbol = "CTY";
-  /// @dev ERC20 compliant token name
+
+  /**
+   * @dev ERC20 compliant token name
+   */
   string public constant name = "Country – CryptoMiner World";
-  /// @dev ERC20 compliant token decimals
-  /// @dev this can be only zero, since ERC721 token is non-fungible
+
+  /**
+   * @dev ERC20 compliant token decimals
+   * @dev Equal to zero – since ERC721 token is non-fungible
+   *      and therefore non-divisible
+   */
   uint8 public constant decimals = 0;
 
-  /// @dev Country data structure
-  /// @dev Occupies 1 storage slot (240 bits)
+  /**
+   * @dev Token data structure (Country Data Structure)
+   * @dev Occupies 1 storage slot (256 bits)
+   */
   struct Country {
-    /// @dev Unique country ID ∈ [1, 192]
-    uint8 id;
-
-    /// @dev Number of land plots country has,
-    ///      proportional to the country area
+    /**
+     * @dev Number of land plots country has,
+     *      proportional to the country area
+     * @dev Immutable
+     */
     uint16 plots;
 
-    /// @dev Percentage country owner receives from each sale
-    uint16 tax;
+    /**
+     * @dev Percentage country owner receives from
+     *      initial plot sale in owned country
+     * @dev Mutable
+     */
+    uint8 tax;
 
-    /// @dev Tax modified time - unix timestamp
+    /**
+     * @dev Initially zero, changes when tax changes
+     * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
+     */
     uint32 taxModified;
 
-    /// @dev Country index within an owner's collection of countries
+    /**
+     * @dev Token index within an owner's collection of tokens
+     * @dev Changes when token is being transferred (token ownership changes)
+     * @dev May change if some other token of the same owner is transferred
+     */
     uint8 index;
 
-    /// @dev Country owner, initialized upon country creation
+    /**
+     * @dev Initially zero, changes when token ownership changes
+     *      (that is token is transferred)
+     * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
+     */
+    uint32 ownershipModified;
+
+    /**
+     * @dev Token owner, initialized upon token creation, cannot be zero
+     * @dev Changes when token is being transferred to a new owner
+     */
     address owner;
   }
 
-  /// @dev Country data array contains number of plots each country contains
+  /**
+   * @dev Country data array contains number of plots each country contains
+   */
   uint16[] public countryData;
 
-  /// @notice All the existing tokens
-  /// @dev Core of the Country as ERC721 token
-  /// @dev Maps Country ID => Country Data Structure
+  /**
+   * @notice All the emitted tokens
+   * @dev Core of the Country as ERC721 token
+   * @dev Maps Token ID => Country Data Structure
+   */
   mapping(uint256 => Country) public tokens;
 
-  /// @dev Mapping from a token ID to an address approved to
-  ///      transfer ownership rights for this token
+  /**
+   * @dev An extension data structure, maps 256 bits of data to a token ID
+   */
+  // TODO: consider extending to unlimited size
+  mapping(uint256 => uint256) ext256;
+
+  /**
+   * @dev Mapping from a token ID to an address approved to
+   *      transfer ownership rights for this token
+   */
   mapping(uint256 => address) public approvals;
 
-  /// @dev Mapping from owner to operator approvals
-  ///      token owner => approved token operator => is approved
+  /**
+   * @dev Mapping from owner to an approved operator address –
+   *      an address approved to transfer any tokens of the owner
+   *      token owner => approved token operator => is approved
+   */
   mapping(address => mapping(address => bool)) public approvedOperators;
 
-  /// @notice Storage for a collections of tokens
-  /// @notice A collection of tokens is an unordered list of token IDs,
-  ///      owned by a particular address (owner)
-  /// @dev A mapping from owner to a collection of his tokens (IDs)
-  /// @dev ERC20 compliant structure for balances can be derived
-  ///      as a length of each collection in the mapping
-  /// @dev ERC20 balances[owner] is equal to collections[owner].length
+  /**
+   * @notice Storage for a collections of tokens
+   * @notice A collection of tokens is an ordered list of token IDs,
+   *      owned by a particular address (owner)
+   * @dev A mapping from owner to a collection of his tokens (IDs)
+   * @dev ERC20 compliant structure for balances can be derived
+   *      as a length of each collection in the mapping
+   * @dev ERC20 balances[owner] is equal to collections[owner].length
+   */
   mapping(address => uint8[]) public collections;
 
-  /// @dev Array with all token ids, used for enumeration
-  /// @dev ERC20 compliant structure for totalSupply can be derived
-  ///      as a length of this collection
-  /// @dev ERC20 totalSupply() is equal to allTokens.length
+  /**
+   * @dev Array with all token ids, used for enumeration
+   * @dev ERC20 compliant structure for totalSupply can be derived
+   *      as a length of this collection
+   * @dev ERC20 totalSupply() is equal to allTokens.length
+   */
   uint8[] public allTokens;
 
-  /// @dev Total number of countries this smart contract holds
-  uint8 private _totalSupply;
-
-  /// @dev Token bitmap – bitmap of 192 elements indicating existing (minted) tokens
-  /// @dev For any i ∈ [0, 191] - tokenMap[i] (which is tokenMap >> i & 0x1)
-  ///      is equal to one if token with ID i exists and to zero if it doesn't
+  /**
+   * @dev Token bitmap – bitmap of 192 elements indicating existing (minted) tokens
+   * @dev For any i ∈ [0, 191] - tokenMap[i] (which is tokenMap >> i & 0x1)
+   *      is equal to one if token with ID i exists and to zero if it doesn't
+   */
   uint192 public tokenMap;
 
-  /// @notice The maximum frequency at which tax rate for a token can be changed
-  /// @dev Tax rate cannot be changed more frequently than once per `MAX_TAX_CHANGE_FREQ` seconds
+  /**
+   * @notice The maximum frequency at which tax rate for a token can be changed
+   * @dev Tax rate cannot be changed more frequently than once per `MAX_TAX_CHANGE_FREQ` seconds
+   */
   uint32 public maxTaxChangeFreq = 86400; // seconds
 
-  /// @dev Maximum tokens allowed should comply with the `tokenMap` type
-  /// @dev This setting is used only in contract constructor, actual
-  ///      maximum supply is defined by `countryData` array length
+  /**
+   * @dev Maximum tokens allowed should comply with the `tokenMap` type
+   * @dev This setting is used only in contract constructor, actual
+   *      maximum supply is defined by `countryData` array length
+   */
   uint8 public constant TOTAL_SUPPLY_MAX = 192;
 
-  /// @notice Maximum tax rate that can be set on the country
-  /// @dev This is an inverted value of the maximum tax:
-  ///      `MAX_TAX_RATE = 1 / MAX_TAX_INV`
+  /**
+   * @notice Maximum tax rate that can be set on the country
+   * @dev This is an inverted value of the maximum tax:
+   *      `MAX_TAX_RATE = 1 / MAX_TAX_INV`
+   */
   uint8 public constant MAX_TAX_INV = 5; // 1/5 or 20%
 
-  /// @notice Default tax rate that is assigned to each country
-  /// @dev This tax rate is set on each country when minting its token
-  uint16 public constant DEFAULT_TAX_RATE = 0x010A; // 1/10 or 10%
+  /**
+   * @notice Default tax rate that is assigned to each country
+   * @dev This tax rate is set on each country when minting its token
+   */
+  uint8 public constant DEFAULT_TAX_RATE = 0x1A; // 1/10 or 10%
 
-  /// @dev Enables ERC721 transfers of the tokens
+  /**
+   * @notice The 'transfers' feature supports regular token transfers
+   * @dev Enables ERC721 transfers of the tokens (token owner performs a transfer)
+   * @dev Token owner is defined in `tokens` data structure
+   */
   uint32 public constant FEATURE_TRANSFERS = 0x00000001;
 
-  /// @dev Enables ERC721 transfers on behalf
+  /**
+   * @notice The 'transfers on behalf' feature supports token transfers by
+   *      trusted operators defined for particular tokens or token owners
+   * @dev Enables ERC721 transfers on behalf (approved operator performs a transfer)
+   * @dev Approved operators are defined in `approvals` and `approvedOperators`
+   *      data structures
+   */
   uint32 public constant FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
 
-  /// @dev Allows owners to update tax value
+  /**
+   * @dev Allows owners to update tax value
+   */
   uint32 public constant FEATURE_ALLOW_TAX_UPDATE = 0x00000004;
 
-  /// @notice Tax manager is responsible for updating maximum
-  ///     allowed frequency of tax rate change
-  /// @dev Role ROLE_TAX_MANAGER allows updating `maxTaxChangeFreq`
-  uint32 public constant ROLE_TAX_MANAGER = 0x00020000;
+  /**
+   * @notice Token creator is responsible for creating tokens
+   * @dev Allows minting tokens
+   */
+  uint32 public constant ROLE_TOKEN_CREATOR = 0x00000001;
 
-  /// @notice Token creator is responsible for creating tokens
-  /// @dev Role ROLE_TOKEN_CREATOR allows minting tokens
-  uint32 public constant ROLE_TOKEN_CREATOR = 0x00040000;
+  /**
+   * @notice Tax manager is responsible for updating maximum
+   *     allowed frequency of tax rate change
+   * @dev Role ROLE_TAX_MANAGER allows updating `maxTaxChangeFreq`
+   */
+  uint32 public constant ROLE_TAX_MANAGER = 0x00000004;
 
-  /// @dev Magic value to be returned upon successful reception of an NFT
-  /// @dev Equal to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`,
-  ///      which can be also obtained as `ERC721Receiver(0).onERC721Received.selector`
+  /**
+   * @dev Magic value to be returned upon successful reception of ERC721 token (NFT)
+   * @dev Equal to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`,
+   *      which can be also obtained as `ERC721Receiver(0).onERC721Received.selector`
+   */
   bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
-  /**
-   * Supported interfaces section
-   */
 
   /**
-   * ERC721 interface definition in terms of ERC165
-   *
-   * 0x80ac58cd ==
-   *   bytes4(keccak256('balanceOf(address)')) ^
-   *   bytes4(keccak256('ownerOf(uint256)')) ^
-   *   bytes4(keccak256('approve(address,uint256)')) ^
-   *   bytes4(keccak256('getApproved(uint256)')) ^
-   *   bytes4(keccak256('setApprovalForAll(address,bool)')) ^
-   *   bytes4(keccak256('isApprovedForAll(address,address)')) ^
-   *   bytes4(keccak256('transferFrom(address,address,uint256)')) ^
-   *   bytes4(keccak256('safeTransferFrom(address,address,uint256)')) ^
-   *   bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'))
+   * @dev Fired in transfer(), transferFrom(), safeTransferFrom(), mint()
+   * @param _from source address or zero if fired in mint()
+   * @param _to non-zero destination address
+   * @param _tokenId id of the token which was transferred from
+   *      source address to destination address
    */
-  bytes4 private constant InterfaceId_ERC721 = 0x80ac58cd;
+  event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 
   /**
-   * ERC721 interface extension – exists(uint256)
-   *
-   * 0x4f558e79 == bytes4(keccak256('exists(uint256)'))
+   * @dev Fired in approve()
+   * @param _owner owner of the token `_tokenId`
+   * @param _approved approved (trusted) address which is allowed now
+   *      to perform token `_tokenId` transfer on owner's behalf
+   * @param _tokenId token which is allowed to be transferred by
+   *      `_approved` on `_owner` behalf
    */
-  bytes4 private constant InterfaceId_ERC721Exists = 0x4f558e79;
-
-  /**
-   * ERC721 interface extension - ERC721Enumerable
-   *
-   * 0x780e9d63 ==
-   *   bytes4(keccak256('totalSupply()')) ^
-   *   bytes4(keccak256('tokenOfOwnerByIndex(address,uint256)')) ^
-   *   bytes4(keccak256('tokenByIndex(uint256)'))
-   */
-  bytes4 private constant InterfaceId_ERC721Enumerable = 0x780e9d63;
-
-  /**
-   * ERC721 interface extension - ERC721Metadata
-   *
-   * 0x5b5e139f ==
-   *   bytes4(keccak256('name()')) ^
-   *   bytes4(keccak256('symbol()')) ^
-   *   bytes4(keccak256('tokenURI(uint256)'))
-   */
-  bytes4 private constant InterfaceId_ERC721Metadata = 0x5b5e139f;
-
-  /// @dev Event names are self-explanatory:
-  /// @dev Fired in mint()
-  /// @dev Address `_by` allows to track who created a token
-  event Minted(address indexed _by, address indexed _to, uint8 indexed _tokenId);
-
-  /// @dev Fired in transfer(), transferFor(), mint()
-  /// @dev When minting a token, address `_from` is zero
-  /// @dev ERC20/ERC721 compliant event
-  event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId, uint256 _value);
-
-  /// @dev Fired in approve()
-  /// @dev ERC721 compliant event
   event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
-  /// @dev Fired in setApprovalForAll()
-  /// @dev ERC721 compliant event
+  /**
+   * @dev Fired in setApprovalForAll()
+   * @param _owner an address which may have some tokens
+   * @param _operator another address which is approved by owner
+   *      to transfer any tokens on their behalf
+   * @param _value true if `_operator` is granted approval,
+   *      false if `_operator` is revoked an approval
+   */
   event ApprovalForAll(address indexed _owner, address indexed _operator, bool _value);
 
-  /// @dev Fired in updateTaxRate()
-  event TaxRateUpdated(address indexed _owner, uint256 indexed _tokenId, uint16 tax, uint16 oldTax);
+  /**
+   * @dev Fired in mint()
+   * @param _by token creator (an address having `ROLE_TOKEN_CREATOR` permission)
+   *      which created (minted) the token `_tokenId`
+   * @param _to an address which received created token (first owner)
+   * @param _tokenId ID of the newly created token
+   */
+  event Minted(address indexed _by, address indexed _to, uint256 indexed _tokenId);
+
+  /**
+   * @dev Fired in updateTaxRate()
+   * @param _by address which updated the tax (token owner)
+   * @param _tokenId token ID the tax was updated for
+   * @param _from old tax value
+   * @param _to new tax value
+   */
+  event TaxRateUpdated(address indexed _by, uint256 indexed _tokenId, uint8 _from, uint8 _to);
+
+  /**
+   * @dev Fired in updateMaxTaxChangeFreq()
+   * @param _by tax manager (an address having `ROLE_TAX_MANAGER` permission)
+   *      which changed the `maxTaxChangeFreq` value on the smart contract
+   * @param _from old maxTaxChangeFreq value
+   * @param _to new maxTaxChangeFreq value
+   */
+  event MaxTaxChangeFreqUpdated(address indexed _by, uint32 _from, uint32 _to);
 
   /**
    * @dev Creates a Country ERC721 instance,
@@ -236,27 +301,27 @@ contract CountryERC721 is AccessControl, ERC165 {
    *      index `i` contains country with an ID `i + 1`
    * @dev The resulting array contains packed data structures for each country, containing:
    *      * number of plots as an integer, 16 bits
-   *      * tax rate as a 16 bit fraction, 16 bits
+   *      * tax rate as a 8 bit fraction, 8 bits
    *      * country owner address as an integer, 160 bits
    * @dev note: country owner address may be zero meaning country is not owned
    * @return an ordered array of countries as packed data structures
    */
-  function getAllCountriesPacked() public view returns(uint192[] memory) {
+  function getAllCountriesPacked() public view returns(uint184[] memory) {
     // determine how many countries we may have minted
     // and define resulting array in memory
-    uint192[] memory result = new uint192[](countryData.length);
+    uint184[] memory result = new uint184[](countryData.length);
 
     // iterate over all possible countries we may have minted
     for(uint8 i = 0; i < countryData.length; i++) {
       // if country is already minted and belongs to someone
       if(exists(i + 1)) {
         // build the result from actual country data
-        result[i] = uint192(getPacked(i + 1)) << 160 | uint160(ownerOf(i + 1));
+        result[i] = uint184(getPacked(i + 1)) << 160 | uint160(ownerOf(i + 1));
       }
       // otherwise, if country was not yet minted
       else {
         // build the result from country initialization data
-        result[i] = uint192(countryData[i]) << 176 | uint176(DEFAULT_TAX_RATE) << 160;
+        result[i] = uint184(countryData[i]) << 168 | uint168(DEFAULT_TAX_RATE) << 160;
       }
     }
 
@@ -322,7 +387,7 @@ contract CountryERC721 is AccessControl, ERC165 {
    * @param _tokenId ID of the country to fetch
    * @return country as 32-bit unsigned integer
    */
-  function getPacked(uint256 _tokenId) public view returns(uint32) {
+  function getPacked(uint256 _tokenId) public view returns(uint24) {
     // validate country existence
     require(exists(_tokenId));
 
@@ -330,7 +395,7 @@ contract CountryERC721 is AccessControl, ERC165 {
     Country memory country = tokens[_tokenId];
 
     // pack the data and return
-    return uint32(country.plots) << 16 | country.tax;
+    return uint24(country.plots) << 8 | country.tax;
   }
 
   /**
@@ -356,12 +421,12 @@ contract CountryERC721 is AccessControl, ERC165 {
    * @param owner an address to query a collection for
    * @return an unordered list of country packed data owned by give address
    */
-  function getPackedCollection(address owner) public view returns(uint40[] memory) {
+  function getPackedCollection(address owner) public view returns(uint32[] memory) {
     // get the list of token IDs the owner owns
     uint8[] memory ids = getCollection(owner);
 
     // allocate correspondent array for packed data
-    uint40[] memory packedCollection = new uint40[](ids.length);
+    uint32[] memory packedCollection = new uint32[](ids.length);
 
     // fetch token info one by one and pack it into the structure
     for(uint i = 0; i < ids.length; i++) {
@@ -369,10 +434,10 @@ contract CountryERC721 is AccessControl, ERC165 {
       uint8 tokenId = ids[i];
 
       // packed token data
-      uint32 packedData = getPacked(tokenId);
+      uint24 packedData = getPacked(tokenId);
 
       // pack the data and save it into result array
-      packedCollection[i] = uint40(tokenId) << 32 | packedData;
+      packedCollection[i] = uint32(tokenId) << 24 | packedData;
     }
 
     // return the result (it can be empty array as well)
@@ -399,10 +464,10 @@ contract CountryERC721 is AccessControl, ERC165 {
    */
   function getTax(uint256 _tokenId) public view returns(uint8, uint8) {
     // obtain token's tax as packed fraction
-    uint16 tax = getTaxPacked(_tokenId);
+    uint8 tax = getTaxPacked(_tokenId);
 
     // return tax as a proper fraction
-    return (tax.getNominator(), tax.getDenominator());
+    return (Fractions8.getNominator(tax), Fractions8.getDenominator(tax));
   }
 
   /**
@@ -410,7 +475,7 @@ contract CountryERC721 is AccessControl, ERC165 {
    * @param _tokenId country id to query tax for
    * @return tax as a proper fraction packed into uint16
    */
-  function getTaxPacked(uint256 _tokenId) public view returns(uint16) {
+  function getTaxPacked(uint256 _tokenId) public view returns(uint8) {
     // validate token existence
     require(exists(_tokenId));
 
@@ -429,7 +494,7 @@ contract CountryERC721 is AccessControl, ERC165 {
     require(exists(_tokenId));
 
     // obtain token's tax percent from storage and return
-    return tokens[_tokenId].tax.toPercent();
+    return Fractions8.toPercent(tokens[_tokenId].tax);
   }
 
   /**
@@ -443,7 +508,7 @@ contract CountryERC721 is AccessControl, ERC165 {
     require(exists(_tokenId));
 
     // obtain token's tax percent from storage, multiply by value and return
-    return tokens[_tokenId].tax.multiplyByInteger(_value);
+    return Fractions8.multiplyByInteger(tokens[_tokenId].tax, _value);
   }
 
   /**
@@ -452,8 +517,8 @@ contract CountryERC721 is AccessControl, ERC165 {
    * @dev Requires message sender to be owner of the token
    * @dev Requires previous tax change to be more then `maxTaxChangeFreq` blocks ago
    * @param _tokenId country id to update tax for
-   * @param nominator tax rate nominator
-   * @param denominator tax rate denominator
+   * @param nominator tax rate nominator, 4 bits unsigned integer [0, 32)
+   * @param denominator tax rate denominator, 4 bits unsigned integer (0, 32)
    */
   function updateTaxRate(uint256 _tokenId, uint8 nominator, uint8 denominator) public {
     // check if tax updating is enabled
@@ -469,16 +534,16 @@ contract CountryERC721 is AccessControl, ERC165 {
     require(tokens[_tokenId].taxModified + maxTaxChangeFreq <= now);
 
     // save old tax value to log
-    uint16 oldTax = tokens[_tokenId].tax;
+    uint8 oldTax = tokens[_tokenId].tax;
 
     // update the tax rate
-    tokens[_tokenId].tax = Fractions16.createProperFraction16(nominator, denominator);
+    tokens[_tokenId].tax = Fractions8.createProperFraction8(nominator, denominator);
 
     // update tax rate updated timestamp
     tokens[_tokenId].taxModified = uint32(now);
 
     // emit an event
-    emit TaxRateUpdated(msg.sender, _tokenId, tokens[_tokenId].tax, oldTax);
+    emit TaxRateUpdated(msg.sender, _tokenId, oldTax, tokens[_tokenId].tax);
   }
 
   /**
@@ -491,8 +556,14 @@ contract CountryERC721 is AccessControl, ERC165 {
     // check if caller has sufficient permissions to update tax change frequency
     require(isSenderInRole(ROLE_TAX_MANAGER));
 
-    // update the tax change frequency
-    maxTaxChangeFreq = _maxTaxChangeFreq;
+    // perform the update only in case of frequency change
+    if(maxTaxChangeFreq != _maxTaxChangeFreq) {
+      // emit an event first not to use additional variable to store old frequency
+      emit MaxTaxChangeFreqUpdated(msg.sender, maxTaxChangeFreq, _maxTaxChangeFreq);
+
+      // update the tax change frequency
+      maxTaxChangeFreq = _maxTaxChangeFreq;
+    }
   }
 
 
@@ -500,25 +571,25 @@ contract CountryERC721 is AccessControl, ERC165 {
    * @dev Creates new token with `tokenId` ID specified and
    *      assigns an ownership `to` for that token
    * @dev Initial token's properties are predefined by its ID
-   * @param to an address to assign created token ownership to
-   * @param tokenId ID of the token to create
+   * @param _to an address to assign created token ownership to
+   * @param _tokenId ID of the token to create
    */
-  function mint(address to, uint8 tokenId) public {
+  function mint(address _to, uint8 _tokenId) public {
     // validate destination address
-    require(to != address(0));
-    require(to != address(this));
+    require(_to != address(0));
+    require(_to != address(this));
 
     // check if caller has sufficient permissions to mint a token
     require(isSenderInRole(ROLE_TOKEN_CREATOR));
 
     // delegate call to `__mint`
-    __mint(to, tokenId);
+    __mint(_to, _tokenId);
 
     // fire Minted event
-    emit Minted(msg.sender, to, tokenId);
+    emit Minted(msg.sender, _to, _tokenId);
 
-    // fire ERC20/ERC721 transfer event
-    emit Transfer(address(0), to, tokenId, 1);
+    // fire ERC721 transfer event
+    emit Transfer(address(0), _to, _tokenId);
   }
 
 
@@ -642,7 +713,7 @@ contract CountryERC721 is AccessControl, ERC165 {
     // if `_from` is equal to sender, require transfers feature to be enabled
     // otherwise require transfers on behalf feature to be enabled
     require(_from == msg.sender && isFeatureEnabled(FEATURE_TRANSFERS)
-      || _from != msg.sender && isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
+         || _from != msg.sender && isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
 
     // call sender gracefully - `operator`
     address operator = msg.sender;
@@ -831,37 +902,46 @@ contract CountryERC721 is AccessControl, ERC165 {
     return StringUtils.concat("http://cryptominerworld.com/country/", StringUtils.itoa(_tokenId, 10));
   }
 
-  /// @dev Performs a transfer of a token `tokenId` from address `from` to address `to`
-  /// @dev Unsafe: doesn't check if caller has enough permissions to execute the call;
-  ///      checks only for token existence and that ownership belongs to `from`
-  /// @dev Is save to call from `transfer(to, tokenId)` since it doesn't need any additional checks
-  /// @dev Must be kept private at all times
-  function __transfer(address from, address to, uint256 _tokenId) private {
-    // validate source and destination address
-    require(to != address(0));
-    require(to != from);
+  /**
+   * @dev Performs a transfer of a token `_tokenId` from address `_from` to address `_to`
+   * @dev Unsafe: doesn't check if caller has enough permissions to execute the call;
+   *      checks only for token existence and that ownership belongs to `_from`
+   * @dev Is save to call from `transfer(_to, _tokenId)` since it doesn't need any additional checks
+   * @dev Must be kept private at all times
+   * @param _from an address which performs a transfer, must be a token owner
+   * @param _to an address which receives a token
+   * @param _tokenId ID of a token to transfer
+   */
+  function __transfer(address _from, address _to, uint256 _tokenId) private {
+    // validate source and destination addresses
+    require(_to != address(0));
+    require(_to != _from);
+
     // impossible by design of transfer(), transferFrom(),
     // approveToken() and approve()
-    assert(from != address(0));
+    assert(_from != address(0));
 
     // validate token existence
     require(exists(_tokenId));
 
     // validate token ownership
-    require(ownerOf(_tokenId) == from);
+    require(ownerOf(_tokenId) == _from);
 
-    // clear approved address for this particular token + emit event
+    // clear approved address for this particular token + emit an event
     __clearApprovalFor(_tokenId);
 
     // move token ownership,
     // update old and new owner's token collections accordingly
-    __move(from, to, _tokenId);
+    __move(_from, _to, _tokenId);
 
-    // fire ERC20/ERC721 transfer event
-    emit Transfer(from, to, _tokenId, 1);
+    // fire ERC721 transfer event
+    emit Transfer(_from, _to, _tokenId);
   }
 
-  /// @dev Clears approved address for a particular token
+  /**
+   * @dev Clears approved address for a particular token
+   * @param _tokenId ID of a token to clear approvals for
+   */
   function __clearApprovalFor(uint256 _tokenId) private {
     // check if approval exists - we don't want to fire an event in vain
     if(approvals[_tokenId] != address(0)) {
@@ -873,88 +953,103 @@ contract CountryERC721 is AccessControl, ERC165 {
     }
   }
 
-  /// @dev Move `country` from owner `from` to a new owner `to`
-  /// @dev Unsafe, doesn't check for consistence
-  /// @dev Must be kept private at all times
-  function __move(address from, address to, uint256 _tokenId) private {
-    // cast token ID to uint32 space
+  /**
+   * @dev Moves token from owner `_from` to a new owner `_to`:
+   *      modifies token owner, moves token ID from `_from` collection
+   *      to `_to` collection
+   * @dev Unsafe, doesn't check for data structures consistency
+   *      (token existence, token ID presence in `collections`, etc.)
+   * @dev Must be kept private at all times
+   * @param _from an address to take token from
+   * @param _to an address to put token into
+   * @param _tokenId ID of the token to move
+   */
+  function __move(address _from, address _to, uint256 _tokenId) private {
+    // cast token ID to uint8 space
     uint8 tokenId = uint8(_tokenId);
 
     // overflow check, failure impossible by design of mint()
     assert(tokenId == _tokenId);
 
-    // get the country pointer to the storage
-    Country storage country = tokens[_tokenId];
+    // get the token structure pointer to the storage
+    Country storage token = tokens[tokenId];
 
-    // get a reference to the collection where country is now
-    uint8[] storage source = collections[from];
+    // get a reference to the collection where token is now
+    uint8[] storage source = collections[_from];
 
-    // get a reference to the collection where country goes to
-    uint8[] storage destination = collections[to];
+    // get a reference to the collection where token goes to
+    uint8[] storage destination = collections[_to];
 
-    // collection `source` cannot be empty, if it is - it's a bug
+    // collection `source` cannot be empty, by design of transfer functions
     assert(source.length != 0);
 
-    // index of the country within collection `source`
-    uint8 i = country.index;
+    // index of the token within collection `source`
+    uint8 i = uint8(token.index);
 
-    // we put the last country in the collection `source` to the position released
-    // get an ID of the last country in `source`
+    // we put the last token in the collection `source` to the position released
+    // get an ID of the last token in `source`
     uint8 sourceId = source[source.length - 1];
 
-    // update country index to point to proper place in the collection `source`
+    // update last token index to point to proper place in the collection `source`
     tokens[sourceId].index = i;
 
-    // put it into the position i within `source`
+    // put it into the position `i` within `source`
     source[i] = sourceId;
 
     // trim the collection `source` by removing last element
     source.length--;
 
-    // update country index according to position in new collection `destination`
-    country.index = uint8(destination.length);
+    // update token index according to position in new collection `destination`
+    token.index = uint8(destination.length);
 
-    // update country owner
-    country.owner = to;
+    // update token owner
+    token.owner = _to;
 
-    // push country into collection
+    // update token ownership transfer date
+    token.ownershipModified = uint32(now);
+
+    // push token into destination collection
     destination.push(tokenId);
   }
 
-  /// @dev Creates new token with `tokenId` ID specified and
-  ///      assigns an ownership `to` for this token
-  /// @dev Unsafe: doesn't check if caller has enough permissions to execute the call
-  ///      checks only that the token doesn't exist yet
-  /// @dev Must be kept private at all times
-  function __mint(address to, uint8 tokenId) private {
+  /**
+   * @dev Creates new token with token ID specified and
+   *      and assigns an ownership `_to` for this token
+   * @dev Unsafe: doesn't check if caller has enough permissions to execute the call,
+   *      checks only that the token doesn't exist yet
+   * @dev Must be kept private at all times
+   * @param _to an address to mint token to (first owner of the token)
+   * @param _tokenId ID of the token to mint
+   */
+  function __mint(address _to, uint8 _tokenId) private {
     // check that `tokenId` is inside valid bounds
-    require(tokenId > 0 && tokenId <= countryData.length);
+    require(_tokenId > 0 && _tokenId <= countryData.length);
 
     // ensure that token with such ID doesn't exist
-    require(!exists(tokenId));
+    require(!exists(_tokenId));
 
     // create new country in memory
     Country memory country = Country({
-      id: tokenId,
-      plots: countryData[tokenId - 1],
+      plots: countryData[_tokenId - 1],
       tax: DEFAULT_TAX_RATE,
       taxModified: 0,
-      index: uint8(collections[to].length),
-      owner: to
+      index: uint8(collections[_to].length),
+      ownershipModified: 0,
+      owner: _to
     });
 
     // push newly created `tokenId` to the owner's collection of tokens
-    collections[to].push(tokenId);
+    collections[_to].push(_tokenId);
 
     // persist country to the storage
-    tokens[tokenId] = country;
+    tokens[_tokenId] = country;
 
     // add token ID to the `allTokens` collection,
     // automatically updates total supply
-    allTokens.push(tokenId);
+    allTokens.push(_tokenId);
 
     // update token bitmap
-    tokenMap |= uint192(1 << uint256(tokenId - 1));
+    tokenMap |= uint192(1 << uint256(_tokenId - 1));
   }
 
 }

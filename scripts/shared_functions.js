@@ -25,3 +25,6 @@ export const write_csv = function(path, header, data) {
 	}
 	fs.appendFileSync(path, `${header}\n${data}`);
 };
+
+// short name for web3.utils.toBN
+export const toBN = web3.utils.toBN;

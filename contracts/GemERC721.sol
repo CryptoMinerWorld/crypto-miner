@@ -1,19 +1,26 @@
 pragma solidity 0.5.8;
 
+import "./AccessControl.sol";
+import "./ERC165.sol";
+import "./ERC721Interfaces.sol";
+import "./ERC721Receiver.sol";
 import "./AddressUtils.sol";
 import "./StringUtils.sol";
-import "./AccessControl.sol";
-import "./ERC721Receiver.sol";
-import "./ERC165.sol";
 
 /**
+ * @title Gem ERC721 Token
+ *
  * @notice Gem is unique tradable entity. Non-fungible.
+ *
  * @dev A gem is an ERC721 non-fungible token, which maps Token ID,
  *      a 32 bit number to a set of gem properties -
  *      attributes (mostly immutable by their nature) and state variables (mutable)
  * @dev A gem token supports only minting, it can be only created
+ *
+ * @author Basil Gorin
  */
-contract GemERC721 is AccessControl, ERC165 {
+// TODO: consider switching to 24-bit token ID
+contract GemERC721 is AccessControl, ERC165, ERC721Interfaces {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
@@ -21,134 +28,210 @@ contract GemERC721 is AccessControl, ERC165 {
    */
   uint256 public constant TOKEN_UID = 0x5f9e14819386e60b64cb52a07e7f47db3cf1d4668841cdfb42fd2b442fdbaf96;
 
-  /// @dev ERC20 compliant token symbol
+  /**
+   * @dev ERC20 compliant token symbol
+   */
   string public constant symbol = "GEM";
-  /// @dev ERC20 compliant token name
+
+  /**
+   * @dev ERC20 compliant token name
+   */
   string public constant name = "GEM – CryptoMiner World";
-  /// @dev ERC20 compliant token decimals
-  /// @dev this can be only zero, since ERC721 token is non-fungible
+
+  /**
+   * @dev ERC20 compliant token decimals
+   * @dev Equal to zero – since ERC721 token is non-fungible
+   *      and therefore non-divisible
+   */
   uint8 public constant decimals = 0;
 
-  /// @dev A gem data structure
-  /// @dev Occupies 64 bytes of storage (512 bits)
+  /**
+   * @dev Token data structure (Gem Data Structure)
+   * @dev Occupies 2 storage slots (512 bits)
+   */
   struct Gem {
-    /// High 256 bits
+    /*** High 256 bits ***/
+
     /// @dev Where gem was found: land plot ID,
     ///      land block within a plot,
     ///      gem number (id) within a block of land, immutable
+    // TODO: shrink to 32 bits
     uint64 coordinates;
 
-    /// @dev Gem color, one of 12 values, immutable
+    /**
+     * @dev Gem color, immutable, one of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+     */
     uint8 color;
 
-    /// @dev Level modified time
-    /// @dev Stored as Ethereum Block Number of the transaction
-    ///      when the level was modified
-    uint32 levelModified;
-
-    /// @dev Level value (mutable), one of 1, 2, 3, 4, 5
+    /**
+     * @dev Gem level, mutable, may only increase
+     */
     uint8 level;
 
-    /// @dev Grade modified time
-    /// @dev Stored as Ethereum Block Number of the transaction
-    ///      when the grade was modified
-    uint32 gradeModified;
+    /**
+     * @dev Initially zero, changes when level is modified
+     *      (meaning the gem is leveled up)
+     * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
+     */
+    uint32 levelModified;
 
-    /// @dev High 8 bits store grade type and low 24 bits grade value
-    /// @dev Grade type is one of D (1), C (2), B (3), A (4), AA (5) and AAA (6)
+    /**
+     * @dev Gem grade, mutable, may only increase
+     * @dev High 8 bits of the grade is grade type:
+     *      D (1), C (2), B (3), A (4), AA (5) and AAA (6)
+     * @dev Low 24 bits of the grade is grade value
+     */
     uint32 grade;
 
-    /// @dev Store state modified time
-    /// @dev Stored as Ethereum Block Number of the transaction
-    ///      when the state was modified
-    uint32 stateModified;
+    /**
+     * @dev Initially zero, changes when grade is modified
+     *      (meaning the gem is upgraded)
+     * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
+     */
+    uint32 gradeModified;
 
-    /// @dev State value, mutable
+    /**
+     * @dev State value, mutable
+     */
+    // TODO: extend to 64 or 80 bits
     uint48 state;
 
+    /**
+     * @dev Initially zero, changes when state is modified
+     * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
+     */
+    uint32 stateModified;
 
-    /// Low 256 bits
-    /// @dev Gem creation time, immutable, cannot be zero
-    /// @dev Stored as Ethereum Block Number of the transaction
-    ///      when the gem was created
+
+    /*** Low 256 bits ***/
+
+    /**
+     * @dev Token creation time, immutable, cannot be zero
+     * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
+     */
     uint32 creationTime;
 
-    /// @dev Gem index within an owner's collection of gems, mutable
+    /**
+     * @dev Token index within an owner's collection of tokens
+     * @dev Changes when token is being transferred (token ownership changes)
+     * @dev May change if some other token of the same owner is transferred
+     * @dev Only low 24 bits are used
+     */
     uint32 index;
 
-    /// @dev Initially zero, changes when ownership is transferred
-    /// @dev Stored as Ethereum Block Number of the transaction
-    ///      when the gem's ownership was changed, mutable
+    /**
+     * @dev Initially zero, changes when token ownership changes
+     *      (that is token is transferred)
+     * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
+     */
     uint32 ownershipModified;
 
-    /// @dev Gem's owner, initialized upon gem creation, mutable
+    /**
+     * @dev Token owner, initialized upon token creation, cannot be zero
+     * @dev Changes when token is being transferred to a new owner
+     */
     address owner;
   }
 
-  /// @notice All the emitted tokens
-  /// @dev Core of the Gem as ERC721 token
-  /// @dev Maps Gem ID => Gem Data Structure
+  /**
+   * @notice All the emitted tokens
+   * @dev Core of the Gem as ERC721 token
+   * @dev Maps Token ID => Gem Data Structure
+   */
   mapping(uint256 => Gem) public tokens;
 
-  /// @dev Mapping from a gem ID to an address approved to
-  ///      transfer ownership rights for this gem
+  /**
+   * @dev An extension data structure, maps 256 bits of data to a token ID
+   */
+  // TODO: consider extending to unlimited size
+  mapping(uint256 => uint256) ext256;
+
+  /**
+   * @dev Mapping from a token ID to an address approved to
+   *      transfer ownership rights for this token
+   */
   mapping(uint256 => address) public approvals;
 
-  /// @dev Mapping from owner to operator approvals
-  ///      token owner => approved token operator => is approved
+  /**
+   * @dev Mapping from owner to an approved operator address –
+   *      an address approved to transfer any tokens of the owner
+   *      token owner => approved token operator => is approved
+   */
   mapping(address => mapping(address => bool)) public approvedOperators;
 
-  /// @notice Storage for a collections of tokens
-  /// @notice A collection of tokens is an ordered list of token IDs,
-  ///      owned by a particular address (owner)
-  /// @dev A mapping from owner to a collection of his tokens (IDs)
-  /// @dev ERC20 compliant structure for balances can be derived
-  ///      as a length of each collection in the mapping
-  /// @dev ERC20 balances[owner] is equal to collections[owner].length
+  /**
+   * @notice Storage for a collections of tokens
+   * @notice A collection of tokens is an ordered list of token IDs,
+   *      owned by a particular address (owner)
+   * @dev A mapping from owner to a collection of his tokens (IDs)
+   * @dev ERC20 compliant structure for balances can be derived
+   *      as a length of each collection in the mapping
+   * @dev ERC20 balances[owner] is equal to collections[owner].length
+   */
   mapping(address => uint32[]) public collections;
 
-  /// @dev Array with all token ids, used for enumeration
-  /// @dev ERC20 compliant structure for totalSupply can be derived
-  ///      as a length of this collection
-  /// @dev ERC20 totalSupply() is equal to allTokens.length
+  /**
+   * @dev Array with all token ids, used for enumeration
+   * @dev ERC20 compliant structure for totalSupply can be derived
+   *      as a length of this collection
+   * @dev ERC20 totalSupply() is equal to allTokens.length
+   */
   uint32[] public allTokens;
 
-  /// @dev The data in token's state may contain lock(s)
-  ///      (ex.: is gem currently mining or not)
-  /// @dev A locked token cannot be transferred or upgraded
-  /// @dev The token is locked if it contains any bits
-  ///      from the `lockedBitmask` in its `state` set
-  uint64 public lockedBitmask = DEFAULT_MINING_BIT;
+  /**
+   * @dev The data in token's state may contain lock(s)
+   *      (ex.: if token currently busy with some function which prevents transfer)
+   * @dev A locked token cannot be transferred
+   * @dev The token is locked if it contains any bits
+   *      from the `transferLock` in its `state` set
+   */
+  uint64 public transferLock = DEFAULT_MINING_BIT;
 
-  /// @dev Enables ERC721 transfers of the tokens
-  uint32 public constant FEATURE_TRANSFERS = 0x00000001;
-
-  /// @dev Enables ERC721 transfers on behalf
-  uint32 public constant FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
-
-  /// @dev Enables partial support of ERC20 transfers of the tokens,
-  ///      allowing to transfer only all owned tokens at once
-  //uint32 public constant ERC20_TRANSFERS = 0x00000004;
-
-  /// @dev Enables partial support of ERC20 transfers on behalf
-  ///      allowing to transfer only all owned tokens at once
-  //uint32 public constant ERC20_TRANSFERS_ON_BEHALF = 0x00000008;
-
-  /// @dev Enables full support of ERC20 transfers of the tokens,
-  ///      allowing to transfer arbitrary amount of the tokens at once
-  //uint32 public constant ERC20_INSECURE_TRANSFERS = 0x00000010;
-
-  /// @dev Default bitmask indicating that the gem is `mining`
-  /// @dev Consists of a single bit at position 1 – binary 1
-  /// @dev The bit meaning in token's `state` is as follows:
-  ///      0: not mining
-  ///      1: mining
+  /**
+   * @dev Default bitmask indicating that the gem is `mining`
+   * @dev Consists of a single bit at position 1 – binary 1
+   * @dev The bit meaning in token's `state` is as follows:
+   *      0: not mining
+   *      1: mining
+   */
   uint64 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
 
-  /// @notice Exchange is responsible for trading tokens on behalf of token holders
-  /// @dev Role ROLE_EXCHANGE allows executing transfer on behalf of token holders
-  /// @dev Not used
-  //uint32 public constant ROLE_EXCHANGE = 0x00010000;
+  /**
+   * @notice The 'transfers' feature supports regular token transfers
+   * @dev Enables ERC721 transfers of the tokens (token owner performs a transfer)
+   * @dev Token owner is defined in `tokens` data structure
+   */
+  uint32 public constant FEATURE_TRANSFERS = 0x00000001;
+
+  /**
+   * @notice The 'transfers on behalf' feature supports token transfers by
+   *      trusted operators defined for particular tokens or token owners
+   * @dev Enables ERC721 transfers on behalf (approved operator performs a transfer)
+   * @dev Approved operators are defined in `approvals` and `approvedOperators`
+   *      data structures
+   */
+  uint32 public constant FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
+
+  /**
+   * @notice Token creator is responsible for creating tokens
+   * @dev Allows minting tokens
+   */
+  uint32 public constant ROLE_TOKEN_CREATOR = 0x00000001;
+
+  /**
+   * @notice State provider is responsible for various features of the game,
+   *      including token locking (required to enabling mining protocol)
+   * @dev Allows modifying token's state
+   */
+  uint32 public constant ROLE_STATE_PROVIDER = 0x00000004;
+
+  /**
+   * @notice Transfer lock provider is responsible for various features of the game,
+   *      including token locking (required to enabling mining protocol)
+   * @dev Allows modifying transfer lock bitmask `transferLock`
+   */
+  uint32 public constant ROLE_TRANSFER_LOCK_PROVIDER = 0x00000008;
+
 
   /// @notice Level provider is responsible for enabling the workshop
   /// @dev Role ROLE_LEVEL_PROVIDER allows leveling up the gem
@@ -158,95 +241,79 @@ contract GemERC721 is AccessControl, ERC165 {
   /// @dev Role ROLE_GRADE_PROVIDER allows modifying gem's grade
   uint32 public constant ROLE_GRADE_PROVIDER = 0x00200000;
 
-  /// @notice Token state provider is responsible for enabling the mining protocol
-  /// @dev Role ROLE_STATE_PROVIDER allows modifying token's state
-  uint32 public constant ROLE_STATE_PROVIDER = 0x00400000;
-
-  /// @notice Token state provider is responsible for enabling the mining protocol
-  /// @dev Role ROLE_STATE_LOCK_PROVIDER allows modifying token's locked bitmask
-  uint32 public constant ROLE_STATE_LOCK_PROVIDER = 0x00800000;
-
-  /// @notice Token creator is responsible for creating tokens
-  /// @dev Role ROLE_TOKEN_CREATOR allows minting tokens
-  uint32 public constant ROLE_TOKEN_CREATOR = 0x00040000;
-
-  /// @notice Token destroyer is responsible for destroying tokens
-  /// @dev Role ROLE_TOKEN_DESTROYER allows burning tokens
-  //uint32 public constant ROLE_TOKEN_DESTROYER = 0x00080000;
-
-  /// @dev Magic value to be returned upon successful reception of an NFT
-  /// @dev Equal to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`,
-  ///      which can be also obtained as `ERC721Receiver(0).onERC721Received.selector`
+  /**
+   * @dev Magic value to be returned upon successful reception of ERC721 token (NFT)
+   * @dev Equal to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`,
+   *      which can be also obtained as `ERC721Receiver(0).onERC721Received.selector`
+   */
   bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
-  /**
-   * Supported interfaces section
-   */
 
   /**
-   * ERC721 interface definition in terms of ERC165
-   *
-   * 0x80ac58cd ==
-   *   bytes4(keccak256('balanceOf(address)')) ^
-   *   bytes4(keccak256('ownerOf(uint256)')) ^
-   *   bytes4(keccak256('approve(address,uint256)')) ^
-   *   bytes4(keccak256('getApproved(uint256)')) ^
-   *   bytes4(keccak256('setApprovalForAll(address,bool)')) ^
-   *   bytes4(keccak256('isApprovedForAll(address,address)')) ^
-   *   bytes4(keccak256('transferFrom(address,address,uint256)')) ^
-   *   bytes4(keccak256('safeTransferFrom(address,address,uint256)')) ^
-   *   bytes4(keccak256('safeTransferFrom(address,address,uint256,bytes)'))
+   * @dev Fired in transfer(), transferFrom(), safeTransferFrom(), mint()
+   * @param _from source address or zero if fired in mint()
+   * @param _to non-zero destination address
+   * @param _tokenId id of the token which was transferred from
+   *      source address to destination address
    */
-  bytes4 private constant InterfaceId_ERC721 = 0x80ac58cd;
+  event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 
   /**
-   * ERC721 interface extension – exists(uint256)
-   *
-   * 0x4f558e79 == bytes4(keccak256('exists(uint256)'))
+   * @dev Fired in approve()
+   * @param _owner owner of the token `_tokenId`
+   * @param _approved approved (trusted) address which is allowed now
+   *      to perform token `_tokenId` transfer on owner's behalf
+   * @param _tokenId token which is allowed to be transferred by
+   *      `_approved` on `_owner` behalf
    */
-  bytes4 private constant InterfaceId_ERC721Exists = 0x4f558e79;
-
-  /**
-   * ERC721 interface extension - ERC721Enumerable
-   *
-   * 0x780e9d63 ==
-   *   bytes4(keccak256('totalSupply()')) ^
-   *   bytes4(keccak256('tokenOfOwnerByIndex(address,uint256)')) ^
-   *   bytes4(keccak256('tokenByIndex(uint256)'))
-   */
-  bytes4 private constant InterfaceId_ERC721Enumerable = 0x780e9d63;
-
-  /**
-   * ERC721 interface extension - ERC721Metadata
-   *
-   * 0x5b5e139f ==
-   *   bytes4(keccak256('name()')) ^
-   *   bytes4(keccak256('symbol()')) ^
-   *   bytes4(keccak256('tokenURI(uint256)'))
-   */
-  bytes4 private constant InterfaceId_ERC721Metadata = 0x5b5e139f;
-
-  /// @dev Event names are self-explanatory:
-  /// @dev Fired in mint()
-  /// @dev Address `_by` allows to track who created a token
-  event Minted(address indexed _by, address indexed _to, uint32 indexed _tokenId);
-
-  /// @dev Fired in burn()
-  /// @dev Address `_by` allows to track who destroyed a token
-  //event Burnt(address indexed _from, address _by, uint32 indexed _tokenId);
-
-  /// @dev Fired in transfer(), transferFor(), mint()
-  /// @dev When minting a token, address `_from` is zero
-  /// @dev ERC20/ERC721 compliant event
-  event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId, uint256 _value);
-
-  /// @dev Fired in approve()
-  /// @dev ERC721 compliant event
   event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
-  /// @dev Fired in setApprovalForAll()
-  /// @dev ERC721 compliant event
+  /**
+   * @dev Fired in setApprovalForAll()
+   * @param _owner an address which may have some tokens
+   * @param _operator another address which is approved by owner
+   *      to transfer any tokens on their behalf
+   * @param _value true if `_operator` is granted approval,
+   *      false if `_operator` is revoked an approval
+   */
   event ApprovalForAll(address indexed _owner, address indexed _operator, bool _value);
+
+  /**
+   * @dev Fired in mint()
+   * @param _by token creator (an address having `ROLE_TOKEN_CREATOR` permission)
+   *      which created (minted) the token `_tokenId`
+   * @param _to an address which received created token (first owner)
+   * @param _tokenId ID of the newly created token
+   */
+  event Minted(address indexed _by, address indexed _to, uint256 indexed _tokenId);
+
+  /**
+   * @dev Fired in setState()
+   * @param _by state provider
+   *      (an address having `ROLE_STATE_PROVIDER` permission)
+   *      which modified token `_tokenId` state
+   * @param _owner owner of the token `_tokenId`
+   * @param _tokenId id of the token whose state was modified
+   * @param _from old state
+   * @param _to new state
+   */
+  event StateModified(
+    address indexed _by,
+    address indexed _owner,
+    uint256 indexed _tokenId,
+    uint128 _from,
+    uint128 _to
+  );
+
+  /**
+   * @dev Fired in setTransferLock()
+   * @param _by transfer lock provider
+   *      (an address having `ROLE_TRANSFER_LOCK_PROVIDER` permission)
+   *      which modified `transferLock` global variable
+   * @param _from old value of `transferLock`
+   * @param _to new value of `transferLock`
+   */
+  event TransferLockChanged(address indexed _by, uint64 _from, uint64 _to);
 
   /// @dev Fired in levelUp()
   event LevelUp(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint8 _levelReached);
@@ -254,11 +321,10 @@ contract GemERC721 is AccessControl, ERC165 {
   /// @dev Fired in upgradeGrade()
   event UpgradeComplete(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint32 _gradeFrom, uint32 _gradeTo);
 
-  /// @dev Fired in setState()
-  event StateModified(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint48 _stateFrom, uint48 _stateTo);
-
-  /// @dev Creates a Gem ERC721 instance,
-  /// @dev Registers a ERC721 interface using ERC165
+  /**
+   * @dev Creates a ERC721 instance,
+   *      registers required ERC721 interfaces via ERC165
+   */
   constructor() public {
     // register the supported interfaces to conform to ERC721 via ERC165
     _registerInterface(InterfaceId_ERC721);
@@ -357,23 +423,6 @@ contract GemERC721 is AccessControl, ERC165 {
   function getCollection(address owner) public view returns(uint32[] memory) {
     // read a collection from mapping and return
     return collections[owner];
-  }
-
-  /**
-   * @dev Allows setting the `lockedBitmask` parameter of the contract,
-   *      which is used to determine if a particular token is locked or not
-   * @dev A locked token cannot be transferred, upgraded or burnt
-   * @dev The token is locked if it contains any bits
-   *      from the `lockedBitmask` in its `state` set
-   * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission.
-   * @param bitmask a value to set `lockedBitmask` to
-   */
-  function setLockedBitmask(uint64 bitmask) public {
-    // check that the call is made by a state lock provider
-    require(isSenderInRole(ROLE_STATE_LOCK_PROVIDER));
-
-    // update the locked bitmask
-    lockedBitmask = bitmask;
   }
 
   /**
@@ -570,10 +619,11 @@ contract GemERC721 is AccessControl, ERC165 {
     tokens[_tokenId].gradeModified = uint32(block.number);
   }
 
+
   /**
    * @dev Gets the state modified date of a token
    * @param _tokenId ID of the token to get state modified date for
-   * @return a token state modification date
+   * @return token state modification date as a unix timestamp
    */
   function getStateModified(uint256 _tokenId) public view returns(uint32) {
     // validate token existence
@@ -597,32 +647,53 @@ contract GemERC721 is AccessControl, ERC165 {
   }
 
   /**
-   * @dev Sets the state of a token
+   * @dev Verifies if token is transferable (can change ownership)
+   * @param _tokenId ID of the token to check transferable state for
+   * @return true if token is transferable, false otherwise
+   */
+  function isTransferable(uint256 _tokenId) public view returns(bool) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // calculate token state and transfer mask intersection
+    // and compare this intersection with zero
+    return tokens[_tokenId].state & transferLock == 0;
+  }
+
+  /**
+   * @dev Modifies the state of a token
    * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
    * @param _tokenId ID of the token to set state for
-   * @param state new state to set for the token
+   * @param newState new state to set for the token
    */
-  function setState(uint256 _tokenId, uint48 state) public {
+  function setState(uint256 _tokenId, uint48 newState) public {
     // check that the call is made by a state provider
     require(isSenderInRole(ROLE_STATE_PROVIDER));
 
     // check that token to set state for exists
     require(exists(_tokenId));
 
-    // emit an event
-    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, tokens[_tokenId].state, state);
+    // read old state value
+    uint48 state = tokens[_tokenId].state;
+
+    // check that new state is not the same as an old one
+    // do not require this for state, allow state modification data update
+    // require(newState != state);
 
     // set the state required
-    tokens[_tokenId].state = state;
+    tokens[_tokenId].state = newState;
 
     // update the state modified date
     tokens[_tokenId].stateModified = uint32(block.number);
+
+    // emit an event
+    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state, newState);
   }
 
   /**
    * @dev Gets the creation time of a token
    * @param _tokenId ID of the token to get creation time for
-   * @return a token creation time
+   * @return a token creation time as a unix timestamp
    */
   function getCreationTime(uint256 _tokenId) public view returns(uint32) {
     // validate token existence
@@ -635,7 +706,7 @@ contract GemERC721 is AccessControl, ERC165 {
   /**
    * @dev Gets the ownership modified time of a token
    * @param _tokenId ID of the token to get ownership modified time for
-   * @return a token ownership modified time
+   * @return a token ownership modified time as a unix timestamp
    */
   function getOwnershipModified(uint256 _tokenId) public view returns(uint32) {
     // validate token existence
@@ -644,6 +715,30 @@ contract GemERC721 is AccessControl, ERC165 {
     // obtain token's ownership modified time from storage and return
     return tokens[_tokenId].ownershipModified;
   }
+
+  /**
+   * @dev Allows setting the `transferLock` parameter of the contract,
+   *      which is used to determine if a particular token is locked or not
+   * @dev A locked token cannot be transferred
+   * @dev The token is locked if it contains any bits
+   *      from the `transferLock` in its `state` set
+   * @dev Requires sender to have `ROLE_TRANSFER_LOCK_PROVIDER` permission.
+   * @param _transferLock a value to set `transferLock` to
+   */
+  function setTransferLock(uint64 _transferLock) public {
+    // check that the call is made by a transfer lock provider
+    require(isSenderInRole(ROLE_TRANSFER_LOCK_PROVIDER));
+
+    // in case if new bitmask is different from what is already set
+    if(_transferLock != transferLock) {
+      // emit an event first - `transferLock` will be overwritten
+      emit TransferLockChanged(msg.sender, transferLock, _transferLock);
+
+      // update the transfer lock
+      transferLock = _transferLock;
+    }
+  }
+
 
   /**
    * @notice Total number of existing tokens (tracked by this contract)
@@ -1038,8 +1133,8 @@ contract GemERC721 is AccessControl, ERC165 {
     // fire Minted event
     emit Minted(msg.sender, to, tokenId);
 
-    // fire ERC20/ERC721 transfer event
-    emit Transfer(address(0), to, tokenId, 1);
+    // fire ERC721 transfer event
+    emit Transfer(address(0), to, tokenId);
   }
 
   /// @dev Performs a transfer of a token `tokenId` from address `from` to address `to`
@@ -1063,7 +1158,7 @@ contract GemERC721 is AccessControl, ERC165 {
 
     // transfer is not allowed for a locked gem
     // (ex.: if ge is currently mining)
-    require(getState(_tokenId) & lockedBitmask == 0);
+    require(getState(_tokenId) & transferLock == 0);
 
     // clear approved address for this particular token + emit event
     __clearApprovalFor(_tokenId);
@@ -1072,8 +1167,8 @@ contract GemERC721 is AccessControl, ERC165 {
     // update old and new owner's gem collections accordingly
     __move(from, to, _tokenId);
 
-    // fire ERC20/ERC721 transfer event
-    emit Transfer(from, to, _tokenId, 1);
+    // fire ERC721 transfer event
+    emit Transfer(from, to, _tokenId);
   }
 
   /// @dev Clears approved address for a particular token

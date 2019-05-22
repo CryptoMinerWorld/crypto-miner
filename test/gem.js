@@ -2,7 +2,7 @@ const Token = artifacts.require("./GemERC721.sol");
 
 const FEATURE_TRANSFERS = 0x00000001;
 const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
-const ROLE_TOKEN_CREATOR = 0x00040000;
+const ROLE_TOKEN_CREATOR = 0x00000001;
 
 contract('GemERC721', function(accounts) {
 	it("initial state: no tokens exist initially", async function() {
@@ -94,8 +94,8 @@ contract('GemERC721', function(accounts) {
 		await tk.updateFeatures(FEATURE_TRANSFERS);
 		await tk.mint(accounts[0], 0x401, 1, 0, 1, 1, 1, 1, 1);
 		await tk.mint(accounts[0], 0x402, 1, 0, 1, 1, 1, 1, 1);
-		await assertThrows(async function() {await tk.setLockedBitmask(0x1, {from: accounts[1]});});
-		await tk.setLockedBitmask(0x1);
+		await assertThrows(async function() {await tk.setTransferLock(0x1, {from: accounts[1]});});
+		await tk.setTransferLock(0x1);
 		await tk.setState(0x401, 0x1);
 		await tk.setState(0x402, 0x1);
 		const fn1 = async () => await tk.transfer(accounts[1], 0x401);
@@ -104,13 +104,13 @@ contract('GemERC721', function(accounts) {
 		await assertThrows(fn2);
 		await tk.setState(0x401, 0x2);
 		await fn1();
-		await tk.setLockedBitmask(0x2);
+		await tk.setTransferLock(0x2);
 		await fn2();
 		const fn = async () => await tk.transfer(accounts[2], 0x401, {from: accounts[1]});
 		await assertThrows(fn);
-		await tk.setLockedBitmask(0x3);
+		await tk.setTransferLock(0x3);
 		await assertThrows(fn);
-		await tk.setLockedBitmask(0x4);
+		await tk.setTransferLock(0x4);
 		await fn();
 		assert.equal(accounts[1], await tk.ownerOf(0x402), "wrong token 0x402 owner");
 		assert.equal(accounts[2], await tk.ownerOf(0x401), "wrong token 0x401 owner");

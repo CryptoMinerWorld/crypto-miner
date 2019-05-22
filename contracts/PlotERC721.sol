@@ -139,6 +139,7 @@ contract PlotERC721 is AccessControl, ERC165, ERC721Interfaces {
      */
     uint32 stateModified;
 
+
     /*** Low 256 bits ***/
 
     /**
@@ -183,6 +184,12 @@ contract PlotERC721 is AccessControl, ERC165, ERC721Interfaces {
    * @dev Maps Token ID => Land Plot Data Structure
    */
   mapping(uint256 => LandPlot) public tokens;
+
+  /**
+   * @dev An extension data structure, maps 256 bits of data to a token ID
+   */
+  // TODO: consider extending to unlimited size
+  mapping(uint256 => uint256) ext256;
 
   /**
    * @dev Mapping from a token ID to an address approved to
@@ -348,11 +355,7 @@ contract PlotERC721 is AccessControl, ERC165, ERC721Interfaces {
    * @param _from old value of `transferLock`
    * @param _to new value of `transferLock`
    */
-  event TransferLockChanged(
-    address indexed _by,
-    uint128 _from,
-    uint128 _to
-  );
+  event TransferLockChanged(address indexed _by, uint128 _from, uint128 _to);
 
   /**
    * @dev Fired in mineTo() and mineBy()
@@ -725,7 +728,8 @@ contract PlotERC721 is AccessControl, ERC165, ERC721Interfaces {
     uint128 state = tokens[_tokenId].state;
 
     // check that new state is not the same as an old one
-    require(newState != state);
+    // do not require this for state, allow state modification data update
+    // require(newState != state);
 
     // set the state required
     tokens[_tokenId].state = newState;
@@ -770,23 +774,20 @@ contract PlotERC721 is AccessControl, ERC165, ERC721Interfaces {
    * @dev The token is locked if it contains any bits
    *      from the `transferLock` in its `state` set
    * @dev Requires sender to have `ROLE_TRANSFER_LOCK_PROVIDER` permission.
-   * @param bitmask a value to set `transferLock` to
+   * @param _transferLock a value to set `transferLock` to
    */
-  function setTransferLock(uint128 bitmask) public {
+  function setTransferLock(uint128 _transferLock) public {
     // check that the call is made by a transfer lock provider
     require(isSenderInRole(ROLE_TRANSFER_LOCK_PROVIDER));
 
-    // old transfer lock value
-    uint128 lock = transferLock;
+    // in case if new bitmask is different from what is already set
+    if(_transferLock != transferLock) {
+      // emit an event first - `transferLock` will be overwritten
+      emit TransferLockChanged(msg.sender, transferLock, _transferLock);
 
-    // check that new lock is not the same as an old one
-    require(lock != bitmask);
-
-    // update the transfer lock
-    transferLock = bitmask;
-
-    // emit an event
-    emit TransferLockChanged(msg.sender, lock, bitmask);
+      // update the transfer lock
+      transferLock = _transferLock;
+    }
   }
 
 
@@ -1165,7 +1166,7 @@ contract PlotERC721 is AccessControl, ERC165, ERC721Interfaces {
     require(exists(_tokenId));
 
     // token URL consists of base URL part (domain) and token ID
-    return StringUtils.concat("http://cryptominerworld.com/plot/0x", StringUtils.itoa(_tokenId, 16));
+    return StringUtils.concat("http://cryptominerworld.com/plot/", StringUtils.itoa(_tokenId, 10));
   }
 
   /**
