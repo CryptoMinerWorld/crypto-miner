@@ -520,10 +520,10 @@ contract PlotERC721 is ERC721Core {
    * @dev Mines the token to the depth specified
    * @dev Requires depth to be bigger than current offset
    * @dev Requires sender to have `ROLE_OFFSET_PROVIDER` permission
-   * @dev _tokenId ID of the token to mine
-   * @dev depth absolute depth value to mine to, greater than current depth
+   * @param _tokenId ID of the token to mine
+   * @param _offset absolute depth value to mine to, greater than current depth
    */
-  function mineTo(uint256 _tokenId, uint8 offset) public {
+  function mineTo(uint256 _tokenId, uint8 _offset) public {
     // check that the call is made by a offset provider
     require(isSenderInRole(ROLE_OFFSET_PROVIDER));
 
@@ -534,29 +534,29 @@ contract PlotERC721 is ERC721Core {
     uint64 tiers = tokens[_tokenId].tiers;
 
     // extract current offset value
-    uint8 offset0 = TierMath.getOffset(tiers);
+    uint8 offset = TierMath.getOffset(tiers);
 
     // ensure we're getting deeper
-    require(offset > offset0);
+    require(_offset > offset);
 
     // perform mining, update the offset
-    tokens[_tokenId].tiers = TierMath.updateOffset(tiers, offset);
+    tokens[_tokenId].tiers = TierMath.updateOffset(tiers, _offset);
 
     // update the offset modification date
     tokens[_tokenId].offsetModified = uint32(now);
 
     // emit an event
-    emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset0, offset);
+    emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset, _offset);
   }
 
   /**
    * @dev Mines the token by the depth delta specified
    * @dev Requires depth delta to be positive value
    * @dev Requires sender to have `ROLE_OFFSET_PROVIDER` permission
-   * @dev _tokenId ID of the token to mine
-   * @dev depth depth delta value to mine by, greater than zero
+   * @param _tokenId ID of the token to mine
+   * @param _by depth delta value to mine by, greater than zero
    */
-  function mineBy(uint256 _tokenId, uint8 by) public {
+  function mineBy(uint256 _tokenId, uint8 _by) public {
     // check that the call is made by a offset provider
     require(isSenderInRole(ROLE_OFFSET_PROVIDER));
 
@@ -567,19 +567,19 @@ contract PlotERC721 is ERC721Core {
     uint64 tiers = tokens[_tokenId].tiers;
 
     // extract current offset value
-    uint8 offset0 = TierMath.getOffset(tiers);
+    uint8 offset = TierMath.getOffset(tiers);
 
-    // ensure we're getting deeper
-    require(by + offset0 > offset0);
+    // ensure we're getting deeper, arithmetic overflow check
+    require(_by + offset > offset);
 
     // perform mining, increase the offset
-    tokens[_tokenId].tiers = TierMath.increaseOffset(tiers, by);
+    tokens[_tokenId].tiers = TierMath.increaseOffset(tiers, _by);
 
     // update the offset modification date
     tokens[_tokenId].offsetModified = uint32(now);
 
     // emit an event
-    emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset0, offset0 + by);
+    emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset, offset + _by);
   }
 
 
@@ -627,30 +627,28 @@ contract PlotERC721 is ERC721Core {
    * @dev Modifies the state of a token
    * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
    * @param _tokenId ID of the token to set state for
-   * @param newState new state to set for the token
+   * @param _state new state to set for the token
    */
-  function setState(uint256 _tokenId, uint128 newState) public {
+  function setState(uint256 _tokenId, uint128 _state) public {
     // check that the call is made by a state provider
     require(isSenderInRole(ROLE_STATE_PROVIDER));
 
-    // check that token to set state for exists
-    require(exists(_tokenId));
-
-    // read old state value
-    uint128 state = tokens[_tokenId].state;
+    // read current state value
+    // verifies token existence under the hood
+    uint128 state = getState(_tokenId);
 
     // check that new state is not the same as an old one
     // do not require this for state, allow state modification data update
-    // require(newState != state);
+    // require(_state != state);
 
     // set the state required
-    tokens[_tokenId].state = newState;
+    tokens[_tokenId].state = _state;
 
-    // update the state modified date
+    // update the state modification date
     tokens[_tokenId].stateModified = uint32(now);
 
     // emit an event
-    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state, newState);
+    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state, _state);
   }
 
   /**
@@ -706,6 +704,7 @@ contract PlotERC721 is ERC721Core {
   /**
    * @dev Creates new token with token ID derived from the country ID
    *      and assigns an ownership `_to` for this token
+   * @dev Allows setting initial token's properties
    * @param _to an address to assign created token ownership to
    * @param _countryId ID of the country to mint token in,
    *     high 8 bits of the token ID will be set to that number
@@ -734,7 +733,7 @@ contract PlotERC721 is ERC721Core {
     // fire Minted event
     emit Minted(msg.sender, _to, _tokenId);
 
-    // fire ERC20/ERC721 transfer event
+    // fire ERC721 transfer event
     emit Transfer(address(0), _to, _tokenId);
   }
 

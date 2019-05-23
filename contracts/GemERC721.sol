@@ -50,11 +50,11 @@ contract GemERC721 is ERC721Core {
   struct Gem {
     /*** High 256 bits ***/
 
-    /// @dev Where gem was found: land plot ID,
-    ///      land block within a plot,
-    ///      gem number (id) within a block of land, immutable
-    // TODO: shrink to 32 bits
-    uint64 coordinates;
+    /**
+     * @dev PlotID where the gem was found, immutable
+     * @dev Zero for the initial gems issued in founder's sale
+     */
+    uint24 plotId;
 
     /**
      * @dev Gem color, immutable, one of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -89,10 +89,22 @@ contract GemERC721 is ERC721Core {
     uint32 gradeModified;
 
     /**
+     * @dev Saved energetic age of the gem, mutable
+     * @dev Stored in seconds
+     */
+    uint32 age;
+
+    /**
+     * @dev Initially zero, changes when age is modified
+     *      (meaning energetic age of the gem is changed)
+     * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
+     */
+    uint32 ageModified;
+
+    /**
      * @dev State value, mutable
      */
-    // TODO: extend to 64 or 80 bits
-    uint48 state;
+    uint24 state;
 
     /**
      * @dev Initially zero, changes when state is modified
@@ -164,7 +176,7 @@ contract GemERC721 is ERC721Core {
    * @dev The token is locked if it contains any bits
    *      from the `transferLock` in its `state` set
    */
-  uint64 public transferLock = DEFAULT_MINING_BIT;
+  uint24 public transferLock = DEFAULT_MINING_BIT;
 
   /**
    * @dev Default bitmask indicating that the gem is `mining`
@@ -173,7 +185,7 @@ contract GemERC721 is ERC721Core {
    *      0: not mining
    *      1: mining
    */
-  uint64 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
+  uint24 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
 
   /**
    * @notice State provider is responsible for various features of the game,
@@ -213,8 +225,8 @@ contract GemERC721 is ERC721Core {
     address indexed _by,
     address indexed _owner,
     uint256 indexed _tokenId,
-    uint128 _from,
-    uint128 _to
+    uint24 _from,
+    uint24 _to
   );
 
   /**
@@ -225,13 +237,13 @@ contract GemERC721 is ERC721Core {
    * @param _from old value of `transferLock`
    * @param _to new value of `transferLock`
    */
-  event TransferLockChanged(address indexed _by, uint64 _from, uint64 _to);
+  event TransferLockChanged(address indexed _by, uint24 _from, uint24 _to);
 
   /// @dev Fired in levelUp()
-  event LevelUp(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint8 _levelReached);
+  event LevelUp(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint8 _from, uint8 _to);
 
   /// @dev Fired in upgradeGrade()
-  event UpgradeComplete(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint32 _gradeFrom, uint32 _gradeTo);
+  event Upgraded(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint32 _from, uint32 _to);
 
   /**
    * @dev Creates a ERC721 instance,
@@ -272,35 +284,53 @@ contract GemERC721 is ERC721Core {
     // validate gem existence
     require(exists(_tokenId));
 
-    // load the gem from storage
-    Gem memory gem = tokens[_tokenId];
+    // load the token from storage
+    Gem memory token = tokens[_tokenId];
 
     // pack high 256 bits of the result
-    uint256 high = uint256(gem.coordinates) << 192
-                 | uint192(gem.color) << 184
-                 | uint184(gem.levelModified) << 152
-                 | uint152(gem.level) << 144
-                 | uint144(gem.gradeModified) << 112
-                 | uint112(gem.grade) << 80
-                 | uint80(gem.stateModified) << 48
-                 | uint48(gem.state);
+    uint256 high = uint256(token.plotId) << 232
+                 | uint232(token.color) << 224
+                 | uint224(token.level) << 216
+                 | uint216(token.levelModified) << 184
+                 | uint184(token.grade) << 152
+                 | uint152(token.gradeModified) << 120
+                 | uint120(token.age) << 88
+                 | uint88(token.ageModified) << 56
+                 | uint56(token.state) << 32
+                 | uint32(token.stateModified);
 
     // pack low 256 bits of the result
-    uint256 low  = uint256(gem.creationTime) << 224
-                 | uint224(gem.index) << 192
-                 | uint192(gem.ownershipModified) << 160
-                 | uint160(gem.owner);
+    uint256 low  = uint256(token.creationTime) << 224
+                 | uint224(token.index) << 192
+                 | uint192(token.ownershipModified) << 160
+                 | uint160(token.owner);
 
     // return the whole 512 bits of result
     return (high, low);
   }
 
   /**
+   * @dev Allows to fetch all existing (minted) token IDs
+   * @return an ordered unsorted list of all existing token IDs
+   */
+  function getAllTokens() public view returns(uint32[] memory) {
+    // read an array of all the minted tokens and return
+    return allTokens;
+  }
+
+  /**
    * @dev Allows to fetch collection of tokens, including internal token data
    *       in a single function, useful when connecting to external node like INFURA
+   * @dev Each element in the collection contains
+   *      token ID (32 bits)
+   *      color (8 bits)
+   *      level (8 bits)
+   *      grade (32 bits)
+   *      state (8 low bits)
    * @param owner an address to query a collection for
+   * @return an ordered unsorted list of packed token data
    */
-  function getPackedCollection(address owner) public view returns (uint80[] memory) {
+  function getPackedCollection(address owner) public view returns (uint88[] memory) {
     // get an array of Gem IDs owned by an `owner` address
     uint32[] memory tokenIds = getCollection(owner);
 
@@ -308,17 +338,15 @@ contract GemERC721 is ERC721Core {
     uint32 balance = uint32(tokenIds.length);
 
     // data container to store the result
-    uint80[] memory result = new uint80[](balance);
+    uint88[] memory result = new uint88[](balance);
 
     // fetch token info one by one and pack into structure
     for(uint32 i = 0; i < balance; i++) {
       // token ID to work with
       uint32 tokenId = tokenIds[i];
-      // get the token properties and pack them together with tokenId
-      uint48 properties = getProperties(tokenId);
 
-      // pack the data
-      result[i] = uint80(tokenId) << 48 | properties;
+      // read all required data and pack it
+      result[i] = uint88(tokenId) << 56 | uint56(getProperties(tokenId)) << 8 | uint8(getState(tokenId));
     }
 
     // return the packed data structure
@@ -326,11 +354,11 @@ contract GemERC721 is ERC721Core {
   }
 
   /**
-   * @notice Retrieves a collection of tokens owned by a particular address
+   * @notice Retrieves a collection of token IDs owned by a particular address
    * @notice An order of token IDs is not guaranteed and may change
    *      when a token from the list is transferred
    * @param owner an address to query a collection for
-   * @return an ordered list of tokens
+   * @return an ordered unsorted list of token IDs
    */
   function getCollection(address owner) public view returns(uint32[] memory) {
     // read a collection from mapping and return
@@ -338,46 +366,16 @@ contract GemERC721 is ERC721Core {
   }
 
   /**
-   * @dev Gets the coordinates of a token
-   * @param _tokenId ID of the token to get coordinates for
-   * @return a token coordinates
-   */
-  function getCoordinates(uint256 _tokenId) public view returns(uint64) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // obtain token's coordinates from storage and return
-    return tokens[_tokenId].coordinates;
-  }
-
-  /**
    * @dev Gets the land plot ID of a gem
    * @param _tokenId ID of the gem to get land plot ID value for
    * @return a token land plot ID
    */
-  function getPlotId(uint256 _tokenId) public view returns(uint32) {
-    // extract high 32 bits of the coordinates and return
-    return uint32(getCoordinates(_tokenId) >> 32);
-  }
+  function getPlotId(uint256 _tokenId) public view returns(uint24) {
+    // validate token existence
+    require(exists(_tokenId));
 
-  /**
-   * @dev Gets the depth (block ID) within plot of land of a gem
-   * @param _tokenId ID of the gem to get depth value for
-   * @return a token depth
-   */
-  function getDepth(uint256 _tokenId) public view returns(uint16) {
-    // extract middle 16 bits of the coordinates and return
-    return uint16(getCoordinates(_tokenId) >> 16);
-  }
-
-  /**
-   * @dev Gets the gem's number within land block
-   * @param _tokenId ID of the gem to get depth value for
-   * @return a gem number within a land block
-   */
-  function getGemNum(uint256 _tokenId) public view returns(uint16) {
-    // extract low 16 bits of the coordinates and return
-    return uint16(getCoordinates(_tokenId));
+    // obtain token's color from storage and return
+    return tokens[_tokenId].plotId;
   }
 
   /**
@@ -437,25 +435,57 @@ contract GemERC721 is ERC721Core {
   }
 
   /**
-   * @dev Levels up a gem
+   * @dev Levels up a gem to the level specified
    * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
    * @param _tokenId ID of the gem to level up
+   * @param _level new gem's level to set to
    */
-  function levelUp(uint256 _tokenId) public {
+  function levelUp(uint256 _tokenId, uint8 _level) public {
     // check that the call is made by a level provider
     require(isSenderInRole(ROLE_LEVEL_PROVIDER));
 
-    // check that token to set state for exists
-    require(exists(_tokenId));
+    // extract current level
+    // verifies token existence under the hood
+    uint8 level = getLevel(_tokenId);
 
-    // update the level modified date
-    tokens[_tokenId].levelModified = uint32(block.number);
+    // ensure level increases
+    require(level < _level);
 
-    // increment the level required
-    tokens[_tokenId].level++;
+    // set new level value required
+    tokens[_tokenId].level = _level;
+
+    // update the level modification date
+    tokens[_tokenId].levelModified = uint32(now);
 
     // emit an event
-    emit LevelUp(msg.sender, ownerOf(_tokenId), _tokenId, tokens[_tokenId].level);
+    emit LevelUp(msg.sender, ownerOf(_tokenId), _tokenId, level, _level);
+  }
+
+  /**
+   * @dev Levels up a gem to by the level delta specified
+   * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
+   * @param _tokenId ID of the gem to level up
+   * @param _by number of levels to level up by
+   */
+  function levelUpBy(uint256 _tokenId, uint8 _by) public {
+    // check that the call is made by a level provider
+    require(isSenderInRole(ROLE_LEVEL_PROVIDER));
+
+    // extract current level
+    // verifies token existence under the hood
+    uint8 level = getLevel(_tokenId);
+
+    // ensure level increases, arithmetic overflow check
+    require(level + _by > level);
+
+    // set new level value required
+    tokens[_tokenId].level += _by;
+
+    // update the level modification date
+    tokens[_tokenId].levelModified = uint32(now);
+
+    // emit an event
+    emit LevelUp(msg.sender, ownerOf(_tokenId), _tokenId, level, level + _by);
   }
 
   /**
@@ -509,26 +539,27 @@ contract GemERC721 is ERC721Core {
    * @dev Requires new grade to be higher than an old one
    * @dev Requires sender to have `ROLE_GRADE_PROVIDER` permission
    * @param _tokenId ID of the gem to modify the grade for
-   * @param grade new grade to set for the token, should be higher then current state
+   * @param _grade new grade to set for the token, should be higher then current grade
    */
-  function upgradeGrade(uint256 _tokenId, uint32 grade) public {
+  function upgrade(uint256 _tokenId, uint32 _grade) public {
     // check that the call is made by a grade provider
     require(isSenderInRole(ROLE_GRADE_PROVIDER));
 
-    // check that token to set grade for exists
-    require(exists(_tokenId));
+    // extract current grade
+    // verifies token existence under the hood
+    uint32 grade = getGrade(_tokenId);
 
     // check if we're not downgrading the gem
-    require(tokens[_tokenId].grade < grade);
-
-    // emit an event
-    emit UpgradeComplete(msg.sender, ownerOf(_tokenId), _tokenId, tokens[_tokenId].grade, grade);
+    require(grade < _grade);
 
     // set the grade required
-    tokens[_tokenId].grade = grade;
+    tokens[_tokenId].grade = _grade;
 
-    // update the grade modified date
-    tokens[_tokenId].gradeModified = uint32(block.number);
+    // update the grade modification date
+    tokens[_tokenId].gradeModified = uint32(now);
+
+    // emit an event
+    emit Upgraded(msg.sender, ownerOf(_tokenId), _tokenId, grade, _grade);
   }
 
 
@@ -550,7 +581,7 @@ contract GemERC721 is ERC721Core {
    * @param _tokenId ID of the token to get state for
    * @return a token state
    */
-  function getState(uint256 _tokenId) public view returns(uint48) {
+  function getState(uint256 _tokenId) public view returns(uint24) {
     // validate token existence
     require(exists(_tokenId));
 
@@ -576,30 +607,28 @@ contract GemERC721 is ERC721Core {
    * @dev Modifies the state of a token
    * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
    * @param _tokenId ID of the token to set state for
-   * @param newState new state to set for the token
+   * @param _state new state to set for the token
    */
-  function setState(uint256 _tokenId, uint48 newState) public {
+  function setState(uint256 _tokenId, uint24 _state) public {
     // check that the call is made by a state provider
     require(isSenderInRole(ROLE_STATE_PROVIDER));
 
-    // check that token to set state for exists
-    require(exists(_tokenId));
-
-    // read old state value
-    uint48 state = tokens[_tokenId].state;
+    // read current state value
+    // verifies token existence under the hood
+    uint24 state = getState(_tokenId);
 
     // check that new state is not the same as an old one
     // do not require this for state, allow state modification data update
-    // require(newState != state);
+    // require(_state != state);
 
     // set the state required
-    tokens[_tokenId].state = newState;
+    tokens[_tokenId].state = _state;
 
-    // update the state modified date
-    tokens[_tokenId].stateModified = uint32(block.number);
+    // update the state modification date
+    tokens[_tokenId].stateModified = uint32(now);
 
     // emit an event
-    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state, newState);
+    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state, _state);
   }
 
   /**
@@ -637,7 +666,7 @@ contract GemERC721 is ERC721Core {
    * @dev Requires sender to have `ROLE_TRANSFER_LOCK_PROVIDER` permission.
    * @param _transferLock a value to set `transferLock` to
    */
-  function setTransferLock(uint64 _transferLock) public {
+  function setTransferLock(uint24 _transferLock) public {
     // check that the call is made by a transfer lock provider
     require(isSenderInRole(ROLE_TRANSFER_LOCK_PROVIDER));
 
@@ -730,32 +759,37 @@ contract GemERC721 is ERC721Core {
   }
 
   /**
-   * @dev Creates new token with `tokenId` ID specified and
-   *      assigns an ownership `to` for that token
+   * @dev Creates new token with token ID derived from the country ID
+   *      and assigns an ownership `_to` for this token
    * @dev Allows setting initial token's properties
-   * @param to an address to assign created token ownership to
-   * @param tokenId ID of the token to create
+   * @param _to an address to mint token to (first owner of the token)
+   * @param _tokenId ID of the token to mint
+   * @param _plotId ID of the plot that gem "belongs to" (was found in)
+   * @param _color gem color
+   * @param _level gem level
+   * @param _grade grade of the gem,
+   *      high 8 bits represent grade type,
+   *      low 24 bits - grade value
    */
   function mint(
-    address to,
-    uint32 tokenId,
-    uint32 plotId,
-    uint16 depth,
-    uint16 gemNum,
-    uint8 color,
-    uint8 level,
-    uint8 gradeType,
-    uint24 gradeValue
+    address _to,
+    uint32 _tokenId,
+    uint24 _plotId,
+    uint8 _color,
+    uint8 _level,
+    uint32 _grade
   ) public {
-    // validate destination address
-    require(to != address(0));
-    require(to != address(this));
-
     // check if caller has sufficient permissions to mint a token
     require(isSenderInRole(ROLE_TOKEN_CREATOR));
 
     // delegate call to `__mint`
-    __mint(to, tokenId, plotId, depth, gemNum, color, level, gradeType, gradeValue);
+    __mint(_to, _tokenId, _plotId, _color, _level, _grade);
+
+    // fire Minted event
+    emit Minted(msg.sender, _to, _tokenId);
+
+    // fire ERC721 transfer event
+    emit Transfer(address(0), _to, _tokenId);
   }
 
   /**
@@ -773,113 +807,125 @@ contract GemERC721 is ERC721Core {
     return StringUtils.concat("http://cryptominerworld.com/gem/", StringUtils.itoa(_tokenId, 10));
   }
 
-  /// @dev Creates new token with `tokenId` ID specified and
-  ///      assigns an ownership `to` for this token
-  /// @dev Unsafe: doesn't check if caller has enough permissions to execute the call
-  ///      checks only that the token doesn't exist yet
-  /// @dev Must be kept private at all times
-  function __mint(
-    address to,
-    uint32 tokenId,
-    uint32 plotId,
-    uint16 depth,
-    uint16 gemNum,
-    uint8 color,
-    uint8 level,
-    uint8 gradeType,
-    uint24 gradeValue
-  ) private {
-    // check that `tokenId` is inside valid bounds
-    require(tokenId > 0);
-
-    // ensure that token with such ID doesn't exist
-    require(!exists(tokenId));
-
-    // create new gem in memory
-    Gem memory gem = Gem({
-      coordinates: uint64(plotId) << 32 | uint32(depth) << 16 | gemNum,
-      color: color,
-      levelModified: 0,
-      level: level,
-      gradeModified: 0,
-      grade: uint32(gradeType) << 24 | gradeValue,
-      stateModified: 0,
-      state: 0,
-
-      creationTime: uint32(block.number),
-      // token index within the owner's collection of token
-      // points to the place where the token will be placed to
-      index: uint32(collections[to].length),
-      ownershipModified: 0,
-      owner: to
-    });
-
-    // push newly created `tokenId` to the owner's collection of tokens
-    collections[to].push(tokenId);
-
-    // persist gem to the storage
-    tokens[tokenId] = gem;
-
-    // add token ID to the `allTokens` collection,
-    // automatically updates total supply
-    allTokens.push(tokenId);
-
-    // fire Minted event
-    emit Minted(msg.sender, to, tokenId);
-
-    // fire ERC721 transfer event
-    emit Transfer(address(0), to, tokenId);
-  }
-
-  /// @dev Move a `gem` from owner `from` to a new owner `to`
-  /// @dev Unsafe, doesn't check for consistence
-  /// @dev Must be kept private at all times
-  function __move(address from, address to, uint256 _tokenId) internal {
+  /**
+   * @dev Moves token from owner `_from` to a new owner `_to`:
+   *      modifies token owner, moves token ID from `_from` collection
+   *      to `_to` collection
+   * @dev Unsafe, doesn't check for data structures consistency
+   *      (token existence, token ID presence in `collections`, etc.)
+   * @dev Must be kept private at all times
+   * @param _from an address to take token from
+   * @param _to an address to put token into
+   * @param _tokenId ID of the token to move
+   */
+  function __move(address _from, address _to, uint256 _tokenId) internal {
     // cast token ID to uint32 space
     uint32 tokenId = uint32(_tokenId);
 
     // overflow check, failure impossible by design of mint()
     assert(tokenId == _tokenId);
 
-    // get the gem pointer to the storage
-    Gem storage gem = tokens[_tokenId];
+    // get the token structure pointer to the storage
+    Gem storage token = tokens[_tokenId];
 
-    // get a reference to the collection where gem is now
-    uint32[] storage source = collections[from];
+    // get a reference to the collection where token is now
+    uint32[] storage source = collections[_from];
 
-    // get a reference to the collection where gem goes to
-    uint32[] storage destination = collections[to];
+    // get a reference to the collection where token goes to
+    uint32[] storage destination = collections[_to];
 
-    // collection `source` cannot be empty, if it is - it's a bug
+    // collection `source` cannot be empty, by design of transfer functions
     assert(source.length != 0);
 
-    // index of the gem within collection `source`
-    uint32 i = gem.index;
+    // index of the token within collection `source`
+    uint32 i = token.index;
 
-    // we put the last gem in the collection `source` to the position released
-    // get an ID of the last gem in `source`
+    // we put the last token in the collection `source` to the position released
+    // get an ID of the last token in `source`
     uint32 sourceId = source[source.length - 1];
 
-    // update gem index to point to proper place in the collection `source`
+    // update last token index to point to proper place in the collection `source`
     tokens[sourceId].index = i;
 
-    // put it into the position i within `source`
+    // put it into the position `i` within `source`
     source[i] = sourceId;
 
     // trim the collection `source` by removing last element
     source.length--;
 
-    // update gem index according to position in new collection `destination`
-    gem.index = uint32(destination.length);
+    // update token index according to position in new collection `destination`
+    token.index = uint32(destination.length);
 
-    // update gem owner
-    gem.owner = to;
+    // update token owner
+    token.owner = _to;
 
-    // update ownership transfer date
-    gem.ownershipModified = uint32(block.number);
+    // update token ownership transfer date
+    token.ownershipModified = uint32(now);
 
-    // push gem into collection
+    // push token into destination collection
     destination.push(tokenId);
+  }
+
+  /**
+   * @dev Creates new token with token ID derived from the country ID
+   *      and assigns an ownership `_to` for this token
+   * @dev Unsafe: doesn't check if caller has enough permissions to execute the call,
+   *      checks only that the token doesn't exist yet
+   * @dev Must be kept private at all times
+   * @param _to an address to mint token to (first owner of the token)
+   * @param _tokenId ID of the token to mint
+   * @param _plotId ID of the plot that gem "belongs to" (was found in)
+   * @param _color gem color
+   * @param _level gem level
+   * @param _grade grade of the gem,
+   *      high 8 bits represent grade type,
+   *      low 24 bits - grade value
+   */
+  function __mint(
+    address _to,
+    uint32 _tokenId,
+    uint24 _plotId,
+    uint8 _color,
+    uint8 _level,
+    uint32 _grade
+  ) private {
+    // validate destination address
+    require(_to != address(0));
+    require(_to != address(this));
+
+    // check that token ID is valid
+    require(_tokenId > 0);
+
+    // ensure that token with such ID doesn't exist
+    require(!exists(_tokenId));
+
+    // create new gem in memory
+    Gem memory token = Gem({
+      plotId: _plotId,
+      color: _color,
+      level: _level,
+      levelModified: 0,
+      grade: _grade,
+      gradeModified: 0,
+      age: 0,
+      ageModified: 0,
+      state: 0,
+      stateModified: 0,
+      creationTime: uint32(now),
+      index: uint32(collections[_to].length),
+      ownershipModified: 0,
+      owner: _to
+    });
+
+    // push newly created `tokenId` to the owner's collection of tokens
+    collections[_to].push(_tokenId);
+
+    // persist token to the storage
+    tokens[_tokenId] = token;
+
+    // add token ID to the `allTokens` collection,
+    // automatically updates total supply
+    allTokens.push(_tokenId);
   }
 
 }

@@ -8,8 +8,8 @@ pragma solidity 0.5.8;
  * @notice A fraction is represented by two numbers - nominator and denominator.
  *
  * @dev A fraction is represented as uint8,
- *      higher 4 bits representing nominator
- *      and lower 4 bits representing denominator
+ *      higher 2 bits representing nominator
+ *      and lower 6 bits representing denominator
  *
  * @author Basil Gorin
  */
@@ -26,7 +26,7 @@ library Fractions8 {
    */
   function createProperFraction8(uint8 n, uint8 d) internal pure returns (uint8) {
     // nominator and denominator overflow checks
-    require(n < 32 && d < 32);
+    require(n < 4 && d < 64);
 
     // denominator cannot be zero by the definition of division
     require(d != 0);
@@ -35,7 +35,7 @@ library Fractions8 {
     require(n < d);
 
     // construct fraction and return
-    return n << 4 | d;
+    return n << 6 | d;
   }
 
   /**
@@ -103,23 +103,23 @@ library Fractions8 {
   }
 
   /**
-   * @dev Extracts 4-bits fraction nominator
+   * @dev Extracts 2-bits fraction nominator
    * @param f a fraction
    * @return nominator
    */
   function getNominator(uint8 f) internal pure returns(uint8) {
-    // return high 4 bits
-    return f >> 4;
+    // return high 2 bits
+    return f >> 6;
   }
 
   /**
-   * @dev Extracts 4-bits fraction denominator
+   * @dev Extracts 6-bits fraction denominator
    * @param f a fraction
    * @return denominator
    */
   function getDenominator(uint8 f) internal pure returns(uint8) {
-    // return low 4 bits
-    return f & 0xF;
+    // return low 6 bits
+    return f & 0x3F;
   }
 
   /**

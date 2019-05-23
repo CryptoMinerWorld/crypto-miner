@@ -150,7 +150,7 @@ contract CountryERC721 is ERC721Core {
    * @notice Default tax rate that is assigned to each country
    * @dev This tax rate is set on each country when minting its token
    */
-  uint8 public constant DEFAULT_TAX_RATE = 0x1A; // 1/10 or 10%
+  uint8 public constant DEFAULT_TAX_RATE = 0x4A; // 1/10 or 10%
 
   /**
    * @dev Allows owners to update tax value

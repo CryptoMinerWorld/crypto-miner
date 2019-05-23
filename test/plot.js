@@ -1,39 +1,20 @@
 // Based on PlotERC721 smart contract
 const Token = artifacts.require("./PlotERC721.sol");
-const ERC721Receiver = artifacts.require("./DummyReceiver.sol");
 
-// supported interfaces
-const InterfaceId_ERC165 = web3.utils.sha3("supportsInterface(bytes4)").substr(0, 10);
-const InterfaceId_ERC721 = interfaceID(
-	"balanceOf(address)",
-	"ownerOf(uint256)",
-	"approve(address,uint256",
-	"getApproved(uint256)",
-	"setApprovalForAll(address,bool)",
-	"isApprovedForAll(address,address)",
-	"transferFrom(address,address,uint256)",
-	"safeTransferFrom(address,address,uint256)",
-	"safeTransferFrom(address,address,uint256,bytes)"
-);
-const InterfaceId_ERC721Exists = web3.utils.sha3("exists(uint256)").substr(0, 10);
-const InterfaceId_ERC721Enumerable = interfaceID(
-	"totalSupply()",
-	"tokenOfOwnerByIndex(address,uint256)",
-	"tokenByIndex(uint256)"
-);
-const InterfaceId_ERC721Metadata = interfaceID(
-	"name()",
-	"symbol()",
-	"tokenURI(uint256)"
-);
+// import ERC721Core dependencies
+import {
+	ERC721Receiver,
+	InterfaceId_ERC165,
+	InterfaceId_ERC721,
+	InterfaceId_ERC721Exists,
+	InterfaceId_ERC721Enumerable,
+	InterfaceId_ERC721Metadata,
+	FEATURE_TRANSFERS,
+	FEATURE_TRANSFERS_ON_BEHALF,
+	ROLE_TOKEN_CREATOR
+} from "./erc721_core";
 
 // Features and Roles:
-// Enables ERC721 transfers of the tokens (token owner performs a transfer)
-const FEATURE_TRANSFERS = 0x00000001;
-// Enables ERC721 transfers on behalf (approved operator performs a transfer)
-const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
-// Allows minting tokens
-const ROLE_TOKEN_CREATOR = 0x00000001;
 // Allows modifying token's state
 const ROLE_STATE_PROVIDER = 0x00000010;
 // Allows modifying transfer lock bitmask (smart contract global)
@@ -70,14 +51,12 @@ const layers1 = [
 const tiers0 = tiers(layers0);
 const tiers1 = tiers(layers1);
 
-// auxiliary BigNumber 2
-const two = web3.utils.toBN(2);
-
 // timestamp right before the test begins
 const now = new Date().getTime() / 1000 | 0;
 
 // tests for Plot ERC721 token
 contract('PlotERC721', (accounts) => {
+
 	it("initial state: initial zero values, supported interfaces", async() => {
 		// analogue to smart contract deployment
 		const tk = await Token.new();
@@ -231,12 +210,12 @@ contract('PlotERC721', (accounts) => {
 		assert.deepEqual([web3.utils.toBN(token0), web3.utils.toBN(token1)], await tk.getCollection(account1), "wrong token collection for account1");
 
 		// calculate token0 and token1 packed structures
-		const packed0 = two.pow(web3.utils.toBN(64)).mul(web3.utils.toBN(token0)).add(web3.utils.toBN(tiers0)).mul(two.pow(web3.utils.toBN(8))).add(web3.utils.toBN(0)); // zero stands for token state
-		const packed1 = two.pow(web3.utils.toBN(64)).mul(web3.utils.toBN(token1)).add(web3.utils.toBN(tiers1)).mul(two.pow(web3.utils.toBN(8))).add(web3.utils.toBN(0)); // zero stands for token state
+		const packed0 = toBN(token0).shln(64).or(toBN(tiers0)).shln(8);
+		const packed1 = toBN(token1).shln(64).or(toBN(tiers1)).shln(8);
 		// calculate token1 extended packed structure
 		const fullPacked1 = [
-			tiers1.mul(two.pow(web3.utils.toBN(32))).add(web3.utils.toBN(0)).mul(two.pow(web3.utils.toBN(128))).add(web3.utils.toBN(0)).mul(two.pow(web3.utils.toBN(32))).add(web3.utils.toBN(0)),
-			(await tk.getCreationTime(token1)).mul(two.pow(web3.utils.toBN(32))).add(web3.utils.toBN(1)).mul(two.pow(web3.utils.toBN(32))).add(web3.utils.toBN(0)).mul(two.pow(web3.utils.toBN(160))).add(web3.utils.toBN(account1))
+			tiers1.shln(32).shln(128).shln(32),
+			(await tk.getCreationTime(token1)).shln(32).or(toBN(1)).shln(32).shln(160).or(toBN(account1))
 		];
 
 		// check calculated getters
@@ -1021,16 +1000,8 @@ contract('PlotERC721', (accounts) => {
 		// verify new transfer lock
 		assert.equal(lock, await tk.transferLock(), "wrong transfer lock");
 	});
-});
 
-// calculates ERC165 interface ID for the given selectors
-function interfaceID(...selectors) {
-	let result = 0;
-	for(let i = 0; i < selectors.length; i++) {
-		result ^= web3.utils.toBN(web3.utils.sha3(selectors[i]).substr(0, 10)).toNumber();
-	}
-	return web3.utils.toHex(result >>> 0);
-}
+});
 
 // function to build tiers packed structure from tiers array
 function tiers(layers) {
@@ -1046,5 +1017,5 @@ function tiers(layers) {
 	return result;
 }
 
-// import auxiliary function to ensure function `fn` throws
-import {assertThrows} from "../scripts/shared_functions";
+// import auxiliary functions
+import {assertThrows, toBN} from "../scripts/shared_functions";
