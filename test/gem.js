@@ -131,11 +131,11 @@ contract('GemERC721', function(accounts) {
 		await tk.approve(accounts[0], 0x401, {from: accounts[1]});
 		await fn1();
 		await tk.updateFeatures(FEATURE_TRANSFERS);
-		const fn = async () => await tk.transferFrom(accounts[0], accounts[1], 0x402);
+		await tk.approve(accounts[2], 0x402);
+		const fn = async () => await tk.transferFrom(accounts[0], accounts[1], 0x402, {from: accounts[2]});
+		await tk.updateFeatures(FEATURE_TRANSFERS);
 		await assertThrows(fn);
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
-		await assertThrows(fn);
-		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 		await fn();
 		assert.equal(accounts[1], await tk.ownerOf(0x402), "wrong token 0x402 owner after transfer on behalf");
 		assert.equal(accounts[2], await tk.ownerOf(0x401), "wrong token 0x401 owner after transfer on behalf");

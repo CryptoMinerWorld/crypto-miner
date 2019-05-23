@@ -2,8 +2,8 @@ const Token = artifacts.require("./CountryERC721.sol");
 
 const FEATURE_TRANSFERS = 0x00000001;
 const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
-const FEATURE_ALLOW_TAX_UPDATE = 0x00000004;
-const ROLE_TOKEN_CREATOR = 0x00040000;
+const FEATURE_ALLOW_TAX_UPDATE = 0x00000010;
+const ROLE_TOKEN_CREATOR = 0x00000001;
 
 // import country data
 import {COUNTRY_DATA, TOTAL_PLOTS} from "../data/country_data";
@@ -237,11 +237,11 @@ contract('CountryERC721', (accounts) => {
 		await tk.approve(accounts[0], token1, {from: accounts[1]});
 		await fn1();
 		await tk.updateFeatures(ROLE_TOKEN_CREATOR);
-		const fn = async () => await tk.transferFrom(accounts[0], accounts[1], token2);
+		await tk.approve(accounts[2], token2);
+		const fn = async () => await tk.transferFrom(accounts[0], accounts[1], token2, {from: accounts[2]});
+		await tk.updateFeatures(FEATURE_TRANSFERS);
 		await assertThrows(fn);
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
-		await assertThrows(fn);
-		await tk.updateFeatures(FEATURE_TRANSFERS);
 		await fn();
 		assert.equal(accounts[1], await tk.ownerOf(token2), "wrong token token2 owner after transfer on behalf");
 		assert.equal(accounts[2], await tk.ownerOf(token1), "wrong token token1 owner after transfer on behalf");

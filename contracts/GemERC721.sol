@@ -1,11 +1,9 @@
 pragma solidity 0.5.8;
 
-import "./AccessControl.sol";
-import "./ERC165.sol";
-import "./ERC721Interfaces.sol";
-import "./ERC721Receiver.sol";
 import "./AddressUtils.sol";
 import "./StringUtils.sol";
+import "./ERC721Receiver.sol";
+import "./ERC721Core.sol";
 
 /**
  * @title Gem ERC721 Token
@@ -20,7 +18,7 @@ import "./StringUtils.sol";
  * @author Basil Gorin
  */
 // TODO: consider switching to 24-bit token ID
-contract GemERC721 is AccessControl, ERC165, ERC721Interfaces {
+contract GemERC721 is ERC721Core {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
@@ -141,25 +139,6 @@ contract GemERC721 is AccessControl, ERC165, ERC721Interfaces {
   mapping(uint256 => Gem) public tokens;
 
   /**
-   * @dev An extension data structure, maps 256 bits of data to a token ID
-   */
-  // TODO: consider extending to unlimited size
-  mapping(uint256 => uint256) ext256;
-
-  /**
-   * @dev Mapping from a token ID to an address approved to
-   *      transfer ownership rights for this token
-   */
-  mapping(uint256 => address) public approvals;
-
-  /**
-   * @dev Mapping from owner to an approved operator address –
-   *      an address approved to transfer any tokens of the owner
-   *      token owner => approved token operator => is approved
-   */
-  mapping(address => mapping(address => bool)) public approvedOperators;
-
-  /**
    * @notice Storage for a collections of tokens
    * @notice A collection of tokens is an ordered list of token IDs,
    *      owned by a particular address (owner)
@@ -197,95 +176,28 @@ contract GemERC721 is AccessControl, ERC165, ERC721Interfaces {
   uint64 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
 
   /**
-   * @notice The 'transfers' feature supports regular token transfers
-   * @dev Enables ERC721 transfers of the tokens (token owner performs a transfer)
-   * @dev Token owner is defined in `tokens` data structure
-   */
-  uint32 public constant FEATURE_TRANSFERS = 0x00000001;
-
-  /**
-   * @notice The 'transfers on behalf' feature supports token transfers by
-   *      trusted operators defined for particular tokens or token owners
-   * @dev Enables ERC721 transfers on behalf (approved operator performs a transfer)
-   * @dev Approved operators are defined in `approvals` and `approvedOperators`
-   *      data structures
-   */
-  uint32 public constant FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
-
-  /**
-   * @notice Token creator is responsible for creating tokens
-   * @dev Allows minting tokens
-   */
-  uint32 public constant ROLE_TOKEN_CREATOR = 0x00000001;
-
-  /**
    * @notice State provider is responsible for various features of the game,
    *      including token locking (required to enabling mining protocol)
    * @dev Allows modifying token's state
    */
-  uint32 public constant ROLE_STATE_PROVIDER = 0x00000004;
+  uint32 public constant ROLE_STATE_PROVIDER = 0x00000010;
 
   /**
    * @notice Transfer lock provider is responsible for various features of the game,
    *      including token locking (required to enabling mining protocol)
    * @dev Allows modifying transfer lock bitmask `transferLock`
    */
-  uint32 public constant ROLE_TRANSFER_LOCK_PROVIDER = 0x00000008;
+  uint32 public constant ROLE_TRANSFER_LOCK_PROVIDER = 0x00000020;
 
 
   /// @notice Level provider is responsible for enabling the workshop
   /// @dev Role ROLE_LEVEL_PROVIDER allows leveling up the gem
-  uint32 public constant ROLE_LEVEL_PROVIDER = 0x00100000;
+  uint32 public constant ROLE_LEVEL_PROVIDER = 0x00000040;
 
   /// @notice Grade provider is responsible for enabling the workshop
   /// @dev Role ROLE_GRADE_PROVIDER allows modifying gem's grade
-  uint32 public constant ROLE_GRADE_PROVIDER = 0x00200000;
+  uint32 public constant ROLE_GRADE_PROVIDER = 0x00000080;
 
-  /**
-   * @dev Magic value to be returned upon successful reception of ERC721 token (NFT)
-   * @dev Equal to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`,
-   *      which can be also obtained as `ERC721Receiver(0).onERC721Received.selector`
-   */
-  bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
-
-
-  /**
-   * @dev Fired in transfer(), transferFrom(), safeTransferFrom(), mint()
-   * @param _from source address or zero if fired in mint()
-   * @param _to non-zero destination address
-   * @param _tokenId id of the token which was transferred from
-   *      source address to destination address
-   */
-  event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
-
-  /**
-   * @dev Fired in approve()
-   * @param _owner owner of the token `_tokenId`
-   * @param _approved approved (trusted) address which is allowed now
-   *      to perform token `_tokenId` transfer on owner's behalf
-   * @param _tokenId token which is allowed to be transferred by
-   *      `_approved` on `_owner` behalf
-   */
-  event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-
-  /**
-   * @dev Fired in setApprovalForAll()
-   * @param _owner an address which may have some tokens
-   * @param _operator another address which is approved by owner
-   *      to transfer any tokens on their behalf
-   * @param _value true if `_operator` is granted approval,
-   *      false if `_operator` is revoked an approval
-   */
-  event ApprovalForAll(address indexed _owner, address indexed _operator, bool _value);
-
-  /**
-   * @dev Fired in mint()
-   * @param _by token creator (an address having `ROLE_TOKEN_CREATOR` permission)
-   *      which created (minted) the token `_tokenId`
-   * @param _to an address which received created token (first owner)
-   * @param _tokenId ID of the newly created token
-   */
-  event Minted(address indexed _by, address indexed _to, uint256 indexed _tokenId);
 
   /**
    * @dev Fired in setState()
@@ -847,224 +759,6 @@ contract GemERC721 is AccessControl, ERC165, ERC721Interfaces {
   }
 
   /**
-   * @notice Transfers ownership rights of a token defined
-   *      by the `tokenId` to a new owner specified by address `to`
-   * @dev Requires the sender of the transaction to be an owner
-   *      of the token specified (`tokenId`)
-   * @param to new owner address
-   * @param _tokenId ID of the token to transfer ownership rights for
-   */
-  function transfer(address to, uint256 _tokenId) public {
-    // check if token transfers feature is enabled
-    require(isFeatureEnabled(FEATURE_TRANSFERS));
-
-    // call sender gracefully - `from`
-    address from = msg.sender;
-
-    // delegate call to unsafe `__transfer`
-    __transfer(from, to, _tokenId);
-  }
-
-  /**
-   * @notice A.k.a "transfer a token on behalf"
-   * @notice Transfers ownership rights of a token defined
-   *      by the `tokenId` to a new owner specified by address `to`
-   * @notice Allows transferring ownership rights by a trading operator
-   *      on behalf of token owner. Allows building an exchange of tokens.
-   * @dev Transfers the ownership of a given token ID to another address
-   * @dev Requires the transaction sender to be one of:
-   *      owner of a gem - then its just a usual `transfer`
-   *      approved – an address explicitly approved earlier by
-   *        the owner of a token to transfer this particular token `tokenId`
-   *      operator - an address explicitly approved earlier by
-   *        the owner to transfer all his tokens on behalf
-   * @param from current owner of the token
-   * @param to address to receive the ownership of the token
-   * @param _tokenId ID of the token to be transferred
-   */
-  function transferFrom(address from, address to, uint256 _tokenId) public {
-    // check if transfers on behalf feature is enabled
-    require(isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
-
-    // call sender gracefully - `operator`
-    address operator = msg.sender;
-
-    // find if an approved address exists for this token
-    address approved = approvals[_tokenId];
-
-    // we assume `from` is an owner of the token,
-    // this will be explicitly checked in `__transfer`
-
-    // fetch how much approvals left for an operator
-    bool approvedOperator = approvedOperators[from][operator];
-
-    // operator must have an approval to transfer this particular token
-    // or operator must be approved to transfer all the tokens
-    // or, if nothing satisfies, this is equal to regular transfer,
-    // where `from` is basically a transaction sender and owner of the token
-    if(operator != approved && !approvedOperator) {
-      // transaction sender doesn't have any special permissions
-      // we will treat him as a token owner and sender and try to perform
-      // a regular transfer:
-      // check `from` to be `operator` (transaction sender):
-      require(from == operator);
-
-      // additionally check if token transfers feature is enabled
-      require(isFeatureEnabled(FEATURE_TRANSFERS));
-    }
-
-    // delegate call to unsafe `__transfer`
-    __transfer(from, to, _tokenId);
-  }
-
-  /**
-   * @notice A.k.a "safe transfer a token on behalf"
-   * @notice Transfers ownership rights of a token defined
-   *      by the `tokenId` to a new owner specified by address `to`
-   * @notice Allows transferring ownership rights by a trading operator
-   *      on behalf of token owner. Allows building an exchange of tokens.
-   * @dev Safely transfers the ownership of a given token ID to another address
-   * @dev Requires the transaction sender to be the owner, approved, or operator
-   * @dev When transfer is complete, this function
-   *      checks if `_to` is a smart contract (code size > 0). If so, it calls
-   *      `onERC721Received` on `_to` and throws if the return value is not
-   *      `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`.
-   * @param _from current owner of the token
-   * @param _to address to receive the ownership of the token
-   * @param _tokenId ID of the token to be transferred
-   * @param _data additional data with no specified format, sent in call to `_to`
-   */
-  function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes memory _data) public {
-    // delegate call to usual (unsafe) `transferFrom`
-    transferFrom(_from, _to, _tokenId);
-
-    // after the successful transfer – check if receiver supports
-    // ERC721Receiver and execute a callback handler `onERC721Received`,
-    // reverting whole transaction on any error:
-    // check if receiver `_to` supports ERC721 interface
-    if (AddressUtils.isContract(_to)) {
-      // if `_to` is a contract – execute onERC721Received
-      bytes4 response = ERC721Receiver(_to).onERC721Received(msg.sender, _from, _tokenId, _data);
-
-      // expected response is ERC721_RECEIVED
-      require(response == ERC721_RECEIVED);
-    }
-  }
-
-  /**
-   * @notice A.k.a "safe transfer a token on behalf"
-   * @notice Transfers ownership rights of a token defined
-   *      by the `tokenId` to a new owner specified by address `to`
-   * @notice Allows transferring ownership rights by a trading operator
-   *      on behalf of token owner. Allows building an exchange of tokens.
-   * @dev Safely transfers the ownership of a given token ID to another address
-   * @dev Requires the transaction sender to be the owner, approved, or operator
-   * @dev Requires from to be an owner of the token
-   * @dev If the target address is a contract, it must implement `onERC721Received`,
-   *      which is called upon a safe transfer, and return the magic value
-   *      `bytes4(keccak256("onERC721Received(address,uint256,bytes)"))`;
-   *      otherwise the transfer is reverted.
-   * @dev This works identically to the other function with an extra data parameter,
-   *      except this function just sets data to "".
-   * @param _from current owner of the token
-   * @param _to address to receive the ownership of the token
-   * @param _tokenId ID of the token to be transferred
-   */
-  function safeTransferFrom(address _from, address _to, uint256 _tokenId) public {
-    // delegate call to overloaded `safeTransferFrom`, set data to ""
-    safeTransferFrom(_from, _to, _tokenId, "");
-  }
-
-  /**
-   * @notice Approves an address to transfer the given token on behalf of its owner
-   *      Can also be used to revoke an approval by setting `to` address to zero
-   * @dev The zero `to` address revokes an approval for a given token
-   * @dev There can only be one approved address per token at a given time
-   * @dev This function can only be called by the token owner
-   * @param _approved address to be approved to transfer the token on behalf of its owner
-   * @param _tokenId ID of the token to be approved for transfer on behalf
-   */
-  function approve(address _approved, uint256 _tokenId) public {
-    // call sender nicely - `from`
-    address from = msg.sender;
-
-    // get token owner address (also ensures that token exists)
-    address owner = ownerOf(_tokenId);
-
-    // caller must own this token
-    require(from == owner);
-    // approval for owner himself is pointless, do not allow
-    require(_approved != owner);
-    // either we're removing approval, or setting it
-    require(approvals[_tokenId] != address(0) || _approved != address(0));
-
-    // set an approval (deletes an approval if to == 0)
-    approvals[_tokenId] = _approved;
-
-    // emit an ERC721 event
-    emit Approval(from, _approved, _tokenId);
-  }
-
-  /**
-   * @notice Removes an approved address, which was previously added by `approve`
-   *      for the given token. Equivalent to calling approve(0, tokenId)
-   * @dev Same as calling approve(0, tokenId)
-   * @param _tokenId ID of the token to remove approved address for
-   */
-  function revokeApproval(uint256 _tokenId) public {
-    // delegate call to `approve`
-    approve(address(0), _tokenId);
-  }
-
-  /**
-   * @dev Sets or unsets the approval of a given operator
-   * @dev An operator is allowed to transfer *all* tokens of the sender on their behalf
-   * @param to operator address to set the approval for
-   * @param approved representing the status of the approval to be set
-   */
-  function setApprovalForAll(address to, bool approved) public {
-    // call sender nicely - `from`
-    address from = msg.sender;
-
-    // validate destination address
-    require(to != address(0));
-
-    // approval for owner himself is pointless, do not allow
-    require(to != from);
-
-    // set an approval
-    approvedOperators[from][to] = approved;
-
-    // emit an ERC721 compliant event
-    emit ApprovalForAll(from, to, approved);
-  }
-
-  /**
-   * @notice Get the approved address for a single token
-   * @dev Throws if `_tokenId` is not a valid token ID.
-   * @param _tokenId ID of the token to find the approved address for
-   * @return the approved address for this token, or the zero address if there is none
-   */
-  function getApproved(uint256 _tokenId) public view returns (address) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // find approved address and return
-    return approvals[_tokenId];
-  }
-
-  /**
-   * @notice Query if an address is an authorized operator for another address
-   * @param _owner the address that owns at least one token
-   * @param _operator the address that acts on behalf of the owner
-   * @return true if `_operator` is an approved operator for `_owner`, false otherwise
-   */
-  function isApprovedForAll(address _owner, address _operator) public view returns (bool) {
-    // is there a positive amount of approvals left
-    return approvedOperators[_owner][_operator];
-  }
-
-  /**
    * @notice A distinct Uniform Resource Identifier (URI) for a given asset.
    * @dev Throws if `_tokenId` is not a valid token ID.
    *      URIs are defined in RFC 3986.
@@ -1137,56 +831,10 @@ contract GemERC721 is AccessControl, ERC165, ERC721Interfaces {
     emit Transfer(address(0), to, tokenId);
   }
 
-  /// @dev Performs a transfer of a token `tokenId` from address `from` to address `to`
-  /// @dev Unsafe: doesn't check if caller has enough permissions to execute the call;
-  ///      checks only for token existence and that ownership belongs to `from`
-  /// @dev Is save to call from `transfer(to, tokenId)` since it doesn't need any additional checks
-  /// @dev Must be kept private at all times
-  function __transfer(address from, address to, uint256 _tokenId) private {
-    // validate source and destination address
-    require(to != address(0));
-    require(to != from);
-    // impossible by design of transfer(), transferFrom(),
-    // approveToken() and approve()
-    assert(from != address(0));
-
-    // validate token existence
-    require(exists(_tokenId));
-
-    // validate token ownership
-    require(ownerOf(_tokenId) == from);
-
-    // transfer is not allowed for a locked gem
-    // (ex.: if ge is currently mining)
-    require(getState(_tokenId) & transferLock == 0);
-
-    // clear approved address for this particular token + emit event
-    __clearApprovalFor(_tokenId);
-
-    // move gem ownership,
-    // update old and new owner's gem collections accordingly
-    __move(from, to, _tokenId);
-
-    // fire ERC721 transfer event
-    emit Transfer(from, to, _tokenId);
-  }
-
-  /// @dev Clears approved address for a particular token
-  function __clearApprovalFor(uint256 _tokenId) private {
-    // check if approval exists - we don't want to fire an event in vain
-    if(approvals[_tokenId] != address(0)) {
-      // clear approval
-      delete approvals[_tokenId];
-
-      // emit an ERC721 event
-      emit Approval(msg.sender, address(0), _tokenId);
-    }
-  }
-
   /// @dev Move a `gem` from owner `from` to a new owner `to`
   /// @dev Unsafe, doesn't check for consistence
   /// @dev Must be kept private at all times
-  function __move(address from, address to, uint256 _tokenId) private {
+  function __move(address from, address to, uint256 _tokenId) internal {
     // cast token ID to uint32 space
     uint32 tokenId = uint32(_tokenId);
 

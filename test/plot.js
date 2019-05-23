@@ -35,11 +35,11 @@ const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
 // Allows minting tokens
 const ROLE_TOKEN_CREATOR = 0x00000001;
 // Allows modifying token's state
-const ROLE_STATE_PROVIDER = 0x00000004;
+const ROLE_STATE_PROVIDER = 0x00000010;
 // Allows modifying transfer lock bitmask (smart contract global)
-const ROLE_TRANSFER_LOCK_PROVIDER = 0x00000008;
+const ROLE_TRANSFER_LOCK_PROVIDER = 0x00000020;
 // Allows modifying token's offset
-const ROLE_OFFSET_PROVIDER = 0x00000010;
+const ROLE_OFFSET_PROVIDER = 0x00000040;
 
 // default depth of the land plot
 const DEPTH = 100;
