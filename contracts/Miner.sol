@@ -1445,6 +1445,8 @@ contract Miner is AccessControl {
 
     // for small inputs just approximate result with linear function
     if(r < 413) {
+      // approximate parabola with a linear function y = 0.5406 * x,
+      // and calculate the reverse - x = y / 0.5406
       a = 5000 * r / 2703;
     }
     // perform calculation according to the formula (see function header)
