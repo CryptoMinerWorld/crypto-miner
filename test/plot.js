@@ -11,16 +11,14 @@ import {
 	InterfaceId_ERC721Metadata,
 	FEATURE_TRANSFERS,
 	FEATURE_TRANSFERS_ON_BEHALF,
-	ROLE_TOKEN_CREATOR
+	ROLE_TOKEN_CREATOR,
+	ROLE_STATE_PROVIDER,
+	ROLE_TRANSFER_LOCK_PROVIDER
 } from "./erc721_core";
 
-// Features and Roles:
-// Allows modifying token's state
-const ROLE_STATE_PROVIDER = 0x00000010;
-// Allows modifying transfer lock bitmask (smart contract global)
-const ROLE_TRANSFER_LOCK_PROVIDER = 0x00000020;
+// PlotERC721 specific Features and Roles:
 // Allows modifying token's offset
-const ROLE_OFFSET_PROVIDER = 0x00000040;
+export const ROLE_OFFSET_PROVIDER = 0x00000040;
 
 // default depth of the land plot
 const DEPTH = 100;

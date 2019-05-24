@@ -1,15 +1,24 @@
+const Token = artifacts.require("./GemERC721.sol");
+
+// import ERC721Core dependencies
 import {
 	InterfaceId_ERC165,
 	InterfaceId_ERC721Enumerable,
 	InterfaceId_ERC721Exists,
-	InterfaceId_ERC721Metadata
+	InterfaceId_ERC721Metadata,
+	FEATURE_TRANSFERS,
+	FEATURE_TRANSFERS_ON_BEHALF,
+	ROLE_TOKEN_CREATOR,
+	ROLE_EXT_WRITER,
+	ROLE_STATE_PROVIDER,
+	ROLE_TRANSFER_LOCK_PROVIDER
 } from "./erc721_core";
 
-const Token = artifacts.require("./GemERC721.sol");
-
-const FEATURE_TRANSFERS = 0x00000001;
-const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
-const ROLE_TOKEN_CREATOR = 0x00000001;
+// GemERC721 specific Features and Roles
+export const ROLE_LEVEL_PROVIDER = 0x00000040;
+export const ROLE_GRADE_PROVIDER = 0x00000080;
+export const ROLE_NEXT_ID_INC = 0x00000100;
+export const ROLE_COLOR_PROVIDER = 0x00000200;
 
 const grade1 = 0x1000001;
 
@@ -49,6 +58,12 @@ contract('GemERC721', function(accounts) {
 
 		// balance of zero address fails
 		await assertThrows(tk.balanceOf, 0);
+
+		// extended functions
+		assert.equal(0x12500, await tk.nextId(), "wrong initial value of nextId");
+		assertArraysEqual([1, 2, 5, 6, 7, 9, 10], await tk.getAvailableColors(), "incorrect initial value for available colors array");
+		assert.equal(0, await tk.read(1, 0, 8), "wrong initial read for 1/0/8");
+		assert.equal(0, await tk.read(1, 0, 256), "wrong initial read for 1/0/256");
 	});
 	it("initial state: throwable functions");
 
@@ -278,8 +293,154 @@ contract('GemERC721', function(accounts) {
 		await assertThrows(async function() {await tk.getOwnershipModified(0x401);});
 		await assertThrows(async function() {await tk.ownerOf(0x401);});
 	});
+
+	it("security: incrementId requires ROLE_NEXT_ID_INC permission", async() => {
+		// deploy Gem Extension
+		const tk = await Token.new();
+
+		// define an address to act as an operator
+		const operator = accounts[1];
+
+		// define the function to check permissions for
+		const fn = async() => await tk.incrementId({from: operator});
+
+		// initially fn throws
+		await assertThrows(fn);
+		// after setting the required permission to operator
+		await tk.updateRole(operator, ROLE_NEXT_ID_INC);
+		// fn succeeds
+		await fn();
+
+		// next Id counter incremented by one
+		assert.equal(0x12501, await tk.nextId(), "wrong nextId counter value");
+	});
+	it("security: write requires ROLE_EXT_WRITER permission", async() => {
+		// deploy Gem Extension
+		const tk = await Token.new();
+
+		// define an address to act as an operator
+		const operator = accounts[1];
+
+		// define the function to check permissions for
+		const fn = async() => await tk.write(1, 17, 0, 8, {from: operator});
+
+		// initially fn throws
+		await assertThrows(fn);
+		// after setting the required permission to operator
+		await tk.updateRole(operator, ROLE_EXT_WRITER);
+		// fn succeeds
+		await fn();
+
+		// verify read returns 17
+		assert.equal(17, await tk.read(1, 0, 8), "wrong value read");
+	});
+	it("security: setAvailableColors requires ROLE_COLOR_PROVIDER permission", async() => {
+		// deploy Gem Extension
+		const tk = await Token.new();
+
+		// define an address to act as an operator
+		const operator = accounts[1];
+
+		// define the function to check permissions for
+		const fn = async() => await tk.setAvailableColors([1, 2, 3], {from: operator});
+
+		// initially fn throws
+		await assertThrows(fn);
+		// after setting the required permission to operator
+		await tk.updateRole(operator, ROLE_COLOR_PROVIDER);
+		// fn succeeds
+		await fn();
+
+		// available colors array updated
+		assertArraysEqual([1, 2, 3], await tk.getAvailableColors(), "incorrect value for available colors array");
+	});
+
+	it("read/write: verify integrity of read/write operation", async() => {
+		// deploy Gem Extension
+		const tk = await Token.new();
+
+		// operate on the first bit
+		assert.equal(0, await tk.read(1, 0, 1), "wrong read 0, 0/1");
+		await tk.write(1, 1, 0, 1);
+		assert.equal(1, await tk.read(1, 0, 1), "wrong read 1, 0/1");
+
+		// operate on the first byte
+		assert.equal(1, await tk.read(1, 0, 8), "wrong read 0, 0/8");
+		await tk.write(1, 17, 0, 8); // 0x11
+		assert.equal(17, await tk.read(1, 0, 8), "wrong read 1, 0/8");
+
+		// operate on the n-th byte
+		assert.equal(0, await tk.read(1, 16, 8), "wrong read 0, 16/8");
+		await tk.write(1, 117, 16, 8); // 0x750000
+		assert.equal(117, await tk.read(1, 16, 8), "wrong read 1, 16/8");
+
+		// operate on n-th bits
+		assert.equal(0, await tk.read(1, 7, 5), "wrong read 0, 7/5");
+		await tk.write(1, 112, 7, 5); // 112 will be truncated to 5 bits which is 16
+		assert.equal(16, await tk.read(1, 7, 5), "wrong read 1, 7/5");
+		assert.equal(16, await tk.read(1, 7, 8), "wrong read 2, 7/8");
+		await tk.write(1, 112, 7, 8); // 0x3800
+		assert.equal(16, await tk.read(1, 7, 5), "wrong read 3, 171/5");
+		assert.equal(112, await tk.read(1, 7, 8), "wrong read 4, 171/8");
+
+		// erase some bits
+		assert.equal(0, await tk.read(1, 24, 32), "wrong read 0, 32/32");
+		await tk.write(1, 65537, 24, 32); // write 0x00010001000000
+		await tk.write(1, 0, 40, 16); // erase high 16 bits of the written data - 0x00010000
+		assert.equal(1, await tk.read(1, 24, 32), "wrong read 1, 32/32");
+
+		// verify whole number
+		assert.equal(0x1753811, await tk.read(1, 0, 256), "wrong whole read");
+
+		// perform few random read/write operations
+		for(let i = 0; i < 32; i++) {
+			const value = Math.floor(Math.random() * 256);
+			const offset = Math.floor(Math.random() * 248);
+			const length = Math.ceil(Math.random() * 8);
+			await tk.write(1, value, offset, length);
+			assert.equal(
+				value & ((1 << length) - 1),
+				await tk.read(1, offset, length),
+				`wrong read ${i}, ${value}/${offset}/${length}`
+			);
+		}
+		console.log(`\t0x${(await tk.read(1, 0, 0)).toString(16)}`);
+
+		// erase everything
+		await tk.write(1, 0, 0, 256);
+		assert.equal(0, await tk.read(1, 0, 0), "wrong read 1, 0/0 (after erase)");
+	});
+
+	it("colors: verify integrity of set/get available colors operation", async() => {
+		// deploy Gem Extension
+		const tk = await Token.new();
+
+		// ensure empty colors array cannot be set
+		await assertThrows(tk.setAvailableColors, []);
+
+		// set and get several colors randomly
+		for(let i = 0; i < 10; i++) {
+			const length = Math.ceil(Math.random() * 12);
+			const colors = new Array(length);
+			for(let j = 0; j < length; j++) {
+				colors[j] = Math.ceil(Math.random() * 12);
+			}
+			// set the available colors
+			await tk.setAvailableColors(colors);
+			// verify available colors are set correctly
+			assertArraysEqual(colors, await tk.getAvailableColors(), "incorrect available colors array " + i);
+		}
+	});
 });
 
 
 // import auxiliary function to ensure function `fn` throws
 import {assertThrows, toBN} from "../scripts/shared_functions";
+
+// auxiliary function to check two arrays are equal
+function assertArraysEqual(actual, expected, msg) {
+	assert(actual.length === expected.length, `${msg}: arrays lengths are different`);
+	for(let i = 0; i < actual.length; i++) {
+		assert.equal(actual[i], expected[i], `${msg}: different elements and index ${i}`);
+	}
+}

@@ -170,6 +170,16 @@ contract GemERC721 is ERC721Core {
   uint32[] public allTokens;
 
   /**
+   * @dev Gem colors available in the system
+   */
+  uint8[] public availableColors = [1, 2, 5, 6, 7, 9, 10];
+
+  /**
+   * @dev Next token (gem) ID
+   */
+  uint32 public nextId = 0x12500;
+
+  /**
    * @dev The data in token's state may contain lock(s)
    *      (ex.: if token currently busy with some function which prevents transfer)
    * @dev A locked token cannot be transferred
@@ -210,6 +220,16 @@ contract GemERC721 is ERC721Core {
   /// @dev Role ROLE_GRADE_PROVIDER allows modifying gem's grade
   uint32 public constant ROLE_GRADE_PROVIDER = 0x00000080;
 
+  /**
+   * @dev Next ID Inc is responsible for incrementing `nextId`,
+   *      permission allows to call `incrementId`
+   */
+  uint32 public constant ROLE_NEXT_ID_INC = 0x00000100;
+
+  /**
+   * @dev Color provider may change the `availableColors` array
+   */
+  uint32 public constant ROLE_COLOR_PROVIDER = 0x00000200;
 
   /**
    * @dev Fired in setState()
@@ -258,6 +278,44 @@ contract GemERC721 is ERC721Core {
   }
 
   /**
+   * @dev Returns current value of `nextId` and increments it by one
+   * @return next token ID
+   */
+  function incrementId() public returns(uint32) {
+    // ensure sender has permission to increment `nextId`
+    require(isSenderInRole(ROLE_NEXT_ID_INC));
+
+    // return `nextId` and increment it after
+    return nextId++;
+  }
+
+  /**
+   * @dev Updates `availableColors` array
+   * @dev Requires sender to have `ROLE_COLOR_PROVIDER` permission
+   * @dev Requires input array not to be empty
+   * @param colors array of available colors to set
+   */
+  function setAvailableColors(uint8[] memory colors) public {
+    // ensure sender has permission to set colors
+    require(isSenderInRole(ROLE_COLOR_PROVIDER));
+
+    // ensure array is not empty
+    require(colors.length != 0);
+
+    // set `availableColors` array
+    availableColors = colors;
+  }
+
+  /**
+   * @dev Getter for an entire `availableColors` array
+   * @return array of available colors - `availableColors`
+   */
+  function getAvailableColors() public view returns(uint8[] memory) {
+    // just return an array as is
+    return availableColors;
+  }
+
+  /**
    * @dev Gets a gem by ID, representing it as two integers.
    *      The two integers are tightly packed with a gem data:
    *      First integer (high bits) contains (from higher to lower bits order):
@@ -277,7 +335,7 @@ contract GemERC721 is ERC721Core {
    *          index,
    *          ownershipModified,
    *          owner
-   * @dev Throws if gem doesn't exist
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the gem to fetch
    */
   function getPacked(uint256 _tokenId) public view returns(uint256, uint256) {
@@ -367,6 +425,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Gets the land plot ID of a gem
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the gem to get land plot ID value for
    * @return a token land plot ID
    */
@@ -381,6 +440,7 @@ contract GemERC721 is ERC721Core {
   /**
    * @dev Gets the gem's properties – color, level and
    *      grade - as packed uint32 number
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the gem to get properties for
    * @return gem's properties - color, level, grade as packed uint32
    */
@@ -397,6 +457,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Gets the color of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get color for
    * @return a token color
    */
@@ -410,6 +471,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Gets the level modified date of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get level modification date for
    * @return a token level modification date
    */
@@ -423,6 +485,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Gets the level of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get level for
    * @return a token level
    */
@@ -437,6 +500,7 @@ contract GemERC721 is ERC721Core {
   /**
    * @dev Levels up a gem to the level specified
    * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the gem to level up
    * @param _level new gem's level to set to
    */
@@ -464,6 +528,7 @@ contract GemERC721 is ERC721Core {
   /**
    * @dev Levels up a gem to by the level delta specified
    * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the gem to level up
    * @param _by number of levels to level up by
    */
@@ -490,6 +555,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Gets the grade modified date of a gem
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the gem to get grade modified date for
    * @return a token grade modified date
    */
@@ -503,6 +569,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Gets the grade of a gem
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the gem to get grade for
    * @return a token grade
    */
@@ -516,6 +583,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Gets the grade type of a gem
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the gem to get grade type for
    * @return a token grade type
    */
@@ -526,6 +594,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Gets the grade value of a gem
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the gem to get grade value for
    * @return a token grade value
    */
@@ -538,6 +607,7 @@ contract GemERC721 is ERC721Core {
    * @dev Upgrades the grade of the gem
    * @dev Requires new grade to be higher than an old one
    * @dev Requires sender to have `ROLE_GRADE_PROVIDER` permission
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the gem to modify the grade for
    * @param _grade new grade to set for the token, should be higher then current grade
    */
@@ -562,9 +632,9 @@ contract GemERC721 is ERC721Core {
     emit Upgraded(msg.sender, ownerOf(_tokenId), _tokenId, grade, _grade);
   }
 
-
   /**
    * @dev Gets the state modified date of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get state modified date for
    * @return token state modification date as a unix timestamp
    */
@@ -578,6 +648,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Gets the state of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get state for
    * @return a token state
    */
@@ -591,6 +662,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Verifies if token is transferable (can change ownership)
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to check transferable state for
    * @return true if token is transferable, false otherwise
    */
@@ -606,6 +678,7 @@ contract GemERC721 is ERC721Core {
   /**
    * @dev Modifies the state of a token
    * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to set state for
    * @param _state new state to set for the token
    */
@@ -633,6 +706,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Gets the creation time of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get creation time for
    * @return a token creation time as a unix timestamp
    */
@@ -646,6 +720,7 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Gets the ownership modified time of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get ownership modified time for
    * @return a token ownership modified time as a unix timestamp
    */
@@ -655,6 +730,34 @@ contract GemERC721 is ERC721Core {
 
     // obtain token's ownership modified time from storage and return
     return tokens[_tokenId].ownershipModified;
+  }
+
+  /**
+   * @dev Gets last modification data of any data in gem's structure
+   * @dev Doesn't take into account ext256 data
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get modification time for
+   * @param ownership flag indicating whether to take
+   *      ownership modification time into account or not
+   * @return a token modification time as a unix timestamp
+   */
+  function getModified(uint256 _tokenId, bool ownership) public view returns(uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // load token data into the memory
+    Gem memory token = tokens[_tokenId];
+
+    // calculate maximums of 3 pairs
+    uint32 levGrade = token.levelModified > token.gradeModified? token.levelModified: token.gradeModified;
+    uint32 ageState = token.ageModified > token.stateModified? token.ageModified: token.stateModified;
+    uint32 creationOwnership = ownership && token.creationTime > token.ownershipModified? token.creationTime: token.ownershipModified;
+
+    // calculate maximum of first 2 pairs
+    uint32 levAge = levGrade > ageState? levGrade: ageState;
+
+    // return the biggest of modification dates
+    return levAge > creationOwnership? levAge: creationOwnership;
   }
 
   /**

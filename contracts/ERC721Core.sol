@@ -52,8 +52,7 @@ contract ERC721Core is AccessControl, ERC165, ERC721Interfaces {
   /**
    * @dev An extension data structure, maps 256 bits of data to a token ID
    */
-  // TODO: consider extending to unlimited size
-  mapping(uint256 => uint256) private ext256;
+  mapping(uint256 => mapping(uint256 => uint256)) private ext256;
 
   /**
    * @dev Mapping from a token ID to an address approved to
@@ -462,6 +461,34 @@ contract ERC721Core is AccessControl, ERC165, ERC721Interfaces {
    * @param length how many bits to write
    */
   function write(uint256 _tokenId, uint256 value, uint8 offset, uint8 length) public {
+    // perform write operation on page zero
+    // delegate call to `writePage`
+    writePage(_tokenId, 0, value, offset, length);
+  }
+
+  /**
+   * @dev Reads token data
+   * @dev To read whole 256 bits, set offset and length to zero
+   * @param _tokenId token ID to read data from
+   * @param offset position in memory to read from (bits)
+   * @param length how many bits to read
+   */
+  function read(uint256 _tokenId, uint8 offset, uint8 length) public view returns(uint256 value) {
+    // perform read operation on page zero
+    // delegate call to `readPage`
+    return readPage(_tokenId, 0, offset, length);
+  }
+
+  /**
+   * @dev Writes token data, allows to access up to 2^256 pages of 256-bit memory slots
+   * @param _tokenId token ID to write data into
+   * @param page index of the page to write to
+   * @param value a value to write;
+   *      to write value as is, set offset and length to zero
+   * @param offset position in memory to write to (bits)
+   * @param length how many bits to write
+   */
+  function writePage(uint256 _tokenId, uint256 page, uint256 value, uint8 offset, uint8 length) public {
     // ensure sender has permission to write to `ext256`
     require(isSenderInRole(ROLE_EXT_WRITER));
 
@@ -477,23 +504,23 @@ contract ERC721Core is AccessControl, ERC165, ERC721Interfaces {
     value = value << offset & valueMask;
 
     // erase portion of the storage required
-    ext256[_tokenId] &= eraseMask;
+    ext256[_tokenId][page] &= eraseMask;
 
     // write data into erased portion
-    ext256[_tokenId] |= value;
+    ext256[_tokenId][page] |= value;
   }
 
   /**
-   * @dev Reads token data
+   * @dev Reads token data, allows to access up to 2^256 pages of 256-bit memory slots
    * @dev To read whole 256 bits, set offset and length to zero
    * @param _tokenId token ID to read data from
+   * @param page index of the page to read from
    * @param offset position in memory to read from (bits)
    * @param length how many bits to read
    */
-  function read(uint256 _tokenId, uint8 offset, uint8 length) public view returns(uint256 value) {
+  function readPage(uint256 _tokenId, uint256 page, uint8 offset, uint8 length) public view returns(uint256 value) {
     // read from required position required length of bits and return
-    return length == 0? ext256[_tokenId] >> offset: ext256[_tokenId] >> offset & ((uint256(1) << length) - 1);
+    return length == 0? ext256[_tokenId][page] >> offset: ext256[_tokenId][page] >> offset & ((uint256(1) << length) - 1);
   }
-
 
 }

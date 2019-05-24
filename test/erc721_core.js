@@ -42,6 +42,10 @@ export const ROLE_TOKEN_CREATOR = 0x00000001;
 export const ROLE_TOKEN_DESTROYER = 0x00000002;
 // Extension writer is responsible for writing into ext256,
 export const ROLE_EXT_WRITER = 0x00000004;
+// State provider is responsible for modifying token's state
+export const ROLE_STATE_PROVIDER = 0x00000010;
+// State provider is responsible for modifying transfer lock bitmask (smart contract global)
+export const ROLE_TRANSFER_LOCK_PROVIDER = 0x00000020;
 
 
 // calculates ERC165 interface ID for the given selectors

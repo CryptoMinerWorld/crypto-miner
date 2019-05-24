@@ -312,7 +312,7 @@ contract PlotERC721 is ERC721Core {
    *          index, 32 bits (only low 24 bits are used)
    *          ownershipModified, 32 bits
    *          owner, 160 bits
-   * @dev Throws if token doesn't exist
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to fetch packed structure for
    */
   function getPacked(uint256 _tokenId) public view returns(uint256, uint256) {
@@ -407,6 +407,7 @@ contract PlotERC721 is ERC721Core {
    *          - Tier 5 offset (start of Tier 5 / end of Tier 4), 8 bits
    *          - End of Tier 5 (block depth), 8 bits
    *      3. Current mining block index (8 bits)
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get tiers for
    * @return token tiers packed data structure
    */
@@ -421,6 +422,7 @@ contract PlotERC721 is ERC721Core {
   /**
    * @dev Gets number of tiers this plot has
    *      - 2 for Antarctica, 5 for the rest of the World
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to query number of tiers for
    * @return number of tiers this plot has,
    *      either 2 (Antarctica) or 5 (rest of the World)
@@ -443,6 +445,7 @@ contract PlotERC721 is ERC721Core {
    *      Tier 5: Obsidian - non-Antarctica only
    * @dev Passing index equal to zero returns Tier 1 offset,
    *      which is equal to zero by design
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to query depth for
    * @param k one-based tier index to query depth for
    * @return depth of the (k)th tier in blocks
@@ -460,6 +463,7 @@ contract PlotERC721 is ERC721Core {
    * @dev Gets token depth (a.k.a. maximum depth)
    *      - the maximum depth it can be mined to (immutable)
    * @dev Throws if token doesn't exist
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get depth for
    * @return token depth – the maximum depth value
    */
@@ -474,6 +478,7 @@ contract PlotERC721 is ERC721Core {
 
   /**
    * @dev Gets the offset modified date of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get offset modified date for
    * @return token offset modification date as a unix timestamp
    */
@@ -489,6 +494,7 @@ contract PlotERC721 is ERC721Core {
    * @dev Gets token offset (a.k.a. depth)
    *      - current mined depth (initially zero)
    * @dev Throws if token doesn't exist
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get offset for
    * @return token offset – current mined depth value
    */
@@ -504,6 +510,7 @@ contract PlotERC721 is ERC721Core {
   /**
    * @dev Verifies if token is fully mined that is
    *      its offset is equal to the depth
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to check
    * @return true if token is fully mined, false otherwise
    */
@@ -520,6 +527,7 @@ contract PlotERC721 is ERC721Core {
    * @dev Mines the token to the depth specified
    * @dev Requires depth to be bigger than current offset
    * @dev Requires sender to have `ROLE_OFFSET_PROVIDER` permission
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to mine
    * @param _offset absolute depth value to mine to, greater than current depth
    */
@@ -553,6 +561,7 @@ contract PlotERC721 is ERC721Core {
    * @dev Mines the token by the depth delta specified
    * @dev Requires depth delta to be positive value
    * @dev Requires sender to have `ROLE_OFFSET_PROVIDER` permission
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to mine
    * @param _by depth delta value to mine by, greater than zero
    */
@@ -585,6 +594,7 @@ contract PlotERC721 is ERC721Core {
 
   /**
    * @dev Gets the state modified date of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get state modified date for
    * @return token state modification date as a unix timestamp
    */
@@ -598,6 +608,7 @@ contract PlotERC721 is ERC721Core {
 
   /**
    * @dev Gets the state of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get state for
    * @return a token state
    */
@@ -611,6 +622,7 @@ contract PlotERC721 is ERC721Core {
 
   /**
    * @dev Verifies if token is transferable (can change ownership)
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to check transferable state for
    * @return true if token is transferable, false otherwise
    */
@@ -626,6 +638,7 @@ contract PlotERC721 is ERC721Core {
   /**
    * @dev Modifies the state of a token
    * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to set state for
    * @param _state new state to set for the token
    */
@@ -653,6 +666,7 @@ contract PlotERC721 is ERC721Core {
 
   /**
    * @dev Gets the creation time of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get creation time for
    * @return a token creation time as a unix timestamp
    */
@@ -666,6 +680,7 @@ contract PlotERC721 is ERC721Core {
 
   /**
    * @dev Gets the ownership modified time of a token
+   * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get ownership modified time for
    * @return a token ownership modified time as a unix timestamp
    */

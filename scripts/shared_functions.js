@@ -28,3 +28,12 @@ export function write_csv(path, header, data) {
 
 // short name for web3.utils.toBN
 export const toBN = web3.utils.toBN;
+
+// auxiliary function to create a zer-filled array of BigNumbers
+export function toBNs(n) {
+	const r = new Array(n);
+	for(let i = 0; i < n; i++) {
+		r[i] = toBN(0);
+	}
+	return r;
+}

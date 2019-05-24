@@ -1,9 +1,19 @@
 const Token = artifacts.require("./CountryERC721.sol");
 
-const FEATURE_TRANSFERS = 0x00000001;
-const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
-const FEATURE_ALLOW_TAX_UPDATE = 0x00000010;
-const ROLE_TOKEN_CREATOR = 0x00000001;
+// import ERC721Core dependencies
+import {
+	InterfaceId_ERC165,
+	InterfaceId_ERC721Enumerable,
+	InterfaceId_ERC721Exists,
+	InterfaceId_ERC721Metadata,
+	FEATURE_TRANSFERS,
+	FEATURE_TRANSFERS_ON_BEHALF,
+	ROLE_TOKEN_CREATOR
+} from "./erc721_core";
+
+// CountryERC721 specific Features and Roles
+export const FEATURE_ALLOW_TAX_UPDATE = 0x00000010;
+export const ROLE_TAX_MANAGER = 0x00000010;
 
 // import country data
 import {COUNTRY_DATA, TOTAL_PLOTS} from "../data/country_data";
