@@ -395,6 +395,129 @@ contract PlotERC721 is ERC721Core {
     return collections[owner];
   }
 
+  /**
+   * @dev Gets the state modified date of a token
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get state modified date for
+   * @return token state modification date as a unix timestamp
+   */
+  function getStateModified(uint256 _tokenId) public view returns(uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's state modified date from storage and return
+    return tokens[_tokenId].stateModified;
+  }
+
+  /**
+   * @dev Gets the state of a token
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get state for
+   * @return a token state
+   */
+  function getState(uint256 _tokenId) public view returns(uint128) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's state from storage and return
+    return tokens[_tokenId].state;
+  }
+
+  /**
+   * @dev Verifies if token is transferable (can change ownership)
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to check transferable state for
+   * @return true if token is transferable, false otherwise
+   */
+  function isTransferable(uint256 _tokenId) public view returns(bool) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // calculate token state and transfer mask intersection
+    // and compare this intersection with zero
+    return tokens[_tokenId].state & transferLock == 0;
+  }
+
+  /**
+   * @dev Modifies the state of a token
+   * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to set state for
+   * @param _state new state to set for the token
+   */
+  function setState(uint256 _tokenId, uint128 _state) public {
+    // check that the call is made by a state provider
+    require(isSenderInRole(ROLE_STATE_PROVIDER));
+
+    // read current state value
+    // verifies token existence under the hood
+    uint128 state = getState(_tokenId);
+
+    // check that new state is not the same as an old one
+    // do not require this for state, allow state modification data update
+    // require(_state != state);
+
+    // set the state required
+    tokens[_tokenId].state = _state;
+
+    // update the state modification date
+    tokens[_tokenId].stateModified = uint32(now);
+
+    // emit an event
+    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state, _state);
+  }
+
+  /**
+   * @dev Gets the creation time of a token
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get creation time for
+   * @return a token creation time as a unix timestamp
+   */
+  function getCreationTime(uint256 _tokenId) public view returns(uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's creation time from storage and return
+    return tokens[_tokenId].creationTime;
+  }
+
+  /**
+   * @dev Gets the ownership modified time of a token
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get ownership modified time for
+   * @return a token ownership modified time as a unix timestamp
+   */
+  function getOwnershipModified(uint256 _tokenId) public view returns(uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's ownership modified time from storage and return
+    return tokens[_tokenId].ownershipModified;
+  }
+
+  /**
+   * @dev Allows setting the `transferLock` parameter of the contract,
+   *      which is used to determine if a particular token is locked or not
+   * @dev A locked token cannot be transferred
+   * @dev The token is locked if it contains any bits
+   *      from the `transferLock` in its `state` set
+   * @dev Requires sender to have `ROLE_TRANSFER_LOCK_PROVIDER` permission.
+   * @param _transferLock a value to set `transferLock` to
+   */
+  function setTransferLock(uint128 _transferLock) public {
+    // check that the call is made by a transfer lock provider
+    require(isSenderInRole(ROLE_TRANSFER_LOCK_PROVIDER));
+
+    // in case if new bitmask is different from what is already set
+    if(_transferLock != transferLock) {
+      // emit an event first - `transferLock` will be overwritten
+      emit TransferLockChanged(msg.sender, transferLock, _transferLock);
+
+      // update the transfer lock
+      transferLock = _transferLock;
+    }
+  }
+
 
   /**
    * @dev Gets token `tiers`, a packed data structure containing
@@ -589,130 +712,6 @@ contract PlotERC721 is ERC721Core {
 
     // emit an event
     emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset, offset + _by);
-  }
-
-
-  /**
-   * @dev Gets the state modified date of a token
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to get state modified date for
-   * @return token state modification date as a unix timestamp
-   */
-  function getStateModified(uint256 _tokenId) public view returns(uint32) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // obtain token's state modified date from storage and return
-    return tokens[_tokenId].stateModified;
-  }
-
-  /**
-   * @dev Gets the state of a token
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to get state for
-   * @return a token state
-   */
-  function getState(uint256 _tokenId) public view returns(uint128) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // obtain token's state from storage and return
-    return tokens[_tokenId].state;
-  }
-
-  /**
-   * @dev Verifies if token is transferable (can change ownership)
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to check transferable state for
-   * @return true if token is transferable, false otherwise
-   */
-  function isTransferable(uint256 _tokenId) public view returns(bool) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // calculate token state and transfer mask intersection
-    // and compare this intersection with zero
-    return tokens[_tokenId].state & transferLock == 0;
-  }
-
-  /**
-   * @dev Modifies the state of a token
-   * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to set state for
-   * @param _state new state to set for the token
-   */
-  function setState(uint256 _tokenId, uint128 _state) public {
-    // check that the call is made by a state provider
-    require(isSenderInRole(ROLE_STATE_PROVIDER));
-
-    // read current state value
-    // verifies token existence under the hood
-    uint128 state = getState(_tokenId);
-
-    // check that new state is not the same as an old one
-    // do not require this for state, allow state modification data update
-    // require(_state != state);
-
-    // set the state required
-    tokens[_tokenId].state = _state;
-
-    // update the state modification date
-    tokens[_tokenId].stateModified = uint32(now);
-
-    // emit an event
-    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state, _state);
-  }
-
-  /**
-   * @dev Gets the creation time of a token
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to get creation time for
-   * @return a token creation time as a unix timestamp
-   */
-  function getCreationTime(uint256 _tokenId) public view returns(uint32) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // obtain token's creation time from storage and return
-    return tokens[_tokenId].creationTime;
-  }
-
-  /**
-   * @dev Gets the ownership modified time of a token
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to get ownership modified time for
-   * @return a token ownership modified time as a unix timestamp
-   */
-  function getOwnershipModified(uint256 _tokenId) public view returns(uint32) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // obtain token's ownership modified time from storage and return
-    return tokens[_tokenId].ownershipModified;
-  }
-
-  /**
-   * @dev Allows setting the `transferLock` parameter of the contract,
-   *      which is used to determine if a particular token is locked or not
-   * @dev A locked token cannot be transferred
-   * @dev The token is locked if it contains any bits
-   *      from the `transferLock` in its `state` set
-   * @dev Requires sender to have `ROLE_TRANSFER_LOCK_PROVIDER` permission.
-   * @param _transferLock a value to set `transferLock` to
-   */
-  function setTransferLock(uint128 _transferLock) public {
-    // check that the call is made by a transfer lock provider
-    require(isSenderInRole(ROLE_TRANSFER_LOCK_PROVIDER));
-
-    // in case if new bitmask is different from what is already set
-    if(_transferLock != transferLock) {
-      // emit an event first - `transferLock` will be overwritten
-      emit TransferLockChanged(msg.sender, transferLock, _transferLock);
-
-      // update the transfer lock
-      transferLock = _transferLock;
-    }
   }
 
 

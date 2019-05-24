@@ -14,15 +14,15 @@ const Miner = artifacts.require("./Miner.sol");
 // import ERC721Core dependencies
 import {
 	ROLE_STATE_PROVIDER
-} from "./erc721_core";
+} from "../test/erc721_core";
 // import PlotERC721 dependencies
 import {
 	ROLE_OFFSET_PROVIDER
-} from "./plot";
+} from "../test/plot";
 // import Miner dependencies
 import {
 	FEATURE_MINING_ENABLED
-} from "./miner";
+} from "../test/miner";
 
 // CSV file headers
 const CSV_HEADER = "tiers,plots,gems1,gems2,gems3,gems4,gems5,silver,gold,artifacts,keys";

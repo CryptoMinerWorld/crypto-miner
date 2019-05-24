@@ -211,25 +211,34 @@ contract GemERC721 is ERC721Core {
    */
   uint32 public constant ROLE_TRANSFER_LOCK_PROVIDER = 0x00000020;
 
-
-  /// @notice Level provider is responsible for enabling the workshop
-  /// @dev Role ROLE_LEVEL_PROVIDER allows leveling up the gem
+  /**
+   * @notice Level provider is responsible for enabling the workshop
+   * @dev Role ROLE_LEVEL_PROVIDER allows leveling up the gem
+   */
   uint32 public constant ROLE_LEVEL_PROVIDER = 0x00000040;
 
-  /// @notice Grade provider is responsible for enabling the workshop
-  /// @dev Role ROLE_GRADE_PROVIDER allows modifying gem's grade
+  /**
+   * @notice Grade provider is responsible for enabling the workshop
+   * @dev Role ROLE_GRADE_PROVIDER allows modifying gem's grade
+   */
   uint32 public constant ROLE_GRADE_PROVIDER = 0x00000080;
+
+  /**
+   * @notice Energetic age provider is responsible for mining
+   * @dev Role ROLE_AGE_PROVIDER allows setting energetic age of the gem
+   */
+  uint32 public constant ROLE_AGE_PROVIDER = 0x00000100;
 
   /**
    * @dev Next ID Inc is responsible for incrementing `nextId`,
    *      permission allows to call `incrementId`
    */
-  uint32 public constant ROLE_NEXT_ID_INC = 0x00000100;
+  uint32 public constant ROLE_NEXT_ID_INC = 0x00000200;
 
   /**
    * @dev Color provider may change the `availableColors` array
    */
-  uint32 public constant ROLE_COLOR_PROVIDER = 0x00000200;
+  uint32 public constant ROLE_COLOR_PROVIDER = 0x00000400;
 
   /**
    * @dev Fired in setState()
@@ -259,11 +268,59 @@ contract GemERC721 is ERC721Core {
    */
   event TransferLockChanged(address indexed _by, uint24 _from, uint24 _to);
 
-  /// @dev Fired in levelUp()
-  event LevelUp(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint8 _from, uint8 _to);
+  /**
+   * @dev Fired in levelUp() and levelUpBy()
+   * @param _by level provider
+   *      (an address having `ROLE_LEVEL_PROVIDER` permission)
+   *      which modified token `_tokenId` level
+   * @param _owner owner of the token `_tokenId`
+   * @param _tokenId id of the token whose level was increased
+   * @param _from old level
+   * @param _to new level
+   */
+  event LevelUp(
+    address indexed _by,
+    address indexed _owner,
+    uint256 indexed _tokenId,
+    uint8 _from,
+    uint8 _to
+  );
 
-  /// @dev Fired in upgradeGrade()
-  event Upgraded(address indexed _by, address indexed _owner, uint256 indexed _tokenId, uint32 _from, uint32 _to);
+  /**
+   * @dev Fired in upgradeGrade()
+   * @param _by grade provider
+   *      (an address having `ROLE_GRADE_PROVIDER` permission)
+   *      which modified token `_tokenId` grade
+   * @param _owner owner of the token `_tokenId`
+   * @param _tokenId id of the token whose grade was increased
+   * @param _from old grade
+   * @param _to new grade
+   */
+  event Upgraded(
+    address indexed _by,
+    address indexed _owner,
+    uint256 indexed _tokenId,
+    uint32 _from,
+    uint32 _to
+  );
+
+  /**
+  * @dev Fired in setAge()
+   * @param _by level provider
+   *      (an address having `ROLE_AGE_PROVIDER` permission)
+   *      which modified token `_tokenId` energetic age
+   * @param _owner owner of the token `_tokenId`
+   * @param _tokenId id of the token whose energetic age was modified
+   * @param _from old energetic age
+   * @param _to new energetic age
+   */
+  event EnergeticAgeModified(
+    address indexed _by,
+    address indexed _owner,
+    uint256 indexed _tokenId,
+    uint32 _from,
+    uint32 _to
+  );
 
   /**
    * @dev Creates a ERC721 instance,
@@ -422,6 +479,130 @@ contract GemERC721 is ERC721Core {
     // read a collection from mapping and return
     return collections[owner];
   }
+
+  /**
+   * @dev Gets the state modified date of a token
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get state modified date for
+   * @return token state modification date as a unix timestamp
+   */
+  function getStateModified(uint256 _tokenId) public view returns(uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's state modified date from storage and return
+    return tokens[_tokenId].stateModified;
+  }
+
+  /**
+   * @dev Gets the state of a token
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get state for
+   * @return a token state
+   */
+  function getState(uint256 _tokenId) public view returns(uint24) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's state from storage and return
+    return tokens[_tokenId].state;
+  }
+
+  /**
+   * @dev Verifies if token is transferable (can change ownership)
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to check transferable state for
+   * @return true if token is transferable, false otherwise
+   */
+  function isTransferable(uint256 _tokenId) public view returns(bool) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // calculate token state and transfer mask intersection
+    // and compare this intersection with zero
+    return tokens[_tokenId].state & transferLock == 0;
+  }
+
+  /**
+   * @dev Modifies the state of a token
+   * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to set state for
+   * @param _state new state to set for the token
+   */
+  function setState(uint256 _tokenId, uint24 _state) public {
+    // check that the call is made by a state provider
+    require(isSenderInRole(ROLE_STATE_PROVIDER));
+
+    // read current state value
+    // verifies token existence under the hood
+    uint24 state = getState(_tokenId);
+
+    // check that new state is not the same as an old one
+    // do not require this for state, allow state modification data update
+    // require(_state != state);
+
+    // set the state required
+    tokens[_tokenId].state = _state;
+
+    // update the state modification date
+    tokens[_tokenId].stateModified = uint32(now);
+
+    // emit an event
+    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state, _state);
+  }
+
+  /**
+   * @dev Gets the creation time of a token
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get creation time for
+   * @return a token creation time as a unix timestamp
+   */
+  function getCreationTime(uint256 _tokenId) public view returns(uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's creation time from storage and return
+    return tokens[_tokenId].creationTime;
+  }
+
+  /**
+   * @dev Gets the ownership modified time of a token
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get ownership modified time for
+   * @return a token ownership modified time as a unix timestamp
+   */
+  function getOwnershipModified(uint256 _tokenId) public view returns(uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's ownership modified time from storage and return
+    return tokens[_tokenId].ownershipModified;
+  }
+
+  /**
+   * @dev Allows setting the `transferLock` parameter of the contract,
+   *      which is used to determine if a particular token is locked or not
+   * @dev A locked token cannot be transferred
+   * @dev The token is locked if it contains any bits
+   *      from the `transferLock` in its `state` set
+   * @dev Requires sender to have `ROLE_TRANSFER_LOCK_PROVIDER` permission.
+   * @param _transferLock a value to set `transferLock` to
+   */
+  function setTransferLock(uint24 _transferLock) public {
+    // check that the call is made by a transfer lock provider
+    require(isSenderInRole(ROLE_TRANSFER_LOCK_PROVIDER));
+
+    // in case if new bitmask is different from what is already set
+    if(_transferLock != transferLock) {
+      // emit an event first - `transferLock` will be overwritten
+      emit TransferLockChanged(msg.sender, transferLock, _transferLock);
+
+      // update the transfer lock
+      transferLock = _transferLock;
+    }
+  }
+
 
   /**
    * @dev Gets the land plot ID of a gem
@@ -632,104 +813,38 @@ contract GemERC721 is ERC721Core {
     emit Upgraded(msg.sender, ownerOf(_tokenId), _tokenId, grade, _grade);
   }
 
-  /**
-   * @dev Gets the state modified date of a token
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to get state modified date for
-   * @return token state modification date as a unix timestamp
-   */
-  function getStateModified(uint256 _tokenId) public view returns(uint32) {
+  function getAgeModified(uint256 _tokenId) public view returns(uint32) {
     // validate token existence
     require(exists(_tokenId));
 
-    // obtain token's state modified date from storage and return
-    return tokens[_tokenId].stateModified;
+    // obtain token's age modified date from storage and return
+    return tokens[_tokenId].ageModified;
   }
 
-  /**
-   * @dev Gets the state of a token
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to get state for
-   * @return a token state
-   */
-  function getState(uint256 _tokenId) public view returns(uint24) {
+  function getAge(uint256 _tokenId) public view returns(uint32) {
     // validate token existence
     require(exists(_tokenId));
 
-    // obtain token's state from storage and return
-    return tokens[_tokenId].state;
+    // obtain token's age from storage and return
+    return tokens[_tokenId].age;
   }
 
-  /**
-   * @dev Verifies if token is transferable (can change ownership)
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to check transferable state for
-   * @return true if token is transferable, false otherwise
-   */
-  function isTransferable(uint256 _tokenId) public view returns(bool) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // calculate token state and transfer mask intersection
-    // and compare this intersection with zero
-    return tokens[_tokenId].state & transferLock == 0;
-  }
-
-  /**
-   * @dev Modifies the state of a token
-   * @dev Requires sender to have `ROLE_STATE_PROVIDER` permission
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to set state for
-   * @param _state new state to set for the token
-   */
-  function setState(uint256 _tokenId, uint24 _state) public {
+  function setAge(uint256 _tokenId, uint32 _age) public {
     // check that the call is made by a state provider
-    require(isSenderInRole(ROLE_STATE_PROVIDER));
+    require(isSenderInRole(ROLE_AGE_PROVIDER));
 
-    // read current state value
+    // read current energetic age value
     // verifies token existence under the hood
-    uint24 state = getState(_tokenId);
-
-    // check that new state is not the same as an old one
-    // do not require this for state, allow state modification data update
-    // require(_state != state);
+    uint32 age = getAge(_tokenId);
 
     // set the state required
-    tokens[_tokenId].state = _state;
+    tokens[_tokenId].age = _age;
 
     // update the state modification date
-    tokens[_tokenId].stateModified = uint32(now);
+    tokens[_tokenId].ageModified = uint32(now);
 
     // emit an event
-    emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state, _state);
-  }
-
-  /**
-   * @dev Gets the creation time of a token
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to get creation time for
-   * @return a token creation time as a unix timestamp
-   */
-  function getCreationTime(uint256 _tokenId) public view returns(uint32) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // obtain token's creation time from storage and return
-    return tokens[_tokenId].creationTime;
-  }
-
-  /**
-   * @dev Gets the ownership modified time of a token
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to get ownership modified time for
-   * @return a token ownership modified time as a unix timestamp
-   */
-  function getOwnershipModified(uint256 _tokenId) public view returns(uint32) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // obtain token's ownership modified time from storage and return
-    return tokens[_tokenId].ownershipModified;
+    emit EnergeticAgeModified(msg.sender, ownerOf(_tokenId), _tokenId, age, _age);
   }
 
   /**
@@ -737,52 +852,56 @@ contract GemERC721 is ERC721Core {
    * @dev Doesn't take into account ext256 data
    * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get modification time for
-   * @param ownership flag indicating whether to take
-   *      ownership modification time into account or not
    * @return a token modification time as a unix timestamp
    */
-  function getModified(uint256 _tokenId, bool ownership) public view returns(uint32) {
+  function getModified(uint256 _tokenId) public view returns(uint32) {
     // validate token existence
     require(exists(_tokenId));
 
     // load token data into the memory
     Gem memory token = tokens[_tokenId];
 
-    // calculate maximums of 3 pairs
-    uint32 levGrade = token.levelModified > token.gradeModified? token.levelModified: token.gradeModified;
+    // calculate maximums of a pair
     uint32 ageState = token.ageModified > token.stateModified? token.ageModified: token.stateModified;
-    uint32 creationOwnership = ownership && token.creationTime > token.ownershipModified? token.creationTime: token.ownershipModified;
-
-    // calculate maximum of first 2 pairs
-    uint32 levAge = levGrade > ageState? levGrade: ageState;
 
     // return the biggest of modification dates
-    return levAge > creationOwnership? levAge: creationOwnership;
+    return ageState > token.creationTime? ageState: token.creationTime;
   }
+
 
   /**
-   * @dev Allows setting the `transferLock` parameter of the contract,
-   *      which is used to determine if a particular token is locked or not
-   * @dev A locked token cannot be transferred
-   * @dev The token is locked if it contains any bits
-   *      from the `transferLock` in its `state` set
-   * @dev Requires sender to have `ROLE_TRANSFER_LOCK_PROVIDER` permission.
-   * @param _transferLock a value to set `transferLock` to
+   * @dev Creates new token with token ID derived from the country ID
+   *      and assigns an ownership `_to` for this token
+   * @dev Allows setting initial token's properties
+   * @param _to an address to mint token to (first owner of the token)
+   * @param _tokenId ID of the token to mint
+   * @param _plotId ID of the plot that gem "belongs to" (was found in)
+   * @param _color gem color
+   * @param _level gem level
+   * @param _grade grade of the gem,
+   *      high 8 bits represent grade type,
+   *      low 24 bits - grade value
    */
-  function setTransferLock(uint24 _transferLock) public {
-    // check that the call is made by a transfer lock provider
-    require(isSenderInRole(ROLE_TRANSFER_LOCK_PROVIDER));
+  function mint(
+    address _to,
+    uint32 _tokenId,
+    uint24 _plotId,
+    uint8 _color,
+    uint8 _level,
+    uint32 _grade
+  ) public {
+    // check if caller has sufficient permissions to mint a token
+    require(isSenderInRole(ROLE_TOKEN_CREATOR));
 
-    // in case if new bitmask is different from what is already set
-    if(_transferLock != transferLock) {
-      // emit an event first - `transferLock` will be overwritten
-      emit TransferLockChanged(msg.sender, transferLock, _transferLock);
+    // delegate call to `__mint`
+    __mint(_to, _tokenId, _plotId, _color, _level, _grade);
 
-      // update the transfer lock
-      transferLock = _transferLock;
-    }
+    // fire Minted event
+    emit Minted(msg.sender, _to, _tokenId);
+
+    // fire ERC721 transfer event
+    emit Transfer(address(0), _to, _tokenId);
   }
-
 
   /**
    * @notice Total number of existing tokens (tracked by this contract)
@@ -859,40 +978,6 @@ contract GemERC721 is ERC721Core {
 
     // return owner's address
     return tokens[_tokenId].owner;
-  }
-
-  /**
-   * @dev Creates new token with token ID derived from the country ID
-   *      and assigns an ownership `_to` for this token
-   * @dev Allows setting initial token's properties
-   * @param _to an address to mint token to (first owner of the token)
-   * @param _tokenId ID of the token to mint
-   * @param _plotId ID of the plot that gem "belongs to" (was found in)
-   * @param _color gem color
-   * @param _level gem level
-   * @param _grade grade of the gem,
-   *      high 8 bits represent grade type,
-   *      low 24 bits - grade value
-   */
-  function mint(
-    address _to,
-    uint32 _tokenId,
-    uint24 _plotId,
-    uint8 _color,
-    uint8 _level,
-    uint32 _grade
-  ) public {
-    // check if caller has sufficient permissions to mint a token
-    require(isSenderInRole(ROLE_TOKEN_CREATOR));
-
-    // delegate call to `__mint`
-    __mint(_to, _tokenId, _plotId, _color, _level, _grade);
-
-    // fire Minted event
-    emit Minted(msg.sender, _to, _tokenId);
-
-    // fire ERC721 transfer event
-    emit Transfer(address(0), _to, _tokenId);
   }
 
   /**

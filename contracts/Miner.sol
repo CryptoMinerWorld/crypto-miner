@@ -386,20 +386,23 @@ contract Miner is AccessControl {
     // read tiers structure of the plot
     uint64 tiers = plotInstance.getTiers(plotId);
 
-    // read level data of the gem
-    uint8 level = gemInstance.getLevel(gemId);
-
     // determine maximum depth this gem can mine to (by level)
-    uint8 maxOffset = TierMath.getTierDepthOrMined(tiers, level);
+    uint8 maxOffset = TierMath.getTierDepthOrMined(tiers, gemInstance.getLevel(gemId));
 
-    // determine gem's effective resting energy, taking into account its grade
-    uint32 energy = effectiveRestingEnergyOf(gemId);
+    // determine gem's resting energy, taking into account its grade
+    uint16 energy = restingEnergyOf(gemId);
+
+    // determine gem's mining rate
+    uint32 rate100000000 = miningRateOf(gemId);
+
+    // calculate effective energy
+    uint32 effectiveEnergy = uint32(uint64(energy) * rate100000000 / 100000000);
 
     // define variable to store new plot offset
     uint8 offset;
 
     // delegate call to `evaluateWith`
-    (offset, energy) = evaluateWith(tiers, maxOffset, energy);
+    (offset, effectiveEnergy) = evaluateWith(tiers, maxOffset, effectiveEnergy);
 
     // in case when offset has increased, we perform initial mining
     // in the same transaction
@@ -407,13 +410,14 @@ contract Miner is AccessControl {
       // delegate call to `__mine` to update plot and mint loot
       __mine(plotId, offset);
 
-      // save unused resting energy into gem's extension
-      gemInstance.write(gemId, energy, 0, 32);
-      // keeping it unlocked and updating state change date
-      gemInstance.setState(gemId, 0);
+      // recalculate energy left
+      energy = uint16(uint64(effectiveEnergy) * 100000000 / rate100000000);
+
+      // save unused energetic age of the gem
+      gemInstance.setAge(gemId, unusedEnergeticAge(energy));
 
       // emit an energy consumed event
-      emit RestingEnergyConsumed(msg.sender, gemId, energy);
+      emit RestingEnergyConsumed(msg.sender, gemId, effectiveEnergy);
     }
 
     // if gem's level allows to mine deeper,
@@ -1372,7 +1376,7 @@ contract Miner is AccessControl {
     }
 
     // determine energetic age of the gem - delegate call to `energeticAgeOf`
-    uint32 age = energeticAgeOf(gemId);
+    uint32 age = gemInstance.getAge(gemId) + energeticAgeOf(gemId);
 
     // calculate the resting energy - delegate call to `restingEnergy`
     // and return the result
@@ -1491,7 +1495,7 @@ contract Miner is AccessControl {
   function energeticAgeOf(uint32 gemId) public view returns(uint32) {
     // gem's age in blocks is defined as a difference between current block number
     // and the maximum of gem's levelModified, gradeModified, creationTime and stateModified
-    uint32 ageSeconds = uint32(now - gemInstance.getModified(gemId, false));
+    uint32 ageSeconds = uint32(now - gemInstance.getModified(gemId));
 
     // return the result in minutes
     return ageSeconds / 60;
