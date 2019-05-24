@@ -1436,17 +1436,29 @@ contract Miner is AccessControl {
    * @return Energetic Age (a) calculated based on Resting Energy (R) provided
    */
   function unusedEnergeticAge(uint16 unusedRestingEnergy) public pure returns(uint32) {
-    // to avoid arithmetic overflow we need to use significantly more
-    // bits than the original 16-bit number, 128 bits is more than enough
-    uint128 r = unusedRestingEnergy;
+    // to avoid arithmetic overflow we need to use more
+    // bits than the original 16-bit number, 64 bits is enough
+    int64 r = unusedRestingEnergy;
 
-    // the result of the calculation is stored in 128-bit integer as well
-    uint128 a = 0;
+    // the result of the calculation is stored in 64-bit integer as well
+    int64 a = 0;
 
+    // for small inputs just approximate result with linear function
+    if(r < 413) {
+      a = 5000 * r / 2703;
+    }
     // perform calculation according to the formula (see function header)
     // if r < 10423 (corresponds to a < 37193 case)
-    if(r < 10423) {
-      // TODO: implement
+    else if(r < 10423) {
+      // Newton method - initial guess
+      a = 18596; // TODO: improve initial guess
+
+      // apply few Newton iterations
+      for(uint8 i = 0; i < 3; i++) {
+        // according to formula x1 = x0 - f(x0) / f'(x0)
+        // 27233
+        a = a - (540600 * a - 7 * int64(uint64(a) ** 2) - r * 1000000) / (540600 - 14 * a);
+      }
     }
     // if r ≥ 10423 (corresponds to a ≥ 37193 case)
     else {
