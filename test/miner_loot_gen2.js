@@ -168,6 +168,12 @@ contract('Loot Gen', (accounts) => {
 		const csv_data = `mine,2,${PLOTS},${gs.join(",")},${sil},${gol},${artifacts20},${foundersKeys},${chestKeys}`;
 		// write statistical raw data into the file
 		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
+
+		// verify some statistics constraints
+		assert(gs[0] > 0, "no level 1 gems");
+		assert(gs[1] > 0, "no level 2 gems");
+		assert(gs[2] > 0, "no level 3 gems");
+		assert(silver > 0, "no silver");
 	});
 
 	it("rnd: loot generator – Rest of the World", async() => {
