@@ -305,7 +305,7 @@ contract GemERC721 is ERC721Core {
   );
 
   /**
-  * @dev Fired in setAge()
+   * @dev Fired in setAge()
    * @param _by level provider
    *      (an address having `ROLE_AGE_PROVIDER` permission)
    *      which modified token `_tokenId` energetic age
@@ -870,9 +870,10 @@ contract GemERC721 is ERC721Core {
 
 
   /**
-   * @dev Creates new token with token ID derived from the country ID
+   * @dev Creates new token with token ID specified
    *      and assigns an ownership `_to` for this token
    * @dev Allows setting initial token's properties
+   * @dev Requires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)
    * @param _to an address to mint token to (first owner of the token)
    * @param _tokenId ID of the token to mint
    * @param _plotId ID of the plot that gem "belongs to" (was found in)
@@ -890,17 +891,46 @@ contract GemERC721 is ERC721Core {
     uint8 _level,
     uint32 _grade
   ) public {
+    // delegate call to `mintWith`
+    mintWith(_to, _tokenId, _plotId, _color, _level, _grade, 0);
+  }
+
+  /**
+   * @dev Creates new token with token ID specified
+   *      and assigns an ownership `_to` for this token
+   * @dev Allows setting initial tokens' properties
+   * @dev Requires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)
+   * @dev Requires caller to be bulk token creator (have `ROLE_BULK_CREATOR` permission)
+   *      if creating more than one token in a single transaction
+   * @dev Requires caller to be age provider (have `ROLE_AGE_PROVIDER` permission) -
+   *      if setting initial energetic age for the token
+   * @param _to an address to mint token to (first owner of the token)
+   * @param _tokenId ID of the token to mint
+   * @param _plotId ID of the plot that gem "belongs to" (was found in)
+   * @param _color gem color
+   * @param _level gem level
+   * @param _grade grade of the gem,
+   *      high 8 bits represent grade type,
+   *      low 24 bits - grade value
+   * @param _age energetic age of the gem
+   */
+  function mintWith(
+    address _to,
+    uint32 _tokenId,
+    uint24 _plotId,
+    uint8 _color,
+    uint8 _level,
+    uint32 _grade,
+    uint32 _age
+  ) public {
     // check if caller has sufficient permissions to mint a token
     require(isSenderInRole(ROLE_TOKEN_CREATOR));
 
+    // if setting an energetic age – also ensure caller is age provider
+    require(_age == 0 || isSenderInRole(ROLE_AGE_PROVIDER));
+
     // delegate call to `__mint`
-    __mint(_to, _tokenId, _plotId, _color, _level, _grade);
-
-    // fire Minted event
-    emit Minted(msg.sender, _to, _tokenId);
-
-    // fire ERC721 transfer event
-    emit Transfer(address(0), _to, _tokenId);
+    __mint(_to, _tokenId, _plotId, _color, _level, _grade, _age);
   }
 
   /**
@@ -1068,6 +1098,7 @@ contract GemERC721 is ERC721Core {
    * @param _grade grade of the gem,
    *      high 8 bits represent grade type,
    *      low 24 bits - grade value
+   * @param _age initial energetic age of the gem
    */
   function __mint(
     address _to,
@@ -1075,7 +1106,8 @@ contract GemERC721 is ERC721Core {
     uint24 _plotId,
     uint8 _color,
     uint8 _level,
-    uint32 _grade
+    uint32 _grade,
+    uint32 _age
   ) private {
     // validate destination address
     require(_to != address(0));
@@ -1095,7 +1127,7 @@ contract GemERC721 is ERC721Core {
       levelModified: 0,
       grade: _grade,
       gradeModified: 0,
-      age: 0,
+      age: _age,
       ageModified: 0,
       state: 0,
       stateModified: 0,
@@ -1114,6 +1146,12 @@ contract GemERC721 is ERC721Core {
     // add token ID to the `allTokens` collection,
     // automatically updates total supply
     allTokens.push(_tokenId);
+
+    // fire Minted event
+    emit Minted(msg.sender, _to, _tokenId);
+
+    // fire ERC721 transfer event
+    emit Transfer(address(0), _to, _tokenId);
   }
 
 }

@@ -12,11 +12,11 @@ const ChestKey = artifacts.require("./ChestKeyERC20.sol");
 const Miner = artifacts.require("./Miner.sol");
 
 // CSV Header
-const CSV_HEADER = "age,resting energy,unused age";
+const CSV_HEADER = "i,age,resting energy,unused age,deviation";
 
 // Miner smart contract tests
 contract('Miner Math', (accounts) => {
-	it("math: Newton's method", async() => {
+	it("math: Newton's method (a -> r -> a)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();
@@ -39,21 +39,20 @@ contract('Miner Math', (accounts) => {
 			chestKey.address
 		);
 
-		for(let i = 0; i < 50000; i++) {
-			const r = await miner.restingEnergy(i);
-			const a = await miner.unusedEnergeticAge(r);
-			write_csv("./data/newton.csv", CSV_HEADER, `${i},${r.toNumber()},${a.toNumber()}`);
-			// assertEqualWith(i, a.toNumber(), 50, `too big leeway - ${i},${r.toNumber()},${a.toNumber()}`);
+		// make exponential iterations
+		for(let i = 0; i < 1500; i++) {
+			const a0 = Math.floor(Math.exp((i)/100) - 1) + i;
+			const r = (await miner.restingEnergy(a0)).toNumber();
+			const a = (await miner.unusedEnergeticAge(r)).toNumber();
+			const dev = Math.abs(a0 - a) / (a0 + 239);
+			write_csv("./data/newton.csv", CSV_HEADER, `${i},${a0},${r},${a},${Math.abs(a0 - a)}`);
+			if(dev >= 0.01) {
+				console.log(`too big deviation - ${i},${a0},${r},${a} -> ${dev}`);
+			}
+			//assert(Math.abs(i - a) / (i + 239) < 0.01, `too big deviation - ${i},${r},${a}`);
 		}
 	});
-
-
 });
 
 // import shared functions
 import {write_csv} from "../scripts/shared_functions";
-
-// asserts equal with the precisions defined in leeway (absolute value)
-function assertEqualWith(expected, actual, leeway, msg) {
-	assert(expected - leeway < actual && expected + leeway > actual, msg);
-}

@@ -389,14 +389,11 @@ contract Miner is AccessControl {
     // determine maximum depth this gem can mine to (by level)
     uint8 maxOffset = TierMath.getTierDepthOrMined(tiers, gemInstance.getLevel(gemId));
 
-    // determine gem's resting energy, taking into account its grade
-    uint16 energy = restingEnergyOf(gemId);
-
     // determine gem's mining rate
     uint32 rate100000000 = miningRateOf(gemId);
 
     // calculate effective energy
-    uint32 effectiveEnergy = uint32(uint64(energy) * rate100000000 / 100000000);
+    uint32 effectiveEnergy = effectiveRestingEnergyOf(gemId);
 
     // define variable to store new plot offset
     uint8 offset;
@@ -411,7 +408,7 @@ contract Miner is AccessControl {
       __mine(plotId, offset);
 
       // recalculate energy left
-      energy = uint16(uint64(effectiveEnergy) * 100000000 / rate100000000);
+      uint16 energy = uint16(uint64(effectiveEnergy) * 100000000 / rate100000000);
 
       // save unused energetic age of the gem
       gemInstance.setAge(gemId, unusedEnergeticAge(energy));
@@ -603,7 +600,7 @@ contract Miner is AccessControl {
     uint64 tiers,
     uint8 maxOffset,
     uint32 initialEnergy
-  ) private view returns(
+  ) public view returns(
     uint8 offset,
     uint32 energyLeft
   ) {
@@ -627,10 +624,10 @@ contract Miner is AccessControl {
         // if current tier depth is bigger than offset – we mine
         if(offset < tierDepth) {
           // determine how deep we can mine in that tier
-          uint8 canMineTo = offset + energyToBlocks(i, energyLeft);
+          uint16 canMineTo = uint16(offset) + energyToBlocks(i, energyLeft);
 
           // we are not crossing the tier though
-          uint8 willMineTo = canMineTo < tierDepth? canMineTo: tierDepth;
+          uint8 willMineTo = canMineTo < tierDepth? uint8(canMineTo): tierDepth;
 
           // determine how much energy is consumed and decrease energy
           energyLeft -= blocksToEnergy(i, willMineTo - offset);
@@ -955,7 +952,7 @@ contract Miner is AccessControl {
     // for bottom of the stack
     if(bos) {
       // determine how many items we get
-      uint256 items = Random.__randomValue(11 * n, 2, 5);
+      uint256 items = Random.__randomValue(11 * n, 2, 3);
 
       // generate that amount of items
       for(uint8 i = 0; i < items; i++) {
@@ -1460,9 +1457,8 @@ contract Miner is AccessControl {
       a = 18596; // TODO: improve initial guess
 
       // apply few Newton iterations
-      for(uint8 i = 0; i < 3; i++) {
+      for(uint8 i = 0; i < 3 || (r > 10000 && i < 5); i++) {
         // according to formula x1 = x0 - f(x0) / f'(x0)
-        // 27233
         a = a - (540600 * a - 7 * int64(uint64(a) ** 2) - r * 1000000) / (540600 - 14 * a);
       }
     }

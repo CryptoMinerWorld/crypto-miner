@@ -3,15 +3,15 @@ const Token = artifacts.require("./GoldERC20.sol");
 // Dummy ERC20/ERC721 Receiver
 const Receiver = artifacts.require("./DummyReceiver.sol");
 
-// Enables ERC20 transfers of the tokens
-const FEATURE_TRANSFERS = 0x00000001;
-// Enables ERC20 transfers on behalf
-const FEATURE_TRANSFERS_ON_BEHALF = 0x00000002;
-
-// Token creator is responsible for creating tokens
-const ROLE_TOKEN_CREATOR = 0x00000001;
-// Token destroyer is responsible for destroying tokens
-const ROLE_TOKEN_DESTROYER = 0x00000002;
+// import ERC721Core dependencies
+import {
+	// Enables ERC20 transfers of the tokens
+	FEATURE_TRANSFERS,
+	// Enables ERC20 transfers on behalf
+	FEATURE_TRANSFERS_ON_BEHALF,
+	ROLE_TOKEN_CREATOR,
+	ROLE_TOKEN_DESTROYER
+} from "./erc721_core";
 
 // tests for GoldERC20 token
 contract('GoldERC20', (accounts) => {

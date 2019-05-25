@@ -12,14 +12,9 @@ const ChestKey = artifacts.require("./ChestKeyERC20.sol");
 const Miner = artifacts.require("./Miner.sol");
 
 // import ERC721Core dependencies
-import {
-	FEATURE_TRANSFERS,
-	ROLE_STATE_PROVIDER
-} from "./erc721_core";
+import {ROLE_STATE_PROVIDER} from "./erc721_core";
 // import PlotERC721 dependencies
-import {
-	ROLE_OFFSET_PROVIDER
-} from "./plot";
+import {ROLE_OFFSET_PROVIDER} from "./erc721_core";
 
 // define Miner specific Features and Roles
 export const FEATURE_MINING_ENABLED = 0x00000001;

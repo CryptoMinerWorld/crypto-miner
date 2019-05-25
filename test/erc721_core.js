@@ -48,6 +48,21 @@ export const ROLE_STATE_PROVIDER = 0x00000010;
 export const ROLE_TRANSFER_LOCK_PROVIDER = 0x00000020;
 
 
+// GemERC721 specific Features and Roles
+export const ROLE_LEVEL_PROVIDER = 0x00000040;
+export const ROLE_GRADE_PROVIDER = 0x00000080;
+export const ROLE_AGE_PROVIDER = 0x00000100;
+export const ROLE_NEXT_ID_INC = 0x00000200;
+export const ROLE_COLOR_PROVIDER = 0x00000400;
+
+// CountryERC721 specific Features and Roles
+export const FEATURE_ALLOW_TAX_UPDATE = 0x00000010;
+export const ROLE_TAX_MANAGER = 0x00000010;
+
+// PlotERC721 specific Features and Roles:
+// Allows modifying token's offset
+export const ROLE_OFFSET_PROVIDER = 0x00000040;
+
 // calculates ERC165 interface ID for the given selectors
 export function interfaceID(...selectors) {
 	let result = 0;

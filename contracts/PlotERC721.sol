@@ -719,6 +719,7 @@ contract PlotERC721 is ERC721Core {
    * @dev Creates new token with token ID derived from the country ID
    *      and assigns an ownership `_to` for this token
    * @dev Allows setting initial token's properties
+   * @dev Requires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)
    * @param _to an address to assign created token ownership to
    * @param _countryId ID of the country to mint token in,
    *     high 8 bits of the token ID will be set to that number
@@ -741,14 +742,8 @@ contract PlotERC721 is ERC721Core {
     // check if caller has sufficient permissions to mint a token
     require(isSenderInRole(ROLE_TOKEN_CREATOR));
 
-    // delegate call to `__mint`
+    // delegate call to `__mint` and return the result
     _tokenId = __mint(_to, _countryId, _tiers);
-
-    // fire Minted event
-    emit Minted(msg.sender, _to, _tokenId);
-
-    // fire ERC721 transfer event
-    emit Transfer(address(0), _to, _tokenId);
   }
 
 
@@ -985,6 +980,12 @@ contract PlotERC721 is ERC721Core {
     // add token ID to the `allTokens` collection,
     // automatically updates total supply
     allTokens.push(_tokenId);
+
+    // fire Minted event
+    emit Minted(msg.sender, _to, _tokenId);
+
+    // fire ERC721 transfer event
+    emit Transfer(address(0), _to, _tokenId);
   }
 
 

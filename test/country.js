@@ -12,8 +12,7 @@ import {
 } from "./erc721_core";
 
 // CountryERC721 specific Features and Roles
-export const FEATURE_ALLOW_TAX_UPDATE = 0x00000010;
-export const ROLE_TAX_MANAGER = 0x00000010;
+import {FEATURE_ALLOW_TAX_UPDATE, ROLE_TAX_MANAGER} from "./erc721_core";
 
 // import country data
 import {COUNTRY_DATA, TOTAL_PLOTS} from "../data/country_data";

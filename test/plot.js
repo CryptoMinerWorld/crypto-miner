@@ -18,7 +18,7 @@ import {
 
 // PlotERC721 specific Features and Roles:
 // Allows modifying token's offset
-export const ROLE_OFFSET_PROVIDER = 0x00000040;
+import {ROLE_OFFSET_PROVIDER} from "./erc721_core";
 
 // default depth of the land plot
 const DEPTH = 100;

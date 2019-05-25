@@ -15,11 +15,13 @@ import {
 } from "./erc721_core";
 
 // GemERC721 specific Features and Roles
-export const ROLE_LEVEL_PROVIDER = 0x00000040;
-export const ROLE_GRADE_PROVIDER = 0x00000080;
-export const ROLE_AGE_PROVIDER = 0x00000100;
-export const ROLE_NEXT_ID_INC = 0x00000200;
-export const ROLE_COLOR_PROVIDER = 0x00000400;
+import {
+	ROLE_LEVEL_PROVIDER,
+	ROLE_GRADE_PROVIDER,
+	ROLE_AGE_PROVIDER,
+	ROLE_NEXT_ID_INC,
+	ROLE_COLOR_PROVIDER
+} from "./erc721_core";
 
 const grade1 = 0x1000001;
 
