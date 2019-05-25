@@ -156,6 +156,7 @@ contract('Loot Gen', (accounts) => {
 		const chestKeys = (await chestKey.balanceOf(player)).toNumber();
 
 		// make some console input (without gem level breakthrough)
+		console.log("\t mined %o plots; items found:", PLOTS);
 		console.log("\tgems: %o", gems.length);
 		console.log("\tsilver: %o", sil);
 		console.log("\tgold: %o", gol);
