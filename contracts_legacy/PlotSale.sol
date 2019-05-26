@@ -686,7 +686,7 @@ contract PlotSale is AccessControlLight {
       }
 
       // generate random value in the [0, 100) range
-      uint8 rnd100 = uint8(Random.__rndVal(rnd >> 16 * i, 0xFFFF, 0, 100));
+      uint8 rnd100 = uint8(Random.__rndVal(rnd >> 16 * (i % 16), 0xFFFF, 0, 100));
 
       // depending on the value generated add to corresponding tier length
       // tier 1: first 35 blocks
