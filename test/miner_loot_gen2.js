@@ -149,8 +149,8 @@ contract('Loot Gen', (accounts) => {
 			gs[gems[i].shrn(40).mod(toBN(256)).toNumber() - 1]++;
 		}
 		// for the rest of the tokens its straight forward
-		const sil = (await silver.balanceOf(player)).div(await silver.ONE_UNIT()).toNumber();
-		const gol = (await gold.balanceOf(player)).div(await gold.ONE_UNIT()).toNumber();
+		const slv = (await silver.balanceOf(player)).div(await silver.ONE_UNIT()).toNumber();
+		const gld = (await gold.balanceOf(player)).div(await gold.ONE_UNIT()).toNumber();
 		const artifacts20 = (await artifactErc20.balanceOf(player)).toNumber();
 		const foundersKeys = (await foundersKey.balanceOf(player)).toNumber();
 		const chestKeys = (await chestKey.balanceOf(player)).toNumber();
@@ -158,14 +158,14 @@ contract('Loot Gen', (accounts) => {
 		// make some console input (without gem level breakthrough)
 		console.log("\t mined %o plots; items found:", PLOTS);
 		console.log("\tgems: %o", gems.length);
-		console.log("\tsilver: %o", sil);
-		console.log("\tgold: %o", gol);
+		console.log("\tsilver: %o", slv);
+		console.log("\tgold: %o", gld);
 		console.log("\tartifacts20: %o", artifacts20);
 		console.log("\tfounder's keys: %o", foundersKeys);
 		console.log("\tchest keys: %o", chestKeys);
 
 		// CSV file data
-		const csv_data = `mine,2,${PLOTS},${gs.join(",")},${sil},${gol},${artifacts20},${foundersKeys},${chestKeys}`;
+		const csv_data = `mine,2,${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${foundersKeys},${chestKeys}`;
 		// write statistical raw data into the file
 		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
 
@@ -173,7 +173,7 @@ contract('Loot Gen', (accounts) => {
 		assert(gs[0] > 0, "no level 1 gems");
 		assert(gs[1] > 0, "no level 2 gems");
 		assert(gs[2] > 0, "no level 3 gems");
-		assert(silver > 0, "no silver");
+		assert(slv > 0, "no silver");
 	});
 
 	it("rnd: loot generator – Rest of the World", async() => {
@@ -304,8 +304,8 @@ contract('Loot Gen', (accounts) => {
 			gs[gems[i].shrn(40).mod(toBN(256)).toNumber() - 1]++;
 		}
 		// for the rest of the tokens its straight forward
-		const sil = (await silver.balanceOf(player)).div(await silver.ONE_UNIT()).toNumber();
-		const gol = (await gold.balanceOf(player)).div(await gold.ONE_UNIT()).toNumber();
+		const slv = (await silver.balanceOf(player)).div(await silver.ONE_UNIT()).toNumber();
+		const gld = (await gold.balanceOf(player)).div(await gold.ONE_UNIT()).toNumber();
 		const artifacts20 = (await artifactErc20.balanceOf(player)).toNumber();
 		const foundersKeys = (await foundersKey.balanceOf(player)).toNumber();
 		const chestKeys = (await chestKey.balanceOf(player)).toNumber();
@@ -313,14 +313,14 @@ contract('Loot Gen', (accounts) => {
 		// make some console input (without gem level breakthrough)
 		console.log("\t mined %o plots; items found:", PLOTS);
 		console.log("\tgems: %o", gems.length);
-		console.log("\tsilver: %o", sil);
-		console.log("\tgold: %o", gol);
+		console.log("\tsilver: %o", slv);
+		console.log("\tgold: %o", gld);
 		console.log("\tartifacts20: %o", artifacts20);
 		console.log("\tfounder's keys: %o", foundersKeys);
 		console.log("\tchest keys: %o", chestKeys);
 
 		// CSV file data
-		const csv_data = `mine,2,${PLOTS},${gs.join(",")},${sil},${gol},${artifacts20},${foundersKeys},${chestKeys}`;
+		const csv_data = `mine,2,${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${foundersKeys},${chestKeys}`;
 		// write statistical raw data into the file
 		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
 
@@ -328,7 +328,7 @@ contract('Loot Gen', (accounts) => {
 		assert(gs[0] > 0, "no level 1 gems");
 		assert(gs[1] > 0, "no level 2 gems");
 		assert(gs[2] > 0, "no level 3 gems");
-		assert(silver > 0, "no silver");
+		assert(slv > 0, "no silver");
 	});
 
 });
