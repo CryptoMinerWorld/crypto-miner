@@ -31,7 +31,7 @@ module.exports = {
 				return wallet;
 			},
 			network_id: "1", // Mainnet
-			gas: 4500000,
+			gas: 7000000,
 			gasPrice: 7000000000 // 7 GWei
 		},
 
@@ -51,7 +51,7 @@ module.exports = {
 				return wallet;
 			},
 			network_id: "4", // Rinkeby
-			gas: 4500000,
+			gas: 7000000,
 			gasPrice: 21000000000 // 21 GWei
 		},
 
@@ -71,7 +71,7 @@ module.exports = {
 				return wallet;
 			},
 			network_id: "3", // Ropsten
-			gas: 4500000,
+			gas: 7000000,
 			gasPrice: 21000000000 // 21 GWei
 		},
 
