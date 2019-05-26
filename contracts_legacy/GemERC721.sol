@@ -287,6 +287,7 @@ contract GemERC721 is AccessControl, ERC165 {
    *          owner
    * @dev Throws if gem doesn't exist
    * @param _tokenId ID of the gem to fetch
+   * @return token data packed into a tuple
    */
   function getPacked(uint256 _tokenId) public constant returns(uint256, uint256) {
     // validate gem existence
