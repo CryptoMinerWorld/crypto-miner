@@ -1023,7 +1023,7 @@ contract Miner is AccessControl {
       }
 
       // generate random value in the [0, 10000) range
-      uint16 rnd10000 = uint8(Random.__rndVal(rnd >> 24 * (i % 10), 0xFFFFFF, 0, 10000));
+      uint16 rnd10000 = uint16(Random.__rndVal(rnd >> 24 * (i % 10), 0xFFFFFF, 0, 10000));
 
       // check if we've got a probability hit
       if(rnd10000 < p) {
