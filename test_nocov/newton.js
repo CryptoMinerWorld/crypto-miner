@@ -40,7 +40,7 @@ contract('Miner Math', (accounts) => {
 		);
 
 		// make exponential iterations
-		for(let i = 0; i < 1500; i++) {
+		for(let i = 0; i < 2000; i++) {
 			const a0 = Math.floor(Math.exp((i)/100) - 1) + i;
 			const r = (await miner.restingEnergy(a0)).toNumber();
 			const a = (await miner.unusedEnergeticAge(r)).toNumber();

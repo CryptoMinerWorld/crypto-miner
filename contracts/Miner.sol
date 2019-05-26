@@ -33,7 +33,7 @@ import "./Random.sol";
  *      - ArtifactERC721
  *      - SilverERC20
  *      - GoldERC20
- *      - ArtifactERC20 // TODO: to be removed after ArtifactERC721 release
+ *      - ArtifactERC20
  *      - FoundersKeyERC20
  *      - ChestKeyERC20
  *
@@ -69,7 +69,6 @@ contract Miner is AccessControl {
    * @dev Expected version (UID) of the deployed ArtifactERC721 instance
    *      this smart contract is designed to work with
    */
-  // TODO: this value should be defined later, after ArtifactERC721 smart contract is released
   uint256 public constant ARTIFACT_UID_REQUIRED = 0x0000000000000000000000000000000000000000000000000000000000000000;
 
   /**
@@ -88,8 +87,7 @@ contract Miner is AccessControl {
    * @dev Expected version (UID) of the deployed ArtifactERC20 instance
    *      this smart contract is designed to work with
    */
-  // TODO: this may be completely removed after ArtifactERC721 release
-  uint256 public constant ARTIFACT_ERC20_UID_REQUIRED = 0x6d1ef7f5fc31fa6dd18ee25fb1982b680858ef0192d3a647397686845d38a08f;
+  uint256 public constant ARTIFACT20_UID_REQUIRED = 0x6d1ef7f5fc31fa6dd18ee25fb1982b680858ef0192d3a647397686845d38a08f;
 
   /**
    * @dev Expected version (UID) of the deployed FoundersKeyERC20 instance
@@ -159,7 +157,6 @@ contract Miner is AccessControl {
    * @dev Miner should have `ArtifactERC721.ROLE_TOKEN_CREATOR` permission to mint tokens
    * @dev Miner should have `ArtifactERC721.ROLE_STATE_PROVIDER` permission lock/unlock tokens
    */
-  // TODO: uncomment when ready
   //ArtifactERC721 public artifactInstance;
 
   /**
@@ -184,7 +181,6 @@ contract Miner is AccessControl {
    *
    * @dev Miner should have `GoldERC20.ROLE_TOKEN_CREATOR` permission to mint tokens
    */
-  // TODO: to be removed when ArtifactERC721 is ready
   ArtifactERC20 public artifactErc20Instance;
 
   /**
@@ -264,9 +260,9 @@ contract Miner is AccessControl {
    * @param _by an address which executed transaction, usually owner of the tokens
    * @param plotId ID of the plot to mine (bound)
    * @param gemId ID of the gem which mines the plot (bound)
-   * @param artifactId ID of the artifact used (bound)
+   * param artifactId ID of the artifact used (bound)
    */
-  event Bound(address indexed _by, uint24 indexed plotId, uint32 indexed gemId, uint16 artifactId);
+  event Bound(address indexed _by, uint24 indexed plotId, uint32 indexed gemId);
 
   /**
    * @dev May be fired in `bind()` and `release()`. Fired in `update()`
@@ -309,7 +305,7 @@ contract Miner is AccessControl {
    * @param _gold address of the deployed GoldERC20 instance with
    *      the `TOKEN_VERSION` equal to `GOLD_UID_REQUIRED`
    * @param _artifactErc20 address of the deployed ArtifactERC20 instance with
-   *      the `TOKEN_UID` equal to `ARTIFACT_ERC20_UID_REQUIRED`
+   *      the `TOKEN_UID` equal to `ARTIFACT20_UID_REQUIRED`
    * @param _foundersKey address of the deployed FoundersKeyERC20 instance with
    *      the `TOKEN_UID` equal to `FOUNDERS_KEY_UID_REQUIRED`
    * @param _chestKey address of the deployed ChestKeyERC20 instance with
@@ -338,7 +334,7 @@ contract Miner is AccessControl {
     // bind smart contract instances
     gemInstance = GemERC721(_gem);
     plotInstance = PlotERC721(_plot);
-    //artifactInstance = ArtifactERC721(_artifact); // TODO: uncomment
+    //artifactInstance = ArtifactERC721(_artifact);
     silverInstance = SilverERC20(_silver);
     goldInstance = GoldERC20(_gold);
     artifactErc20Instance = ArtifactERC20(_artifactErc20);
@@ -346,14 +342,14 @@ contract Miner is AccessControl {
     chestKeyInstance = ChestKeyERC20(_chestKey);
 
     // verify smart contract versions
-    //require(gemInstance.TOKEN_UID() == GEM_UID_REQUIRED);
-    //require(plotInstance.TOKEN_UID() == PLOT_UID_REQUIRED);
-    //require(artifactInstance.TOKEN_UID() == ARTIFACT_UID_REQUIRED); // TODO: uncomment
-    //require(silverInstance.TOKEN_UID() == SILVER_UID_REQUIRED);
-    //require(goldInstance.TOKEN_UID() == GOLD_UID_REQUIRED);
-    //require(artifactErc20Instance.TOKEN_UID() == ARTIFACT_ERC20_UID_REQUIRED);
-    //require(foundersKeyInstance.TOKEN_UID() == FOUNDERS_KEY_UID_REQUIRED);
-    //require(chestKeyInstance.TOKEN_UID() == CHEST_KEY_UID_REQUIRED);
+    require(gemInstance.TOKEN_UID() == GEM_UID_REQUIRED);
+    require(plotInstance.TOKEN_UID() == PLOT_UID_REQUIRED);
+    //require(artifactInstance.TOKEN_UID() == ARTIFACT_UID_REQUIRED);
+    require(silverInstance.TOKEN_UID() == SILVER_UID_REQUIRED);
+    require(goldInstance.TOKEN_UID() == GOLD_UID_REQUIRED);
+    require(artifactErc20Instance.TOKEN_UID() == ARTIFACT20_UID_REQUIRED);
+    require(foundersKeyInstance.TOKEN_UID() == FOUNDERS_KEY_UID_REQUIRED);
+    require(chestKeyInstance.TOKEN_UID() == CHEST_KEY_UID_REQUIRED);
   }
 
   /**
@@ -365,10 +361,10 @@ contract Miner is AccessControl {
    *      doesn't belong to transaction sender
    * @param plotId ID of the land plot to mine
    * @param gemId ID of the gem to mine land plot with
-   * @param artifactId ID of the artifact to affect the gem
+   * param artifactId ID of the artifact to affect the gem
    *      properties during mining process
    */
-  function bind(uint24 plotId, uint32 gemId, uint16 artifactId) public {
+  function bind(uint24 plotId, uint32 gemId) public {
     // verify mining feature is enabled
     require(isFeatureEnabled(FEATURE_MINING_ENABLED));
 
@@ -376,12 +372,10 @@ contract Miner is AccessControl {
     // verifies token existence under the hood
     require(plotInstance.ownerOf(plotId) == msg.sender);
     require(gemInstance.ownerOf(gemId) == msg.sender);
-    //require(artifactId == 0 || artifactInstance.ownerOf(artifactId) == msg.sender); // TODO: uncomment
 
     // verify all tokens are not in a locked state
     require(plotInstance.getState(plotId) & DEFAULT_MINING_BIT == 0);
     require(gemInstance.getState(gemId) & DEFAULT_MINING_BIT == 0);
-    //require(artifactId == 0 || artifactInstance.getState(artifactId) & DEFAULT_MINING_BIT == 0); // TODO: uncomment
 
     // read tiers structure of the plot
     uint64 tiers = plotInstance.getTiers(plotId);
@@ -408,7 +402,7 @@ contract Miner is AccessControl {
       __mine(plotId, offset);
 
       // recalculate energy left
-      uint16 energy = uint16(uint64(effectiveEnergy) * 100000000 / rate100000000);
+      uint32 energy = uint32(uint64(effectiveEnergy) * 100000000 / rate100000000);
 
       // save unused energetic age of the gem
       gemInstance.setAge(gemId, unusedEnergeticAge(energy));
@@ -429,13 +423,13 @@ contract Miner is AccessControl {
       // store mining information in the internal mapping
       miningPlots[plotId] = MiningData({
         gemId: gemId,
-        artifactId: artifactId,
+        artifactId: 0,
         player: msg.sender,
         bound: uint32(now)
       });
 
       // emit en event
-      emit Bound(msg.sender, plotId, gemId, artifactId);
+      emit Bound(msg.sender, plotId, gemId);
     }
   }
 
@@ -1043,21 +1037,20 @@ contract Miner is AccessControl {
    * @dev Throws if arrays specified are zero-sized
    * @param plotIds an array of IDs of the land plots to mine
    * @param gemIds an array of IDs of the gems to mine land plots with
-   * @param artifactIds an array of IDs of the artifacts to affect the gems
+   * param artifactIds an array of IDs of the artifacts to affect the gems
    *      properties during mining process
    */
-  function bulkBind(uint24[] memory plotIds, uint32[] memory gemIds, uint16[] memory artifactIds) public {
+  function bulkBind(uint24[] memory plotIds, uint32[] memory gemIds) public {
     // verify arrays have same lengths
     require(plotIds.length == gemIds.length);
-    require(plotIds.length == artifactIds.length);
+    //require(plotIds.length == artifactIds.length);
 
     // ensure arrays are not zero sized
     require(plotIds.length != 0);
 
     // simply iterate over each element
     for(uint32 i = 0; i < plotIds.length; i++) {
-      // delegate call to `bind`
-      bind(plotIds[i], gemIds[i], artifactIds[i]);
+      bind(plotIds[i], gemIds[i]);
     }
   }
 
@@ -1359,9 +1352,9 @@ contract Miner is AccessControl {
    * @notice The gem accumulates resting energy when it's not mining
    * @dev Throws if gem with the given ID doesn't exist
    * @param gemId ID of the gem to calculate resting energy for
-   * @return resting energy of the given gem
+   * @return resting energy of the given gem (minutes of resting)
    */
-  function restingEnergyOf(uint32 gemId) public view returns(uint16) {
+  function restingEnergyOf(uint32 gemId) public view returns(uint32) {
     // determine gems' grade type
     // verifies gem existence under the hood
     uint8 e = gemInstance.getGradeType(gemId);
@@ -1395,7 +1388,7 @@ contract Miner is AccessControl {
    * @param energeticAge number of minutes the gem was not mining
    * @return Resting Energy (R) calculated based on Energetic Age (a) provided
    */
-  function restingEnergy(uint32 energeticAge) public pure returns(uint16) {
+  function restingEnergy(uint32 energeticAge) public pure returns(uint32) {
     // to avoid arithmetic overflow we need to use significantly more
     // bits than the original 32-bit number, 128 bits is more than enough
     uint128 a = energeticAge;
@@ -1415,11 +1408,8 @@ contract Miner is AccessControl {
       r = 10423 + (a - 37193) * 199 / 10000;
     }
 
-    // cast the result into uint16, maximum value 65,535
-    // corresponds to energetic age of 2,806,625 minutes,
-    // which is approximately 5 years and 124 days,
-    // that should be more than enough
-    return r > 0xFFFF? 0xFFFF : uint16(r);
+    // cast the result into uint32 and return the result
+    return uint32(r);
   }
 
   /**
@@ -1436,7 +1426,7 @@ contract Miner is AccessControl {
    * @param unusedRestingEnergy resting energy in minutes the gem accumulated while was not mining
    * @return Energetic Age (a) calculated based on Resting Energy (R) provided
    */
-  function unusedEnergeticAge(uint16 unusedRestingEnergy) public pure returns(uint32) {
+  function unusedEnergeticAge(uint32 unusedRestingEnergy) public pure returns(uint32) {
     // to avoid arithmetic overflow we need to use more
     // bits than the original 16-bit number, 64 bits is enough
     int64 r = unusedRestingEnergy;
@@ -1469,11 +1459,8 @@ contract Miner is AccessControl {
       a = 37193 + 10000 * (r - 10423) / 199;
     }
 
-    // cast the result into uint32, maximum value 2,806,625 minutes
-    // corresponds to maximum resting energy 65,535,
-    // which is approximately 5 years and 124 days,
-    // that should be more than enough
-    return a > 2806625? 2806625: uint32(a);
+    // cast the result into uint32 and return
+    return uint32(a);
   }
 
   /**

@@ -176,7 +176,7 @@ contract('Miner', (accounts) => {
 		assert(await plot.isTransferable(1), "plot is not transferable");
 
 		// bind gem to a plot
-		await miner.bind(1, 1, 0);
+		await miner.bind(1, 1);
 
 		// verify all the tokens are locked now
 		assert(await gem.getState(1) > 0, "wrong gem's state");

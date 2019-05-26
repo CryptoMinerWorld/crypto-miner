@@ -138,7 +138,7 @@ contract('Loot Gen', (accounts) => {
 			);
 
 			// mine the plot immediately
-			await miner.bind(i + 1, i + 1, 0);
+			await miner.bind(i + 1, i + 1);
 		}
 
 		// to determine levels of the gems - get full collection
@@ -231,6 +231,104 @@ contract('Loot Gen', (accounts) => {
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
 		assert(loot[5] > 0, "no silver");
+	});
+
+	it("rnd: loot mining – Rest of the World", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// define player account
+		const player = accounts[0];
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// enable mining feature on the miner
+		await miner.updateFeatures(FEATURE_MINING_ENABLED);
+		// grant miner permissions to modify gem's state and mint gems
+		await gem.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_NEXT_ID_INC);
+		// grant miner permission(s) to update plot
+		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
+		// grant miner permission(s) to mint silver
+		await silver.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		// grant miner permission(s) to mint gold
+		await gold.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		// grant miner permission(s) to mint artifacts
+		await artifactErc20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		// grant miner permission(s) to mint founder's chest keys
+		await foundersKey.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		// grant miner permission(s) to mint chest keys
+		await chestKey.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+
+		// mint 100 high grade gems to mine plots
+		for(let i = 0; i < PLOTS; i++) {
+			// mint the plot - ID of the minted plot is `i + 1`
+			await plot.mint(player, 0, "0x05002341555F6400");
+
+			// mint the gem ID `i + 1` with energetic age
+			await gem.mintWith(
+				player,
+				i + 1, // Token ID
+				i + 1, // Plot ID
+				1, // Color,
+				5, // Level
+				0x06FFFFFF, // Grade Type AAA, Grade Value 16,777,215
+				2806625 // Energetic Age
+			);
+
+			// mine the plot immediately
+			await miner.bind(i + 1, i + 1);
+		}
+
+		// to determine levels of the gems - get full collection
+		const gems = await gem.getPackedCollection(player);
+		let gs = new Array(5).fill(0);
+		for(let i = 0; i < gems.length; i++) {
+			// and unpack each gem's level individually
+			gs[gems[i].shrn(40).mod(toBN(256)).toNumber() - 1]++;
+		}
+		// for the rest of the tokens its straight forward
+		const sil = (await silver.balanceOf(player)).div(await silver.ONE_UNIT()).toNumber();
+		const gol = (await gold.balanceOf(player)).div(await gold.ONE_UNIT()).toNumber();
+		const artifacts20 = (await artifactErc20.balanceOf(player)).toNumber();
+		const foundersKeys = (await foundersKey.balanceOf(player)).toNumber();
+		const chestKeys = (await chestKey.balanceOf(player)).toNumber();
+
+		// make some console input (without gem level breakthrough)
+		console.log("\t mined %o plots; items found:", PLOTS);
+		console.log("\tgems: %o", gems.length);
+		console.log("\tsilver: %o", sil);
+		console.log("\tgold: %o", gol);
+		console.log("\tartifacts20: %o", artifacts20);
+		console.log("\tfounder's keys: %o", foundersKeys);
+		console.log("\tchest keys: %o", chestKeys);
+
+		// CSV file data
+		const csv_data = `mine,2,${PLOTS},${gs.join(",")},${sil},${gol},${artifacts20},${foundersKeys},${chestKeys}`;
+		// write statistical raw data into the file
+		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
+
+		// verify some statistics constraints
+		assert(gs[0] > 0, "no level 1 gems");
+		assert(gs[1] > 0, "no level 2 gems");
+		assert(gs[2] > 0, "no level 3 gems");
+		assert(silver > 0, "no silver");
 	});
 
 });
