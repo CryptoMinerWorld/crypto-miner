@@ -320,7 +320,7 @@ contract('Loot Gen', (accounts) => {
 		console.log("\tchest keys: %o", chestKeys);
 
 		// CSV file data
-		const csv_data = `mine,2,${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${foundersKeys},${chestKeys}`;
+		const csv_data = `mine,5,${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${foundersKeys},${chestKeys}`;
 		// write statistical raw data into the file
 		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
 
