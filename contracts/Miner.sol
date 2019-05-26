@@ -1011,10 +1011,22 @@ contract Miner is AccessControl {
    * @param n number of experiments to launch
    */
   function rndEval(uint16 seedOffset, uint16 p, uint16 n) public view returns(uint16 amount) {
+    // variable to store some randomness to work with
+    uint256 rnd;
+
     // we perform `iterations` number of iterations
     for(uint16 i = 0; i < n; i++) {
-      // for each iteration we check if we've got a probability hit
-      if(Random.__randomValue(seedOffset + i, 0, 10000) < p) {
+      // each 10 iterations starting from iteration 0
+      if(i % 10 == 0) {
+        // generate new randomness to work with
+        rnd = Random.__rawRandom(seedOffset + i / 10);
+      }
+
+      // generate random value in the [0, 10000) range
+      uint16 rnd10000 = uint8(Random.__rndVal(rnd >> 24 * (i % 10), 0xFFFFFF, 0, 10000));
+
+      // check if we've got a probability hit
+      if(rnd10000 < p) {
         // and if yes we increase the counter
         amount++;
       }
