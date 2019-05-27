@@ -1,7 +1,7 @@
 pragma solidity 0.5.8;
 
 /**
- * @dev Gem ERC721 v1 interface
+ * @dev Gem ERC721 v1 interface (old)
  */
 interface GemV1 {
   /**
@@ -48,7 +48,7 @@ interface GemV1 {
 }
 
 /**
- * @dev Country ERC721 v1 interface
+ * @dev Country ERC721 v1 interface (old)
  */
 interface CountryV1 {
   /**
@@ -112,7 +112,9 @@ contract TokenHelper {
       uint8 color = uint8(high >> 184);
       uint8 level = uint8(high >> 144);
       uint32 grade = uint32(high >> 80);
-      uint32 age = uint32(now - uint32(low >> 224)) / 60;
+      // convert block number difference into minutes,
+      // assuming average block size is 15 seconds
+      uint32 age = uint32(block.number - uint32(low >> 224)) / 4;
 
       // save owner
       owners[i] = address(low);
