@@ -70,16 +70,35 @@ interface CountryV1 {
 }
 
 /**
+ * @dev Dutch Auction V1 interface
+ */
+interface AuctionV1 {
+  /**
+   * @dev Gets an owner of a token
+   * @param _token deployed token instance address
+   * @param _tokenId ID of the token listed on the auction
+   * @return address of the owner of the token
+   */
+  function owners(address _token, uint256 _tokenId) external view returns(address);
+}
+
+/**
  * @dev Helper smart contract to read Gem and Country ERC721 tokens
  */
-contract TokenHelper {
+contract TokenReader {
   /**
    * @dev Reads Gem ERC721 token data, with pagination
    * @param gemAddress deployed Gem ERC721 v1 instance
+   * @param auctionAddress deployed Dutch Auction instance which may own token
    * @param offset an offset to read from, must be less than total token supply
    * @param length number of elements to read starting from offset, must not be zero
    */
-  function readGemV1Data(address gemAddress, uint32 offset, uint32 length) public view returns(address[] memory, uint128[] memory) {
+  function readGemV1Data(
+    address gemAddress,
+    address auctionAddress,
+    uint32 offset,
+    uint32 length
+  ) public view returns(address[] memory, uint128[] memory) {
     // determine token total supply
     uint256 supply = GemV1(gemAddress).totalSupply();
 
@@ -100,32 +119,33 @@ contract TokenHelper {
     // build the result element by element
     for(uint32 i = 0; i < owners.length; i++) {
       // read token ID
-      uint256 id = uint32(GemV1(gemAddress).tokenByIndex(i + offset));
+      uint256 tokenId = uint32(GemV1(gemAddress).tokenByIndex(i + offset));
       // prepare tuple variables to read packed data into and read data
       uint256 high;
       uint256 low;
-      (high, low) = GemV1(gemAddress).getPacked(id);
+      (high, low) = GemV1(gemAddress).getPacked(tokenId);
 
-      // extract the variables of interest
-      uint32 plotId = uint32(high >> 224);
-      require(uint16(plotId) == plotId); // ensure plotId fits into uint16
-      uint8 color = uint8(high >> 184);
-      uint8 level = uint8(high >> 144);
-      uint32 grade = uint32(high >> 80);
-      // convert block number difference into minutes,
-      // assuming average block size is 15 seconds
-      uint32 age = uint32(block.number - uint32(low >> 224)) / 4;
+      // ensure plotId fits into uint16
+      require(uint16(high >> 224) == uint32(high >> 224));
 
       // save owner
       owners[i] = address(low);
 
+      // in case when owner is an auction
+      if(owners[i] == auctionAddress) {
+        // fix the owner address by fetching the real owner
+        owners[i] = AuctionV1(auctionAddress).owners(gemAddress, tokenId);
+      }
+
       // pack token properties
-      data[i] = uint128(id) << 96
-              | uint96(uint16(plotId)) << 80
-              | uint80(color) << 72
-              | uint72(level) << 64
-              | uint64(grade) << 32
-              | age;
+      data[i] = uint128(tokenId) << 96
+              | uint96(uint16(high >> 224)) << 80
+              | uint80(uint8(high >> 184)) << 72
+              | uint72(uint8(high >> 144)) << 64
+              | uint64(uint32(high >> 80)) << 32
+              // convert block number difference into minutes,
+              // assuming average block size is 15 seconds
+              | uint32(block.number - uint32(low >> 224)) / 4;
     }
 
     // return the result
@@ -135,11 +155,12 @@ contract TokenHelper {
   /**
    * @dev Reads all the Country ERC721 token data, entirely
    * @param countryAddress deployed Country ERC721 v1 instance
+   * @param auctionAddress deployed Dutch Auction instance which may own token
    * @return an array containing 192 elements,
    *      each element `i` representing a token ID = `i + 1`, containing:
    *      - token owner address, 160 bits
    */
-  function readCountryV1Data(address countryAddress) public view returns(address[] memory) {
+  function readCountryV1Data(address countryAddress, address auctionAddress) public view returns(address[] memory) {
     // read the country map
     uint192 map = CountryV1(countryAddress).tokenMap();
 
@@ -152,6 +173,12 @@ contract TokenHelper {
       if(map >> i & 1 == 1) {
         // and save its owner into result
         result[i] = CountryV1(countryAddress).ownerOf(i + 1);
+
+        // in case when owner is an auction
+        if(result[i] == auctionAddress) {
+          // fix the owner address by fetching the real owner
+          result[i] = AuctionV1(auctionAddress).owners(countryAddress, i + 1);
+        }
       }
     }
 
