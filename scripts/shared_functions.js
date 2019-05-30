@@ -23,7 +23,20 @@ export function write_csv(path, header, data) {
 	if(fs.existsSync(path)) {
 		header = "";
 	}
-	fs.appendFileSync(path, `${header}\n${data}`);
+	fs.appendFileSync(path, `${header}\n${data}`, {encoding: "utf8"});
+}
+
+// auxiliary function to read data from CSV file
+// if CSV begins with the header specified - deletes the header from data returned
+export function read_csv(path, header) {
+	if(!fs.existsSync(path)) {
+		return "";
+	}
+	const data = fs.readFileSync(path, {encoding: "utf8"});
+	if(data.indexOf(`${header}\n`) === 0) {
+		return data.substring(header.length + 1)
+	}
+	return data;
 }
 
 // short name for web3.utils.toBN

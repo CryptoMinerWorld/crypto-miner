@@ -24,7 +24,7 @@ const FEATURE_MINING_ENABLED = 0x00000001;
 const CSV_HEADER = "type,tiers,plots,gems1,gems2,gems3,gems4,gems5,silver,gold,artifacts,keys";
 
 // test depth - number of plots to simulate
-const PLOTS = 100;
+const PLOTS = 500;
 
 // Loot Generator tests - plot simulation
 contract('Loot Gen', (accounts) => {
