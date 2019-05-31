@@ -32,7 +32,9 @@ module.exports = {
 			},
 			network_id: "1", // Mainnet
 			gas: 7000000,
-			gasPrice: 7000000000 // 7 GWei
+			gasPrice: 7000000000, // 7 GWei
+			// skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
+			// timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
 		},
 
 		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
@@ -52,7 +54,9 @@ module.exports = {
 			},
 			network_id: "4", // Rinkeby
 			gas: 7000000,
-			gasPrice: 21000000000 // 21 GWei
+			gasPrice: 21000000000, // 21 GWei
+			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
+			// timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
 		},
 
 		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
@@ -72,7 +76,9 @@ module.exports = {
 			},
 			network_id: "3", // Ropsten
 			gas: 7000000,
-			gasPrice: 21000000000 // 21 GWei
+			gasPrice: 21000000000, // 21 GWei
+			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
+			// timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
 		},
 
 		// run with ./coverage.sh, read more: https://www.npmjs.com/package/solidity-coverage
