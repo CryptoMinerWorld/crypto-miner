@@ -1,0 +1,775 @@
+{
+  "contractName": "FoundersKeyERC20",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_spender",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "mint",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "unsafeTransferFrom",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "TOKEN_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_TOKEN_CREATOR",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_TRANSFERS_ON_BEHALF",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_TRANSFERS",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isOperatorInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "name": "_spender",
+          "type": "address"
+        }
+      ],
+      "name": "allowance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_TOKEN_DESTROYER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Minted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Burnt",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "FeaturesUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-05-31T07:53:56.332Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "Founder's Chest Key is mintable and burnable entity,     meaning it can be created or destroyed by the authorized addressesAn address authorized can mint/burn its own tokens (own balance) as well     as tokens owned by another address (additional permission level required)",
+    "methods": {
+      "allowance(address,address)": {
+        "details": "A function to check an amount of tokens owner approved     to transfer on its behalf by some other address called \"spender\"",
+        "params": {
+          "_owner": "an address which approves transferring some tokens on its behalf",
+          "_spender": "an address approved to transfer some tokens on behalf"
+        },
+        "return": "an amount of tokens approved address `_spender` can transfer on behalf     of token owner `_owner`"
+      },
+      "approve(address,uint256)": {
+        "details": "Caller must not necessarily own any tokens to grant the permission",
+        "params": {
+          "_spender": "an address approved by the caller (token owner)     to spend some tokens on its behalf",
+          "_value": "an amount of tokens spender `_spender` is allowed to     transfer on behalf of the token owner"
+        },
+        "return": "true on success, throws otherwise"
+      },
+      "balanceOf(address)": {
+        "details": "Gets the balance of the specified address",
+        "params": {
+          "_owner": "the address to query the the balance for"
+        },
+        "return": "an amount of tokens owned by the address specified"
+      },
+      "burn(address,uint256)": {
+        "details": "Burns (destroys) some tokens from the address specifiedRequires sender to have `ROLE_TOKEN_DESTROYER` permission",
+        "params": {
+          "_from": "an address to burn some tokens from",
+          "_value": "an amount of tokens to burn (destroy)"
+        }
+      },
+      "evaluateBy(address,uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator address,     and role required (set of permissions), calculate the resulting     set of permissions (role).If operator is super admin and has full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operator has no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+        "params": {
+          "actual": "input set of permissions to modify",
+          "operator": "address of the contract operator to use permissions of",
+          "required": "desired set of permissions operator would like to have"
+        },
+        "return": "resulting set of permissions this operator can set"
+      },
+      "isFeatureEnabled(uint256)": {
+        "details": "Checks if requested set of features is enabled globally on the contract",
+        "params": {
+          "required": "set of features to check"
+        },
+        "return": "true if all the features requested are enabled, false otherwise"
+      },
+      "isOperatorInRole(address,uint256)": {
+        "details": "Checks if operator `operator` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isSenderInRole(uint256)": {
+        "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "mint(address,uint256)": {
+        "details": "Mints (creates) some tokens to address specifiedRequires sender to have `ROLE_TOKEN_CREATOR` permission",
+        "params": {
+          "_to": "an address to mint tokens to",
+          "_value": "an amount of tokens to mint (create)"
+        }
+      },
+      "safeTransferFrom(address,address,uint256,bytes)": {
+        "details": "Inspired by ERC721 safeTransferFrom, this function allows to     send arbitrary data to the receiver on successful token transferCalled by token owner on his own or approved address,     an address approved earlier by token owner to     transfer some amount of tokens on its behalfThrows on any error like     * incorrect `_value` (zero) or     * insufficient token balance or     * incorrect `_to` address:         * zero address or         * same as `_from` address (self transfer)         * smart contract which doesn't support ERC20Receiver interface",
+        "params": {
+          "_data": "[optional] additional data with no specified format,     sent in onERC20Received call to `_to` in case if its a smart contract",
+          "_from": "token owner which approved caller (transaction sender)     to transfer `_value` of tokens on its behalf",
+          "_to": "an address to transfer tokens to,     must be either an external address or a smart contract,     compliant with the ERC20 standard",
+          "_value": "amount of tokens to be transferred, must     be greater than zero"
+        },
+        "return": "true on success, throws otherwise"
+      },
+      "totalSupply()": {
+        "details": "Equal to sum of all token balances",
+        "return": "total number of tokens"
+      },
+      "transfer(address,uint256)": {
+        "details": "Called by token owner (an address which has a     positive token balance tracked by this smart contract)Throws on any error like     * incorrect `_value` (zero) or     * insufficient token balance or     * incorrect `_to` address:         * zero address or         * self address or         * smart contract which doesn't support ERC20",
+        "params": {
+          "_to": "an address to transfer tokens to,     must be either an external address or a smart contract,     compliant with the ERC20 standard",
+          "_value": "amount of tokens to be transferred, must     be greater than zero"
+        },
+        "return": "true on success, throws otherwise"
+      },
+      "transferFrom(address,address,uint256)": {
+        "details": "Called by token owner on his own or approved address,     an address approved earlier by token owner to     transfer some amount of tokens on its behalfThrows on any error like     * incorrect `_value` (zero) or     * insufficient token balance or     * incorrect `_to` address:         * zero address or         * same as `_from` address (self transfer)         * smart contract which doesn't support ERC20",
+        "params": {
+          "_from": "token owner which approved caller (transaction sender)     to transfer `_value` of tokens on its behalf",
+          "_to": "an address to transfer tokens to,     must be either an external address or a smart contract,     compliant with the ERC20 standard",
+          "_value": "amount of tokens to be transferred, must     be greater than zero"
+        },
+        "return": "true on success, throws otherwise"
+      },
+      "unsafeTransferFrom(address,address,uint256)": {
+        "details": "In contrast to `safeTransferFrom` doesn't check recipient     smart contract to support ERC20 tokens (ERC20Receiver)Designed to be used by developers when the receiver is known     to support ERC20 tokens but doesn't implement ERC20Receiver interfaceCalled by token owner on his own or approved address,     an address approved earlier by token owner to     transfer some amount of tokens on its behalfThrows on any error like     * incorrect `_value` (zero) or     * insufficient token balance or     * incorrect `_to` address:         * zero address or         * same as `_from` address (self transfer)",
+        "params": {
+          "_from": "token owner which approved caller (transaction sender)     to transfer `_value` of tokens on its behalf",
+          "_to": "an address to transfer tokens to,     must be either an external address or a smart contract,     compliant with the ERC20 standard",
+          "_value": "amount of tokens to be transferred, must     be greater than zero"
+        },
+        "return": "true on success, throws otherwise"
+      },
+      "updateFeatures(uint256)": {
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissions.=Requires transaction sender to have `ROLE_FEATURE_MANAGER` permission.",
+        "params": {
+          "mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateRole(address,uint256)": {
+        "details": "Updates set of permissions (role) for a given operator,     taking into account sender's permissions.Setting role to zero is equivalent to removing an operator.Setting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders permissions (role) to an operator.Requires transaction sender to have `ROLE_ROLE_MANAGER` permission.",
+        "params": {
+          "operator": "address of an operator to alter permissions for",
+          "role": "bitmask representing a set of permissions to     enable/disable for an operator specified"
+        }
+      }
+    },
+    "title": "Founder's Chest Key ERC20 Token"
+  },
+  "userdoc": {
+    "methods": {
+      "approve(address,uint256)": {
+        "notice": "Approves address called \"spender\" to transfer some amount     of tokens on behalf of the owner"
+      },
+      "balanceOf(address)": {
+        "notice": "Gets the balance of particular address"
+      },
+      "safeTransferFrom(address,address,uint256,bytes)": {
+        "notice": "Transfers some tokens on behalf of address `_from' (token owner)     to some other address `_to`"
+      },
+      "totalSupply()": {
+        "notice": "Total number of tokens tracked by this smart contract"
+      },
+      "transfer(address,uint256)": {
+        "notice": "Transfers some tokens to an address `_to`"
+      },
+      "transferFrom(address,address,uint256)": {
+        "notice": "Transfers some tokens on behalf of address `_from' (token owner)     to some other address `_to`"
+      },
+      "unsafeTransferFrom(address,address,uint256)": {
+        "notice": "Transfers some tokens on behalf of address `_from' (token owner)     to some other address `_to`"
+      }
+    },
+    "notice": "Founder's Chest Key is a transferable fungible entity (ERC20 token)     used to open Founder's Chest found in AntarcticaFounder's Chest Key is a part of the mining process and Chest System.     Keys may by found in plots of land (see PlotERC721) in Antarctica only when mining"
+  }
+}

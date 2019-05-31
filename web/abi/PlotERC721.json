@@ -1,0 +1,2004 @@
+{
+  "contractName": "PlotERC721",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getApproved",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_approved",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "name": "minted",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_EXT_WRITER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "InterfaceId_ERC165",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "approvedOperators",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "page",
+          "type": "uint256"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "name": "offset",
+          "type": "uint8"
+        },
+        {
+          "name": "length",
+          "type": "uint8"
+        }
+      ],
+      "name": "writePage",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "collections",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokens",
+      "outputs": [
+        {
+          "name": "tiers",
+          "type": "uint64"
+        },
+        {
+          "name": "offsetModified",
+          "type": "uint32"
+        },
+        {
+          "name": "state",
+          "type": "uint128"
+        },
+        {
+          "name": "stateModified",
+          "type": "uint32"
+        },
+        {
+          "name": "creationTime",
+          "type": "uint32"
+        },
+        {
+          "name": "index",
+          "type": "uint32"
+        },
+        {
+          "name": "ownershipModified",
+          "type": "uint32"
+        },
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "name": "offset",
+          "type": "uint8"
+        },
+        {
+          "name": "length",
+          "type": "uint8"
+        }
+      ],
+      "name": "write",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "approvals",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "allTokens",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_TRANSFER_LOCK_PROVIDER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "page",
+          "type": "uint256"
+        },
+        {
+          "name": "offset",
+          "type": "uint8"
+        },
+        {
+          "name": "length",
+          "type": "uint8"
+        }
+      ],
+      "name": "readPage",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "transferLock",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint128"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "DEFAULT_MINING_BIT",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint128"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_STATE_PROVIDER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "TOKEN_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_TOKEN_CREATOR",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_TRANSFERS_ON_BEHALF",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_operator",
+          "type": "address"
+        },
+        {
+          "name": "_approved",
+          "type": "bool"
+        }
+      ],
+      "name": "setApprovalForAll",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "revokeApproval",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_TRANSFERS",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isOperatorInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "offset",
+          "type": "uint8"
+        },
+        {
+          "name": "length",
+          "type": "uint8"
+        }
+      ],
+      "name": "read",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_TOKEN_DESTROYER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "name": "_operator",
+          "type": "address"
+        }
+      ],
+      "name": "isApprovedForAll",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_OFFSET_PROVIDER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_from",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "name": "_to",
+          "type": "uint128"
+        }
+      ],
+      "name": "StateModified",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_from",
+          "type": "uint128"
+        },
+        {
+          "indexed": false,
+          "name": "_to",
+          "type": "uint128"
+        }
+      ],
+      "name": "TransferLockChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_from",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "_to",
+          "type": "uint8"
+        }
+      ],
+      "name": "OffsetModified",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_approved",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_value",
+          "type": "bool"
+        }
+      ],
+      "name": "ApprovalForAll",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Minted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "FeaturesUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPacked",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getAllTokens",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint24[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "getPackedCollection",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint96[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "getCollection",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint24[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getStateModified",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getState",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint128"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "isTransferable",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "_state",
+          "type": "uint128"
+        }
+      ],
+      "name": "setState",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getCreationTime",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getOwnershipModified",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_transferLock",
+          "type": "uint128"
+        }
+      ],
+      "name": "setTransferLock",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getTiers",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getNumberOfTiers",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "k",
+          "type": "uint8"
+        }
+      ],
+      "name": "getTierDepth",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getDepth",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getOffsetModified",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getOffset",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFullyMined",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "_offset",
+          "type": "uint8"
+        }
+      ],
+      "name": "mineTo",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "_by",
+          "type": "uint8"
+        }
+      ],
+      "name": "mineBy",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_countryId",
+          "type": "uint8"
+        },
+        {
+          "name": "_tiers",
+          "type": "uint64"
+        }
+      ],
+      "name": "mint",
+      "outputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_index",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenByIndex",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "name": "_index",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenOfOwnerByIndex",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "exists",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ownerOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenURI",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-05-31T07:44:46.574Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "A plot is an ERC721 non-fungible token, which maps Token ID -     a 24 bit number - to a set of plot properties -     attributes (mostly immutable by their nature) and state variables (mutable)Token ID consists of 24 bits, high 8 bits represent a country id     (see CountryERC721) this token belongs to, low 16 bits represent     an index number of the token within a countryContains information about tier structure (how many blocks of each tier exists),     current mining state (how many blocks is already mined, is block in mining state     or not, etc.)Doesn't contain information about the items to be mined     (silver, gold, artifacts, gems, keys, chests, etc.), this information     is stored in mining smart contractA plot token supports only minting, it can be created but not destroyed",
+    "methods": {
+      "approve(address,uint256)": {
+        "details": "The zero approved address revokes an approval for a given tokenThere can only be one approved address per token at a given timeThis function can only be called by the token owner",
+        "params": {
+          "_approved": "address to be approved to transfer the token on behalf of its owner",
+          "_tokenId": "ID of the token to be approved for transfer on behalf"
+        }
+      },
+      "balanceOf(address)": {
+        "details": "Gets the balance of the specified address",
+        "params": {
+          "_owner": "address to query the balance for"
+        },
+        "return": "number of tokens owned by the address specified"
+      },
+      "constructor": {
+        "details": "Creates a ERC721 instance,     registers required ERC721 interfaces via ERC165"
+      },
+      "evaluateBy(address,uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator address,     and role required (set of permissions), calculate the resulting     set of permissions (role).If operator is super admin and has full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operator has no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+        "params": {
+          "actual": "input set of permissions to modify",
+          "operator": "address of the contract operator to use permissions of",
+          "required": "desired set of permissions operator would like to have"
+        },
+        "return": "resulting set of permissions this operator can set"
+      },
+      "exists(uint256)": {
+        "details": "Returns whether the specified token ID exists (has owner)",
+        "params": {
+          "_tokenId": "ID of the token to query the existence for"
+        },
+        "return": "true if specified token exists, false otherwise"
+      },
+      "getAllTokens()": {
+        "details": "Allows to fetch all existing (minted) token IDs",
+        "return": "an ordered unsorted list of all existing token IDs"
+      },
+      "getApproved(uint256)": {
+        "details": "Throws if `_tokenId` is not a valid token ID.",
+        "params": {
+          "_tokenId": "ID of the token to find the approved address for"
+        },
+        "return": "the approved address for this token,     or the zero address if there is no approved address"
+      },
+      "getCollection(address)": {
+        "params": {
+          "owner": "an address to query a collection for"
+        },
+        "return": "an ordered unsorted list of token IDs"
+      },
+      "getCreationTime(uint256)": {
+        "details": "Gets the creation time of a tokenThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to get creation time for"
+        },
+        "return": "a token creation time as a unix timestamp"
+      },
+      "getDepth(uint256)": {
+        "details": "Gets token depth (a.k.a. maximum depth)     - the maximum depth it can be mined to (immutable)Throws if token doesn't existThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to get depth for"
+        },
+        "return": "token depth – the maximum depth value"
+      },
+      "getNumberOfTiers(uint256)": {
+        "details": "Gets number of tiers this plot has     - 2 for Antarctica, 5 for the rest of the WorldThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to query number of tiers for"
+        },
+        "return": "number of tiers this plot has,     either 2 (Antarctica) or 5 (rest of the World)"
+      },
+      "getOffset(uint256)": {
+        "details": "Gets token offset (a.k.a. depth)     - current mined depth (initially zero)Throws if token doesn't existThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to get offset for"
+        },
+        "return": "token offset – current mined depth value"
+      },
+      "getOffsetModified(uint256)": {
+        "details": "Gets the offset modified date of a tokenThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to get offset modified date for"
+        },
+        "return": "token offset modification date as a unix timestamp"
+      },
+      "getOwnershipModified(uint256)": {
+        "details": "Gets the ownership modified time of a tokenThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to get ownership modified time for"
+        },
+        "return": "a token ownership modified time as a unix timestamp"
+      },
+      "getPacked(uint256)": {
+        "details": "Gets a token by ID, representing it as two integers.     The two integers are tightly packed with a token data:     First integer (high bits) contains (from higher to lower bits order):         tiers, 64 bits         offsetModified, 32 bits         state, 128 bits         stateModified, 32 bits   *      Second integer (low bits) contains (from higher to lower bits order):         creationTime, 32 bits         index, 32 bits (only low 24 bits are used)         ownershipModified, 32 bits         owner, 160 bitsThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to fetch packed structure for"
+        }
+      },
+      "getPackedCollection(address)": {
+        "details": "Allows to fetch collection of tokens, including internal token data      in a single function, useful when connecting to external node like INFURAEach element in the collection contains     token ID (24 bits)     tiers (64 bits)     state (8 low bits)",
+        "params": {
+          "owner": "an address to query a collection for"
+        },
+        "return": "an ordered unsorted list of packed token data"
+      },
+      "getState(uint256)": {
+        "details": "Gets the state of a tokenThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to get state for"
+        },
+        "return": "a token state"
+      },
+      "getStateModified(uint256)": {
+        "details": "Gets the state modified date of a tokenThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to get state modified date for"
+        },
+        "return": "token state modification date as a unix timestamp"
+      },
+      "getTierDepth(uint256,uint8)": {
+        "details": "Gets the depth of the tier defined by its one-based index:     Tier 1: Dirt / Snow     Tier 2: Clay / Ice     Tier 3: Limestone - non-Antarctica only     Tier 4: Marble - non-Antarctica only     Tier 5: Obsidian - non-Antarctica onlyPassing index equal to zero returns Tier 1 offset,     which is equal to zero by designThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to query depth for",
+          "k": "one-based tier index to query depth for"
+        },
+        "return": "depth of the (k)th tier in blocks"
+      },
+      "getTiers(uint256)": {
+        "details": "Gets token `tiers`, a packed data structure containing     1. Number of tiers this plot contains (8 bits)     2. Tier structure of the plot (48 bits)         - Tier 1 offset (start of Tier 1), usually zero, 8 bits         - Tier 2 offset (start of Tier 2 / end of Tier 1), 8 bits         - Tier 3 offset (start of Tier 3 / end of Tier 2), 8 bits         - Tier 4 offset (start of Tier 4 / end of Tier 3), 8 bits         - Tier 5 offset (start of Tier 5 / end of Tier 4), 8 bits         - End of Tier 5 (block depth), 8 bits     3. Current mining block index (8 bits)Throws if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to get tiers for"
+        },
+        "return": "token tiers packed data structure"
+      },
+      "isApprovedForAll(address,address)": {
+        "params": {
+          "_operator": "the address that acts on behalf of the owner",
+          "_owner": "the address which may have another address acting     on their behalf (operator address)"
+        },
+        "return": "true if `_operator` is allowed to transfer `_owner`s tokens, false otherwise"
+      },
+      "isFeatureEnabled(uint256)": {
+        "details": "Checks if requested set of features is enabled globally on the contract",
+        "params": {
+          "required": "set of features to check"
+        },
+        "return": "true if all the features requested are enabled, false otherwise"
+      },
+      "isFullyMined(uint256)": {
+        "details": "Verifies if token is fully mined that is     its offset is equal to the depthThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to check"
+        },
+        "return": "true if token is fully mined, false otherwise"
+      },
+      "isOperatorInRole(address,uint256)": {
+        "details": "Checks if operator `operator` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isSenderInRole(uint256)": {
+        "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isTransferable(uint256)": {
+        "details": "Verifies if token is transferable (can change ownership)Throws if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to check transferable state for"
+        },
+        "return": "true if token is transferable, false otherwise"
+      },
+      "mineBy(uint256,uint8)": {
+        "details": "Mines the token by the depth delta specifiedRequires depth delta to be positive valueRequires sender to have `ROLE_OFFSET_PROVIDER` permissionThrows if token specified doesn't exist",
+        "params": {
+          "_by": "depth delta value to mine by, greater than zero",
+          "_tokenId": "ID of the token to mine"
+        }
+      },
+      "mineTo(uint256,uint8)": {
+        "details": "Mines the token to the depth specifiedRequires depth to be bigger than current offsetRequires sender to have `ROLE_OFFSET_PROVIDER` permissionThrows if token specified doesn't exist",
+        "params": {
+          "_offset": "absolute depth value to mine to, greater than current depth",
+          "_tokenId": "ID of the token to mine"
+        }
+      },
+      "mint(address,uint8,uint64)": {
+        "details": "Creates new token with token ID derived from the country ID     and assigns an ownership `_to` for this tokenAllows setting initial token's propertiesRequires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)",
+        "params": {
+          "_countryId": "ID of the country to mint token in,    high 8 bits of the token ID will be set to that number",
+          "_tiers": "tiers structure of the token to create, containing     1. Number of tiers this plot contains (8 bits)       - 2 for Antarctica or 5 for the rest of the World     2. Tier structure of the plot (48 bits)        6 elements, 8 bits each:         - Tier 1 offset (start of Tier 1), usually zero         - Tier 2 offset (start of Tier 2 / end of Tier 1)         - Tier 3 offset (start of Tier 3 / end of Tier 2)         - Tier 4 offset (start of Tier 4 / end of Tier 3)         - Tier 5 offset (start of Tier 5 / end of Tier 4)         - End of Tier 5 (block depth)     3. Current mining block index (8 bits)       - must be zero",
+          "_to": "an address to assign created token ownership to"
+        },
+        "return": "generated token ID"
+      },
+      "ownerOf(uint256)": {
+        "details": "Gets the owner of the specified token from the `tokens` mappingThrows if a token with the ID specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to query the owner for"
+        },
+        "return": "owner address currently marked as the owner of the given token"
+      },
+      "read(uint256,uint8,uint8)": {
+        "details": "Reads token dataTo read whole 256 bits, set offset and length to zero",
+        "params": {
+          "_tokenId": "token ID to read data from",
+          "length": "how many bits to read",
+          "offset": "position in memory to read from (bits)"
+        }
+      },
+      "readPage(uint256,uint256,uint8,uint8)": {
+        "details": "Reads token data, allows to access up to 2^256 pages of 256-bit memory slotsTo read whole 256 bits, set offset and length to zero",
+        "params": {
+          "_tokenId": "token ID to read data from",
+          "length": "how many bits to read",
+          "offset": "position in memory to read from (bits)",
+          "page": "index of the page to read from"
+        }
+      },
+      "revokeApproval(uint256)": {
+        "details": "Equal to calling `approve(0, _tokenId)`",
+        "params": {
+          "_tokenId": "ID of the token to remove approved address for"
+        }
+      },
+      "safeTransferFrom(address,address,uint256)": {
+        "details": "Safely transfers the ownership of a given token ID to another address     by verifying if the receiver is an external address or     by calling onERC721Received() function on the receiver if its a smart contractRequires the transaction sender to be one of:     owner of a token - then its similar to `transfer()` but with       ERC721 support check on the receiver     approved – an address explicitly approved earlier by       the owner of a token to transfer this particular token ID     operator - an address explicitly approved earlier by       the owner to transfer all his tokens on behalfWhen transfer is complete, this function     checks if `_to` is a smart contract (code size > 0).     If so - it calls `onERC721Received()` and throws if the return value is not     `bytes4(keccak256(\"onERC721Received(address,address,uint256,bytes)\"))`.     The whole transaction is reverted in case of this error.This works identically to the other function with an extra data parameter,     except this function just sets data to \"\".",
+        "params": {
+          "_from": "current owner of the token",
+          "_to": "address to receive the ownership of the token",
+          "_tokenId": "ID of the token to be transferred     in the onERC721Received() call to `_to`;     ignored if the receiver is an external address"
+        }
+      },
+      "safeTransferFrom(address,address,uint256,bytes)": {
+        "details": "Safely transfers the ownership of a given token ID to another address     by verifying if the receiver is an external address or     by calling onERC721Received() function on the receiver if its a smart contractRequires the transaction sender to be one of:     owner of a token - then its similar to `transfer()` but with       ERC721 support check on the receiver     approved – an address explicitly approved earlier by       the owner of a token to transfer this particular token ID     operator - an address explicitly approved earlier by       the owner to transfer all his tokens on behalfWhen transfer is complete, this function     checks if `_to` is a smart contract (code size > 0).     If so - it calls `onERC721Received()` and throws if the return value is not     `bytes4(keccak256(\"onERC721Received(address,address,uint256,bytes)\"))`.     The whole transaction is reverted in case of this error.",
+        "params": {
+          "_data": "Additional data with no specified format, sent     in the onERC721Received() call to `_to`;     ignored if the receiver is an external address",
+          "_from": "current owner of the token",
+          "_to": "address to receive the ownership of the token",
+          "_tokenId": "ID of the token to be transferred"
+        }
+      },
+      "setApprovalForAll(address,bool)": {
+        "details": "Sets or unsets the approval state of a given operatorAn operator is allowed to transfer ALL tokens of the sender on their behalf",
+        "params": {
+          "_approved": "representing the status of the approval to be set:     true – grants an approval     false - revokes an approval",
+          "_operator": "operator address to set the approval for"
+        }
+      },
+      "setState(uint256,uint128)": {
+        "details": "Modifies the state of a tokenRequires sender to have `ROLE_STATE_PROVIDER` permissionThrows if token specified doesn't exist",
+        "params": {
+          "_state": "new state to set for the token",
+          "_tokenId": "ID of the token to set state for"
+        }
+      },
+      "setTransferLock(uint128)": {
+        "details": "Allows setting the `transferLock` parameter of the contract,     which is used to determine if a particular token is locked or notA locked token cannot be transferredThe token is locked if it contains any bits     from the `transferLock` in its `state` setRequires sender to have `ROLE_TRANSFER_LOCK_PROVIDER` permission.",
+        "params": {
+          "_transferLock": "a value to set `transferLock` to"
+        }
+      },
+      "supportsInterface(bytes4)": {
+        "details": "Interface identification is specified in ERC-165.     This function uses less than 30,000 gas.",
+        "params": {
+          "_interfaceId": "The interface identifier, as specified in ERC-165"
+        },
+        "return": "`true` if the contract implements `interfaceID` and     `interfaceID` is not 0xffffffff, `false` otherwise"
+      },
+      "tokenByIndex(uint256)": {
+        "details": "Throws if `_index` >= `totalSupply()`.",
+        "params": {
+          "_index": "a counter less than `totalSupply()`"
+        },
+        "return": "The token ID for the `_index`th token, unsorted"
+      },
+      "tokenOfOwnerByIndex(address,uint256)": {
+        "details": "Throws if `_index` >= `balanceOf(_owner)`.",
+        "params": {
+          "_index": "a counter less than `balanceOf(_owner)`",
+          "_owner": "an address of the owner to query token from"
+        },
+        "return": "the token ID for the `_index`th token assigned to `_owner`, unsorted"
+      },
+      "tokenURI(uint256)": {
+        "details": "Throws if `_tokenId` is not a valid token ID.     URIs are defined in RFC 3986.",
+        "params": {
+          "_tokenId": "token ID of the token to query"
+        },
+        "return": "token URI as UTF-8 string"
+      },
+      "totalSupply()": {
+        "return": "A count of valid tokens tracked by this contract,   where each one of them has an assigned and   queryable owner not equal to the zero address"
+      },
+      "transfer(address,uint256)": {
+        "details": "Transfers the ownership of a given token ID to another addressThis function is maintained to be used by developers to reduce gas costsRequires the transaction sender to be an owner of the token specified",
+        "params": {
+          "_to": "new owner address",
+          "_tokenId": "ID of the token to transfer ownership rights for"
+        }
+      },
+      "transferFrom(address,address,uint256)": {
+        "details": "Transfers the ownership of a given token ID to another addressThis function is maintained to be used by developers to reduce gas costsRequires the transaction sender to be one of:     owner of a token - then its just a usual `transfer()` (aka unsafe transfer)     approved – an address explicitly approved earlier by       the owner of a token to transfer this particular token ID     operator - an address explicitly approved earlier by       the owner to transfer all his tokens on behalf",
+        "params": {
+          "_from": "current owner of the token",
+          "_to": "address to receive the ownership of the token",
+          "_tokenId": "ID of the token to be transferred"
+        }
+      },
+      "updateFeatures(uint256)": {
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissions.=Requires transaction sender to have `ROLE_FEATURE_MANAGER` permission.",
+        "params": {
+          "mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateRole(address,uint256)": {
+        "details": "Updates set of permissions (role) for a given operator,     taking into account sender's permissions.Setting role to zero is equivalent to removing an operator.Setting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders permissions (role) to an operator.Requires transaction sender to have `ROLE_ROLE_MANAGER` permission.",
+        "params": {
+          "operator": "address of an operator to alter permissions for",
+          "role": "bitmask representing a set of permissions to     enable/disable for an operator specified"
+        }
+      },
+      "write(uint256,uint256,uint8,uint8)": {
+        "details": "Writes token data",
+        "params": {
+          "_tokenId": "token ID to write data into",
+          "length": "how many bits to write",
+          "offset": "position in memory to write to (bits)",
+          "value": "a value to write;     to write value as is, set offset and length to zero"
+        }
+      },
+      "writePage(uint256,uint256,uint256,uint8,uint8)": {
+        "details": "Writes token data, allows to access up to 2^256 pages of 256-bit memory slots",
+        "params": {
+          "_tokenId": "token ID to write data into",
+          "length": "how many bits to write",
+          "offset": "position in memory to write to (bits)",
+          "page": "index of the page to write to",
+          "value": "a value to write;     to write value as is, set offset and length to zero"
+        }
+      }
+    },
+    "title": "Land Plot ERC721 Token"
+  },
+  "userdoc": {
+    "methods": {
+      "approve(address,uint256)": {
+        "notice": "Approves an address to transfer the given token on behalf of its ownerCan also be used to revoke an approval by setting approved address to zero"
+      },
+      "balanceOf(address)": {
+        "notice": "Gets number of tokens owned by the given address"
+      },
+      "exists(uint256)": {
+        "notice": "Checks if specified token exists,     meaning it was minted and has an owner"
+      },
+      "getApproved(uint256)": {
+        "notice": "Gets the approved address for a single token"
+      },
+      "getCollection(address)": {
+        "notice": "Retrieves a collection of token IDs owned by a particular addressAn order of token IDs is not guaranteed and may change     when a token from the list is transferred"
+      },
+      "isApprovedForAll(address,address)": {
+        "notice": "Query if an address is an authorized operator for another address"
+      },
+      "ownerOf(uint256)": {
+        "notice": "Finds an owner address for the token specified"
+      },
+      "revokeApproval(uint256)": {
+        "notice": "Removes an approved address, which was previously added by `approve()`     for the given token. Equivalent to calling `approve(0, _tokenId)`."
+      },
+      "safeTransferFrom(address,address,uint256)": {
+        "notice": "A.k.a \"safe transfer on behalf\"Transfers ownership rights of a token defined     by the token ID to a new owner specified by its addressAllows transferring ownership rights by a trading operator     on behalf of token owner. Allows building an exchange of tokens.Validates if destination address supports ERC721"
+      },
+      "safeTransferFrom(address,address,uint256,bytes)": {
+        "notice": "A.k.a \"safe transfer on behalf\"Transfers ownership rights of a token defined     by the token ID to a new owner specified by its addressAllows transferring ownership rights by a trading operator     on behalf of token owner. Allows building an exchange of tokens.Validates if destination address supports ERC721"
+      },
+      "supportsInterface(bytes4)": {
+        "notice": "Query if a contract implements an interface"
+      },
+      "tokenByIndex(uint256)": {
+        "notice": "Enumerate valid tokens"
+      },
+      "tokenOfOwnerByIndex(address,uint256)": {
+        "notice": "Enumerate tokens assigned to an owner"
+      },
+      "tokenURI(uint256)": {
+        "notice": "A distinct Uniform Resource Identifier (URI) for a given asset."
+      },
+      "totalSupply()": {
+        "notice": "Total number of existing tokens (tracked by this contract)"
+      },
+      "transfer(address,uint256)": {
+        "notice": "A.k.a \"unsafe transfer\"Transfers ownership rights of the token defined     by the token ID to a new owner specified by its addressDoesn't validate if destination address supports ERC721 tokens!     The token may be LOST if destination address doesn't support ERC721 tokens."
+      },
+      "transferFrom(address,address,uint256)": {
+        "notice": "A.k.a \"unsafe transfer on behalf\"Transfers ownership rights of a token defined     by the token ID to a new owner specified by its addressAllows transferring ownership rights by a trading operator     on behalf of token owner. Allows building an exchange of tokens.Doesn't validate if destination address supports ERC721 tokens!     The token may be LOST if destination address doesn't support ERC721 tokens."
+      }
+    },
+    "notice": "Land Plot is unique tradable entity. Non-fungible.A plot consists of five tiers containing 100 blocks.For Antarctica:     Tier 1: Snow, contains 35 blocks on average     Tier 2: Ice, contains 65 blocks on averageAll other countries:     Tier 1: Dirt, contains 35 blocks on average     Tier 2: Clay, contains 30 blocks on average     Tier 3: Limestone, contains 20 blocks on average     Tier 4: Marble, contains 10 blocks on average     Tier 5: Obsidian, contains 5 blocks on averageExamples: *      |              snow               |                              ice                               |     1111111111111111111111111111111111122222222222222222222222222222222222222222222222222222222222222222     |           35 blocks             |                           65 blocks                            | *      |              dirt               |            clay             |     limestone     |  marble |obs.|     1111111111111111111111111111111111122222222222222222222222222222233333333333333333333444444444455555     |           35 blocks             |          30 blocks          |     20 blocks     |10 blocks| 5  | *The plot can be mined with a gem. When mined, a block     can spawn an item (silver, gold, artifacts, gems, keys, chests, etc.)"
+  }
+}

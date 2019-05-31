@@ -1,0 +1,848 @@
+{
+  "contractName": "RefPointsTracker",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "known",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "holders",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "TRACKER_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_SELLER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_REF_POINTS_CONSUMER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "consumed",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isOperatorInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "knownAddresses",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_REF_POINTS_ISSUER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "issued",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_total",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_available",
+          "type": "uint256"
+        }
+      ],
+      "name": "RefPointsIssued",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_total",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_available",
+          "type": "uint256"
+        }
+      ],
+      "name": "RefPointsConsumed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "KnownAddressAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "FeaturesUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "available",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "isKnown",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "referrer",
+          "type": "address"
+        },
+        {
+          "name": "referred",
+          "type": "address"
+        }
+      ],
+      "name": "isValid",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getAllHolders",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getNumberOfHolders",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getKnownAddresses",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getNumberOfKnownAddresses",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "issueTo",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "consumeFrom",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_address",
+          "type": "address"
+        }
+      ],
+      "name": "addKnownAddress",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address[]"
+        },
+        {
+          "name": "_amount",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "bulkIssue",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_from",
+          "type": "address[]"
+        },
+        {
+          "name": "_amount",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "bulkConsume",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_addresses",
+          "type": "address[]"
+        }
+      ],
+      "name": "bulkAddKnownAddresses",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-05-31T07:54:32.139Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "Keeps track of issued and consumed referral points, calculates available referral     points as difference between issued and consumedBased on improved access control list (ACL Light), allowing issuers and consumers     to issue and consume respectively referral points to players' addresses",
+    "methods": {
+      "addKnownAddress(address)": {
+        "details": "A callback function called by seller on successful sale     and some wei being spent by the playerAdds address specified to `knownAddresses` mappingRequires sender to have `ROLE_SELLER` permission",
+        "params": {
+          "_address": "an address which spent some wei (bought something)"
+        }
+      },
+      "available(address)": {
+        "details": "Calculated as difference between issued points counter and consumed points counterUnsafe, doesn't check for `issued >= consumed` constraint,     relies on proper behaviour of `issued/consumed` update functions",
+        "params": {
+          "owner": "address of the player address to get available referral points for"
+        },
+        "return": "available referral points counter for address specified"
+      },
+      "balanceOf(address)": {
+        "params": {
+          "owner": "address of the player address to get available referral points for"
+        },
+        "return": "available referral points counter for address specified"
+      },
+      "bulkAddKnownAddresses(address[])": {
+        "details": "A callback function called by seller on successful sale     and some wei being spent by several playersCan be also used to initialize smart contract with a     bunch of initial dataAdds addresses specified to `knownAddresses` mappingRequires sender to have `ROLE_SELLER` permissionThrows if input array is empty",
+        "params": {
+          "_addresses": "an array of addresses which spent some wei (bought something)"
+        }
+      },
+      "bulkConsume(address[],uint256[])": {
+        "details": "This is a bulk version of `consumeFrom` functionRequires sender to have `ROLE_REF_POINTS_CONSUMER` permission",
+        "params": {
+          "_amount": "array of referral points values to consume",
+          "_from": "array of addresses to consume referral points from"
+        }
+      },
+      "bulkIssue(address[],uint256[])": {
+        "details": "This is a bulk version of `issueTo` functionRequires sender to have `ROLE_REF_POINTS_ISSUER` permission",
+        "params": {
+          "_amount": "array of referral points values to issue",
+          "_to": "array of addresses to issue referral points to"
+        }
+      },
+      "consumeFrom(address,uint256)": {
+        "details": "Requires sender to have `ROLE_REF_POINTS_CONSUMER` permission",
+        "params": {
+          "_amount": "number of referral points to consume",
+          "_from": "an address to consume referral points from"
+        }
+      },
+      "evaluateBy(address,uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator address,     and role required (set of permissions), calculate the resulting     set of permissions (role).If operator is super admin and has full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operator has no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+        "params": {
+          "actual": "input set of permissions to modify",
+          "operator": "address of the contract operator to use permissions of",
+          "required": "desired set of permissions operator would like to have"
+        },
+        "return": "resulting set of permissions this operator can set"
+      },
+      "getAllHolders()": {
+        "return": "an array of referral points holders addresses,     doesn't contain duplicates"
+      },
+      "getKnownAddresses()": {
+        "return": "an array of known addresses,     doesn't contain duplicates"
+      },
+      "getNumberOfHolders()": {
+        "return": "length of the referral points holders array"
+      },
+      "getNumberOfKnownAddresses()": {
+        "return": "length of the known addresses array"
+      },
+      "isFeatureEnabled(uint256)": {
+        "details": "Checks if requested set of features is enabled globally on the contract",
+        "params": {
+          "required": "set of features to check"
+        },
+        "return": "true if all the features requested are enabled, false otherwise"
+      },
+      "isKnown(address)": {
+        "details": "Address is known if it was added as known by `ROLE_SELLER`     or was issued some referral points by `ROLE_REF_POINTS_ISSUER`",
+        "params": {
+          "_address": "address to query known status for"
+        },
+        "return": "true if address is known (added ot has some ref points issued)"
+      },
+      "isOperatorInRole(address,uint256)": {
+        "details": "Checks if operator `operator` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isSenderInRole(uint256)": {
+        "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isValid(address,address)": {
+        "details": "Addresses are treated as valid if referrer is already known to     the smart contract and referred is not knownZero referrer address is treated as not validZero referred address is treated as not valid",
+        "params": {
+          "referred": "address of the referred (unknown address)",
+          "referrer": "address of the referrer (known address)"
+        },
+        "return": "true if referrer is known and referred is unknown,     false otherwise; false if any of the addresses is zero"
+      },
+      "issueTo(address,uint256)": {
+        "details": "Requires sender to have `ROLE_REF_POINTS_ISSUER` permission",
+        "params": {
+          "_amount": "number of referral points to issue",
+          "_to": "an address to issue referral points to"
+        }
+      },
+      "updateFeatures(uint256)": {
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissions.=Requires transaction sender to have `ROLE_FEATURE_MANAGER` permission.",
+        "params": {
+          "mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateRole(address,uint256)": {
+        "details": "Updates set of permissions (role) for a given operator,     taking into account sender's permissions.Setting role to zero is equivalent to removing an operator.Setting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders permissions (role) to an operator.Requires transaction sender to have `ROLE_ROLE_MANAGER` permission.",
+        "params": {
+          "operator": "address of an operator to alter permissions for",
+          "role": "bitmask representing a set of permissions to     enable/disable for an operator specified"
+        }
+      }
+    },
+    "title": "Referral Points Tracker"
+  },
+  "userdoc": {
+    "methods": {
+      "available(address)": {
+        "notice": "Available referral points counter of a particular address,     referral points available to be spent"
+      },
+      "balanceOf(address)": {
+        "notice": "ERC20-compatible alias for `available` referral points counter"
+      },
+      "bulkConsume(address[],uint256[])": {
+        "notice": "Consumes referral points from players addresses"
+      },
+      "bulkIssue(address[],uint256[])": {
+        "notice": "Issues referral points to players addresses"
+      },
+      "consumeFrom(address,uint256)": {
+        "notice": "Consumes referral points from a player address"
+      },
+      "getAllHolders()": {
+        "notice": "Lists all referral points holders addresses"
+      },
+      "getKnownAddresses()": {
+        "notice": "Lists all known addresses as an array"
+      },
+      "getNumberOfHolders()": {
+        "notice": "Number of all referral points holders"
+      },
+      "getNumberOfKnownAddresses()": {
+        "notice": "Number of all known addresses"
+      },
+      "isKnown(address)": {
+        "notice": "Verifies if an address is known to the tracker"
+      },
+      "isValid(address,address)": {
+        "notice": "Verifies if referrer and referred addresses are valid,     that is if a referrer can invite given referred"
+      },
+      "issueTo(address,uint256)": {
+        "notice": "Issues referral points to a player address"
+      }
+    },
+    "notice": "RefPointsTracker keeps track of referral points earned and consumed by players"
+  }
+}
