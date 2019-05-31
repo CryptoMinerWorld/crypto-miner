@@ -11,13 +11,12 @@ import "./ERC721Core.sol";
  * @notice Gem is unique tradable entity. Non-fungible.
  *
  * @dev A gem is an ERC721 non-fungible token, which maps Token ID,
- *      a 32 bit number to a set of gem properties -
+ *      a 24 bit number to a set of gem properties -
  *      attributes (mostly immutable by their nature) and state variables (mutable)
  * @dev A gem token supports only minting, it can be only created
  *
  * @author Basil Gorin
  */
-// TODO: consider switching to 24-bit token ID
 contract GemERC721 is ERC721Core {
   /**
    * @dev Smart contract unique identifier, a random number
@@ -159,7 +158,7 @@ contract GemERC721 is ERC721Core {
    *      as a length of each collection in the mapping
    * @dev ERC20 balances[owner] is equal to collections[owner].length
    */
-  mapping(address => uint32[]) public collections;
+  mapping(address => uint24[]) public collections;
 
   /**
    * @dev Array with all token ids, used for enumeration
@@ -167,7 +166,7 @@ contract GemERC721 is ERC721Core {
    *      as a length of this collection
    * @dev ERC20 totalSupply() is equal to allTokens.length
    */
-  uint32[] public allTokens;
+  uint24[] public allTokens;
 
   /**
    * @dev Gem colors available in the system
@@ -177,7 +176,7 @@ contract GemERC721 is ERC721Core {
   /**
    * @dev Next token (gem) ID
    */
-  uint32 public nextId = 0x12500;
+  uint24 public nextId = 0x12500;
 
   /**
    * @dev The data in token's state may contain lock(s)
@@ -338,7 +337,7 @@ contract GemERC721 is ERC721Core {
    * @dev Returns current value of `nextId` and increments it by one
    * @return next token ID
    */
-  function incrementId() public returns(uint32) {
+  function incrementId() public returns(uint24) {
     // ensure sender has permission to increment `nextId`
     require(isSenderInRole(ROLE_NEXT_ID_INC));
 
@@ -428,7 +427,7 @@ contract GemERC721 is ERC721Core {
    * @dev Allows to fetch all existing (minted) token IDs
    * @return an ordered unsorted list of all existing token IDs
    */
-  function getAllTokens() public view returns(uint32[] memory) {
+  function getAllTokens() public view returns(uint24[] memory) {
     // read an array of all the minted tokens and return
     return allTokens;
   }
@@ -445,23 +444,23 @@ contract GemERC721 is ERC721Core {
    * @param owner an address to query a collection for
    * @return an ordered unsorted list of packed token data
    */
-  function getPackedCollection(address owner) public view returns (uint88[] memory) {
+  function getPackedCollection(address owner) public view returns (uint80[] memory) {
     // get an array of Gem IDs owned by an `owner` address
-    uint32[] memory tokenIds = getCollection(owner);
+    uint24[] memory tokenIds = getCollection(owner);
 
     // how many gems are there in a collection
-    uint32 balance = uint32(tokenIds.length);
+    uint24 balance = uint24(tokenIds.length);
 
     // data container to store the result
-    uint88[] memory result = new uint88[](balance);
+    uint80[] memory result = new uint80[](balance);
 
     // fetch token info one by one and pack into structure
     for(uint32 i = 0; i < balance; i++) {
       // token ID to work with
-      uint32 tokenId = tokenIds[i];
+      uint24 tokenId = tokenIds[i];
 
       // read all required data and pack it
-      result[i] = uint88(tokenId) << 56 | uint56(getProperties(tokenId)) << 8 | uint8(getState(tokenId));
+      result[i] = uint80(tokenId) << 56 | uint56(getProperties(tokenId)) << 8 | uint8(getState(tokenId));
     }
 
     // return the packed data structure
@@ -475,7 +474,7 @@ contract GemERC721 is ERC721Core {
    * @param owner an address to query a collection for
    * @return an ordered unsorted list of token IDs
    */
-  function getCollection(address owner) public view returns(uint32[] memory) {
+  function getCollection(address owner) public view returns(uint24[] memory) {
     // read a collection from mapping and return
     return collections[owner];
   }
@@ -813,6 +812,12 @@ contract GemERC721 is ERC721Core {
     emit Upgraded(msg.sender, ownerOf(_tokenId), _tokenId, grade, _grade);
   }
 
+  /**
+   * @dev Gets the energetic age modification date of a gem
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the gem to get age modification date for
+   * @return a token energetic age modification date
+   */
   function getAgeModified(uint256 _tokenId) public view returns(uint32) {
     // validate token existence
     require(exists(_tokenId));
@@ -821,6 +826,12 @@ contract GemERC721 is ERC721Core {
     return tokens[_tokenId].ageModified;
   }
 
+  /**
+   * @dev Gets the energetic age of a gem
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the gem to get age for
+   * @return a token energetic age value
+   */
   function getAge(uint256 _tokenId) public view returns(uint32) {
     // validate token existence
     require(exists(_tokenId));
@@ -829,6 +840,13 @@ contract GemERC721 is ERC721Core {
     return tokens[_tokenId].age;
   }
 
+  /**
+   * @dev Modifies the energetic age of a token
+   * @dev Requires sender to have `ROLE_AGE_PROVIDER` permission
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to set age for
+   * @param _age new energetic age to set for the token
+   */
   function setAge(uint256 _tokenId, uint32 _age) public {
     // check that the call is made by a state provider
     require(isSenderInRole(ROLE_AGE_PROVIDER));
@@ -885,7 +903,7 @@ contract GemERC721 is ERC721Core {
    */
   function mint(
     address _to,
-    uint32 _tokenId,
+    uint24 _tokenId,
     uint24 _plotId,
     uint8 _color,
     uint8 _level,
@@ -916,7 +934,7 @@ contract GemERC721 is ERC721Core {
    */
   function mintWith(
     address _to,
-    uint32 _tokenId,
+    uint24 _tokenId,
     uint24 _plotId,
     uint8 _color,
     uint8 _level,
@@ -1037,8 +1055,8 @@ contract GemERC721 is ERC721Core {
    * @param _tokenId ID of the token to move
    */
   function __move(address _from, address _to, uint256 _tokenId) internal {
-    // cast token ID to uint32 space
-    uint32 tokenId = uint32(_tokenId);
+    // cast token ID to uint24 space
+    uint24 tokenId = uint24(_tokenId);
 
     // overflow check, failure impossible by design of mint()
     assert(tokenId == _tokenId);
@@ -1047,20 +1065,20 @@ contract GemERC721 is ERC721Core {
     Gem storage token = tokens[_tokenId];
 
     // get a reference to the collection where token is now
-    uint32[] storage source = collections[_from];
+    uint24[] storage source = collections[_from];
 
     // get a reference to the collection where token goes to
-    uint32[] storage destination = collections[_to];
+    uint24[] storage destination = collections[_to];
 
     // collection `source` cannot be empty, by design of transfer functions
     assert(source.length != 0);
 
     // index of the token within collection `source`
-    uint32 i = token.index;
+    uint24 i = uint24(token.index); // we use only low 24 bits of the index
 
     // we put the last token in the collection `source` to the position released
     // get an ID of the last token in `source`
-    uint32 sourceId = source[source.length - 1];
+    uint24 sourceId = source[source.length - 1];
 
     // update last token index to point to proper place in the collection `source`
     tokens[sourceId].index = i;
@@ -1072,7 +1090,7 @@ contract GemERC721 is ERC721Core {
     source.length--;
 
     // update token index according to position in new collection `destination`
-    token.index = uint32(destination.length);
+    token.index = uint24(destination.length);
 
     // update token owner
     token.owner = _to;
@@ -1102,7 +1120,7 @@ contract GemERC721 is ERC721Core {
    */
   function __mint(
     address _to,
-    uint32 _tokenId,
+    uint24 _tokenId,
     uint24 _plotId,
     uint8 _color,
     uint8 _level,
