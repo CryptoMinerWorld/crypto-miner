@@ -1,10 +1,26 @@
-pragma solidity 0.4.23;
+pragma solidity 0.5.8;
 
-import "./AccessControlLight.sol";
-import "./FoundersPlots.sol";
+import "./AccessControl.sol";
 import "./PlotERC721.sol";
 import "./TierMath.sol";
 import "./Random.sol";
+
+/**
+ * @dev An auxiliary interface to extract single function `geodeBalances` from
+ *      Presale/Presale2 smart contracts to allow exchanging geodes to founders'
+ *      plots in Antarctica using PlotAntarctica smart contract
+ */
+interface FoundersPlots {
+  /**
+   * @dev Given founder's address, returns amount of geodes this founder has
+   * @dev This number is equal to number of land plots in Antarctica this
+   *      address can get, see `PlotAntarctica`
+   * @param addr founder's address
+   * @return number of geodes this founder has
+   */
+  function geodeBalances(address addr) external view returns (uint16);
+
+}
 
 /**
  * @title Plot Sale – Antarctica
@@ -23,13 +39,13 @@ import "./Random.sol";
  *
  * @author Basil Gorin
  */
-contract PlotAntarctica is AccessControlLight {
+contract PlotAntarctica is AccessControl {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant CONTRACT_UID = 0x82f23d3fe6367434e4c10b8e94a7e30d023d5a371a56c5ff8c7b76b7131476b4;
+  uint256 public constant CONTRACT_UID = 0xdd56fb04a36253db207a94cbc6d3d68a6b219c5afb69a454c65436a706b7ca77;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
@@ -168,7 +184,7 @@ contract PlotAntarctica is AccessControlLight {
    * @param seedOffset initial seed to use for random generation
    * @return randomized tiers structure consisting of five tiers
    */
-  function random2Tiers(uint256 seedOffset) public constant returns(uint64 tiers) {
+  function random2Tiers(uint256 seedOffset) public view returns(uint64 tiers) {
     // variable to store some randomness to work with
     uint256 rnd;
 
@@ -210,7 +226,7 @@ contract PlotAntarctica is AccessControlLight {
    * @param n number of tiers structures to generate
    * @return an array of randomized tiers structures consisting of five tiers each
    */
-  function random2TiersArray(uint256 seedOffset, uint32 n) public constant returns(uint64[]) {
+  function random2TiersArray(uint256 seedOffset, uint32 n) public view returns(uint64[] memory) {
     // allocate memory for the result
     uint64[] memory tiers = new uint64[](n);
 

@@ -39,8 +39,21 @@ export function read_csv(path, header) {
 	return data;
 }
 
+// zero address (old int 0)
+export const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
+
 // short name for web3.utils.toBN
 export const toBN = web3.utils.toBN;
+
+// short name for web3.eth.getBalance as BN
+export async function getBalanceBN(acc) {
+	return toBN(await web3.eth.getBalance(acc));
+}
+
+// short name for tx.receipt.gasUsed as BN
+export function gasUsedBN(tx) {
+	return toBN(tx.receipt.gasUsed);
+}
 
 // auxiliary function to create a zer-filled array of BigNumbers
 export function toBNs(n) {
