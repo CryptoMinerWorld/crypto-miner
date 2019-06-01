@@ -25,7 +25,7 @@ interface GemV2 {
    *      low 24 bits - grade value
    * @param _age energetic age of the gem
    */
-  function mintWith(address _to, uint32 _tokenId, uint24 _plotId, uint8 _color, uint8 _level, uint32 _grade, uint32 _age) external;
+  function mintWith(address _to, uint24 _tokenId, uint24 _plotId, uint8 _color, uint8 _level, uint32 _grade, uint32 _age) external;
 }
 
 /**

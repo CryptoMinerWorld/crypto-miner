@@ -44,7 +44,6 @@ import "./Random.sol";
  *
  * @author Basil Gorin
  */
-// TODO: deployment gas usage exceeds 4,500,000!
 contract Miner is AccessControl {
   /**
    * @dev Smart contract unique identifier, a random number
@@ -57,7 +56,7 @@ contract Miner is AccessControl {
    * @dev Expected version (UID) of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_UID_REQUIRED = 0x5f9e14819386e60b64cb52a07e7f47db3cf1d4668841cdfb42fd2b442fdbaf96;
+  uint256 public constant GEM_UID_REQUIRED = 0xec2889e3eccbe7b093facc70f8e7972e79dcb95782ca00e93259b2b6c81a249d;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
@@ -113,13 +112,13 @@ contract Miner is AccessControl {
      * @dev ID of the gem which is mining the plot,
      *      the gem is locked when mining
      */
-    uint32 gemId;
+    uint24 gemId;
 
     /**
      * @dev ID of the artifact which is mining the plot,
      *      the artifact is locked when mining
      */
-    uint16 artifactId;
+    uint24 artifactId;
 
     /**
      * @dev A player, an address who initiated `bind()` transaction
@@ -253,7 +252,7 @@ contract Miner is AccessControl {
    * @param gemId ID of the gem whose energy was consumed
    * @param energyLeft how much energy has left
    */
-  event RestingEnergyConsumed(address indexed _by, uint32 indexed gemId, uint32 energyLeft);
+  event RestingEnergyConsumed(address indexed _by, uint24 indexed gemId, uint32 energyLeft);
 
   /**
    * @dev May be fired in `bind()`
@@ -262,7 +261,7 @@ contract Miner is AccessControl {
    * @param gemId ID of the gem which mines the plot (bound)
    * param artifactId ID of the artifact used (bound)
    */
-  event Bound(address indexed _by, uint24 indexed plotId, uint32 indexed gemId);
+  event Bound(address indexed _by, uint24 indexed plotId, uint24 indexed gemId);
 
   /**
    * @dev May be fired in `bind()` and `release()`. Fired in `update()`
@@ -287,7 +286,7 @@ contract Miner is AccessControl {
    * @param gemId ID of the gem released
    * @param artifactId ID of the artifact released
    */
-  event Released(address indexed _by, uint24 indexed plotId, uint32 indexed gemId, uint16 artifactId);
+  event Released(address indexed _by, uint24 indexed plotId, uint24 indexed gemId, uint24 artifactId);
 
 
   /**
@@ -364,7 +363,7 @@ contract Miner is AccessControl {
    * param artifactId ID of the artifact to affect the gem
    *      properties during mining process
    */
-  function bind(uint24 plotId, uint32 gemId) public {
+  function bind(uint24 plotId, uint24 gemId) public {
     // verify mining feature is enabled
     require(isFeatureEnabled(FEATURE_MINING_ENABLED));
 
@@ -1052,7 +1051,7 @@ contract Miner is AccessControl {
    * param artifactIds an array of IDs of the artifacts to affect the gems
    *      properties during mining process
    */
-  function bulkBind(uint24[] memory plotIds, uint32[] memory gemIds) public {
+  function bulkBind(uint24[] memory plotIds, uint24[] memory gemIds) public {
     // verify arrays have same lengths
     require(plotIds.length == gemIds.length);
     //require(plotIds.length == artifactIds.length);
@@ -1186,7 +1185,7 @@ contract Miner is AccessControl {
    * @param plotId ID of the plot to mine
    * @return number of blocks the gem can mine, zero if it cannot mine more
    */
-  function gemMinesTo(uint32 gemId, uint24 plotId) public view returns(uint8) {
+  function gemMinesTo(uint24 gemId, uint24 plotId) public view returns(uint8) {
     // delegate call to `levelAllowsToMineTo`
     return TierMath.getTierDepthOrMined(plotInstance.getTiers(plotId), gemInstance.getLevel(gemId));
   }
@@ -1229,7 +1228,7 @@ contract Miner is AccessControl {
    * @param gemId ID of the gem to calculate effective mining energy for
    * @return effective mining energy for the specified gem
    */
-  function effectiveMiningEnergyOf(uint32 gemId) public view returns(uint32) {
+  function effectiveMiningEnergyOf(uint24 gemId) public view returns(uint32) {
     // determine mining energy of the gem,
     // by definition it's equal to its energetic age
     // verifies gem's existence under the hood
@@ -1253,7 +1252,7 @@ contract Miner is AccessControl {
    * @param gemId ID of the gem to calculate effective resting energy for
    * @return effective resting energy for the specified gem
    */
-  function effectiveRestingEnergyOf(uint32 gemId) public view returns(uint32) {
+  function effectiveRestingEnergyOf(uint24 gemId) public view returns(uint32) {
     // determine resting energy of the gem
     // verifies gem's existence under the hood
     uint32 energy = restingEnergyOf(gemId);
@@ -1293,7 +1292,7 @@ contract Miner is AccessControl {
    * @param gemId ID of the gem to calculate mining rate for
    * @return mining rate of the gem multiplied by 10^8
    */
-  function miningRateOf(uint32 gemId) public view returns(uint32) {
+  function miningRateOf(uint24 gemId) public view returns(uint32) {
     // read the grade of the given gem
     // verifies gem existence under the hood
     uint32 grade = gemInstance.getGrade(gemId);
@@ -1366,7 +1365,7 @@ contract Miner is AccessControl {
    * @param gemId ID of the gem to calculate resting energy for
    * @return resting energy of the given gem (minutes of resting)
    */
-  function restingEnergyOf(uint32 gemId) public view returns(uint32) {
+  function restingEnergyOf(uint24 gemId) public view returns(uint32) {
     // determine gems' grade type
     // verifies gem existence under the hood
     uint8 e = gemInstance.getGradeType(gemId);
@@ -1487,7 +1486,7 @@ contract Miner is AccessControl {
    * @param gemId ID of the gem to calculate energetic age for
    * @return energetic age of the gem in minutes
    */
-  function energeticAgeOf(uint32 gemId) public view returns(uint32) {
+  function energeticAgeOf(uint24 gemId) public view returns(uint32) {
     // gem's age in blocks is defined as a difference between current block number
     // and the maximum of gem's levelModified, gradeModified, creationTime and stateModified
     uint32 ageSeconds = uint32(now - gemInstance.getModified(gemId));
