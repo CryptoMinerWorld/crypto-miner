@@ -32,29 +32,29 @@ module.exports = async function(deployer, network, accounts) {
 	];
 
 	// deployed instances' addresses
-	const conf = network === "ropsten"?
-	{ // Ropsten Addresses
-		GemERC721: "0x3ACd26F0b5080C30c066a2055A4254A5BB05F22a",
-		CountryERC721: "0x785b1246E57b9f72C6bb19e5aC3178aEffb0Fe73",
-		PlotERC721: "0x8920Df4215934E5f6c8935F0049E9b9d8dDF3656",
-		SilverERC20: "0x63d49c8D35C9fB523515756337cef0991B304696",
-		GoldERC20: "0x761A2430FA69158c24Cb92CE4bc5d55F82931911",
-		ArtifactERC20: "0x307015ef34a1baEb9Bf6fcbED03611235Bdd01aD",
-		ChestKeyERC20: "0x18E29d4a0339D4a2e8D70408FE53cf9B07B09F38",
-		FoundersKeyERC20: "0xBE0d479710274735Ebd361E90e56E0604a879700",
-		RefPointsTracker: "0x731d55CD90762c02535fF410427Dd280A1B74397",
-	}:
-	{ // Rinkeby Addresses
-		GemERC721: "0x874828Da14178e4C07Fd32FA37cDFC8BbE5bDb6E",
-		CountryERC721: "0xD6c9bf5b99B18D8ff48d6E8B622624ea98b9AB46",
-		PlotERC721: "0x7d45f25636BcF3B19e0527ab0F7cFB7839ba74ac",
-		SilverERC20: "0xeb5aBE47DD8766443D6d386bDe8117098BAadAF4",
-		GoldERC20: "0x17787355dd0ACD6f890051a1BddF1659Ce63C022",
-		ArtifactERC20: "0x06D32F8E3792a7F08f54A165Cb302b0c0612B689",
-		ChestKeyERC20: "0x62Ef1c0f809e7dEbc866c3EBdDF89d2B61AE6C48",
-		FoundersKeyERC20: "0x9ac197768D4bC204aD83CC8c9E564F6B66a98170",
-		RefPointsTracker: "0x3E73B24CBfbc0C14eaE581384E0D1681f80e88bf",
-	};
+	const conf = network === "ropsten" ?
+		{ // Ropsten Addresses
+			GemERC721: "0x3ACd26F0b5080C30c066a2055A4254A5BB05F22a",
+			CountryERC721: "0x785b1246E57b9f72C6bb19e5aC3178aEffb0Fe73",
+			PlotERC721: "0x8920Df4215934E5f6c8935F0049E9b9d8dDF3656",
+			SilverERC20: "0x63d49c8D35C9fB523515756337cef0991B304696",
+			GoldERC20: "0x761A2430FA69158c24Cb92CE4bc5d55F82931911",
+			ArtifactERC20: "0x307015ef34a1baEb9Bf6fcbED03611235Bdd01aD",
+			ChestKeyERC20: "0x18E29d4a0339D4a2e8D70408FE53cf9B07B09F38",
+			FoundersKeyERC20: "0xBE0d479710274735Ebd361E90e56E0604a879700",
+			RefPointsTracker: "0x731d55CD90762c02535fF410427Dd280A1B74397",
+		}:
+		{ // Rinkeby Addresses
+			GemERC721: "0x874828Da14178e4C07Fd32FA37cDFC8BbE5bDb6E",
+			CountryERC721: "0xD6c9bf5b99B18D8ff48d6E8B622624ea98b9AB46",
+			PlotERC721: "0x7d45f25636BcF3B19e0527ab0F7cFB7839ba74ac",
+			SilverERC20: "0xeb5aBE47DD8766443D6d386bDe8117098BAadAF4",
+			GoldERC20: "0x17787355dd0ACD6f890051a1BddF1659Ce63C022",
+			ArtifactERC20: "0x06D32F8E3792a7F08f54A165Cb302b0c0612B689",
+			ChestKeyERC20: "0x62Ef1c0f809e7dEbc866c3EBdDF89d2B61AE6C48",
+			FoundersKeyERC20: "0x9ac197768D4bC204aD83CC8c9E564F6B66a98170",
+			RefPointsTracker: "0x3E73B24CBfbc0C14eaE581384E0D1681f80e88bf",
+		};
 
 	// deployed instances
 	const instances = {
@@ -167,18 +167,6 @@ module.exports = async function(deployer, network, accounts) {
 		else {
 			console.log("skipping issuing and consuming ref points " + i);
 		}
-	}
-
-	// check minting was successful
-	for(let i = 0; i < testers.length; i++) {
-		assert.equal(15, await instances.GemERC721.balanceOf(testers[i]), "wrong gem balance for account " + testers[i]);
-		assert.equal(3, await instances.CountryERC721.balanceOf(testers[i]), "wrong country balance for account " + testers[i]);
-		assert.equal(15, await instances.PlotERC721.balanceOf(testers[i]), "wrong plot balance for account " + testers[i]);
-		assert.equal(10000000, await instances.SilverERC20.balanceOf(testers[i]), "wrong silver balance for account " + testers[i]);
-		assert.equal(1000000, await instances.GoldERC20.balanceOf(testers[i]), "wrong gold balance for account " + testers[i]);
-		assert.equal(10, await instances.ArtifactERC20.balanceOf(testers[i]), "wrong artifact balance for account " + testers[i]);
-		assert.equal(10, await instances.ChestKeyERC20.balanceOf(testers[i]), "wrong chest keys balance for account " + testers[i]);
-		assert.equal(10, await instances.FoundersKeyERC20.balanceOf(testers[i]), "wrong founder's keys balance for account " + testers[i]);
 	}
 
 };
