@@ -66,61 +66,107 @@ module.exports = async function(deployer, network, accounts) {
 		const level = 1 + i % 5;
 		const gradeType = 1 + i % 6;
 		const gradeValue = Math.floor(Math.random() * 1000000);
-		console.log("\tminting gem %o, %o, %o, %o, %o", i + 1, color, level, gradeType, gradeValue);
-		if(!await instances.GemERC721.exists(i + 1)) {
+
+		const exists = await instances.GemERC721.exists(i + 1);
+		console.log("%s gem %o, %o, %o, %o, %o", (exists? "skipping": "minting"), i + 1, color, level, gradeType, gradeValue);
+		if(!exists) {
 			await instances.GemERC721.mint(to, i + 1, i + 1, color, level, gradeType << 24 | gradeValue);
 		}
 	}
 	// countries - CountryERC721
 	for(let i = 0; i < 3 * testers.length; i++) {
-		console.log("\tminting country %o", i + 1);
-		if(!await instances.CountryERC721.exists(i + 1)) {
+		const exists = await instances.CountryERC721.exists(i + 1);
+		console.log("%s country %o", (exists? "skipping": "minting"), i + 1);
+		if(!exists) {
 			await instances.CountryERC721.mint(testers[i % testers.length], i + 1);
 		}
 	}
 	// plots - PlotERC721
 	// Antarctica - 2 tiers
 	for(let i = 0; i < 5 * testers.length; i++) {
-		console.log("\tminting Antarctica plot %o", i + 1);
-		if(!await instances.PlotERC721.exists(i + 1)) {
+		const exists = await instances.PlotERC721.exists(i + 1);
+		console.log("%s Antarctica plot %o", (exists? "skipping": "minting"), i + 1);
+		if(!exists) {
 			await instances.PlotERC721.mint(testers[i % testers.length], 0, "0x0200236464646400");
 		}
 	}
 	// Rest of the World - 5 tiers
 	for(let i = 0; i < 10 * testers.length; i++) {
-		console.log("\tminting regular plot %o", 5 * testers.length + i + 1);
-		if(!await instances.PlotERC721.exists(5 * testers.length + i + 1)) {
+		const exists = await instances.PlotERC721.exists(5 * testers.length + i + 1);
+		console.log("%s regular plot %o", (exists? "skipping": "minting"), 5 * testers.length + i + 1);
+		if(!exists) {
 			await instances.PlotERC721.mint(testers[i % testers.length], 0, "0x05002341555F6400");
 		}
 	}
 
 	// mint few ERC20 tokens
 	for(let i = 0; i < testers.length; i++) {
+		let exists;
+
 		// Silver ERC20
-		console.log("\tminting silver " + i);
-		await instances.SilverERC20.mint(testers[i], 10000);
+		exists = !(await instances.SilverERC20.balanceOf(testers[i])).isZero();
+		console.log((exists? "skipping ": "") + "minting 10000 silver " + i);
+		if(!exists) {
+			await instances.SilverERC20.mint(testers[i], 10000);
+		}
+
 		// Gold ERC20
-		console.log("\tminting gold " + i);
-		await instances.GoldERC20.mint(testers[i], 1000);
+		exists = !(await instances.GoldERC20.balanceOf(testers[i])).isZero();
+		console.log((exists? "skipping ": "") + "minting 1000 gold " + i);
+		if(!exists) {
+			await instances.GoldERC20.mint(testers[i], 1000);
+		}
+
 		// Artifacts ERC20
-		console.log("\tminting artifacts " + i);
-		await instances.ArtifactERC20.mint(testers[i], 10);
+		exists = !(await instances.ArtifactERC20.balanceOf(testers[i])).isZero();
+		console.log((exists? "skipping ": "") + "minting 10 artifacts " + i);
+		if(!exists) {
+			await instances.ArtifactERC20.mint(testers[i], 10);
+		}
+
 		// Chest Keys ERC20
-		console.log("\tminting chest keys " + i);
-		await instances.ChestKeyERC20.mint(testers[i], 10);
+		exists = !(await instances.ChestKeyERC20.balanceOf(testers[i])).isZero();
+		console.log((exists? "skipping ": "") + "minting 10 chest keys " + i);
+		if(!exists) {
+			await instances.ChestKeyERC20.mint(testers[i], 10);
+		}
+
 		// Founder's Keys ERC20
-		console.log("\tminting founder's keys " + i);
-		await instances.FoundersKeyERC20.mint(testers[i], 10);
+		exists = !(await instances.FoundersKeyERC20.balanceOf(testers[i])).isZero();
+		console.log((exists? "skipping ": "") + "minting 10 founder's keys " + i);
+		if(exists) {
+			await instances.FoundersKeyERC20.mint(testers[i], 10);
+		}
 	}
 
 	// issue some referral points
 	for(let i = 0; i < testers.length; i++) {
-		// issue some amount
-		console.log("\tissuing ref points " + i);
-		await instances.RefPointsTracker.issueTo(testers[i], 2000);
-		// consume twice less amount
-		console.log("\tconsuming ref points " + i);
-		await instances.RefPointsTracker.consumeFrom(testers[i], 1000);
+		// check if points already issued
+		const exists = !(await instances.RefPointsTracker.balanceOf(testers[i])).isZero();
+
+		if(!exists) {
+			// issue some amount
+			console.log("issuing ref points " + i);
+			await instances.RefPointsTracker.issueTo(testers[i], 2000);
+			// consume twice less amount
+			console.log("consuming ref points " + i);
+			await instances.RefPointsTracker.consumeFrom(testers[i], 1000);
+		}
+		else {
+			console.log("skipping issuing and consuming ref points " + i);
+		}
+	}
+
+	// check minting was successful
+	for(let i = 0; i < testers.length; i++) {
+		assert.equal(15, await instances.GemERC721.balanceOf(testers[i]), "wrong gem balance for account " + testers[i]);
+		assert.equal(3, await instances.CountryERC721.balanceOf(testers[i]), "wrong country balance for account " + testers[i]);
+		assert.equal(15, await instances.PlotERC721.balanceOf(testers[i]), "wrong plot balance for account " + testers[i]);
+		assert.equal(10000000, await instances.SilverERC20.balanceOf(testers[i]), "wrong silver balance for account " + testers[i]);
+		assert.equal(1000000, await instances.GoldERC20.balanceOf(testers[i]), "wrong gold balance for account " + testers[i]);
+		assert.equal(10, await instances.ArtifactERC20.balanceOf(testers[i]), "wrong artifact balance for account " + testers[i]);
+		assert.equal(10, await instances.ChestKeyERC20.balanceOf(testers[i]), "wrong chest keys balance for account " + testers[i]);
+		assert.equal(10, await instances.FoundersKeyERC20.balanceOf(testers[i]), "wrong founder's keys balance for account " + testers[i]);
 	}
 
 };
