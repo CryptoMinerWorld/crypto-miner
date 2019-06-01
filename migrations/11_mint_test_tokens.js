@@ -32,7 +32,19 @@ module.exports = async function(deployer, network, accounts) {
 	];
 
 	// deployed instances' addresses
-	const conf = {
+	const conf = network === "ropsten"?
+	{ // Ropsten Addresses
+		GemERC721: "0x3ACd26F0b5080C30c066a2055A4254A5BB05F22a",
+		CountryERC721: "0x785b1246E57b9f72C6bb19e5aC3178aEffb0Fe73",
+		PlotERC721: "0x8920Df4215934E5f6c8935F0049E9b9d8dDF3656",
+		SilverERC20: "0x63d49c8D35C9fB523515756337cef0991B304696",
+		GoldERC20: "0x761A2430FA69158c24Cb92CE4bc5d55F82931911",
+		ArtifactERC20: "0x307015ef34a1baEb9Bf6fcbED03611235Bdd01aD",
+		ChestKeyERC20: "0x18E29d4a0339D4a2e8D70408FE53cf9B07B09F38",
+		FoundersKeyERC20: "0xBE0d479710274735Ebd361E90e56E0604a879700",
+		RefPointsTracker: "0x731d55CD90762c02535fF410427Dd280A1B74397",
+	}:
+	{ // Rinkeby Addresses
 		GemERC721: "0x874828Da14178e4C07Fd32FA37cDFC8BbE5bDb6E",
 		CountryERC721: "0xD6c9bf5b99B18D8ff48d6E8B622624ea98b9AB46",
 		PlotERC721: "0x7d45f25636BcF3B19e0527ab0F7cFB7839ba74ac",
