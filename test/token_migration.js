@@ -129,14 +129,26 @@ contract('V1 -> V2 Migration', (accounts) => {
 			// extract portion of data array
 			const gems_to_write = gems.slice(offset, offset + bulkSize).map(packGemData);
 
-			// write all the gems and measure gas
-			const gasUsed = (await writer.writeBulkGemV2Data(gemV2.address, owners_to_write, gems_to_write)).receipt.gasUsed;
+			// check gem existence at the offset
+			if(!await gemV2.exists(gems[offset][0])) {
+				// write all the gems and measure gas
+				const gasUsed = (await writer.writeBulkGemV2Data(gemV2.address, owners_to_write, gems_to_write)).receipt.gasUsed;
 
-			// update cumulative gas used
-			cumulativeGasUsed += gasUsed;
+				// update cumulative gas used
+				cumulativeGasUsed += gasUsed;
 
-			// log the result
-			console.log("\t%o gem(s) written (%o total): %o gas used", bulkSize, offset + bulkSize, gasUsed);
+				// log the result
+				console.log(
+					"\t%o gem(s) written (%o total): %o gas used",
+					Math.min(bulkSize, owners.length - offset),
+					Math.min(offset + bulkSize, owners.length),
+					gasUsed
+				);
+			}
+			else {
+				// log the message
+				console.log("\t%o gem(s) skipped", Math.min(bulkSize, owners.length - offset));
+			}
 		}
 
 		// print the cumulative gas usage result
