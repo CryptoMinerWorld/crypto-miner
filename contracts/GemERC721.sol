@@ -23,7 +23,7 @@ contract GemERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0x5f9e14819386e60b64cb52a07e7f47db3cf1d4668841cdfb42fd2b442fdbaf96;
+  uint256 public constant TOKEN_UID = 0xec2889e3eccbe7b093facc70f8e7972e79dcb95782ca00e93259b2b6c81a249d;
 
   /**
    * @dev ERC20 compliant token symbol

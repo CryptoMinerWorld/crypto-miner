@@ -50,7 +50,7 @@ contract Miner is AccessControl {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x61fa3af26f34b66f983b25b9d4d43df50e2df46d54131391b6deb492fe73f5d2;
+  uint256 public constant MINER_UID = 0x4cae2b5cd047e2fb4b2f23a0a6adb3266225c7804a634900cc0a7a5eae3bf994;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
@@ -650,38 +650,12 @@ contract Miner is AccessControl {
     // get tiers structure of the plot
     uint64 tiers = plotInstance.getTiers(plotId);
 
-    // extract current offset
+    // extract current offset to be used in event emitter
     uint8 offset0 = TierMath.getOffset(tiers);
 
-    // ensure new offset is bigger than initial one
-    require(offset0 < offset);
-
-    // packed structure to accumulate results
-    uint16[] memory loot = new uint16[](9);
-
-    // get indexes of first and last tiers
-    uint8 tier0 = TierMath.getTierIndex(tiers, offset0);
-    uint8 tier1 = TierMath.getTierIndex(tiers, offset);
-
-    // if we do not cross tiers
-    if(tier0 == tier1) {
-      // just process current tier according to offsets
-      loot = genLoot(tier0, offset - offset0, TierMath.isBottomOfStack(tiers, offset), loot);
-    }
-    // otherwise, if we cross one or more tiers
-    else {
-      // process first tier
-      loot = genLoot(tier0, TierMath.getTierDepth(tiers, tier0 + 1) - offset0, false, loot);
-
-      // process middle tiers
-      for(uint8 i = tier0 + 1; i <= tier1 - 1; i++) {
-        // process full tier `i`
-        loot = genLoot(i, TierMath.getTierDepth(tiers, i - i) - TierMath.getTierDepth(tiers, i), false, loot);
-      }
-
-      // process last tier
-      loot = genLoot(tier1, offset - TierMath.getTierDepth(tiers, tier1 - 1), TierMath.isBottomOfStack(tiers, offset), loot);
-    }
+    // calculate the loot based on the offset
+    // ensures new offset is bigger than initial one under the hood
+    uint16[] memory loot = tiersLoot(tiers, offset, new uint16[](9));
 
     // loot processing - delegate call to `processLoot`
     __processLoot(loot, plotId);
@@ -713,7 +687,7 @@ contract Miner is AccessControl {
     // mint gems level 1, 2, 3, 4, 5
     for(uint8 i = 0; i < 5; i++) {
       // mint gems level `i`
-      __mintGems(i + 1, loot[i], plotId);
+      __mintGems(256 * i, i + 1, loot[i], plotId);
     }
 
     // if there is silver to mint
@@ -753,37 +727,56 @@ contract Miner is AccessControl {
    * @dev Auxiliary function to mint gems
    * @dev The loot is minted to transaction sender
    * @dev Unsafe, must be kept private at all times
+   * @param seedOffset seed offset to be used for random generation, there
+   *      will be `n / 3` of seeds used [seedOffset, seedOffset + n / 3)
    * @param level level of the gems to mint
    * @param n number of gems to mint
    * @param plotId ID of the plot the gem is found in
    */
-  function __mintGems(uint8 level, uint16 n, uint24 plotId) private {
+  function __mintGems(uint256 seedOffset, uint8 level, uint16 n, uint24 plotId) private {
+    // variable to store some randomness to work with
+    uint256 rnd;
+
     // we're about to mint `n` gems
     for(uint16 i = 0; i < n; i++) {
-      // to generate grade type we need some random first
-      uint256 gradeTypeRnd = Random.__randomValue(0x10000 + i, 0, 10000);
+      // each 3 iterations starting from iteration 0
+      if(i % 3 == 0) {
+        // generate new randomness to work with
+        rnd = Random.generate256(seedOffset + i / 3);
+      }
+
+      // generate random value in the [0, 10000) range
+      // for grade type generation
+      uint16 rnd10000 = uint16(Random.uniform(rnd >> 72 * (i % 3), 24, 10000));
+
+      // extract 16 bits of randomness - range [0, 65536) for color generation
+      uint16 rnd65k = uint16(rnd >> 24 + 72 * (i % 3));
+
+      // generate random value in range [0, 1000000) range
+      // to be used as a grade value
+      uint24 rnd1000000 = uint24(Random.uniform(rnd >> 40 + 72 * (i % 3), 32, 1000000));
 
       // define variable to store grade type
       uint8 gradeType;
 
       // grade D: 50%
-      if(gradeTypeRnd < 5000) {
+      if(rnd10000 < 5000) {
         gradeType = 1;
       }
       // grade C: 37%
-      else if(gradeTypeRnd < 8700) {
+      else if(rnd10000 < 8700) {
         gradeType = 2;
       }
       // grade B: 10%
-      else if(gradeTypeRnd < 9700) {
+      else if(rnd10000 < 9700) {
         gradeType = 3;
       }
       // grade A: 2.5%
-      else if(gradeTypeRnd < 9950) {
+      else if(rnd10000 < 9950) {
         gradeType = 4;
       }
       // grade A: 0.49%
-      else if(gradeTypeRnd < 9999) {
+      else if(rnd10000 < 9999) {
         gradeType = 5;
       }
       // grade AAA: 0.01%
@@ -796,29 +789,82 @@ contract Miner is AccessControl {
         msg.sender,
         gemInstance.incrementId(),
         plotId,
-        randomColor(0x10100 + i),
+        randomColor(rnd65k),
         level,
         uint32(gradeType) << 24 |
-        uint24(Random.__randomValue(0x10200 + i, 0, 1000000))
+        rnd1000000
       );
     }
   }
 
   /**
    * @dev Picks random color from `availableColors` array
-   * @param seed seed to be used in random number generator
+   * @param randomness a random number in range [0, 65536)
+   *      used to pick a color
    * @return gem color, an integer [1, 12]
    */
-    function randomColor(uint256 seed) public view returns(uint8) {
+    function randomColor(uint16 randomness) public view returns(uint8) {
       // get available colors array
       uint8[] memory availableColors = gemInstance.getAvailableColors();
 
       // generate random index and return random number from the array
-      return availableColors[Random.__randomValue(seed, 0, uint8(availableColors.length))];
+      return availableColors[Random.uniform(randomness, 16, availableColors.length)];
     }
 
   /**
-   * @dev Auxiliary function to generate loot when mining `n` blocks in tier `k`
+   * @dev Auxiliary function to generate loot for mining `tiers` structure
+   * @dev Loot data is accumulated in `loot` array, containing:
+   *      index 0: gems level 1
+   *      index 1: gems level 2
+   *      index 2: gems level 3
+   *      index 3: gems level 4
+   *      index 4: gems level 5
+   *      index 5: silver
+   *      index 6: gold
+   *      index 7: artifacts
+   *      index 8: keys
+   * @param tiers tiers data structure of the land plot to evaluate loot for
+   * @param offset depth to mine tiers structure to,
+   *      must be bigger than current offset
+   * @param loot an array containing loot information
+   */
+  function tiersLoot(uint64 tiers, uint8 offset, uint16[] memory loot) public view returns(uint16[] memory) {
+    // extract current offset
+    uint8 offset0 = TierMath.getOffset(tiers);
+
+    // ensure new offset is bigger than initial one
+    require(offset0 < offset);
+
+    // get indexes of first and last tiers
+    uint8 tier0 = TierMath.getTierIndex(tiers, offset0);
+    uint8 tier1 = TierMath.getTierIndex(tiers, offset);
+
+    // if we do not cross tiers
+    if(tier0 == tier1) {
+      // just process current tier according to offsets
+      loot = tierLoot(tier0, offset - offset0, TierMath.isBottomOfStack(tiers, offset)? 1: 0, loot);
+    }
+    // otherwise, if we cross one or more tiers
+    else {
+      // process first tier
+      loot = tierLoot(tier0, TierMath.getTierDepth(tiers, tier0 + 1) - offset0, 0, loot);
+
+      // process middle tiers
+      for(uint8 i = tier0 + 1; i <= tier1 - 1; i++) {
+        // process full tier `i`
+        loot = tierLoot(i, TierMath.getTierDepth(tiers, i - i) - TierMath.getTierDepth(tiers, i), 0, loot);
+      }
+
+      // process last tier
+      loot = tierLoot(tier1, offset - TierMath.getTierDepth(tiers, tier1 - 1), TierMath.isBottomOfStack(tiers, offset)? 1: 0, loot);
+    }
+
+    // return the result
+    return loot;
+  }
+
+  /**
+   * @dev Auxiliary function to generate loot for mining `n` blocks in tier `k`
    * @dev Loot data is accumulated in `loot` array, containing:
    *      index 0: gems level 1
    *      index 1: gems level 2
@@ -831,10 +877,13 @@ contract Miner is AccessControl {
    *      index 8: keys
    * @param k one-based tier index to process loot for
    * @param n number of blocks to process for tier specified
-   * @param bos bottom of stack indicator, true if plot is fully mined
+   * @param b bottom of stack counter, specifies how many blocks
+   *      should be considered to be bottom of the stack;
+   *      usually equals to zero if bottom is not reached or
+   *      one if bottom of the stack is reached
    * @param loot an array containing loot information
    */
-  function genLoot(uint8 k, uint16 n, bool bos, uint16[] memory loot) public view returns(uint16[] memory) {
+  function tierLoot(uint8 k, uint16 n, uint16 b, uint16[] memory loot) public view returns(uint16[] memory) {
     // for each block out of `n` blocks in tier `k`
     // we need to generate up to 11 random numbers,
     // with the precision up to 0.01%, that is 10^-4
@@ -942,15 +991,19 @@ contract Miner is AccessControl {
       require(false);
     }
 
-    // for bottom of the stack
-    if(bos) {
-      // determine how many items we get
-      uint256 items = Random.__randomValue(11 * n, 2, 3);
+    // for bottom of the stack blocks
+    for(uint16 i = 0; i < b; i++) {
+      // generate some random data to work with
+      uint256 rnd = Random.generate256(11 * n + i);
+
+      // determine how many items we get based on low 16 bits of the randomness
+      uint256 items = 2 + Random.uniform(rnd, 16, 3);
 
       // generate that amount of items
-      for(uint8 i = 0; i < items; i++) {
+      for(uint8 j = 0; j < items; j++) {
         // generate random value in range [0, 10000)
-        uint256 rnd10000 = Random.__randomValue(11 * n + 1 + i, 0, 10000);
+        // using bits (16, 88] - (16, 136]
+        uint256 rnd10000 = Random.uniform(rnd >> (16 + 24 * j), 24, 10000);
 
         // generate loot according to the probabilities
         // gem (lvl 1): 1%
@@ -1005,7 +1058,7 @@ contract Miner is AccessControl {
    * @dev Auxiliary function to calculate amount of successful experiments
    *      in `n` iterations with the `p` probability each
    * @param seedOffset seed offset to be used for random generation, there
-   *      will be `n` of seeds used [seedOffset, seedOffset + n)
+   *      will be `n / 10` of seeds used [seedOffset, seedOffset + n / 10)
    * @param p probability of successful event in bp (basis point, ‱)
    * @param n number of experiments to launch
    */
@@ -1018,11 +1071,11 @@ contract Miner is AccessControl {
       // each 10 iterations starting from iteration 0
       if(i % 10 == 0) {
         // generate new randomness to work with
-        rnd = Random.__rawRandom(seedOffset + i / 10);
+        rnd = Random.generate256(seedOffset + i / 10);
       }
 
       // generate random value in the [0, 10000) range
-      uint16 rnd10000 = uint16(Random.__rndVal(rnd >> 24 * (i % 10), 0xFFFFFF, 0, 10000));
+      uint16 rnd10000 = uint16(Random.uniform(rnd >> 24 * (i % 10), 24, 10000));
 
       // check if we've got a probability hit
       if(rnd10000 < p) {

@@ -28,7 +28,7 @@ contract AccessControl {
   /**
    * @dev Bitmask representing all the possible permissions (super admin role)
    */
-  uint256 private constant FULL_PRIVILEGES_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+  uint256 private constant FULL_PRIVILEGES_MASK = uint256(-1); // uint256(-1) overflows to 0xFFFF...
 
   /**
    * @dev A bitmask of globally enabled features

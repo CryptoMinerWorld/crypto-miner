@@ -938,10 +938,6 @@ contract PlotERC721 is ERC721Core {
     // 2 (Antarctica) or 5 (Rest of the World) elements
     require(n == 2 || n == 5);
 
-    // ensure tier1 offset is zero
-    // not required - ensured by the 0xFF00FFFFFFFFFF00 mask (see below)
-    // require(TierMath.getTierDepth(_tiers, 0) == 0);
-
     // validate tiers structure – first n layers
     for(uint8 i = 0; i < n; i++) {
       // (n)th tier offset must be greater than or equal to (n-1)th tier offset
@@ -954,14 +950,9 @@ contract PlotERC721 is ERC721Core {
       require(uint8(_tiers >> (6 - n) * 8) == uint8(_tiers >> (5 - j) * 8));
     }
 
-    // verify initial offset is zero
-    // not required - ensured by the 0xFF00FFFFFFFFFF00 mask (see below)
-    // require(TierMath.getOffset(_tiers) == 0);
-
     // create new token in memory
     LandPlot memory token = LandPlot({
-      // TODO: consider removing this mask - it's not a plot business what is its initial state
-      tiers: 0xFF00FFFFFFFFFF00 & _tiers, // erase tier1 offset and initial offsets
+      tiers: 0xFFFFFFFFFFFFFF00 & _tiers, // erase (ignore) initial offset
       offsetModified: 0,
       state: 0,
       stateModified: 0,

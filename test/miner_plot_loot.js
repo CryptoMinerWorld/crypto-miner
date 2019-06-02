@@ -24,13 +24,15 @@ const FEATURE_MINING_ENABLED = 0x00000001;
 const CSV_HEADER = "type,tiers,plots,gems1,gems2,gems3,gems4,gems5,silver,gold,artifacts,keys";
 
 // test depth - number of plots to simulate
-const PLOTS = 500;
+const PLOTS = 100;
+// number of plots in a batch
+const BULK_SIZE = 100;
 
 // Loot Generator tests - plot simulation
-contract('Loot Gen', (accounts) => {
-	it("rnd: loot generator – Antarctica", async() => {
+contract('Miner: Plot Loot', (accounts) => {
+	it("tier loot – Antarctica (2 Tiers)", async() => {
 		// execute only for PLOTS >= 100
-		assert(PLOTS >= 100, "too few PLOTS to test: " + PLOTS);
+		assert(PLOTS >= BULK_SIZE, "too few PLOTS to test: " + PLOTS);
 
 		// define miner dependencies
 		const gem = await Gem.new();
@@ -58,18 +60,18 @@ contract('Loot Gen', (accounts) => {
 		let loot = toBNs(9);
 
 		// process 100 plots in each iteration
-		for(let i = 0; i < PLOTS / 100; i ++) {
+		for(let i = 0; i < PLOTS / BULK_SIZE; i ++) {
 			// Antarctica consists of two tiers
 			// 3,500 blocks in tier 1
-			loot = await miner.genLoot(1, 3500, false, loot);
+			loot = await miner.tierLoot(1, 35 * BULK_SIZE, 0, loot);
 			// 6,500 blocks in tier 2
-			loot = await miner.genLoot(2, 6500, true, loot);
+			loot = await miner.tierLoot(2, 65 * BULK_SIZE, BULK_SIZE, loot);
 		}
 
 		// CSV file data
-		const csv_data = `gen,2,${PLOTS},${loot.join(",")}`;
+		const csv_data = `A,2,${PLOTS},${loot.join(",")}`;
 		// write statistical raw data into the file
-		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
@@ -77,8 +79,50 @@ contract('Loot Gen', (accounts) => {
 		assert(loot[2] > 0, "no level 3 gems");
 		assert(loot[5] > 0, "no silver");
 	});
+	it("tiers loot – Antarctica (2 Tiers)", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
 
-	it("rnd: loot mining – Antarctica", async() => {
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// variable to store loot in
+		let loot = toBNs(9);
+
+		// process 100 plots in each iteration
+		for(let i = 0; i < PLOTS; i ++) {
+			// process Antarctica tiers structure fully
+			loot = await miner.tiersLoot("0x0200236464646400", 100, loot);
+		}
+
+		// CSV file data
+		const csv_data = `B,2,${PLOTS},${loot.join(",")}`;
+		// write statistical raw data into the file
+		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
+
+		// verify some statistics constraints
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
+		assert(loot[2] > 0, "no level 3 gems");
+		assert(loot[5] > 0, "no silver");
+	});
+	it("mining a plot – Antarctica (2 Tiers)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();
@@ -165,20 +209,22 @@ contract('Loot Gen', (accounts) => {
 		console.log("\tchest keys: %o", chestKeys);
 
 		// CSV file data
-		const csv_data = `mine,2,${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${foundersKeys},${chestKeys}`;
+		const csv_data = `C,2,${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${foundersKeys}`;
 		// write statistical raw data into the file
-		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(gs[0] > 0, "no level 1 gems");
 		assert(gs[1] > 0, "no level 2 gems");
 		assert(gs[2] > 0, "no level 3 gems");
 		assert(slv > 0, "no silver");
+
+		// TODO: inspect gem color and grade
 	});
 
-	it("rnd: loot generator – Rest of the World", async() => {
+	it("tier loot – Rest of the World (5 Tiers)", async() => {
 		// execute only for PLOTS >= 100
-		assert(PLOTS >= 100, "too few PLOTS to test: " + PLOTS);
+		assert(PLOTS >= BULK_SIZE, "too few PLOTS to test: " + PLOTS);
 
 		// define miner dependencies
 		const gem = await Gem.new();
@@ -206,34 +252,83 @@ contract('Loot Gen', (accounts) => {
 		let loot = toBNs(9);
 
 		// process 100 plots in each iteration
-		for(let i = 0; i < PLOTS / 100; i ++) {
+		for(let i = 0; i < PLOTS / BULK_SIZE; i ++) {
 			// Rest of the World consists of five tiers
 			// for 100 plots there is
 			// 3,500 blocks in tier 1
-			loot = await miner.genLoot(1, 3500, false, loot);
+			loot = await miner.tierLoot(1, 35 * BULK_SIZE, 0, loot);
 			// 3,000 blocks in tier 2
-			loot = await miner.genLoot(2, 3000, false, loot);
+			loot = await miner.tierLoot(2, 30 * BULK_SIZE, 0, loot);
 			// 2,000 blocks in tier 3
-			loot = await miner.genLoot(3, 2000, false, loot);
+			loot = await miner.tierLoot(3, 20 * BULK_SIZE, 0, loot);
 			// 1,000 blocks in tier 4
-			loot = await miner.genLoot(4, 1000, false, loot);
+			loot = await miner.tierLoot(4, 10 * BULK_SIZE, 0, loot);
 			// 500 blocks in tier 5
-			loot = await miner.genLoot(5, 500, true, loot);
+			loot = await miner.tierLoot(5, 5 * BULK_SIZE, BULK_SIZE, loot);
 		}
 
 		// CSV file data
-		const csv_data = `gen,5,${PLOTS},${loot.join(",")}`;
+		const csv_data = `A,5,${PLOTS},${loot.join(",")}`;
 		// write statistical raw data into the file
-		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
+		assert(loot[3] > 0, "no level 4 gems");
+		assert(loot[4] > 0, "no level 5 gems");
 		assert(loot[5] > 0, "no silver");
 	});
+	it("tiers loot – Rest of the World (5 Tiers)", async() => {
+		// execute only for PLOTS >= 100
+		assert(PLOTS >= BULK_SIZE, "too few PLOTS to test: " + PLOTS);
 
-	it("rnd: loot mining – Rest of the World", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// variable to store loot in
+		let loot = toBNs(9);
+
+		// process 100 plots in each iteration
+		for(let i = 0; i < PLOTS; i ++) {
+			// process Rest of the World tiers structure fully
+			loot = await miner.tiersLoot("0x05002341555F6400", 100, loot);
+		}
+
+		// CSV file data
+		const csv_data = `B,5,${PLOTS},${loot.join(",")}`;
+		// write statistical raw data into the file
+		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
+
+		// verify some statistics constraints
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
+		assert(loot[2] > 0, "no level 3 gems");
+		assert(loot[3] > 0, "no level 4 gems");
+		assert(loot[4] > 0, "no level 5 gems");
+		assert(loot[5] > 0, "no silver");
+	});
+	it("mining a plot – Rest of the World (5 Tiers)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();
@@ -320,15 +415,19 @@ contract('Loot Gen', (accounts) => {
 		console.log("\tchest keys: %o", chestKeys);
 
 		// CSV file data
-		const csv_data = `mine,5,${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${foundersKeys},${chestKeys}`;
+		const csv_data = `C,5,${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${chestKeys}`;
 		// write statistical raw data into the file
-		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(gs[0] > 0, "no level 1 gems");
 		assert(gs[1] > 0, "no level 2 gems");
 		assert(gs[2] > 0, "no level 3 gems");
+		assert(gs[3] > 0, "no level 4 gems");
+		assert(gs[4] > 0, "no level 5 gems");
 		assert(slv > 0, "no silver");
+
+		// TODO: inspect gem color and grade
 	});
 
 });

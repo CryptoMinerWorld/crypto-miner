@@ -216,7 +216,7 @@ contract('Miner', (accounts) => {
 
 		// we run 600 rounds and expect each color to be present around 100 times
 		for(let i = 0; i < 600; i++) {
-			colors[await miner.randomColor(i) - 1]++;
+			colors[await miner.randomColor(Math.floor(Math.random() * 65536)) - 1]++;
 		}
 
 		// ensure we have reasonable amount of each color

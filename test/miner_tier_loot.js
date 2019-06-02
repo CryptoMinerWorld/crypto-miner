@@ -18,8 +18,8 @@ const CSV_HEADER = "tier,blocks,gems1,gems2,gems3,gems4,gems5,silver,gold,artifa
 const BLOCKS = 10000;
 
 // Loot Generator tests - raw blocks
-contract('Loot Gen (RAW)', (accounts) => {
-	it("rnd: loot generator - tier 1", async() => {
+contract('Miner: Tier Loot', (accounts) => {
+	it("tier loot (1)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();
@@ -43,12 +43,12 @@ contract('Loot Gen (RAW)', (accounts) => {
 		);
 
 		// gen loot for 10,000 blocks in tier 1
-		const loot = await miner.genLoot(1, BLOCKS, false, toBNs(9));
+		const loot = await miner.tierLoot(1, BLOCKS, 0, toBNs(9));
 
 		// CSV file data
 		const csv_data = `1,${BLOCKS},${loot.join(",")}`;
 		// write statistical raw data into the file
-		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
+		write_csv("./data/tier_loot.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
@@ -62,7 +62,7 @@ contract('Loot Gen (RAW)', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("rnd: loot generator - tier 2", async() => {
+	it("tier loot (2)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();
@@ -86,12 +86,12 @@ contract('Loot Gen (RAW)', (accounts) => {
 		);
 
 		// gen loot for 10,000 blocks in tier 2
-		const loot = await miner.genLoot(2, BLOCKS, false, toBNs(9));
+		const loot = await miner.tierLoot(2, BLOCKS, 0, toBNs(9));
 
 		// CSV file data
 		const csv_data = `2,${BLOCKS},${loot.join(",")}`;
 		// write statistical raw data into the file
-		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
+		write_csv("./data/tier_loot.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
@@ -105,7 +105,7 @@ contract('Loot Gen (RAW)', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("rnd: loot generator - tier 3", async() => {
+	it("tier loot (3)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();
@@ -129,12 +129,12 @@ contract('Loot Gen (RAW)', (accounts) => {
 		);
 
 		// gen loot for 10,000 blocks in tier 3
-		const loot = await miner.genLoot(3, BLOCKS, false, toBNs(9));
+		const loot = await miner.tierLoot(3, BLOCKS, 0, toBNs(9));
 
 		// CSV file data
 		const csv_data = `3,${BLOCKS},${loot.join(",")}`;
 		// write statistical raw data into the file
-		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
+		write_csv("./data/tier_loot.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
@@ -148,7 +148,7 @@ contract('Loot Gen (RAW)', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("rnd: loot generator - tier 4", async() => {
+	it("tier loot (4)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();
@@ -172,12 +172,12 @@ contract('Loot Gen (RAW)', (accounts) => {
 		);
 
 		// gen loot for 10,000 blocks in tier 4
-		const loot = await miner.genLoot(4, BLOCKS, false, toBNs(9));
+		const loot = await miner.tierLoot(4, BLOCKS, 0, toBNs(9));
 
 		// CSV file data
 		const csv_data = `4,${BLOCKS},${loot.join(",")}`;
 		// write statistical raw data into the file
-		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
+		write_csv("./data/tier_loot.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
@@ -191,7 +191,7 @@ contract('Loot Gen (RAW)', (accounts) => {
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
-	it("rnd: loot generator - tier 5", async() => {
+	it("tier loot (5)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();
@@ -215,12 +215,12 @@ contract('Loot Gen (RAW)', (accounts) => {
 		);
 
 		// gen loot for 10,000 blocks in tier 5
-		const loot = await miner.genLoot(5, BLOCKS, false, toBNs(9));
+		const loot = await miner.tierLoot(5, BLOCKS, 0, toBNs(9));
 
 		// CSV file data
 		const csv_data = `5,${BLOCKS},${loot.join(",")}`;
 		// write statistical raw data into the file
-		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
+		write_csv("./data/tier_loot.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");

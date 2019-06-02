@@ -696,11 +696,11 @@ contract PlotSale is AccessControl {
       // each 16 iterations starting from iteration 0
       if(i % 16 == 0) {
         // generate new randomness to work with
-        rnd = Random.__rawRandom(seedOffset + i / 16);
+        rnd = Random.generate256(seedOffset + i / 16);
       }
 
       // generate random value in the [0, 100) range
-      uint8 rnd100 = uint8(Random.__rndVal(rnd >> 16 * (i % 16), 0xFFFF, 0, 100));
+      uint8 rnd100 = uint8(Random.uniform(rnd >> 16 * (i % 16), 16, 100));
 
       // depending on the value generated add to corresponding tier length
       // tier 1: first 35 blocks

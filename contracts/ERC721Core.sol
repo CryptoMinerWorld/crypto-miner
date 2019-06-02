@@ -493,12 +493,11 @@ contract ERC721Core is AccessControl, ERC165, ERC721Interfaces {
     require(isSenderInRole(ROLE_EXT_WRITER));
 
     // create value mask
-    uint256 valueMask = length == 0? // if length is zero its same as 256, which is full mask
-                        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF:
-                        ((uint256(1) << length) - 1) << offset;
+    // if length is zero its same as 256, which is full mask
+    uint256 valueMask = length == 0? uint256(-1): ((uint256(1) << length) - 1) << offset; // uint256(-1) overflows to 0xFFFF...
 
     // create erase mask
-    uint256 eraseMask = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF ^ valueMask;
+    uint256 eraseMask = uint256(-1) ^ valueMask; // uint256(-1) overflows to 0xFFFF...
 
     // shift and mask value as needed
     value = value << offset & valueMask;

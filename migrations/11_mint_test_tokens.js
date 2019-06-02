@@ -45,7 +45,7 @@ module.exports = async function(deployer, network, accounts) {
 			RefPointsTracker: "0x731d55CD90762c02535fF410427Dd280A1B74397",
 		}:
 		{ // Rinkeby Addresses
-			GemERC721: "0x874828Da14178e4C07Fd32FA37cDFC8BbE5bDb6E",
+			GemERC721: "0xf142cC5dF58fD42E28Cf9055Ea913C002fEFa3b2",
 			CountryERC721: "0xD6c9bf5b99B18D8ff48d6E8B622624ea98b9AB46",
 			PlotERC721: "0x7d45f25636BcF3B19e0527ab0F7cFB7839ba74ac",
 			SilverERC20: "0xeb5aBE47DD8766443D6d386bDe8117098BAadAF4",
