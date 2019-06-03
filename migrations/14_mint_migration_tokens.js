@@ -45,7 +45,7 @@ module.exports = async function(deployer, network, accounts) {
 			TokenWriter: "0x4822b1172217875272d918e93076339193462E06",
 		}:
 		{ // Rinkeby Addresses
-			GemERC721: "0x874828Da14178e4C07Fd32FA37cDFC8BbE5bDb6E",
+			GemERC721: "0xf142cC5dF58fD42E28Cf9055Ea913C002fEFa3b2",
 			CountryERC721: "0xD6c9bf5b99B18D8ff48d6E8B622624ea98b9AB46",
 			PlotERC721: "0x7d45f25636BcF3B19e0527ab0F7cFB7839ba74ac",
 			SilverERC20: "0xeb5aBE47DD8766443D6d386bDe8117098BAadAF4",
@@ -54,8 +54,8 @@ module.exports = async function(deployer, network, accounts) {
 			ChestKeyERC20: "0x62Ef1c0f809e7dEbc866c3EBdDF89d2B61AE6C48",
 			FoundersKeyERC20: "0x9ac197768D4bC204aD83CC8c9E564F6B66a98170",
 			RefPointsTracker: "0x3E73B24CBfbc0C14eaE581384E0D1681f80e88bf",
-			TokenReader: "0x81527e0d830881aa55e820D9f1792c8c012cf4d7",
-			TokenWriter: "0x2fd5CEC72400f48F05C11aBf0D0B1bFf83681E58",
+			TokenReader: "0x5A1943A31b12e685193EF7aA1589d752225BF5dA",
+			TokenWriter: "0x89F8978b73B8a5abf08B8D3CeEB148Cc9ED4a1ec",
 		};
 
 	// deployed instances
