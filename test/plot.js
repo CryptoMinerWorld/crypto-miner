@@ -178,11 +178,12 @@ contract('PlotERC721', (accounts) => {
 		// verify simple (non-packed) getters
 		assert(tiers0.eq(await tk.getTiers(token0)), "token0 has wrong tiers struct");
 		assert(tiers1.eq(await tk.getTiers(token1)), "token1 has wrong tiers struct");
+		assert.equal(2, await tk.getNumberOfTiers(token0), "token0 has wrong number of tiers");
+		assert.equal(DEPTH, await tk.getDepth(token0), "token0 has wrong depth");
+		assert.equal(DEPTH, await tk.getDepth(token1), "token1 has wrong depth");
 		assert.equal(0, await tk.getTierDepth(token0, 0), "token0 has wrong tier0 depth");
 		assert.equal(0, await tk.getTierDepth(token1, 0), "token1 has wrong tier0 depth");
-		assert.equal(2, await tk.getNumberOfTiers(token0), "token0 has wrong number of tiers");
-		assert.equal(5, await tk.getNumberOfTiers(token1), "token1 has wrong number of tiers");
-		assert.equal(DEPTH, await tk.getDepth(token0), "token0 has wrong depth");
+		assert.equal(1, await tk.getTierIndex(token0, 0), "token0 has wrong tier index 1");
 		assert.equal(0, await tk.getOffsetModified(token0), "token0 has non-zero offsetModified");
 		assert.equal(0, await tk.getOffset(token0), "token0 has wrong offset");
 		assert(!await tk.isFullyMined(token0), "token0 is fully mined");
@@ -199,13 +200,34 @@ contract('PlotERC721', (accounts) => {
 
 		// validate tiers structure
 		for(let i = 1; i <= 5; i++) {
+			// measure tier depths
 			assert.equal(layers0[i + 1], await tk.getTierDepth(token0, i), `token0 has wrong tier${i} depth`);
 			assert.equal(layers1[i + 1], await tk.getTierDepth(token1, i), `token1 has wrong tier${i} depth`);
+
+			// validate calculated tier index
+			assert.equal(Math.min(i, 2), await tk.getTierIndex(token0, layers0[i]), "token0 has wrong tier index " + i);
+			assert.equal(Math.min(i, 5), await tk.getTierIndex(token1, layers1[i]), "token1 has wrong tier index " + i);
+		}
+
+		// validate getTierDepth/getTierIndex compatibility
+		// for each possible offset `i`
+		for(let i = 0; i < DEPTH + 1; i++) {
+			// determine what tier it is
+			const index0 = (await tk.getTierIndex(token0, i)).toNumber();
+			const index1 = (await tk.getTierIndex(token1, i)).toNumber();
+
+			// determine what depth it has
+			const depth0 = (await tk.getTierDepth(token0, index0)).toNumber();
+			const depth1 = (await tk.getTierDepth(token1, index1)).toNumber();
+
+			// ensure tier index for the determined depth match
+			assert.equal(Math.min(index0 + 1, 2), await tk.getTierIndex(token0, depth0), "tier index/depth mismatch for token0, offset " + i);
+			assert.equal(Math.min(index1 + 1, 5), await tk.getTierIndex(token1, depth1), "tier index/depth mismatch for token1, offset " + i);
 		}
 
 		// complex and packed getters
-		assert.deepEqual([web3.utils.toBN(token0), web3.utils.toBN(token1)], await tk.getAllTokens(), "wrong all tokens collection");
-		assert.deepEqual([web3.utils.toBN(token0), web3.utils.toBN(token1)], await tk.getCollection(account1), "wrong token collection for account1");
+		assert.deepEqual([toBN(token0), toBN(token1)], await tk.getAllTokens(), "wrong all tokens collection");
+		assert.deepEqual([toBN(token0), toBN(token1)], await tk.getCollection(account1), "wrong token collection for account1");
 
 		// calculate token0 and token1 packed structures
 		const packed0 = toBN(token0).shln(64).or(toBN(tiers0)).shln(8);
@@ -1007,9 +1029,9 @@ function tiers(layers) {
 	assert.equal(8, layers.length, "expected 8 layers elements, got " + layers.length);
 
 	// pack it
-	let result = web3.utils.toBN(0);
+	let result = toBN(0);
 	for(let i = 0; i < layers.length; i++) {
-		result = result.mul(web3.utils.toBN(256)).add(web3.utils.toBN(layers[i]));
+		result = result.shln(8).or(toBN(layers[i]));
 	}
 
 	return result;

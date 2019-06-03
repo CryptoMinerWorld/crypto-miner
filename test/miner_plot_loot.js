@@ -182,15 +182,18 @@ contract('Miner: Plot Loot', (accounts) => {
 			);
 
 			// mine the plot immediately
-			await miner.bind(i + 1, i + 1);
+			await miner.bind(i + 1, i + 1, {from: player});
 		}
 
 		// to determine levels of the gems - get full collection
 		const gems = await gem.getPackedCollection(player);
 		let gs = new Array(5).fill(0);
 		for(let i = 0; i < gems.length; i++) {
-			// and unpack each gem's level individually
-			gs[gems[i].shrn(40).mod(toBN(256)).toNumber() - 1]++;
+			// verify gem ID is not one of the already existing ones
+			if(gems[i].shrn(56).gte(toBN(PLOTS))) {
+				// and unpack each gem's level individually
+				gs[gems[i].shrn(40).mod(toBN(256)).toNumber() - 1]++;
+			}
 		}
 		// for the rest of the tokens its straight forward
 		const slv = (await silver.balanceOf(player)).div(await silver.ONE_UNIT()).toNumber();
@@ -200,7 +203,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		const chestKeys = (await chestKey.balanceOf(player)).toNumber();
 
 		// make some console input (without gem level breakthrough)
-		console.log("\t mined %o plots; items found:", PLOTS);
+		console.log("\tmined %o plots; items found:", PLOTS);
 		console.log("\tgems: %o", gems.length);
 		console.log("\tsilver: %o", slv);
 		console.log("\tgold: %o", gld);
@@ -388,15 +391,18 @@ contract('Miner: Plot Loot', (accounts) => {
 			);
 
 			// mine the plot immediately
-			await miner.bind(i + 1, i + 1);
+			await miner.bind(i + 1, i + 1, {from: player});
 		}
 
 		// to determine levels of the gems - get full collection
 		const gems = await gem.getPackedCollection(player);
-		let gs = new Array(5).fill(0);
+		const gs = new Array(5).fill(0);
 		for(let i = 0; i < gems.length; i++) {
-			// and unpack each gem's level individually
-			gs[gems[i].shrn(40).mod(toBN(256)).toNumber() - 1]++;
+			// verify gem ID is not one of the already existing ones
+			if(gems[i].shrn(56).gte(toBN(PLOTS))) {
+				// and unpack each gem's level individually
+				gs[gems[i].shrn(40).mod(toBN(256)).toNumber() - 1]++;
+			}
 		}
 		// for the rest of the tokens its straight forward
 		const slv = (await silver.balanceOf(player)).div(await silver.ONE_UNIT()).toNumber();
@@ -406,7 +412,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		const chestKeys = (await chestKey.balanceOf(player)).toNumber();
 
 		// make some console input (without gem level breakthrough)
-		console.log("\t mined %o plots; items found:", PLOTS);
+		console.log("\tmined %o plots; items found:", PLOTS);
 		console.log("\tgems: %o", gems.length);
 		console.log("\tsilver: %o", slv);
 		console.log("\tgold: %o", gld);

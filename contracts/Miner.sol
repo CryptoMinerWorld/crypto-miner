@@ -403,8 +403,8 @@ contract Miner is AccessControl {
       // recalculate energy left
       uint32 energy = uint32(uint64(effectiveEnergy) * 100000000 / rate100000000);
 
-      // save unused energetic age of the gem
-      gemInstance.setAge(gemId, unusedEnergeticAge(energy));
+      // save unused energetic age of the gem, in seconds
+      gemInstance.setAge(gemId, unusedEnergeticAge(energy) * 60);
 
       // emit an energy consumed event
       emit RestingEnergyConsumed(msg.sender, gemId, effectiveEnergy);
@@ -830,33 +830,43 @@ contract Miner is AccessControl {
    */
   function tiersLoot(uint64 tiers, uint8 offset, uint16[] memory loot) public view returns(uint16[] memory) {
     // extract current offset
+    //    [           '.....................|.............................|...................|.........|....]
     uint8 offset0 = TierMath.getOffset(tiers);
 
     // ensure new offset is bigger than initial one
+    //    [           '                     |                             |          "........|.........|....]
     require(offset0 < offset);
 
     // get indexes of first and last tiers
+    //    [11111111111'111111111111111111111|                             |                   |         |    ]
     uint8 tier0 = TierMath.getTierIndex(tiers, offset0);
+    //    [                                 |                             |3333333333"33333333|         |    ]
     uint8 tier1 = TierMath.getTierIndex(tiers, offset);
 
     // if we do not cross tiers
+    //    [    '                     "      |                             |                   |         |    ]
     if(tier0 == tier1) {
       // just process current tier according to offsets
+      //  [    '*********************"      |                             |                   |         |    ]
       loot = tierLoot(tier0, offset - offset0, TierMath.isBottomOfStack(tiers, offset)? 1: 0, loot);
     }
     // otherwise, if we cross one or more tiers
+    //    [           '                     |                             |          "        |         |    ]
     else {
       // process first tier
-      loot = tierLoot(tier0, TierMath.getTierDepth(tiers, tier0 + 1) - offset0, 0, loot);
+      //  [           '*********************|                             |          "        |         |    ]
+      loot = tierLoot(tier0, TierMath.getTierDepth(tiers, tier0) - offset0, 0, loot);
 
       // process middle tiers
-      for(uint8 i = tier0 + 1; i <= tier1 - 1; i++) {
+      //  [           '                     |*****************************|          "        |         |    ]
+      for(uint8 i = tier0 + 1; i < tier1; i++) {
         // process full tier `i`
-        loot = tierLoot(i, TierMath.getTierDepth(tiers, i - i) - TierMath.getTierDepth(tiers, i), 0, loot);
+        loot = tierLoot(i, TierMath.getTierHeight(tiers, i), 0, loot);
       }
 
       // process last tier
-      loot = tierLoot(tier1, offset - TierMath.getTierDepth(tiers, tier1 - 1), TierMath.isBottomOfStack(tiers, offset)? 1: 0, loot);
+      //  [           '                     |                             |**********"        |         |    ]
+      loot = tierLoot(tier1, offset - TierMath.getTierOffset(tiers, tier1), TierMath.isBottomOfStack(tiers, offset)? 1: 0, loot);
     }
 
     // return the result
@@ -1430,7 +1440,7 @@ contract Miner is AccessControl {
     }
 
     // determine energetic age of the gem - delegate call to `energeticAgeOf`
-    uint32 age = gemInstance.getAge(gemId) + energeticAgeOf(gemId);
+    uint32 age = gemInstance.getAge(gemId) / 60 + energeticAgeOf(gemId);
 
     // calculate the resting energy - delegate call to `restingEnergy`
     // and return the result

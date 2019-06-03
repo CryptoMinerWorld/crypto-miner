@@ -46,6 +46,38 @@ library TierMath {
   }
 
   /**
+   * @dev Gets the depth of the tiers data structure, that is
+   *      the depth of the deepest tier
+   * @param tiers tiers data structure to extract maximum depth from
+   * @return tiers depth – the maximum depth value
+   */
+  function getDepth(uint64 tiers) internal pure returns (uint8) {
+    // extract the end of tier 5 (block depth) and return
+    return uint8(tiers >> 8);
+  }
+
+  /**
+   * @dev Gets offset of the tiers defined by its one-based index:
+   *      Tier 1: Dirt / Snow
+   *      Tier 2: Clay / Ice
+   *      Tier 3: Limestone - non-Antarctica only
+   *      Tier 4: Marble - non-Antarctica only
+   *      Tier 5: Obsidian - non-Antarctica only
+   * @dev Requires index to be one-based (zero not allowed)
+   * @dev Tier `k` offset is tier `k - 1` depth
+   * @param tiers tiers data structure to extract depth from
+   * @param k one-based tier index to extract offset for
+   * @return offset of the (k)th tier in blocks
+   */
+  function getTierOffset(uint64 tiers, uint8 k) internal pure returns (uint8) {
+    // ensure `k` is not zero
+    require(k != 0);
+
+    // tier `k` offset is tier `k - 1` depth
+    return getTierDepth(tiers, k - 1);
+  }
+
+  /**
    * @dev Gets the depth of the tier defined by its one-based index:
    *      Tier 1: Dirt / Snow
    *      Tier 2: Clay / Ice
@@ -69,6 +101,24 @@ library TierMath {
 
     // extract requested tier depth data from tier structure and return
     return uint8(tiers >> (6 - k) * 8);
+  }
+
+  /**
+   * @dev Gets height of the tiers defined by its one-based index:
+   *      Tier 1: Dirt / Snow
+   *      Tier 2: Clay / Ice
+   *      Tier 3: Limestone - non-Antarctica only
+   *      Tier 4: Marble - non-Antarctica only
+   *      Tier 5: Obsidian - non-Antarctica only
+   * @dev Requires index to be one-based (zero not allowed)
+   * @param tiers tiers data structure to extract height from
+   * @param k one-based tier index to extract height for
+   * @return height of the (k)th tier in blocks
+   */
+  function getTierHeight(uint64 tiers, uint8 k) internal pure returns (uint8) {
+    // tier height is the difference of its height and offset:
+    // delegate call to `getTierDepth` and `getTierOffset`
+    return getTierDepth(tiers, k) - getTierOffset(tiers, k);
   }
 
   /**
@@ -104,7 +154,7 @@ library TierMath {
     // iterate over all tiers in the plot
     for(uint8 i = 1; i <= n; i++) {
       // check if offset is within current tier bounds
-      if(getTierDepth(tiers, i - 1) <= offset && offset < getTierDepth(tiers, i)) {
+      if(getTierOffset(tiers, i) <= offset && offset < getTierDepth(tiers, i)) {
         // and return the index
         return i;
       }
@@ -112,20 +162,6 @@ library TierMath {
 
     // if index was not found return maximum tier index
     return n;
-  }
-
-  /**
-   * @dev Gets the depth of the tiers data structure, that is
-   *      the depth of the deepest tier
-   * @param tiers tiers data structure to extract maximum depth from
-   * @return tiers depth – the maximum depth value
-   */
-  function getDepth(uint64 tiers) internal pure returns (uint8) {
-    // get number of tiers for the given tiers structure
-    uint8 n = getNumberOfTiers(tiers);
-
-    // extract last tier value from the tiers and return
-    return uint8(tiers >> (6 - n) * 8);
   }
 
   /**

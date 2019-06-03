@@ -560,6 +560,23 @@ contract PlotERC721 is ERC721Core {
   }
 
   /**
+   * @dev Gets token depth (a.k.a. maximum depth)
+   *      - the maximum depth it can be mined to (immutable)
+   * @dev Throws if token doesn't exist
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get depth for
+   * @return token depth – the maximum depth value
+   */
+  function getDepth(uint256 _tokenId) public view returns (uint8) {
+    // get token's tiers data structure
+    // verifies token existence under the hood
+    uint64 tiers = getTiers(_tokenId);
+
+    // use TierMath library to perform the operation
+    return TierMath.getDepth(tiers);
+  }
+
+  /**
    * @dev Gets the depth of the tier defined by its one-based index:
    *      Tier 1: Dirt / Snow
    *      Tier 2: Clay / Ice
@@ -583,20 +600,19 @@ contract PlotERC721 is ERC721Core {
   }
 
   /**
-   * @dev Gets token depth (a.k.a. maximum depth)
-   *      - the maximum depth it can be mined to (immutable)
-   * @dev Throws if token doesn't exist
+   * @dev Gets tier index by block index (offset)
    * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to get depth for
-   * @return token depth – the maximum depth value
+   * @param _tokenId ID of the token to query depth for
+   * @param offset block offset to query tier index for
+   * @return one-based tier index
    */
-  function getDepth(uint256 _tokenId) public view returns (uint8) {
+  function getTierIndex(uint256 _tokenId, uint8 offset) public view returns (uint8) {
     // get token's tiers data structure
     // verifies token existence under the hood
     uint64 tiers = getTiers(_tokenId);
 
     // use TierMath library to perform the operation
-    return TierMath.getDepth(tiers);
+    return TierMath.getTierIndex(tiers, offset);
   }
 
   /**
