@@ -1305,7 +1305,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint80[]"
+          "type": "uint112[]"
         }
       ],
       "payable": false,
@@ -1759,6 +1759,25 @@
       "type": "function"
     },
     {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getEnergeticAge",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "constant": false,
       "inputs": [
         {
@@ -1964,7 +1983,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-05-31T07:43:45.403Z",
+  "updatedAt": "2019-06-03T14:43:36.452Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "A gem is an ERC721 non-fungible token, which maps Token ID,     a 24 bit number to a set of gem properties -     attributes (mostly immutable by their nature) and state variables (mutable)A gem token supports only minting, it can be only created",
@@ -2051,6 +2070,13 @@
         },
         "return": "a token creation time as a unix timestamp"
       },
+      "getEnergeticAge(uint256)": {
+        "details": "Calculates cumulative energetic age of the gem,     based on the saved value (see `getAge`) and accumulated value     from last token modification (see `getModified`)",
+        "params": {
+          "_tokenId": "ID of the token to get cumulative energetic age for"
+        },
+        "return": "cumulative energetic age of the gem in seconds"
+      },
       "getGrade(uint256)": {
         "details": "Gets the grade of a gemThrows if token specified doesn't exist",
         "params": {
@@ -2108,13 +2134,13 @@
         "return": "a token ownership modified time as a unix timestamp"
       },
       "getPacked(uint256)": {
-        "details": "Gets a gem by ID, representing it as two integers.     The two integers are tightly packed with a gem data:     First integer (high bits) contains (from higher to lower bits order):         coordinates:           plotId,           depth (block ID),           gemNum (gem ID within a block)         color,         levelModified,         level,         gradeModified,         grade,         stateModified,         state,     Second integer (low bits) contains (from higher to lower bits order):         creationTime,         index,         ownershipModified,         ownerThrows if token specified doesn't exist",
+        "details": "Gets a gem by ID, representing it as two integers.     The two integers are tightly packed with a gem data:     First integer (high bits) contains (from higher to lower bits order):         plotId, 24 bits         color, 8 bits         level, 8 bits         levelModified, 32 bits         grade, 32 bits         gradeModified, 32 bits         age, 32 bits         ageModified, 32 bits         state, 24 bits         stateModified, 32 bits     Second integer (low bits) contains (from higher to lower bits order):         creationTime, 32 bits         index, 32 bits (only low 24 bits are used)         ownershipModified, 32 bits         owner, 160 bitsThrows if token specified doesn't exist",
         "params": {
           "_tokenId": "ID of the gem to fetch"
         }
       },
       "getPackedCollection(address)": {
-        "details": "Allows to fetch collection of tokens, including internal token data      in a single function, useful when connecting to external node like INFURAEach element in the collection contains     token ID (32 bits)     color (8 bits)     level (8 bits)     grade (32 bits)     state (8 low bits)",
+        "details": "Allows to fetch collection of tokens, including internal token data      in a single function, useful when connecting to external node like INFURAEach element in the collection contains     token ID (24 bits)     color (8 bits)     level (8 bits)     grade (32 bits)     energetic age (32 bits)     state (8 low bits)",
         "params": {
           "owner": "an address to query a collection for"
         },
