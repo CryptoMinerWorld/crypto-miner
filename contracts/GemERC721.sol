@@ -23,7 +23,7 @@ contract GemERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0xec2889e3eccbe7b093facc70f8e7972e79dcb95782ca00e93259b2b6c81a249d;
+  uint256 public constant TOKEN_UID = 0x8f3ed5e134a27674c9f1073ee196e620c308a73c5321972a6a7548040751662a;
 
   /**
    * @dev ERC20 compliant token symbol
@@ -375,22 +375,21 @@ contract GemERC721 is ERC721Core {
    * @dev Gets a gem by ID, representing it as two integers.
    *      The two integers are tightly packed with a gem data:
    *      First integer (high bits) contains (from higher to lower bits order):
-   *          coordinates:
-   *            plotId,
-   *            depth (block ID),
-   *            gemNum (gem ID within a block)
-   *          color,
-   *          levelModified,
-   *          level,
-   *          gradeModified,
-   *          grade,
-   *          stateModified,
-   *          state,
+   *          plotId, 24 bits
+   *          color, 8 bits
+   *          level, 8 bits
+   *          levelModified, 32 bits
+   *          grade, 32 bits
+   *          gradeModified, 32 bits
+   *          age, 32 bits
+   *          ageModified, 32 bits
+   *          state, 24 bits
+   *          stateModified, 32 bits
    *      Second integer (low bits) contains (from higher to lower bits order):
-   *          creationTime,
-   *          index,
-   *          ownershipModified,
-   *          owner
+   *          creationTime, 32 bits
+   *          index, 32 bits (only low 24 bits are used)
+   *          ownershipModified, 32 bits
+   *          owner, 160 bits
    * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the gem to fetch
    */
@@ -436,15 +435,16 @@ contract GemERC721 is ERC721Core {
    * @dev Allows to fetch collection of tokens, including internal token data
    *       in a single function, useful when connecting to external node like INFURA
    * @dev Each element in the collection contains
-   *      token ID (32 bits)
+   *      token ID (24 bits)
    *      color (8 bits)
    *      level (8 bits)
    *      grade (32 bits)
+   *      energetic age (32 bits)
    *      state (8 low bits)
    * @param owner an address to query a collection for
    * @return an ordered unsorted list of packed token data
    */
-  function getPackedCollection(address owner) public view returns (uint80[] memory) {
+  function getPackedCollection(address owner) public view returns (uint112[] memory) {
     // get an array of Gem IDs owned by an `owner` address
     uint24[] memory tokenIds = getCollection(owner);
 
@@ -452,15 +452,18 @@ contract GemERC721 is ERC721Core {
     uint24 balance = uint24(tokenIds.length);
 
     // data container to store the result
-    uint80[] memory result = new uint80[](balance);
+    uint112[] memory result = new uint112[](balance);
 
     // fetch token info one by one and pack into structure
-    for(uint32 i = 0; i < balance; i++) {
+    for(uint24 i = 0; i < balance; i++) {
       // token ID to work with
       uint24 tokenId = tokenIds[i];
 
       // read all required data and pack it
-      result[i] = uint80(tokenId) << 56 | uint56(getProperties(tokenId)) << 8 | uint8(getState(tokenId));
+      result[i] = uint112(tokenId) << 88
+                | uint88(getProperties(tokenId)) << 40
+                | uint40(getEnergeticAge(tokenId) << 8)
+                | uint8(getState(tokenId));
     }
 
     // return the packed data structure
@@ -886,6 +889,17 @@ contract GemERC721 is ERC721Core {
     return ageState > token.creationTime? ageState: token.creationTime;
   }
 
+  /**
+   * @dev Calculates cumulative energetic age of the gem,
+   *      based on the saved value (see `getAge`) and accumulated value
+   *      from last token modification (see `getModified`)
+   * @param _tokenId ID of the token to get cumulative energetic age for
+   * @return cumulative energetic age of the gem in seconds
+   */
+  function getEnergeticAge(uint256 _tokenId) public view returns(uint32) {
+    // get age, modified and now and return the difference (seconds)
+    return uint32(getAge(_tokenId) + now - getModified(_tokenId));
+  }
 
   /**
    * @dev Creates new token with token ID specified

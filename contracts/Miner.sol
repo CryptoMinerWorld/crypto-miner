@@ -56,7 +56,7 @@ contract Miner is AccessControl {
    * @dev Expected version (UID) of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_UID_REQUIRED = 0xec2889e3eccbe7b093facc70f8e7972e79dcb95782ca00e93259b2b6c81a249d;
+  uint256 public constant GEM_UID_REQUIRED = 0x8f3ed5e134a27674c9f1073ee196e620c308a73c5321972a6a7548040751662a;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
