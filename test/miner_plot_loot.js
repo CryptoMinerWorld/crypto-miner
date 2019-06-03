@@ -190,9 +190,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		let gs = new Array(5).fill(0);
 		for(let i = 0; i < gems.length; i++) {
 			// verify gem ID is not one of the already existing ones
-			if(gems[i].shrn(56).gte(toBN(PLOTS))) {
+			if(gems[i].shrn(88).gte(toBN(PLOTS))) {
 				// and unpack each gem's level individually
-				gs[gems[i].shrn(40).mod(toBN(256)).toNumber() - 1]++;
+				gs[gems[i].shrn(72).mod(toBN(256)).toNumber() - 1]++;
 			}
 		}
 		// for the rest of the tokens its straight forward
@@ -399,9 +399,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		const gs = new Array(5).fill(0);
 		for(let i = 0; i < gems.length; i++) {
 			// verify gem ID is not one of the already existing ones
-			if(gems[i].shrn(56).gte(toBN(PLOTS))) {
+			if(gems[i].shrn(88).gte(toBN(PLOTS))) {
 				// and unpack each gem's level individually
-				gs[gems[i].shrn(40).mod(toBN(256)).toNumber() - 1]++;
+				gs[gems[i].shrn(72).mod(toBN(256)).toNumber() - 1]++;
 			}
 		}
 		// for the rest of the tokens its straight forward
