@@ -143,9 +143,9 @@ contract TokenReader {
               | uint80(uint8(high >> 184)) << 72
               | uint72(uint8(high >> 144)) << 64
               | uint64(uint32(high >> 80)) << 32
-              // convert block number difference into minutes,
+              // convert block number difference into seconds,
               // assuming average block size is 15 seconds
-              | uint32(block.number - uint32(low >> 224)) / 4;
+              | uint32(block.number - uint32(low >> 224)) * 15;
     }
 
     // return the result
