@@ -77,7 +77,12 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[0] > 0, "no level 1 gems");
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
+		assert(loot[3] > 0, "no level 4 gems");
+		assert(loot[4] > 0, "no level 5 gems");
 		assert(loot[5] > 0, "no silver");
+		assert(loot[6] > 0, "no gold");
+		assert(loot[7] > 0, "no artifacts");
+		assert(loot[8] > 0, "no keys");
 	});
 	it("tiers loot – Antarctica (2 Tiers)", async() => {
 		// define miner dependencies
@@ -120,7 +125,12 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[0] > 0, "no level 1 gems");
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
+		assert(loot[3] > 0, "no level 4 gems");
+		assert(loot[4] > 0, "no level 5 gems");
 		assert(loot[5] > 0, "no silver");
+		assert(loot[6] > 0, "no gold");
+		assert(loot[7] > 0, "no artifacts");
+		assert(loot[8] > 0, "no keys");
 	});
 	it("mining a plot – Antarctica (2 Tiers)", async() => {
 		// define miner dependencies
@@ -220,7 +230,13 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(gs[0] > 0, "no level 1 gems");
 		assert(gs[1] > 0, "no level 2 gems");
 		assert(gs[2] > 0, "no level 3 gems");
+		assert(gs[3] > 0, "no level 4 gems");
+		assert(gs[4] > 0, "no level 5 gems");
 		assert(slv > 0, "no silver");
+		assert(gld > 0, "no gold");
+		assert(artifacts20 > 0, "no artifacts");
+		assert(foundersKeys > 0, "no founder's keys");
+		assert.equal(0, chestKeys, "chest key(s) present");
 
 		// TODO: inspect gem color and grade
 	});
@@ -282,6 +298,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[3] > 0, "no level 4 gems");
 		assert(loot[4] > 0, "no level 5 gems");
 		assert(loot[5] > 0, "no silver");
+		assert(loot[6] > 0, "no gold");
+		assert(loot[7] > 0, "no artifacts");
+		assert(loot[8] > 0, "no keys");
 	});
 	it("tiers loot – Rest of the World (5 Tiers)", async() => {
 		// execute only for PLOTS >= 100
@@ -330,6 +349,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[3] > 0, "no level 4 gems");
 		assert(loot[4] > 0, "no level 5 gems");
 		assert(loot[5] > 0, "no silver");
+		assert(loot[6] > 0, "no gold");
+		assert(loot[7] > 0, "no artifacts");
+		assert(loot[8] > 0, "no keys");
 	});
 	it("mining a plot – Rest of the World (5 Tiers)", async() => {
 		// define miner dependencies
@@ -432,6 +454,10 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(gs[3] > 0, "no level 4 gems");
 		assert(gs[4] > 0, "no level 5 gems");
 		assert(slv > 0, "no silver");
+		assert(gld > 0, "no gold");
+		assert(artifacts20 > 0, "no artifacts");
+		assert.equal(0, foundersKeys, "founder's key(s) present");
+		assert(chestKeys > 0, "no chest keys");
 
 		// TODO: inspect gem color and grade
 	});

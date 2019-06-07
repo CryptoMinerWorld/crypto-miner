@@ -900,10 +900,10 @@ contract Miner is AccessControl {
 
     // for tier 1
     if(k == 1) {
-      // gem (lvl 1): 1.2%
-      loot[0] += rndEval(0, 120, n);
-      // gem (lvl 2): 0.4%
-      loot[1] += rndEval(n, 40, n);
+      // gem (lvl 1): 1%
+      loot[0] += rndEval(0, 100, n);
+      // gem (lvl 2): 0.1%
+      loot[1] += rndEval(n, 10, n);
       // silver (1pc): 9%
       loot[5] += rndEval(2 * n, 900, n);
       // silver (5pcs): 0.5%
@@ -913,12 +913,10 @@ contract Miner is AccessControl {
     }
     // for tier 2
     else if(k == 2) {
-      // gem (lvl 1): 1.9%
-      loot[0] += rndEval(0, 190, n);
-      // gem (lvl 2): 0.8%
-      loot[1] += rndEval(n, 80, n);
-      // gem (lvl 3): 0.2%
-      loot[2] += rndEval(2 * n, 20, n);
+      // gem (lvl 1): 0.8%
+      loot[0] += rndEval(0, 80, n);
+      // gem (lvl 2): 0.6%
+      loot[1] += rndEval(n, 60, n);
       // silver (1pc): 12%
       loot[5] += rndEval(3 * n, 1200, n);
       // silver (5pcs): 1%
@@ -930,12 +928,12 @@ contract Miner is AccessControl {
     }
     // for tier 3
     else if(k == 3) {
-      // gem (lvl 1): 1.1%
-      loot[0] += rndEval(0, 110, n);
-      // gem (lvl 2): 1.3%
-      loot[1] += rndEval(n, 130, n);
-      // gem (lvl 3): 0.6%
-      loot[2] += rndEval(2 * n, 60, n);
+      // gem (lvl 1): 0.5%
+      loot[0] += rndEval(0, 50, n);
+      // gem (lvl 2): 0.3%
+      loot[1] += rndEval(n, 30, n);
+      // gem (lvl 3): 0.08%
+      loot[2] += rndEval(2 * n, 8, n);
       // gem (lvl 4): 0.04%
       loot[3] += rndEval(3 * n, 4, n);
       // silver (1): 4%
@@ -951,14 +949,12 @@ contract Miner is AccessControl {
     }
     // for tier 4
     else if(k == 4) {
-      // gem (lvl 1): 0.6%
-      loot[0] += rndEval(0, 60, n);
-      // gem (lvl 2): 1%
-      loot[1] += rndEval(n, 100, n);
-      // gem (lvl 3): 2.2%
-      loot[2] += rndEval(2 * n, 220, n);
-      // gem (lvl 4): 0.12%
-      loot[3] += rndEval(3 * n, 12, n);
+      // gem (lvl 2): 0.1%
+      loot[1] += rndEval(n, 10, n);
+      // gem (lvl 3): 0.8%
+      loot[2] += rndEval(2 * n, 80, n);
+      // gem (lvl 4): 0.1%
+      loot[3] += rndEval(3 * n, 10, n);
       // silver (1): 3%
       loot[5] += rndEval(4 * n, 300, n);
       // silver (5): 5%
@@ -972,14 +968,10 @@ contract Miner is AccessControl {
     }
     // for tier 5
     else if(k == 5) {
-      // gem (lvl 1): 0.4%
-      loot[0] += rndEval(0, 40, n);
-      // gem (lvl 2): 1.2%
-      loot[1] += rndEval(n, 120, n);
-      // gem (lvl 3): 3.7%
-      loot[2] += rndEval(2 * n, 370, n);
-      // gem (lvl 4): 0.5%
-      loot[3] += rndEval(3 * n, 50, n);
+      // gem (lvl 3): 0.2%
+      loot[2] += rndEval(2 * n, 20, n);
+      // gem (lvl 4): 0.4%
+      loot[3] += rndEval(3 * n, 40, n);
       // gem (lvl 5): 0.04%
       loot[4] += rndEval(4 * n, 4, n);
       // silver (1): 2%
@@ -1016,28 +1008,28 @@ contract Miner is AccessControl {
         uint256 rnd10000 = Random.uniform(rnd >> (16 + 24 * j), 24, 10000);
 
         // generate loot according to the probabilities
-        // gem (lvl 1): 1%
-        if(rnd10000 < 100) {
-          loot[0]++;
-        }
-        // gem (lvl 2): 7%
-        else if(rnd10000 < 800) {
+        // gem (lvl 1): none
+        // gem (lvl 2): 5%
+        if(rnd10000 < 500) {
           loot[1]++;
         }
-        // gem (lvl 3): 14%
-        else if(rnd10000 < 2200) {
+        // gem (lvl 3): 7%
+        else if(rnd10000 < 1200) {
           loot[2]++;
         }
-        // gem (lvl 4): 8.5%
-        else if(rnd10000 < 3050) {
+        // gem (lvl 4): 4%
+        else if(rnd10000 < 1600) {
           loot[3]++;
         }
-        // gem (lvl 5): 2%
-        else if(rnd10000 < 3250) {
+        // gem (lvl 5): 0.5%
+        else if(rnd10000 < 1650) {
           loot[4]++;
         }
-        // silver (1): none
-        // silver (5): 40.37%
+        // silver (1): 11%
+        else if(rnd10000 < 2750) {
+          loot[5]++;
+        }
+        // silver (5): 45.37%
         else if(rnd10000 < 7287) {
           loot[5] += 5;
         }

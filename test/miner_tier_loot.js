@@ -96,13 +96,56 @@ contract('Miner: Tier Loot', (accounts) => {
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
 		assert(loot[1] > 0, "no level 2 gems");
-		assert(loot[2] > 0, "no level 3 gems");
+		assert.equal(0, loot[2], "level 3 gem(s) present");
 		assert.equal(0, loot[3], "level 4 gem(s) present");
 		assert.equal(0, loot[4], "level 5 gem(s) present");
 		assert(loot[5] > 0, "no silver");
 		assert.equal(0, loot[6], "gold present");
 		assert(loot[7] > 0, "no artifact(s)");
 		assert.equal(0, loot[8], "key(s) present");
+	});
+
+	it("tier loot (2) - BOS", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// gen loot for 10,000 blocks in tier 2
+		const loot = await miner.tierLoot(2, BLOCKS, BLOCKS, toBNs(9));
+
+		// CSV file data
+		const csv_data = `2B,${BLOCKS},${loot.join(",")}`;
+		// write statistical raw data into the file
+		write_csv("./data/tier_loot.csv", CSV_HEADER, csv_data);
+
+		// verify some statistics constraints
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
+		assert(loot[2] > 0, "no level 3 gems");
+		assert(loot[3] > 0, "no level 4 gems");
+		assert(loot[4] > 0, "no level 5 gems");
+		assert(loot[5] > 0, "no silver");
+		assert(loot[6] > 0, "no gold");
+		assert(loot[7] > 0, "no artifacts");
+		assert(loot[8] > 0, "no keys");
 	});
 
 	it("tier loot (3)", async() => {
@@ -144,7 +187,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		assert.equal(0, loot[4], "level 5 gem(s) present");
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
-		assert(loot[7] > 0, "no artifact(s)");
+		assert(loot[7] > 0, "no artifacts");
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
@@ -180,14 +223,14 @@ contract('Miner: Tier Loot', (accounts) => {
 		write_csv("./data/tier_loot.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
-		assert(loot[0] > 0, "no level 1 gems");
+		assert.equal(0, loot[0], "level 1 gem(s) present");
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
 		assert(loot[3] > 0, "no level 4 gems");
 		assert.equal(0, loot[4], "level 5 gem(s) present");
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
-		assert(loot[7] > 0, "no artifact(s) present");
+		assert(loot[7] > 0, "no artifacts");
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
@@ -223,15 +266,58 @@ contract('Miner: Tier Loot', (accounts) => {
 		write_csv("./data/tier_loot.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
-		assert(loot[0] > 0, "no level 1 gems");
+		assert.equal(0, loot[0], "level 1 gem(s) present");
+		assert.equal(0, loot[1], "level 2 gem(s) present");
+		assert(loot[2] > 0, "no level 3 gems");
+		assert(loot[3] > 0, "no level 4 gems");
+		assert(loot[4] > 0, "no level 5 gems");
+		assert(loot[5] > 0, "no silver");
+		assert(loot[6] > 0, "no gold");
+		assert(loot[7] > 0, "no artifacts");
+		assert(loot[8] > 0, "no keys");
+	});
+
+	it("tier loot (5) – BOS", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// gen loot for 10,000 blocks in tier 5
+		const loot = await miner.tierLoot(5, BLOCKS, BLOCKS, toBNs(9));
+
+		// CSV file data
+		const csv_data = `5B,${BLOCKS},${loot.join(",")}`;
+		// write statistical raw data into the file
+		write_csv("./data/tier_loot.csv", CSV_HEADER, csv_data);
+
+		// verify some statistics constraints
+		assert.equal(0, loot[0], "level 1 gems present");
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
 		assert(loot[3] > 0, "no level 4 gems");
 		assert(loot[4] > 0, "no level 5 gems");
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
-		assert(loot[7] > 0, "no artifact(s)");
-		assert(loot[8] > 0, "no key(s)");
+		assert(loot[7] > 0, "no artifacts");
+		assert(loot[8] > 0, "no keys");
 	});
 });
 
