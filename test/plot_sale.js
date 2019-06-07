@@ -216,7 +216,7 @@ contract('PlotSale', (accounts) => {
 		};
 
 		// player 1 buys a plot and becomes a referrer
-		await buy(1, p1, "0x0000000000000000000000000000000000000000");
+		await buy(1, p1, ZERO_ADDR);
 		// player 2 buys 4 plots referring to player 1 - it's not enough to get points
 		await buy(4, p2, p1);
 		// player 3 buys 5 plots referring to player 2 – both get referral points
@@ -237,4 +237,4 @@ contract('PlotSale', (accounts) => {
 });
 
 // import auxiliary function to ensure function `fn` throws
-import {assertThrows, toBN, getBalanceBN, gasUsedBN} from "../scripts/shared_functions";
+import {assertThrows, toBN, getBalanceBN, gasUsedBN, ZERO_ADDR} from "../scripts/shared_functions";
