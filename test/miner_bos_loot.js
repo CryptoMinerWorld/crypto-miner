@@ -18,8 +18,8 @@ const CSV_HEADER = "tier,blocks,gems1,gems2,gems3,gems4,gems5,silver,gold,artifa
 const BLOCKS = 10000;
 
 // Loot Generator tests - raw blocks
-contract('Loot Gen (RAW)', (accounts) => {
-	it("rnd: loot generator - tier 2 BOS", async() => {
+contract('Miner: BOS Loot', (accounts) => {
+	it("BOS loot - Antarctica (Tier 2 BOS)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();
@@ -42,7 +42,7 @@ contract('Loot Gen (RAW)', (accounts) => {
 			chestKey.address
 		);
 
-		// gen loot for 10,000 blocks in tier 5 BOS
+		// gen loot for 10,000 blocks in tier 2 BOS
 		let loot = toBNs(9);
 		for(let i = 0; i < BLOCKS; i++) {
 			loot = await miner.genLoot(2, 1, true, loot);
@@ -64,7 +64,7 @@ contract('Loot Gen (RAW)', (accounts) => {
 		assert(loot[7] > 0, "no artifact(s)");
 		assert(loot[8] > 0, "no key(s)");
 	});
-	it("rnd: loot generator - tier 5 BOS", async() => {
+	it("BOS loot – Rest of the World (Tier 5 BOS)", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();

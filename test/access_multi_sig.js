@@ -60,7 +60,9 @@ contract('Access Control MultiSig', (accounts) => {
 		for(let i = 0; i < maskSet.length; i++) {
 			mask.bincn(maskSet[i]);
 		}
-		console.log("\t[%o]", toPrettyBinary(mask, 256));
+		const prettyBinary = toPrettyBinary(mask, 256);
+		console.log("\t[%o]", prettyBinary.substr(0, 128));
+		console.log("\t[%o]", prettyBinary.substr(128));
 
 		// apply mask and verify the mask directly and indirectly
 		await ac.updateFeatures(mask);
@@ -162,7 +164,9 @@ contract('Access Control MultiSig', (accounts) => {
 		for(let i = 0; i < maskSet.length; i++) {
 			role.bincn(maskSet[i]);
 		}
-		console.log("\t[%o]", toPrettyBinary(role, 256));
+		const prettyBinary = toPrettyBinary(role, 256);
+		console.log("\t[%o]", prettyBinary.substr(0, 128));
+		console.log("\t[%o]", prettyBinary.substr(128));
 
 		// apply role and verify the role directly and indirectly
 		await ac.updateRole(user, role);
