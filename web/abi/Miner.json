@@ -1,0 +1,1708 @@
+{
+  "contractName": "Miner",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "foundersKeyInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isUserInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "name": "miningPlots",
+      "outputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        },
+        {
+          "name": "artifactId",
+          "type": "uint24"
+        },
+        {
+          "name": "player",
+          "type": "address"
+        },
+        {
+          "name": "bound",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_MINING_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "chestKeyInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FOUNDERS_KEY_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_MSIG_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ERASE_MINING_BIT",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MINER_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "gemInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ARTIFACT20_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        }
+      ],
+      "name": "constructUpdateMsigRequest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ARTIFACT_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "DEFAULT_MINING_BIT",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MSIG_QUORUM",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_MINING_OPERATOR",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_by",
+          "type": "address[]"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "PLOT_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "GOLD_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "GEM_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_ROLLBACK_OPERATOR",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "plotInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_ACCESS_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "goldInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "MINUTES_TO_MINE",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        },
+        {
+          "name": "v",
+          "type": "uint8[]"
+        },
+        {
+          "name": "r",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "s",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "updateMsig",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "silverInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "artifactErc20Instance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "SILVER_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "CHEST_KEY_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_gem",
+          "type": "address"
+        },
+        {
+          "name": "_plot",
+          "type": "address"
+        },
+        {
+          "name": "_artifact",
+          "type": "address"
+        },
+        {
+          "name": "_silver",
+          "type": "address"
+        },
+        {
+          "name": "_gold",
+          "type": "address"
+        },
+        {
+          "name": "_artifactErc20",
+          "type": "address"
+        },
+        {
+          "name": "_foundersKey",
+          "type": "address"
+        },
+        {
+          "name": "_chestKey",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "gemId",
+          "type": "uint24"
+        },
+        {
+          "indexed": false,
+          "name": "energyLeft",
+          "type": "uint32"
+        }
+      ],
+      "name": "RestingEnergyConsumed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "plotId",
+          "type": "uint24"
+        },
+        {
+          "indexed": true,
+          "name": "gemId",
+          "type": "uint24"
+        }
+      ],
+      "name": "Bound",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "plotId",
+          "type": "uint24"
+        },
+        {
+          "indexed": false,
+          "name": "offsetFrom",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "offsetTo",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "loot",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "Updated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "plotId",
+          "type": "uint24"
+        },
+        {
+          "indexed": true,
+          "name": "gemId",
+          "type": "uint24"
+        },
+        {
+          "indexed": false,
+          "name": "artifactId",
+          "type": "uint24"
+        }
+      ],
+      "name": "Released",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        },
+        {
+          "name": "gemId",
+          "type": "uint24"
+        }
+      ],
+      "name": "bind",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "release",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "update",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "rollback",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "evaluate",
+      "outputs": [
+        {
+          "name": "offset",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "tiers",
+          "type": "uint64"
+        },
+        {
+          "name": "maxOffset",
+          "type": "uint8"
+        },
+        {
+          "name": "initialEnergy",
+          "type": "uint32"
+        }
+      ],
+      "name": "evaluateWith",
+      "outputs": [
+        {
+          "name": "offset",
+          "type": "uint8"
+        },
+        {
+          "name": "energyLeft",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "randomness",
+          "type": "uint16"
+        }
+      ],
+      "name": "randomColor",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "tiers",
+          "type": "uint64"
+        },
+        {
+          "name": "offset",
+          "type": "uint8"
+        },
+        {
+          "name": "loot",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "tiersLoot",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "k",
+          "type": "uint8"
+        },
+        {
+          "name": "n",
+          "type": "uint16"
+        },
+        {
+          "name": "b",
+          "type": "uint16"
+        },
+        {
+          "name": "loot",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "tierLoot",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "seedOffset",
+          "type": "uint16"
+        },
+        {
+          "name": "p",
+          "type": "uint16"
+        },
+        {
+          "name": "n",
+          "type": "uint16"
+        }
+      ],
+      "name": "rndEval",
+      "outputs": [
+        {
+          "name": "amount",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotIds",
+          "type": "uint24[]"
+        },
+        {
+          "name": "gemIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "bulkBind",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "bulkRelease",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "plotIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "bulkUpdate",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "plotIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "bulkEvaluate",
+      "outputs": [
+        {
+          "name": "offsets",
+          "type": "uint8[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "getBoundGemId",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "getBoundArtifactId",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        },
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "gemMinesTo",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "tier",
+          "type": "uint8"
+        },
+        {
+          "name": "n",
+          "type": "uint8"
+        }
+      ],
+      "name": "blocksToEnergy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "tier",
+          "type": "uint8"
+        },
+        {
+          "name": "energy",
+          "type": "uint32"
+        }
+      ],
+      "name": "energyToBlocks",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        }
+      ],
+      "name": "effectiveMiningEnergyOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        }
+      ],
+      "name": "effectiveRestingEnergyOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "energy",
+          "type": "uint32"
+        },
+        {
+          "name": "grade",
+          "type": "uint32"
+        }
+      ],
+      "name": "effectiveEnergy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        }
+      ],
+      "name": "miningRateOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "grade",
+          "type": "uint32"
+        }
+      ],
+      "name": "miningRate",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        }
+      ],
+      "name": "restingEnergyOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "energeticAge",
+          "type": "uint32"
+        }
+      ],
+      "name": "restingEnergy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "unusedRestingEnergy",
+          "type": "uint32"
+        }
+      ],
+      "name": "unusedEnergeticAge",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        }
+      ],
+      "name": "energeticAgeOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-06-07T13:30:23.955Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "Miner may read, write, mint, lock and unlock tokens     (locked tokens cannot be transferred i.e. cannot change owner)Following tokens may be accessed for reading (token properties affect mining):     - GemERC721     - PlotERC721     - ArtifactERC721Following tokens may be accessed for writing (token properties change when mining):     - PlotERC721Following tokens may be minted (token can be found in the land plot when mining):     - GemERC721     - ArtifactERC721     - SilverERC20     - GoldERC20     - ArtifactERC20     - FoundersKeyERC20     - ChestKeyERC20Following tokens may be locked or unlocked (tokens are locked when mining):     - GemERC721     - PlotERC721     - ArtifactERC721",
+    "methods": {
+      "bind(uint24,uint24)": {
+        "details": "Locks all the tokens passed as parametersThrows if any of the tokens is already lockedThrows if any of the tokens specified doesn't exist or     doesn't belong to transaction sender",
+        "params": {
+          "gemId": "ID of the gem to mine land plot with param artifactId ID of the artifact to affect the gem     properties during mining process",
+          "plotId": "ID of the land plot to mine"
+        }
+      },
+      "blocksToEnergy(uint8,uint8)": {
+        "details": "See also `energyToBlocks` function",
+        "params": {
+          "n": "number of blocks to mine in the specified tier",
+          "tier": "tier number of interest"
+        },
+        "return": "required energy in minutes"
+      },
+      "bulkBind(uint24[],uint24[])": {
+        "details": "Bulk version of the `bind()` functionLocks all the tokens passed as parametersThrows if any of the tokens is already lockedThrows if any of the tokens specified doesn't exist or     doesn't belong to transaction senderThrows if arrays lengths provided mismatchThrows if arrays provided contain duplicatesThrows if arrays specified are zero-sized",
+        "params": {
+          "gemIds": "an array of IDs of the gems to mine land plots with param artifactIds an array of IDs of the artifacts to affect the gems     properties during mining process",
+          "plotIds": "an array of IDs of the land plots to mine"
+        }
+      },
+      "bulkEvaluate(uint24[])": {
+        "details": "Bulk version of the `evaluate()` functionDoesn't update land plots states in the distributed ledgerMay be used by frontend to display current mining state close to realtimeThrows if array specified is zero-sizedThrows if any of the land plots specified is not in mining state     (was not bound previously using `bind()` or `bulkBind()`)",
+        "params": {
+          "plotIds": "an array of IDs of the land plots to evaluate current states for"
+        },
+        "return": "an array of evaluated current mining block indexes for the given land plots array"
+      },
+      "bulkRelease(uint24[])": {
+        "details": "Bulk version of the `release()` functionSaves updated land plots states into distributed ledger and may     produce (mint) some new tokens (silver, gold, etc.)Unlocks all the tokens involved (previously bound)Throws if array specified is zero-sizedThrows if any of the land plot tokens specified     doesn't exist or doesn't belong to transaction senderThrows if any of the land plots specified is not in mining state     (was not bound previously using `bind()` or `bulkBind()`)",
+        "params": {
+          "plotIds": "an array of IDs of the land plots to stop mining"
+        }
+      },
+      "bulkUpdate(uint24[])": {
+        "details": "Bulk version of the `update()` functionSaves updated land plots states into distributed ledger and may     produce (mint) some new tokens (silver, gold, etc.)All the tokens involved (previously bound) remain in a locked stateThrows if array specified is zero-sizedThrows if any of the land plot tokens specified     doesn't exist or doesn't belong to transaction senderThrows if any of the land plots specified is not in mining state     (was not bound previously using `bind()` or `bulkBind()`)",
+        "params": {
+          "plotIds": "an array of IDs of the land plots to update states for"
+        }
+      },
+      "constructUpdateMsigRequest(address,uint256,uint256)": {
+        "details": "Used to create an update role request to be signed by the userOnce signed by at least 2 users, the request can be executed     using `updateRoleMsig` function",
+        "params": {
+          "_expiresOn": "an expiration date of the request",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "constructor": {
+        "details": "Creates a Miner instance, binding it to GemERC721, PlotERC721,     ArtifactERC721, SilverERC20, GoldERC20, ArtifactERC20,     FoundersKeyERC20, ChestKeyERC20 token instances specified",
+        "params": {
+          "_artifact": "address of the deployed ArtifactERC721 instance with     the `TOKEN_UID` equal to `ARTIFACT_UID_REQUIRED`",
+          "_artifactErc20": "address of the deployed ArtifactERC20 instance with     the `TOKEN_UID` equal to `ARTIFACT20_UID_REQUIRED`",
+          "_chestKey": "address of the deployed ChestKeyERC20 instance with     the `TOKEN_UID` equal to `CHEST_KEY_UID_REQUIRED`",
+          "_foundersKey": "address of the deployed FoundersKeyERC20 instance with     the `TOKEN_UID` equal to `FOUNDERS_KEY_UID_REQUIRED`",
+          "_gem": "address of the deployed GemERC721 instance with     the `TOKEN_VERSION` equal to `GEM_UID_REQUIRED`",
+          "_gold": "address of the deployed GoldERC20 instance with     the `TOKEN_VERSION` equal to `GOLD_UID_REQUIRED`",
+          "_plot": "address of the deployed PlotERC721 instance with     the `TOKEN_UID` equal to `PLOT_UID_REQUIRED`",
+          "_silver": "address of the deployed SilverERC20 instance with     the `TOKEN_VERSION` equal to `SILVER_UID_REQUIRED`"
+        }
+      },
+      "effectiveEnergy(uint32,uint32)": {
+        "details": "Effective energy is base energy multiplied by mining rate of the gem",
+        "params": {
+          "energy": "base energy of the gem",
+          "grade": "full grade value of the gem, containing grade type and value"
+        },
+        "return": "effective energy of the gem in minutes"
+      },
+      "effectiveMiningEnergyOf(uint24)": {
+        "details": "See `energeticAgeOf` and `effectiveEnergy` functions for more detailsThrows if the gem specified doesn't exist",
+        "params": {
+          "gemId": "ID of the gem to calculate effective mining energy for"
+        },
+        "return": "effective mining energy for the specified gem"
+      },
+      "effectiveRestingEnergyOf(uint24)": {
+        "details": "See `restingEnergyOf` and `effectiveEnergy` functions for more detailsThrows if the gem specified doesn't exist",
+        "params": {
+          "gemId": "ID of the gem to calculate effective resting energy for"
+        },
+        "return": "effective resting energy for the specified gem"
+      },
+      "energeticAgeOf(uint24)": {
+        "details": "Energetic age is an approximate number of minutes the gem accumulated energyThe time is measured from the time when gem modified its properties     (level or grade) or its state for the last time till nowIf the gem didn't change its properties ot state since its genesis,     the time is measured from gem's creation timeFor resting (non-mining) gems of grades A, AA and AAA energetic age     is used to calculate their resting energyFor mining gems of any grade energetic age is equal to mining energy",
+        "params": {
+          "gemId": "ID of the gem to calculate energetic age for"
+        },
+        "return": "energetic age of the gem in minutes"
+      },
+      "energyToBlocks(uint8,uint32)": {
+        "details": "See also `blocksToEnergy` function",
+        "params": {
+          "energy": "available energy in minutes",
+          "tier": "tier number of interest"
+        },
+        "return": "number of blocks which can be mined"
+      },
+      "evaluate(uint24)": {
+        "details": "Doesn't update land plot state in the distributed ledgerUsed internally by `release()` and `update()` to calculate state of the plotMay be used by frontend to display current mining state close to realtime",
+        "params": {
+          "plotId": "ID of the land plot to evaluate current state for"
+        },
+        "return": "evaluated current mining block index for the given land plot"
+      },
+      "evaluateBy(address[],uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator addresses,     and role required (set of permissions), calculate the resulting     set of permissions (role).If all operators are super admins and have full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operators have no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+        "params": {
+          "_by": "non-empty array of addresses of the contract operators     to use permissions of for evaluation",
+          "actual": "input set of permissions to evaluate against",
+          "required": "desired set of permissions to have"
+        },
+        "return": "resulting set of permissions which can be set"
+      },
+      "evaluateWith(uint64,uint8,uint32)": {
+        "details": "Doesn't update land plot state in the distributed ledgerUsed internally by `release()` and `update()` to calculate state of the plotMay be used by frontend to display current mining state close to realtime",
+        "params": {
+          "initialEnergy": "available energy to be spent by the gem",
+          "maxOffset": "maximum offset the gem can mine to",
+          "tiers": "tiers data structure of the land plot to evaluate current state for"
+        },
+        "return": "a tuple containing:     offset – evaluated current mining block index for the given land plot     energy - energy left after mining"
+      },
+      "features()": {
+        "details": "Auxiliary getter function to maintain compatibility with previous     versions of the Access Control List smart contract, where     features was a separate uint256 public field"
+      },
+      "gemMinesTo(uint24,uint24)": {
+        "details": "This function verifies current plot offset and based on the gem's level     and plot's offset determines how deep this gem can mineThrows if the gem or plot specified doesn't exist",
+        "params": {
+          "gemId": "ID of the gem to use",
+          "plotId": "ID of the plot to mine"
+        },
+        "return": "number of blocks the gem can mine, zero if it cannot mine more"
+      },
+      "getBoundArtifactId(uint24)": {
+        "details": "Finds a gem bound to a particular plot",
+        "params": {
+          "plotId": "ID of the plot to query bound gem for"
+        },
+        "return": "ID of the bound gem"
+      },
+      "getBoundGemId(uint24)": {
+        "details": "Finds a gem bound to a particular plot",
+        "params": {
+          "plotId": "ID of the plot to query bound gem for"
+        },
+        "return": "ID of the bound gem"
+      },
+      "isFeatureEnabled(uint256)": {
+        "details": "Checks if requested set of features is enabled globally on the contract",
+        "params": {
+          "required": "set of features to check against"
+        },
+        "return": "true if all the features requested are enabled, false otherwise"
+      },
+      "isSenderInRole(uint256)": {
+        "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isUserInRole(address,uint256)": {
+        "details": "Checks if user `user` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against",
+          "user": "address of the user to check role for"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "miningRate(uint32)": {
+        "details": "Calculates mining rate `r` of the gem, based on its grade type `e`     and grade value `u` according to the formulas:       r = 1 + (e - 1) * 10^-1 + 5 * u * 10^-8, e = [1, 2, 3]       r = 1.4 + 15 * u * 10^-8, e = 4       r = 2 + 2 * u * 10^-7, e = 5       r = 4 + u * 10^-6, e = 6Gem's grade type and value are extracted from the packed `grade`The value returned is multiplied by 10^8",
+        "params": {
+          "grade": "grade of the gem,     high 8 bits of which contain grade type e = [1, 2, 3, 4, 5, 6]     low 24 bits contain grade value u = [0, 1000000)"
+        },
+        "return": "`r * 10^8`, where `r` is the mining rate of the gem of grade `grade`"
+      },
+      "miningRateOf(uint24)": {
+        "details": "See `miningRate` function for more detailsThrows if gem specified doesn't exist",
+        "params": {
+          "gemId": "ID of the gem to calculate mining rate for"
+        },
+        "return": "mining rate of the gem multiplied by 10^8"
+      },
+      "randomColor(uint16)": {
+        "details": "Picks random color from `availableColors` array",
+        "params": {
+          "randomness": "a random number in range [0, 65536)     used to pick a color"
+        },
+        "return": "gem color, an integer [1, 12]"
+      },
+      "release(uint24)": {
+        "details": "Saves updated land plot state into distributed ledger and may     produce (mint) some new tokens (silver, gold, etc.)Unlocks all the tokens involved (previously bound)Throws if land plot token specified doesn't exist or     doesn't belong to transaction senderThrows if land plot specified is not in mining state     (was not bound previously using `bind()`)",
+        "params": {
+          "plotId": "ID of the land plot to stop mining"
+        }
+      },
+      "restingEnergy(uint32)": {
+        "details": "Linear threshold `37193` in the equation above is     the root of the equation `-7 * 10^-6 * x^2 + 0.5406x = 0.0199`,     where x is gem age in minutes and `k = 0.0199` is energy increase per minute,     which is calculated as `k = 10437 / 525600`,     where `525600 = 365 * 24 * 60` is number of minutes in one year and `n = 10437`     is the right root of equation `-7 * 10^-6 * x^2 + 0.5406x = 0`,     `n` is the number of minutes to parabola peak",
+        "params": {
+          "energeticAge": "number of minutes the gem was not mining"
+        },
+        "return": "Resting Energy (R) calculated based on Energetic Age (a) provided"
+      },
+      "restingEnergyOf(uint24)": {
+        "details": "Throws if gem with the given ID doesn't exist",
+        "params": {
+          "gemId": "ID of the gem to calculate resting energy for"
+        },
+        "return": "resting energy of the given gem (minutes of resting)"
+      },
+      "rndEval(uint16,uint16,uint16)": {
+        "details": "Auxiliary function to calculate amount of successful experiments     in `n` iterations with the `p` probability each",
+        "params": {
+          "n": "number of experiments to launch",
+          "p": "probability of successful event in bp (basis point, ‱)",
+          "seedOffset": "seed offset to be used for random generation, there     will be `n / 10` of seeds used [seedOffset, seedOffset + n / 10)"
+        }
+      },
+      "rollback(uint24)": {
+        "details": "Service function to unlock plot and associated gem and artifact if anyReverts the mining (doesn't update plot)May be executed only by rollback operator",
+        "params": {
+          "plotId": "ID of the plot to unlock"
+        }
+      },
+      "tierLoot(uint8,uint16,uint16,uint16[])": {
+        "details": "Auxiliary function to generate loot for mining `n` blocks in tier `k`Loot data is accumulated in `loot` array, containing:     index 0: gems level 1     index 1: gems level 2     index 2: gems level 3     index 3: gems level 4     index 4: gems level 5     index 5: silver     index 6: gold     index 7: artifacts     index 8: keys",
+        "params": {
+          "b": "bottom of stack counter, specifies how many blocks     should be considered to be bottom of the stack;     usually equals to zero if bottom is not reached or     one if bottom of the stack is reached",
+          "k": "one-based tier index to process loot for",
+          "loot": "an array containing loot information",
+          "n": "number of blocks to process for tier specified"
+        }
+      },
+      "tiersLoot(uint64,uint8,uint16[])": {
+        "details": "Auxiliary function to generate loot for mining `tiers` structureLoot data is accumulated in `loot` array, containing:     index 0: gems level 1     index 1: gems level 2     index 2: gems level 3     index 3: gems level 4     index 4: gems level 5     index 5: silver     index 6: gold     index 7: artifacts     index 8: keys",
+        "params": {
+          "loot": "an array containing loot information",
+          "offset": "depth to mine tiers structure to,     must be bigger than current offset",
+          "tiers": "tiers data structure of the land plot to evaluate loot for"
+        }
+      },
+      "unusedEnergeticAge(uint32)": {
+        "details": "See `restingEnergy` function and Resting Energy original formula     for more information about the inverseThe square root in the first part of the formula is calculated     using fast inverse square root algorithm by Michael Abrash from id SoftwareSee https://en.wikipedia.org/wiki/Fast_inverse_square_root",
+        "params": {
+          "unusedRestingEnergy": "resting energy in minutes the gem accumulated while was not mining"
+        },
+        "return": "Energetic Age (a) calculated based on Resting Energy (R) provided"
+      },
+      "update(uint24)": {
+        "details": "Saves updated land plot state into distributed ledger and may     produce (mint) some new tokens (silver, gold, etc.)All the tokens involved (previously bound) remain in a locked stateThrows if land plot token specified doesn't exist or     doesn't belong to transaction senderThrows if land plot specified is not in mining state     (was not bound previously using `bind()`)",
+        "params": {
+          "plotId": "ID of the land plot to update state for"
+        }
+      },
+      "updateFeatures(uint256)": {
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissionsRequires transaction sender to have `ROLE_ACCESS_MANAGER` permissionFunction is left for backward compatibility with older versions",
+        "params": {
+          "_mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateMsig(address,uint256,uint256,uint8[],bytes32[],bytes32[])": {
+        "details": "MultiSig version of the `updateRole` functionUpdates set of permissions (role) for a given user,     taking into account signers' permissionsSetting role to zero is equivalent to removing all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying signers' permissions (roles intersection) to the userRequires transaction signers to have `ROLE_ROLE_MANAGER` permissionRequires `MSIG_QUORUM` signatures in MultiSig mode –     if `FEATURE_MSIG_ENABLED` is enabled",
+        "params": {
+          "_expiresOn": "an expiration date of the request,     optional, required in MultiSig mode only",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract",
+          "r": "an array of ECDSA signature outputs, \"r\",     optional, required in MultiSig mode only",
+          "s": "an array of ECDSA signature outputs, \"s\",     optional, required in MultiSig mode only",
+          "v": "an array of ECDSA signature outputs, \"v\",     optional, required in MultiSig mode only"
+        }
+      },
+      "updateRole(address,uint256)": {
+        "details": "Updates set of permissions (role) for a given user,     taking into account sender's permissions.Setting role to zero is equivalent to removing an all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders' permissions (role) to the userRequires transaction sender to have `ROLE_ACCESS_MANAGER` permission",
+        "params": {
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      }
+    },
+    "title": "Miner"
+  },
+  "userdoc": {
+    "methods": {
+      "bind(uint24,uint24)": {
+        "notice": "Binds a gem and (optionally) an artifact to a land plot     and starts mining of the plot"
+      },
+      "blocksToEnergy(uint8,uint8)": {
+        "notice": "Determines how many minutes of energy is required to mine     `n` blocks of tier number `tier`"
+      },
+      "bulkBind(uint24[],uint24[])": {
+        "notice": "Binds several gems and (optionally) artifacts to land plots     and starts mining of these plots in a single transaction"
+      },
+      "bulkEvaluate(uint24[])": {
+        "notice": "Evaluates current state of several plots without performing a transaction"
+      },
+      "bulkRelease(uint24[])": {
+        "notice": "Releases several gems and artifacts (if any) bound earlier     with `bind()` or `bulkBind()` from land plots and stops mining of plots"
+      },
+      "bulkUpdate(uint24[])": {
+        "notice": "Updates several plots states without releasing gems and artifacts (if any)     bound earlier with `bind()` or `bulkBind()` from land plots, doesn't stop mining"
+      },
+      "effectiveEnergy(uint32,uint32)": {
+        "notice": "Calculates effective energy of the gem based on its base energy and grade"
+      },
+      "effectiveMiningEnergyOf(uint24)": {
+        "notice": "Determines effective mining energy of a particular gemGems of any grades accumulate mining energy when mining"
+      },
+      "effectiveRestingEnergyOf(uint24)": {
+        "notice": "Determines effective resting energy of a particular gemGems of grades A, AA and AAA accumulate resting energy when not mining"
+      },
+      "energyToBlocks(uint8,uint32)": {
+        "notice": "Determines how many blocks in tier number `tier` can be     mined using the energy of `energy` minutes"
+      },
+      "evaluate(uint24)": {
+        "notice": "Evaluates current state of the plot without performing a transaction"
+      },
+      "evaluateWith(uint64,uint8,uint32)": {
+        "notice": "Evaluates current state of the plot without performing a transaction"
+      },
+      "gemMinesTo(uint24,uint24)": {
+        "notice": "Determines how deep can particular gem mine on a particular plot"
+      },
+      "miningRate(uint32)": {
+        "notice": "Calculates mining rate of the gem by its grade"
+      },
+      "miningRateOf(uint24)": {
+        "notice": "Determines mining rate of a particular gem based on its grade"
+      },
+      "release(uint24)": {
+        "notice": "Releases a gem and an artifact (if any) bound earlier     with `bind()` from a land plot and stops mining of the plot"
+      },
+      "restingEnergy(uint32)": {
+        "notice": "Resting Energy (R) formula implementation:     R = -7 * 10^-6 * a^2 + 0.5406 * a, if a < 37193, R ∈ [0, 10423)     R = 10423 + 0.0199 * (a - 37193), if a ≥ 37193, R ∈ [10423, ∞)     where `a` stands for Energetic Age of the gem (minutes)"
+      },
+      "restingEnergyOf(uint24)": {
+        "notice": "Calculates resting energy for the gem specified,     see `restingEnergy` for more details on resting energyThe gem accumulates resting energy when it's not mining"
+      },
+      "unusedEnergeticAge(uint32)": {
+        "notice": "Unused Energetic Age (a0) formula implementation:                           __________________________     a0 = 38614 - 71429 * √0.29225 - 2.8 * 10^-5 * R , if R < 10423, a0 ∈ [0, 38614)     a0 = 38614 + (R - 10423) / 0.0199, if R ≥ 10423, a0 ∈ (38614, ∞)     where `R` stands for Unused Resting Energy of the gem (minutes)"
+      },
+      "update(uint24)": {
+        "notice": "Updates plot state without releasing a gem and artifact (if any)     bound earlier with `bind()` from a land plot, doesn't stop mining"
+      }
+    },
+    "notice": "Miner is responsible for mining mechanics of the CryptoMiner World     and allows game tokens (ERC721 and ERC20) to interact with each other"
+  }
+}

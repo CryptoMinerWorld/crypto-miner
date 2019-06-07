@@ -54,6 +54,29 @@
       "type": "function"
     },
     {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isUserInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "constant": false,
       "inputs": [
         {
@@ -138,6 +161,20 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_MSIG_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -343,6 +380,33 @@
       "constant": true,
       "inputs": [
         {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        }
+      ],
+      "name": "constructUpdateMsigRequest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
           "name": "",
           "type": "uint256"
         }
@@ -491,6 +555,39 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "MSIG_QUORUM",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "ROLE_STATE_PROVIDER",
       "outputs": [
         {
@@ -538,6 +635,33 @@
         {
           "name": "",
           "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_by",
+          "type": "address[]"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
         }
       ],
       "payable": false,
@@ -598,11 +722,11 @@
       "constant": false,
       "inputs": [
         {
-          "name": "operator",
+          "name": "_to",
           "type": "address"
         },
         {
-          "name": "role",
+          "name": "_role",
           "type": "uint256"
         }
       ],
@@ -610,6 +734,20 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_ACCESS_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -670,29 +808,6 @@
       "constant": true,
       "inputs": [
         {
-          "name": "operator",
-          "type": "address"
-        },
-        {
-          "name": "required",
-          "type": "uint256"
-        }
-      ],
-      "name": "isOperatorInRole",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
           "name": "_tokenId",
           "type": "uint256"
         },
@@ -720,11 +835,45 @@
       "constant": false,
       "inputs": [
         {
-          "name": "mask",
+          "name": "_mask",
           "type": "uint256"
         }
       ],
       "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        },
+        {
+          "name": "v",
+          "type": "uint8[]"
+        },
+        {
+          "name": "r",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "s",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "updateMsig",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -761,33 +910,6 @@
         {
           "name": "",
           "type": "bool"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "operator",
-          "type": "address"
-        },
-        {
-          "name": "actual",
-          "type": "uint256"
-        },
-        {
-          "name": "required",
-          "type": "uint256"
-        }
-      ],
-      "name": "evaluateBy",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
         }
       ],
       "payable": false,
@@ -1005,28 +1127,6 @@
         }
       ],
       "name": "Minted",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "name": "_by",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "name": "_requested",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "_actual",
-          "type": "uint256"
-        }
-      ],
-      "name": "FeaturesUpdated",
       "type": "event"
     },
     {
@@ -1302,6 +1402,25 @@
         {
           "name": "_tokenId",
           "type": "uint256"
+        }
+      ],
+      "name": "getDepth",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
         },
         {
           "name": "k",
@@ -1325,9 +1444,13 @@
         {
           "name": "_tokenId",
           "type": "uint256"
+        },
+        {
+          "name": "offset",
+          "type": "uint8"
         }
       ],
-      "name": "getDepth",
+      "name": "getTierIndex",
       "outputs": [
         {
           "name": "",
@@ -1592,7 +1715,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-05-31T07:44:46.574Z",
+  "updatedAt": "2019-06-07T13:30:23.792Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "A plot is an ERC721 non-fungible token, which maps Token ID -     a 24 bit number - to a set of plot properties -     attributes (mostly immutable by their nature) and state variables (mutable)Token ID consists of 24 bits, high 8 bits represent a country id     (see CountryERC721) this token belongs to, low 16 bits represent     an index number of the token within a countryContains information about tier structure (how many blocks of each tier exists),     current mining state (how many blocks is already mined, is block in mining state     or not, etc.)Doesn't contain information about the items to be mined     (silver, gold, artifacts, gems, keys, chests, etc.), this information     is stored in mining smart contractA plot token supports only minting, it can be created but not destroyed",
@@ -1611,17 +1734,25 @@
         },
         "return": "number of tokens owned by the address specified"
       },
+      "constructUpdateMsigRequest(address,uint256,uint256)": {
+        "details": "Used to create an update role request to be signed by the userOnce signed by at least 2 users, the request can be executed     using `updateRoleMsig` function",
+        "params": {
+          "_expiresOn": "an expiration date of the request",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
       "constructor": {
         "details": "Creates a ERC721 instance,     registers required ERC721 interfaces via ERC165"
       },
-      "evaluateBy(address,uint256,uint256)": {
-        "details": "Based on the actual role provided (set of permissions), operator address,     and role required (set of permissions), calculate the resulting     set of permissions (role).If operator is super admin and has full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operator has no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+      "evaluateBy(address[],uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator addresses,     and role required (set of permissions), calculate the resulting     set of permissions (role).If all operators are super admins and have full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operators have no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
         "params": {
-          "actual": "input set of permissions to modify",
-          "operator": "address of the contract operator to use permissions of",
-          "required": "desired set of permissions operator would like to have"
+          "_by": "non-empty array of addresses of the contract operators     to use permissions of for evaluation",
+          "actual": "input set of permissions to evaluate against",
+          "required": "desired set of permissions to have"
         },
-        "return": "resulting set of permissions this operator can set"
+        "return": "resulting set of permissions which can be set"
       },
       "exists(uint256)": {
         "details": "Returns whether the specified token ID exists (has owner)",
@@ -1629,6 +1760,9 @@
           "_tokenId": "ID of the token to query the existence for"
         },
         "return": "true if specified token exists, false otherwise"
+      },
+      "features()": {
+        "details": "Auxiliary getter function to maintain compatibility with previous     versions of the Access Control List smart contract, where     features was a separate uint256 public field"
       },
       "getAllTokens()": {
         "details": "Allows to fetch all existing (minted) token IDs",
@@ -1724,6 +1858,14 @@
         },
         "return": "depth of the (k)th tier in blocks"
       },
+      "getTierIndex(uint256,uint8)": {
+        "details": "Gets tier index by block index (offset)Throws if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to query depth for",
+          "offset": "block offset to query tier index for"
+        },
+        "return": "one-based tier index"
+      },
       "getTiers(uint256)": {
         "details": "Gets token `tiers`, a packed data structure containing     1. Number of tiers this plot contains (8 bits)     2. Tier structure of the plot (48 bits)         - Tier 1 offset (start of Tier 1), usually zero, 8 bits         - Tier 2 offset (start of Tier 2 / end of Tier 1), 8 bits         - Tier 3 offset (start of Tier 3 / end of Tier 2), 8 bits         - Tier 4 offset (start of Tier 4 / end of Tier 3), 8 bits         - Tier 5 offset (start of Tier 5 / end of Tier 4), 8 bits         - End of Tier 5 (block depth), 8 bits     3. Current mining block index (8 bits)Throws if token specified doesn't exist",
         "params": {
@@ -1741,7 +1883,7 @@
       "isFeatureEnabled(uint256)": {
         "details": "Checks if requested set of features is enabled globally on the contract",
         "params": {
-          "required": "set of features to check"
+          "required": "set of features to check against"
         },
         "return": "true if all the features requested are enabled, false otherwise"
       },
@@ -1752,17 +1894,10 @@
         },
         "return": "true if token is fully mined, false otherwise"
       },
-      "isOperatorInRole(address,uint256)": {
-        "details": "Checks if operator `operator` has all the permissions (role) required",
-        "params": {
-          "required": "set of permissions (role) to check"
-        },
-        "return": "true if all the permissions requested are enabled, false otherwise"
-      },
       "isSenderInRole(uint256)": {
         "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
         "params": {
-          "required": "set of permissions (role) to check"
+          "required": "set of permissions (role) to check against"
         },
         "return": "true if all the permissions requested are enabled, false otherwise"
       },
@@ -1772,6 +1907,14 @@
           "_tokenId": "ID of the token to check transferable state for"
         },
         "return": "true if token is transferable, false otherwise"
+      },
+      "isUserInRole(address,uint256)": {
+        "details": "Checks if user `user` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against",
+          "user": "address of the user to check role for"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
       },
       "mineBy(uint256,uint8)": {
         "details": "Mines the token by the depth delta specifiedRequires depth delta to be positive valueRequires sender to have `ROLE_OFFSET_PROVIDER` permissionThrows if token specified doesn't exist",
@@ -1911,16 +2054,27 @@
         }
       },
       "updateFeatures(uint256)": {
-        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissions.=Requires transaction sender to have `ROLE_FEATURE_MANAGER` permission.",
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissionsRequires transaction sender to have `ROLE_ACCESS_MANAGER` permissionFunction is left for backward compatibility with older versions",
         "params": {
-          "mask": "bitmask representing a set of features to enable/disable"
+          "_mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateMsig(address,uint256,uint256,uint8[],bytes32[],bytes32[])": {
+        "details": "MultiSig version of the `updateRole` functionUpdates set of permissions (role) for a given user,     taking into account signers' permissionsSetting role to zero is equivalent to removing all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying signers' permissions (roles intersection) to the userRequires transaction signers to have `ROLE_ROLE_MANAGER` permissionRequires `MSIG_QUORUM` signatures in MultiSig mode –     if `FEATURE_MSIG_ENABLED` is enabled",
+        "params": {
+          "_expiresOn": "an expiration date of the request,     optional, required in MultiSig mode only",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract",
+          "r": "an array of ECDSA signature outputs, \"r\",     optional, required in MultiSig mode only",
+          "s": "an array of ECDSA signature outputs, \"s\",     optional, required in MultiSig mode only",
+          "v": "an array of ECDSA signature outputs, \"v\",     optional, required in MultiSig mode only"
         }
       },
       "updateRole(address,uint256)": {
-        "details": "Updates set of permissions (role) for a given operator,     taking into account sender's permissions.Setting role to zero is equivalent to removing an operator.Setting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders permissions (role) to an operator.Requires transaction sender to have `ROLE_ROLE_MANAGER` permission.",
+        "details": "Updates set of permissions (role) for a given user,     taking into account sender's permissions.Setting role to zero is equivalent to removing an all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders' permissions (role) to the userRequires transaction sender to have `ROLE_ACCESS_MANAGER` permission",
         "params": {
-          "operator": "address of an operator to alter permissions for",
-          "role": "bitmask representing a set of permissions to     enable/disable for an operator specified"
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
         }
       },
       "write(uint256,uint256,uint8,uint8)": {

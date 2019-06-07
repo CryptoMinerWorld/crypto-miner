@@ -1,5 +1,5 @@
 {
-  "contractName": "RefPointsTracker",
+  "contractName": "Workshop",
   "abi": [
     {
       "constant": true,
@@ -29,14 +29,14 @@
       "inputs": [
         {
           "name": "",
-          "type": "address"
+          "type": "uint256"
         }
       ],
-      "name": "known",
+      "name": "LEVEL_PRICES",
       "outputs": [
         {
           "name": "",
-          "type": "bool"
+          "type": "uint8"
         }
       ],
       "payable": false,
@@ -51,25 +51,6 @@
         {
           "name": "",
           "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "holders",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
         }
       ],
       "payable": false,
@@ -93,11 +74,11 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "TRACKER_UID",
+      "name": "gemInstance",
       "outputs": [
         {
           "name": "",
-          "type": "uint256"
+          "type": "address"
         }
       ],
       "payable": false,
@@ -107,11 +88,25 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "ROLE_SELLER",
+      "name": "GRADE_VALUES",
       "outputs": [
         {
           "name": "",
-          "type": "uint32"
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "WORKSHOP_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
         }
       ],
       "payable": false,
@@ -186,6 +181,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "MAXIMUM_LEVEL_VALUE",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "MSIG_QUORUM",
       "outputs": [
         {
@@ -210,6 +219,25 @@
         {
           "name": "",
           "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "GRADE_PRICES",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
         }
       ],
       "payable": false,
@@ -246,11 +274,11 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "ROLE_REF_POINTS_CONSUMER",
+      "name": "GOLD_UID_REQUIRED",
       "outputs": [
         {
           "name": "",
-          "type": "uint32"
+          "type": "uint256"
         }
       ],
       "payable": false,
@@ -259,13 +287,8 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "consumed",
+      "inputs": [],
+      "name": "GEM_UID_REQUIRED",
       "outputs": [
         {
           "name": "",
@@ -310,13 +333,8 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "knownAddresses",
+      "inputs": [],
+      "name": "goldInstance",
       "outputs": [
         {
           "name": "",
@@ -339,6 +357,20 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MAXIMUM_GRADE_TYPE",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -378,11 +410,11 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "ROLE_REF_POINTS_ISSUER",
+      "name": "silverInstance",
       "outputs": [
         {
           "name": "",
-          "type": "uint32"
+          "type": "address"
         }
       ],
       "payable": false,
@@ -391,17 +423,26 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "issued",
+      "inputs": [],
+      "name": "SILVER_UID_REQUIRED",
       "outputs": [
         {
           "name": "",
           "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_UPGRADES_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -428,84 +469,44 @@
       "type": "function"
     },
     {
-      "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
-          "name": "_by",
+          "name": "gemAddress",
           "type": "address"
         },
         {
-          "indexed": true,
-          "name": "_to",
+          "name": "silverAddress",
           "type": "address"
         },
         {
-          "indexed": false,
-          "name": "_amount",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "_total",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "_available",
-          "type": "uint256"
+          "name": "goldAddress",
+          "type": "address"
         }
       ],
-      "name": "RefPointsIssued",
-      "type": "event"
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
     {
       "anonymous": false,
       "inputs": [
         {
           "indexed": true,
-          "name": "_by",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "name": "_from",
-          "type": "address"
+          "name": "tokenId",
+          "type": "uint24"
         },
         {
           "indexed": false,
-          "name": "_amount",
-          "type": "uint256"
+          "name": "level",
+          "type": "uint8"
         },
         {
           "indexed": false,
-          "name": "_total",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "_available",
-          "type": "uint256"
+          "name": "grade",
+          "type": "uint32"
         }
       ],
-      "name": "RefPointsConsumed",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "name": "_by",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "name": "_address",
-          "type": "address"
-        }
-      ],
-      "name": "KnownAddressAdded",
+      "name": "UpgradeComplete",
       "type": "event"
     },
     {
@@ -539,282 +540,185 @@
       "constant": true,
       "inputs": [
         {
-          "name": "owner",
-          "type": "address"
-        }
-      ],
-      "name": "available",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "owner",
-          "type": "address"
-        }
-      ],
-      "name": "balanceOf",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "_address",
-          "type": "address"
-        }
-      ],
-      "name": "isKnown",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "referrer",
-          "type": "address"
+          "name": "tokenId",
+          "type": "uint24"
         },
         {
-          "name": "referred",
-          "type": "address"
+          "name": "levelDelta",
+          "type": "uint8"
+        },
+        {
+          "name": "gradeTypeDelta",
+          "type": "uint8"
         }
       ],
-      "name": "isValid",
+      "name": "getUpgradePrice",
       "outputs": [
         {
-          "name": "",
-          "type": "bool"
+          "name": "silverRequired",
+          "type": "uint8"
+        },
+        {
+          "name": "goldRequired",
+          "type": "uint8"
         }
       ],
       "payable": false,
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "tokenId",
+          "type": "uint24"
+        },
+        {
+          "name": "levelDelta",
+          "type": "uint8"
+        },
+        {
+          "name": "gradeTypeDelta",
+          "type": "uint8"
+        },
+        {
+          "name": "silver",
+          "type": "uint8"
+        },
+        {
+          "name": "gold",
+          "type": "uint8"
+        }
+      ],
+      "name": "upgrade",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "constant": true,
-      "inputs": [],
-      "name": "getAllHolders",
+      "inputs": [
+        {
+          "name": "tokenIds",
+          "type": "uint24[]"
+        },
+        {
+          "name": "levelDeltas",
+          "type": "uint8[]"
+        },
+        {
+          "name": "gradeDeltas",
+          "type": "uint8[]"
+        }
+      ],
+      "name": "getBulkUpgradePrice",
       "outputs": [
         {
-          "name": "",
-          "type": "address[]"
+          "name": "silverRequired",
+          "type": "uint32"
+        },
+        {
+          "name": "goldRequired",
+          "type": "uint32"
         }
       ],
       "payable": false,
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "tokenIds",
+          "type": "uint24[]"
+        },
+        {
+          "name": "levelDeltas",
+          "type": "uint8[]"
+        },
+        {
+          "name": "gradeDeltas",
+          "type": "uint8[]"
+        },
+        {
+          "name": "silver",
+          "type": "uint32"
+        },
+        {
+          "name": "gold",
+          "type": "uint32"
+        }
+      ],
+      "name": "bulkUpgrade",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "constant": true,
-      "inputs": [],
-      "name": "getNumberOfHolders",
+      "inputs": [
+        {
+          "name": "rnd128",
+          "type": "uint128"
+        },
+        {
+          "name": "gradeValue",
+          "type": "uint24"
+        }
+      ],
+      "name": "randomGradeValue",
       "outputs": [
         {
           "name": "",
-          "type": "uint256"
+          "type": "uint24"
         }
       ],
       "payable": false,
-      "stateMutability": "view",
+      "stateMutability": "pure",
       "type": "function"
     },
     {
       "constant": true,
-      "inputs": [],
-      "name": "getKnownAddresses",
+      "inputs": [
+        {
+          "name": "n",
+          "type": "uint32"
+        },
+        {
+          "name": "iterations",
+          "type": "uint32"
+        }
+      ],
+      "name": "randomGradeValues",
       "outputs": [
         {
           "name": "",
-          "type": "address[]"
+          "type": "uint24[]"
         }
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "getNumberOfKnownAddresses",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "_to",
-          "type": "address"
-        },
-        {
-          "name": "_amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "issueTo",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "_from",
-          "type": "address"
-        },
-        {
-          "name": "_amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "consumeFrom",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "_address",
-          "type": "address"
-        }
-      ],
-      "name": "addKnownAddress",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "_to",
-          "type": "address[]"
-        },
-        {
-          "name": "_amount",
-          "type": "uint256[]"
-        }
-      ],
-      "name": "bulkIssue",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "_from",
-          "type": "address[]"
-        },
-        {
-          "name": "_amount",
-          "type": "uint256[]"
-        }
-      ],
-      "name": "bulkConsume",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "_addresses",
-          "type": "address[]"
-        }
-      ],
-      "name": "bulkAddKnownAddresses",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
       "type": "function"
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-07T13:06:55.046Z",
+  "updatedAt": "2019-06-07T13:12:24.559Z",
   "devdoc": {
     "author": "Basil Gorin",
-    "details": "Keeps track of issued and consumed referral points, calculates available referral     points as difference between issued and consumedBased on improved access control list (ACL Light), allowing issuers and consumers     to issue and consume respectively referral points to players' addresses",
+    "details": "Workshop acts as role provider (ROLE_LEVEL_PROVIDER) and     grade provider (ROLE_GRADE_PROVIDER) for the gem ERC721 token (GemERC721),     providing an ability to level up and upgrade their gemsWorkshop acts as a token destroyer (ROLE_TOKEN_DESTROYER)     for the gold and silver ERC20 tokens (GoldERC20 and SilverERC20),     consuming (burning) these tokens when leveling and upgrading gem(s)",
     "methods": {
-      "addKnownAddress(address)": {
-        "details": "A callback function called by seller on successful sale     and some wei being spent by the playerAdds address specified to `knownAddresses` mappingRequires sender to have `ROLE_SELLER` permission",
+      "bulkUpgrade(uint24[],uint8[],uint8[],uint32,uint32)": {
+        "details": "Increases all gem's level and/or grade type in the     array specified by the values specified in corresponding input arraysConsumes gold and/or silver on success, amounts required can be     calculated using `getBulkUpgradePrice()` functionThrows if at least one of the amounts of silver/gold required to perform     an upgrade exceeds maximum allowed values `silver` and `gold` authorized     to be spent by the transaction sender (player)Throws on empty inputsThrows if input arrays differ in sizeThrows if `tokenIds` contains invalid token IDsThrows if `levelDeltas` contains invalid values, i.e. values     which violate token level constraints (maximum level)Throws if `gradeDeltas` contains invalid values, i.e. values     which violate token grade constraints (maximum grade)Throws if for any token ID in the `tokenIds` array, corresponding     values in `levelDeltas` and `gradeDeltas` (level delta and     grade delta combination) result in no level/grade change for the gemRequires transaction sender to be an owner of all the gemsThrows if token owner (transaction sender) has not enough     gold and/or silver on the balance",
         "params": {
-          "_address": "an address which spent some wei (bought something)"
-        }
-      },
-      "available(address)": {
-        "details": "Calculated as difference between issued points counter and consumed points counterUnsafe, doesn't check for `issued >= consumed` constraint,     relies on proper behaviour of `issued/consumed` update functions",
-        "params": {
-          "owner": "address of the player address to get available referral points for"
-        },
-        "return": "available referral points counter for address specified"
-      },
-      "balanceOf(address)": {
-        "params": {
-          "owner": "address of the player address to get available referral points for"
-        },
-        "return": "available referral points counter for address specified"
-      },
-      "bulkAddKnownAddresses(address[])": {
-        "details": "A callback function called by seller on successful sale     and some wei being spent by several playersCan be also used to initialize smart contract with a     bunch of initial dataAdds addresses specified to `knownAddresses` mappingRequires sender to have `ROLE_SELLER` permissionThrows if input array is empty",
-        "params": {
-          "_addresses": "an array of addresses which spent some wei (bought something)"
-        }
-      },
-      "bulkConsume(address[],uint256[])": {
-        "details": "This is a bulk version of `consumeFrom` functionRequires sender to have `ROLE_REF_POINTS_CONSUMER` permission",
-        "params": {
-          "_amount": "array of referral points values to consume",
-          "_from": "array of addresses to consume referral points from"
-        }
-      },
-      "bulkIssue(address[],uint256[])": {
-        "details": "This is a bulk version of `issueTo` functionRequires sender to have `ROLE_REF_POINTS_ISSUER` permission",
-        "params": {
-          "_amount": "array of referral points values to issue",
-          "_to": "array of addresses to issue referral points to"
+          "gold": "maximum amount of gold sender authorizes smart contract to consume",
+          "gradeDeltas": "an array of non-zero grade deltas, each element     corresponds to an element in tokenIds with the same index",
+          "levelDeltas": "an array of non-zero level deltas, each element     corresponds to an element in tokenIds with the same index",
+          "silver": "maximum amount of silver sender authorizes smart contract to consume",
+          "tokenIds": "an array of valid token IDs to upgrade"
         }
       },
       "constructUpdateMsigRequest(address,uint256,uint256)": {
@@ -825,11 +729,12 @@
           "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
         }
       },
-      "consumeFrom(address,uint256)": {
-        "details": "Requires sender to have `ROLE_REF_POINTS_CONSUMER` permission",
+      "constructor": {
+        "details": "Creates a workshop instance, binding it to gem (ERC721 token),     silver (ERC20 token) and gold (ERC20 token) instances specified",
         "params": {
-          "_amount": "number of referral points to consume",
-          "_from": "an address to consume referral points from"
+          "gemAddress": "address of the deployed GemERC721 instance with     the `TOKEN_VERSION` equal to `GEM_TOKEN_VERSION_REQUIRED`",
+          "goldAddress": "address of the deployed GoldERC20 instance with     the `TOKEN_VERSION` equal to `GOLD_TOKEN_VERSION_REQUIRED`",
+          "silverAddress": "address of the deployed SilverERC20 instance with     the `TOKEN_VERSION` equal to `SILVER_TOKEN_VERSION_REQUIRED`"
         }
       },
       "evaluateBy(address[],uint256,uint256)": {
@@ -844,17 +749,23 @@
       "features()": {
         "details": "Auxiliary getter function to maintain compatibility with previous     versions of the Access Control List smart contract, where     features was a separate uint256 public field"
       },
-      "getAllHolders()": {
-        "return": "an array of referral points holders addresses,     doesn't contain duplicates"
+      "getBulkUpgradePrice(uint24[],uint8[],uint8[])": {
+        "details": "This function contains same logic as in `bulkUpgrade()` and can     be used before calling it externally to check     sender has enough silver and gold to perform the transactionThrows on empty inputsThrows if input arrays differ in sizeThrows if `tokenIds` contains invalid token IDsThrows if `levelDeltas` contains invalid values, i.e. values     which violate token level constraints (maximum level)Throws if `gradeDeltas` contains invalid values, i.e. values     which violate token grade constraints (maximum grade)Throws if for any token ID in the `tokenIds` array, corresponding     values in `levelDeltas` and `gradeDeltas` (level delta and     grade delta combination) result in no level/grade change for the gemIf both `levelDeltas[i]` and `gradeDeltas[i]` are zeros for some `i`,     assumes this is a grade value only upgrade (for grade AAA gems) for that `i`Doesn't check token ID ownership, assuming it is checked     when performing an upgrade transaction itself",
+        "params": {
+          "gradeDeltas": "an array of non-zero grade deltas, each element     corresponds to an element in tokenIds with the same index",
+          "levelDeltas": "an array of non-zero level deltas, each element     corresponds to an element in tokenIds with the same index",
+          "tokenIds": "an array of valid token IDs to upgrade"
+        },
+        "return": "a tuple of two elements, first represents an amount of     silver required, second – amount of gold required"
       },
-      "getKnownAddresses()": {
-        "return": "an array of known addresses,     doesn't contain duplicates"
-      },
-      "getNumberOfHolders()": {
-        "return": "length of the referral points holders array"
-      },
-      "getNumberOfKnownAddresses()": {
-        "return": "length of the known addresses array"
+      "getUpgradePrice(uint24,uint8,uint8)": {
+        "details": "This function contains same logic as in `upgrade()` and can     be used before calling it externally to check     sender has enough silver and gold to perform the transactionThrows if `tokenId` is invalid (non-existent token)Throws if `levelDelta` is invalid, i.e. violates     token level constraints (maximum level)Throws if `gradeTypeDelta` is invalid, i.e. violates     token grade constraints (maximum grade)Throws if `levelDelta` and `gradeTypeDelta` (level delta and     grade delta combination) result in no level/grade change for the gem     (ex.: both `levelDelta` and `gradeTypeDelta` are zero and gem grade is not AAA)Doesn't check token ID ownership, assuming it is checked     when performing an upgrade transaction itselfIf both `levelDelta` and `gradeTypeDelta` are zeros, assumes     this is a grade value only upgrade (for grade AAA gems)",
+        "params": {
+          "gradeTypeDelta": "number of grades to increase token grade by",
+          "levelDelta": "number of levels to increase token level by",
+          "tokenId": "a valid token ID to upgrade grade type for"
+        },
+        "return": "tuple containing amounts of silver and gold     required to upgrade the gem"
       },
       "isFeatureEnabled(uint256)": {
         "details": "Checks if requested set of features is enabled globally on the contract",
@@ -862,13 +773,6 @@
           "required": "set of features to check against"
         },
         "return": "true if all the features requested are enabled, false otherwise"
-      },
-      "isKnown(address)": {
-        "details": "Address is known if it was added as known by `ROLE_SELLER`     or was issued some referral points by `ROLE_REF_POINTS_ISSUER`",
-        "params": {
-          "_address": "address to query known status for"
-        },
-        "return": "true if address is known (added ot has some ref points issued)"
       },
       "isSenderInRole(uint256)": {
         "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
@@ -885,20 +789,20 @@
         },
         "return": "true if all the permissions requested are enabled, false otherwise"
       },
-      "isValid(address,address)": {
-        "details": "Addresses are treated as valid if referrer is already known to     the smart contract and referred is not knownZero referrer address is treated as not validZero referred address is treated as not valid",
+      "randomGradeValue(uint128,uint24)": {
+        "details": "Generates new grade value based on the current one using     quadratic random distribution",
         "params": {
-          "referred": "address of the referred (unknown address)",
-          "referrer": "address of the referrer (known address)"
+          "gradeValue": "current grade value, lower than `GRADE_VALUES`",
+          "rnd128": "128 bits of randomness to be used to generate random grade value"
         },
-        "return": "true if referrer is known and referred is unknown,     false otherwise; false if any of the addresses is zero"
+        "return": "new grade value, lower than `GRADE_VALUES`, bigger or equal to current one"
       },
-      "issueTo(address,uint256)": {
-        "details": "Requires sender to have `ROLE_REF_POINTS_ISSUER` permission",
+      "randomGradeValues(uint32,uint32)": {
+        "details": "A function to check `randomGradeValue` generation,     see randomGradeValue function",
         "params": {
-          "_amount": "number of referral points to issue",
-          "_to": "an address to issue referral points to"
-        }
+          "n": "how many grade values to generate"
+        },
+        "return": "an array of grade values of length n"
       },
       "updateFeatures(uint256)": {
         "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissionsRequires transaction sender to have `ROLE_ACCESS_MANAGER` permissionFunction is left for backward compatibility with older versions",
@@ -923,49 +827,35 @@
           "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
           "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
         }
+      },
+      "upgrade(uint24,uint8,uint8,uint8,uint8)": {
+        "details": "Consumes gold and/or silver on success, amounts can be     calculated using `getLevelUpPrice()` and `getUpgradePrice()` functionsThrows if at least one of the amounts of silver/gold required to perform     an upgrade exceeds maximum allowed values `silver` and `gold` authorized     to be spent by the transaction sender (player)Increases gem's level and/or grade type by the values specifiedThrows if `tokenId` is invalid (non-existent token)Throws if `levelDelta` is invalid, i.e. violates     token level constraints (maximum level)Throws if `gradeTypeDelta` is invalid, i.e. violates     token grade constraints (maximum grade)Throws if `levelDelta` and `gradeTypeDelta` (level delta and     grade delta combination) result in no level/grade change for the gem     (ex.: both `levelDelta` and `gradeTypeDelta` are zero and gem grade is not AAA)If both `levelDelta` and `gradeTypeDelta` are zeros, assumes     this is a grade value only upgrade (for grade AAA gems)Requires transaction sender to be an owner of the gemThrows if token owner (transaction sender) has not enough     gold and/or silver on the balance",
+        "params": {
+          "gold": "maximum amount of gold sender authorizes smart contract to consume",
+          "gradeTypeDelta": "number of grades to increase token grade by",
+          "levelDelta": "number of levels to increase token level by",
+          "silver": "maximum amount of silver sender authorizes smart contract to consume",
+          "tokenId": "ID of the gem to level up / upgrade"
+        }
       }
     },
-    "title": "Referral Points Tracker"
+    "title": "Workshop (Gem Upgrade Smart Contract)"
   },
   "userdoc": {
     "methods": {
-      "available(address)": {
-        "notice": "Available referral points counter of a particular address,     referral points available to be spent"
+      "bulkUpgrade(uint24[],uint8[],uint8[],uint32,uint32)": {
+        "notice": "Levels up and/or upgrades several gems in single transaction (bulk mode)"
       },
-      "balanceOf(address)": {
-        "notice": "ERC20-compatible alias for `available` referral points counter"
+      "getBulkUpgradePrice(uint24[],uint8[],uint8[])": {
+        "notice": "Calculates an amount of silver and gold required to perform an upgrade"
       },
-      "bulkConsume(address[],uint256[])": {
-        "notice": "Consumes referral points from players addresses"
+      "getUpgradePrice(uint24,uint8,uint8)": {
+        "notice": "Calculates amount of silver and gold required to perform     level up and grade upgrade of a particular gem by     level and grade type deltas specified"
       },
-      "bulkIssue(address[],uint256[])": {
-        "notice": "Issues referral points to players addresses"
-      },
-      "consumeFrom(address,uint256)": {
-        "notice": "Consumes referral points from a player address"
-      },
-      "getAllHolders()": {
-        "notice": "Lists all referral points holders addresses"
-      },
-      "getKnownAddresses()": {
-        "notice": "Lists all known addresses as an array"
-      },
-      "getNumberOfHolders()": {
-        "notice": "Number of all referral points holders"
-      },
-      "getNumberOfKnownAddresses()": {
-        "notice": "Number of all known addresses"
-      },
-      "isKnown(address)": {
-        "notice": "Verifies if an address is known to the tracker"
-      },
-      "isValid(address,address)": {
-        "notice": "Verifies if referrer and referred addresses are valid,     that is if a referrer can invite given referred"
-      },
-      "issueTo(address,uint256)": {
-        "notice": "Issues referral points to a player address"
+      "upgrade(uint24,uint8,uint8,uint8,uint8)": {
+        "notice": "Levels up and/or upgrades a particular gem"
       }
     },
-    "notice": "RefPointsTracker keeps track of referral points earned and consumed by players"
+    "notice": "Workshop smart contract is responsible for gem leveling/upgrading logic;     usually the gem may be upgrading by spending some gold and silver"
   }
 }
