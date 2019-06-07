@@ -24,7 +24,7 @@ contract FoundersKeyERC20 is ChestKeyERC20 {
    *      and changes smart contract itself is to be redeployed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0x195fc13bf83083219a1035e7a3e6c3a4e64d853f6dc9e2a5643a929eb74dd920;
+  uint256 public constant TOKEN_UID = 0x11df2ff3adbbb9c5e0824c6ec6f2a81cbeaa4a69b6302d8726fd7b854952d3aa;
 
   /**
    * @notice ERC20 name of the token (long name)

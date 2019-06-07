@@ -1,6 +1,6 @@
 pragma solidity 0.5.8;
 
-import "./AccessControl.sol";
+import "./AccessMultiSig.sol";
 
 /**
  * @title Referral Points Tracker
@@ -14,14 +14,14 @@ import "./AccessControl.sol";
  *
  * @author Basil Gorin
  */
-contract RefPointsTracker is AccessControl {
+contract RefPointsTracker is AccessMultiSig {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
    *      and changes smart contract itself is to be redeployed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TRACKER_UID = 0x2f81c11d03f0b3ccc5eb91e741f689bb57c05a4065d46002de6a73a9df00f6ff;
+  uint256 public constant TRACKER_UID = 0x0d8292f7303414b8d3bf94275e4951f0520fe555f65e1db469fced2c930a828f;
 
   /**
    * @notice Referral points issuer is responsible for issuing

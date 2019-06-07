@@ -1,9 +1,9 @@
 pragma solidity 0.5.8;
 
+import "./AccessMultiSig.sol";
 import "./ERC165.sol";
 import "./ERC721.sol";
 import "./ERC721Receiver.sol";
-import "./AccessControl.sol";
 import "./Fractions8.sol";
 
 /**
@@ -42,7 +42,7 @@ import "./Fractions8.sol";
  *
  * @author Basil Gorin
  */
-contract DutchAuction is AccessControl, ERC721Receiver {
+contract DutchAuction is AccessMultiSig, ERC721Receiver {
   /// @dev Base structure representing an item for sale on the auction
   /// @dev 256 bits structure, occupies exactly one memory slot
   struct Item {

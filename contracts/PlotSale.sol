@@ -1,6 +1,6 @@
 pragma solidity 0.5.8;
 
-import "./AccessControl.sol";
+import "./AccessMultiSig.sol";
 import "./RefPointsTracker.sol";
 import "./PlotERC721.sol";
 import "./CountryERC721.sol";
@@ -40,31 +40,31 @@ import "./Random.sol";
  *
  * @author Basil Gorin
  */
-contract PlotSale is AccessControl {
+contract PlotSale is AccessMultiSig {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant SALE_UID = 0x5bc0fad8726e6ef02935c92239c7373221c162dcff55c3de5aeefe94d81d3556;
+  uint256 public constant SALE_UID = 0x3d5d4a6fc745b9f8b6f5a2fed0bbe602b069a73408c1e9b219394ed1eb52b28d;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant REF_TRACKER_UID_REQUIRED = 0x2f81c11d03f0b3ccc5eb91e741f689bb57c05a4065d46002de6a73a9df00f6ff;
+  uint256 public constant REF_TRACKER_UID_REQUIRED = 0x0d8292f7303414b8d3bf94275e4951f0520fe555f65e1db469fced2c930a828f;
 
   /**
    * @dev Expected version (UID) of the deployed CountryERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant COUNTRY_UID_REQUIRED = 0x487e7af2a810b59da545d840b09a1fa474d482fc2a7c22ed553d6f5a2030b53c;
+  uint256 public constant COUNTRY_UID_REQUIRED = 0x38744552bd2c44dee253933dfe185d043fc821932d74514bcf9cd59502c33d58;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant PLOT_UID_REQUIRED = 0x216c71f30bc2bf96dd0dfeae5cf098bfe9e0da295785ebe16a6696b0d997afec;
+  uint256 public constant PLOT_UID_REQUIRED = 0x7df5103a724ac7be6e123911fe18fdf39fef1cb58606628a357bde2d45c4d906;
 
   /**
    * @notice Enables world land plot sale

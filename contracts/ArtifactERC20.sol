@@ -24,7 +24,7 @@ contract ArtifactERC20 is ChestKeyERC20 {
    *      and changes smart contract itself is to be redeployed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0x6d1ef7f5fc31fa6dd18ee25fb1982b680858ef0192d3a647397686845d38a08f;
+  uint256 public constant TOKEN_UID = 0x951eea7b6e07fbde80a8d6b330cd61d2d6e1f7483c0317ddf9a1ffc2aa56524f;
 
   /**
    * @notice ERC20 symbol of that token (short name)

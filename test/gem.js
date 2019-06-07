@@ -89,6 +89,12 @@ contract('GemERC721', function(accounts) {
 	it("mint: integrity of newly created token", async function() {
 		const tk = await Token.new();
 		await tk.mint(accounts[0], 0x401, 17, 11, 5, 0x300000B);
+
+		// check packed collection before gem age has changed
+		const packedCollection = await tk.getPackedCollection(accounts[0]);
+		assert.equal(1, packedCollection.length, "wrong packed collection length for " + accounts[0]);
+		assert(toBN("0x4010B050300000B0000000000").eq(packedCollection[0]), "wrong token packed data at index 0");
+
 		assert.equal(17, await tk.getPlotId(0x401), "gem 0x401 has wrong plotId");
 		assert.equal(11, await tk.getColor(0x401), "gem 0x401 wrong color");
 		assert.equal(5, await tk.getLevel(0x401), "gem 0x401 wrong level");
@@ -120,10 +126,6 @@ contract('GemERC721', function(accounts) {
 		assert.equal(0x401, collection[0], "wrong token ID at index 0");
 		assert.equal(0x401, await tk.tokenByIndex(0), "wrong tokenByIndex at index 0");
 		assert.equal(0x401, await tk.tokenOfOwnerByIndex(accounts[0], 0), "wrong tokenOfOwnerByIndex at index 0");
-
-		const packedCollection = await tk.getPackedCollection(accounts[0]);
-		assert.equal(1, packedCollection.length, "wrong packed collection length for " + accounts[0]);
-		assert(toBN("0x4010B050300000B0000000000").eq(packedCollection[0]), "wrong token packed data at index 0");
 	});
 
 	it("transfer: transferring a token", async function() {

@@ -1,12 +1,12 @@
 pragma solidity 0.5.8;
 
+import "./AccessMultiSig.sol";
 import "./AddressUtils.sol";
 import "./ERC165.sol";
 import "./ERC721Receiver.sol";
 import "./ERC721Interfaces.sol";
-import "./AccessControl.sol";
 
-contract ERC721Core is AccessControl, ERC165, ERC721Interfaces {
+contract ERC721Core is AccessMultiSig, ERC165, ERC721Interfaces {
 
   /**
    * @notice The 'transfers' feature supports regular token transfers

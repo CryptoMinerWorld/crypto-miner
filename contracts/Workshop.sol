@@ -1,6 +1,6 @@
 pragma solidity 0.5.8;
 
-import "./AccessControl.sol";
+import "./AccessMultiSig.sol";
 import "./GemERC721.sol";
 import "./GoldERC20.sol";
 import "./SilverERC20.sol";
@@ -21,31 +21,31 @@ import "./Random.sol";
  *
  * @author Basil Gorin
  */
-contract Workshop is AccessControl {
+contract Workshop is AccessMultiSig {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant WORKSHOP_UID = 0x5843b39776efe86828a0b182279e4e7280fe0885127450503e238eb3ed5f53b9;
+  uint256 public constant WORKSHOP_UID = 0xd53975e00149fb67d976993d4d2d65e7f314800c456140f59f9d2f25ef7a5606;
 
   /**
    * @dev Expected version of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_UID_REQUIRED = 0x8f3ed5e134a27674c9f1073ee196e620c308a73c5321972a6a7548040751662a;
+  uint256 public constant GEM_UID_REQUIRED = 0x259bcf6e06acb5617a0bc9bbf2ff36611433e94c389dfd42d65951b13c0af088;
 
   /**
    * @dev Expected version of the deployed SilverERC20 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant SILVER_UID_REQUIRED = 0x7a137fa4315e494a34e94bf9214632429f3db8ab037df8e859c368661dd070ac;
+  uint256 public constant SILVER_UID_REQUIRED = 0xd2ed13751444fdd75b1916ee718753f38af6537fca083868a151de23e07751af;
 
   /**
    * @dev Expected version of the deployed GoldERC20 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GOLD_UID_REQUIRED = 0xac39d91c110e8dd1c604e5b1e58cec50e813064f49f0df63b1abb865a2aa9c81;
+  uint256 public constant GOLD_UID_REQUIRED = 0xfaa04f5eafa80e0f8b560c49d4dffb3ca7e34fd289606af21700ba5685db87bc;
 
   /**
    * @dev Maximum token level this workshop can level up gem to

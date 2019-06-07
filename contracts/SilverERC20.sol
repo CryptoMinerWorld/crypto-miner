@@ -24,7 +24,7 @@ contract SilverERC20 is GoldERC20 {
    *      and changes smart contract itself is to be redeployed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0x7a137fa4315e494a34e94bf9214632429f3db8ab037df8e859c368661dd070ac;
+  uint256 public constant TOKEN_UID = 0xd2ed13751444fdd75b1916ee718753f38af6537fca083868a151de23e07751af;
 
   /**
    * @notice ERC20 symbol of that token (short name)

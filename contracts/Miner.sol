@@ -1,6 +1,6 @@
 pragma solidity 0.5.8;
 
-import "./AccessControl.sol";
+import "./AccessMultiSig.sol";
 import "./GemERC721.sol";
 import "./PlotERC721.sol";
 import "./SilverERC20.sol";
@@ -44,25 +44,25 @@ import "./Random.sol";
  *
  * @author Basil Gorin
  */
-contract Miner is AccessControl {
+contract Miner is AccessMultiSig {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x4cae2b5cd047e2fb4b2f23a0a6adb3266225c7804a634900cc0a7a5eae3bf994;
+  uint256 public constant MINER_UID = 0x4b37316c78e0fdcfd20573133ecad8d8b8e17eb9f2b79f8c29d5f4ba86de952a;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_UID_REQUIRED = 0x8f3ed5e134a27674c9f1073ee196e620c308a73c5321972a6a7548040751662a;
+  uint256 public constant GEM_UID_REQUIRED = 0x259bcf6e06acb5617a0bc9bbf2ff36611433e94c389dfd42d65951b13c0af088;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant PLOT_UID_REQUIRED = 0x216c71f30bc2bf96dd0dfeae5cf098bfe9e0da295785ebe16a6696b0d997afec;
+  uint256 public constant PLOT_UID_REQUIRED = 0x7df5103a724ac7be6e123911fe18fdf39fef1cb58606628a357bde2d45c4d906;
 
   /**
    * @dev Expected version (UID) of the deployed ArtifactERC721 instance
@@ -74,31 +74,31 @@ contract Miner is AccessControl {
    * @dev Expected version (UID) of the deployed SilverERC20 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant SILVER_UID_REQUIRED = 0x7a137fa4315e494a34e94bf9214632429f3db8ab037df8e859c368661dd070ac;
+  uint256 public constant SILVER_UID_REQUIRED = 0xd2ed13751444fdd75b1916ee718753f38af6537fca083868a151de23e07751af;
 
   /**
    * @dev Expected version (UID) of the deployed GoldERC20 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GOLD_UID_REQUIRED = 0xac39d91c110e8dd1c604e5b1e58cec50e813064f49f0df63b1abb865a2aa9c81;
+  uint256 public constant GOLD_UID_REQUIRED = 0xfaa04f5eafa80e0f8b560c49d4dffb3ca7e34fd289606af21700ba5685db87bc;
 
   /**
    * @dev Expected version (UID) of the deployed ArtifactERC20 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant ARTIFACT20_UID_REQUIRED = 0x6d1ef7f5fc31fa6dd18ee25fb1982b680858ef0192d3a647397686845d38a08f;
+  uint256 public constant ARTIFACT20_UID_REQUIRED = 0x951eea7b6e07fbde80a8d6b330cd61d2d6e1f7483c0317ddf9a1ffc2aa56524f;
 
   /**
    * @dev Expected version (UID) of the deployed FoundersKeyERC20 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant FOUNDERS_KEY_UID_REQUIRED = 0x195fc13bf83083219a1035e7a3e6c3a4e64d853f6dc9e2a5643a929eb74dd920;
+  uint256 public constant FOUNDERS_KEY_UID_REQUIRED = 0x11df2ff3adbbb9c5e0824c6ec6f2a81cbeaa4a69b6302d8726fd7b854952d3aa;
 
   /**
    * @dev Expected version (UID) of the deployed ChestKeyERC20 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant CHEST_KEY_UID_REQUIRED = 0x5cff9ead39980fd8345fbf0413b44c7846a0df4ffe877bd4cb23ea62b4df832d;
+  uint256 public constant CHEST_KEY_UID_REQUIRED = 0xb09a25815aabc348579249353625bd63fa007579c1503f6af9c2aff075253789;
 
   /**
    * @dev Auxiliary data structure used in `miningPlots` mapping to

@@ -1,6 +1,6 @@
 pragma solidity 0.5.8;
 
-import "./AccessControl.sol";
+import "./AccessMultiSig.sol";
 import "./AddressUtils.sol";
 import "./ERC20Receiver.sol";
 
@@ -19,14 +19,14 @@ import "./ERC20Receiver.sol";
  *
  * @author Basil Gorin
  */
-contract GoldERC20 is AccessControl {
+contract GoldERC20 is AccessMultiSig {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
    *      and changes smart contract itself is to be redeployed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0xac39d91c110e8dd1c604e5b1e58cec50e813064f49f0df63b1abb865a2aa9c81;
+  uint256 public constant TOKEN_UID = 0xfaa04f5eafa80e0f8b560c49d4dffb3ca7e34fd289606af21700ba5685db87bc;
 
   /**
    * @notice ERC20 symbol of that token (short name)

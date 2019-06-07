@@ -193,6 +193,10 @@ contract('Miner: Plot Loot', (accounts) => {
 
 			// mine the plot immediately
 			await miner.bind(i + 1, i + 1, {from: player});
+
+			if(i % BULK_SIZE === 0) {
+				console.log("\t%o/%o", i / BULK_SIZE, PLOTS / BULK_SIZE)
+			}
 		}
 
 		// to determine levels of the gems - get full collection
@@ -398,14 +402,14 @@ contract('Miner: Plot Loot', (accounts) => {
 
 		// mint 100 high grade gems to mine plots
 		for(let i = 0; i < PLOTS; i++) {
-			// mint the plot - ID of the minted plot is `i + 1`
-			await plot.mint(player, 0, "0x05002341555F6400");
+			// mint the plot - ID of the minted plot is `65537 + i`
+			await plot.mint(player, 1, "0x05002341555F6400");
 
 			// mint the gem ID `i + 1` with energetic age
 			await gem.mintWith(
 				player,
 				i + 1, // Token ID
-				i + 1, // Plot ID
+				65537 + i, // Plot ID
 				1, // Color,
 				5, // Level
 				0x06FFFFFF, // Grade Type AAA, Grade Value 16,777,215
@@ -413,7 +417,11 @@ contract('Miner: Plot Loot', (accounts) => {
 			);
 
 			// mine the plot immediately
-			await miner.bind(i + 1, i + 1, {from: player});
+			await miner.bind(65537 + i, i + 1, {from: player});
+
+			if(i % BULK_SIZE === 0) {
+				console.log("\t%o/%o", i / BULK_SIZE, PLOTS / BULK_SIZE)
+			}
 		}
 
 		// to determine levels of the gems - get full collection

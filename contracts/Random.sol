@@ -24,7 +24,7 @@ library Random {
     uint256 mask = b == 0? uint256(-1): (uint256(1) << b) - 1; // uint256(-1) overflows to 0xFFFF...
 
     // arithmetic overflow check
-    require(mask * n / n == mask, "arithmetic overflow: reduce b or/and n");
+    require(mask * n / n == mask);
 
     // return random value in range [0, n)
     return (mask & rnd256) * n / (mask + 1);

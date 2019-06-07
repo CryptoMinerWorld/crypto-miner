@@ -23,7 +23,7 @@ contract CountryERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0x487e7af2a810b59da545d840b09a1fa474d482fc2a7c22ed553d6f5a2030b53c;
+  uint256 public constant TOKEN_UID = 0x38744552bd2c44dee253933dfe185d043fc821932d74514bcf9cd59502c33d58;
 
   /**
    * @dev ERC20 compliant token symbol
@@ -149,6 +149,9 @@ contract CountryERC721 is ERC721Core {
   /**
    * @notice Default tax rate that is assigned to each country
    * @dev This tax rate is set on each country when minting its token
+   * @dev 0x4A = binary 01001010,
+   *      high 2 bits = binary 01 = 1,
+   *      low 6 bits = binary 001010 = 10
    */
   uint8 public constant DEFAULT_TAX_RATE = 0x4A; // 1/10 or 10%
 

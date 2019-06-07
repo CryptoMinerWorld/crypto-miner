@@ -1,6 +1,6 @@
 pragma solidity 0.5.8;
 
-import "./AccessControl.sol";
+import "./AccessMultiSig.sol";
 import "./PlotERC721.sol";
 import "./TierMath.sol";
 import "./Random.sol";
@@ -39,19 +39,19 @@ interface FoundersPlots {
  *
  * @author Basil Gorin
  */
-contract PlotAntarctica is AccessControl {
+contract PlotAntarctica is AccessMultiSig {
   /**
    * @dev Smart contract unique identifier, a random number
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant CONTRACT_UID = 0xdd56fb04a36253db207a94cbc6d3d68a6b219c5afb69a454c65436a706b7ca77;
+  uint256 public constant CONTRACT_UID = 0x820741fc13b3e819ad01914a58d18cb62d0735f509eb92a906958ef055177109;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant PLOT_UID_REQUIRED = 0x216c71f30bc2bf96dd0dfeae5cf098bfe9e0da295785ebe16a6696b0d997afec;
+  uint256 public constant PLOT_UID_REQUIRED = 0x7df5103a724ac7be6e123911fe18fdf39fef1cb58606628a357bde2d45c4d906;
 
   /**
    * @notice Enables getting tokens for free for game founders

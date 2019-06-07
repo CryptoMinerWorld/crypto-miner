@@ -7,7 +7,7 @@ const Reader = artifacts.require("./TokenReader.sol");
 const Writer = artifacts.require("./TokenWriter.sol");
 
 // permissions
-import {ROLE_TOKEN_CREATOR, ROLE_AGE_PROVIDER} from "./test/erc721_core";
+import {ROLE_TOKEN_CREATOR, ROLE_AGE_PROVIDER} from "../test/erc721_core";
 
 // V1 -> V2 Migration Tests
 contract('V1 -> V2 Migration', (accounts) => {
