@@ -491,7 +491,7 @@ contract Workshop is AccessControl {
    * @param gradeValue current grade value, lower than `GRADE_VALUES`
    * @return new grade value, lower than `GRADE_VALUES`, bigger or equal to current one
    */
-  function randomGradeValue(uint128 rnd128, uint24 gradeValue) public view returns(uint24) {
+  function randomGradeValue(uint128 rnd128, uint24 gradeValue) public pure returns(uint24) {
     // this version of workshop cannot upgrade grades out of `GRADE_VALUES` range
     require(gradeValue < GRADE_VALUES);
 

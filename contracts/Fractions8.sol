@@ -18,10 +18,10 @@ library Fractions8 {
    * @dev Creates proper fraction with nominator < denominator
    * @dev Throws if nominator is equal or greater then denominator
    * @dev Throws if denominator is zero
-   * @dev Throws if nominator doesn't fit into low 4 bits
-   * @dev Throws if denominator doesn't fit into low 4 bits
-   * @param n fraction nominator, only low 4 bits must be set
-   * @param d fraction denominator, only low 4 bits must be set
+   * @dev Throws if nominator doesn't fit into low 2 bits
+   * @dev Throws if denominator doesn't fit into low 6 bits
+   * @param n fraction nominator, only low 2 bits must be set
+   * @param d fraction denominator, only low 6 bits must be set
    * @return fraction with nominator and denominator specified
    */
   function createProperFraction8(uint8 n, uint8 d) internal pure returns (uint8) {
