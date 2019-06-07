@@ -45,11 +45,11 @@ module.exports = async function(deployer, network, accounts) {
 		};
 
 		const workshop = await Workshop.deployed();
-		console.log("updating gem roles");
+		console.log("updating gem access");
 		await instances.GemERC721.updateRole(workshop.address, 0x000000C0); // ROLE_LEVEL_PROVIDER | ROLE_GRADE_PROVIDER
-		console.log("updating silver roles");
+		console.log("updating silver access");
 		await instances.SilverERC20.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
-		console.log("updating gold roles");
+		console.log("updating gold access");
 		await instances.GoldERC20.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 		console.log("enabling workshop features");
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);

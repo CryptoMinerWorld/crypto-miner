@@ -12,6 +12,7 @@ const Miner = artifacts.require("./Miner");
 
 // Features and Roles required to be enabled
 const ROLE_TOKEN_CREATOR = 0x00000001;
+const FEATURE_MINING_ENABLED = 0x00000001;
 
 // Miner smart contract deployment
 module.exports = async function(deployer, network, accounts) {
@@ -68,13 +69,21 @@ module.exports = async function(deployer, network, accounts) {
 		};
 
 		const miner = await Miner.deployed();
+		console.log("updating gem access");
 		await instances.GemERC721.updateRole(miner.address, 0x00000311); // ROLE_TOKEN_CREATOR | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_NEXT_ID_INC
+		console.log("updating plot access");
 		await instances.PlotERC721.updateRole(miner.address, 0x00000050); // ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER
+		console.log("updating silver access");
 		await instances.SilverERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		console.log("updating gold access");
 		await instances.GoldERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		console.log("updating artifact access");
 		await instances.ArtifactERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
-		await instances.ChestKeyERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		console.log("updating founder's key access");
 		await instances.FoundersKeyERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		console.log("updating chest key access");
+		await instances.ChestKeyERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		console.log("updating miner features");
 		await miner.updateFeatures(0x00000001); // FEATURE_MINING_ENABLED
 	}
 };
