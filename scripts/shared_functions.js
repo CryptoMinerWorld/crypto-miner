@@ -45,6 +45,14 @@ export const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 // short name for web3.utils.toBN
 export const toBN = web3.utils.toBN;
 
+// short name for web3.utils.toWei
+export const toWei = web3.utils.toWei;
+
+// short name for web3.utils.toWei as BN
+export function toWeiBN(number, unit) {
+	return toBN(toWei(web3.utils.isBN(number)? number: "" + number, unit));
+}
+
 // short name for web3.eth.getBalance as BN
 export async function getBalanceBN(acc) {
 	return toBN(await web3.eth.getBalance(acc));
@@ -62,4 +70,26 @@ export function toBNs(n) {
 		r[i] = toBN(0);
 	}
 	return r;
+}
+
+// a function to print a BN in binary mode
+export function toPrettyBinary(n, padTo = 0) {
+	let result = "";
+
+	n = n.clone();
+	while(!n.isZero()) {
+		const zeroBits = n.zeroBits();
+		result += ".".repeat(zeroBits);
+		n.ishrn(zeroBits);
+		if(!zeroBits) {
+			result += "*";
+			n.ishrn(1);
+		}
+	}
+
+	if(padTo && result.length < padTo) {
+		result += ".".repeat(padTo - result.length);
+	}
+
+	return result;
 }
