@@ -12,19 +12,19 @@ const ChestKey = artifacts.require("./ChestKeyERC20.sol");
 const Miner = artifacts.require("./Miner.sol");
 
 // import ERC721Core dependencies
-import {ROLE_STATE_PROVIDER, ROLE_TOKEN_CREATOR} from "./erc721_core";
+import {ROLE_STATE_PROVIDER, ROLE_TOKEN_CREATOR} from "../test/erc721_core";
 // import GemERC721 dependencies
-import {ROLE_AGE_PROVIDER, ROLE_NEXT_ID_INC} from "./erc721_core";
+import {ROLE_AGE_PROVIDER, ROLE_NEXT_ID_INC} from "../test/erc721_core";
 // import PlotERC721 dependencies
-import {ROLE_OFFSET_PROVIDER} from "./erc721_core";
+import {ROLE_OFFSET_PROVIDER} from "../test/erc721_core";
 // import Miner dependencies
 const FEATURE_MINING_ENABLED = 0x00000001;
 
 // CSV file headers
-const CSV_HEADER = "type,tiers,plots,gems1,gems2,gems3,gems4,gems5,silver,gold,artifacts,keys";
+const CSV_HEADER = "plots,gems1,gems2,gems3,gems4,gems5,silver,gold,artifacts,keys";
 
 // test depth - number of plots to simulate
-const PLOTS = 100;
+const PLOTS = 500;
 // number of plots in a batch
 const BULK_SIZE = 100;
 
@@ -69,9 +69,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		}
 
 		// CSV file data
-		const csv_data = `A,2,${PLOTS},${loot.join(",")}`;
+		const csv_data = `${PLOTS},${loot.join(",")}`;
 		// write statistical raw data into the file
-		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot_A2.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
@@ -117,9 +117,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		}
 
 		// CSV file data
-		const csv_data = `B,2,${PLOTS},${loot.join(",")}`;
+		const csv_data = `${PLOTS},${loot.join(",")}`;
 		// write statistical raw data into the file
-		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot_B2.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
@@ -222,9 +222,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		console.log("\tchest keys: %o", chestKeys);
 
 		// CSV file data
-		const csv_data = `C,2,${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${foundersKeys}`;
+		const csv_data = `${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${foundersKeys}`;
 		// write statistical raw data into the file
-		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot_C2.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(gs[0] > 0, "no level 1 gems");
@@ -287,9 +287,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		}
 
 		// CSV file data
-		const csv_data = `A,5,${PLOTS},${loot.join(",")}`;
+		const csv_data = `${PLOTS},${loot.join(",")}`;
 		// write statistical raw data into the file
-		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot_A5.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
@@ -338,9 +338,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		}
 
 		// CSV file data
-		const csv_data = `B,5,${PLOTS},${loot.join(",")}`;
+		const csv_data = `${PLOTS},${loot.join(",")}`;
 		// write statistical raw data into the file
-		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot_B5.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
@@ -443,9 +443,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		console.log("\tchest keys: %o", chestKeys);
 
 		// CSV file data
-		const csv_data = `C,5,${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${chestKeys}`;
+		const csv_data = `${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${chestKeys}`;
 		// write statistical raw data into the file
-		write_csv("./data/plot_loot.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot_C5.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
 		assert(gs[0] > 0, "no level 1 gems");
