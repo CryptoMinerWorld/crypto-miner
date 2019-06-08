@@ -10,6 +10,7 @@ import "./FoundersKeyERC20.sol";
 import "./ChestKeyERC20.sol";
 import "./TierMath.sol";
 import "./Random.sol";
+import "./TimeUtils.sol";
 
 /**
  * @title Miner
@@ -50,7 +51,7 @@ contract Miner is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x4b37316c78e0fdcfd20573133ecad8d8b8e17eb9f2b79f8c29d5f4ba86de952a;
+  uint256 public constant MINER_UID = 0xbef7a42dc0366a1783048b2fd4602c66da1484b27b1a8349b0389633b52699dd;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
@@ -1348,13 +1349,17 @@ contract Miner is AccessMultiSig {
    * @return mining rate of the gem multiplied by 10^8
    */
   function miningRateOf(uint24 gemId) public view returns(uint32) {
+    // read the color of the gem
+    uint8 color = gemInstance.getColor(gemId);
+
     // read the grade of the given gem
     // verifies gem existence under the hood
     uint32 grade = gemInstance.getGrade(gemId);
 
+    // taking into account current month and gem color 5% mining rate bonus
     // calculate mining rate - delegate call to `miningRate`
-    // and return the result
-    return miningRate(grade);
+    // multiplication by 21 may overflow uint32 in this particular case
+    return TimeUtils.monthIndex() == color? uint32(uint64(miningRate(grade)) * 21 / 20): miningRate(grade);
   }
 
   /**
