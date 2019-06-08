@@ -2,9 +2,35 @@ pragma solidity 0.5.8;
 
 import "./AccessMultiSig.sol";
 import "./ERC165.sol";
-import "./ERC721.sol";
 import "./ERC721Receiver.sol";
 import "./Fractions8.sol";
+
+/**
+ * @dev Subset of ERC-721 interface required by DutchAuction
+ */
+interface ERC721 {
+  /**
+   * @dev ERC721 ownerOf - find owner of the token specified
+   * @param _tokenId The identifier for an NFT.
+   */
+  function ownerOf(uint256 _tokenId) external view returns (address);
+
+  /**
+   * @dev ERC721 transferFrom – "unsafe transfer on behalf"
+   * @param _from The current owner of the NFT.
+   * @param _to The new owner.
+   * @param _tokenId The NFT to transfer.
+   */
+  function transferFrom(address _from, address _to, uint256 _tokenId) external;
+
+  /**
+   * @dev ERC721 safeTransferFrom – "safe transfer on behalf"
+   * @param _from The current owner of the NFT.
+   * @param _to The new owner.
+   * @param _tokenId The NFT to transfer.
+   */
+  function safeTransferFrom(address _from, address _to, uint256 _tokenId) external;
+}
 
 /**
  * @title Dutch Auction Marketplace
