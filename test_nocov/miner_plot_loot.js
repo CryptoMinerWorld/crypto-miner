@@ -20,11 +20,16 @@ import {ROLE_OFFSET_PROVIDER} from "../test/erc721_core";
 // import Miner dependencies
 const FEATURE_MINING_ENABLED = 0x00000001;
 
+// available gem colors the miner can mint
+// This array MUST be sorted!
+const AVAILABLE_GEM_COLORS = [1, 2, 5, 6, 7, 9, 10].sort();
+
 // CSV file headers
-const CSV_HEADER = "plots,gems1,gems2,gems3,gems4,gems5,silver,gold,artifacts,keys";
+const CSV_HEADER = "plots,lv1,lv2,lv3,lv4,lv5,silver,gold,artifacts,keys";
+const CSV_HEADER_C = "plots,c1,c2,c3,c4,c5,c6,c7,c8,c9,10,c11,c12,lv1,lv2,lv3,lv4,lv5,D,C,B,A,AA,AAA,silver,gold,artifacts,keys";
 
 // test depth - number of plots to simulate
-const PLOTS = 500;
+const PLOTS = 1000;
 // number of plots in a batch
 const BULK_SIZE = 100;
 
@@ -194,55 +199,23 @@ contract('Miner: Plot Loot', (accounts) => {
 			// mine the plot immediately
 			await miner.bind(i + 1, i + 1, {from: player});
 
-			if(i % BULK_SIZE === 0) {
+			if(i !==0 && i % BULK_SIZE === 0) {
 				console.log("\t%o/%o", i / BULK_SIZE, PLOTS / BULK_SIZE)
 			}
 		}
 
-		// to determine levels of the gems - get full collection
-		const gems = await gem.getPackedCollection(player);
-		let gs = new Array(5).fill(0);
-		for(let i = 0; i < gems.length; i++) {
-			// verify gem ID is not one of the already existing ones
-			if(gems[i].shrn(88).gte(toBN(PLOTS))) {
-				// and unpack each gem's level individually
-				gs[gems[i].shrn(72).mod(toBN(256)).toNumber() - 1]++;
-			}
-		}
-		// for the rest of the tokens its straight forward
-		const slv = (await silver.balanceOf(player)).div(await silver.ONE_UNIT()).toNumber();
-		const gld = (await gold.balanceOf(player)).div(await gold.ONE_UNIT()).toNumber();
-		const artifacts20 = (await artifactErc20.balanceOf(player)).toNumber();
-		const foundersKeys = (await foundersKey.balanceOf(player)).toNumber();
-		const chestKeys = (await chestKey.balanceOf(player)).toNumber();
+		// extract the loot
+		const loot = await extractLoot(player, gem, silver, gold, artifactErc20, foundersKey, chestKey);
 
-		// make some console input (without gem level breakthrough)
-		console.log("\tmined %o plots; items found:", PLOTS);
-		console.log("\tgems: %o", gems.length);
-		console.log("\tsilver: %o", slv);
-		console.log("\tgold: %o", gld);
-		console.log("\tartifacts20: %o", artifacts20);
-		console.log("\tfounder's keys: %o", foundersKeys);
-		console.log("\tchest keys: %o", chestKeys);
-
-		// CSV file data
-		const csv_data = `${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${foundersKeys}`;
+		// CSV file data - type C
+		const csv_data_c = `${PLOTS},${loot.colors.join(",")},${loot.levels.join(",")},${loot.grades.join(",")},${loot.silver},${loot.gold},${loot.artifacts20},${loot.foundersKeys}`;
 		// write statistical raw data into the file
-		write_csv("./data/plot_loot_C2.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot_C2.csv", CSV_HEADER_C, csv_data_c);
 
-		// verify some statistics constraints
-		assert(gs[0] > 0, "no level 1 gems");
-		assert(gs[1] > 0, "no level 2 gems");
-		assert(gs[2] > 0, "no level 3 gems");
-		assert(gs[3] > 0, "no level 4 gems");
-		assert(gs[4] > 0, "no level 5 gems");
-		assert(slv > 0, "no silver");
-		assert(gld > 0, "no gold");
-		assert(artifacts20 > 0, "no artifacts");
-		assert(foundersKeys > 0, "no founder's keys");
-		assert.equal(0, chestKeys, "chest key(s) present");
-
-		// TODO: inspect gem color and grade
+		// verify some statistics on the loot
+		verifyTheLoot(loot);
+		// for the Antarctica no chest keys should be present - only founder's keys
+		assert.equal(0, loot.chestKeys, "chest key(s) present");
 	});
 
 	it("tier loot – Rest of the World (5 Tiers)", async() => {
@@ -419,58 +392,101 @@ contract('Miner: Plot Loot', (accounts) => {
 			// mine the plot immediately
 			await miner.bind(65537 + i, i + 1, {from: player});
 
-			if(i % BULK_SIZE === 0) {
+			if(i !== 0 && i % BULK_SIZE === 0) {
 				console.log("\t%o/%o", i / BULK_SIZE, PLOTS / BULK_SIZE)
 			}
 		}
 
-		// to determine levels of the gems - get full collection
-		const gems = await gem.getPackedCollection(player);
-		const gs = new Array(5).fill(0);
-		for(let i = 0; i < gems.length; i++) {
-			// verify gem ID is not one of the already existing ones
-			if(gems[i].shrn(88).gte(toBN(PLOTS))) {
-				// and unpack each gem's level individually
-				gs[gems[i].shrn(72).mod(toBN(256)).toNumber() - 1]++;
-			}
-		}
-		// for the rest of the tokens its straight forward
-		const slv = (await silver.balanceOf(player)).div(await silver.ONE_UNIT()).toNumber();
-		const gld = (await gold.balanceOf(player)).div(await gold.ONE_UNIT()).toNumber();
-		const artifacts20 = (await artifactErc20.balanceOf(player)).toNumber();
-		const foundersKeys = (await foundersKey.balanceOf(player)).toNumber();
-		const chestKeys = (await chestKey.balanceOf(player)).toNumber();
+		// extract the loot
+		const loot = await extractLoot(player, gem, silver, gold, artifactErc20, foundersKey, chestKey);
 
-		// make some console input (without gem level breakthrough)
-		console.log("\tmined %o plots; items found:", PLOTS);
-		console.log("\tgems: %o", gems.length);
-		console.log("\tsilver: %o", slv);
-		console.log("\tgold: %o", gld);
-		console.log("\tartifacts20: %o", artifacts20);
-		console.log("\tfounder's keys: %o", foundersKeys);
-		console.log("\tchest keys: %o", chestKeys);
-
-		// CSV file data
-		const csv_data = `${PLOTS},${gs.join(",")},${slv},${gld},${artifacts20},${chestKeys}`;
+		// CSV file data - type C
+		const csv_data_c = `${PLOTS},${loot.colors.join(",")},${loot.levels.join(",")},${loot.grades.join(",")},${loot.silver},${loot.gold},${loot.artifacts20},${loot.foundersKeys}`;
 		// write statistical raw data into the file
-		write_csv("./data/plot_loot_C5.csv", CSV_HEADER, csv_data);
+		write_csv("./data/plot_loot_C5.csv", CSV_HEADER_C, csv_data_c);
 
-		// verify some statistics constraints
-		assert(gs[0] > 0, "no level 1 gems");
-		assert(gs[1] > 0, "no level 2 gems");
-		assert(gs[2] > 0, "no level 3 gems");
-		assert(gs[3] > 0, "no level 4 gems");
-		assert(gs[4] > 0, "no level 5 gems");
-		assert(slv > 0, "no silver");
-		assert(gld > 0, "no gold");
-		assert(artifacts20 > 0, "no artifacts");
-		assert.equal(0, foundersKeys, "founder's key(s) present");
-		assert(chestKeys > 0, "no chest keys");
-
-		// TODO: inspect gem color and grade
+		// verify some statistics on the loot
+		verifyTheLoot(loot);
+		// for the Rest of the World no founders' keys should be present
+		assert.equal(0, loot.foundersKeys, "founder's key(s) present");
 	});
 
 });
+
+// function to extract the loot from specified player's account
+async function extractLoot(player, gem, silver, gold, artifactErc20, foundersKey, chestKey) {
+	const loot = {
+		gems: 0,
+		colors: new Array(12).fill(0),
+		levels: new Array(5).fill(0),
+		grades: new Array(6).fill(0),
+		silver: 0,
+		gold: 0,
+		artifacts20: 0,
+		foundersKeys: 0,
+		chestKeys: 0
+	};
+	// to determine levels of the gems - get full collection
+	const gems = await gem.getPackedCollection(player);
+	loot.gems = gems.length;
+	for(let i = 0; i < gems.length; i++) {
+		// verify gem ID is not one of the already existing ones
+		if(gems[i].shrn(88).gte(toBN(PLOTS))) {
+			// and unpack each gem's color, level and grade individually
+			loot.colors[gems[i].shrn(80).mod(toBN(256)).toNumber() - 1]++;
+			loot.levels[gems[i].shrn(72).mod(toBN(256)).toNumber() - 1]++;
+			loot.grades[gems[i].shrn(64).mod(toBN(256)).toNumber() - 1]++;
+		}
+	}
+	// for the rest of the tokens its straight forward
+	loot.silver = (await silver.balanceOf(player)).div(await silver.ONE_UNIT()).toNumber();
+	loot.gold = (await gold.balanceOf(player)).div(await gold.ONE_UNIT()).toNumber();
+	loot.artifacts20 = (await artifactErc20.balanceOf(player)).toNumber();
+	loot.foundersKeys = (await foundersKey.balanceOf(player)).toNumber();
+	loot.chestKeys = (await chestKey.balanceOf(player)).toNumber();
+
+	// make some console input (without gem level breakthrough)
+	console.log("\tmined %o plots; items found:", PLOTS);
+	console.log("\tgems: %o", loot.gems);
+	console.log("\tsilver: %o", loot.silver);
+	console.log("\tgold: %o", loot.gold);
+	console.log("\tartifacts20: %o", loot.artifacts20);
+	if(loot.foundersKeys) {
+		console.log("\tfounder's keys: %o", loot.foundersKeys);
+	}
+	if(loot.chestKeys) {
+		console.log("\tchest keys: %o", loot.chestKeys);
+	}
+
+	return loot;
+}
+
+// function to verify loot constraints when mining 1000 plots fully
+function verifyTheLoot(loot) {
+	// verify gem colors:
+	for(let i = 1; i <= 12; i++) {
+		if(AVAILABLE_GEM_COLORS.indexOf(i) !== -1) {
+			assert(loot.colors[i - 1] > 0, `no color ${i} gems`);
+		}
+		else {
+			assert.equal(0, loot.colors[i - 1], `color ${i} gem(s) present`)
+		}
+	}
+	// verify gem levels:
+	for(let i = 1; i <= 5; i++) {
+		assert(loot.levels[i - 1] > 0, `no level ${i} gems`);
+	}
+	// verify gem grades: D, C, B, A, AA are very likely to be found,
+	// while chance not to find grade AAA in 1000 plots is up to 80%
+	for(let i = 1; i <= 5; i++) {
+		assert(loot.grades[i - 1] > 0, `no grade ${i} gems`)
+	}
+	assert(loot.silver > 0, "no silver");
+	assert(loot.gold > 0, "no gold");
+	assert(loot.artifacts20 > 0, "no artifacts");
+	// still about 40% chance of not getting a key in 1000 plots – comment out
+	// assert(loot.chestKeys + loot.foundersKeys > 0, "no keys");
+}
 
 
 // import shared functions
