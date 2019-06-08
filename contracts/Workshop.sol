@@ -27,7 +27,7 @@ contract Workshop is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant WORKSHOP_UID = 0xd53975e00149fb67d976993d4d2d65e7f314800c456140f59f9d2f25ef7a5606;
+  uint256 public constant WORKSHOP_UID = 0x059bfb62c4821927d0f2c7457a9de172c96dfeffd688a3e4a9eec52aaf5b7054;
 
   /**
    * @dev Expected version of the deployed GemERC721 instance
@@ -398,6 +398,7 @@ contract Workshop is AccessMultiSig {
    *      grade delta combination) result in no level/grade change for the gem
    *      (ex.: both `levelDelta` and `gradeTypeDelta` are zero and gem grade is not AAA)
    * @dev Requires transaction sender to be an owner of the gem
+   * @dev Requires the gem not to be locked (not mining)
    * @dev Throws if token owner (transaction sender) has not enough
    *      gold and/or silver on the balance
    * @dev Consumes gold and/or silver on success, amounts can be
@@ -420,6 +421,10 @@ contract Workshop is AccessMultiSig {
   ) private {
     // ensure token is owned by the sender, it also ensures token exists
     require(gemInstance.ownerOf(tokenId) == msg.sender);
+
+    // verify token is not locked
+    require(gemInstance.isTransferable(tokenId));
+
     // to assign tuple return value from `getUpgradePrice`
     // we need to define the variables first
     uint8 silverRequired;
