@@ -19,9 +19,9 @@ import {ROLE_OFFSET_PROVIDER} from "./erc721_core";
 import {ROLE_AGE_PROVIDER} from "./erc721_core";
 
 // define Miner specific Features and Roles
-export const FEATURE_MINING_ENABLED = 0x00000001;
-export const ROLE_MINING_OPERATOR = 0x00000001;
-export const ROLE_ROLLBACK_OPERATOR = 0x00000002;
+const FEATURE_MINING_ENABLED = 0x00000001;
+const ROLE_MINING_OPERATOR = 0x00000001;
+const ROLE_ROLLBACK_OPERATOR = 0x00000002;
 
 // Miner smart contract tests
 contract('Miner', (accounts) => {
