@@ -439,11 +439,11 @@ async function extractLoot(player, gem, silver, gold, artifactErc20, foundersKey
 	loot.gems = gems.length;
 	for(let i = 0; i < gems.length; i++) {
 		// verify gem ID is not one of the already existing ones
-		if(gems[i].shrn(88).gte(toBN(PLOTS))) {
+		if(gems[i].shrn(176).gte(toBN(PLOTS))) {
 			// and unpack each gem's color, level and grade individually
-			loot.colors[gems[i].shrn(80).mod(toBN(256)).toNumber() - 1]++;
-			loot.levels[gems[i].shrn(72).mod(toBN(256)).toNumber() - 1]++;
-			loot.grades[gems[i].shrn(64).mod(toBN(256)).toNumber() - 1]++;
+			loot.colors[gems[i].shrn(168).mod(toBN(256)).toNumber() - 1]++;
+			loot.levels[gems[i].shrn(160).mod(toBN(256)).toNumber() - 1]++;
+			loot.grades[gems[i].shrn(152).mod(toBN(256)).toNumber() - 1]++;
 		}
 	}
 	// for the rest of the tokens its straight forward
