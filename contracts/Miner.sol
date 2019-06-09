@@ -403,7 +403,7 @@ contract Miner is AccessMultiSig {
     // in the same transaction
     if(offset > TierMath.getOffset(tiers)) {
       // delegate call to `__mine` to update plot and mint loot
-      __mine(plotId, offset);
+      __mine(plotId, gemId, offset);
 
       // recalculate energy left
       uint32 energy = uint32(uint64(effectiveEnergy) * 100000000 / rate100000000);
@@ -460,14 +460,17 @@ contract Miner is AccessMultiSig {
     // evaluate the plot
     uint8 offset = evaluate(plotId);
 
+    // load binding data
+    MiningData memory m = plots[plotId];
+
     // if offset changed
     if(offset != plotInstance.getOffset(plotId)) {
       // delegate call to `__mine` to update plot and mint loot
-      __mine(plotId, offset);
+      __mine(plotId, m.gemId, offset);
     }
 
     // unlock the tokens - delegate call to `__unlock`
-    __unlock(plotId);
+    __unlock(plotId, m.gemId);
   }
 
   /**
@@ -490,19 +493,19 @@ contract Miner is AccessMultiSig {
     // evaluate the plot
     uint8 offset = evaluate(plotId);
 
+    // load binding data
+    MiningData memory m = plots[plotId];
+
     // delegate call to `__mine` to update plot and mint loot
-    __mine(plotId, offset);
+    __mine(plotId, m.gemId, offset);
 
     // if plot is fully mined now
     if(plotInstance.isFullyMined(plotId)) {
       // unlock the tokens - delegate call to `__unlock`
-      __unlock(plotId);
+      __unlock(plotId, m.gemId);
     }
     // if plot still can be mined do not unlock
     else {
-      // load binding data
-      MiningData memory m = plots[plotId];
-
       // keeping it locked and updating state change date
       gemInstance.setState(m.gemId, DEFAULT_MINING_BIT);
     }
@@ -518,8 +521,11 @@ contract Miner is AccessMultiSig {
     // ensure function is called by rollback operator
     require(isSenderInRole(ROLE_ROLLBACK_OPERATOR));
 
+    // load binding data
+    MiningData memory m = plots[plotId];
+
     // unlock the tokens - delegate call to `__unlock`
-    __unlock(plotId);
+    __unlock(plotId, m.gemId);
   }
 
   /**
@@ -527,14 +533,11 @@ contract Miner is AccessMultiSig {
    * @dev Unsafe, must be kept private
    * @param plotId ID of the plot to unlock
    */
-  function __unlock(uint24 plotId) private {
-    // load binding data
-    MiningData memory m = plots[plotId];
-
+  function __unlock(uint24 plotId, uint24 gemId) private {
     // unlock the plot, erasing everything else in its state
     plotInstance.setState(plotId, 0);
     // unlock the gem, erasing everything else in its state
-    gemInstance.setState(m.gemId, 0);
+    gemInstance.setState(gemId, 0);
     // unlock artifact if any, erasing everything in its state
     // artifactInstance.setState(m.artifactId, 0);
 
@@ -542,7 +545,7 @@ contract Miner is AccessMultiSig {
     delete plots[plotId];
 
     // emit en event
-    emit Released(msg.sender, plotId, m.gemId);
+    emit Released(msg.sender, plotId, gemId);
   }
 
   /**
@@ -652,10 +655,7 @@ contract Miner is AccessMultiSig {
    * @param offset depth to mine the plot to,
    *      must be bigger than current plot depth
    */
-  function __mine(uint24 plotId, uint8 offset) private {
-    // load binding data, gemId to be used in event emitter
-    MiningData memory m = plots[plotId];
-
+  function __mine(uint24 plotId, uint24 gemId, uint8 offset) private {
     // get tiers structure of the plot
     uint64 tiers = plotInstance.getTiers(plotId);
 
@@ -673,10 +673,10 @@ contract Miner is AccessMultiSig {
     plotInstance.mineTo(plotId, offset);
 
     // update gem's stats
-    gemInstance.updateMinedStats(m.gemId, TierMath.isBottomOfStack(tiers, offset)? 1: 0, offset - offset0);
+    gemInstance.updateMinedStats(gemId, TierMath.isBottomOfStack(tiers, offset)? 1: 0, offset - offset0);
 
     // emit an event
-    emit Updated(msg.sender, plotId, m.gemId, offset0, offset, loot);
+    emit Updated(msg.sender, plotId, gemId, offset0, offset, loot);
   }
 
   /**
