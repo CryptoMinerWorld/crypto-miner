@@ -849,25 +849,49 @@ contract Miner is AccessMultiSig {
     if(tier0 == tier1) {
       // just process current tier according to offsets
       //  [    '*********************"      |                             |                   |         |    ]
-      loot = tierLoot(tier0, offset - offset0, TierMath.isBottomOfStack(tiers, offset)? 1: 0, loot);
+      loot = tierLoot(
+        tier0,
+        offset - offset0,
+        TierMath.getNumberOfTiers(tiers) == 2,
+        TierMath.isBottomOfStack(tiers, offset) ? 1 : 0,
+        loot
+      );
     }
     // otherwise, if we cross one or more tiers
     //    [           '                     |                             |          "        |         |    ]
     else {
       // process first tier
       //  [           '*********************|                             |          "        |         |    ]
-      loot = tierLoot(tier0, TierMath.getTierDepth(tiers, tier0) - offset0, 0, loot);
+      loot = tierLoot(
+        tier0,
+        TierMath.getTierDepth(tiers, tier0) - offset0,
+        TierMath.getNumberOfTiers(tiers) == 2,
+        0,
+        loot
+      );
 
       // process middle tiers
       //  [           '                     |*****************************|          "        |         |    ]
       for(uint8 i = tier0 + 1; i < tier1; i++) {
         // process full tier `i`
-        loot = tierLoot(i, TierMath.getTierHeight(tiers, i), 0, loot);
+        loot = tierLoot(
+          i,
+          TierMath.getTierHeight(tiers, i),
+          TierMath.getNumberOfTiers(tiers) == 2,
+          0,
+          loot
+        );
       }
 
       // process last tier
       //  [           '                     |                             |**********"        |         |    ]
-      loot = tierLoot(tier1, offset - TierMath.getTierOffset(tiers, tier1), TierMath.isBottomOfStack(tiers, offset)? 1: 0, loot);
+      loot = tierLoot(
+        tier1,
+        offset - TierMath.getTierOffset(tiers, tier1),
+        TierMath.getNumberOfTiers(tiers) == 2,
+        TierMath.isBottomOfStack(tiers, offset) ? 1 : 0,
+        loot
+      );
     }
 
     // return the result
@@ -888,16 +912,117 @@ contract Miner is AccessMultiSig {
    *      index 8: keys
    * @param k one-based tier index to process loot for
    * @param n number of blocks to process for tier specified
+   * @param a boolean flag indicating Antarctica plot type
+   *      (founder's drop rates apply)
    * @param b bottom of stack counter, specifies how many blocks
    *      should be considered to be bottom of the stack;
    *      usually equals to zero if bottom is not reached or
    *      one if bottom of the stack is reached
    * @param loot an array containing loot information
    */
-  function tierLoot(uint8 k, uint16 n, uint16 b, uint16[] memory loot) public view returns(uint16[] memory) {
+  function tierLoot(uint8 k, uint16 n, bool a, uint16 b, uint16[] memory loot) public view returns(uint16[] memory) {
     // for each block out of `n` blocks in tier `k`
     // we need to generate up to 11 random numbers,
     // with the precision up to 0.01%, that is 10^-4
+
+    // Antarctica
+    if(a) {
+      // for tier 1
+      if(k == 1) {
+        // gem (lvl 1): 1%
+        loot[0] += rndEval(0, 100, n);
+        // gem (lvl 2): 0.15%
+        loot[1] += rndEval(n, 15, n);
+        // silver (1pc): 9%, silver (5pcs): 0.5%, silver (15pcs): 0.1%
+        loot[5] += rndEval(5 * n, 900, n) + 5 * rndEval(6 * n, 50, n) + 15 * rndEval(7 * n, 10, n);
+      }
+      // for tier 2
+      else if(k == 2) {
+        // gem (lvl 1): 0.8%
+        loot[0] += rndEval(0, 80, n);
+        // gem (lvl 2): 0.6%
+        loot[1] += rndEval(n, 60, n);
+        // gem (lvl 3): 0.08%
+        loot[2] += rndEval(2 * n, 8, n);
+        // gem (lvl 4): 0.02%
+        loot[3] += rndEval(3 * n, 2, n);
+        // silver (1pc): 12%, silver (5pcs): 1%, silver (15pcs): 0.2%
+        loot[5] += rndEval(5 * n, 1200, n) + 5 * rndEval(6 * n, 100, n) + 15 * rndEval(7 * n, 20, n);
+        // gold (1): 0.01%
+        loot[6] += rndEval(8 * n, n, 1);
+        // artifact: 0.02%
+        loot[7] += rndEval(9 * n, 2, n);
+      }
+      // any other tier is invalid
+      else {
+        // throw an exception
+        require(false);
+      }
+
+      // for bottom of the stack blocks
+      for(uint16 i = 0; i < b; i++) {
+        // generate some random data to work with
+        uint256 rnd = Random.generate256(11 * n + i);
+
+        // determine how many items we get based on low 16 bits of the randomness
+        uint256 items = 2 + Random.uniform(rnd, 16, 3);
+
+        // generate that amount of items
+        for(uint8 j = 0; j < items; j++) {
+          // generate random value in range [0, 10000)
+          // using bits (16, 88] - (16, 136]
+          uint256 rnd10000 = Random.uniform(rnd >> (16 + 24 * j), 24, 10000);
+
+          // generate loot according to the probabilities
+          // gem (lvl 1): none
+          // gem (lvl 2): 5%
+          if(rnd10000 < 500) {
+            loot[1]++;
+          }
+          // gem (lvl 3): 7%
+          else if(rnd10000 < 1200) {
+            loot[2]++;
+          }
+          // gem (lvl 4): 4%
+          else if(rnd10000 < 1600) {
+            loot[3]++;
+          }
+          // gem (lvl 5): 0.5%
+          else if(rnd10000 < 1650) {
+            loot[4]++;
+          }
+          // silver (1): 11%
+          else if(rnd10000 < 2750) {
+            loot[5]++;
+          }
+          // silver (5): 44.58%
+          else if(rnd10000 < 7208) {
+            loot[5] += 5;
+          }
+          // silver (15): 26%
+          else if(rnd10000 < 9808) {
+            loot[5] += 15;
+          }
+          // gold (1): 0.7%
+          else if(rnd10000 < 9878) {
+            loot[6]++;
+          }
+          // artifact: 1%
+          else if(rnd10000 < 9978) {
+            loot[7]++;
+          }
+          // key: 0.22%
+          else {
+            loot[8]++;
+          }
+        }
+      }
+
+      // return the loot
+      return loot;
+    }
+
+    // Rest of the World
 
     // for tier 1
     if(k == 1) {
@@ -905,12 +1030,8 @@ contract Miner is AccessMultiSig {
       loot[0] += rndEval(0, 100, n);
       // gem (lvl 2): 0.1%
       loot[1] += rndEval(n, 10, n);
-      // silver (1pc): 9%
-      loot[5] += rndEval(2 * n, 900, n);
-      // silver (5pcs): 0.5%
-      loot[5] += 5 * rndEval(3 * n, 50, n);
-      // silver (15pcs): 0.1%
-      loot[5] += 15 * rndEval(4 * n, 10, n);
+      // silver (1pc): 9%, silver (5pcs): 0.5%, silver (15pcs): 0.1%
+      loot[5] += rndEval(5 * n, 900, n) + 5 * rndEval(6 * n, 50, n) + 15 * rndEval(7 * n, 10, n);
     }
     // for tier 2
     else if(k == 2) {
@@ -918,14 +1039,10 @@ contract Miner is AccessMultiSig {
       loot[0] += rndEval(0, 80, n);
       // gem (lvl 2): 0.6%
       loot[1] += rndEval(n, 60, n);
-      // silver (1pc): 12%
-      loot[5] += rndEval(3 * n, 1200, n);
-      // silver (5pcs): 1%
-      loot[5] += 5 * rndEval(4 * n, 100, n);
-      // silver (15pcs): 0.2%
-      loot[5] += 15 * rndEval(5 * n, 20, n);
+      // silver (1pc): 12%, silver (5pcs): 1%, silver (15pcs): 0.2%
+      loot[5] += rndEval(5 * n, 1200, n) + 5 * rndEval(6 * n, 100, n) + 15 * rndEval(7 * n, 20, n);
       // artifact: 0.01%
-      loot[7] += rndEval(6 * n, n, 1);
+      loot[7] += rndEval(9 * n, n, 1);
     }
     // for tier 3
     else if(k == 3) {
@@ -937,16 +1054,12 @@ contract Miner is AccessMultiSig {
       loot[2] += rndEval(2 * n, 8, n);
       // gem (lvl 4): 0.04%
       loot[3] += rndEval(3 * n, 4, n);
-      // silver (1): 4%
-      loot[5] += rndEval(4 * n, 400, n);
-      // silver (5): 4%
-      loot[5] += 5 * rndEval(5 * n, 400, n);
-      // silver (15): 0.6%
-      loot[5] += 15 * rndEval(6 * n, 60, n);
+      // silver (1): 4%, silver (5): 4%, silver (15): 0.6%
+      loot[5] += rndEval(5 * n, 400, n) + 5 * rndEval(6 * n, 400, n) + 15 * rndEval(7 * n, 60, n);
       // gold (1): 0.01%
-      loot[6] += rndEval(7 * n, n, 1);
+      loot[6] += rndEval(8 * n, n, 1);
       // artifact: 0.04%
-      loot[7] += rndEval(8 * n, 4, n);
+      loot[7] += rndEval(9 * n, 4, n);
     }
     // for tier 4
     else if(k == 4) {
@@ -956,16 +1069,12 @@ contract Miner is AccessMultiSig {
       loot[2] += rndEval(2 * n, 80, n);
       // gem (lvl 4): 0.1%
       loot[3] += rndEval(3 * n, 10, n);
-      // silver (1): 3%
-      loot[5] += rndEval(4 * n, 300, n);
-      // silver (5): 5%
-      loot[5] += 5 * rndEval(5 * n, 500, n);
-      // silver (15): 1.2%
-      loot[5] += 15 * rndEval(6 * n, 120, n);
+      // silver (1): 3%, silver (5): 5%, silver (15): 1.2%
+      loot[5] += rndEval(5 * n, 300, n) + 5 * rndEval(6 * n, 500, n) + 15 * rndEval(7 * n, 120, n);
       // gold (1): 0.02%
-      loot[6] += rndEval(7 * n, 2, n);
+      loot[6] += rndEval(8 * n, 2, n);
       // artifact: 0.13%
-      loot[7] += rndEval(8 * n, 13, n);
+      loot[7] += rndEval(9 * n, 13, n);
     }
     // for tier 5
     else if(k == 5) {
@@ -975,12 +1084,8 @@ contract Miner is AccessMultiSig {
       loot[3] += rndEval(3 * n, 40, n);
       // gem (lvl 5): 0.04%
       loot[4] += rndEval(4 * n, 4, n);
-      // silver (1): 2%
-      loot[5] += rndEval(5 * n, 200, n);
-      // silver (5): 7%
-      loot[5] += 5 * rndEval(6 * n, 700, n);
-      // silver (15): 5%
-      loot[5] += 15 * rndEval(7 * n, 500, n);
+      // silver (1): 2%, silver (5): 7%, silver (15): 5%
+      loot[5] += rndEval(5 * n, 200, n) + 5 * rndEval(6 * n, 700, n) + 15 * rndEval(7 * n, 500, n);
       // gold (1): 0.05%
       loot[6] += rndEval(8 * n, 5, n);
       // artifact: 0.4%

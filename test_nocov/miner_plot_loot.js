@@ -26,7 +26,7 @@ const AVAILABLE_GEM_COLORS = [1, 2, 5, 6, 7, 9, 10].sort();
 
 // CSV file headers
 const CSV_HEADER = "plots,lv1,lv2,lv3,lv4,lv5,silver,gold,artifacts,keys";
-const CSV_HEADER_C = "plots,c1,c2,c3,c4,c5,c6,c7,c8,c9,10,c11,c12,lv1,lv2,lv3,lv4,lv5,D,C,B,A,AA,AAA,silver,gold,artifacts,keys";
+const CSV_HEADER_C = "plots,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,lv1,lv2,lv3,lv4,lv5,D,C,B,A,AA,AAA,silver,gold,artifacts,keys";
 
 // test depth - number of plots to simulate
 const PLOTS = 1000;
@@ -68,9 +68,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		for(let i = 0; i < PLOTS / BULK_SIZE; i ++) {
 			// Antarctica consists of two tiers
 			// 3,500 blocks in tier 1
-			loot = await miner.tierLoot(1, 35 * BULK_SIZE, 0, loot);
+			loot = await miner.tierLoot(1, 35 * BULK_SIZE, true, 0, loot);
 			// 6,500 blocks in tier 2
-			loot = await miner.tierLoot(2, 65 * BULK_SIZE, BULK_SIZE, loot);
+			loot = await miner.tierLoot(2, 65 * BULK_SIZE, true, BULK_SIZE, loot);
 		}
 
 		// CSV file data
@@ -87,7 +87,8 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
 		assert(loot[7] > 0, "no artifacts");
-		assert(loot[8] > 0, "no keys");
+		// there is a 74% chance of not getting any keys in 1000 plots
+		//assert(loot[8] > 0, "no keys");
 	});
 	it("tiers loot – Antarctica (2 Tiers)", async() => {
 		// define miner dependencies
@@ -135,7 +136,8 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
 		assert(loot[7] > 0, "no artifacts");
-		assert(loot[8] > 0, "no keys");
+		// there is a 74% chance of not getting any keys in 1000 plots
+		//assert(loot[8] > 0, "no keys");
 	});
 	it("mining a plot – Antarctica (2 Tiers)", async() => {
 		// define miner dependencies
@@ -252,15 +254,15 @@ contract('Miner: Plot Loot', (accounts) => {
 			// Rest of the World consists of five tiers
 			// for 100 plots there is
 			// 3,500 blocks in tier 1
-			loot = await miner.tierLoot(1, 35 * BULK_SIZE, 0, loot);
+			loot = await miner.tierLoot(1, 35 * BULK_SIZE, false, 0, loot);
 			// 3,000 blocks in tier 2
-			loot = await miner.tierLoot(2, 30 * BULK_SIZE, 0, loot);
+			loot = await miner.tierLoot(2, 30 * BULK_SIZE, false, 0, loot);
 			// 2,000 blocks in tier 3
-			loot = await miner.tierLoot(3, 20 * BULK_SIZE, 0, loot);
+			loot = await miner.tierLoot(3, 20 * BULK_SIZE, false, 0, loot);
 			// 1,000 blocks in tier 4
-			loot = await miner.tierLoot(4, 10 * BULK_SIZE, 0, loot);
+			loot = await miner.tierLoot(4, 10 * BULK_SIZE, false, 0, loot);
 			// 500 blocks in tier 5
-			loot = await miner.tierLoot(5, 5 * BULK_SIZE, BULK_SIZE, loot);
+			loot = await miner.tierLoot(5, 5 * BULK_SIZE, false, BULK_SIZE, loot);
 		}
 
 		// CSV file data
@@ -277,6 +279,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
 		assert(loot[7] > 0, "no artifacts");
+		// there is a 37% chance of not getting a key in tier 5 for 1000 plots
+		// and 74% chance of not finding a key in the bottom of the stack for 1000 plots
+		// 73% chance of getting at least one key
 		assert(loot[8] > 0, "no keys");
 	});
 	it("tiers loot – Rest of the World (5 Tiers)", async() => {
@@ -328,6 +333,9 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
 		assert(loot[7] > 0, "no artifacts");
+		// there is a 37% chance of not getting a key in tier 5 for 1000 plots
+		// and 74% chance of not finding a key in the bottom of the stack for 1000 plots
+		// 73% chance of getting at least one key
 		assert(loot[8] > 0, "no keys");
 	});
 	it("mining a plot – Rest of the World (5 Tiers)", async() => {
@@ -401,7 +409,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		const loot = await extractLoot(player, gem, silver, gold, artifactErc20, foundersKey, chestKey);
 
 		// CSV file data - type C
-		const csv_data_c = `${PLOTS},${loot.colors.join(",")},${loot.levels.join(",")},${loot.grades.join(",")},${loot.silver},${loot.gold},${loot.artifacts20},${loot.foundersKeys}`;
+		const csv_data_c = `${PLOTS},${loot.colors.join(",")},${loot.levels.join(",")},${loot.grades.join(",")},${loot.silver},${loot.gold},${loot.artifacts20},${loot.chestKeys}`;
 		// write statistical raw data into the file
 		write_csv("./data/plot_loot_C5.csv", CSV_HEADER_C, csv_data_c);
 
@@ -484,7 +492,8 @@ function verifyTheLoot(loot) {
 	assert(loot.silver > 0, "no silver");
 	assert(loot.gold > 0, "no gold");
 	assert(loot.artifacts20 > 0, "no artifacts");
-	// still about 40% chance of not getting a key in 1000 plots – comment out
+	// there is a 74% chance of not getting any keys in 1000 plots in Antarctica
+	// and 73% chance of finding at least one key in 1000 plots for the rest of the world
 	// assert(loot.chestKeys + loot.foundersKeys > 0, "no keys");
 }
 
