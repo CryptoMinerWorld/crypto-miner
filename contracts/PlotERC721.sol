@@ -430,12 +430,10 @@ contract PlotERC721 is ERC721Core {
    * @return true if token is transferable, false otherwise
    */
   function isTransferable(uint256 _tokenId) public view returns(bool) {
-    // validate token existence
-    require(exists(_tokenId));
-
     // calculate token state and transfer mask intersection
     // and compare this intersection with zero
-    return tokens[_tokenId].state & transferLock == 0;
+    // check token existence under the hood in getState()
+    return getState(_tokenId) & transferLock == 0;
   }
 
   /**

@@ -23,7 +23,7 @@ contract GemERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0x259bcf6e06acb5617a0bc9bbf2ff36611433e94c389dfd42d65951b13c0af088;
+  uint256 public constant TOKEN_UID = 0xd427dd7fed7ae5a853e296754a314280d19660ff9db5cb32a7ec6f238a716d8a;
 
   /**
    * @dev ERC20 compliant token symbol
@@ -66,13 +66,6 @@ contract GemERC721 is ERC721Core {
     uint8 level;
 
     /**
-     * @dev Initially zero, changes when level is modified
-     *      (meaning the gem is leveled up)
-     * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
-     */
-    uint32 levelModified;
-
-    /**
      * @dev Gem grade, mutable, may only increase
      * @dev High 8 bits of the grade is grade type:
      *      D (1), C (2), B (3), A (4), AA (5) and AAA (6)
@@ -81,11 +74,21 @@ contract GemERC721 is ERC721Core {
     uint32 grade;
 
     /**
-     * @dev Initially zero, changes when grade is modified
+     * @dev Initially zero, changes when level or grade is modified
      *      (meaning the gem is upgraded)
      * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
      */
-    uint32 gradeModified;
+    uint32 propertiesModified;
+
+    /**
+     * @dev Initially zero, can only increase
+     */
+    uint24 plotsMined;
+
+    /**
+     * @dev Initially zero, can only increase
+     */
+    uint32 blocksMined;
 
     /**
      * @dev Saved energetic age of the gem, mutable
@@ -94,19 +97,13 @@ contract GemERC721 is ERC721Core {
     uint32 age;
 
     /**
-     * @dev Initially zero, changes when age is modified
-     *      (meaning energetic age of the gem is changed)
-     * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
-     */
-    uint32 ageModified;
-
-    /**
      * @dev State value, mutable
      */
-    uint24 state;
+    uint32 state;
 
     /**
-     * @dev Initially zero, changes when state is modified
+     * @dev Initially zero, changes when blocks mined, plots mined,
+     *      age or state are modified
      * @dev Stored as unix timestamp - number of seconds passed since 1/1/1970
      */
     uint32 stateModified;
@@ -185,7 +182,7 @@ contract GemERC721 is ERC721Core {
    * @dev The token is locked if it contains any bits
    *      from the `transferLock` in its `state` set
    */
-  uint24 public transferLock = DEFAULT_MINING_BIT;
+  uint32 public transferLock = DEFAULT_MINING_BIT;
 
   /**
    * @dev Default bitmask indicating that the gem is `mining`
@@ -194,7 +191,7 @@ contract GemERC721 is ERC721Core {
    *      0: not mining
    *      1: mining
    */
-  uint24 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
+  uint32 public constant DEFAULT_MINING_BIT = 0x1; // bit number 1
 
   /**
    * @notice State provider is responsible for various features of the game,
@@ -229,15 +226,21 @@ contract GemERC721 is ERC721Core {
   uint32 public constant ROLE_AGE_PROVIDER = 0x00000100;
 
   /**
+   * @notice Mine stats provider is responsible for updating gem mining stats
+   * @dev Role ROLE_MINED_STATS_PROVIDER allows updating plots and blocks mined counters
+   */
+  uint32 public constant ROLE_MINED_STATS_PROVIDER = 0x00000200;
+
+  /**
    * @dev Next ID Inc is responsible for incrementing `nextId`,
    *      permission allows to call `incrementId`
    */
-  uint32 public constant ROLE_NEXT_ID_INC = 0x00000200;
+  uint32 public constant ROLE_NEXT_ID_INC = 0x00001000;
 
   /**
-   * @dev Color provider may change the `availableColors` array
+   * @dev Available colors provider may change the `availableColors` array
    */
-  uint32 public constant ROLE_COLOR_PROVIDER = 0x00000400;
+  uint32 public constant ROLE_AVAILABLE_COLORS_PROVIDER = 0x00002000;
 
   /**
    * @dev Fired in setState()
@@ -253,8 +256,8 @@ contract GemERC721 is ERC721Core {
     address indexed _by,
     address indexed _owner,
     uint256 indexed _tokenId,
-    uint24 _from,
-    uint24 _to
+    uint32 _from,
+    uint32 _to
   );
 
   /**
@@ -265,7 +268,7 @@ contract GemERC721 is ERC721Core {
    * @param _from old value of `transferLock`
    * @param _to new value of `transferLock`
    */
-  event TransferLockChanged(address indexed _by, uint24 _from, uint24 _to);
+  event TransferLockChanged(address indexed _by, uint32 _from, uint32 _to);
 
   /**
    * @dev Fired in levelUp() and levelUpBy()
@@ -322,6 +325,28 @@ contract GemERC721 is ERC721Core {
   );
 
   /**
+   * @dev Fired in updateMinedStats()
+   * @param _by mined stats provider
+   *      (an address having `ROLE_MINED_STATS_PROVIDER` permission)
+   *      which modified token `_tokenId` energetic age
+   * @param _owner owner of the token `_tokenId`
+   * @param _tokenId id of the token whose energetic age was modified
+   * @param _plotsFrom old minedPlots value
+   * @param _plotsTo new minedPlots value
+   * @param _blocksFrom old minedBlocks value
+   * @param _blocksTo new minedBlocks value
+   */
+  event MinedStatsModified(
+    address indexed _by,
+    address indexed _owner,
+    uint256 indexed _tokenId,
+    uint24 _plotsFrom,
+    uint24 _plotsTo,
+    uint32 _blocksFrom,
+    uint32 _blocksTo
+  );
+  
+  /**
    * @dev Creates a ERC721 instance,
    *      registers required ERC721 interfaces via ERC165
    */
@@ -347,13 +372,13 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Updates `availableColors` array
-   * @dev Requires sender to have `ROLE_COLOR_PROVIDER` permission
+   * @dev Requires sender to have `ROLE_AVAILABLE_COLORS_PROVIDER` permission
    * @dev Requires input array not to be empty
    * @param colors array of available colors to set
    */
   function setAvailableColors(uint8[] memory colors) public {
     // ensure sender has permission to set colors
-    require(isSenderInRole(ROLE_COLOR_PROVIDER));
+    require(isSenderInRole(ROLE_AVAILABLE_COLORS_PROVIDER));
 
     // ensure array is not empty
     require(colors.length != 0);
@@ -378,12 +403,12 @@ contract GemERC721 is ERC721Core {
    *          plotId, 24 bits
    *          color, 8 bits
    *          level, 8 bits
-   *          levelModified, 32 bits
    *          grade, 32 bits
-   *          gradeModified, 32 bits
+   *          propertiesModified, 32 bits
+   *          plots mined, 24 bits
+   *          blocks mined, 32 bits
    *          age, 32 bits
-   *          ageModified, 32 bits
-   *          state, 24 bits
+   *          state, 32 bits
    *          stateModified, 32 bits
    *      Second integer (low bits) contains (from higher to lower bits order):
    *          creationTime, 32 bits
@@ -404,12 +429,12 @@ contract GemERC721 is ERC721Core {
     uint256 high = uint256(token.plotId) << 232
                  | uint232(token.color) << 224
                  | uint224(token.level) << 216
-                 | uint216(token.levelModified) << 184
-                 | uint184(token.grade) << 152
-                 | uint152(token.gradeModified) << 120
-                 | uint120(token.age) << 88
-                 | uint88(token.ageModified) << 56
-                 | uint56(token.state) << 32
+                 | uint216(token.grade) << 184
+                 | uint184(token.propertiesModified) << 152
+                 | uint152(token.plotsMined) << 128
+                 | uint128(token.blocksMined) << 96
+                 | uint96(token.age) << 64
+                 | uint64(token.state) << 32
                  | uint32(token.stateModified);
 
     // pack low 256 bits of the result
@@ -439,12 +464,14 @@ contract GemERC721 is ERC721Core {
    *      color (8 bits)
    *      level (8 bits)
    *      grade (32 bits)
+   *      plots mined (24 bits)
+   *      blocks mined (32 bits)
    *      energetic age (32 bits)
    *      state (8 low bits)
    * @param owner an address to query a collection for
    * @return an ordered unsorted list of packed token data
    */
-  function getPackedCollection(address owner) public view returns (uint112[] memory) {
+  function getPackedCollection(address owner) public view returns (uint200[] memory) {
     // get an array of Gem IDs owned by an `owner` address
     uint24[] memory tokenIds = getCollection(owner);
 
@@ -452,7 +479,7 @@ contract GemERC721 is ERC721Core {
     uint24 balance = uint24(tokenIds.length);
 
     // data container to store the result
-    uint112[] memory result = new uint112[](balance);
+    uint200[] memory result = new uint200[](balance);
 
     // fetch token info one by one and pack into structure
     for(uint24 i = 0; i < balance; i++) {
@@ -460,9 +487,12 @@ contract GemERC721 is ERC721Core {
       uint24 tokenId = tokenIds[i];
 
       // read all required data and pack it
-      result[i] = uint112(tokenId) << 88
-                | uint88(getProperties(tokenId)) << 40
-                | uint40(getEnergeticAge(tokenId) << 8)
+      result[i] = uint200(tokenId) << 176
+                | uint176(getProperties(tokenId)) << 128
+                | uint128(getPlotsMined(tokenId)) << 104
+                | uint104(getBlocksMined(tokenId)) << 72
+                | uint72(getAge(tokenId)) << 40
+                | uint40(getModified(tokenId)) << 8
                 | uint8(getState(tokenId));
     }
 
@@ -502,11 +532,11 @@ contract GemERC721 is ERC721Core {
    * @param _tokenId ID of the token to get state for
    * @return a token state
    */
-  function getState(uint256 _tokenId) public view returns(uint24) {
+  function getState(uint256 _tokenId) public view returns(uint32) {
     // validate token existence
     require(exists(_tokenId));
 
-    // obtain token's state from storage and return
+    // obtain the value of interest from token structure
     return tokens[_tokenId].state;
   }
 
@@ -517,12 +547,10 @@ contract GemERC721 is ERC721Core {
    * @return true if token is transferable, false otherwise
    */
   function isTransferable(uint256 _tokenId) public view returns(bool) {
-    // validate token existence
-    require(exists(_tokenId));
-
     // calculate token state and transfer mask intersection
     // and compare this intersection with zero
-    return tokens[_tokenId].state & transferLock == 0;
+    // check token existence under the hood in getState()
+    return getState(_tokenId) & transferLock == 0;
   }
 
   /**
@@ -532,13 +560,13 @@ contract GemERC721 is ERC721Core {
    * @param _tokenId ID of the token to set state for
    * @param _state new state to set for the token
    */
-  function setState(uint256 _tokenId, uint24 _state) public {
+  function setState(uint256 _tokenId, uint32 _state) public {
     // check that the call is made by a state provider
     require(isSenderInRole(ROLE_STATE_PROVIDER));
 
     // read current state value
     // verifies token existence under the hood
-    uint24 state = getState(_tokenId);
+    uint32 state = getState(_tokenId);
 
     // check that new state is not the same as an old one
     // do not require this for state, allow state modification data update
@@ -591,7 +619,7 @@ contract GemERC721 is ERC721Core {
    * @dev Requires sender to have `ROLE_TRANSFER_LOCK_PROVIDER` permission.
    * @param _transferLock a value to set `transferLock` to
    */
-  function setTransferLock(uint24 _transferLock) public {
+  function setTransferLock(uint32 _transferLock) public {
     // check that the call is made by a transfer lock provider
     require(isSenderInRole(ROLE_TRANSFER_LOCK_PROVIDER));
 
@@ -616,7 +644,7 @@ contract GemERC721 is ERC721Core {
     // validate token existence
     require(exists(_tokenId));
 
-    // obtain token's color from storage and return
+    // obtain the value of interest from token structure
     return tokens[_tokenId].plotId;
   }
 
@@ -648,22 +676,22 @@ contract GemERC721 is ERC721Core {
     // validate token existence
     require(exists(_tokenId));
 
-    // obtain token's color from storage and return
+    // obtain the value of interest from token structure
     return tokens[_tokenId].color;
   }
 
   /**
-   * @dev Gets the level modified date of a token
+   * @dev Gets the level or grade modified date of a gem
    * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the token to get level modification date for
-   * @return a token level modification date
+   * @param _tokenId ID of the gem to get properties modified date for
+   * @return a token grade modified date
    */
-  function getLevelModified(uint256 _tokenId) public view returns(uint32) {
+  function getPropertiesModified(uint256 _tokenId) public view returns(uint32) {
     // validate token existence
     require(exists(_tokenId));
 
-    // obtain token's level modified date from storage and return
-    return tokens[_tokenId].levelModified;
+    // obtain token's grade modified date from storage and return
+    return tokens[_tokenId].propertiesModified;
   }
 
   /**
@@ -676,7 +704,7 @@ contract GemERC721 is ERC721Core {
     // validate token existence
     require(exists(_tokenId));
 
-    // obtain token's level from storage and return
+    // obtain the value of interest from token structure
     return tokens[_tokenId].level;
   }
 
@@ -687,7 +715,7 @@ contract GemERC721 is ERC721Core {
    * @param _tokenId ID of the gem to level up
    * @param _level new gem's level to set to
    */
-  function levelUp(uint256 _tokenId, uint8 _level) public {
+  function levelUpTo(uint256 _tokenId, uint8 _level) public {
     // check that the call is made by a level provider
     require(isSenderInRole(ROLE_LEVEL_PROVIDER));
 
@@ -702,7 +730,7 @@ contract GemERC721 is ERC721Core {
     tokens[_tokenId].level = _level;
 
     // update the level modification date
-    tokens[_tokenId].levelModified = uint32(now);
+    tokens[_tokenId].propertiesModified = uint32(now);
 
     // emit an event
     emit LevelUp(msg.sender, ownerOf(_tokenId), _tokenId, level, _level);
@@ -730,24 +758,10 @@ contract GemERC721 is ERC721Core {
     tokens[_tokenId].level += _by;
 
     // update the level modification date
-    tokens[_tokenId].levelModified = uint32(now);
+    tokens[_tokenId].propertiesModified = uint32(now);
 
     // emit an event
     emit LevelUp(msg.sender, ownerOf(_tokenId), _tokenId, level, level + _by);
-  }
-
-  /**
-   * @dev Gets the grade modified date of a gem
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the gem to get grade modified date for
-   * @return a token grade modified date
-   */
-  function getGradeModified(uint256 _tokenId) public view returns(uint32) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // obtain token's grade modified date from storage and return
-    return tokens[_tokenId].gradeModified;
   }
 
   /**
@@ -760,7 +774,7 @@ contract GemERC721 is ERC721Core {
     // validate token existence
     require(exists(_tokenId));
 
-    // obtain token's grade from storage and return
+    // obtain the value of interest from token structure
     return tokens[_tokenId].grade;
   }
 
@@ -809,24 +823,65 @@ contract GemERC721 is ERC721Core {
     tokens[_tokenId].grade = _grade;
 
     // update the grade modification date
-    tokens[_tokenId].gradeModified = uint32(now);
+    tokens[_tokenId].propertiesModified = uint32(now);
 
     // emit an event
     emit Upgraded(msg.sender, ownerOf(_tokenId), _tokenId, grade, _grade);
   }
 
   /**
-   * @dev Gets the energetic age modification date of a gem
+   * @dev Gets number of plots mined by the gem
    * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the gem to get age modification date for
-   * @return a token energetic age modification date
+   * @param _tokenId ID of the gem to get plots mined for
+   * @return a plots mined by the token value
    */
-  function getAgeModified(uint256 _tokenId) public view returns(uint32) {
+  function getPlotsMined(uint256 _tokenId) public view returns(uint24) {
     // validate token existence
     require(exists(_tokenId));
 
-    // obtain token's age modified date from storage and return
-    return tokens[_tokenId].ageModified;
+    // obtain the value of interest from token structure
+    return tokens[_tokenId].plotsMined;
+  }
+
+  /**
+   * @dev Gets number of blocks mined by the gem
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the gem to get blocks mined for
+   * @return a blocks mined by the token value
+   */
+  function getBlocksMined(uint256 _tokenId) public view returns(uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain the value of interest from token structure
+    return tokens[_tokenId].blocksMined;
+  }
+
+  /**
+   * @dev Increases plots mined and blocks mined counters of the gem
+   */
+  function updateMinedStats(uint256 _tokenId, uint24 _plots, uint32 _blocks) public {
+    // check that the call is made by a state provider
+    require(isSenderInRole(ROLE_MINED_STATS_PROVIDER));
+
+    // read plots and blocks mined values,
+    // verify token existence under the hood
+    uint24 plotsMined = getPlotsMined(_tokenId);
+    uint32 blocksMined = getBlocksMined(_tokenId);
+
+    // arithmetic overflow checks
+    require(plotsMined + _plots >= plotsMined);
+    require(blocksMined + _blocks >= blocksMined);
+
+    // update mining stats
+    tokens[_tokenId].plotsMined += _plots;
+    tokens[_tokenId].blocksMined += _blocks;
+
+    // update the state modification date
+    tokens[_tokenId].stateModified = uint32(now);
+
+    // emit en event
+    emit MinedStatsModified(msg.sender, ownerOf(_tokenId), _tokenId, plotsMined, plotsMined + _plots, blocksMined, blocksMined + _blocks);
   }
 
   /**
@@ -839,7 +894,7 @@ contract GemERC721 is ERC721Core {
     // validate token existence
     require(exists(_tokenId));
 
-    // obtain token's age from storage and return
+    // obtain the value of interest from token structure
     return tokens[_tokenId].age;
   }
 
@@ -862,14 +917,14 @@ contract GemERC721 is ERC721Core {
     tokens[_tokenId].age = _age;
 
     // update the state modification date
-    tokens[_tokenId].ageModified = uint32(now);
+    tokens[_tokenId].stateModified = uint32(now);
 
     // emit an event
     emit EnergeticAgeModified(msg.sender, ownerOf(_tokenId), _tokenId, age, _age);
   }
 
   /**
-   * @dev Gets last modification data of any data in gem's structure
+   * @dev Gets last modification date of any data in gem's structure
    * @dev Doesn't take into account ext256 data
    * @dev Throws if token specified doesn't exist
    * @param _tokenId ID of the token to get modification time for
@@ -882,23 +937,8 @@ contract GemERC721 is ERC721Core {
     // load token data into the memory
     Gem memory token = tokens[_tokenId];
 
-    // calculate maximums of a pair
-    uint32 ageState = token.ageModified > token.stateModified? token.ageModified: token.stateModified;
-
     // return the biggest of modification dates
-    return ageState > token.creationTime? ageState: token.creationTime;
-  }
-
-  /**
-   * @dev Calculates cumulative energetic age of the gem,
-   *      based on the saved value (see `getAge`) and accumulated value
-   *      from last token modification (see `getModified`)
-   * @param _tokenId ID of the token to get cumulative energetic age for
-   * @return cumulative energetic age of the gem in seconds
-   */
-  function getEnergeticAge(uint256 _tokenId) public view returns(uint32) {
-    // get age, modified and now and return the difference (seconds)
-    return uint32(getAge(_tokenId) + now - getModified(_tokenId));
+    return token.stateModified > token.creationTime? token.stateModified: token.creationTime;
   }
 
   /**
@@ -1156,11 +1196,11 @@ contract GemERC721 is ERC721Core {
       plotId: _plotId,
       color: _color,
       level: _level,
-      levelModified: 0,
       grade: _grade,
-      gradeModified: 0,
+      propertiesModified: 0,
+      plotsMined: 0,
+      blocksMined: 0,
       age: _age,
-      ageModified: 0,
       state: 0,
       stateModified: 0,
       creationTime: uint32(now),

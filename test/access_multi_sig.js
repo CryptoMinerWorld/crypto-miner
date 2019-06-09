@@ -257,19 +257,19 @@ contract('Access Control MultiSig', (accounts) => {
 		const operator = accounts[4];
 
 		// define functions to update roles and features
-		const updFeatures = async() => await ac.updateFeatures(SOME_PERM);
+		const disableMsig = async() => await ac.updateFeatures(SOME_PERM);
 		const updRole = async() => await ac.updateRole(operator, SOME_PERM);
 		const enableMsig = async() => await ac.updateFeatures(FEATURE_MSIG_ENABLED.or(SOME_PERM));
 
 		// requests succeed but only before MSIG is enabled
-		await updFeatures();
+		await disableMsig();
 		await updRole();
 		await updRole();
-		await updFeatures();
+		await disableMsig();
 		await enableMsig();
 		// after MSIG enabled all non-MultiSig functions fail
 		await assertThrows(enableMsig);
-		await assertThrows(updFeatures);
+		await assertThrows(disableMsig);
 		await assertThrows(updRole);
 
 		// verify features and roles set

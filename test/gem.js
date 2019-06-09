@@ -20,7 +20,7 @@ import {
 	ROLE_GRADE_PROVIDER,
 	ROLE_AGE_PROVIDER,
 	ROLE_NEXT_ID_INC,
-	ROLE_COLOR_PROVIDER
+	ROLE_AVAILABLE_COLORS_PROVIDER
 } from "./erc721_core";
 
 const grade1 = 0x1000001;
@@ -90,11 +90,6 @@ contract('GemERC721', function(accounts) {
 		const tk = await Token.new();
 		await tk.mint(accounts[0], 0x401, 17, 11, 5, 0x300000B);
 
-		// check packed collection before gem age has changed
-		const packedCollection = await tk.getPackedCollection(accounts[0]);
-		assert.equal(1, packedCollection.length, "wrong packed collection length for " + accounts[0]);
-		assert(toBN("0x4010B050300000B0000000000").eq(packedCollection[0]), "wrong token packed data at index 0");
-
 		assert.equal(17, await tk.getPlotId(0x401), "gem 0x401 has wrong plotId");
 		assert.equal(11, await tk.getColor(0x401), "gem 0x401 wrong color");
 		assert.equal(5, await tk.getLevel(0x401), "gem 0x401 wrong level");
@@ -107,9 +102,9 @@ contract('GemERC721', function(accounts) {
 		assert(creationTime.gt(0), "gem 0x401 wrong creation time");
 		const ownershipModified = await tk.getOwnershipModified(0x401);
 		assert.equal(0, ownershipModified, "gem 0x401 wrong ownership modified");
-		const levelModified = await tk.getLevelModified(0x401);
+		const levelModified = await tk.getPropertiesModified(0x401);
 		assert.equal(0, levelModified, "gem 0x401 wrong level modified");
-		const gradeModified = await tk.getGradeModified(0x401);
+		const gradeModified = await tk.getPropertiesModified(0x401);
 		assert.equal(0, gradeModified, "gem 0x401 wrong grade modified");
 		const stateModified = await tk.getStateModified(0x401);
 		assert.equal(0, stateModified, "gem 0x401 wrong state modified");
@@ -118,8 +113,15 @@ contract('GemERC721', function(accounts) {
 		assert.equal("http://cryptominerworld.com/gem/1025", tokenURI, "wrong 0x401 tokenURI");
 
 		const packed = await tk.getPacked(0x401);
-		assert(packed[0].eq(toBN("0x0000110B05000000000300000B00000000000000000000000000000000000000")), "gem 0x401 wrong high");
-		assert(packed[1].eq(toBN("0x" + creationTime.toString(16) + "0000000000000000" + accounts[0].substr(2, 40))), "gem 0x401 wrong high");
+		assert(packed[0].eq(toBN("0x0000110B050300000B0000000000000000000000000000000000000000000000")), "gem 0x401 wrong high");
+		assert(packed[1].eq(toBN("0x" + creationTime.toString(16) + "0000000000000000" + accounts[0].substr(2, 40))), "gem 0x401 wrong low");
+
+		// check packed collection
+		const packedCollection = await tk.getPackedCollection(accounts[0]);
+		assert.equal(1, packedCollection.length, "wrong packed collection length for " + accounts[0]);
+		console.log("%o", packedCollection[0].toString(16));
+		console.log("0x4010B050300000B0000000000000000000000" + creationTime.toString(16) + "00");
+		assert(toBN("0x4010B050300000B0000000000000000000000" + creationTime.toString(16) + "00").eq(packedCollection[0]), "wrong token packed data at index 0");
 
 		const collection = await tk.getCollection(accounts[0]);
 		assert.equal(1, collection.length, "wrong collection length for " + accounts[0]);
@@ -339,7 +341,7 @@ contract('GemERC721', function(accounts) {
 		// verify read returns 17
 		assert.equal(17, await tk.read(1, 0, 8), "wrong value read");
 	});
-	it("security: setAvailableColors requires ROLE_COLOR_PROVIDER permission", async() => {
+	it("security: setAvailableColors requires ROLE_AVAILABLE_COLORS_PROVIDER permission", async() => {
 		// deploy Gem Extension
 		const tk = await Token.new();
 
@@ -352,7 +354,7 @@ contract('GemERC721', function(accounts) {
 		// initially fn throws
 		await assertThrows(fn);
 		// after setting the required permission to operator
-		await tk.updateRole(operator, ROLE_COLOR_PROVIDER);
+		await tk.updateRole(operator, ROLE_AVAILABLE_COLORS_PROVIDER);
 		// fn succeeds
 		await fn();
 

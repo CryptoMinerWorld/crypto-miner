@@ -490,7 +490,7 @@ contract('Workshop', (accounts) => {
 		assert.equal(6, await gem.getGradeType(1), "incorrect grade type after maximum grade upgrade");
 
 		const gradeValue = (await gem.getGradeValue(1)).toNumber();
-		assert(gradeValue > 900000, "grade value is too low after several upgrades");
+		assert(gradeValue > 850000, "grade value is too low after several upgrades");
 		assert(gradeValue < 1000000, "grade value exceeded its maximum");
 	});
 	it("upgrades: 20 grade value upgrades", async() => {

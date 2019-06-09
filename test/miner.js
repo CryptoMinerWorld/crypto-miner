@@ -15,6 +15,8 @@ const Miner = artifacts.require("./Miner.sol");
 import {ROLE_STATE_PROVIDER} from "./erc721_core";
 // import PlotERC721 dependencies
 import {ROLE_OFFSET_PROVIDER} from "./erc721_core";
+// import GemERC721 dependencies
+import {ROLE_AGE_PROVIDER} from "./erc721_core";
 
 // define Miner specific Features and Roles
 export const FEATURE_MINING_ENABLED = 0x00000001;
@@ -53,9 +55,9 @@ contract('Miner', (accounts) => {
 		//assert.equal(artifact.address, await miner.artifactInstance(), "wrong artifact instance address");
 		assert.equal(s.address, await miner.silverInstance(), "wrong silver instance address");
 		assert.equal(o.address, await miner.goldInstance(), "wrong gold instance address");
-		//assert.equal(artifactErc20.address, await miner.artifactErc20Instance(), "wrong artifact ERC20 instance address");
-		//assert.equal(foundersKey.address, await miner.foundersKeyInstance(), "wrong founder's key instance address");
-		//assert.equal(chestKey.address, await miner.chestKeyInstance(), "wrong chest key instance address");
+		assert.equal(e.address, await miner.artifactErc20Instance(), "wrong artifact ERC20 instance address");
+		assert.equal(f.address, await miner.foundersKeyInstance(), "wrong founder's key instance address");
+		assert.equal(c.address, await miner.chestKeyInstance(), "wrong chest key instance address");
 	});
 
 	it("mining: mining properties of the new gem(s)", async() => {
@@ -165,7 +167,7 @@ contract('Miner', (accounts) => {
 		// enable mining feature on the miner
 		await miner.updateFeatures(FEATURE_MINING_ENABLED);
 		// grant miner permissions to modify gem's state
-		await gem.updateRole(miner.address, ROLE_STATE_PROVIDER);
+		await gem.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER);
 		// grant miner permission(s) to update plot
 		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
 
