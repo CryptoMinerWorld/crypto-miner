@@ -202,6 +202,20 @@
     },
     {
       "constant": true,
+      "inputs": [],
+      "name": "ROLE_MINED_STATS_PROVIDER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "",
@@ -335,15 +349,19 @@
           "type": "uint8"
         },
         {
-          "name": "levelModified",
-          "type": "uint32"
-        },
-        {
           "name": "grade",
           "type": "uint32"
         },
         {
-          "name": "gradeModified",
+          "name": "propertiesModified",
+          "type": "uint32"
+        },
+        {
+          "name": "plotsMined",
+          "type": "uint24"
+        },
+        {
+          "name": "blocksMined",
           "type": "uint32"
         },
         {
@@ -351,12 +369,8 @@
           "type": "uint32"
         },
         {
-          "name": "ageModified",
-          "type": "uint32"
-        },
-        {
           "name": "state",
-          "type": "uint24"
+          "type": "uint32"
         },
         {
           "name": "stateModified",
@@ -407,20 +421,6 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "ROLE_COLOR_PROVIDER",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -587,7 +587,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint24"
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -620,7 +620,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint24"
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -1026,6 +1026,20 @@
     },
     {
       "constant": true,
+      "inputs": [],
+      "name": "ROLE_AVAILABLE_COLORS_PROVIDER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "required",
@@ -1070,12 +1084,12 @@
         {
           "indexed": false,
           "name": "_from",
-          "type": "uint24"
+          "type": "uint32"
         },
         {
           "indexed": false,
           "name": "_to",
-          "type": "uint24"
+          "type": "uint32"
         }
       ],
       "name": "StateModified",
@@ -1092,12 +1106,12 @@
         {
           "indexed": false,
           "name": "_from",
-          "type": "uint24"
+          "type": "uint32"
         },
         {
           "indexed": false,
           "name": "_to",
-          "type": "uint24"
+          "type": "uint32"
         }
       ],
       "name": "TransferLockChanged",
@@ -1197,6 +1211,48 @@
         }
       ],
       "name": "EnergeticAgeModified",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_plotsFrom",
+          "type": "uint24"
+        },
+        {
+          "indexed": false,
+          "name": "_plotsTo",
+          "type": "uint24"
+        },
+        {
+          "indexed": false,
+          "name": "_blocksFrom",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "_blocksTo",
+          "type": "uint32"
+        }
+      ],
+      "name": "MinedStatsModified",
       "type": "event"
     },
     {
@@ -1405,7 +1461,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint112[]"
+          "type": "uint200[]"
         }
       ],
       "payable": false,
@@ -1462,7 +1518,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint24"
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -1497,7 +1553,7 @@
         },
         {
           "name": "_state",
-          "type": "uint24"
+          "type": "uint32"
         }
       ],
       "name": "setState",
@@ -1549,7 +1605,7 @@
       "inputs": [
         {
           "name": "_transferLock",
-          "type": "uint24"
+          "type": "uint32"
         }
       ],
       "name": "setTransferLock",
@@ -1623,7 +1679,7 @@
           "type": "uint256"
         }
       ],
-      "name": "getLevelModified",
+      "name": "getPropertiesModified",
       "outputs": [
         {
           "name": "",
@@ -1665,7 +1721,7 @@
           "type": "uint8"
         }
       ],
-      "name": "levelUp",
+      "name": "levelUpTo",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -1687,25 +1743,6 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "_tokenId",
-          "type": "uint256"
-        }
-      ],
-      "name": "getGradeModified",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -1791,7 +1828,26 @@
           "type": "uint256"
         }
       ],
-      "name": "getAgeModified",
+      "name": "getPlotsMined",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getBlocksMined",
       "outputs": [
         {
           "name": "",
@@ -1800,6 +1856,28 @@
       ],
       "payable": false,
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "_plots",
+          "type": "uint24"
+        },
+        {
+          "name": "_blocks",
+          "type": "uint32"
+        }
+      ],
+      "name": "updateMinedStats",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -1848,25 +1926,6 @@
         }
       ],
       "name": "getModified",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "_tokenId",
-          "type": "uint256"
-        }
-      ],
-      "name": "getEnergeticAge",
       "outputs": [
         {
           "name": "",
@@ -2083,7 +2142,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-07T13:30:23.699Z",
+  "updatedAt": "2019-06-09T06:40:35.635Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "A gem is an ERC721 non-fungible token, which maps Token ID,     a 24 bit number to a set of gem properties -     attributes (mostly immutable by their nature) and state variables (mutable)A gem token supports only minting, it can be only created",
@@ -2139,13 +2198,6 @@
         },
         "return": "a token energetic age value"
       },
-      "getAgeModified(uint256)": {
-        "details": "Gets the energetic age modification date of a gemThrows if token specified doesn't exist",
-        "params": {
-          "_tokenId": "ID of the gem to get age modification date for"
-        },
-        "return": "a token energetic age modification date"
-      },
       "getAllTokens()": {
         "details": "Allows to fetch all existing (minted) token IDs",
         "return": "an ordered unsorted list of all existing token IDs"
@@ -2160,6 +2212,13 @@
       "getAvailableColors()": {
         "details": "Getter for an entire `availableColors` array",
         "return": "array of available colors - `availableColors`"
+      },
+      "getBlocksMined(uint256)": {
+        "details": "Gets number of blocks mined by the gemThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the gem to get blocks mined for"
+        },
+        "return": "a blocks mined by the token value"
       },
       "getCollection(address)": {
         "params": {
@@ -2181,26 +2240,12 @@
         },
         "return": "a token creation time as a unix timestamp"
       },
-      "getEnergeticAge(uint256)": {
-        "details": "Calculates cumulative energetic age of the gem,     based on the saved value (see `getAge`) and accumulated value     from last token modification (see `getModified`)",
-        "params": {
-          "_tokenId": "ID of the token to get cumulative energetic age for"
-        },
-        "return": "cumulative energetic age of the gem in seconds"
-      },
       "getGrade(uint256)": {
         "details": "Gets the grade of a gemThrows if token specified doesn't exist",
         "params": {
           "_tokenId": "ID of the gem to get grade for"
         },
         "return": "a token grade"
-      },
-      "getGradeModified(uint256)": {
-        "details": "Gets the grade modified date of a gemThrows if token specified doesn't exist",
-        "params": {
-          "_tokenId": "ID of the gem to get grade modified date for"
-        },
-        "return": "a token grade modified date"
       },
       "getGradeType(uint256)": {
         "details": "Gets the grade type of a gemThrows if token specified doesn't exist",
@@ -2223,15 +2268,8 @@
         },
         "return": "a token level"
       },
-      "getLevelModified(uint256)": {
-        "details": "Gets the level modified date of a tokenThrows if token specified doesn't exist",
-        "params": {
-          "_tokenId": "ID of the token to get level modification date for"
-        },
-        "return": "a token level modification date"
-      },
       "getModified(uint256)": {
-        "details": "Gets last modification data of any data in gem's structureDoesn't take into account ext256 dataThrows if token specified doesn't exist",
+        "details": "Gets last modification date of any data in gem's structureDoesn't take into account ext256 dataThrows if token specified doesn't exist",
         "params": {
           "_tokenId": "ID of the token to get modification time for"
         },
@@ -2245,13 +2283,13 @@
         "return": "a token ownership modified time as a unix timestamp"
       },
       "getPacked(uint256)": {
-        "details": "Gets a gem by ID, representing it as two integers.     The two integers are tightly packed with a gem data:     First integer (high bits) contains (from higher to lower bits order):         plotId, 24 bits         color, 8 bits         level, 8 bits         levelModified, 32 bits         grade, 32 bits         gradeModified, 32 bits         age, 32 bits         ageModified, 32 bits         state, 24 bits         stateModified, 32 bits     Second integer (low bits) contains (from higher to lower bits order):         creationTime, 32 bits         index, 32 bits (only low 24 bits are used)         ownershipModified, 32 bits         owner, 160 bitsThrows if token specified doesn't exist",
+        "details": "Gets a gem by ID, representing it as two integers.     The two integers are tightly packed with a gem data:     First integer (high bits) contains (from higher to lower bits order):         plotId, 24 bits         color, 8 bits         level, 8 bits         grade, 32 bits         propertiesModified, 32 bits         plots mined, 24 bits         blocks mined, 32 bits         age, 32 bits         state, 32 bits         stateModified, 32 bits     Second integer (low bits) contains (from higher to lower bits order):         creationTime, 32 bits         index, 32 bits (only low 24 bits are used)         ownershipModified, 32 bits         owner, 160 bitsThrows if token specified doesn't exist",
         "params": {
           "_tokenId": "ID of the gem to fetch"
         }
       },
       "getPackedCollection(address)": {
-        "details": "Allows to fetch collection of tokens, including internal token data      in a single function, useful when connecting to external node like INFURAEach element in the collection contains     token ID (24 bits)     color (8 bits)     level (8 bits)     grade (32 bits)     energetic age (32 bits)     state (8 low bits)",
+        "details": "Allows to fetch collection of tokens, including internal token data      in a single function, useful when connecting to external node like INFURAEach element in the collection contains     token ID (24 bits)     color (8 bits)     level (8 bits)     grade (32 bits)     plots mined (24 bits)     blocks mined (32 bits)     energetic age (32 bits)     state (8 low bits)",
         "params": {
           "owner": "an address to query a collection for"
         },
@@ -2264,12 +2302,26 @@
         },
         "return": "a token land plot ID"
       },
+      "getPlotsMined(uint256)": {
+        "details": "Gets number of plots mined by the gemThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the gem to get plots mined for"
+        },
+        "return": "a plots mined by the token value"
+      },
       "getProperties(uint256)": {
         "details": "Gets the gem's properties – color, level and     grade - as packed uint32 numberThrows if token specified doesn't exist",
         "params": {
           "_tokenId": "ID of the gem to get properties for"
         },
         "return": "gem's properties - color, level, grade as packed uint32"
+      },
+      "getPropertiesModified(uint256)": {
+        "details": "Gets the level or grade modified date of a gemThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the gem to get properties modified date for"
+        },
+        "return": "a token grade modified date"
       },
       "getState(uint256)": {
         "details": "Gets the state of a tokenThrows if token specified doesn't exist",
@@ -2325,17 +2377,17 @@
         },
         "return": "true if all the permissions requested are enabled, false otherwise"
       },
-      "levelUp(uint256,uint8)": {
-        "details": "Levels up a gem to the level specifiedRequires sender to have `ROLE_STATE_PROVIDER` permissionThrows if token specified doesn't exist",
-        "params": {
-          "_level": "new gem's level to set to",
-          "_tokenId": "ID of the gem to level up"
-        }
-      },
       "levelUpBy(uint256,uint8)": {
         "details": "Levels up a gem to by the level delta specifiedRequires sender to have `ROLE_STATE_PROVIDER` permissionThrows if token specified doesn't exist",
         "params": {
           "_by": "number of levels to level up by",
+          "_tokenId": "ID of the gem to level up"
+        }
+      },
+      "levelUpTo(uint256,uint8)": {
+        "details": "Levels up a gem to the level specifiedRequires sender to have `ROLE_STATE_PROVIDER` permissionThrows if token specified doesn't exist",
+        "params": {
+          "_level": "new gem's level to set to",
           "_tokenId": "ID of the gem to level up"
         }
       },
@@ -2424,19 +2476,19 @@
         }
       },
       "setAvailableColors(uint8[])": {
-        "details": "Updates `availableColors` arrayRequires sender to have `ROLE_COLOR_PROVIDER` permissionRequires input array not to be empty",
+        "details": "Updates `availableColors` arrayRequires sender to have `ROLE_AVAILABLE_COLORS_PROVIDER` permissionRequires input array not to be empty",
         "params": {
           "colors": "array of available colors to set"
         }
       },
-      "setState(uint256,uint24)": {
+      "setState(uint256,uint32)": {
         "details": "Modifies the state of a tokenRequires sender to have `ROLE_STATE_PROVIDER` permissionThrows if token specified doesn't exist",
         "params": {
           "_state": "new state to set for the token",
           "_tokenId": "ID of the token to set state for"
         }
       },
-      "setTransferLock(uint24)": {
+      "setTransferLock(uint32)": {
         "details": "Allows setting the `transferLock` parameter of the contract,     which is used to determine if a particular token is locked or notA locked token cannot be transferredThe token is locked if it contains any bits     from the `transferLock` in its `state` setRequires sender to have `ROLE_TRANSFER_LOCK_PROVIDER` permission.",
         "params": {
           "_transferLock": "a value to set `transferLock` to"
@@ -2494,6 +2546,9 @@
         "params": {
           "_mask": "bitmask representing a set of features to enable/disable"
         }
+      },
+      "updateMinedStats(uint256,uint24,uint32)": {
+        "details": "Increases plots mined and blocks mined counters of the gem"
       },
       "updateMsig(address,uint256,uint256,uint8[],bytes32[],bytes32[])": {
         "details": "MultiSig version of the `updateRole` functionUpdates set of permissions (role) for a given user,     taking into account signers' permissionsSetting role to zero is equivalent to removing all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying signers' permissions (roles intersection) to the userRequires transaction signers to have `ROLE_ROLE_MANAGER` permissionRequires `MSIG_QUORUM` signatures in MultiSig mode –     if `FEATURE_MSIG_ENABLED` is enabled",

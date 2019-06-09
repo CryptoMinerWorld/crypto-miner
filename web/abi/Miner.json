@@ -40,37 +40,6 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "uint24"
-        }
-      ],
-      "name": "miningPlots",
-      "outputs": [
-        {
-          "name": "gemId",
-          "type": "uint24"
-        },
-        {
-          "name": "artifactId",
-          "type": "uint24"
-        },
-        {
-          "name": "player",
-          "type": "address"
-        },
-        {
-          "name": "bound",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
       "inputs": [],
       "name": "FEATURE_MINING_ENABLED",
       "outputs": [
@@ -230,6 +199,37 @@
         {
           "name": "",
           "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "name": "plots",
+      "outputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        },
+        {
+          "name": "artifactId",
+          "type": "uint24"
+        },
+        {
+          "name": "player",
+          "type": "address"
+        },
+        {
+          "name": "bound",
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -717,6 +717,11 @@
           "type": "uint24"
         },
         {
+          "indexed": true,
+          "name": "gemId",
+          "type": "uint24"
+        },
+        {
           "indexed": false,
           "name": "offsetFrom",
           "type": "uint8"
@@ -751,11 +756,6 @@
         {
           "indexed": true,
           "name": "gemId",
-          "type": "uint24"
-        },
-        {
-          "indexed": false,
-          "name": "artifactId",
           "type": "uint24"
         }
       ],
@@ -955,6 +955,10 @@
         {
           "name": "n",
           "type": "uint16"
+        },
+        {
+          "name": "a",
+          "type": "bool"
         },
         {
           "name": "b",
@@ -1352,7 +1356,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-07T13:30:23.955Z",
+  "updatedAt": "2019-06-09T06:37:59.039Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "Miner may read, write, mint, lock and unlock tokens     (locked tokens cannot be transferred i.e. cannot change owner)Following tokens may be accessed for reading (token properties affect mining):     - GemERC721     - PlotERC721     - ArtifactERC721Following tokens may be accessed for writing (token properties change when mining):     - PlotERC721Following tokens may be minted (token can be found in the land plot when mining):     - GemERC721     - ArtifactERC721     - SilverERC20     - GoldERC20     - ArtifactERC20     - FoundersKeyERC20     - ChestKeyERC20Following tokens may be locked or unlocked (tokens are locked when mining):     - GemERC721     - PlotERC721     - ArtifactERC721",
@@ -1583,9 +1587,10 @@
           "plotId": "ID of the plot to unlock"
         }
       },
-      "tierLoot(uint8,uint16,uint16,uint16[])": {
+      "tierLoot(uint8,uint16,bool,uint16,uint16[])": {
         "details": "Auxiliary function to generate loot for mining `n` blocks in tier `k`Loot data is accumulated in `loot` array, containing:     index 0: gems level 1     index 1: gems level 2     index 2: gems level 3     index 3: gems level 4     index 4: gems level 5     index 5: silver     index 6: gold     index 7: artifacts     index 8: keys",
         "params": {
+          "a": "boolean flag indicating Antarctica plot type     (founder's drop rates apply)",
           "b": "bottom of stack counter, specifies how many blocks     should be considered to be bottom of the stack;     usually equals to zero if bottom is not reached or     one if bottom of the stack is reached",
           "k": "one-based tier index to process loot for",
           "loot": "an array containing loot information",
