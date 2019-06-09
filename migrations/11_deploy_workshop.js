@@ -7,8 +7,10 @@ const GoldERC20 = artifacts.require("./GoldERC20");
 const Workshop = artifacts.require("./Workshop");
 
 // Features and Roles required to be enabled
-const ROLE_TOKEN_DESTROYER = 0x00000002;
 const FEATURE_UPGRADES_ENABLED = 0x00000001;
+const ROLE_TOKEN_DESTROYER = 0x00000002;
+const ROLE_LEVEL_PROVIDER = 0x00000040;
+const ROLE_GRADE_PROVIDER = 0x00000080;
 
 // Workshop smart contract deployment
 module.exports = async function(deployer, network, accounts) {
@@ -27,7 +29,7 @@ module.exports = async function(deployer, network, accounts) {
 
 		}:
 		{ // Ropsten addresses
-			GemERC721:          "0x766870343381b6A1bDD09d9d1c6F3E5BdfF5438B",
+			GemERC721:          "0x60014A33fe30E471c406Ddd99361487Ffe7f1189",
 			SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
 			GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
 		};
@@ -46,7 +48,7 @@ module.exports = async function(deployer, network, accounts) {
 
 		const workshop = await Workshop.deployed();
 		console.log("updating gem access");
-		await instances.GemERC721.updateRole(workshop.address, 0x000000C0); // ROLE_LEVEL_PROVIDER | ROLE_GRADE_PROVIDER
+		await instances.GemERC721.updateRole(workshop.address, ROLE_LEVEL_PROVIDER | ROLE_GRADE_PROVIDER);
 		console.log("updating silver access");
 		await instances.SilverERC20.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
 		console.log("updating gold access");

@@ -11,8 +11,13 @@ const FoundersKeyERC20 = artifacts.require("./FoundersKeyERC20");
 const Miner = artifacts.require("./Miner");
 
 // Features and Roles required to be enabled
-const ROLE_TOKEN_CREATOR = 0x00000001;
 const FEATURE_MINING_ENABLED = 0x00000001;
+const ROLE_TOKEN_CREATOR = 0x00000001;
+const ROLE_STATE_PROVIDER = 0x00000010;
+const ROLE_OFFSET_PROVIDER = 0x00000040;
+const ROLE_AGE_PROVIDER = 0x00000100;
+const ROLE_MINED_STATS_PROVIDER = 0x00000200;
+const ROLE_NEXT_ID_INC = 0x00001000;
 
 // Miner smart contract deployment
 module.exports = async function(deployer, network, accounts) {
@@ -31,7 +36,7 @@ module.exports = async function(deployer, network, accounts) {
 
 		}:
 		{ // Ropsten Addresses
-			GemERC721:          "0x766870343381b6A1bDD09d9d1c6F3E5BdfF5438B",
+			GemERC721:          "0x60014A33fe30E471c406Ddd99361487Ffe7f1189",
 			PlotERC721:         "0x4ED45BeC5762aB8b191Dd978db5609a53F21576f",
 			SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
 			GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
@@ -70,9 +75,9 @@ module.exports = async function(deployer, network, accounts) {
 
 		const miner = await Miner.deployed();
 		console.log("updating gem access");
-		await instances.GemERC721.updateRole(miner.address, 0x00000311); // ROLE_TOKEN_CREATOR | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_NEXT_ID_INC
+		await instances.GemERC721.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_INC | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
 		console.log("updating plot access");
-		await instances.PlotERC721.updateRole(miner.address, 0x00000050); // ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER
+		await instances.PlotERC721.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
 		console.log("updating silver access");
 		await instances.SilverERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
 		console.log("updating gold access");
@@ -84,6 +89,6 @@ module.exports = async function(deployer, network, accounts) {
 		console.log("updating chest key access");
 		await instances.ChestKeyERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
 		console.log("updating miner features");
-		await miner.updateFeatures(0x00000001); // FEATURE_MINING_ENABLED
+		await miner.updateFeatures(FEATURE_MINING_ENABLED);
 	}
 };
