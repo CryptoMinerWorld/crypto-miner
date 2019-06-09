@@ -556,7 +556,6 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
    * @dev The data returned:
    *      [0] t0  auction start time (unix timestamp)
    *      [1] t1  auction end time (unix timestamp)
-   *      [2] t   current time (unix timestamp)
    *      [3] p0  starting price (wei)
    *      [4] p1  final price (wei)
    *      [5] p   current price (wei)
@@ -568,7 +567,6 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
   function getTokenSaleStatus(address tokenAddress, uint256 _tokenId) public view returns(
     uint32 t0,
     uint32 t1,
-    uint32 t,
     uint96 p0,
     uint96 p1,
     uint96 p,
@@ -577,7 +575,7 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
     // check if token is on sale,
     if(!isTokenOnSale(tokenAddress, _tokenId)) {
       // return zeros if token is not on sale
-      return (0, 0, 0, 0, 0, 0, address(0));
+      return (0, 0, 0, 0, 0, address(0));
     }
 
     // read item into memory from storage
@@ -586,18 +584,44 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
     // set the return tuple parameters
     t0 = item.t0;
     t1 = item.t1;
-    t = uint32(now);
     p0 = item.p0;
     p1 = item.p1;
 
     // calculate and assign the price
-    p = price(t0, t1, t, p0, p1); // in wei
+    p = price(t0, t1, uint32(now), p0, p1); // in wei
 
     // finally, get the owner
     owner = owners[tokenAddress][_tokenId];
 
     // return the data calculated as a tuple
-    return (t0, t1, t, p0, p1, p, owner);
+    return (t0, t1, p0, p1, p, owner);
+  }
+
+  /**
+   *      First integer (high bits) contains (from higher to lower bits order):
+   *          auction start time, t0, 32 bits
+   *          auction end time, t1, 32 bits
+   *          starting price, p0, 96 bits
+   *          final price, p1, 96 bits
+   *      Second integer (low bits) contains (from higher to lower bits order):
+   *          current price, p, 96 bits
+   *          token owner, 160 bits
+   */
+  function getTokenSaleStatusPacked(address tokenAddress, uint256 _tokenId) public view returns(uint256, uint256) {
+    uint32 t0;
+    uint32 t1;
+    uint96 p0;
+    uint96 p1;
+    uint96 p;
+    address owner;
+    (t0, t1, p0, p1, p, owner) = getTokenSaleStatus(tokenAddress, _tokenId);
+    uint256 high = uint256(t0) << 224
+                 | uint224(t1) << 192
+                 | uint192(p0) << 96
+                 | p1;
+    uint256 low = uint256(p) << 160
+                | uint160(owner);
+    return (high, low);
   }
 
   /**
