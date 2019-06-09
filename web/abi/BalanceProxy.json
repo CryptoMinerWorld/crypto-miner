@@ -1,0 +1,47 @@
+{
+  "contractName": "BalanceProxy",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "instances",
+          "type": "address[]"
+        },
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balancesOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-06-09T00:08:18.325Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "BalanceProxy provides a convenient way of queering several   uint256 balances of any address(es) against some other smart contract   address(es) implementing BalanceOf interface",
+    "methods": {
+      "balancesOf(address[],address)": {
+        "details": "Gets an array of balances of the owner specified     against `BalanceOf` instances specifiedRequires array of instances not to be empty and contain     valid addresses of the `BalanceOf` instances",
+        "params": {
+          "instances": "an array of deployed `BalanceOf`",
+          "owner": "an address to query balances for"
+        }
+      }
+    },
+    "title": "Balance Proxy"
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}
