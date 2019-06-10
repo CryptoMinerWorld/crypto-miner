@@ -74,15 +74,13 @@ module.exports = async function(deployer, network, accounts) {
 		}
 	}
 	// countries - CountryERC721
-/*
 	for(let i = 0; i < 3 * testers.length; i++) {
-		const exists = await instances.CountryERC721.exists(i + 1);
-		console.log("%s country %o", (exists? "skipping": "minting"), i + 1);
+		const exists = await instances.CountryERC721.exists(190 - i);
+		console.log("%s country %o", (exists? "skipping": "minting"), 190 - i);
 		if(!exists) {
-			await instances.CountryERC721.mint(testers[i % testers.length], i + 1);
+			await instances.CountryERC721.mint(testers[i % testers.length], 190 - i);
 		}
 	}
-*/
 	// plots - PlotERC721
 	// Antarctica - 2 tiers
 	for(let i = 0; i < 5 * testers.length; i++) {
