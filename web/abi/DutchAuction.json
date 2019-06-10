@@ -1,0 +1,1378 @@
+{
+  "contractName": "DutchAuction",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isUserInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_WHITELIST_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_MSIG_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MAX_FEE_INV",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "beneficiary",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "chestVault",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "items",
+      "outputs": [
+        {
+          "name": "t0",
+          "type": "uint32"
+        },
+        {
+          "name": "t1",
+          "type": "uint32"
+        },
+        {
+          "name": "p0",
+          "type": "uint96"
+        },
+        {
+          "name": "p1",
+          "type": "uint96"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        }
+      ],
+      "name": "constructUpdateMsigRequest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_ADD",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MSIG_QUORUM",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_by",
+          "type": "address[]"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_FEE_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "owners",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_ACCESS_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "supportedTokenAddresses",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_AUCTION_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "GWEI",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_BUY",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "fee",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        },
+        {
+          "name": "v",
+          "type": "uint8[]"
+        },
+        {
+          "name": "r",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "s",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "updateMsig",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_tokenAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "t0",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "t1",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "t",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "p0",
+          "type": "uint96"
+        },
+        {
+          "indexed": false,
+          "name": "p1",
+          "type": "uint96"
+        },
+        {
+          "indexed": false,
+          "name": "p",
+          "type": "uint96"
+        }
+      ],
+      "name": "ItemAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_tokenAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ItemRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_tokenAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "t0",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "t1",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "t",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "p0",
+          "type": "uint96"
+        },
+        {
+          "indexed": false,
+          "name": "p1",
+          "type": "uint96"
+        },
+        {
+          "indexed": false,
+          "name": "p",
+          "type": "uint96"
+        },
+        {
+          "indexed": false,
+          "name": "fee",
+          "type": "uint96"
+        }
+      ],
+      "name": "ItemBought",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "n",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "d",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "beneficiary",
+          "type": "address"
+        }
+      ],
+      "name": "TransactionFeeUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "supported",
+          "type": "bool"
+        }
+      ],
+      "name": "whitelist",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "duration",
+          "type": "uint32"
+        },
+        {
+          "name": "p0",
+          "type": "uint96"
+        },
+        {
+          "name": "p1",
+          "type": "uint96"
+        }
+      ],
+      "name": "addNow",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "t0",
+          "type": "uint32"
+        },
+        {
+          "name": "t1",
+          "type": "uint32"
+        },
+        {
+          "name": "p0",
+          "type": "uint96"
+        },
+        {
+          "name": "p1",
+          "type": "uint96"
+        }
+      ],
+      "name": "addWith",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "remove",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "buy",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "_to",
+          "type": "address"
+        }
+      ],
+      "name": "buyTo",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_operator",
+          "type": "address"
+        },
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC721Received",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "n",
+          "type": "uint8"
+        },
+        {
+          "name": "d",
+          "type": "uint8"
+        }
+      ],
+      "name": "setFee",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_beneficiary",
+          "type": "address"
+        },
+        {
+          "name": "_chestVault",
+          "type": "address"
+        }
+      ],
+      "name": "setBeneficiary",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "n",
+          "type": "uint8"
+        },
+        {
+          "name": "d",
+          "type": "uint8"
+        },
+        {
+          "name": "_beneficiary",
+          "type": "address"
+        },
+        {
+          "name": "_chestVault",
+          "type": "address"
+        }
+      ],
+      "name": "setFeeAndBeneficiary",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getTokenSaleStatus",
+      "outputs": [
+        {
+          "name": "t0",
+          "type": "uint32"
+        },
+        {
+          "name": "t1",
+          "type": "uint32"
+        },
+        {
+          "name": "p0",
+          "type": "uint96"
+        },
+        {
+          "name": "p1",
+          "type": "uint96"
+        },
+        {
+          "name": "p",
+          "type": "uint96"
+        },
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getTokenSaleStatusPacked",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "isTokenOnSale",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getCurrentPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "t0",
+          "type": "uint32"
+        },
+        {
+          "name": "t1",
+          "type": "uint32"
+        },
+        {
+          "name": "p0",
+          "type": "uint96"
+        },
+        {
+          "name": "p1",
+          "type": "uint96"
+        }
+      ],
+      "name": "priceNow",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "price",
+          "type": "uint96"
+        }
+      ],
+      "name": "calculateFeeValue",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_t0",
+          "type": "uint32"
+        },
+        {
+          "name": "_t1",
+          "type": "uint32"
+        },
+        {
+          "name": "_t",
+          "type": "uint32"
+        },
+        {
+          "name": "_p0",
+          "type": "uint96"
+        },
+        {
+          "name": "_p1",
+          "type": "uint96"
+        }
+      ],
+      "name": "price",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "p",
+          "type": "uint96"
+        }
+      ],
+      "name": "ceil1000000000",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-06-10T01:45:17.981Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "For each item on sale the following parameters are defined:     * sale start time - t0     * sale start price - p0     * sale end time - t1     * sale end price - p1     * item ID (ERC721 token ID)     * ERC721 instance addressCurrent price `p` of each item is calculated linearly based     on the sale parameters:     a) if current time `t` is in range (t0, t1):         `p = p0 - (t - t0) * (p0 - p1) / (t1 - t0)`     b) if current time `t` is lower than  or equal to`t0`:         `p = p0`     c) if current time `t` is greater than or equal to `t1`:         `p = p1`Following constraints when adding item for sale must be met:     * t1 > t0: sale starts before it ends     * p0 ≥ p1: start price is higher than end priceFollowing constraints when buying item on sale must be met:     * msg.value ≥ p: price constraintThis implementation operates with an arbitrary ERC721 token as an item,     with the only limitation: token ID space is expected to be uint32",
+    "methods": {
+      "addNow(address,uint256,uint32,uint96,uint96)": {
+        "details": "Adds an item to the auction, starting right now.Requires an item to be transferred on behalf of its owner.",
+        "params": {
+          "_tokenId": "token ID for sale",
+          "duration": "duration of the auction in seconds",
+          "p0": "sale start price",
+          "p1": "sale end price",
+          "tokenAddress": "ERC721 deployed instance address"
+        }
+      },
+      "addWith(address,uint256,uint32,uint32,uint96,uint96)": {
+        "details": "Adds an item to the auction. Allows to set auction start time.Requires an item to be transferred on behalf of its owner.",
+        "params": {
+          "_tokenId": "token ID for sale",
+          "p0": "sale start price",
+          "p1": "sale end price",
+          "t0": "sale start time",
+          "t1": "sale end time",
+          "tokenAddress": "ERC721 deployed instance address"
+        }
+      },
+      "buy(address,uint256)": {
+        "details": "Requires now < t1Requires msg.value ≥ p",
+        "params": {
+          "_tokenId": "unique ID of the item on sale (token ID)",
+          "tokenAddress": "ERC721 deployed instance address"
+        }
+      },
+      "buyTo(address,uint256,address)": {
+        "details": "Requires now < t1Requires msg.value ≥ p",
+        "params": {
+          "_to": "an address to send the item bought to",
+          "_tokenId": "unique ID of the item on sale (token ID)",
+          "tokenAddress": "ERC721 deployed instance address"
+        }
+      },
+      "calculateFeeValue(uint96)": {
+        "details": "Calculates fee value based on the fee percent set in the smart contract,     taking into account also if beneficiary / chest vault addresses are set",
+        "params": {
+          "price": "selling price to calculate fee for"
+        },
+        "return": "calculated fee value, zero if either beneficiary address or fee is zero"
+      },
+      "ceil1000000000(uint96)": {
+        "details": "Auxiliary function to round down price to be multiple of 1 Gwei (1000000000)",
+        "params": {
+          "p": "price in wei"
+        },
+        "return": "price in wei, rounded down to be multiple of 1 Gwei (1000000000)"
+      },
+      "constructUpdateMsigRequest(address,uint256,uint256)": {
+        "details": "Used to create an update role request to be signed by the userOnce signed by at least 2 users, the request can be executed     using `updateRoleMsig` function",
+        "params": {
+          "_expiresOn": "an expiration date of the request",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "evaluateBy(address[],uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator addresses,     and role required (set of permissions), calculate the resulting     set of permissions (role).If all operators are super admins and have full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operators have no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+        "params": {
+          "_by": "non-empty array of addresses of the contract operators     to use permissions of for evaluation",
+          "actual": "input set of permissions to evaluate against",
+          "required": "desired set of permissions to have"
+        },
+        "return": "resulting set of permissions which can be set"
+      },
+      "features()": {
+        "details": "Auxiliary getter function to maintain compatibility with previous     versions of the Access Control List smart contract, where     features was a separate uint256 public field"
+      },
+      "getCurrentPrice(address,uint256)": {
+        "details": "Calculates current auction price for the item specified.Doesn't check the `_t0 < _t1` and `_p0 > _p1` constraints.     It is in caller responsibility to ensure them otherwise result is not correct.",
+        "params": {
+          "_tokenId": "ID of item to query price for",
+          "tokenAddress": "ERC721 deployed instance address"
+        },
+        "return": "current item price (at the time `now`)"
+      },
+      "getTokenSaleStatus(address,uint256)": {
+        "details": "Returns item sale status parameters as a packed 224 bits structure.The data returned:     [0] t0  auction start time (unix timestamp)     [1] t1  auction end time (unix timestamp)     [3] p0  starting price (wei)     [4] p1  final price (wei)     [5] p   current price (wei)     [6] owner token owner (previous)",
+        "params": {
+          "_tokenId": "id of the item",
+          "tokenAddress": "ERC721 deployed instance address"
+        },
+        "return": "a tuple containing all auction status for a particular ERC721 item"
+      },
+      "isFeatureEnabled(uint256)": {
+        "details": "Checks if requested set of features is enabled globally on the contract",
+        "params": {
+          "required": "set of features to check against"
+        },
+        "return": "true if all the features requested are enabled, false otherwise"
+      },
+      "isSenderInRole(uint256)": {
+        "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isTokenOnSale(address,uint256)": {
+        "details": "Checks if the item specified is listed for sale",
+        "params": {
+          "_tokenId": "id of the item",
+          "tokenAddress": "ERC721 deployed instance address"
+        },
+        "return": "true of the item defined by its tokenId is for sale"
+      },
+      "isUserInRole(address,uint256)": {
+        "details": "Checks if user `user` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against",
+          "user": "address of the user to check role for"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "onERC721Received(address,address,uint256,bytes)": {
+        "details": "The ERC721 smart contract calls this function on the recipient after a `transfer`.     This function MAY throw to revert and reject the transfer.     Return of other than the magic value MUST result in the transaction being reverted.",
+        "params": {
+          "_data": "Additional data contains tokenId, t0, t1, p0, p1 (256 packed)",
+          "_from": "The address which previously owned the token",
+          "_operator": "The address which called `safeTransferFrom` function",
+          "_tokenId": "The NFT identifier which is being transferred"
+        },
+        "return": "`bytes4(keccak256(\"onERC721Received(address,address,uint256,bytes)\"))` unless throwing"
+      },
+      "price(uint32,uint32,uint32,uint96,uint96)": {
+        "details": "Calculates auction price in the given moment for the sale parameters given.Doesn't check the `_t0 < _t1` and `_p0 > _p1` constraints.     It is in caller responsibility to ensure them otherwise result is not correct.The result is rounded down to be a multiple of 1 Gwei",
+        "params": {
+          "_p0": "initial price",
+          "_p1": "final price",
+          "_t": "time of interest / time to query the price for",
+          "_t0": "auction start time",
+          "_t1": "auction end time"
+        },
+        "return": "price in time `t` according to formula `p = p0 - (t - t0) * (p0 - p1) / (t1 - t0)`"
+      },
+      "priceNow(uint32,uint32,uint96,uint96)": {
+        "details": "Calculates current auction price for the sale parameters given.Doesn't check the `_t0 < _t1` and `_p0 ≥ _p1` constraints.     It is in caller responsibility to ensure them otherwise result is not correct.",
+        "params": {
+          "p0": "initial price",
+          "p1": "final price",
+          "t0": "auction start time",
+          "t1": "auction end time"
+        },
+        "return": "price in time `now` according to formula `p = p0 - (now - t0) * (p0 - p1) / (t1 - t0)`"
+      },
+      "remove(address,uint256)": {
+        "details": "Removes an item from the auction.Requires sender to be previous owner of the item     or to have `ROLE_AUCTION_MANAGER` permission.",
+        "params": {
+          "_tokenId": "unique ID of the item, previously generated when item was added",
+          "tokenAddress": "ERC721 deployed instance address"
+        }
+      },
+      "setBeneficiary(address,address)": {
+        "details": "Allows to set the transaction fee beneficiaryRequires sender to have `ROLE_FEE_MANAGER` permission",
+        "params": {
+          "_beneficiary": "transaction fee beneficiary",
+          "_chestVault": "some small portion of the fee goes to this address"
+        }
+      },
+      "setFee(uint8,uint8)": {
+        "details": "Allows to set the transaction fee less or equal to 5%Throws if fee exceeds 5%Requires sender to have `ROLE_FEE_MANAGER` permission",
+        "params": {
+          "d": "fee fraction denominator, not zero",
+          "n": "fee fraction nominator"
+        }
+      },
+      "setFeeAndBeneficiary(uint8,uint8,address,address)": {
+        "details": "Allows to set the transaction fee and beneficiaryRequires sender to have `ROLE_FEE_MANAGER` permission",
+        "params": {
+          "_beneficiary": "transaction fee beneficiary",
+          "_chestVault": "some small portion of the fee goes to this address",
+          "d": "fee fraction denominator, not zero",
+          "n": "fee fraction nominator"
+        }
+      },
+      "updateFeatures(uint256)": {
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissionsRequires transaction sender to have `ROLE_ACCESS_MANAGER` permissionFunction is left for backward compatibility with older versions",
+        "params": {
+          "_mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateMsig(address,uint256,uint256,uint8[],bytes32[],bytes32[])": {
+        "details": "MultiSig version of the `updateRole` functionUpdates set of permissions (role) for a given user,     taking into account signers' permissionsSetting role to zero is equivalent to removing all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying signers' permissions (roles intersection) to the userRequires transaction signers to have `ROLE_ROLE_MANAGER` permissionRequires `MSIG_QUORUM` signatures in MultiSig mode –     if `FEATURE_MSIG_ENABLED` is enabled",
+        "params": {
+          "_expiresOn": "an expiration date of the request,     optional, required in MultiSig mode only",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract",
+          "r": "an array of ECDSA signature outputs, \"r\",     optional, required in MultiSig mode only",
+          "s": "an array of ECDSA signature outputs, \"s\",     optional, required in MultiSig mode only",
+          "v": "an array of ECDSA signature outputs, \"v\",     optional, required in MultiSig mode only"
+        }
+      },
+      "updateRole(address,uint256)": {
+        "details": "Updates set of permissions (role) for a given user,     taking into account sender's permissions.Setting role to zero is equivalent to removing an all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders' permissions (role) to the userRequires transaction sender to have `ROLE_ACCESS_MANAGER` permission",
+        "params": {
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "whitelist(address,bool)": {
+        "details": "Whitelists the ERC721 token address specified to allow adding     corresponding token instances into an auctionRequires sender to have `ROLE_WHITELIST_MANAGER` permission",
+        "params": {
+          "tokenAddress": "deployed ERC721 instance address"
+        }
+      }
+    },
+    "title": "Dutch Auction Marketplace"
+  },
+  "userdoc": {
+    "methods": {
+      "buy(address,uint256)": {
+        "notice": "Allows to buy an item listed for sale.An item bought is sent back to `msg.sender`Requires that the sale for that item is not expired     and that enough value is sent to the function"
+      },
+      "buyTo(address,uint256,address)": {
+        "notice": "Allows to buy an item listed for sale for someone else.An item bought is sent to address '_to'Requires that the sale for that item is not expired     and that enough value is sent to the function"
+      },
+      "getTokenSaleStatusPacked(address,uint256)": {
+        "notice": "First integer (high bits) contains (from higher to lower bits order):         auction start time, t0, 32 bits         auction end time, t1, 32 bits         starting price, p0, 96 bits         final price, p1, 96 bits     Second integer (low bits) contains (from higher to lower bits order):         current price, p, 96 bits         token owner, 160 bits"
+      },
+      "onERC721Received(address,address,uint256,bytes)": {
+        "notice": "Handle the receipt of an NFT: adds it into an auctionThe contract address is always the message sender.     A wallet/broker/auction application MUST implement the wallet interface     if it will accept safe transfers."
+      }
+    },
+    "notice": "Dutch auction represents a method of selling     in which the price is reduced until a buyer is found     or sale time has ended (item expired for sale)."
+  }
+}

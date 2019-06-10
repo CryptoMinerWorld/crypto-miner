@@ -54,8 +54,8 @@ FoundersKeyERC20:   0x1D6f61dAeCB9ccbf5b5a61D9cD68d96DAdd0Bb1C
 ChestKeyERC20:      0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34
 RefPointsTracker:   0x19ec83A089BCC1D62F4e1fE8D29930FEd245903a
 
-TokenReader:
-TokenWriter:
+TokenReader:        0x8226a7b2fFD7fd09Fb131c2373F1964dFA7A8410
+TokenWriter:        0x44285F74C68df231F91eD07ac9A8D27A2346DBe1
 --------------------------------------------------------------
 
 
