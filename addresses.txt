@@ -1,5 +1,10 @@
 ==============================================================
 ========================== Mainnet  ==========================
+Beneficiary MSIG:   0xe0123204873fD29A29aEf3f99FaF1b1c45fe3B1E
+Founder's Chest:    0xC352f692F55dEf49f0B736Ec1F7CA0F862eabD23
+World Chest:        0xc16c6f45FBA73fBC18e29EaB26732d1621A448c3
+Monthly Chest:      0x2906DA90D3f99D5913bB3461183682951ca7280c
+
 BalanceProxy:       0xbd7Ca763E12d23535B59949ade53c104BD88d42F
 ==============================================================
 ==============================================================
@@ -10,6 +15,9 @@ BalanceProxy:       0xbd7Ca763E12d23535B59949ade53c104BD88d42F
 -------------------------- Ropsten  --------------------------
 --------------------------------------------------------------
 BalanceProxy:       0xB9E1A9AfdC2e9b0712d4f2df4F9e3977b7bEe6b3
+TokenHelper:        0xC9eB085d69e28B89A032B0d30B8d8d46b0bfFc8e
+
+DutchAuction:       0x1D6f61dAeCB9ccbf5b5a61D9cD68d96DAdd0Bb1C
 
 GemERC721:          0x60014A33fe30E471c406Ddd99361487Ffe7f1189
 CountryERC721:      0xf23197d25Ca59e4554Ef7BBcF579971A14882601
@@ -32,16 +40,19 @@ TokenWriter:        0x4822b1172217875272d918e93076339193462E06
 -------------------------- Rinkeby  --------------------------
 --------------------------------------------------------------
 BalanceProxy:       0x24941131e02FCEf029aaABa705aB46E3FD3b3E3b
+TokenHelper:        0xf90e5F2C90E402280f5fE918b6a1C30Cf42A5f39
 
-GemERC721:
-CountryERC721:
-PlotERC721:
-SilverERC20:
-GoldERC20:
-ArtifactERC20:
-ChestKeyERC20:
-FoundersKeyERC20:
-RefPointsTracker:
+DutchAuction:       0xe8eb326de8aec834Ee7e4420268f3B803A87CB00
+
+GemERC721:          0xd55369023CE587ff1DCC7190f95D3C137E4ca220
+CountryERC721:      0x8b67c86f5ab90796c60370E6CbBc7CCc5bAfEe35
+PlotERC721:         0x6452e4671B0D9CcFE5d06Fd171bAaE8d9b133F31
+SilverERC20:        0x9b2AAA1B68AD54647001b90e8620753D1451ef7a
+GoldERC20:          0xADf5116E59e0aDf82EE808b427288C8481b39Efe
+ArtifactERC20:      0xC9eB085d69e28B89A032B0d30B8d8d46b0bfFc8e
+FoundersKeyERC20:   0x1D6f61dAeCB9ccbf5b5a61D9cD68d96DAdd0Bb1C
+ChestKeyERC20:      0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34
+RefPointsTracker:   0x19ec83A089BCC1D62F4e1fE8D29930FEd245903a
 
 TokenReader:
 TokenWriter:
