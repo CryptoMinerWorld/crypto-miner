@@ -24,6 +24,8 @@ module.exports = async function(deployer, network, accounts) {
 		return;
 	}
 
+	console.log("network: %o", network);
+
 	// testing addresses
 	const testers = [
 		"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
@@ -33,14 +35,14 @@ module.exports = async function(deployer, network, accounts) {
 
 	// deployed instances' addresses
 	const conf = { // Ropsten Addresses
-		GemERC721:          "0x766870343381b6A1bDD09d9d1c6F3E5BdfF5438B",
+		GemERC721:          "0x60014A33fe30E471c406Ddd99361487Ffe7f1189",
 		CountryERC721:      "0xf23197d25Ca59e4554Ef7BBcF579971A14882601",
 		PlotERC721:         "0x4ED45BeC5762aB8b191Dd978db5609a53F21576f",
 		SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
 		GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
 		ArtifactERC20:      "0x06D09B097D56B5DEB70C31eaa5802d6447913eeC",
-		ChestKeyERC20:      "0x604206004488Aa28F5b57dfF4BF3d235cec63234",
 		FoundersKeyERC20:   "0x901E6a702D832Cff1356639F4a99046aB4cE4bCa",
+		ChestKeyERC20:      "0x604206004488Aa28F5b57dfF4BF3d235cec63234",
 		RefPointsTracker:   "0x33e0BD722e9e357bAa7BEF0F0192F7ad889BaD8f",
 	};
 
@@ -52,8 +54,8 @@ module.exports = async function(deployer, network, accounts) {
 		SilverERC20: await SilverERC20.at(conf.SilverERC20),
 		GoldERC20: await GoldERC20.at(conf.GoldERC20),
 		ArtifactERC20: await ArtifactERC20.at(conf.ArtifactERC20),
-		ChestKeyERC20: await ChestKeyERC20.at(conf.ChestKeyERC20),
 		FoundersKeyERC20: await FoundersKeyERC20.at(conf.FoundersKeyERC20),
+		ChestKeyERC20: await ChestKeyERC20.at(conf.ChestKeyERC20),
 		RefPointsTracker: await RefPointsTracker.at(conf.RefPointsTracker),
 	};
 
@@ -124,18 +126,18 @@ module.exports = async function(deployer, network, accounts) {
 			await instances.ArtifactERC20.mint(testers[i], 10);
 		}
 
-		// Chest Keys ERC20
-		exists = !(await instances.ChestKeyERC20.balanceOf(testers[i])).isZero();
-		console.log((exists? "skipping ": "") + "minting 10 chest keys " + i);
-		if(!exists) {
-			await instances.ChestKeyERC20.mint(testers[i], 10);
-		}
-
 		// Founder's Keys ERC20
 		exists = !(await instances.FoundersKeyERC20.balanceOf(testers[i])).isZero();
 		console.log((exists? "skipping ": "") + "minting 10 founder's keys " + i);
 		if(exists) {
 			await instances.FoundersKeyERC20.mint(testers[i], 10);
+		}
+
+		// Chest Keys ERC20
+		exists = !(await instances.ChestKeyERC20.balanceOf(testers[i])).isZero();
+		console.log((exists? "skipping ": "") + "minting 10 chest keys " + i);
+		if(!exists) {
+			await instances.ChestKeyERC20.mint(testers[i], 10);
 		}
 	}
 
