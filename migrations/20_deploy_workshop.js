@@ -27,11 +27,16 @@ module.exports = async function(deployer, network, accounts) {
 	const conf = network === "mainnet"?
 		{ // Mainnet addresses
 
-		}:
+		}: network === "ropsten"?
 		{ // Ropsten addresses
 			GemERC721:          "0x60014A33fe30E471c406Ddd99361487Ffe7f1189",
 			SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
 			GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
+		}:
+		{ // Rinkeby adddresses
+			GemERC721:          "0xd55369023CE587ff1DCC7190f95D3C137E4ca220",
+			SilverERC20:        "0x9b2AAA1B68AD54647001b90e8620753D1451ef7a",
+			GoldERC20:          "0xADf5116E59e0aDf82EE808b427288C8481b39Efe",
 		};
 
 	// deploy workshop

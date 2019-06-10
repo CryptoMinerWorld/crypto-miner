@@ -34,15 +34,24 @@ module.exports = async function(deployer, network, accounts) {
 	const conf = network === "mainnet"?
 		{ // Mainnet addresses
 
-		}:
+		}: network === "ropsten"?
 		{ // Ropsten Addresses
 			GemERC721:          "0x60014A33fe30E471c406Ddd99361487Ffe7f1189",
 			PlotERC721:         "0x4ED45BeC5762aB8b191Dd978db5609a53F21576f",
 			SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
 			GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
 			ArtifactERC20:      "0x06D09B097D56B5DEB70C31eaa5802d6447913eeC",
-			ChestKeyERC20:      "0x604206004488Aa28F5b57dfF4BF3d235cec63234",
 			FoundersKeyERC20:   "0x901E6a702D832Cff1356639F4a99046aB4cE4bCa",
+			ChestKeyERC20:      "0x604206004488Aa28F5b57dfF4BF3d235cec63234",
+		}:
+		{
+			GemERC721:          "0xd55369023CE587ff1DCC7190f95D3C137E4ca220",
+			PlotERC721:         "0x6452e4671B0D9CcFE5d06Fd171bAaE8d9b133F31",
+			SilverERC20:        "0x9b2AAA1B68AD54647001b90e8620753D1451ef7a",
+			GoldERC20:          "0xADf5116E59e0aDf82EE808b427288C8481b39Efe",
+			ArtifactERC20:      "0xC9eB085d69e28B89A032B0d30B8d8d46b0bfFc8e",
+			FoundersKeyERC20:   "0x1D6f61dAeCB9ccbf5b5a61D9cD68d96DAdd0Bb1C",
+			ChestKeyERC20:      "0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34",
 		};
 
 	// deployed instances
