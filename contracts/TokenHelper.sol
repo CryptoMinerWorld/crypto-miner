@@ -4,18 +4,21 @@ import "./DutchAuction.sol";
 import "./GemERC721.sol";
 
 /**
- * @title Dutch Auction Helper
+ * @title Token Helper
  *
- * @notice Dutch Auction Helper addresses some issues with currently active
- *      Dutch Auction smart contract, providing support for
- *      the next CryptoMiner World release on February 21, 2019
- *
- * @dev Resolves an issue with getting tokens information of a particular user
- *      in case when the tokens of interest are listed on the auction
+ * @notice Token Helper provides several convenient read-only methods to optimize
+ *      work with ERC721 and ERC20 tokens
  *
  * @author Basil Gorin
  */
-contract DutchAuctionHelper {
+contract TokenHelper {
+  /**
+   * @dev Smart contract unique identifier, a random number
+   * @dev Should be regenerated each time smart contact source code is changed
+   * @dev Generated using https://www.random.org/bytes/
+   */
+  uint256 public constant HELPER_UID = 0xfff87d62c2288198f2a9393536625b5791da36a6a86dc39f10011a40643c014c;
+
   /**
    * @dev Similarly to `GemERC721.getPackedCollection`, returns packed collection
    *      of tokens for a particular owner
@@ -94,7 +97,7 @@ contract DutchAuctionHelper {
    * @dev Similarly to `GemERC721.getPackedCollection`, returns packed collection
    *      of all the tokens being sold currently on the auction
    * @param auction DutchAuction instance, providing `owner(address, uint32) => address` interface
-   * @param token GemERC721 instance, providing `getPackedCollection(owner) => uint80` interface
+   * @param token GemERC721 instance, providing `getPackedCollection(owner) => uint200` interface
    * @return packed tokens collection structure, containing:
    *      index 3i - 200 low bits
    *        gem ID (24 bits)
