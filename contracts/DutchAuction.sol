@@ -69,117 +69,187 @@ interface ERC721 {
  * @author Basil Gorin
  */
 contract DutchAuction is AccessMultiSig, ERC721Receiver {
-  /// @dev Base structure representing an item for sale on the auction
-  /// @dev 256 bits structure, occupies exactly one memory slot
+  /**
+   * @dev Smart contract unique identifier, a random number
+   * @dev Should be regenerated each time smart contact source code is changed
+   * @dev Generated using https://www.random.org/bytes/
+   */
+  uint256 AUCTION_UID = 0xb2fa7d42bfef09b4c1b69db4ed0af2a0fabcf8904ae11d61419584f96d282e7b;
+
+  /**
+   * @dev Base structure representing an item for sale on the auction
+   * @dev 256 bits structure, occupies exactly one memory slot
+   */
   struct Item {
-    // sale start time, seconds
+    /**
+     * @dev sale start time, unix timestamp
+     */
     uint32 t0;
-    // sale end time, seconds
+
+    /**
+     * sale end time, unix timestamp
+     */
     uint32 t1;
-    // sale start price, wei, maximum value 7.9 * 10^10 ETH
+
+    /**
+     * sale start price, wei, maximum value 7.9 * 10^10 ETH
+     */
     uint96 p0;
-    // sale end price, wei,  maximum value 7.9 * 10^10 ETH
+
+    /**
+     * sale end price, wei,  maximum value 7.9 * 10^10 ETH
+     */
     uint96 p1;
   }
 
-  /// @dev Enables add(), addWith(), onERC721Received()
+  /**
+   * @dev Enables add(), addWith(), onERC721Received()
+   */
   uint32 public constant FEATURE_ADD = 0x00000001;
 
-  /// @dev Enables buy()
+  /**
+   * @dev Enables buy()
+   */
   uint32 public constant FEATURE_BUY = 0x00000002;
 
-  /// @notice Auction manager is responsible for removing items
-  /// @dev Role ROLE_AUCTION_MANAGER allows executing remove
+  /**
+   * @notice Auction manager is responsible for removing items
+   * @dev Role ROLE_AUCTION_MANAGER allows executing remove
+   */
   uint32 public constant ROLE_AUCTION_MANAGER = 0x00000001;
 
-  /// @notice Fee manager is responsible for setting sale fees on the smart contract
-  /// @dev Role ROLE_FEE_MANAGER allows executing setFee, setBeneficiary, setFeeAndBeneficiary
+  /**
+   * @notice Fee manager is responsible for setting sale fees on the smart contract
+   * @dev Role ROLE_FEE_MANAGER allows executing setFee, setBeneficiary, setFeeAndBeneficiary
+   */
   uint32 public constant ROLE_FEE_MANAGER = 0x00000002;
 
-  /// @notice Whitelist manager is responsible for managing the whitelist of
-  ///      supported ERC721 token addresses - `supportedTokenAddresses`
-  /// @dev Role ROLE_WHITELIST_MANAGER allows executing whitelist function
+  /**
+   * @notice Whitelist manager is responsible for managing the whitelist of
+   *      supported ERC721 token addresses - `supportedTokenAddresses`
+   * @dev Role ROLE_WHITELIST_MANAGER allows executing whitelist function
+   */
   uint32 public constant ROLE_WHITELIST_MANAGER = 0x00000004;
 
-  /// @notice Maximum fee that can be set on the contract
-  /// @dev This is an inverted value of the maximum fee:
-  ///      `MAX_FEE = 1 / MAX_FEE_INV`
+  /**
+   * @notice Maximum fee that can be set on the contract
+   * @dev This is an inverted value of the maximum fee:
+   *      `MAX_FEE = 1 / MAX_FEE_INV`
+   */
   uint8 public constant MAX_FEE_INV = 20; // 1/20 or 5%
 
-  /// @dev 1 Gwei = 1000000000
+  /**
+   * @dev 1 Gwei = 1000000000
+   */
   uint96 public constant GWEI = 1000000000;
 
-  /// @dev Transaction fee, defined by its nominator and denominator
-  /// @dev Fee is guaranteed to be in a range between 0 and 5 percent
+  /**
+   * @dev Transaction fee, defined by its nominator and denominator
+   * @dev Fee is guaranteed to be in a range between 0 and 5 percent
+   */
   uint8 public fee;
 
-  /// @dev Address which receives 80% the transaction fee
+  /**
+   * @dev Address which receives 80% the transaction fee
+   */
   address payable public beneficiary;
 
-  /// @dev Address to send 20% of the transaction fee to
-  address payable public chestVault;
+  /**
+   * @dev Address to send 20% of the transaction fee to
+   */
+  address payable public chest;
 
-  /// @dev Auxiliary data structure to keep track of previous item owners
-  /// @dev Used to be able to return items back to owners
-  ///      token address -> token ID -> owner address
+  /**
+   * @dev Auxiliary data structure to keep track of previous item owners
+   * @dev Used to be able to return items back to owners
+   *      token address -> token ID -> owner address
+   */
   mapping(address => mapping(uint256 => address)) public owners;
 
-  /// @notice All the items available for sale with their sale parameters
-  /// @dev Includes both expired and available items
-  ///     token address -> token ID -> auction data (see Item struct)
+  /**
+   * @notice All the items available for sale with their sale parameters
+   * @dev Includes both expired and available items
+   *     token address -> token ID -> auction data (see Item struct)
+   */
   mapping(address => mapping(uint256 => Item)) public items;
 
-  /// @notice All the token addresses supported by this auction implementation
+  /**
+   * @notice All the token addresses supported by this auction implementation
+   */
   mapping(address => bool) public supportedTokenAddresses;
 
-  /// @dev Fired in addNow(), addWith()
+  /**
+   * @dev Fired in addNow(), addWith(), onERC721Received()
+   * @param _by who added this item for sale
+   * @param _from who is the owner of this item for sale
+   * @param _tokenAddress ERC721 deployed instance address
+   * @param _tokenId token ID for sale
+   * @param t0 sale start time
+   * @param t1 sale end time
+   * @param t current time (now)
+   * @param p0 sale start price
+   * @param p1 sale end price
+   * @param p current price
+   */
   event ItemAdded(
-    // who added this item for sale by calling addWith()
     address indexed _by,
-    // who is the owner of this item for sale
     address _from,
-    // rest of the values correspond to addWith() signature
-    address indexed _tokenAddress, // deployed ERC721 instance
-    uint256 indexed _tokenId,      // unique item ID (token ID)
-    uint32 t0, // seconds
-    uint32 t1, // seconds
-    uint32 t,  // seconds
-    uint96 p0, // wei
-    uint96 p1, // wei
-    uint96 p   // current price in wei
+    address indexed _tokenAddress,
+    uint256 indexed _tokenId,
+    uint32 t0,
+    uint32 t1,
+    uint32 t,
+    uint96 p0,
+    uint96 p1,
+    uint96 p
   );
 
-  /// @dev Fired in remove()
-  event ItemRemoved(
-    // auction manager who sent a transaction (ROLE_AUCTION_MANAGER)
-    address indexed _by,
-    // smart contract address representing this ERC721 token
-    address _tokenAddress,
-    // unique item ID (token ID)
-    uint256 _tokenId
-  );
+  /**
+   * @dev Fired in remove()
+   * @param _by auction manager who sent a transaction (ROLE_AUCTION_MANAGER)
+   * @param _tokenAddress smart contract address representing this ERC721 token
+   * @param _tokenId unique item ID (token ID)
+   */
+  event ItemRemoved(address indexed _by, address indexed _tokenAddress, uint256 indexed _tokenId);
 
-  /// @dev Fired in buyItem()
+  /**
+   * @dev Fired in buyItem()
+   * @param _by who bought this item from sale
+   * @param _from previous item owner
+   * @param _to new item owner
+   * @param _tokenAddress ERC721 deployed instance address
+   * @param _tokenId token ID for sale
+   * @param t0 sale start time
+   * @param t1 sale end time
+   * @param t current time (now)
+   * @param p0 sale start price
+   * @param p1 sale end price
+   * @param p current price
+   * @param fee fee paid
+   */
   event ItemBought(
     address indexed _by,
-    // previous item owner
     address _from,
-    // new item owner
     address _to,
-    // rest of the values correspond to addWith() signature and Item structure
-    address indexed _tokenAddress, // deployed ERC721 instance
-    uint256 indexed _tokenId,       // unique item ID (token ID)
-    uint32 t0, // seconds
-    uint32 t1, // seconds
-    uint32 t,  // seconds
-    uint96 p0, // wei
-    uint96 p1, // wei
-    uint96 p,  // current price in wei
-    uint96 fee // fee payed
+    address indexed _tokenAddress,
+    uint256 indexed _tokenId,
+    uint32 t0,
+    uint32 t1,
+    uint32 t,
+    uint96 p0,
+    uint96 p1,
+    uint96 p,
+    uint96 fee
   );
 
-  /// @dev Fired in setFee, setBeneficiary, setFeeAndBeneficiary
-  event TransactionFeeUpdated(uint8 n, uint8 d, address beneficiary);
+  /**
+   * @dev Fired in setFee, setBeneficiary, setFeeAndBeneficiary
+   * @param n tax fee nominator, n ∈ [0, 4)
+   * @param d tax fee denominator, d ∈ [1, 64)
+   * @param beneficiary fee beneficiary address
+   * @param chest some small portion of the fee goes to this address
+   */
+  event TransactionFeeUpdated(uint8 n, uint8 d, address beneficiary, address chest);
 
   /**
    * @dev Whitelists the ERC721 token address specified to allow adding
@@ -410,7 +480,7 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
       uint256 value20 = feeValue / 5;
 
       // send 20% of the value to the chest vault
-      chestVault.transfer(value20);
+      chest.transfer(value20);
 
       // send the rest of the value (80%) to the beneficiary
       beneficiary.transfer(feeValue - value20);
@@ -504,25 +574,25 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
     fee = Fractions8.createProperFraction8(n, d);
 
     // emit an event
-    emit TransactionFeeUpdated(n, d, beneficiary);
+    emit TransactionFeeUpdated(n, d, beneficiary, chest);
   }
 
   /**
    * @dev Allows to set the transaction fee beneficiary
    * @dev Requires sender to have `ROLE_FEE_MANAGER` permission
    * @param _beneficiary transaction fee beneficiary
-   * @param _chestVault some small portion of the fee goes to this address
+   * @param _chest some small portion of the fee goes to this address
    */
-  function setBeneficiary(address payable _beneficiary, address payable _chestVault) public {
+  function setBeneficiary(address payable _beneficiary, address payable _chest) public {
     // ensure sender has valid permissions
     require(isSenderInRole(ROLE_FEE_MANAGER));
 
     // addresses can be zero as well, zero addresses disable transaction fees
     beneficiary = _beneficiary;
-    chestVault = _chestVault;
+    chest = _chest;
 
     // emit an event
-    emit TransactionFeeUpdated(Fractions8.getNominator(fee), Fractions8.getDenominator(fee), beneficiary);
+    emit TransactionFeeUpdated(Fractions8.getNominator(fee), Fractions8.getDenominator(fee), beneficiary, chest);
   }
 
   /**
@@ -531,9 +601,9 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
    * @param n fee fraction nominator
    * @param d fee fraction denominator, not zero
    * @param _beneficiary transaction fee beneficiary
-   * @param _chestVault some small portion of the fee goes to this address
+   * @param _chest some small portion of the fee goes to this address
    */
-  function setFeeAndBeneficiary(uint8 n, uint8 d, address payable _beneficiary, address payable _chestVault) public {
+  function setFeeAndBeneficiary(uint8 n, uint8 d, address payable _beneficiary, address payable _chest) public {
     // ensure sender has valid permissions
     require(isSenderInRole(ROLE_FEE_MANAGER));
 
@@ -545,10 +615,10 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
 
     // addresses can be zero as well, zero addresses disable transaction fees
     beneficiary = _beneficiary;
-    chestVault = _chestVault;
+    chest = _chest;
 
     // emit an event
-    emit TransactionFeeUpdated(n, d, beneficiary);
+    emit TransactionFeeUpdated(n, d, beneficiary, chest);
   }
 
   /**
@@ -608,19 +678,28 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
    *          token owner, 160 bits
    */
   function getTokenSaleStatusPacked(address tokenAddress, uint256 _tokenId) public view returns(uint256, uint256) {
+    // define variables to store data returned from `getTokenSaleStatus`
     uint32 t0;
     uint32 t1;
     uint96 p0;
     uint96 p1;
     uint96 p;
     address owner;
+
+    // delegate call to `getTokenSaleStatus`
     (t0, t1, p0, p1, p, owner) = getTokenSaleStatus(tokenAddress, _tokenId);
+
+    // pack high 256 bits of the result
     uint256 high = uint256(t0) << 224
                  | uint224(t1) << 192
                  | uint192(p0) << 96
                  | p1;
+
+    // pack low 256 bits of the result
     uint256 low = uint256(p) << 160
                 | uint160(owner);
+
+    // return the result as a tuple
     return (high, low);
   }
 
@@ -677,7 +756,7 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
    */
   function calculateFeeValue(uint96 price) public view returns(uint96) {
     // fee is applied only when it is not zero and when beneficiary and chestVault are defined
-    if(beneficiary != address(0) && chestVault != address(0) && !Fractions8.isZero(fee)) {
+    if(beneficiary != address(0) && chest != address(0) && !Fractions8.isZero(fee)) {
       // calculate the fee and return
       return uint96(Fractions8.multiplyByInteger(fee, price));
     }

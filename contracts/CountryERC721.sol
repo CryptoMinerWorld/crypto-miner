@@ -486,6 +486,7 @@ contract CountryERC721 is ERC721Core {
    * @dev Creates new token with `tokenId` ID specified and
    *      assigns an ownership `to` for that token
    * @dev Initial token's properties are predefined by its ID
+   * @dev Requires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)
    * @param _to an address to assign created token ownership to
    * @param _tokenId ID of the token to create
    */
