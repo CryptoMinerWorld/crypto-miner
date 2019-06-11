@@ -1,5 +1,7 @@
 pragma solidity 0.5.8;
 
+import "./AddressUtils.sol";
+
 /**
  * @dev Gem ERC721 v1 interface (old)
  */
@@ -80,6 +82,48 @@ interface AuctionV1 {
    * @return address of the owner of the token
    */
   function owners(address _token, uint256 _tokenId) external view returns(address);
+}
+
+/**
+ * @dev RefPointsTracker v1 interface (old)
+ */
+interface RefV1 {
+  /**
+   * @notice Lists all referral points holders addresses
+   * @return an array of referral points holders addresses,
+   *      doesn't contain duplicates
+   */
+  function getAllHolders() external view returns (address[] memory);
+
+  /**
+   * @notice Lists all known addresses as an array
+   * @return an array of known addresses,
+   *      doesn't contain duplicates
+   */
+  function getKnownAddresses() external view returns(address[] memory);
+
+  /**
+   * @notice Issued referral points counter, tracks how much points
+   *      a particular address earned over the entire time
+   * @dev Initially zero, may only increase over time, must be equal to
+   *      or greater than `consumed` - consumed referral points counter
+   */
+  function issued(address) external view returns(uint256);
+
+  /**
+   * @notice Consumed referral points counter, tracks how much points
+   *      a particular address consumed (spent) over the entire time
+   * @dev Initially zero, may only increase over time, must be equal to
+   *      or less than `issued` - issued referral points counter
+   */
+  function consumed(address) external view returns(uint256);
+
+  /**
+   * @notice ERC20-compatible alias for `available` referral points counter
+   * @param owner address of the player address to get available referral points for
+   * @return available referral points counter for address specified
+   */
+  function balanceOf(address owner) external view returns (uint256);
 }
 
 /**
@@ -186,4 +230,78 @@ contract TokenReader {
     return result;
   }
 
+  /**
+   * @dev Reads referral points data - points issued and consumed
+   * @param refAddress deployed RefPointsTracker v1 instance
+   * @return ref points holders array
+   */
+  function readRefPointsData(address refAddress) public view returns(uint256[] memory) {
+    // get pointer to the instance
+    RefV1 refV1 = RefV1(refAddress);
+
+    // read all ref points holders addresses
+    address[] memory addr = refV1.getAllHolders();
+
+    // allocate memory for result
+    uint256[] memory result = new uint256[](addr.length);
+
+    // fill in the result array, pack the data
+    for(uint256 i = 0; i < addr.length; i++) {
+      // pack and assign the result data entry
+      result[i] = uint256(refV1.issued(addr[i])) << 224
+                | uint224(refV1.consumed(addr[i])) << 192
+                | uint192(refV1.balanceOf(addr[i])) << 160
+                | uint160(addr[i]);
+    }
+
+    // return the result
+    return result;
+  }
+
+  /**
+   * @dev Reads referral points data - known addresses
+   * @param refAddress deployed RefPointsTracker v1 instance
+   * @return known addresses packed structure containing also ref points if any
+   */
+  function readKnownAddresses(address refAddress) public view returns(uint256[] memory) {
+    // get pointer to the instance
+    RefV1 refV1 = RefV1(refAddress);
+
+    // read all known addresses data
+    address[] memory addr = refV1.getKnownAddresses();
+
+    // allocate memory for result
+    uint256[] memory result = new uint256[](addr.length);
+
+    // fill in the result array, pack the data
+    for(uint256 i = 0; i < addr.length; i++) {
+      // pack and assign the result data entry
+      result[i] = uint256(refV1.issued(addr[i])) << 224
+                | uint224(refV1.consumed(addr[i])) << 192
+                | uint192(refV1.balanceOf(addr[i])) << 160
+                | uint160(addr[i]);
+    }
+
+    // return the result
+    return result;
+  }
+
+  /**
+   * @dev A function to check if an array of addresses contains smart contracts
+   * @param addresses an array of input addresses
+   * @return a boolean array indicating if an address is a smart contract, true - YES
+   */
+  function isContract(address[] memory addresses) public view returns(bool[] memory) {
+    // allocate memory for the result
+    bool[] memory result = new bool[](addresses.length);
+
+    // iterate the array and fill in the result
+    for(uint256 i = 0; i < addresses.length; i++) {
+      // by determining if the address is a contract
+      result[i] = AddressUtils.isContract(addresses[i]);
+    }
+
+    // return the result
+    return result;
+  }
 }
