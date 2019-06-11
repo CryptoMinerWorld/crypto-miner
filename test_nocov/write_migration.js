@@ -282,7 +282,7 @@ contract('V1 -> V2 Migration', (accounts) => {
 			}
 
 			// extract raw256 data
-			data256.push(web3.utils.toBN(props.pop()));
+			data256.push(props.map(packRefData));
 		}
 		console.log("\t%o of %o records parsed", data256.length, csv_lines.length);
 
@@ -330,7 +330,7 @@ contract('V1 -> V2 Migration', (accounts) => {
 			}
 
 			// extract raw256 data
-			data256.push(web3.utils.toBN(props.pop()));
+			data256.push(props.map(packRefData));
 		}
 		console.log("\t%o of %o records parsed", data256.length, csv_lines.length);
 
@@ -372,9 +372,17 @@ function packGemData(p) {
 	// ensure all elements are converted to BNs
 	p = p.map((a) => toBN(a));
 	// pack gem ID, plot ID, color, level, grade, energetic age and return
-	return toBN(p[0]).shln(24).or(p[1]).shln(8).or(p[2]).shln(8).or(p[3]).shln(32).or(p[4]).shln(32).or(p[7]);
+	return p[0].shln(24).or(p[1]).shln(8).or(p[2]).shln(8).or(p[3]).shln(32).or(p[4]).shln(32).or(p[7]);
 }
 
+// auxiliary function to pack gem data from array into uint128
+function packRefData(p) {
+	assert.equal(4, p.length, "wrong array length");
+	// ensure all elements are converted to BNs
+	p = p.map((a) => toBN(a));
+	// pack issued, consumed, balance and owner
+	return p[0].shln(32).or(p[1]).shln(32).or(p[2]).shln(160).or(p[3]);
+}
 
 // import shared functions
 import {read_csv, toBN} from "../scripts/shared_functions";
