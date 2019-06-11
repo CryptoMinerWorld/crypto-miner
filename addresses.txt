@@ -34,7 +34,7 @@ Workshop:           0x3cc379D1485B4803827C6C819c2F521A8DFfd72A
 Miner:              0x55A1f14ba24728871DC11aD2D332b12d6FD2DC30
 
 TokenReader:        0x7DA1b0552c0CAf7A72d8a7bc7F7813B3AC2FcC35
-TokenWriter:        0x4822b1172217875272d918e93076339193462E06
+TokenWriter:        0xdb4f3644e05E6fB6BB7426A4f258356b728AB720
 --------------------------------------------------------------
 
 
@@ -60,7 +60,7 @@ Workshop:           0x4d6B40F9b4Bf8d5d1C066C4C2c20fdfbEEdc5057
 Miner:
 
 TokenReader:        0x8226a7b2fFD7fd09Fb131c2373F1964dFA7A8410
-TokenWriter:        0x44285F74C68df231F91eD07ac9A8D27A2346DBe1
+TokenWriter:        0x6f98A7FfE026F6514B7bdC01418a21C384B0Fa63
 --------------------------------------------------------------
 
 
