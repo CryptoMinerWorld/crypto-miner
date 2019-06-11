@@ -33,7 +33,7 @@ contract('Tiers RND', (accounts) => {
 		const csv_data = tiersArray.map(tiers => {
 			const t = new Array(5);
 			for(let i = 0; i < t.length; i++) {
-				t[i] = tiers.shrn(8 * (5 - i)).mod(toBN(256)).toNumber();
+				t[i] = tiers.shrn(8 * (5 - i)).maskn(8).toNumber();
 			}
 			return t.join();
 		}).join("\n");
@@ -66,7 +66,7 @@ contract('Tiers RND', (accounts) => {
 		const csv_data = tiersArray.map(tiers => {
 			const t = new Array(5);
 			for(let i = 0; i < t.length; i++) {
-				t[i] = tiers.shrn(8 * (5 - i)).mod(toBN(256)).toNumber();
+				t[i] = tiers.shrn(8 * (5 - i)).maskn(8).toNumber();
 			}
 			return t.join();
 		}).join("\n");

@@ -690,11 +690,11 @@ async function verifyGemProperties(gemIds, gem, levels, lvlUps, grades, upgrades
 		// read level, grade type and grade value as packed data
 		const gemProps = await gem.getProperties(gemIds[i]);
 		// extract level
-		const level = gemProps.shrn(32).mod(toBN(256)).toNumber();
+		const level = gemProps.shrn(32).maskn(8).toNumber();
 		// extract grade type
-		const gradeType = gemProps.shrn(24).mod(toBN(256)).toNumber();
+		const gradeType = gemProps.shrn(24).maskn(8).toNumber();
 		// extract grade value
-		const gradeValue = gemProps.mod(toBN(16777216)).toNumber();
+		const gradeValue = gemProps.maskn(24).toNumber();
 
 		// verify level at index i
 		assert.equal(levels[i] + lvlUps[i], level, "wrong level at " + i);

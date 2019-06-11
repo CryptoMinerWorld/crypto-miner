@@ -66,9 +66,9 @@ contract('PlotSale', (accounts) => {
 
 		// generate randomized tier structure
 		const tiers = await s.random5Tiers(0);
-		assert.equal(5, tiers.shrn(56).mod(toBN(256)), "wrong number of tiers");
-		assert.equal(0, tiers.shrn(48).mod(toBN(256)), "wrong tier1 offset");
-		assert.equal(0, tiers.mod(toBN(256)), "wrong initial offset");
+		assert.equal(5, tiers.shrn(56).maskn(8), "wrong number of tiers");
+		assert.equal(0, tiers.shrn(48).maskn(8), "wrong tier1 offset");
+		assert.equal(0, tiers.maskn(8), "wrong initial offset");
 	});
 
 	it("buy: ETH flow", async() => {
