@@ -37,7 +37,7 @@ contract('Tiers RND', (accounts) => {
 			for(let i = 0; i < t.length; i++) {
 				t[i] = tiers.dividedToIntegerBy(two.pow(8 * (5 - i))).modulo(256).toNumber();
 			}
-			return t.join(",");
+			return t.join();
 		}).join("\n");
 
 		// write statistical raw data into the file
@@ -70,7 +70,7 @@ contract('Tiers RND', (accounts) => {
 			for(let i = 0; i < t.length; i++) {
 				t[i] = tiers.dividedToIntegerBy(two.pow(8 * (5 - i))).modulo(256).toNumber();
 			}
-			return t.join(",");
+			return t.join();
 		}).join("\n");
 
 		// write statistical raw data into the file

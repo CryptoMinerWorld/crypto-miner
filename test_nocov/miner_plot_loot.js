@@ -74,7 +74,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		}
 
 		// CSV file data
-		const csv_data = `${PLOTS},${loot.join(",")}`;
+		const csv_data = `${PLOTS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/plot_loot_A2.csv", CSV_HEADER, csv_data);
 
@@ -123,7 +123,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		}
 
 		// CSV file data
-		const csv_data = `${PLOTS},${loot.join(",")}`;
+		const csv_data = `${PLOTS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/plot_loot_B2.csv", CSV_HEADER, csv_data);
 
@@ -210,7 +210,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		const loot = await extractLoot(player, gem, silver, gold, artifactErc20, foundersKey, chestKey);
 
 		// CSV file data - type C
-		const csv_data_c = `${PLOTS},${loot.colors.join(",")},${loot.levels.join(",")},${loot.grades.join(",")},${loot.silver},${loot.gold},${loot.artifacts20},${loot.foundersKeys}`;
+		const csv_data_c = `${PLOTS},${loot.colors.join()},${loot.levels.join()},${loot.grades.join()},${loot.silver},${loot.gold},${loot.artifacts20},${loot.foundersKeys}`;
 		// write statistical raw data into the file
 		write_csv("./data/plot_loot_C2.csv", CSV_HEADER_C, csv_data_c);
 
@@ -266,7 +266,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		}
 
 		// CSV file data
-		const csv_data = `${PLOTS},${loot.join(",")}`;
+		const csv_data = `${PLOTS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/plot_loot_A5.csv", CSV_HEADER, csv_data);
 
@@ -320,7 +320,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		}
 
 		// CSV file data
-		const csv_data = `${PLOTS},${loot.join(",")}`;
+		const csv_data = `${PLOTS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/plot_loot_B5.csv", CSV_HEADER, csv_data);
 
@@ -409,7 +409,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		const loot = await extractLoot(player, gem, silver, gold, artifactErc20, foundersKey, chestKey);
 
 		// CSV file data - type C
-		const csv_data_c = `${PLOTS},${loot.colors.join(",")},${loot.levels.join(",")},${loot.grades.join(",")},${loot.silver},${loot.gold},${loot.artifacts20},${loot.chestKeys}`;
+		const csv_data_c = `${PLOTS},${loot.colors.join()},${loot.levels.join()},${loot.grades.join()},${loot.silver},${loot.gold},${loot.artifacts20},${loot.chestKeys}`;
 		// write statistical raw data into the file
 		write_csv("./data/plot_loot_C5.csv", CSV_HEADER_C, csv_data_c);
 

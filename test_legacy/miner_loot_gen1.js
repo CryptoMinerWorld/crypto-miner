@@ -49,7 +49,7 @@ contract('Loot Gen (RAW)', (accounts) => {
 		const loot = await miner.genLoot(1, BLOCKS, false, new Array(9));
 
 		// CSV file data
-		const csv_data = `1,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `1,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
 
@@ -94,7 +94,7 @@ contract('Loot Gen (RAW)', (accounts) => {
 		const loot = await miner.genLoot(2, BLOCKS, false, new Array(9));
 
 		// CSV file data
-		const csv_data = `2,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `2,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
 
@@ -139,7 +139,7 @@ contract('Loot Gen (RAW)', (accounts) => {
 		const loot = await miner.genLoot(3, BLOCKS, false, new Array(9));
 
 		// CSV file data
-		const csv_data = `3,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `3,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
 
@@ -184,7 +184,7 @@ contract('Loot Gen (RAW)', (accounts) => {
 		const loot = await miner.genLoot(4, BLOCKS, false, new Array(9));
 
 		// CSV file data
-		const csv_data = `4,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `4,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
 
@@ -229,7 +229,7 @@ contract('Loot Gen (RAW)', (accounts) => {
 		const loot = await miner.genLoot(5, BLOCKS, false, new Array(9));
 
 		// CSV file data
-		const csv_data = `5,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `5,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/loot_raw.csv", CSV_HEADER, csv_data);
 

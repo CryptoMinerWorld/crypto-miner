@@ -56,7 +56,7 @@ contract('Loot Gen', (accounts) => {
 		loot = await miner.genLoot(2, 65 * PLOTS, true, loot);
 
 		// CSV file data
-		const csv_data = `2,${PLOTS},${loot.join(",")}`;
+		const csv_data = `2,${PLOTS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
 
@@ -109,7 +109,7 @@ contract('Loot Gen', (accounts) => {
 		loot = await miner.genLoot(5, 5 * PLOTS, true, loot);
 
 		// CSV file data
-		const csv_data = `5,${PLOTS},${loot.join(",")}`;
+		const csv_data = `5,${PLOTS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/loot_plots.csv", CSV_HEADER, csv_data);
 

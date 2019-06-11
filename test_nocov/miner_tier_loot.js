@@ -46,7 +46,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		const loot = await miner.tierLoot(1, BLOCKS, true, 0, toBNs(9));
 
 		// CSV file data
-		const csv_data = `1,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `1,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/tier_loot_2.csv", CSV_HEADER, csv_data);
 
@@ -89,7 +89,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		const loot = await miner.tierLoot(2, BLOCKS, true, 0, toBNs(9));
 
 		// CSV file data
-		const csv_data = `2,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `2,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/tier_loot_2.csv", CSV_HEADER, csv_data);
 
@@ -135,7 +135,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		const loot = await miner.tierLoot(2, BLOCKS, true, BLOCKS, toBNs(9));
 
 		// CSV file data
-		const csv_data = `2B,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `2B,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/tier_loot_2.csv", CSV_HEADER, csv_data);
 
@@ -178,7 +178,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		const loot = await miner.tierLoot(1, BLOCKS, false, 0, toBNs(9));
 
 		// CSV file data
-		const csv_data = `1,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `1,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/tier_loot_5.csv", CSV_HEADER, csv_data);
 
@@ -221,7 +221,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		const loot = await miner.tierLoot(2, BLOCKS, false, 0, toBNs(9));
 
 		// CSV file data
-		const csv_data = `2,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `2,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/tier_loot_5.csv", CSV_HEADER, csv_data);
 
@@ -264,7 +264,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		const loot = await miner.tierLoot(3, BLOCKS, false, 0, toBNs(9));
 
 		// CSV file data
-		const csv_data = `3,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `3,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/tier_loot_5.csv", CSV_HEADER, csv_data);
 
@@ -307,7 +307,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		const loot = await miner.tierLoot(4, BLOCKS, false, 0, toBNs(9));
 
 		// CSV file data
-		const csv_data = `4,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `4,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/tier_loot_5.csv", CSV_HEADER, csv_data);
 
@@ -350,7 +350,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		const loot = await miner.tierLoot(5, BLOCKS, false, 0, toBNs(9));
 
 		// CSV file data
-		const csv_data = `5,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `5,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/tier_loot_5.csv", CSV_HEADER, csv_data);
 
@@ -393,7 +393,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		const loot = await miner.tierLoot(5, BLOCKS, false, BLOCKS, toBNs(9));
 
 		// CSV file data
-		const csv_data = `5B,${BLOCKS},${loot.join(",")}`;
+		const csv_data = `5B,${BLOCKS},${loot.join()}`;
 		// write statistical raw data into the file
 		write_csv("./data/tier_loot_5.csv", CSV_HEADER, csv_data);
 
