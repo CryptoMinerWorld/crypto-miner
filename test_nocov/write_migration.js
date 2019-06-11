@@ -160,6 +160,9 @@ contract('V1 -> V2 Migration', (accounts) => {
 			}
 		}
 
+		// clean the permissions used
+		await token.updateRole(writer.address, 0);
+
 		// print the cumulative gas usage result
 		console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 	});
@@ -241,6 +244,9 @@ contract('V1 -> V2 Migration', (accounts) => {
 			}
 		}
 
+		// clean the permissions used
+		await token.updateRole(writer.address, 0);
+
 		// print the cumulative gas usage result
 		console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 	});
@@ -285,6 +291,11 @@ contract('V1 -> V2 Migration', (accounts) => {
 
 		// log the result
 		console.log("\t%o record(s) written: %o gas used", data256.length, gasUsed);
+
+		// clean the permissions used
+		await tracker.updateRole(writer.address, 0);
+
+		// log cumulative gas used
 		console.log("\tcumulative gas used: %o (%o ETH)", gasUsed, Math.ceil(gasUsed / 1000000) / 1000);
 	});
 
@@ -346,6 +357,9 @@ contract('V1 -> V2 Migration', (accounts) => {
 				gasUsed
 			);
 		}
+
+		// clean the permissions used
+		await tracker.updateRole(writer.address, 0);
 
 		// log the result
 		console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
