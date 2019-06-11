@@ -52,7 +52,7 @@ contract PlotSale is AccessMultiSig {
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant REF_TRACKER_UID_REQUIRED = 0x0d8292f7303414b8d3bf94275e4951f0520fe555f65e1db469fced2c930a828f;
+  uint256 public constant REF_TRACKER_UID_REQUIRED = 0xe2e757604d700ca3a2a49e36a752c3974a10fd4fea31f1fe3ee944eaa535513c;
 
   /**
    * @dev Expected version (UID) of the deployed CountryERC721 instance

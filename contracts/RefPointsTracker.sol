@@ -21,7 +21,7 @@ contract RefPointsTracker is AccessMultiSig {
    *      and changes smart contract itself is to be redeployed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TRACKER_UID = 0x0d8292f7303414b8d3bf94275e4951f0520fe555f65e1db469fced2c930a828f;
+  uint256 public constant TRACKER_UID = 0xe2e757604d700ca3a2a49e36a752c3974a10fd4fea31f1fe3ee944eaa535513c;
 
   /**
    * @notice Referral points issuer is responsible for issuing
@@ -220,120 +220,6 @@ contract RefPointsTracker is AccessMultiSig {
     // check if caller has sufficient permissions to issue referral points
     require(isSenderInRole(ROLE_REF_POINTS_ISSUER));
 
-    // delegate call to unsafe `__issueTo`
-    __issueTo(_to, _amount);
-  }
-
-  /**
-   * @notice Consumes referral points from a player address
-   * @dev Requires sender to have `ROLE_REF_POINTS_CONSUMER` permission
-   * @param _from an address to consume referral points from
-   * @param _amount number of referral points to consume
-   */
-  function consumeFrom(address _from, uint256 _amount) public {
-    // check if caller has sufficient permissions to consume referral points
-    require(isSenderInRole(ROLE_REF_POINTS_CONSUMER));
-
-    // delegate call to unsafe `__consumeFrom`
-    __consumeFrom(_from, _amount);
-  }
-
-  /**
-   * @dev A callback function called by seller on successful sale
-   *      and some wei being spent by the player
-   * @dev Adds address specified to `knownAddresses` mapping
-   * @dev Requires sender to have `ROLE_SELLER` permission
-   * @param _address an address which spent some wei (bought something)
-   */
-  function addKnownAddress(address _address) public {
-    // check if caller has sufficient permissions to add an address
-    require(isSenderInRole(ROLE_SELLER));
-
-    // delegate call to `__addKnownAddress`
-    __addKnownAddress(_address);
-  }
-
-  /**
-   * @notice Issues referral points to players addresses
-   * @dev This is a bulk version of `issueTo` function
-   * @dev Requires sender to have `ROLE_REF_POINTS_ISSUER` permission
-   * @param _to array of addresses to issue referral points to
-   * @param _amount array of referral points values to issue
-   */
-  function bulkIssue(address[] memory _to, uint256[] memory _amount) public {
-    // check if caller has sufficient permissions to issue referral points
-    require(isSenderInRole(ROLE_REF_POINTS_ISSUER));
-
-    // verify input arrays lengths consistency
-    require(_to.length == _amount.length);
-
-    // verify input arrays are not empty
-    require(_to.length != 0);
-
-    // iterate over both arrays (they have same size)
-    for(uint256 i = 0; i < _to.length; i++) {
-      // and issue referral points for each element
-      // delegate call to `__issueTo`
-      __issueTo(_to[i], _amount[i]);
-    }
-  }
-
-  /**
-   * @notice Consumes referral points from players addresses
-   * @dev This is a bulk version of `consumeFrom` function
-   * @dev Requires sender to have `ROLE_REF_POINTS_CONSUMER` permission
-   * @param _from array of addresses to consume referral points from
-   * @param _amount array of referral points values to consume
-   */
-  function bulkConsume(address[] memory _from, uint256[] memory _amount) public {
-    // check if caller has sufficient permissions to consume referral points
-    require(isSenderInRole(ROLE_REF_POINTS_CONSUMER));
-
-    // verify input arrays lengths consistency
-    require(_from.length == _amount.length);
-
-    // verify input arrays are not empty
-    require(_from.length != 0);
-
-    // iterate over both arrays (they have same size)
-    for(uint256 i = 0; i < _from.length; i++) {
-      // and consume referral points for each element
-      // delegate call to `__consumeFrom`
-      __consumeFrom(_from[i], _amount[i]);
-    }
-  }
-
-  /**
-   * @dev A callback function called by seller on successful sale
-   *      and some wei being spent by several players
-   * @dev Can be also used to initialize smart contract with a
-   *      bunch of initial data
-   * @dev Adds addresses specified to `knownAddresses` mapping
-   * @dev Requires sender to have `ROLE_SELLER` permission
-   * @dev Throws if input array is empty
-   * @param _addresses an array of addresses which spent some wei (bought something)
-   */
-  function bulkAddKnownAddresses(address[] memory _addresses) public {
-    // check if caller has sufficient permissions to add the addresses
-    require(isSenderInRole(ROLE_SELLER));
-
-    // verify input array is not empty
-    require(_addresses.length != 0);
-
-    // iterate over the array
-    for(uint256 i = 0; i < _addresses.length; i++) {
-      // and each one to the `knownAddresses` mapping
-      __addKnownAddress(_addresses[i]);
-    }
-  }
-
-  /**
-   * @dev Issues referral points to a player address
-   * @dev Unsafe, doesn't check for permissions, must be kept private
-   * @param _to an address to issue referral points to
-   * @param _amount number of referral points to issue
-   */
-  function __issueTo(address _to, uint256 _amount) private {
     // arithmetic overflow check, non-zero amount check
     require(issued[_to] + _amount > issued[_to]);
 
@@ -351,12 +237,15 @@ contract RefPointsTracker is AccessMultiSig {
   }
 
   /**
-   * @dev Consumes referral points from a player address
-   * @dev Unsafe, doesn't check for permissions, must be kept private
+   * @notice Consumes referral points from a player address
+   * @dev Requires sender to have `ROLE_REF_POINTS_CONSUMER` permission
    * @param _from an address to consume referral points from
    * @param _amount number of referral points to consume
    */
-  function __consumeFrom(address _from, uint256 _amount) private {
+  function consumeFrom(address _from, uint256 _amount) public {
+    // check if caller has sufficient permissions to consume referral points
+    require(isSenderInRole(ROLE_REF_POINTS_CONSUMER));
+
     // arithmetic overflow check, non-zero amount check
     require(consumed[_from] + _amount > consumed[_from]);
 
@@ -371,11 +260,16 @@ contract RefPointsTracker is AccessMultiSig {
   }
 
   /**
+   * @dev A callback function called by seller on successful sale
+   *      and some wei being spent by the player
    * @dev Adds address specified to `knownAddresses` mapping
-   * @dev Unsafe, doesn't check for permissions, must be kept private
+   * @dev Requires sender to have `ROLE_SELLER` permission
    * @param _address an address which spent some wei (bought something)
    */
-  function __addKnownAddress(address _address) private {
+  function addKnownAddress(address _address) public {
+    // check if caller has sufficient permissions to add an address
+    require(isSenderInRole(ROLE_SELLER));
+
     // if `_address` is valid (non-zero) and new -
     if(_address != address(0) && !isKnown(_address)) {
       // - track it in `knownAddresses` array

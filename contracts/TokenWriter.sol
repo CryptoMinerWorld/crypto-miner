@@ -36,10 +36,50 @@ interface CountryV2 {
    * @dev Creates new token with `tokenId` ID specified and
    *      assigns an ownership `to` for that token
    * @dev Initial token's properties are predefined by its ID
+   * @dev Requires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)
    * @param _to an address to assign created token ownership to
    * @param _tokenId ID of the token to create
    */
   function mint(address _to, uint8 _tokenId) external;
+}
+
+/**
+ * @dev RefPointsTracker V2 interface (current)
+ */
+interface RefV2 {
+  /**
+   * @notice Verifies if an address is known to the tracker
+   * @dev Address is known if it was added as known by `ROLE_SELLER`
+   *      or was issued some referral points by `ROLE_REF_POINTS_ISSUER`
+   * @param _address address to query known status for
+   * @return true if address is known (added ot has some ref points issued)
+   */
+  function isKnown(address _address) external view returns(bool);
+
+  /**
+   * @notice Issues referral points to a player address
+   * @dev Requires sender to have `ROLE_REF_POINTS_ISSUER` permission
+   * @param _to an address to issue referral points to
+   * @param _amount number of referral points to issue
+   */
+  function issueTo(address _to, uint256 _amount) external;
+
+  /**
+   * @notice Consumes referral points from a player address
+   * @dev Requires sender to have `ROLE_REF_POINTS_CONSUMER` permission
+   * @param _from an address to consume referral points from
+   * @param _amount number of referral points to consume
+   */
+  function consumeFrom(address _from, uint256 _amount) external;
+
+  /**
+   * @dev A callback function called by seller on successful sale
+   *      and some wei being spent by the player
+   * @dev Adds address specified to `knownAddresses` mapping
+   * @dev Requires sender to have `ROLE_SELLER` permission
+   * @param _address an address which spent some wei (bought something)
+   */
+  function addKnownAddress(address _address) external;
 }
 
 /**
@@ -66,6 +106,11 @@ contract TokenWriter is AccessControl {
    * @dev Country writer is responsible for country minting
    */
   uint32 public constant ROLE_COUNTRY_WRITER = 0x00000002;
+
+  /**
+   * @dev Ref Points writer is responsible for referral points issuing
+   */
+  uint32 public constant ROLE_REF_WRITER = 0x00000004;
 
   /**
    * @dev Creates several gems in single transaction
@@ -160,7 +205,88 @@ contract TokenWriter is AccessControl {
 
     // iterate and mint
     for(uint8 i = 0; i < owners.length; i++) {
-      CountryV2(countryAddress).mint(owners[i], idOffset + i + 1);
+      // if owner address passed is zero no need to mint it - skip it
+      if(owners[i] != address(0)) {
+        CountryV2(countryAddress).mint(owners[i], idOffset + i + 1);
+      }
     }
   }
+
+  /**
+   * @notice Issues referral points to players addresses
+   * @dev This is a bulk version of `issueTo` function
+   * @param trackerAddress deployed RefPointsTracker v2 instance
+   * @param _data array of packed data structures containing
+   *      issued, 32 bits
+   *      consumed, 32 bits
+   *      issued - consumed, 32 bits
+   *      address, 160 bits
+   */
+  function writeRefPointsData(address trackerAddress, uint256[] memory _data) public {
+    // ensure smart contract is fresh (security constraint)
+    require(now - deployed < SECURITY_TIMEOUT);
+
+    // verify sender permissions
+    require(isSenderInRole(ROLE_REF_WRITER));
+
+    // verify input arrays are not empty
+    require(_data.length != 0);
+
+    // iterate over both arrays (they have same size)
+    for(uint256 i = 0; i < _data.length; i++) {
+      // verify issued, consumed and balance match (data integrity check)
+      require(uint32(_data[i] >> 224) == uint32(_data[i] >> 192) + uint32(_data[i] >> 160));
+
+      // verify issued is not zero
+      require(_data[i] >> 160 != 0);
+
+      // ensure not to write twice – verify address is not yet known
+      require(!RefV2(trackerAddress).isKnown(address(_data[i])));
+
+      // issue referral points for each element
+      // delegate call to `__issueTo`
+      RefV2(trackerAddress).issueTo(address(_data[i]), uint32(_data[i] >> 224));
+
+      // consume referral points for each element - if not zero
+      if(uint32(_data[i] >> 192) != 0) {
+        // delegate call to `__consumeFrom`
+        RefV2(trackerAddress).consumeFrom(address(_data[i]), uint32(_data[i] >> 192));
+      }
+    }
+  }
+
+  /**
+   * @dev A callback function called by seller on successful sale
+   *      and some wei being spent by several players
+   * @dev Can be also used to initialize smart contract with a
+   *      bunch of initial data
+   * @dev Adds addresses specified to `knownAddresses` mapping
+   * @dev Throws if input array is empty
+   * @param trackerAddress deployed RefPointsTracker v2 instance
+   * @param _data array of packed data structures containing
+   *      issued, 32 bits
+   *      consumed, 32 bits
+   *      issued - consumed, 32 bits
+   *      address, 160 bits
+   */
+  function writeKnownAddrData(address trackerAddress, uint256[] memory _data) public {
+    // ensure smart contract is fresh (security constraint)
+    require(now - deployed < SECURITY_TIMEOUT);
+
+    // verify sender permissions
+    require(isSenderInRole(ROLE_REF_WRITER));
+
+    // verify input array is not empty
+    require(_data.length != 0);
+
+    // iterate over the array
+    for(uint256 i = 0; i < _data.length; i++) {
+      // verify issued, consumed and balance are all zeros (data integrity check)
+      require(_data[i] >> 160 == 0);
+
+      // and each one to the `knownAddresses` mapping
+      RefV2(trackerAddress).addKnownAddress(address(_data[i]));
+    }
+  }
+
 }
