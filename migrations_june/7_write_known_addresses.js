@@ -27,11 +27,11 @@ module.exports = async function(deployer, network, accounts) {
 
 		}: network === "ropsten"?
 		{ // Ropsten Addresses
-			RefPointsTracker:   "0x33e0BD722e9e357bAa7BEF0F0192F7ad889BaD8f",
+			RefPointsTracker:   "0xC97a91a4e1bfbf18a9038BAE649Fa92d0B242Cfb",
 			TokenWriter:        "0xdb4f3644e05E6fB6BB7426A4f258356b728AB720",
 		}:
 		{ // Rinkeby Addresses
-			RefPointsTracker:   "0x19ec83A089BCC1D62F4e1fE8D29930FEd245903a",
+			RefPointsTracker:   "0x749bc7098055d4eb68516538b4D2e56bf1fea09a",
 			TokenWriter:        "0x6f98A7FfE026F6514B7bdC01418a21C384B0Fa63",
 		};
 
