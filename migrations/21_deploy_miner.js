@@ -1,4 +1,4 @@
-// ERC721 and ERC20 Token smart contracts
+// Miner dependencies
 const GemERC721 = artifacts.require("./GemERC721");
 const PlotERC721 = artifacts.require("./PlotERC721");
 const SilverERC20 = artifacts.require("./SilverERC20");
@@ -44,7 +44,7 @@ module.exports = async function(deployer, network, accounts) {
 			FoundersKeyERC20:   "0x901E6a702D832Cff1356639F4a99046aB4cE4bCa",
 			ChestKeyERC20:      "0x604206004488Aa28F5b57dfF4BF3d235cec63234",
 		}:
-		{
+		{ // Rinkeby Addresses
 			GemERC721:          "0xd55369023CE587ff1DCC7190f95D3C137E4ca220",
 			PlotERC721:         "0x6452e4671B0D9CcFE5d06Fd171bAaE8d9b133F31",
 			SilverERC20:        "0x9b2AAA1B68AD54647001b90e8620753D1451ef7a",
