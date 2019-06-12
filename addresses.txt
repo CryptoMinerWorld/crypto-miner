@@ -33,6 +33,8 @@ RefPointsTracker:   0xC97a91a4e1bfbf18a9038BAE649Fa92d0B242Cfb
 Workshop:           0x3cc379D1485B4803827C6C819c2F521A8DFfd72A
 Miner:              0x55A1f14ba24728871DC11aD2D332b12d6FD2DC30
 
+PlotSale:           0xD99D4C6215098E728B9b45A335c018aabBA5418b
+
 TokenReader:        0x7DA1b0552c0CAf7A72d8a7bc7F7813B3AC2FcC35
 TokenWriter:        0xdb4f3644e05E6fB6BB7426A4f258356b728AB720
 --------------------------------------------------------------
@@ -58,6 +60,8 @@ RefPointsTracker:   0x749bc7098055d4eb68516538b4D2e56bf1fea09a
 
 Workshop:           0x4d6B40F9b4Bf8d5d1C066C4C2c20fdfbEEdc5057
 Miner:
+
+PlotSale:
 
 TokenReader:        0x8226a7b2fFD7fd09Fb131c2373F1964dFA7A8410
 TokenWriter:        0x6f98A7FfE026F6514B7bdC01418a21C384B0Fa63
