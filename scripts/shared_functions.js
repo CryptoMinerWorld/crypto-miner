@@ -33,10 +33,10 @@ export function read_csv(path, header) {
 		return "";
 	}
 	const data = fs.readFileSync(path, {encoding: "utf8"});
-	if(data.indexOf(`${header}\n`) === 0) {
-		return data.substring(header.length + 1)
+	if(data.indexOf(`${header}\n`) !== 0) {
+		throw new Error("malformed CSV header");
 	}
-	return data;
+	return data.substring(header.length + 1)
 }
 
 // zero address (old int 0)
