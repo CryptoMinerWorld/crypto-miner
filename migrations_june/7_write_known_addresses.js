@@ -49,13 +49,13 @@ module.exports = async function(deployer, network, accounts) {
 	await tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 
 	// CSV header
-	const csv_header = "address,raw256";
+	const csv_header = "issued,consumed,available,address";
 	// read CSV data
 	const csv_data = read_csv("./data/known_addresses.csv", csv_header);
 	console.log("\t%o bytes CSV data read", csv_data.length);
 
 	// define array to store the data
-	const data256 = [];
+	const data = [];
 
 	// split CSV data by lines: each line is a tracker
 	const csv_lines = csv_data.split(/[\r\n]+/);
@@ -65,37 +65,43 @@ module.exports = async function(deployer, network, accounts) {
 		const props = csv_lines[i].split(",").map((a) => a.trim());
 
 		// skip malformed line
-		if(props.length !== 2) {
+		if(props.length !== 4) {
 			continue;
 		}
 
-		// extract raw256 data
-		data256.push(props.map(packRefData));
+		// extract data
+		data.push(props);
 	}
-	console.log("\t%o of %o records parsed", data256.length, csv_lines.length);
+	console.log("\t%o of %o records parsed", data.length, csv_lines.length);
 
 	// track cumulative gas usage
 	let cumulativeGasUsed = 0;
 
 	// iterate the arrays in bulks
 	const bulkSize = 100;
-	for(let offset = 0; offset < data256.length; offset += bulkSize) {
+	for(let offset = 0; offset < data.length; offset += bulkSize) {
 		// extract portion of owners array
-		const data_to_write = data256.slice(offset, offset + bulkSize);
+		const data_to_write = data.slice(offset, offset + bulkSize).map(packRefData);
 
-		// write all the gems and measure gas
-		const gasUsed = (await writer.writeKnownAddrData(tracker.address, data_to_write)).receipt.gasUsed;
+		// check if ref points are already written
+		if(!await tracker.isKnown(data[offset][3])) {
+			// write all the gems and measure gas
+			const gasUsed = (await writer.writeKnownAddrData(tracker.address, data_to_write)).receipt.gasUsed;
 
-		// update cumulative gas used
-		cumulativeGasUsed += gasUsed;
+			// update cumulative gas used
+			cumulativeGasUsed += gasUsed;
 
-		// log the result
-		console.log(
-			"\t%o record(s) written (%o total): %o gas used",
-			Math.min(bulkSize, data256.length - offset),
-			Math.min(offset + bulkSize, data256.length),
-			gasUsed
-		);
+			// log the result
+			console.log(
+				"\t%o record(s) written (%o total): %o gas used",
+				Math.min(bulkSize, data.length - offset),
+				Math.min(offset + bulkSize, data.length),
+				gasUsed
+			);
+		}
+		else {
+			console.log("\t%o record(s) skipped", Math.min(bulkSize, data.length - offset));
+		}
 	}
 
 	// clean the permissions used
@@ -116,10 +122,10 @@ function read_csv(path, header) {
 		return "";
 	}
 	const data = fs.readFileSync(path, {encoding: "utf8"});
-	if(data.indexOf(`${header}\n`) === 0) {
-		return data.substring(header.length + 1)
+	if(data.indexOf(`${header}\n`) !== 0) {
+		throw new Error("malformed CSV header");
 	}
-	return data;
+	return data.substring(header.length + 1)
 }
 
 // short name for web3.utils.toBN
