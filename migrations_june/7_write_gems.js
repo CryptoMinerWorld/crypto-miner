@@ -24,14 +24,10 @@ module.exports = async function(deployer, network, accounts) {
 	const conf = network === "mainnet"?
 		{ // Mainnet Addresses
 
-		}: network === "ropsten"?
-		{ // Ropsten Addresses
-			GemERC721:          "0x60014A33fe30E471c406Ddd99361487Ffe7f1189",
-			TokenWriter:        "0xdb4f3644e05E6fB6BB7426A4f258356b728AB720",
 		}:
-		{ // Rinkeby Addresses
-			GemERC721:          "0xd55369023CE587ff1DCC7190f95D3C137E4ca220",
-			TokenWriter:        "0x6f98A7FfE026F6514B7bdC01418a21C384B0Fa63",
+		{ // Ropsten Addresses
+			GemERC721:          "0xFe71e1d0c1f678b94B5fa7542071CfFE2DEa4E31",
+			TokenWriter:        "0xdb4f3644e05E6fB6BB7426A4f258356b728AB720",
 		};
 
 	// deployed instances
@@ -43,9 +39,6 @@ module.exports = async function(deployer, network, accounts) {
 	// redefine instances links
 	const token = instances.GemERC721;
 	const writer = instances.TokenWriter;
-
-	// grant writer permission to mint gems and set energetic age
-	await token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
 
 	// CSV header
 	const csv_header = "tokenId,plotId,color,level,grade,grade type,grade value,age,owner";
@@ -75,6 +68,9 @@ module.exports = async function(deployer, network, accounts) {
 		gems.push(props);
 	}
 	console.log("\t%o of %o token(s) parsed", gems.length, csv_lines.length);
+
+	// grant writer permission to mint gems and set energetic age
+	await token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
 
 	// track cumulative gas usage
 	let cumulativeGasUsed = 0;

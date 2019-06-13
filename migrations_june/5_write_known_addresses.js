@@ -25,14 +25,10 @@ module.exports = async function(deployer, network, accounts) {
 	const conf = network === "mainnet"?
 		{ // Mainnet Addresses
 
-		}: network === "ropsten"?
+		}:
 		{ // Ropsten Addresses
 			RefPointsTracker:   "0xC97a91a4e1bfbf18a9038BAE649Fa92d0B242Cfb",
 			TokenWriter:        "0xdb4f3644e05E6fB6BB7426A4f258356b728AB720",
-		}:
-		{ // Rinkeby Addresses
-			RefPointsTracker:   "0x749bc7098055d4eb68516538b4D2e56bf1fea09a",
-			TokenWriter:        "0x6f98A7FfE026F6514B7bdC01418a21C384B0Fa63",
 		};
 
 	// deployed instances
@@ -44,9 +40,6 @@ module.exports = async function(deployer, network, accounts) {
 	// redefine instances links
 	const tracker = instances.RefPointsTracker;
 	const writer = instances.TokenWriter;
-
-	// grant writer permission to mint gems and set energetic age
-	await tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 
 	// CSV header
 	const csv_header = "issued,consumed,available,address";
@@ -73,6 +66,9 @@ module.exports = async function(deployer, network, accounts) {
 		data.push(props);
 	}
 	console.log("\t%o of %o records parsed", data.length, csv_lines.length);
+
+	// grant writer permission to mint gems and set energetic age
+	await tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 
 	// track cumulative gas usage
 	let cumulativeGasUsed = 0;
