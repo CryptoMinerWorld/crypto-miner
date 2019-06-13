@@ -6,14 +6,14 @@ const Plot = artifacts.require("./PlotERC721.sol");
 const Sale = artifacts.require("./PlotSale.sol");
 
 // World Plot Sale dependencies
-import {COUNTRY_DATA} from "../data_legacy/country_data";
+import {COUNTRY_DATA} from "../data/country_data";
 
 // one token price
 const SALE_PRICE = 20000000000000000;
 
 // PlotSale gas usage related tests
 contract('PlotSale: Gas Usage', (accounts) => {
-	it("gas: deploying a SC requires 2,532,620 gas", async() => {
+	it("gas: deploying a SC requires 3,136,078 gas", async() => {
 		// define plot sale dependencies
 		const r = await Tracker.new(); // ref tracker
 		const c = await Country.new(COUNTRY_DATA); // country ERC721
@@ -30,7 +30,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		const gasUsed = txReceipt.gasUsed;
 
 		// confirm gas usage result
-		assertEqual(2532620, gasUsed, "deploying SC gas usage mismatch: " + gasUsed);
+		assertEqual(3136078, gasUsed, "deploying SC gas usage mismatch: " + gasUsed);
 	});
 
 	it("gas: buying one plot requires 360,847 gas", async() => {
@@ -55,7 +55,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// buy one plot in Russia - no country owner
-		const gasUsed = (await s.buy(1, 1, 0, {from: p, value: SALE_PRICE})).receipt.gasUsed;
+		const gasUsed = (await s.buy(1, 1, {from: p, value: SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
 		assertEqual(360847, gasUsed, "buying one plot gas usage mismatch: " + gasUsed);
@@ -82,7 +82,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// buy 10 plots in Russia - no country owner
-		const gasUsed = (await s.buy(1, 10, 0, {from: p, value: 10 * SALE_PRICE})).receipt.gasUsed;
+		const gasUsed = (await s.buy(1, 10, {from: p, value: 10 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
 		assertEqual(1812575, gasUsed, "buying ten plots gas usage mismatch: " + gasUsed);
@@ -109,7 +109,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// buy 25 plots in Russia - no country owner
-		const gasUsed = (await s.buy(1, 25, 0, {from: p, value: 25 * SALE_PRICE})).receipt.gasUsed;
+		const gasUsed = (await s.buy(1, 25, {from: p, value: 25 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
 		assertEqual(4289335, gasUsed, "buying 25 plots gas usage mismatch: " + gasUsed);
@@ -136,7 +136,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// buy 45 plots in Russia - no country owner
-		const gasUsed = (await s.buy(1, 45, 0, {from: p, value: 45 * SALE_PRICE})).receipt.gasUsed;
+		const gasUsed = (await s.buy(1, 45, {from: p, value: 45 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
 		assertEqual(7570425, gasUsed, "buying 45 plots gas usage mismatch: " + gasUsed);
@@ -168,7 +168,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// buy one plot in Russia - owned country
-		const gasUsed = (await s.buy(1, 1, 0, {from: p, value: SALE_PRICE})).receipt.gasUsed;
+		const gasUsed = (await s.buy(1, 1, {from: p, value: SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
 		assertEqual(390146, gasUsed, "buying one plot from owned country gas usage mismatch: " + gasUsed);
@@ -199,7 +199,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// buy 10 plots in Russia - owned country
-		const gasUsed = (await s.buy(1, 10, 0, {from: p, value: 10 * SALE_PRICE})).receipt.gasUsed;
+		const gasUsed = (await s.buy(1, 10, {from: p, value: 10 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
 		assertEqual(1842624, gasUsed, "buying ten plots from owned country gas usage mismatch: " + gasUsed);
@@ -230,7 +230,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// buy 25 plots in Russia - owned country
-		const gasUsed = (await s.buy(1, 25, 0, {from: p, value: 25 * SALE_PRICE})).receipt.gasUsed;
+		const gasUsed = (await s.buy(1, 25, {from: p, value: 25 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
 		assertEqual(4319904, gasUsed, "buying 25 plots from owned country gas usage mismatch: " + gasUsed);
@@ -261,7 +261,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// buy 45 plots in Russia - owned country
-		const gasUsed = (await s.buy(1, 45, 0, {from: p, value: 45 * SALE_PRICE})).receipt.gasUsed;
+		const gasUsed = (await s.buy(1, 45, {from: p, value: 45 * SALE_PRICE})).receipt.gasUsed;
 
 		// confirm gas usage result
 		assertEqual(7601604, gasUsed, "buying 45 plots from owned country gas usage mismatch: " + gasUsed);
@@ -410,7 +410,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// add a coupon
-		await s.updateCoupon(web3.sha3("coupon"), 1);
+		await s.updateCoupon(web3.utils.sha3("coupon"), 1);
 
 		// get plot(s) for coupon
 		const gasUsed = (await s.useCoupon("coupon", {from: p})).receipt.gasUsed;
@@ -440,7 +440,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// add a coupon
-		await s.updateCoupon(web3.sha3("coupon"), 10);
+		await s.updateCoupon(web3.utils.sha3("coupon"), 10);
 
 		// get plot(s) for coupon
 		const gasUsed = (await s.useCoupon("coupon", {from: p})).receipt.gasUsed;
@@ -470,7 +470,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// add a coupon
-		await s.updateCoupon(web3.sha3("coupon"), 25);
+		await s.updateCoupon(web3.utils.sha3("coupon"), 25);
 
 		// get plot(s) for coupon
 		const gasUsed = (await s.useCoupon("coupon", {from: p})).receipt.gasUsed;
@@ -500,7 +500,7 @@ contract('PlotSale: Gas Usage', (accounts) => {
 		await r.updateRole(s.address, 0x00000004); // seller
 
 		// add a coupon
-		await s.updateCoupon(web3.sha3("coupon"), 45);
+		await s.updateCoupon(web3.utils.sha3("coupon"), 45);
 
 		// get plot(s) for coupon
 		const gasUsed = (await s.useCoupon("coupon", {from: p})).receipt.gasUsed;

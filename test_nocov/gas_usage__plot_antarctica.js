@@ -58,7 +58,7 @@ contract('PlotAntarctica: Gas Usage', (accounts) => {
 
 		assertEqual(1658096, gasUsed, "getting ten plots gas usage mismatch: " + gasUsed);
 	});
-	it("gas: getting 50 plots requires 7,918,951 gas", async() => {
+	it("gas: getting 15 plots requires 2,472,939 gas", async() => { // getting 50 plots requires 7,918,951 gas
 		// define plot Antarctica dependencies
 		const m = await FoundersPlotsMock.new(); // Founders Plots Mock simulates Presale2
 		const t = await Plot.new(); // plot ERC721
@@ -75,7 +75,7 @@ contract('PlotAntarctica: Gas Usage', (accounts) => {
 		// buy one plot in Russia - no country owner
 		const gasUsed = (await s.get(15, {from: p})).receipt.gasUsed;
 
-		assertEqual(2472939, gasUsed, "getting 50 plots gas usage mismatch: " + gasUsed);
+		assertEqual(2472939, gasUsed, "getting 15 plots gas usage mismatch: " + gasUsed);
 	});
 });
 
