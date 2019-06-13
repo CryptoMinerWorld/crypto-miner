@@ -35,28 +35,28 @@ module.exports = async function(deployer, network, accounts) {
 
 	// deployed instances' addresses
 	const conf = { // Ropsten Addresses
-		GemERC721:          "0x60014A33fe30E471c406Ddd99361487Ffe7f1189",
-		CountryERC721:      "0xf23197d25Ca59e4554Ef7BBcF579971A14882601",
-		PlotERC721:         "0x4ED45BeC5762aB8b191Dd978db5609a53F21576f",
-		SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
-		GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
+		RefPointsTracker:   "0xC97a91a4e1bfbf18a9038BAE649Fa92d0B242Cfb",
 		ArtifactERC20:      "0x06D09B097D56B5DEB70C31eaa5802d6447913eeC",
 		FoundersKeyERC20:   "0x901E6a702D832Cff1356639F4a99046aB4cE4bCa",
 		ChestKeyERC20:      "0x604206004488Aa28F5b57dfF4BF3d235cec63234",
-		RefPointsTracker:   "0x33e0BD722e9e357bAa7BEF0F0192F7ad889BaD8f",
+		SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
+		GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
+		CountryERC721:      "0x7825f2bd389B8962F0578804D7B1c3FC03cF14f1",
+		PlotERC721:         "0x1C3634f7345fd3f3884C5D6FF1F96E16A69b40Ea",
+		GemERC721:          "0xFe71e1d0c1f678b94B5fa7542071CfFE2DEa4E31",
 	};
 
 	// deployed instances
 	const instances = {
-		GemERC721: await GemERC721.at(conf.GemERC721),
-		CountryERC721: await CountryERC721.at(conf.CountryERC721),
-		PlotERC721: await PlotERC721.at(conf.PlotERC721),
-		SilverERC20: await SilverERC20.at(conf.SilverERC20),
-		GoldERC20: await GoldERC20.at(conf.GoldERC20),
+		RefPointsTracker: await RefPointsTracker.at(conf.RefPointsTracker),
 		ArtifactERC20: await ArtifactERC20.at(conf.ArtifactERC20),
 		FoundersKeyERC20: await FoundersKeyERC20.at(conf.FoundersKeyERC20),
 		ChestKeyERC20: await ChestKeyERC20.at(conf.ChestKeyERC20),
-		RefPointsTracker: await RefPointsTracker.at(conf.RefPointsTracker),
+		SilverERC20: await SilverERC20.at(conf.SilverERC20),
+		GoldERC20: await GoldERC20.at(conf.GoldERC20),
+		CountryERC721: await CountryERC721.at(conf.CountryERC721),
+		PlotERC721: await PlotERC721.at(conf.PlotERC721),
+		GemERC721: await GemERC721.at(conf.GemERC721),
 	};
 
 	// mint few ERC721 tokens
