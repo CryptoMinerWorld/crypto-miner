@@ -17,7 +17,7 @@ contract TokenHelper {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant HELPER_UID = 0xfff87d62c2288198f2a9393536625b5791da36a6a86dc39f10011a40643c014c;
+  uint256 public constant HELPER_UID = 0x8ceda032508c397dfe0884d145929e67cc0f2a27738fbb424a504a9e17756f89;
 
   /**
    * @dev Similarly to `GemERC721.getPackedCollection`, returns packed collection
@@ -59,7 +59,7 @@ contract TokenHelper {
     // iterate over all the tokens on the auction
     for(uint24 i = 0; i < packed.length; i++) {
       // extract tokenId
-      uint24 tokenId = uint24(packed[i] >> 176);
+      uint24 tokenId = uint24(packed[i]);
 
       // and if the token belongs to `owner` (previous ownership technically)
       if(DutchAuction(auction).owners(token, tokenId) == owner) {
@@ -131,7 +131,7 @@ contract TokenHelper {
     // iterate over all the tokens on the auction
     for(uint24 i = 0; i < packed.length; i++) {
       // extract tokenId
-      uint24 tokenId = uint24(packed[i] >> 176);
+      uint24 tokenId = uint24(packed[i]);
 
       // construct packed result items:
       // 3i
