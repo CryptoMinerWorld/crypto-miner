@@ -205,10 +205,14 @@ contract('CountryERC721', (accounts) => {
 		// construct expected packed struct for tokens0
 		const expectedPacked0 = [];
 		for(const token of tokens0) {
-			expectedPacked0.push(toBN(token).shln(16).or(toBN(COUNTRY_DATA[token - 1])).shln(8).or(toBN(0x4A)));
+			expectedPacked0.push(toBN(COUNTRY_DATA[token - 1]).shln(8).or(toBN(0x4A)).shln(8).or(toBN(token)));
 		}
 
-		assert.deepEqual(expectedPacked0.map(a => a.toString(16)), (await tk.getPackedCollection(accounts[0])).map(a => a.toString(16)), "wrong token packed collection for account 0");
+		assert.deepEqual(
+			expectedPacked0.map(a => a.toString(16)),
+			(await tk.getPackedCollection(accounts[0])).map(a => a.toString(16)),
+			"wrong token packed collection for account 0"
+		);
 	});
 
 

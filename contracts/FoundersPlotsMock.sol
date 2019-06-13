@@ -14,7 +14,7 @@ contract FoundersPlotsMock is FoundersPlots {
    * @return 65,535 if address is not zero, zero otherwise
    */
   function geodeBalances(address addr) external view returns (uint16) {
-    // check input and return 65,535
-    return addr == address(0)? 0: 0xFFFF;
+    // check input and return 15
+    return addr == address(0)? 0: 0xF;
   }
 }

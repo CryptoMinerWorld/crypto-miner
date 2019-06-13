@@ -46,7 +46,7 @@ contract PlotSale is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant SALE_UID = 0x3d5d4a6fc745b9f8b6f5a2fed0bbe602b069a73408c1e9b219394ed1eb52b28d;
+  uint256 public constant SALE_UID = 0xb5583de7cc68d93ea1cfd4d99c24e0494b1b6fef33f277b5cff7493e3eef4153;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
@@ -58,13 +58,13 @@ contract PlotSale is AccessMultiSig {
    * @dev Expected version (UID) of the deployed CountryERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant COUNTRY_UID_REQUIRED = 0x38744552bd2c44dee253933dfe185d043fc821932d74514bcf9cd59502c33d58;
+  uint256 public constant COUNTRY_UID_REQUIRED = 0xd4e385d974863e26814816b3604ac1351462df3f07fe434451a4beacd376fad6;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant PLOT_UID_REQUIRED = 0x7df5103a724ac7be6e123911fe18fdf39fef1cb58606628a357bde2d45c4d906;
+  uint256 public constant PLOT_UID_REQUIRED = 0xc5b810e451b3296f5ffa4087dc00adac5c57a053c276db3987921c798b153571;
 
   /**
    * @notice Enables world land plot sale

@@ -23,18 +23,20 @@ contract TokenHelper {
    * @dev Similarly to `GemERC721.getPackedCollection`, returns packed collection
    *      of tokens for a particular owner
    * @param auction DutchAuction instance, providing `owner(address, uint256) => address` interface
-   * @param token GemERC721 instance, providing `getPackedCollection(owner) => uint200` interface
+   * @param token GemERC721 instance, providing `getPackedCollection(owner) => uint256` interface
    * @param owner address to query tokens for
    * @return packed tokens collection structure, containing:
-   *      index 3i - 200 low bits
-   *        gem ID (24 bits)
-   *        gem color (8 bits)
-   *        gem level (8 bits)
-   *        gem grade (32 bits)
-   *        gem plots mined (24 bits)
-   *        gem blocks mined (32 bits)
-   *        gem energetic age (32 bits)
-   *        gem state (8 low bits)
+   *      index 3i - 256 bits
+   *        max (state modified, creation time) (32 bits)
+   *        max (ownership modified, creation time) (32 bits)
+   *        grade (32 bits)
+   *        level (8 bits)
+   *        plots mined (24 bits)
+   *        blocks mined (32 bits)
+   *        energetic age (32 bits)
+   *        state (32 bits)
+   *        color (8 bits)
+   *        token ID (24 bits)
    *      index 3i + 1 – 256 bits
    *        auction start time, t0, 32 bits
    *        auction end time, t1, 32 bits
@@ -46,7 +48,7 @@ contract TokenHelper {
    */
   function getGemCollectionByOwner(address auction, address token, address owner) public view returns(uint256[] memory) {
     // get all the tokens available on the auction
-    uint200[] memory packed = GemERC721(token).getPackedCollection(auction);
+    uint256[] memory packed = GemERC721(token).getPackedCollection(auction);
 
     // create an empty array to copy tokens owned by `owner`
     uint256[] memory extended = new uint256[](3 * packed.length);
@@ -99,15 +101,17 @@ contract TokenHelper {
    * @param auction DutchAuction instance, providing `owner(address, uint32) => address` interface
    * @param token GemERC721 instance, providing `getPackedCollection(owner) => uint200` interface
    * @return packed tokens collection structure, containing:
-   *      index 3i - 200 low bits
-   *        gem ID (24 bits)
-   *        gem color (8 bits)
-   *        gem level (8 bits)
-   *        gem grade (32 bits)
-   *        gem plots mined (24 bits)
-   *        gem blocks mined (32 bits)
-   *        gem energetic age (32 bits)
-   *        gem state (8 low bits)
+   *      index 3i - 256 bits
+   *        max (state modified, creation time) (32 bits)
+   *        max (ownership modified, creation time) (32 bits)
+   *        grade (32 bits)
+   *        level (8 bits)
+   *        plots mined (24 bits)
+   *        blocks mined (32 bits)
+   *        energetic age (32 bits)
+   *        state (32 bits)
+   *        color (8 bits)
+   *        token ID (24 bits)
    *      index 3i + 1 – 256 bits
    *        auction start time, t0, 32 bits
    *        auction end time, t1, 32 bits
@@ -119,7 +123,7 @@ contract TokenHelper {
    */
   function getAllGems(address auction, address token) public view returns(uint256[] memory) {
     // get all the tokens available on the auction
-    uint200[] memory packed = GemERC721(token).getPackedCollection(auction);
+    uint256[] memory packed = GemERC721(token).getPackedCollection(auction);
 
     // create an empty array to copy tokens extending the properties
     uint256[] memory extended = new uint256[](3 * packed.length);

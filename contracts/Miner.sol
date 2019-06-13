@@ -51,19 +51,19 @@ contract Miner is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x29145aabd5eca104b5baa8c2ae2a7e6862f198f786ae04b39c84bd6f4f1ea28e;
+  uint256 public constant MINER_UID = 0x1b71de921b7532e957aa0ceae769adc27d3487b33eb5248b3ca63d121cc735aa;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_UID_REQUIRED = 0xd427dd7fed7ae5a853e296754a314280d19660ff9db5cb32a7ec6f238a716d8a;
+  uint256 public constant GEM_UID_REQUIRED = 0x66fb61e14900ebf44ba5bd2da5e3adf87793bc5af28b5761f26c96972b73ec50;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant PLOT_UID_REQUIRED = 0x7df5103a724ac7be6e123911fe18fdf39fef1cb58606628a357bde2d45c4d906;
+  uint256 public constant PLOT_UID_REQUIRED = 0xc5b810e451b3296f5ffa4087dc00adac5c57a053c276db3987921c798b153571;
 
   /**
    * @dev Expected version (UID) of the deployed ArtifactERC721 instance

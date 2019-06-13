@@ -119,7 +119,7 @@ contract('GemERC721', function(accounts) {
 		// check packed collection
 		const packedCollection = await tk.getPackedCollection(accounts[0]);
 		assert.equal(1, packedCollection.length, "wrong packed collection length for " + accounts[0]);
-		assert(toBN("0x4010B050300000B0000000000000000000000" + creationTime.toString(16) + "00").eq(packedCollection[0]), "wrong token packed data at index 0");
+		assert(toBN("0x" + creationTime.toString(16) + creationTime.toString(16) + "0300000B050000000000000000000000000000000B000401").eq(packedCollection[0]), "wrong token packed data at index 0");
 
 		const collection = await tk.getCollection(accounts[0]);
 		assert.equal(1, collection.length, "wrong collection length for " + accounts[0]);

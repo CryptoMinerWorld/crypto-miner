@@ -23,7 +23,7 @@ contract CountryERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0x38744552bd2c44dee253933dfe185d043fc821932d74514bcf9cd59502c33d58;
+  uint256 public constant TOKEN_UID = 0xd4e385d974863e26814816b3604ac1351462df3f07fe434451a4beacd376fad6;
 
   /**
    * @dev ERC20 compliant token symbol
@@ -345,14 +345,8 @@ contract CountryERC721 is ERC721Core {
 
     // fetch token info one by one and pack it into the structure
     for(uint i = 0; i < ids.length; i++) {
-      // token ID
-      uint8 tokenId = ids[i];
-
-      // packed token data
-      uint24 packedData = getPacked(tokenId);
-
       // pack the data and save it into result array
-      packedCollection[i] = uint32(tokenId) << 24 | packedData;
+      packedCollection[i] = uint32(getPacked(ids[i])) << 8 | ids[i];
     }
 
     // return the result (it can be empty array as well)

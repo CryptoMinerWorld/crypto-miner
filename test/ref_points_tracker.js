@@ -42,21 +42,18 @@ contract('RefPointsTracker', (accounts) => {
 
 		// functions to issue referral points
 		const fn1 = async() => await tracker.issueTo(player, 1, {from: issuer});
-		const fn2 = async() => await tracker.bulkIssue([player], [1], {from: issuer});
 
 		// originally issuer doesn't have required permission
 		await assertThrows(fn1);
-		await assertThrows(fn2);
 
 		// grant issuer permission required
 		await tracker.updateRole(issuer, ROLE_REF_POINTS_ISSUER);
 
 		// verify issuer can perform operations now
 		await fn1();
-		await fn2();
 
 		// verify referral points increased correctly
-		assert.equal(2, await tracker.issued(player), "incorrect issued value after issuing 2 points");
+		assert.equal(1, await tracker.issued(player), "incorrect issued value after issuing 1 point(s)");
 	});
 	it("permissions: consuming ref points requires ROLE_REF_POINTS_CONSUMER permission", async() => {
 		const tracker = await Tracker.new();
@@ -72,21 +69,18 @@ contract('RefPointsTracker', (accounts) => {
 
 		// functions to consume referral points
 		const fn1 = async() => await tracker.consumeFrom(player, 1, {from: consumer});
-		const fn2 = async() => await tracker.bulkConsume([player], [1], {from: consumer});
 
 		// originally consumer doesn't have required permission
 		await assertThrows(fn1);
-		await assertThrows(fn2);
 
 		// grant consumer permission required
 		await tracker.updateRole(consumer, ROLE_REF_POINTS_CONSUMER);
 
 		// verify consumer can perform operations now
 		await fn1();
-		await fn2();
 
 		// verify consumed referral points increased correctly
-		assert.equal(2, await tracker.consumed(player), "incorrect consumed value after consuming 2 points");
+		assert.equal(1, await tracker.consumed(player), "incorrect consumed value after consuming 1 point(s)");
 	});
 	it("permissions: adding known addresses requires ROLE_SELLER permission", async() => {
 		const tracker = await Tracker.new();
@@ -96,11 +90,10 @@ contract('RefPointsTracker', (accounts) => {
 
 		// functions to consume referral points
 		const fn1 = async() => await tracker.addKnownAddress(accounts[0], {from: seller});
-		const fn2 = async() => await tracker.bulkAddKnownAddresses(accounts, {from: seller});
+		const fn2 = async() => await tracker.addKnownAddress(accounts[1], {from: seller});
 
 		// originally seller doesn't have required permission
 		await assertThrows(fn1);
-		await assertThrows(fn2);
 
 		// grant seller permission required
 		await tracker.updateRole(seller, ROLE_SELLER);
@@ -110,13 +103,13 @@ contract('RefPointsTracker', (accounts) => {
 		// at this point accounts[0] can be a referrer
 		assert(await tracker.isValid(accounts[0], accounts[1]), "account0 is not a valid referrer for account1");
 
-		// bulk add will make all the addresses known
+		// additional add will make second address known
 		await fn2();
-		// but at this point all accounts are already known and cannot have valid referral links
+		// and here same "isValid" validation fails
 		assert(!await tracker.isValid(accounts[0], accounts[1]), "account0 is still a valid referrer for account1");
 
 		// verify known addresses were tracked correctly
-		assert.equal(accounts.length, await tracker.getNumberOfKnownAddresses(), "wrong number of known addresses");
+		assert.equal(2, await tracker.getNumberOfKnownAddresses(), "wrong number of known addresses");
 		assert(await tracker.isKnown(accounts[1]), "known addresses doesn't contain account 1");
 	});
 	it("issuing and consuming: general flow", async() => {
@@ -170,6 +163,7 @@ contract('RefPointsTracker', (accounts) => {
 		// consuming is not possible anymore - no points to consume
 		await assertThrows(consume);
 	});
+/*
 	it("issuing and consuming: bulk flow", async() => {
 		const tracker = await Tracker.new();
 
@@ -244,6 +238,7 @@ contract('RefPointsTracker', (accounts) => {
 		// consuming is not possible anymore - no points to consume
 		await assertThrows(consume);
 	});
+*/
 	it("issuing and consuming: arithmetic overflow checks", async() => {
 		const tracker = await Tracker.new();
 
@@ -292,6 +287,7 @@ contract('RefPointsTracker', (accounts) => {
 		await assertThrows(issue0);
 		await assertThrows(consume0);
 	});
+/*
 	it("adding known addresses: bulk flow", async() => {
 		const tracker = await Tracker.new();
 
@@ -333,6 +329,7 @@ contract('RefPointsTracker', (accounts) => {
 		assert(await tracker.isValid(a1, a3), "known and unknown addresses didn't produce valid referral link");
 		assert(!await tracker.isValid(a3, a1), "unknown and known addresses produced valid referral link");
 	});
+*/
 });
 
 // default random function to use

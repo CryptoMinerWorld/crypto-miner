@@ -27,13 +27,13 @@ contract Workshop is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant WORKSHOP_UID = 0x059bfb62c4821927d0f2c7457a9de172c96dfeffd688a3e4a9eec52aaf5b7054;
+  uint256 public constant WORKSHOP_UID = 0x475f566b2f52a81a2515beed4acdd083ae4da2861d4df786d9a1a0daa87702dc;
 
   /**
    * @dev Expected version of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_UID_REQUIRED = 0xd427dd7fed7ae5a853e296754a314280d19660ff9db5cb32a7ec6f238a716d8a;
+  uint256 public constant GEM_UID_REQUIRED = 0x66fb61e14900ebf44ba5bd2da5e3adf87793bc5af28b5761f26c96972b73ec50;
 
   /**
    * @dev Expected version of the deployed SilverERC20 instance

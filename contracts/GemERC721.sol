@@ -23,7 +23,7 @@ contract GemERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0xd427dd7fed7ae5a853e296754a314280d19660ff9db5cb32a7ec6f238a716d8a;
+  uint256 public constant TOKEN_UID = 0x66fb61e14900ebf44ba5bd2da5e3adf87793bc5af28b5761f26c96972b73ec50;
 
   /**
    * @dev ERC20 compliant token symbol
@@ -460,18 +460,20 @@ contract GemERC721 is ERC721Core {
    * @dev Allows to fetch collection of tokens, including internal token data
    *       in a single function, useful when connecting to external node like INFURA
    * @dev Each element in the collection contains
-   *      token ID (24 bits)
-   *      color (8 bits)
-   *      level (8 bits)
+   *      max (state modified, creation time) (32 bits)
+   *      max (ownership modified, creation time) (32 bits)
    *      grade (32 bits)
+   *      level (8 bits)
    *      plots mined (24 bits)
    *      blocks mined (32 bits)
    *      energetic age (32 bits)
-   *      state (8 low bits)
+   *      state (32 bits)
+   *      color (8 bits)
+   *      token ID (24 bits)
    * @param owner an address to query a collection for
    * @return an ordered unsorted list of packed token data
    */
-  function getPackedCollection(address owner) public view returns (uint200[] memory) {
+  function getPackedCollection(address owner) public view returns (uint256[] memory) {
     // get an array of Gem IDs owned by an `owner` address
     uint24[] memory tokenIds = getCollection(owner);
 
@@ -479,21 +481,24 @@ contract GemERC721 is ERC721Core {
     uint24 balance = uint24(tokenIds.length);
 
     // data container to store the result
-    uint200[] memory result = new uint200[](balance);
+    uint256[] memory result = new uint256[](balance);
 
     // fetch token info one by one and pack into structure
     for(uint24 i = 0; i < balance; i++) {
-      // token ID to work with
-      uint24 tokenId = tokenIds[i];
+      // load token data structure into memory
+      Gem memory token = tokens[tokenIds[i]];
 
       // read all required data and pack it
-      result[i] = uint200(tokenId) << 176
-                | uint176(getProperties(tokenId)) << 128
-                | uint128(getPlotsMined(tokenId)) << 104
-                | uint104(getBlocksMined(tokenId)) << 72
-                | uint72(getAge(tokenId)) << 40
-                | uint40(getModified(tokenId)) << 8
-                | uint8(getState(tokenId));
+      result[i] = uint256(token.stateModified > token.creationTime? token.stateModified: token.creationTime) << 224
+                | uint224(token.ownershipModified > token.creationTime? token.ownershipModified: token.creationTime) << 192
+                | uint192(token.grade) << 160
+                | uint160(token.level) << 152
+                | uint152(token.plotsMined) << 128
+                | uint128(token.blocksMined) << 96
+                | uint96(token.age) << 64
+                | uint64(token.state) << 32
+                | uint32(token.color) << 24
+                | tokenIds[i];
     }
 
     // return the packed data structure

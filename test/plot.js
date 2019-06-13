@@ -230,8 +230,8 @@ contract('PlotERC721', (accounts) => {
 		assert.deepEqual([toBN(token0), toBN(token1)], await tk.getCollection(account1), "wrong token collection for account1");
 
 		// calculate token0 and token1 packed structures
-		const packed0 = toBN(token0).shln(64).or(toBN(tiers0)).shln(8);
-		const packed1 = toBN(token1).shln(64).or(toBN(tiers1)).shln(8);
+		const packed0 = tiers0.shln(8).shln(24).or(toBN(token0));
+		const packed1 = tiers1.shln(8).shln(24).or(toBN(token1));
 		// calculate token1 extended packed structure
 		const fullPacked1 = [
 			tiers1.shln(32).shln(128).shln(32),

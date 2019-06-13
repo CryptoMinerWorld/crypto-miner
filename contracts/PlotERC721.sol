@@ -65,7 +65,7 @@ contract PlotERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0x7df5103a724ac7be6e123911fe18fdf39fef1cb58606628a357bde2d45c4d906;
+  uint256 public constant TOKEN_UID = 0xc5b810e451b3296f5ffa4087dc00adac5c57a053c276db3987921c798b153571;
 
   /**
    * @dev ERC20 compliant token symbol
@@ -351,9 +351,9 @@ contract PlotERC721 is ERC721Core {
    * @dev Allows to fetch collection of tokens, including internal token data
    *       in a single function, useful when connecting to external node like INFURA
    * @dev Each element in the collection contains
-   *      token ID (24 bits)
    *      tiers (64 bits)
    *      state (8 low bits)
+   *      token ID (24 bits)
    * @param owner an address to query a collection for
    * @return an ordered unsorted list of packed token data
    */
@@ -376,7 +376,7 @@ contract PlotERC721 is ERC721Core {
       LandPlot memory plot = tokens[tokenId];
 
       // pack the data
-      result[i] = uint96(tokenId) << 72 | uint72(plot.tiers) << 8 | uint8(plot.state);
+      result[i] = uint96(plot.tiers) << 32 | uint32(plot.state) << 24 | tokenId;
     }
 
     // return the packed data structure

@@ -209,16 +209,14 @@ contract('Dutch Auction', accounts => {
 		// extract the data
 		const _t0 = status[0];
 		const _t1 = status[1];
-		const _t = status[2];
-		const _p0 = status[3];
-		const _p1 = status[4];
-		const _p = status[5];
-		const _owner = status[6];
+		const _p0 = status[2];
+		const _p1 = status[3];
+		const _p = status[4];
+		const _owner = status[5];
 
 		// check the data returned back from an auction is correct
 		assert.equal(t0, _t0, "wrong t0 after putting item up for sale");
 		assert.equal(t1, _t1, "wrong t1 after putting item up for sale");
-		assert(_t.gte(_t0) && _t.lt(_t1), "wrong t after putting item up for sale");
 		assert(p0.eq(_p0), "wrong p0 after putting item up for sale");
 		assert(p1.eq(_p1), "wrong p1 after putting item up for sale");
 		assert(_p.lte(_p0) && _p.gt(_p1), "wrong p after putting item up for sale");

@@ -45,13 +45,13 @@ contract PlotAntarctica is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant CONTRACT_UID = 0x820741fc13b3e819ad01914a58d18cb62d0735f509eb92a906958ef055177109;
+  uint256 public constant CONTRACT_UID = 0xcdf58c4cb6f0ff5f4364d95b6a91852b0ab317f4fe34a8e0c44a63fa51a55eb3;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant PLOT_UID_REQUIRED = 0x7df5103a724ac7be6e123911fe18fdf39fef1cb58606628a357bde2d45c4d906;
+  uint256 public constant PLOT_UID_REQUIRED = 0xc5b810e451b3296f5ffa4087dc00adac5c57a053c276db3987921c798b153571;
 
   /**
    * @notice Enables getting tokens for free for game founders
