@@ -18,15 +18,11 @@ const ROLE_SELLER = 0x00000004;
 
 // V1 -> V2 Migration Tests
 contract('V1 -> V2 Migration', (accounts) => {
-/*
 	it("migration: write gem data from CSV (write by owner)", async() => {
 		// deploy GemV2
-		const gemV2 = await GemV2.new();
+		const token = await GemV2.new();
 		// deploy Token Writer
 		const writer = await Writer.new();
-
-		// grant writer permission to mint gems and set energetic age
-		await gemV2.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
 
 		// CSV header
 		const csv_header = "tokenId,plotId,color,level,grade,grade type,grade value,age,owner";
@@ -62,6 +58,9 @@ contract('V1 -> V2 Migration', (accounts) => {
 		}
 		console.log("\t%o token(s) belong to %o account(s)", csv_lines.length, Object.keys(gemsByOwner).length);
 
+		// grant writer permission to mint gems and set energetic age
+		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
+
 		// track cumulative gas usage
 		let cumulativeGasUsed = 0;
 
@@ -74,7 +73,7 @@ contract('V1 -> V2 Migration', (accounts) => {
 			const packed = tokens.map(packGemData);
 
 			// write all the tokens and measure gas
-			const gasUsed = (await writer.writeOwnerGemV2Data(gemV2.address, owner, packed)).receipt.gasUsed;
+			const gasUsed = (await writer.writeOwnerGemV2Data(token.address, owner, packed)).receipt.gasUsed;
 
 			// update cumulative gas used
 			cumulativeGasUsed += gasUsed;
@@ -83,20 +82,18 @@ contract('V1 -> V2 Migration', (accounts) => {
 			console.log("\t%o token(s) for %o written: %o gas used", tokens.length, owner, gasUsed);
 		}
 
+		// clean the permissions used
+		await token.updateRole(writer.address, 0);
+
 		// print the cumulative gas usage result
 		console.log("\tcumulative gas used: %o", cumulativeGasUsed);
 	});
-*/
 
-/*
 	it("migration: write gem data from CSV (bulk write)", async() => {
 		// deploy GemV2
 		const token = await GemV2.new();
 		// deploy Token Writer
 		const writer = await Writer.new();
-
-		// grant writer permission to mint gems and set energetic age
-		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
 
 		// CSV header
 		const csv_header = "tokenId,plotId,color,level,grade,grade type,grade value,age,owner";
@@ -126,6 +123,9 @@ contract('V1 -> V2 Migration', (accounts) => {
 			gems.push(props);
 		}
 		console.log("\t%o of %o token(s) parsed", gems.length, csv_lines.length);
+
+		// grant writer permission to mint gems and set energetic age
+		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
 
 		// track cumulative gas usage
 		let cumulativeGasUsed = 0;
@@ -167,16 +167,12 @@ contract('V1 -> V2 Migration', (accounts) => {
 		// print the cumulative gas usage result
 		console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 	});
-*/
 
 	it("migration: write country data from CSV", async() => {
 		// deploy Country V2
 		const token = await CountryV2.new(COUNTRY_DATA);
 		// deploy Token Writer
 		const writer = await Writer.new();
-
-		// grant writer permission to mint gems and set energetic age
-		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR);
 
 		// CSV header
 		const csv_header = "tokenId,owner";
@@ -214,6 +210,9 @@ contract('V1 -> V2 Migration', (accounts) => {
 				return;
 			}
 		}
+
+		// grant writer permission to mint gems and set energetic age
+		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR);
 
 		// track cumulative gas usage
 		let cumulativeGasUsed = 0;
@@ -259,9 +258,6 @@ contract('V1 -> V2 Migration', (accounts) => {
 		// deploy Token Writer
 		const writer = await Writer.new();
 
-		// grant writer permission to mint gems and set energetic age
-		await tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
-
 		// CSV header
 		const csv_header = "issued,consumed,available,address";
 		// read CSV data
@@ -287,6 +283,9 @@ contract('V1 -> V2 Migration', (accounts) => {
 			data.push(props);
 		}
 		console.log("\t%o of %o records parsed", data.length, csv_lines.length);
+
+		// grant writer permission to mint gems and set energetic age
+		await tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 
 		// track cumulative gas usage
 		let cumulativeGasUsed = 0;
@@ -318,9 +317,6 @@ contract('V1 -> V2 Migration', (accounts) => {
 		// deploy Token Writer
 		const writer = await Writer.new();
 
-		// grant writer permission to mint gems and set energetic age
-		await tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
-
 		// CSV header
 		const csv_header = "issued,consumed,available,address";
 		// read CSV data
@@ -346,6 +342,9 @@ contract('V1 -> V2 Migration', (accounts) => {
 			data.push(props);
 		}
 		console.log("\t%o of %o records parsed", data.length, csv_lines.length);
+
+		// grant writer permission to mint gems and set energetic age
+		await tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 
 		// track cumulative gas usage
 		let cumulativeGasUsed = 0;
