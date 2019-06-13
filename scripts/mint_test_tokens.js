@@ -159,4 +159,6 @@ module.exports = async function(deployer, network, accounts) {
 		}
 	}
 
+	console.log("minting complete");
+
 };
