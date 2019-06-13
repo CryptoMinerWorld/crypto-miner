@@ -6,66 +6,43 @@ Founder's Chest:    0xC352f692F55dEf49f0B736Ec1F7CA0F862eabD23
 World Chest:        0xc16c6f45FBA73fBC18e29EaB26732d1621A448c3
 Monthly Chest:      0x2906DA90D3f99D5913bB3461183682951ca7280c
 
+FoundersPlots:      0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1
 BalanceProxy:       0xbd7Ca763E12d23535B59949ade53c104BD88d42F
 
 TokenReader:        0xD51ae49aDDa7CBaa6d070EA933AAaBf68a24C264
 ==============================================================
 
 
+
 --------------------------------------------------------------
 -------------------------- Ropsten  --------------------------
 --------------------------------------------------------------
+FoundersPlots:      0xA7EAd1a2e9Ee57b97Fd0D96ce480a39C40ed67E9
 BalanceProxy:       0xB9E1A9AfdC2e9b0712d4f2df4F9e3977b7bEe6b3
-TokenHelper:        0xC9eB085d69e28B89A032B0d30B8d8d46b0bfFc8e
+TokenHelper:        0x2A8C5C641D2389f63ecE968CdDe734F874AcdDF1
 
 DutchAuction:       0x1D6f61dAeCB9ccbf5b5a61D9cD68d96DAdd0Bb1C
 
-GemERC721:          0x60014A33fe30E471c406Ddd99361487Ffe7f1189
-CountryERC721:      0xf23197d25Ca59e4554Ef7BBcF579971A14882601
-PlotERC721:         0x4ED45BeC5762aB8b191Dd978db5609a53F21576f
-SilverERC20:        0x7EDC3fea733E790814e3c2A9D997A55f531D8868
-GoldERC20:          0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f
+RefPointsTracker:   0xC97a91a4e1bfbf18a9038BAE649Fa92d0B242Cfb
 ArtifactERC20:      0x06D09B097D56B5DEB70C31eaa5802d6447913eeC
 FoundersKeyERC20:   0x901E6a702D832Cff1356639F4a99046aB4cE4bCa
 ChestKeyERC20:      0x604206004488Aa28F5b57dfF4BF3d235cec63234
-RefPointsTracker:   0xC97a91a4e1bfbf18a9038BAE649Fa92d0B242Cfb
+SilverERC20:        0x7EDC3fea733E790814e3c2A9D997A55f531D8868
+GoldERC20:          0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f
+CountryERC721:      0x7825f2bd389B8962F0578804D7B1c3FC03cF14f1
+PlotERC721:         0x1C3634f7345fd3f3884C5D6FF1F96E16A69b40Ea
+GemERC721:          0xFe71e1d0c1f678b94B5fa7542071CfFE2DEa4E31
 
-Workshop:           0x3cc379D1485B4803827C6C819c2F521A8DFfd72A
-Miner:              0x55A1f14ba24728871DC11aD2D332b12d6FD2DC30
+Workshop:           0x29406A29aE9665415eA9077DF2227aD8CdC5aEeB
+Miner:              0xE8D5c5Ed1629E7b6114d5d8Da0899b2278824370
 
-PlotSale:           0xD99D4C6215098E728B9b45A335c018aabBA5418b
+PlotSale:           0x5Ed6aDF21a9Ceac6356FE4E80653dC07DD3a86ae
+PlotAntarctica:     0xDdEe3Df8516b7ED0CeFb7017b2D7704D17102075
 
 TokenReader:        0x7DA1b0552c0CAf7A72d8a7bc7F7813B3AC2FcC35
 TokenWriter:        0xdb4f3644e05E6fB6BB7426A4f258356b728AB720
 --------------------------------------------------------------
 
-
---------------------------------------------------------------
--------------------------- Rinkeby  --------------------------
---------------------------------------------------------------
-BalanceProxy:       0x24941131e02FCEf029aaABa705aB46E3FD3b3E3b
-TokenHelper:        0xf90e5F2C90E402280f5fE918b6a1C30Cf42A5f39
-
-DutchAuction:       0xe8eb326de8aec834Ee7e4420268f3B803A87CB00
-
-GemERC721:          0xd55369023CE587ff1DCC7190f95D3C137E4ca220
-CountryERC721:      0x8b67c86f5ab90796c60370E6CbBc7CCc5bAfEe35
-PlotERC721:         0x6452e4671B0D9CcFE5d06Fd171bAaE8d9b133F31
-SilverERC20:        0x9b2AAA1B68AD54647001b90e8620753D1451ef7a
-GoldERC20:          0xADf5116E59e0aDf82EE808b427288C8481b39Efe
-ArtifactERC20:      0xC9eB085d69e28B89A032B0d30B8d8d46b0bfFc8e
-FoundersKeyERC20:   0x1D6f61dAeCB9ccbf5b5a61D9cD68d96DAdd0Bb1C
-ChestKeyERC20:      0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34
-RefPointsTracker:   0x749bc7098055d4eb68516538b4D2e56bf1fea09a
-
-Workshop:           0x4d6B40F9b4Bf8d5d1C066C4C2c20fdfbEEdc5057
-Miner:
-
-PlotSale:
-
-TokenReader:        0x8226a7b2fFD7fd09Fb131c2373F1964dFA7A8410
-TokenWriter:        0x6f98A7FfE026F6514B7bdC01418a21C384B0Fa63
---------------------------------------------------------------
 
 
 --------------------------------------------------------------
