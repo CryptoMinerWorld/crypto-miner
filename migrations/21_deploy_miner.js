@@ -19,7 +19,7 @@ const ROLE_AGE_PROVIDER = 0x00000100;
 const ROLE_MINED_STATS_PROVIDER = 0x00000200;
 const ROLE_NEXT_ID_INC = 0x00001000;
 
-// Miner smart contract deployment
+// main section of the script, blockchain interaction
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
 		console.log("[deploy miner] test network - skipping the migration script");
@@ -34,24 +34,15 @@ module.exports = async function(deployer, network, accounts) {
 	const conf = network === "mainnet"?
 		{ // Mainnet addresses
 
-		}: network === "ropsten"?
+		}:
 		{ // Ropsten Addresses
-			GemERC721:          "0x60014A33fe30E471c406Ddd99361487Ffe7f1189",
-			PlotERC721:         "0x4ED45BeC5762aB8b191Dd978db5609a53F21576f",
-			SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
-			GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
 			ArtifactERC20:      "0x06D09B097D56B5DEB70C31eaa5802d6447913eeC",
 			FoundersKeyERC20:   "0x901E6a702D832Cff1356639F4a99046aB4cE4bCa",
 			ChestKeyERC20:      "0x604206004488Aa28F5b57dfF4BF3d235cec63234",
-		}:
-		{ // Rinkeby Addresses
-			GemERC721:          "0xd55369023CE587ff1DCC7190f95D3C137E4ca220",
-			PlotERC721:         "0x6452e4671B0D9CcFE5d06Fd171bAaE8d9b133F31",
-			SilverERC20:        "0x9b2AAA1B68AD54647001b90e8620753D1451ef7a",
-			GoldERC20:          "0xADf5116E59e0aDf82EE808b427288C8481b39Efe",
-			ArtifactERC20:      "0xC9eB085d69e28B89A032B0d30B8d8d46b0bfFc8e",
-			FoundersKeyERC20:   "0x1D6f61dAeCB9ccbf5b5a61D9cD68d96DAdd0Bb1C",
-			ChestKeyERC20:      "0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34",
+			SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
+			GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
+			PlotERC721:         "0x1C3634f7345fd3f3884C5D6FF1F96E16A69b40Ea",
+			GemERC721:          "0xFe71e1d0c1f678b94B5fa7542071CfFE2DEa4E31",
 		};
 
 	// deployed instances
@@ -72,31 +63,32 @@ module.exports = async function(deployer, network, accounts) {
 	if(network !== "mainnet") {
 		// get links to deployed instances
 		const instances = {
-			GemERC721: await GemERC721.at(conf.GemERC721),
-			PlotERC721: await PlotERC721.at(conf.PlotERC721),
-			ArtifactC721: await GemERC721.at(conf.GemERC721), // ArtifactERC721
-			SilverERC20: await SilverERC20.at(conf.SilverERC20),
-			GoldERC20: await GoldERC20.at(conf.GoldERC20),
 			ArtifactERC20: await ArtifactERC20.at(conf.ArtifactERC20),
 			ChestKeyERC20: await ChestKeyERC20.at(conf.ChestKeyERC20),
 			FoundersKeyERC20: await FoundersKeyERC20.at(conf.FoundersKeyERC20),
+			SilverERC20: await SilverERC20.at(conf.SilverERC20),
+			GoldERC20: await GoldERC20.at(conf.GoldERC20),
+			ArtifactC721: await GemERC721.at(conf.GemERC721), // ArtifactERC721
+			PlotERC721: await PlotERC721.at(conf.PlotERC721),
+			GemERC721: await GemERC721.at(conf.GemERC721),
 		};
 
+		// enable all features and roles required
 		const miner = await Miner.deployed();
-		console.log("updating gem access");
-		await instances.GemERC721.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_INC | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
-		console.log("updating plot access");
-		await instances.PlotERC721.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
-		console.log("updating silver access");
-		await instances.SilverERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
-		console.log("updating gold access");
-		await instances.GoldERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
 		console.log("updating artifact access");
 		await instances.ArtifactERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
 		console.log("updating founder's key access");
 		await instances.FoundersKeyERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
 		console.log("updating chest key access");
 		await instances.ChestKeyERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		console.log("updating silver access");
+		await instances.SilverERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		console.log("updating gold access");
+		await instances.GoldERC20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		console.log("updating plot access");
+		await instances.PlotERC721.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
+		console.log("updating gem access");
+		await instances.GemERC721.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_INC | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
 		console.log("updating miner features");
 		await miner.updateFeatures(FEATURE_MINING_ENABLED);
 	}

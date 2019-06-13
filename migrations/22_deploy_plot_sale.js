@@ -29,20 +29,11 @@ module.exports = async function(deployer, network, accounts) {
 		{ // Mainnet addresses
 			beneficiary:        "0xe0123204873fD29A29aEf3f99FaF1b1c45fe3B1E", // MainNet MultiSig
 			saleStartUTC:       1559844000, // 06/21/2019 @ 6:00pm UTC
-		}: network === "ropsten"?
+		}:
 		{ // Ropsten Addresses
 			RefPointsTracker:   "0xC97a91a4e1bfbf18a9038BAE649Fa92d0B242Cfb",
-			CountryERC721:      "0xf23197d25Ca59e4554Ef7BBcF579971A14882601",
-			PlotERC721:         "0x4ED45BeC5762aB8b191Dd978db5609a53F21576f",
-			worldChest:         "0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-			monthlyChest:       "0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
-			beneficiary:        "0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
-			saleStartUTC:       -60 + new Date().getTime() / 1000 | 0,
-		}:
-		{ // Rinkeby Addresses
-			RefPointsTracker:   "0x749bc7098055d4eb68516538b4D2e56bf1fea09a",
-			CountryERC721:      "0x8b67c86f5ab90796c60370E6CbBc7CCc5bAfEe35",
-			PlotERC721:         "0x6452e4671B0D9CcFE5d06Fd171bAaE8d9b133F31",
+			CountryERC721:      "0x7825f2bd389B8962F0578804D7B1c3FC03cF14f1",
+			PlotERC721:         "0x1C3634f7345fd3f3884C5D6FF1F96E16A69b40Ea",
 			worldChest:         "0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
 			monthlyChest:       "0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
 			beneficiary:        "0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
@@ -64,7 +55,6 @@ module.exports = async function(deployer, network, accounts) {
 
 	// for test networks set all the permissions automatically
 	if(network !== "mainnet") {
-		// get links to all the deployed instances
 		// get links to deployed instances
 		const instances = {
 			RefPointsTracker: await RefPointsTracker.at(conf.RefPointsTracker),
