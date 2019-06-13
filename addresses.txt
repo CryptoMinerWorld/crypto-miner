@@ -19,7 +19,7 @@ TokenReader:        0xD51ae49aDDa7CBaa6d070EA933AAaBf68a24C264
 --------------------------------------------------------------
 FoundersPlots:      0xA7EAd1a2e9Ee57b97Fd0D96ce480a39C40ed67E9
 BalanceProxy:       0xB9E1A9AfdC2e9b0712d4f2df4F9e3977b7bEe6b3
-TokenHelper:        0x2A8C5C641D2389f63ecE968CdDe734F874AcdDF1
+TokenHelper:        0xB1b38C1Ea450a77C7e83EC2473214b95da8Dc509
 
 DutchAuction:       0x1D6f61dAeCB9ccbf5b5a61D9cD68d96DAdd0Bb1C
 
