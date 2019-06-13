@@ -23,17 +23,19 @@ contract("PlotERC721: Gas Usage", (accounts) => {
 	});
 
 	it("gas: transferring a token requires 72113 gas", async() => {
+		const player = accounts[1];
+		const player2 = accounts[2];
 		const tk = await Token.new();
 		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
-		await tk.mint(accounts[0], 1, toBN("0x05002341555F6400"));
-		const gasUsed = (await tk.safeTransferFrom(accounts[0], accounts[1], 1, {from: accounts[0]})).receipt.gasUsed;
+		await tk.mint(player, 0, toBN("0x05002341555F6400"));
+		const gasUsed = (await tk.safeTransferFrom(player, player2, 1, {from: player})).receipt.gasUsed;
 
 		assertEqual(72113, gasUsed, "transferring a token gas usage mismatch: " + gasUsed);
 	});
 
 	it("gas: mining a plot by 1 block requires 33352 gas", async() => {
 		const tk = await Token.new();
-		await tk.mint(accounts[0], 1, toBN("0x05002341555F6400"));
+		await tk.mint(accounts[0], 0, toBN("0x05002341555F6400"));
 		const gasUsed = (await tk.mineBy(1, 1)).receipt.gasUsed;
 
 		assertEqual(33352, gasUsed, "mining a plot by 1 block gas usage mismatch: " + gasUsed);
@@ -41,7 +43,7 @@ contract("PlotERC721: Gas Usage", (accounts) => {
 
 	it("gas: mining a plot to block 1 requires 32230 gas", async() => {
 		const tk = await Token.new();
-		await tk.mint(accounts[0], 1, toBN("0x05002341555F6400"));
+		await tk.mint(accounts[0], 0, toBN("0x05002341555F6400"));
 		const gasUsed = (await tk.mineTo(1, 1)).receipt.gasUsed;
 
 		assertEqual(32230, gasUsed, "mining a plot to block 1 gas usage mismatch: " + gasUsed);
