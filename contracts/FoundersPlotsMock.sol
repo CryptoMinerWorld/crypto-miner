@@ -4,14 +4,14 @@ import "./PlotAntarctica.sol";
 
 /**
  * @dev Founders Plots Mock, simplest FoundersPlots implementation,
- *      returning 65,535 plots for any address except zero address
+ *      returning 15 plots for any address except zero address
  */
 contract FoundersPlotsMock is FoundersPlots {
   /**
-   * @dev Dummy implementation returning 65,535 for all inputs except zero
+   * @dev Dummy implementation returning 15 for all inputs except zero
    *      input which results in zero output
    * @param addr address to query balance for
-   * @return 65,535 if address is not zero, zero otherwise
+   * @return 15 if address is not zero, zero otherwise
    */
   function geodeBalances(address addr) external view returns (uint16) {
     // check input and return 15
