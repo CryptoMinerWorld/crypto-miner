@@ -1,0 +1,41 @@
+{
+  "contractName": "FoundersPlots",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "geodeBalances",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-06-13T00:47:13.867Z",
+  "devdoc": {
+    "details": "An auxiliary interface to extract single function `geodeBalances` from     Presale/Presale2 smart contracts to allow exchanging geodes to founders'     plots in Antarctica using PlotAntarctica smart contract",
+    "methods": {
+      "geodeBalances(address)": {
+        "details": "Given founder's address, returns amount of geodes this founder hasThis number is equal to number of land plots in Antarctica this     address can get, see `PlotAntarctica`",
+        "params": {
+          "addr": "founder's address"
+        },
+        "return": "number of geodes this founder has"
+      }
+    }
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

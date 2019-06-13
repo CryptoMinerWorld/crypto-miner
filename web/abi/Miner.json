@@ -1356,7 +1356,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-09T06:37:59.039Z",
+  "updatedAt": "2019-06-13T00:39:17.119Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "Miner may read, write, mint, lock and unlock tokens     (locked tokens cannot be transferred i.e. cannot change owner)Following tokens may be accessed for reading (token properties affect mining):     - GemERC721     - PlotERC721     - ArtifactERC721Following tokens may be accessed for writing (token properties change when mining):     - PlotERC721Following tokens may be minted (token can be found in the land plot when mining):     - GemERC721     - ArtifactERC721     - SilverERC20     - GoldERC20     - ArtifactERC20     - FoundersKeyERC20     - ChestKeyERC20Following tokens may be locked or unlocked (tokens are locked when mining):     - GemERC721     - PlotERC721     - ArtifactERC721",

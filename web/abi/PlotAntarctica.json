@@ -1,5 +1,5 @@
 {
-  "contractName": "RefPointsTracker",
+  "contractName": "PlotAntarctica",
   "abi": [
     {
       "constant": true,
@@ -26,50 +26,12 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "known",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
       "inputs": [],
       "name": "FEATURE_MSIG_ENABLED",
       "outputs": [
         {
           "name": "",
           "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "holders",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
         }
       ],
       "payable": false,
@@ -93,25 +55,11 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "TRACKER_UID",
+      "name": "foundersPlots",
       "outputs": [
         {
           "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "ROLE_SELLER",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
+          "type": "address"
         }
       ],
       "payable": false,
@@ -218,6 +166,20 @@
     },
     {
       "constant": true,
+      "inputs": [],
+      "name": "ANTARCTICA_COUNTRY_ID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "_by",
@@ -246,7 +208,21 @@
     {
       "constant": true,
       "inputs": [],
-      "name": "ROLE_REF_POINTS_CONSUMER",
+      "name": "PLOT_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_GET_ENABLED",
       "outputs": [
         {
           "name": "",
@@ -259,17 +235,12 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "consumed",
+      "inputs": [],
+      "name": "plotInstance",
       "outputs": [
         {
           "name": "",
-          "type": "uint256"
+          "type": "address"
         }
       ],
       "payable": false,
@@ -309,25 +280,6 @@
       "type": "function"
     },
     {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "knownAddresses",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "constant": false,
       "inputs": [
         {
@@ -339,6 +291,20 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "CONTRACT_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -377,39 +343,6 @@
     },
     {
       "constant": true,
-      "inputs": [],
-      "name": "ROLE_REF_POINTS_ISSUER",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "issued",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
       "inputs": [
         {
           "name": "required",
@@ -428,36 +361,19 @@
       "type": "function"
     },
     {
-      "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
-          "name": "_by",
+          "name": "_foundersPlots",
           "type": "address"
         },
         {
-          "indexed": true,
-          "name": "_to",
+          "name": "_plot",
           "type": "address"
-        },
-        {
-          "indexed": false,
-          "name": "_amount",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "_total",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "_available",
-          "type": "uint256"
         }
       ],
-      "name": "RefPointsIssued",
-      "type": "event"
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
     {
       "anonymous": false,
@@ -468,44 +384,12 @@
           "type": "address"
         },
         {
-          "indexed": true,
-          "name": "_from",
-          "type": "address"
-        },
-        {
           "indexed": false,
-          "name": "_amount",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "_total",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "_available",
-          "type": "uint256"
+          "name": "_tokenId",
+          "type": "uint24"
         }
       ],
-      "name": "RefPointsConsumed",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "name": "_by",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "name": "_address",
-          "type": "address"
-        }
-      ],
-      "name": "KnownAddressAdded",
+      "name": "PlotIssued",
       "type": "event"
     },
     {
@@ -536,217 +420,68 @@
       "type": "event"
     },
     {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "owner",
-          "type": "address"
-        }
-      ],
-      "name": "available",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "owner",
-          "type": "address"
-        }
-      ],
-      "name": "balanceOf",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "_address",
-          "type": "address"
-        }
-      ],
-      "name": "isKnown",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "referrer",
-          "type": "address"
-        },
-        {
-          "name": "referred",
-          "type": "address"
-        }
-      ],
-      "name": "isValid",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "getAllHolders",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address[]"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "getNumberOfHolders",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "getKnownAddresses",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address[]"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "getNumberOfKnownAddresses",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "constant": false,
       "inputs": [
         {
-          "name": "_to",
-          "type": "address"
-        },
-        {
-          "name": "_amount",
-          "type": "uint256"
+          "name": "n",
+          "type": "uint8"
         }
       ],
-      "name": "issueTo",
+      "name": "get",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
-      "constant": false,
+      "constant": true,
       "inputs": [
         {
-          "name": "_from",
-          "type": "address"
-        },
-        {
-          "name": "_amount",
+          "name": "seedOffset",
           "type": "uint256"
         }
       ],
-      "name": "consumeFrom",
-      "outputs": [],
+      "name": "random2Tiers",
+      "outputs": [
+        {
+          "name": "tiers",
+          "type": "uint64"
+        }
+      ],
       "payable": false,
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
-      "constant": false,
+      "constant": true,
       "inputs": [
         {
-          "name": "_address",
-          "type": "address"
+          "name": "seedOffset",
+          "type": "uint256"
+        },
+        {
+          "name": "n",
+          "type": "uint32"
         }
       ],
-      "name": "addKnownAddress",
-      "outputs": [],
+      "name": "random2TiersArray",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64[]"
+        }
+      ],
       "payable": false,
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-13T00:43:59.936Z",
+  "updatedAt": "2019-06-13T00:47:13.937Z",
   "devdoc": {
     "author": "Basil Gorin",
-    "details": "Keeps track of issued and consumed referral points, calculates available referral     points as difference between issued and consumedBased on improved access control list (ACL Light), allowing issuers and consumers     to issue and consume respectively referral points to players' addresses",
+    "details": "5,000 constraint is not part of this smart contract, it is ensured in     Presale/Presale2 smart contracts executed earlierPlot Sale – Antarctica acts as `ROLE_TOKEN_CREATOR` for PlotERC721 token",
     "methods": {
-      "addKnownAddress(address)": {
-        "details": "A callback function called by seller on successful sale     and some wei being spent by the playerAdds address specified to `knownAddresses` mappingRequires sender to have `ROLE_SELLER` permission",
-        "params": {
-          "_address": "an address which spent some wei (bought something)"
-        }
-      },
-      "available(address)": {
-        "details": "Calculated as difference between issued points counter and consumed points counterUnsafe, doesn't check for `issued >= consumed` constraint,     relies on proper behaviour of `issued/consumed` update functions",
-        "params": {
-          "owner": "address of the player address to get available referral points for"
-        },
-        "return": "available referral points counter for address specified"
-      },
-      "balanceOf(address)": {
-        "params": {
-          "owner": "address of the player address to get available referral points for"
-        },
-        "return": "available referral points counter for address specified"
-      },
       "constructUpdateMsigRequest(address,uint256,uint256)": {
         "details": "Used to create an update role request to be signed by the userOnce signed by at least 2 users, the request can be executed     using `updateRoleMsig` function",
         "params": {
@@ -755,11 +490,11 @@
           "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
         }
       },
-      "consumeFrom(address,uint256)": {
-        "details": "Requires sender to have `ROLE_REF_POINTS_CONSUMER` permission",
+      "constructor": {
+        "details": "Instantiates Plot Sale – Antarctica, binding it to     FoundersPlots/Presale/Presale2 instance - a smart contract providing     `geodeBalances` function;     PlotERC721 instance which is used to mint land plots",
         "params": {
-          "_amount": "number of referral points to consume",
-          "_from": "an address to consume referral points from"
+          "_foundersPlots": "valid FoundersPlots/Presale/Presale2 instance",
+          "_plot": "address of the deployed PlotERC721 instance with     the `TOKEN_UID` equal to `PLOT_UID_REQUIRED`"
         }
       },
       "evaluateBy(address[],uint256,uint256)": {
@@ -774,17 +509,11 @@
       "features()": {
         "details": "Auxiliary getter function to maintain compatibility with previous     versions of the Access Control List smart contract, where     features was a separate uint256 public field"
       },
-      "getAllHolders()": {
-        "return": "an array of referral points holders addresses,     doesn't contain duplicates"
-      },
-      "getKnownAddresses()": {
-        "return": "an array of known addresses,     doesn't contain duplicates"
-      },
-      "getNumberOfHolders()": {
-        "return": "length of the referral points holders array"
-      },
-      "getNumberOfKnownAddresses()": {
-        "return": "length of the known addresses array"
+      "get(uint8)": {
+        "details": "Mints tokens requested (Country ID 0 – Antarctica)Requires sender to have some geodes, which is checked through     `FoundersPlots` instance supplied during contract deployment",
+        "params": {
+          "n": "amount of tokens to mint"
+        }
       },
       "isFeatureEnabled(uint256)": {
         "details": "Checks if requested set of features is enabled globally on the contract",
@@ -792,13 +521,6 @@
           "required": "set of features to check against"
         },
         "return": "true if all the features requested are enabled, false otherwise"
-      },
-      "isKnown(address)": {
-        "details": "Address is known if it was added as known by `ROLE_SELLER`     or was issued some referral points by `ROLE_REF_POINTS_ISSUER`",
-        "params": {
-          "_address": "address to query known status for"
-        },
-        "return": "true if address is known (added ot has some ref points issued)"
       },
       "isSenderInRole(uint256)": {
         "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
@@ -815,20 +537,20 @@
         },
         "return": "true if all the permissions requested are enabled, false otherwise"
       },
-      "isValid(address,address)": {
-        "details": "Addresses are treated as valid if referrer is already known to     the smart contract and referred is not knownZero referrer address is treated as not validZero referred address is treated as not valid",
+      "random2Tiers(uint256)": {
+        "details": "Auxiliary function to generate randomized tier structure     of two tiers (Antarctica)Function generates random 256-bit number 7 times, which     should be taken into account when using it in cycle     and supplying seed offset which should increase at least by 7     in each cycle call",
         "params": {
-          "referred": "address of the referred (unknown address)",
-          "referrer": "address of the referrer (known address)"
+          "seedOffset": "initial seed to use for random generation"
         },
-        "return": "true if referrer is known and referred is unknown,     false otherwise; false if any of the addresses is zero"
+        "return": "randomized tiers structure consisting of five tiers"
       },
-      "issueTo(address,uint256)": {
-        "details": "Requires sender to have `ROLE_REF_POINTS_ISSUER` permission",
+      "random2TiersArray(uint256,uint32)": {
+        "details": "Auxiliary function to generate `n` randomized tier structures     of five tiers (non-Antarctica - rest of the World)",
         "params": {
-          "_amount": "number of referral points to issue",
-          "_to": "an address to issue referral points to"
-        }
+          "n": "number of tiers structures to generate",
+          "seedOffset": "initial seed to use for random generation"
+        },
+        "return": "an array of randomized tiers structures consisting of five tiers each"
       },
       "updateFeatures(uint256)": {
         "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissionsRequires transaction sender to have `ROLE_ACCESS_MANAGER` permissionFunction is left for backward compatibility with older versions",
@@ -855,41 +577,14 @@
         }
       }
     },
-    "title": "Referral Points Tracker"
+    "title": "Plot Sale – Antarctica"
   },
   "userdoc": {
     "methods": {
-      "available(address)": {
-        "notice": "Available referral points counter of a particular address,     referral points available to be spent"
-      },
-      "balanceOf(address)": {
-        "notice": "ERC20-compatible alias for `available` referral points counter"
-      },
-      "consumeFrom(address,uint256)": {
-        "notice": "Consumes referral points from a player address"
-      },
-      "getAllHolders()": {
-        "notice": "Lists all referral points holders addresses"
-      },
-      "getKnownAddresses()": {
-        "notice": "Lists all known addresses as an array"
-      },
-      "getNumberOfHolders()": {
-        "notice": "Number of all referral points holders"
-      },
-      "getNumberOfKnownAddresses()": {
-        "notice": "Number of all known addresses"
-      },
-      "isKnown(address)": {
-        "notice": "Verifies if an address is known to the tracker"
-      },
-      "isValid(address,address)": {
-        "notice": "Verifies if referrer and referred addresses are valid,     that is if a referrer can invite given referred"
-      },
-      "issueTo(address,uint256)": {
-        "notice": "Issues referral points to a player address"
+      "get(uint8)": {
+        "notice": "Issues land plots in Antarctica for game founders (geode owners)"
       }
     },
-    "notice": "RefPointsTracker keeps track of referral points earned and consumed by players"
+    "notice": "PlotAntarctica is responsible for issuing land plots in Antarctica.     These are game founders' plots which are issued for free for geode owners –     founders of the game which bought geodes on the game's early stageThere are 5,000 land plots available for exchange, only about 1,500,     however will be exchanged since only about 1,500 geodes was bought"
   }
 }

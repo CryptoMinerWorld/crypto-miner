@@ -1461,7 +1461,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint200[]"
+          "type": "uint256[]"
         }
       ],
       "payable": false,
@@ -2142,7 +2142,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-09T06:40:35.635Z",
+  "updatedAt": "2019-06-13T00:39:16.899Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "A gem is an ERC721 non-fungible token, which maps Token ID,     a 24 bit number to a set of gem properties -     attributes (mostly immutable by their nature) and state variables (mutable)A gem token supports only minting, it can be only created",
@@ -2289,7 +2289,7 @@
         }
       },
       "getPackedCollection(address)": {
-        "details": "Allows to fetch collection of tokens, including internal token data      in a single function, useful when connecting to external node like INFURAEach element in the collection contains     token ID (24 bits)     color (8 bits)     level (8 bits)     grade (32 bits)     plots mined (24 bits)     blocks mined (32 bits)     energetic age (32 bits)     state (8 low bits)",
+        "details": "Allows to fetch collection of tokens, including internal token data      in a single function, useful when connecting to external node like INFURAEach element in the collection contains     max (state modified, creation time) (32 bits)     max (ownership modified, creation time) (32 bits)     grade (32 bits)     level (8 bits)     plots mined (24 bits)     blocks mined (32 bits)     energetic age (32 bits)     state (32 bits)     color (8 bits)     token ID (24 bits)",
         "params": {
           "owner": "an address to query a collection for"
         },

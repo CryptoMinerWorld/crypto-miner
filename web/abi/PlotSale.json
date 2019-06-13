@@ -1,0 +1,1146 @@
+{
+  "contractName": "PlotSale",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isUserInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_COUPON_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "name": "balancesByCountry",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "refPointsTracker",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_WITHDRAW_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_MSIG_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "beneficiary",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "COUNTRY_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "REF_POINTS_PRICE",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "worldChest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        }
+      ],
+      "name": "constructUpdateMsigRequest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_USING_COUPONS_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "REF_TRACKER_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MSIG_QUORUM",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "SALE_PRICE",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "monthlyChest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "BERMUDA_COUNTRY_ID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_by",
+          "type": "address[]"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "PLOT_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_GET_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_SALE_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "plotInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_ACCESS_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "SALE_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "countryInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        },
+        {
+          "name": "v",
+          "type": "uint8[]"
+        },
+        {
+          "name": "r",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "s",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "updateMsig",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "saleStartUTC",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_ref",
+          "type": "address"
+        },
+        {
+          "name": "_country",
+          "type": "address"
+        },
+        {
+          "name": "_plot",
+          "type": "address"
+        },
+        {
+          "name": "_worldChest",
+          "type": "address"
+        },
+        {
+          "name": "_monthlyChest",
+          "type": "address"
+        },
+        {
+          "name": "_beneficiary",
+          "type": "address"
+        },
+        {
+          "name": "_saleStartUTC",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_tokenId",
+          "type": "uint24"
+        }
+      ],
+      "name": "PlotIssued",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "countryId",
+          "type": "uint8"
+        },
+        {
+          "indexed": true,
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "oldValue",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "newValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "CountryBalanceUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "key",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "n",
+          "type": "uint8"
+        }
+      ],
+      "name": "CouponUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "key",
+          "type": "uint256"
+        }
+      ],
+      "name": "CouponRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "key",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "n",
+          "type": "uint8"
+        }
+      ],
+      "name": "CouponConsumed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "countryId",
+          "type": "uint8"
+        },
+        {
+          "name": "n",
+          "type": "uint8"
+        }
+      ],
+      "name": "buy",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "countryId",
+          "type": "uint8"
+        },
+        {
+          "name": "n",
+          "type": "uint8"
+        },
+        {
+          "name": "referrer",
+          "type": "address"
+        }
+      ],
+      "name": "buyRef",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "n",
+          "type": "uint8"
+        }
+      ],
+      "name": "get",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "countryId",
+          "type": "uint8"
+        }
+      ],
+      "name": "withdrawFrom",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "withdraw",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "code",
+          "type": "string"
+        }
+      ],
+      "name": "isCouponValid",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "code",
+          "type": "string"
+        }
+      ],
+      "name": "useCoupon",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "key",
+          "type": "uint256"
+        },
+        {
+          "name": "n",
+          "type": "uint8"
+        }
+      ],
+      "name": "updateCoupon",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "keys",
+          "type": "uint256[]"
+        },
+        {
+          "name": "n",
+          "type": "uint8"
+        }
+      ],
+      "name": "bulkUpdateCoupons",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "seedOffset",
+          "type": "uint256"
+        }
+      ],
+      "name": "random5Tiers",
+      "outputs": [
+        {
+          "name": "tiers",
+          "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "seedOffset",
+          "type": "uint256"
+        },
+        {
+          "name": "n",
+          "type": "uint32"
+        }
+      ],
+      "name": "random5TiersArray",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-06-13T00:44:00.072Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "Technically, 10% country tax value is not hardcoded into sale smart contract     and is accessed from each country token (see the CountryERC721)Land Plot Sale acts as `ROLE_TOKEN_CREATOR` for PlotERC721 token",
+    "methods": {
+      "balanceOf(address)": {
+        "details": "Sums all the country balances for the given owner",
+        "params": {
+          "owner": "an address of a country(ies) owner to query balance for"
+        }
+      },
+      "bulkUpdateCoupons(uint256[],uint8)": {
+        "details": "Requires sender to have `ROLE_COUPON_MANAGER` permissionOverwrites the coupons if they already exist",
+        "params": {
+          "keys": "array of coupon codes hashes (keccak256)",
+          "n": "amount of tokens these coupons allows to retrieve;     use zero value to remove the coupons, non-zero value to add/update them"
+        }
+      },
+      "buy(uint8,uint8)": {
+        "details": "Buys `n` land plots in a country defined by its ID `countryId`Requires transaction to have enough value to buy `n` land plotsRequires country specified to have at least `n` unsold plots",
+        "params": {
+          "countryId": "ID of the country to issue plots in;     owner of the country receives 10% country tax",
+          "n": "amount of land plots to buy"
+        }
+      },
+      "buyRef(uint8,uint8,address)": {
+        "details": "Buys `n` land plots in a country defined by its ID `countryId`Requires transaction to have enough value to buy `n` land plotsRequires country specified to have at least `n` unsold plots",
+        "params": {
+          "countryId": "ID of the country to issue plots in;     owner of the country receives 10% country tax",
+          "n": "amount of land plots to buy",
+          "referrer": "[optional] referrer address of the player     who already bought some land plots or any other items     in the previous sales, set to zero to specify no referral"
+        }
+      },
+      "constructUpdateMsigRequest(address,uint256,uint256)": {
+        "details": "Used to create an update role request to be signed by the userOnce signed by at least 2 users, the request can be executed     using `updateRoleMsig` function",
+        "params": {
+          "_expiresOn": "an expiration date of the request",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "constructor": {
+        "details": "Creates a World Land Plot Sale instance, binding it to     referral points tracker, world and monthly chests, beneficiary,     CountryERC721 and PlotERC721 token instances specified",
+        "params": {
+          "_beneficiary": "an address to send rest of incoming funds",
+          "_country": "address of the deployed CountryERC721 instance with     the `TOKEN_VERSION` equal to `COUNTRY_UID_REQUIRED`",
+          "_monthlyChest": "an address to send 5% of incoming funds",
+          "_plot": "address of the deployed PlotERC721 instance with     the `TOKEN_UID` equal to `PLOT_UID_REQUIRED`",
+          "_ref": "address of the deployed RefPointsTracker instance with     the `TRACKER_VERSION` equal to `REF_TRACKER_UID_REQUIRED`",
+          "_saleStartUTC": "sale start date as a unix timestamp",
+          "_worldChest": "an address to send 20% of incoming funds"
+        }
+      },
+      "evaluateBy(address[],uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator addresses,     and role required (set of permissions), calculate the resulting     set of permissions (role).If all operators are super admins and have full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operators have no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+        "params": {
+          "_by": "non-empty array of addresses of the contract operators     to use permissions of for evaluation",
+          "actual": "input set of permissions to evaluate against",
+          "required": "desired set of permissions to have"
+        },
+        "return": "resulting set of permissions which can be set"
+      },
+      "features()": {
+        "details": "Auxiliary getter function to maintain compatibility with previous     versions of the Access Control List smart contract, where     features was a separate uint256 public field"
+      },
+      "get(uint8)": {
+        "details": "Issues `n` land plots in a Bermuda Triangle (Country ID 255)Requires sender to have enough referral points to get `n` land plotsMaximum number of plots to be issued in Bermuda Triangle is 65,535",
+        "params": {
+          "n": "amount of land plots to issue"
+        }
+      },
+      "isCouponValid(string)": {
+        "params": {
+          "code": "coupon code to validate"
+        },
+        "return": "amount of tokens this coupon allows to obtain     or zero if coupon is not valid"
+      },
+      "isFeatureEnabled(uint256)": {
+        "details": "Checks if requested set of features is enabled globally on the contract",
+        "params": {
+          "required": "set of features to check against"
+        },
+        "return": "true if all the features requested are enabled, false otherwise"
+      },
+      "isSenderInRole(uint256)": {
+        "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isUserInRole(address,uint256)": {
+        "details": "Checks if user `user` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against",
+          "user": "address of the user to check role for"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "random5Tiers(uint256)": {
+        "details": "Auxiliary function to generate randomized tier structure     of five tiers (non-Antarctica - rest of the World)Function generates random 256-bit number 7 times, which     should be taken into account when using it in cycle     and supplying seed offset which should increase at least by 7     in each cycle call",
+        "params": {
+          "seedOffset": "initial seed to use for random generation"
+        },
+        "return": "randomized tiers structure consisting of five tiers"
+      },
+      "random5TiersArray(uint256,uint32)": {
+        "details": "Auxiliary function to generate `n` randomized tier structures     of five tiers (non-Antarctica - rest of the World)",
+        "params": {
+          "n": "number of tiers structures to generate",
+          "seedOffset": "initial seed to use for random generation"
+        },
+        "return": "an array of randomized tiers structures consisting of five tiers each"
+      },
+      "updateCoupon(uint256,uint8)": {
+        "details": "Requires sender to have `ROLE_COUPON_MANAGER` permissionThrows if removing non-existing couponWhen updating an existing coupon requires new value for     free tokens to be different from the old one",
+        "params": {
+          "key": "coupon code hash",
+          "n": "amount of tokens this coupon allows to retrieve;     use zero value to remove the coupon, non-zero value to add/update a coupon"
+        }
+      },
+      "updateFeatures(uint256)": {
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissionsRequires transaction sender to have `ROLE_ACCESS_MANAGER` permissionFunction is left for backward compatibility with older versions",
+        "params": {
+          "_mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateMsig(address,uint256,uint256,uint8[],bytes32[],bytes32[])": {
+        "details": "MultiSig version of the `updateRole` functionUpdates set of permissions (role) for a given user,     taking into account signers' permissionsSetting role to zero is equivalent to removing all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying signers' permissions (roles intersection) to the userRequires transaction signers to have `ROLE_ROLE_MANAGER` permissionRequires `MSIG_QUORUM` signatures in MultiSig mode –     if `FEATURE_MSIG_ENABLED` is enabled",
+        "params": {
+          "_expiresOn": "an expiration date of the request,     optional, required in MultiSig mode only",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract",
+          "r": "an array of ECDSA signature outputs, \"r\",     optional, required in MultiSig mode only",
+          "s": "an array of ECDSA signature outputs, \"s\",     optional, required in MultiSig mode only",
+          "v": "an array of ECDSA signature outputs, \"v\",     optional, required in MultiSig mode only"
+        }
+      },
+      "updateRole(address,uint256)": {
+        "details": "Updates set of permissions (role) for a given user,     taking into account sender's permissions.Setting role to zero is equivalent to removing an all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders' permissions (role) to the userRequires transaction sender to have `ROLE_ACCESS_MANAGER` permission",
+        "params": {
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "useCoupon(string)": {
+        "details": "The plots are minted in Bermuda Triangle (Country ID 255)Maximum number of plots to be issued in Bermuda Triangle is 65,535Throws if coupon is invalid, `FEATURE_USING_COUPONS_ENABLED` is not enabled    or if the silver sale this smart contract is bound to already finished",
+        "params": {
+          "code": "coupon code to use"
+        }
+      },
+      "withdraw(address)": {
+        "details": "Allows to withdraw funds from all the countries which belong to the senderRequires a specified `owner` to be an owner of     at least one country with non-zero balanceIf transaction sender is not a withdraw manager     (doesn't have  `ROLE_WITHDRAW_MANAGER`) permission,     requires them to be a specified country owner - `owner`",
+        "params": {
+          "owner": "an address owning at least one country with non-zero balance"
+        }
+      },
+      "withdrawFrom(uint8)": {
+        "details": "Allows to withdraw funds from only one country defined by `countryId`If transaction sender is not a withdraw manager     (doesn't have  `ROLE_WITHDRAW_MANAGER`) permission,     requires them to be a specified country ownerThrows if specified Country available balance is zero",
+        "params": {
+          "countryId": "ID of the country to withdraw balance from"
+        }
+      }
+    },
+    "title": "World Land Plot Sale"
+  },
+  "userdoc": {
+    "methods": {
+      "balanceOf(address)": {
+        "notice": "Calculates country owner's balance available for withdrawal"
+      },
+      "bulkUpdateCoupons(uint256[],uint8)": {
+        "notice": "Allows adding coupons for free tokens retrieval"
+      },
+      "buy(uint8,uint8)": {
+        "notice": "Buys several land plots in/from a country specified"
+      },
+      "buyRef(uint8,uint8,address)": {
+        "notice": "Buys several land plots in/from a country specified,     allowing to specify a referrer address of the existing buyer"
+      },
+      "get(uint8)": {
+        "notice": "Issues several land plots in/from a Bermuda Triangle     in exchange for referral points"
+      },
+      "isCouponValid(string)": {
+        "notice": "Allows validating a coupon, returns an amount     of tokens this coupon allows to obtain"
+      },
+      "updateCoupon(uint256,uint8)": {
+        "notice": "Allows adding, removing and updating coupons to obtain free tokens"
+      },
+      "useCoupon(string)": {
+        "notice": "Allows using a coupon, mints land plots if coupon is valid"
+      },
+      "withdraw(address)": {
+        "notice": "Withdraws country owner's income from selling their country land plots"
+      },
+      "withdrawFrom(uint8)": {
+        "notice": "Withdraws country owner's income from selling their country land plots"
+      }
+    },
+    "notice": "PlotSale is responsible for selling (minting in exchange for ETH)     PlotERC721 land plot tokens to the playersThere are 500 000 land plot tokens available for saleEach token on sale \"belongs\" to some country (see CountryERC721)     which receives 10% sale tax.     Country owner can withdraw accumulated tax at any momentSale price is fixed to 0.02 ETH per land plot (one PlotERC721 token).Incoming funds are distributed in the following way:     10% goes to the country owner (10% country tax)     20% goes to the World Chest     5%  goes to the Monthly Chest     65% goes to the beneficiaryIf corresponding country was not sold and its owner doesn't exist,       10% country tax goes to the beneficiaryWhen referring another player, referrer gets two referral points and     referred gets one referral point for each five plots referred boughtNote that referrer must be already known to the system,     while referred must be new, unknown address"
+  }
+}

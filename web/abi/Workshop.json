@@ -706,7 +706,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-07T13:12:24.559Z",
+  "updatedAt": "2019-06-13T00:32:41.638Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "Workshop acts as role provider (ROLE_LEVEL_PROVIDER) and     grade provider (ROLE_GRADE_PROVIDER) for the gem ERC721 token (GemERC721),     providing an ability to level up and upgrade their gemsWorkshop acts as a token destroyer (ROLE_TOKEN_DESTROYER)     for the gold and silver ERC20 tokens (GoldERC20 and SilverERC20),     consuming (burning) these tokens when leveling and upgrading gem(s)",

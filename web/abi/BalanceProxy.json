@@ -26,7 +26,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-09T00:08:18.325Z",
+  "updatedAt": "2019-06-11T13:00:17.714Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "BalanceProxy provides a convenient way of queering several   uint256 balances of any address(es) against some other smart contract   address(es) implementing BalanceOf interface",
