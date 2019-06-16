@@ -196,7 +196,7 @@ contract('PlotERC721', (accounts) => {
 		assert.equal(token0, await tk.tokenOfOwnerByIndex(account1, 0), "wrong token ID at index 0 owned by account1");
 		assert.equal(account1, await tk.ownerOf(token0), "wrong owner of token0");
 		assert.equal(0, await tk.getApproved(token0), "token0 should not be approved yet");
-		assert.equal("http://cryptominerworld.com/plot/" + token1.toString(10), await tk.tokenURI(token1), "wrong token1 URI");
+		assert.equal("http://cryptominerworld.com/plot/" + token1, await tk.tokenURI(token1), "wrong token1 URI");
 
 		// validate tiers structure
 		for(let i = 1; i <= 5; i++) {
@@ -226,8 +226,8 @@ contract('PlotERC721', (accounts) => {
 		}
 
 		// complex and packed getters
-		assert.deepEqual([toBN(token0), toBN(token1)], await tk.getAllTokens(), "wrong all tokens collection");
-		assert.deepEqual([toBN(token0), toBN(token1)], await tk.getCollection(account1), "wrong token collection for account1");
+		assertArraysEqual([toBN(token0), toBN(token1)], await tk.getAllTokens(), "wrong all tokens collection");
+		assertArraysEqual([toBN(token0), toBN(token1)], await tk.getCollection(account1), "wrong token collection for account1");
 
 		// calculate token0 and token1 packed structures
 		const packed0 = tiers0.shln(8).shln(24).or(toBN(token0));
@@ -239,8 +239,8 @@ contract('PlotERC721', (accounts) => {
 		];
 
 		// check calculated getters
-		assert.deepEqual([packed0, packed1].map(a => a.toString(16)), (await tk.getPackedCollection(account1)).map(a => a.toString(16)), "account1 has wrong packed collection");
-		assert.deepEqual(fullPacked1.map(a => a.toString(16)), Object.values(await tk.getPacked(token1)).map(a => a.toString(16)), "token1 has wrong packed data");
+		assertArraysEqual([packed0, packed1], await tk.getPackedCollection(account1), "account1 has wrong packed collection");
+		assertArraysEqual(fullPacked1, await tk.getPacked(token1), "token1 has wrong packed data");
 	});
 
 	it("unsafe transfer: transferring a token", async() => {
@@ -1038,4 +1038,4 @@ function tiers(layers) {
 }
 
 // import auxiliary functions
-import {assertThrows, toBN} from "../scripts/shared_functions";
+import {assertThrows, assertArraysEqual, toBN} from "../scripts/shared_functions";

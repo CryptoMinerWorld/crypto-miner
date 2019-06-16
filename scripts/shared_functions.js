@@ -93,3 +93,18 @@ export function toPrettyBinary(n, padTo = 0) {
 
 	return result;
 }
+
+// a function to compare two arrays of numbers
+export function assertArraysEqual(a1, a2, msg) {
+	if(!a1.length) {
+		a1 = Object.values(a1);
+	}
+	if(!a2.length) {
+		a2 = Object.values(a2);
+	}
+
+	assert.equal(a1.length, a2.length, `${msg}: arrays lengths are different`);
+	for(let i = 0; i < a1.length; i++) {
+		assert(a1[i] == a2[i] || toBN(a1[i]).eq(toBN(a2[i])),`${msg}: elements differ at position ${i}`);
+	}
+}

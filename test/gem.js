@@ -23,12 +23,19 @@ import {
 	ROLE_AVAILABLE_COLORS_PROVIDER
 } from "./erc721_core";
 
+// some default gem props
+const token1 = 0x401;
+const token2 = 0x402;
 const grade1 = 0x1000001;
+// a function to mint default grade gem
+async function mint1(tk, acc) {
+	await tk.mint(acc, token1, 1, 1, 1, grade1);
+}
 
 contract('GemERC721', function(accounts) {
 
 	it("initial state: initial zero values, supported interfaces", async() => {
-		// analogue to smart contract deployment
+		// instantiate token instance
 		const tk = await Token.new();
 
 		// some account to work with
@@ -49,7 +56,7 @@ contract('GemERC721', function(accounts) {
 		assert(!await tk.exists(0x401), "token 1 already exists initially");
 
 		// create one token
-		await tk.mint(account1, 0x401, 1, 1, 1, grade1);
+		await mint1(tk, account1);
 
 		// verify same values to be equal one
 		assert.equal(1, (await tk.getAllTokens()).length, "empty all tokens collection");
@@ -68,9 +75,158 @@ contract('GemERC721', function(accounts) {
 		assert.equal(0, await tk.read(1, 0, 8), "wrong initial read for 1/0/8");
 		assert.equal(0, await tk.read(1, 0, 256), "wrong initial read for 1/0/256");
 	});
-	it("initial state: throwable functions");
+	it("initial state: throwable functions", async() => {
+		// instantiate token instance
+		const tk = await Token.new();
 
-	it("integrity: verify minted token data integrity");
+		// some account to work with
+		const account1 = accounts[1];
+
+		// define function that throw initially
+		const getPacked = async() => await tk.getPacked(token1);
+		const getPlotId = async() => await tk.getPlotId(token1);
+		const getPropertiesModified = async() => await tk.getPropertiesModified(token1);
+		const getProperties = async() => await tk.getProperties(token1);
+		const getColor = async() => await tk.getColor(token1);
+		const getLevel = async() => await tk.getLevel(token1);
+		const getGrade = async() => await tk.getGrade(token1);
+		const getGradeType = async() => await tk.getGradeType(token1);
+		const getGradeValue = async() => await tk.getGradeValue(token1);
+		const getPlotsMined = async() => await tk.getPlotsMined(token1);
+		const getBlocksMined = async() => await tk.getBlocksMined(token1);
+		const getAge = async() => await tk.getAge(token1);
+		const getModified = async() => await tk.getModified(token1);
+		const getStateModified = async() => await tk.getStateModified(token1);
+		const getState = async() => await tk.getState(token1);
+		const isTransferable = async() => await tk.isTransferable(token1);
+		const getCreationTime = async() => await tk.getCreationTime(token1);
+		const getOwnershipModified = async() => await tk.getOwnershipModified(token1);
+		const tokenByIndex = async() => await tk.tokenByIndex(0);
+		const tokenOfOwnerByIndex = async() => await tk.tokenOfOwnerByIndex(account1, 0);
+		const ownerOf = async() => await tk.ownerOf(token1);
+		const getApproved = async() => await tk.getApproved(token1);
+		const tokenURI = async() => await tk.tokenURI(token1);
+
+		// check all these functions throw
+		await assertThrows(getPacked);
+		await assertThrows(getPlotId);
+		await assertThrows(getPropertiesModified);
+		await assertThrows(getProperties);
+		await assertThrows(getColor);
+		await assertThrows(getLevel);
+		await assertThrows(getGrade);
+		await assertThrows(getGradeType);
+		await assertThrows(getGradeValue);
+		await assertThrows(getPlotsMined);
+		await assertThrows(getBlocksMined);
+		await assertThrows(getAge);
+		await assertThrows(getModified);
+		await assertThrows(getStateModified);
+		await assertThrows(getState);
+		await assertThrows(isTransferable);
+		await assertThrows(getCreationTime);
+		await assertThrows(getOwnershipModified);
+		await assertThrows(tokenByIndex);
+		await assertThrows(tokenOfOwnerByIndex);
+		await assertThrows(ownerOf);
+		await assertThrows(getApproved);
+		await assertThrows(tokenURI);
+
+		// create one token
+		await mint1(tk, account1);
+
+		// now the functions which throw should not throw anymore
+		await getPacked();
+		await getPlotId();
+		await getPropertiesModified();
+		await getProperties();
+		await getColor();
+		await getLevel();
+		await getGrade();
+		await getGradeType();
+		await getGradeValue();
+		await getPlotsMined();
+		await getBlocksMined();
+		await getAge();
+		await getModified();
+		await getStateModified();
+		await getState();
+		await isTransferable();
+		await getCreationTime();
+		await getOwnershipModified();
+		await tokenByIndex();
+		await tokenOfOwnerByIndex();
+		await ownerOf();
+		await getApproved();
+		await tokenURI();
+	});
+
+	it("integrity: verify minted token data integrity", async() => {
+		// instantiate token instance
+		const tk = await Token.new();
+
+		// some account to work with
+		const account1 = accounts[1];
+
+		// define some token properties
+		const plotId = 17;
+		const colorId = 11;
+		const levelId = 5;
+		const gradeType = 3;
+		const gradeValue = 11;
+		const age = 60;
+		const grade = gradeType << 24 | gradeValue;
+		const properties = toBN(colorId).shln(8).or(toBN(levelId)).shln(32).or(toBN(grade));
+
+		// create two tokens
+		await tk.mintWith(account1, token1, plotId, colorId, levelId, grade, age);
+		await tk.mint(account1, token2, plotId, colorId, levelId, grade);
+
+		// extract token1 creation time to be used later
+		const creation1 = await tk.getCreationTime(token1);
+		const creation2 = await tk.getCreationTime(token2);
+
+		// verify simple (non-packed) getters
+		assert.equal(plotId, await tk.getPlotId(token1), "token1 has wrong plotId");
+		assert.equal(0, await tk.getPropertiesModified(token1), "token1 has non-zero propertiesModified");
+		assert(properties.eq(await tk.getProperties(token1)), "token1 has wrong properties");
+		assert.equal(colorId, await tk.getColor(token1), "token1 has wrong color");
+		assert.equal(levelId, await tk.getLevel(token1), "token1 has wrong level");
+		assert.equal(grade, await tk.getGrade(token1), "token1 has wrong grade");
+		assert.equal(gradeType, await tk.getGradeType(token1), "token1 has wrong gradeType");
+		assert.equal(gradeValue, await tk.getGradeValue(token1), "token1 has wrong gradeValue");
+		assert.equal(age, await tk.getAge(token1), "token1 has wrong age");
+		assert.equal(0, await tk.getAge(token2), "token2 has non-zero age");
+		assert(creation1.eq(await tk.getModified(token1)), "token1 has wrong modified time");
+		assert.equal(0, await tk.getStateModified(token1), "token1 has wrong stateModified");
+		assert.equal(0, await tk.getState(token1), "token1 has non-zero state");
+		assert(await tk.isTransferable(token1), "token1 is not transferable");
+		assert(creation1.gt(toBN(0)), "token1 has zero creation time");
+		assert.equal(0, await tk.getOwnershipModified(token1), "token1 1 has wrong ownershipModified");
+		assert.equal(token1, await tk.tokenByIndex(0), "wrong token ID at index 0");
+		assert.equal(token1, await tk.tokenOfOwnerByIndex(account1, 0), "wrong token ID at index 0 owned by account1");
+		assert.equal(account1, await tk.ownerOf(token1), "wrong owner of token1");
+		assert.equal(0, await tk.getApproved(token1), "token1 should not be approved yet");
+		assert.equal("http://cryptominerworld.com/gem/" + token1, await tk.tokenURI(token1), "wrong token1 URI");
+
+		// complex and packed getters
+		assert.deepEqual([toBN(token1), toBN(token2)], await tk.getAllTokens(), "wrong all tokens collection");
+		assert.deepEqual([toBN(token1), toBN(token2)], await tk.getCollection(account1), "wrong token collection for account1");
+
+		// calculate token1 and token2 packed structures
+		const packed1 = creation1.shln(32).or(creation1).shln(32).or(toBN(grade)).shln(8).or(toBN(levelId)).shln(24).shln(32).shln(32).or(toBN(age)).shln(32).shln(8).or(toBN(colorId)).shln(24).or(toBN(token1));
+		const packed2 = creation2.shln(32).or(creation2).shln(32).or(toBN(grade)).shln(8).or(toBN(levelId)).shln(24).shln(32).shln(32).shln(32).shln(8).or(toBN(colorId)).shln(24).or(toBN(token2));
+		// compare with packed collection getter
+		assertArraysEqual([packed1, packed2], await tk.getPackedCollection(account1), "account1 has wrong packed collection");
+
+		// calculate token1 extended packed structure
+		const fullPacked1 = [
+			toBN(plotId).shln(8).or(toBN(colorId)).shln(8).or(toBN(levelId)).shln(32).or(toBN(grade)).shln(32).shln(24).shln(32).shln(32).or(toBN(age)).shln(32).shln(32),
+			creation1.shln(32).shln(32).shln(160).or(toBN(account1))
+		];
+		// compare with the packed getter
+		assertArraysEqual(fullPacked1, await tk.getPacked(token1), "token1 wrong getPacked");
+	});
 	it("mint: creating a token", async function() {
 		const tk = await Token.new();
 		await tk.mint(accounts[0], 0x401, 1, 1, 1, grade1);
@@ -85,47 +241,6 @@ contract('GemERC721', function(accounts) {
 		assert.equal(1, await tk.balanceOf(accounts[0]), accounts[0] + " has wrong balance after minting a token");
 		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " has wrong balance after minting a token");
 		assert.equal(0, await tk.balanceOf(accounts[2]), accounts[2] + " has wrong initial balance");
-	});
-	it("mint: integrity of newly created token", async function() {
-		const tk = await Token.new();
-		await tk.mint(accounts[0], 0x401, 17, 11, 5, 0x300000B);
-
-		assert.equal(17, await tk.getPlotId(0x401), "gem 0x401 has wrong plotId");
-		assert.equal(11, await tk.getColor(0x401), "gem 0x401 wrong color");
-		assert.equal(5, await tk.getLevel(0x401), "gem 0x401 wrong level");
-		assert.equal(3, await tk.getGradeType(0x401), "gem 0x401 wrong gradeType");
-		assert.equal(11, await tk.getGradeValue(0x401), "gem 0x401 wrong gradeValue");
-		assert.equal(0x0300000B, await tk.getGrade(0x401), "gem 0x401 wrong grade");
-		assert.equal(0xB050300000B, await tk.getProperties(0x401), "gem 0x401 has wrong properties");
-
-		const creationTime = await tk.getCreationTime(0x401);
-		assert(creationTime.gt(0), "gem 0x401 wrong creation time");
-		const ownershipModified = await tk.getOwnershipModified(0x401);
-		assert.equal(0, ownershipModified, "gem 0x401 wrong ownership modified");
-		const levelModified = await tk.getPropertiesModified(0x401);
-		assert.equal(0, levelModified, "gem 0x401 wrong level modified");
-		const gradeModified = await tk.getPropertiesModified(0x401);
-		assert.equal(0, gradeModified, "gem 0x401 wrong grade modified");
-		const stateModified = await tk.getStateModified(0x401);
-		assert.equal(0, stateModified, "gem 0x401 wrong state modified");
-
-		const tokenURI = await tk.tokenURI(0x401);
-		assert.equal("http://cryptominerworld.com/gem/1025", tokenURI, "wrong 0x401 tokenURI");
-
-		const packed = await tk.getPacked(0x401);
-		assert(packed[0].eq(toBN("0x0000110B050300000B0000000000000000000000000000000000000000000000")), "gem 0x401 wrong high");
-		assert(packed[1].eq(toBN("0x" + creationTime.toString(16) + "0000000000000000" + accounts[0].substr(2, 40))), "gem 0x401 wrong low");
-
-		// check packed collection
-		const packedCollection = await tk.getPackedCollection(accounts[0]);
-		assert.equal(1, packedCollection.length, "wrong packed collection length for " + accounts[0]);
-		assert(toBN("0x" + creationTime.toString(16) + creationTime.toString(16) + "0300000B050000000000000000000000000000000B000401").eq(packedCollection[0]), "wrong token packed data at index 0");
-
-		const collection = await tk.getCollection(accounts[0]);
-		assert.equal(1, collection.length, "wrong collection length for " + accounts[0]);
-		assert.equal(0x401, collection[0], "wrong token ID at index 0");
-		assert.equal(0x401, await tk.tokenByIndex(0), "wrong tokenByIndex at index 0");
-		assert.equal(0x401, await tk.tokenOfOwnerByIndex(accounts[0], 0), "wrong tokenOfOwnerByIndex at index 0");
 	});
 
 	it("transfer: transferring a token", async function() {
@@ -440,12 +555,4 @@ contract('GemERC721', function(accounts) {
 
 
 // import auxiliary function to ensure function `fn` throws
-import {assertThrows, toBN} from "../scripts/shared_functions";
-
-// auxiliary function to check two arrays are equal
-function assertArraysEqual(actual, expected, msg) {
-	assert(actual.length === expected.length, `${msg}: arrays lengths are different`);
-	for(let i = 0; i < actual.length; i++) {
-		assert.equal(actual[i], expected[i], `${msg}: different elements and index ${i}`);
-	}
-}
+import {assertThrows, assertArraysEqual, toBN} from "../scripts/shared_functions";

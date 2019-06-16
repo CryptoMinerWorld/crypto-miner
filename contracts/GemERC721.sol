@@ -654,6 +654,20 @@ contract GemERC721 is ERC721Core {
   }
 
   /**
+   * @dev Gets the level or grade modified date of a gem
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the gem to get properties modified date for
+   * @return a token grade modified date
+   */
+  function getPropertiesModified(uint256 _tokenId) public view returns(uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's grade modified date from storage and return
+    return tokens[_tokenId].propertiesModified;
+  }
+
+  /**
    * @dev Gets the gem's properties – color, level and
    *      grade - as packed uint32 number
    * @dev Throws if token specified doesn't exist
@@ -683,20 +697,6 @@ contract GemERC721 is ERC721Core {
 
     // obtain the value of interest from token structure
     return tokens[_tokenId].color;
-  }
-
-  /**
-   * @dev Gets the level or grade modified date of a gem
-   * @dev Throws if token specified doesn't exist
-   * @param _tokenId ID of the gem to get properties modified date for
-   * @return a token grade modified date
-   */
-  function getPropertiesModified(uint256 _tokenId) public view returns(uint32) {
-    // validate token existence
-    require(exists(_tokenId));
-
-    // obtain token's grade modified date from storage and return
-    return tokens[_tokenId].propertiesModified;
   }
 
   /**
