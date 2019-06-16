@@ -74,7 +74,7 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 AUCTION_UID = 0xb2fa7d42bfef09b4c1b69db4ed0af2a0fabcf8904ae11d61419584f96d282e7b;
+  uint256 public constant AUCTION_UID = 0xb2fa7d42bfef09b4c1b69db4ed0af2a0fabcf8904ae11d61419584f96d282e7b;
 
   /**
    * @dev Base structure representing an item for sale on the auction

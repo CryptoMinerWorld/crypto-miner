@@ -23,7 +23,7 @@ module.exports = async function(deployer, network, accounts) {
 
 		}:
 		{ // Ropsten addresses
-			DutchAuction:       "0x1D6f61dAeCB9ccbf5b5a61D9cD68d96DAdd0Bb1C",
+			DutchAuction:       "0xA55bf145A6199da39fc83F1612FFD0317F85aB72",
 			GemERC721:          "0xFe71e1d0c1f678b94B5fa7542071CfFE2DEa4E31",
 		};
 
