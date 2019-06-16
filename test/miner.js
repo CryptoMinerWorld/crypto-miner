@@ -181,9 +181,9 @@ contract('Miner', (accounts) => {
 		await miner.bind(1, 1);
 
 		// verify all the tokens are locked now
-		assert(await gem.getState(1) > 0, "wrong gem's state");
+		assert.equal(1, await gem.getState(1), "wrong gem's state");
 		assert(!await gem.isTransferable(1), "gem is still transferable");
-		assert(await plot.getState(1) > 0, "wrong plot's state");
+		assert.equal(1, await plot.getState(1), "wrong plot's state");
 		assert(!await plot.isTransferable(1), "plot is still transferable");
 	});
 

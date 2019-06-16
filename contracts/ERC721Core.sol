@@ -522,4 +522,26 @@ contract ERC721Core is AccessMultiSig, ERC165, ERC721Interfaces {
     return length == 0? ext256[_tokenId][page] >> offset: ext256[_tokenId][page] >> offset & ((uint256(1) << length) - 1);
   }
 
+  /**
+   * @dev Proxy function for built-in 'now', returns 'now' as uint32
+   * @dev Testing time-dependent functionality in Solidity is challenging.
+   *      The time flows in unpredictable way, at variable speed
+   *      from block to block, from miner to miner.
+   *      Testrpc (ganache) doesn't solve the issue. It helps to unlock
+   *      the speed of time changes introducing though numerous testrpc-specific
+   *      problems.
+   * @dev In most test cases, however, time change emulation on the block level
+   *      is not required and contract-based simulation is enough.
+   * @dev To simulate time change on contract level we introduce a `now32`
+   *      proxy-function which proxies all calls to built-in 'now' function.
+   *      It doesn't modify time and doesn't affect smart contract logic by any means.
+   *      But it allows to extend this smart contract by a test smart contract,
+   *      which will allow time change simulation by overriding this function only.
+   * @return uint32(now) – current timestamp as uint32
+   */
+  function now32() public view returns(uint32) {
+    // call built-in 'now' and return
+    return uint32(now);
+  }
+
 }

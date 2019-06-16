@@ -1,5 +1,8 @@
+// Now provider is used to play with current time
+const NowProvider = artifacts.require("./__NowProvider.sol");
+
 // Miner smart contract dependencies
-const Gem = artifacts.require("./GemERC721.sol");
+const Gem = artifacts.require("./__GemERC721.sol");
 const Plot = artifacts.require("./PlotERC721.sol");
 const Artifact = artifacts.require("./PlotERC721.sol"); // TODO
 const Silver = artifacts.require("./SilverERC20.sol");
@@ -9,22 +12,25 @@ const FoundersKey = artifacts.require("./FoundersKeyERC20.sol");
 const ChestKey = artifacts.require("./ChestKeyERC20.sol");
 
 // Miner smart contract itself
-const Miner = artifacts.require("./Miner.sol");
+const Miner = artifacts.require("./__Miner.sol");
 
 // import ERC721Core dependencies
-import {ROLE_TOKEN_CREATOR, ROLE_STATE_PROVIDER} from "../test/erc721_core";
+import {ROLE_TOKEN_CREATOR, ROLE_STATE_PROVIDER} from "./erc721_core";
 // import Gem ERC721 dependencies
-import {ROLE_AGE_PROVIDER} from "../test/erc721_core";
+import {ROLE_AGE_PROVIDER, ROLE_MINED_STATS_PROVIDER, ROLE_NEXT_ID_INC} from "./erc721_core";
 // import Plot ERC721 features
-import {ROLE_OFFSET_PROVIDER} from "../test/erc721_core";
-// import Miner features
-import {FEATURE_MINING_ENABLED} from "../test/miner";
+import {ROLE_OFFSET_PROVIDER} from "./erc721_core";
+// import Miner dependencies
+const FEATURE_MINING_ENABLED = 0x00000001;
 
 // Miner smart contract tests requiring time manipulation
 contract('Miner (Time Increase)', (accounts) => {
 	it("mining: mining properties of the 25 min old gem(s)", async() => {
+		// now provider
+		const np = await NowProvider.new();
+
 		// define miner dependencies
-		const gem = await Gem.new();
+		const gem = await Gem.new(np.address);
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -42,7 +48,8 @@ contract('Miner (Time Increase)', (accounts) => {
 			gold.address,
 			artifactErc20.address,
 			foundersKey.address,
-			chestKey.address
+			chestKey.address,
+			np.address
 		);
 
 		// create few different gems
@@ -54,12 +61,9 @@ contract('Miner (Time Increase)', (accounts) => {
 		await gem.mint(accounts[0], 3, 1, 1, 1, 0x60F423F);
 
 		// rewind 25 minutes forward
-		for(let i = 0; i < 100; i++) {
-			await increaseTime(15);
-		}
-
+		await np.incTime(1500);
 		// expected values
-		const a = 25; // energetic age
+		const a = 25; // energetic age in seconds
 		const R = restingEnergy(a); // resting energy
 
 		// resting energy should be calculated as R = -7 * 10^-6 * a^2 + 0.5406 * a, where a = 30,000
@@ -86,8 +90,11 @@ contract('Miner (Time Increase)', (accounts) => {
 	});
 
 	it("mining: mining with resting energy only (bind without locking)", async() => {
+		// now provider
+		const np = await NowProvider.new();
+
 		// define miner dependencies
-		const gem = await Gem.new();
+		const gem = await Gem.new(np.address);
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -105,13 +112,14 @@ contract('Miner (Time Increase)', (accounts) => {
 			gold.address,
 			artifactErc20.address,
 			foundersKey.address,
-			chestKey.address
+			chestKey.address,
+			np.address
 		);
 
 		// enable mining feature on the miner
 		await miner.updateFeatures(FEATURE_MINING_ENABLED);
 		// grant miner permissions to modify gem's state and mint gems
-		await gem.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER);
+		await gem.updateRole(miner.address,  ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_INC | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
 		// grant miner permission(s) to update plot
 		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
 		// grant miner permission(s) to mint silver
@@ -131,9 +139,7 @@ contract('Miner (Time Increase)', (accounts) => {
 		await gem.mint(accounts[0], 1, 1, 1, 1,0x60F423F);
 
 		// rewind 13 minutes forward to accumulate enough resting energy
-		for(let i = 0; i < 52; i++) {
-			await increaseTime(15);
-		}
+		await np.incTime(780);
 
 		// verify plot is mined by one block
 		assert.equal(0, await plot.getOffset(1), "wrong initial plot offset");
@@ -154,11 +160,12 @@ contract('Miner (Time Increase)', (accounts) => {
 		assert.equal(1, await plot.getTierDepth(1, 1), "wrong tier 1 depth");
 
 		// bind gem to a plot, it should release immediately (resting energy mining)
-		await miner.bind(1, 1, 0);
+		await miner.bind(1, 1);
 
 		// verify all the tokens are still not locked
 		assert.equal(0, await gem.getState(1), "non-zero gem's state after mining");
-		assert.equal(0, await plot.getState(1) > 0, "non-zero plot's state after mining");
+		assert(await gem.isTransferable(1), "gem is not transferable after mining");
+		assert.equal(0, await plot.getState(1), "non-zero plot's state after mining");
 		assert(await plot.isTransferable(1), "plot is not transferable after mining");
 
 		// verify plot is mined by one block
@@ -166,8 +173,11 @@ contract('Miner (Time Increase)', (accounts) => {
 	});
 
 	it("mining: evaluating plot offset", async() => {
+		// now provider
+		const np = await NowProvider.new();
+
 		// define miner dependencies
-		const gem = await Gem.new();
+		const gem = await Gem.new(np.address);
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -185,7 +195,8 @@ contract('Miner (Time Increase)', (accounts) => {
 			gold.address,
 			artifactErc20.address,
 			foundersKey.address,
-			chestKey.address
+			chestKey.address,
+			np.address
 		);
 
 		// enable mining feature on the miner
@@ -201,23 +212,24 @@ contract('Miner (Time Increase)', (accounts) => {
 		await gem.mint(accounts[0], 1, 1, 1, 5, 0x60F423F);
 
 		// bind gem to a plot
-		await miner.bind(1, 1, 0);
+		await miner.bind(1, 1);
 
 		// initially evaluate returns zero
 		assert.equal(0, await miner.evaluate(1), "non-zero evaluated offset");
 
 		// rewind 7 minutes forward to mine one block
-		for(let i = 0; i < 28; i++) {
-			await increaseTime(15);
-		}
+		await np.incTime(420);
 
 		// evaluate now should return 1 block
 		assert.equal(1, await miner.evaluate(1), "wrong evaluated offset");
 	});
 
 	it("mining: updating plot offset and releasing", async() => {
+		// now provider
+		const np = await NowProvider.new();
+
 		// define miner dependencies
-		const gem = await Gem.new();
+		const gem = await Gem.new(np.address);
 		const plot = await Plot.new();
 		const artifact = await Artifact.new();
 		const silver = await Silver.new();
@@ -235,13 +247,14 @@ contract('Miner (Time Increase)', (accounts) => {
 			gold.address,
 			artifactErc20.address,
 			foundersKey.address,
-			chestKey.address
+			chestKey.address,
+			np.address
 		);
 
 		// enable mining feature on the miner
 		await miner.updateFeatures(FEATURE_MINING_ENABLED);
 		// grant miner permissions to modify gem's state and mint gems
-		await gem.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER);
+		await gem.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_INC | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
 		// grant miner permission(s) to update plot
 		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
 		// grant miner permission(s) to mint silver
@@ -261,16 +274,14 @@ contract('Miner (Time Increase)', (accounts) => {
 		await gem.mint(accounts[0], 1, 1, 1, 5, 0x60F423F);
 
 		// bind gem to a plot
-		await miner.bind(1, 1, 0);
+		await miner.bind(1, 1);
 
 
 		// initially update fails
 		await assertThrows(miner.update, 1);
 
 		// rewind 7 minutes forward to mine one block
-		for(let i = 0; i < 28; i++) {
-			await increaseTime(15);
-		}
+		await np.incTime(420);
 
 		// update succeeds now by mining one block
 		await miner.update(1);
@@ -281,8 +292,9 @@ contract('Miner (Time Increase)', (accounts) => {
 		assert.equal(1, await plot.getOffset(1), "wrong plot offset after mining");
 
 		// verify all the tokens are still in a locked state
-		assert((await gem.getState(1)).modulo(2) > 0, "gem is still transferable");
-		assert(await plot.getState(1) > 0, "wrong plot's state");
+		assert.equal(1, await gem.getState(1), "wrong gem's state");
+		assert(!await gem.isTransferable(1), "gem is still transferable");
+		assert.equal(1, await plot.getState(1), "wrong plot's state");
 		assert(!await plot.isTransferable(1), "plot is still transferable");
 
 		// release
@@ -291,8 +303,9 @@ contract('Miner (Time Increase)', (accounts) => {
 		await assertThrows(miner.release, 1);
 
 		// verify all the tokens are unlocked
-		assert.equal(0, (await gem.getState(1)).modulo(2), "gem is not transferable after releasing it");
-		assert.equal(0, await plot.getState(1) > 0, "non-zero plot's state after releasing it");
+		assert.equal(0, await gem.getState(1), "non-zero gem's state after releasing it");
+		assert(await gem.isTransferable(1), "gem is not transferable after releasing it");
+		assert.equal(0, await plot.getState(1), "non-zero plot's state after releasing it");
 		assert(await plot.isTransferable(1), "plot is not transferable after releasing it");
 
 		// verify plot is mined by one block
@@ -307,22 +320,6 @@ function restingEnergy(a) {
 		Math.floor(-7 / 1000000 * Math.pow(Math.min(a, h), 2) + 0.5406 * Math.min(a, h) + 0.0199 * Math.max(a - h, 0)),
 		65535
 	);
-}
-
-// auxiliary function to increase EVM time
-async function increaseTime(delta) {
-	await web3.currentProvider.send({
-		jsonrpc: "2.0",
-		method: "evm_increaseTime",
-		params: [delta],
-		id: new Date().getSeconds()
-	});
-	await web3.currentProvider.send({
-		jsonrpc: "2.0",
-		method: "evm_mine",
-		params: [],
-		id: new Date().getSeconds()
-	});
 }
 
 

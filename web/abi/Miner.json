@@ -138,6 +138,29 @@
     },
     {
       "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "collections",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint72"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [],
       "name": "gemInstance",
       "outputs": [
@@ -193,12 +216,17 @@
     },
     {
       "constant": true,
-      "inputs": [],
-      "name": "ARTIFACT_UID_REQUIRED",
-      "outputs": [
+      "inputs": [
         {
           "name": "",
           "type": "uint256"
+        }
+      ],
+      "name": "allTokens",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint232"
         }
       ],
       "payable": false,
@@ -216,6 +244,10 @@
       "name": "plots",
       "outputs": [
         {
+          "name": "plotId",
+          "type": "uint24"
+        },
+        {
           "name": "gemId",
           "type": "uint24"
         },
@@ -224,8 +256,12 @@
           "type": "uint24"
         },
         {
-          "name": "player",
-          "type": "address"
+          "name": "globalBoundIndex",
+          "type": "uint24"
+        },
+        {
+          "name": "ownerBoundIndex",
+          "type": "uint24"
         },
         {
           "name": "bound",
@@ -268,6 +304,25 @@
         {
           "name": "",
           "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "name": "gems",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint24"
         }
       ],
       "payable": false,
@@ -548,6 +603,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "now32",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "silverInstance",
       "outputs": [
         {
@@ -788,6 +857,118 @@
       ],
       "name": "RoleUpdated",
       "type": "event"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "getCollection",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint72[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getAllTokens",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint232[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "getPlotBinding",
+      "outputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        },
+        {
+          "name": "artifactId",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        }
+      ],
+      "name": "getGemBinding",
+      "outputs": [
+        {
+          "name": "plotId",
+          "type": "uint24"
+        },
+        {
+          "name": "artifactId",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "constant": false,
@@ -1076,44 +1257,6 @@
       "constant": true,
       "inputs": [
         {
-          "name": "plotId",
-          "type": "uint24"
-        }
-      ],
-      "name": "getBoundGemId",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "plotId",
-          "type": "uint24"
-        }
-      ],
-      "name": "getBoundArtifactId",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
           "name": "gemId",
           "type": "uint24"
         },
@@ -1356,11 +1499,18 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-13T00:39:17.119Z",
+  "updatedAt": "2019-06-16T06:57:43.368Z",
   "devdoc": {
     "author": "Basil Gorin",
-    "details": "Miner may read, write, mint, lock and unlock tokens     (locked tokens cannot be transferred i.e. cannot change owner)Following tokens may be accessed for reading (token properties affect mining):     - GemERC721     - PlotERC721     - ArtifactERC721Following tokens may be accessed for writing (token properties change when mining):     - PlotERC721Following tokens may be minted (token can be found in the land plot when mining):     - GemERC721     - ArtifactERC721     - SilverERC20     - GoldERC20     - ArtifactERC20     - FoundersKeyERC20     - ChestKeyERC20Following tokens may be locked or unlocked (tokens are locked when mining):     - GemERC721     - PlotERC721     - ArtifactERC721",
+    "details": "Miner may read, write, mint, lock and unlock tokens     (locked tokens cannot be transferred i.e. cannot change owner)Following tokens may be accessed for reading (token properties affect mining):     - ArtifactERC721     - GemERC721     - PlotERC721Following tokens may be accessed for writing (token properties change when mining):     - GemERC721, statistics updates - plots/blocks mined     - PlotERC721, offset updates – currently mined depthFollowing tokens may be created (token can be found in the land plot when mining):     - ArtifactERC721     - GemERC721     - SilverERC20     - GoldERC20     - ArtifactERC20     - FoundersKeyERC20     - ChestKeyERC20Following tokens may be locked or unlocked (tokens are locked when mining):     - ArtifactERC721     - GemERC721     - PlotERC721",
     "methods": {
+      "balanceOf(address)": {
+        "details": "Gets an amount of plots/gems/artifacts being currently     mined by the miner for a given owner address",
+        "params": {
+          "owner": "address to query mining balance for"
+        },
+        "return": "amount of plots being currently mined by address"
+      },
       "bind(uint24,uint24)": {
         "details": "Locks all the tokens passed as parametersThrows if any of the tokens is already lockedThrows if any of the tokens specified doesn't exist or     doesn't belong to transaction sender",
         "params": {
@@ -1446,11 +1596,11 @@
         "return": "effective resting energy for the specified gem"
       },
       "energeticAgeOf(uint24)": {
-        "details": "Energetic age is an approximate number of minutes the gem accumulated energyThe time is measured from the time when gem modified its properties     (level or grade) or its state for the last time till nowIf the gem didn't change its properties ot state since its genesis,     the time is measured from gem's creation timeFor resting (non-mining) gems of grades A, AA and AAA energetic age     is used to calculate their resting energyFor mining gems of any grade energetic age is equal to mining energy",
+        "details": "Energetic age is the time period the gem accumulated energyThe time is measured from the time when gem modified its properties     (level or grade) or its state for the last time till nowIf the gem didn't change its properties or state since its genesis,     the time is measured from gem's creation timeFor resting (non-mining) gems of grades A, AA and AAA energetic age     is used to calculate their resting energyFor mining gems of any grade energetic age is equal to mining energy",
         "params": {
           "gemId": "ID of the gem to calculate energetic age for"
         },
-        "return": "energetic age of the gem in minutes"
+        "return": "energetic age of the gem in seconds"
       },
       "energyToBlocks(uint8,uint32)": {
         "details": "See also `blocksToEnergy` function",
@@ -1496,14 +1646,18 @@
         },
         "return": "number of blocks the gem can mine, zero if it cannot mine more"
       },
-      "getBoundArtifactId(uint24)": {
-        "details": "Finds a gem bound to a particular plot",
-        "params": {
-          "plotId": "ID of the plot to query bound gem for"
-        },
-        "return": "ID of the bound gem"
+      "getAllTokens()": {
+        "details": "Gets all the plot IDs, gem IDs, artifact IDs currently mined",
+        "return": "an ordered unsorted list containing     artifact ID, 24 bits (reserved, not used yet)     gem ID, 24 bits     plot ID, 24 bits     owner, 160 bits"
       },
-      "getBoundGemId(uint24)": {
+      "getCollection(address)": {
+        "details": "Gets all the plot IDs, gem IDs, artifact IDs currently mined     by a particular address",
+        "params": {
+          "owner": "an address to query collection for"
+        },
+        "return": "an ordered unsorted list of binding UIDs:     artifact ID, 24 bits (reserved, not used yet)     gem ID, 24 bits     plot ID, 24 bits"
+      },
+      "getPlotBinding(uint24)": {
         "details": "Finds a gem bound to a particular plot",
         "params": {
           "plotId": "ID of the plot to query bound gem for"
@@ -1545,6 +1699,10 @@
           "gemId": "ID of the gem to calculate mining rate for"
         },
         "return": "mining rate of the gem multiplied by 10^8"
+      },
+      "now32()": {
+        "details": "Proxy function for built-in 'now', returns 'now' as uint32",
+        "return": "uint32(now) – current timestamp as uint32"
       },
       "randomColor(uint16)": {
         "details": "Picks random color from `availableColors` array",
@@ -1604,6 +1762,10 @@
           "offset": "depth to mine tiers structure to,     must be bigger than current offset",
           "tiers": "tiers data structure of the land plot to evaluate loot for"
         }
+      },
+      "totalSupply()": {
+        "details": "Gets an amount of plots/gems/artifacts being currently mined",
+        "return": "total number of plots currently mined"
       },
       "unusedEnergeticAge(uint32)": {
         "details": "See `restingEnergy` function and Resting Energy original formula     for more information about the inverseThe square root in the first part of the formula is calculated     using fast inverse square root algorithm by Michael Abrash from id SoftwareSee https://en.wikipedia.org/wiki/Fast_inverse_square_root",

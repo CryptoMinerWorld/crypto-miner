@@ -22,16 +22,17 @@ import "./TimeUtils.sol";
  *      (locked tokens cannot be transferred i.e. cannot change owner)
  *
  * @dev Following tokens may be accessed for reading (token properties affect mining):
+ *      - ArtifactERC721
  *      - GemERC721
  *      - PlotERC721
- *      - ArtifactERC721
  *
  * @dev Following tokens may be accessed for writing (token properties change when mining):
- *      - PlotERC721
+ *      - GemERC721, statistics updates - plots/blocks mined
+ *      - PlotERC721, offset updates – currently mined depth
  *
- * @dev Following tokens may be minted (token can be found in the land plot when mining):
- *      - GemERC721
+ * @dev Following tokens may be created (token can be found in the land plot when mining):
  *      - ArtifactERC721
+ *      - GemERC721
  *      - SilverERC20
  *      - GoldERC20
  *      - ArtifactERC20
@@ -39,9 +40,9 @@ import "./TimeUtils.sol";
  *      - ChestKeyERC20
  *
  * @dev Following tokens may be locked or unlocked (tokens are locked when mining):
+ *      - ArtifactERC721
  *      - GemERC721
  *      - PlotERC721
- *      - ArtifactERC721
  *
  * @author Basil Gorin
  */
@@ -51,7 +52,7 @@ contract Miner is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x1b71de921b7532e957aa0ceae769adc27d3487b33eb5248b3ca63d121cc735aa;
+  uint256 public constant MINER_UID = 0x29cc7a4c1c353b1aae9068258606fb1c7a65697500226c215514241f143a84f5;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
@@ -64,12 +65,6 @@ contract Miner is AccessMultiSig {
    *      this smart contract is designed to work with
    */
   uint256 public constant PLOT_UID_REQUIRED = 0xc5b810e451b3296f5ffa4087dc00adac5c57a053c276db3987921c798b153571;
-
-  /**
-   * @dev Expected version (UID) of the deployed ArtifactERC721 instance
-   *      this smart contract is designed to work with
-   */
-  uint256 public constant ARTIFACT_UID_REQUIRED = 0x0000000000000000000000000000000000000000000000000000000000000000;
 
   /**
    * @dev Expected version (UID) of the deployed SilverERC20 instance
@@ -103,12 +98,17 @@ contract Miner is AccessMultiSig {
 
   /**
    * @dev Auxiliary data structure used in `plots` mapping to
-   *      store information about gems and artifacts bound tto mine
+   *      store information about gems and artifacts bound to mine
    *      a particular plot of land
-   * @dev Additionally it stores address of the player who initiated
-   *      the `bind()` transaction and its unix timestamp
+   * @dev Additionally it stores the unix timestamp of the transaction
+   *      when mining has started
    */
   struct MiningData {
+    /**
+     * @dev ID of the plot being mined
+     */
+    uint24 plotId;
+
     /**
      * @dev ID of the gem which is mining the plot,
      *      the gem is locked when mining
@@ -122,9 +122,15 @@ contract Miner is AccessMultiSig {
     uint24 artifactId;
 
     /**
-     * @dev A player, an address who initiated `bind()` transaction
+     * @dev Index of gem ID and plot ID in `allBoundTokens` array
      */
-    address player;
+    uint24 globalBoundIndex;
+
+    /**
+     * @dev Index of gem ID and plot ID in `boundCollections` array
+     *      of a particular owner
+     */
+    uint24 ownerBoundIndex;
 
     /**
      * @dev Unix timestamp of the `bind()` transaction
@@ -149,15 +155,6 @@ contract Miner is AccessMultiSig {
    * @dev Miner should have `PlotERC721.ROLE_STATE_PROVIDER` permission lock/unlock tokens
    */
   PlotERC721 public plotInstance;
-
-  /**
-   * @dev ArtifactERC721 deployed instance,
-   *      tokens of that instance can be read, minted, locked and unlocked
-   *
-   * @dev Miner should have `ArtifactERC721.ROLE_TOKEN_CREATOR` permission to mint tokens
-   * @dev Miner should have `ArtifactERC721.ROLE_STATE_PROVIDER` permission lock/unlock tokens
-   */
-  //ArtifactERC721 public artifactInstance;
 
   /**
    * @dev SilverERC20 deployed instance,
@@ -199,13 +196,46 @@ contract Miner is AccessMultiSig {
    */
   ChestKeyERC20 public chestKeyInstance;
 
-
   /**
    * @dev Mapping to store mining information that is which
    *      gems and artifacts mine which plots
-   * @dev See `MiningData` data structure for more details
+   * @dev Can be modified only by `__bind` and `__unbind` functions
+   * @dev Maps plot ID => MiningData struct
    */
   mapping(uint24 => MiningData) public plots;
+
+  /**
+   * @dev Auxiliary mapping keeps track of what gems are mining
+   *      which plots
+   * @dev Can be modified only by `__bind` and `__unbind` functions
+   * @dev Maps gem ID => plot ID
+   */
+  mapping(uint24 => uint24) public gems;
+
+  /**
+   * @dev Enumerations of the tokens bound and locked by
+   *      this smart contract for each owner
+   * @dev Each element contains a "binding UID":
+   *      artifact ID, 24 bits (reserved, not used yet)
+   *      gem ID, 24 bits
+   *      plot ID, 24 bits
+   * @dev Can be modified only by `__bind` and `__unbind` functions
+   */
+  mapping(address => uint72[]) public collections;
+
+  /**
+   * @dev Enumeration of all the tokens bound and locked by
+   *      this smart contract
+   * @dev Each element contains a "binding UID" and owner
+   *      (an address which bound the tokens and which is consistent
+   *      with the collections mapping)
+   *      artifact ID, 24 bits (reserved, not used yet)
+   *      gem ID, 24 bits
+   *      plot ID, 24 bits
+   *      owner, 160 bits
+   * @dev Can be modified only by `__bind` and `__unbind` functions
+   */
+  uint232[] public allTokens;
 
   /**
    * @dev How many minutes of mining (resting) energy it takes
@@ -357,6 +387,68 @@ contract Miner is AccessMultiSig {
   }
 
   /**
+   * @dev Gets all the plot IDs, gem IDs, artifact IDs currently mined
+   *      by a particular address
+   * @param owner an address to query collection for
+   * @return an ordered unsorted list of binding UIDs:
+   *      artifact ID, 24 bits (reserved, not used yet)
+   *      gem ID, 24 bits
+   *      plot ID, 24 bits
+   */
+  function getCollection(address owner) public view returns(uint72[] memory) {
+    // read a collection from mapping and return
+    return collections[owner];
+  }
+
+  /**
+   * @dev Gets an amount of plots/gems/artifacts being currently
+   *      mined by the miner for a given owner address
+   * @param owner address to query mining balance for
+   * @return amount of plots being currently mined by address
+   */
+  function balanceOf(address owner) public view returns(uint256) {
+    // read owner's collection length and return
+    return collections[owner].length;
+  }
+
+  /**
+   * @dev Gets all the plot IDs, gem IDs, artifact IDs currently mined
+   * @return an ordered unsorted list containing
+   *      artifact ID, 24 bits (reserved, not used yet)
+   *      gem ID, 24 bits
+   *      plot ID, 24 bits
+   *      owner, 160 bits
+   */
+  function getAllTokens() public view returns(uint232[] memory) {
+    // read all tokens data and return
+    return allTokens;
+  }
+
+  /**
+   * @dev Gets an amount of plots/gems/artifacts being currently mined
+   * @return total number of plots currently mined
+   */
+  function totalSupply() public view returns(uint256) {
+    // read all tokens array length and return
+    return allTokens.length;
+  }
+
+  /**
+   * @dev Finds a gem bound to a particular plot
+   * @param plotId ID of the plot to query bound gem for
+   * @return ID of the bound gem
+   */
+  function getPlotBinding(uint24 plotId) public view returns(uint24 gemId, uint24 artifactId) {
+    // read and return the result
+    return (plots[plotId].gemId, 0);
+  }
+
+  function getGemBinding(uint24 gemId) public view returns(uint24 plotId, uint24 artifactId) {
+    // read and return the result
+    return (gems[gemId], 0);
+  }
+
+  /**
    * @notice Binds a gem and (optionally) an artifact to a land plot
    *      and starts mining of the plot
    * @dev Locks all the tokens passed as parameters
@@ -409,7 +501,7 @@ contract Miner is AccessMultiSig {
       uint32 energy = uint32(uint64(effectiveEnergy) * 100000000 / rate100000000);
 
       // save unused energetic age of the gem, in seconds
-      gemInstance.setAge(gemId, unusedEnergeticAge(energy) * 60);
+      gemInstance.setAge(gemId, unusedEnergeticAge(energy));
 
       // emit an energy consumed event
       emit RestingEnergyConsumed(msg.sender, gemId, effectiveEnergy);
@@ -427,13 +519,36 @@ contract Miner is AccessMultiSig {
       // energetic age is fully consumed, erase it
       gemInstance.setAge(gemId, 0);
 
-      // store mining information in the internal mapping
-      plots[plotId] = MiningData({
+      // check the tokens are not in bound state already
+      require(plots[plotId].bound == 0 && gems[gemId] == 0);
+
+      // calculate binding UID,
+      // composed of plotId, gemId and artifactId (if provided)
+      uint72 bindingUid = uint48(gemId) << 24 | plotId;
+
+      // we assume sender is an owner
+      address owner = msg.sender;
+
+      // create a binding data structure in the memory, pointing to the
+      // ends of allTokens and collections[msg.sender] arrays
+      MiningData memory m = MiningData({
+        plotId: plotId,
         gemId: gemId,
         artifactId: 0,
-        player: msg.sender,
-        bound: uint32(now)
+        globalBoundIndex: uint24(allTokens.length),
+        ownerBoundIndex: uint24(collections[owner].length),
+        bound: now32()
       });
+
+      // add binding UID to the ends of mentioned arrays
+      allTokens.push(bindingUid << 160 | uint160(owner));
+      collections[owner].push(bindingUid);
+
+      // save binding data structure to the mapping
+      plots[plotId] = m;
+
+      // link gem ID to plot ID in the correspondent mapping
+      gems[gemId] = plotId;
 
       // emit en event
       emit Bound(msg.sender, plotId, gemId);
@@ -460,17 +575,14 @@ contract Miner is AccessMultiSig {
     // evaluate the plot
     uint8 offset = evaluate(plotId);
 
-    // load binding data
-    MiningData memory m = plots[plotId];
-
     // if offset changed
     if(offset != plotInstance.getOffset(plotId)) {
       // delegate call to `__mine` to update plot and mint loot
-      __mine(plotId, m.gemId, offset);
+      __mine(plotId, plots[plotId].gemId, offset);
     }
 
     // unlock the tokens - delegate call to `__unlock`
-    __unlock(plotId, m.gemId);
+    __unlock(plotId);
   }
 
   /**
@@ -502,7 +614,7 @@ contract Miner is AccessMultiSig {
     // if plot is fully mined now
     if(plotInstance.isFullyMined(plotId)) {
       // unlock the tokens - delegate call to `__unlock`
-      __unlock(plotId, m.gemId);
+      __unlock(plotId);
     }
     // if plot still can be mined do not unlock
     else {
@@ -521,11 +633,8 @@ contract Miner is AccessMultiSig {
     // ensure function is called by rollback operator
     require(isSenderInRole(ROLE_ROLLBACK_OPERATOR));
 
-    // load binding data
-    MiningData memory m = plots[plotId];
-
     // unlock the tokens - delegate call to `__unlock`
-    __unlock(plotId, m.gemId);
+    __unlock(plotId);
   }
 
   /**
@@ -533,19 +642,56 @@ contract Miner is AccessMultiSig {
    * @dev Unsafe, must be kept private
    * @param plotId ID of the plot to unlock
    */
-  function __unlock(uint24 plotId, uint24 gemId) private {
+  function __unlock(uint24 plotId) private {
+    // load binding data
+    MiningData memory m = plots[plotId];
+
     // unlock the plot, erasing everything else in its state
     plotInstance.setState(plotId, 0);
     // unlock the gem, erasing everything else in its state
-    gemInstance.setState(gemId, 0);
+    gemInstance.setState(m.gemId, 0);
     // unlock artifact if any, erasing everything in its state
     // artifactInstance.setState(m.artifactId, 0);
 
-    // erase mining information in the internal mapping
-    delete plots[plotId];
+    // we need to delete binding from 5 places:
+    // 1. plots mapping
+    // 2. gems mapping
+    // 3. artifacts mapping (optional)
+    // 4. allTokens array
+    // 5. collections[owner] array
+
+    // ensure the data is consistent (exists)
+    require(m.bound != 0);
+
+    // get the owner
+    address owner = address(allTokens[m.globalBoundIndex]);
+
+    // to remove binding from allTokens and collections[owner] arrays
+    // (partially items 4 and 5) we move last elements in these arrays to the
+    // position to be removed and then shrink both arrays
+
+    // move last token data in an array to the freed position
+    allTokens[m.globalBoundIndex] = allTokens[allTokens.length - 1];
+    // same for owner's collection - move last to the freed position
+    collections[owner][m.ownerBoundIndex] = collections[owner][collections[owner].length - 1];
+
+    // now we need to fix data in the plots mapping for the moved plot
+    // get the moved plot ID
+    uint24 movedPlotId = uint24(collections[owner][m.ownerBoundIndex]);
+    // update binding data for moved element
+    plots[movedPlotId].globalBoundIndex = m.globalBoundIndex;
+    plots[movedPlotId].ownerBoundIndex = m.ownerBoundIndex;
+
+    // delete the rest of the bindings (items 1, 2 and 3)
+    delete plots[m.plotId];
+    delete gems[m.gemId];
+
+    // shrink both arrays by removing last element (finish with items 4 and 5)
+    allTokens.length--;
+    collections[owner].length--;
 
     // emit en event
-    emit Released(msg.sender, plotId, gemId);
+    emit Released(msg.sender, m.plotId, m.gemId);
   }
 
   /**
@@ -1317,38 +1463,6 @@ contract Miner is AccessMultiSig {
 
 
   /**
-   * @dev Finds a gem bound to a particular plot
-   * @param plotId ID of the plot to query bound gem for
-   * @return ID of the bound gem
-   */
-  function getBoundGemId(uint24 plotId) public view returns(uint32) {
-    // load binding data
-    MiningData memory m = plots[plotId];
-
-    // ensure binding data entry exists
-    require(m.bound != 0);
-
-    // return the result
-    return m.gemId;
-  }
-
-  /**
-   * @dev Finds a gem bound to a particular plot
-   * @param plotId ID of the plot to query bound gem for
-   * @return ID of the bound gem
-   */
-  function getBoundArtifactId(uint24 plotId) public view returns(uint32) {
-    // load binding data
-    MiningData memory m = plots[plotId];
-
-    // ensure binding data entry exists
-    require(m.bound != 0);
-
-    // return the result
-    return m.artifactId;
-  }
-
-  /**
    * @notice Determines how deep can particular gem mine on a particular plot
    * @dev This function verifies current plot offset and based on the gem's level
    *      and plot's offset determines how deep this gem can mine
@@ -1402,7 +1516,7 @@ contract Miner is AccessMultiSig {
    */
   function effectiveMiningEnergyOf(uint24 gemId) public view returns(uint32) {
     // determine mining energy of the gem,
-    // by definition it's equal to its energetic age
+    // by definition it's equal to its energetic age (converted to minutes)
     // verifies gem's existence under the hood
     uint32 energy = energeticAgeOf(gemId);
 
@@ -1553,7 +1667,7 @@ contract Miner is AccessMultiSig {
     }
 
     // determine energetic age of the gem - delegate call to `energeticAgeOf`
-    uint32 age = gemInstance.getAge(gemId) / 60 + energeticAgeOf(gemId);
+    uint32 age = gemInstance.getAge(gemId) + energeticAgeOf(gemId);
 
     // calculate the resting energy - delegate call to `restingEnergy`
     // and return the result
@@ -1631,7 +1745,7 @@ contract Miner is AccessMultiSig {
     // if r < 10423 (corresponds to a < 37193 case)
     else if(r < 10423) {
       // Newton method - initial guess
-      a = 18596; // TODO: improve initial guess
+      a = 18596;
 
       // apply few Newton iterations
       for(uint8 i = 0; i < 3 || (r > 10000 && i < 5); i++) {
@@ -1651,10 +1765,10 @@ contract Miner is AccessMultiSig {
   }
 
   /**
-   * @dev Energetic age is an approximate number of minutes the gem accumulated energy
+   * @dev Energetic age is the time period the gem accumulated energy
    * @dev The time is measured from the time when gem modified its properties
    *      (level or grade) or its state for the last time till now
-   * @dev If the gem didn't change its properties ot state since its genesis,
+   * @dev If the gem didn't change its properties or state since its genesis,
    *      the time is measured from gem's creation time
    * @dev For resting (non-mining) gems of grades A, AA and AAA energetic age
    *      is used to calculate their resting energy
@@ -1666,9 +1780,35 @@ contract Miner is AccessMultiSig {
     // read gem modification date, which can also be gem creation date
     uint32 modified = gemInstance.getModified(gemId);
 
+    // get current time using test-friendly now32 function
+    uint32 n32 = now32();
+
     // convert the time passed into minutes and return
-    return now > modified? uint32(now - modified) / 60: 0;
+    return n32 > modified? uint32(n32 - modified) / 60: 0;
   }
+
+  /**
+   * @dev Proxy function for built-in 'now', returns 'now' as uint32
+   * @dev Testing time-dependent functionality in Solidity is challenging.
+   *      The time flows in unpredictable way, at variable speed
+   *      from block to block, from miner to miner.
+   *      Testrpc (ganache) doesn't solve the issue. It helps to unlock
+   *      the speed of time changes introducing though numerous testrpc-specific
+   *      problems.
+   * @dev In most test cases, however, time change emulation on the block level
+   *      is not required and contract-based simulation is enough.
+   * @dev To simulate time change on contract level we introduce a `now32`
+   *      proxy-function which proxies all calls to built-in 'now' function.
+   *      It doesn't modify time and doesn't affect smart contract logic by any means.
+   *      But it allows to extend this smart contract by a test smart contract,
+   *      which will allow time change simulation by overriding this function only.
+   * @return uint32(now) – current timestamp as uint32
+   */
+  function now32() public view returns(uint32) {
+    // call built-in 'now' and return
+    return uint32(now);
+  }
+
 
 }
 

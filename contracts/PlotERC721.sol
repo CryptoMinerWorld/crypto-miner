@@ -459,7 +459,7 @@ contract PlotERC721 is ERC721Core {
     tokens[_tokenId].state = _state;
 
     // update the state modification date
-    tokens[_tokenId].stateModified = uint32(now);
+    tokens[_tokenId].stateModified = now32();
 
     // emit an event
     emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state, _state);
@@ -688,7 +688,7 @@ contract PlotERC721 is ERC721Core {
     tokens[_tokenId].tiers = TierMath.updateOffset(tiers, _offset);
 
     // update the offset modification date
-    tokens[_tokenId].offsetModified = uint32(now);
+    tokens[_tokenId].offsetModified = now32();
 
     // emit an event
     emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset, _offset);
@@ -722,7 +722,7 @@ contract PlotERC721 is ERC721Core {
     tokens[_tokenId].tiers = TierMath.increaseOffset(tiers, _by);
 
     // update the offset modification date
-    tokens[_tokenId].offsetModified = uint32(now);
+    tokens[_tokenId].offsetModified = now32();
 
     // emit an event
     emit OffsetModified(msg.sender, ownerOf(_tokenId), _tokenId, offset, offset + _by);
@@ -910,7 +910,7 @@ contract PlotERC721 is ERC721Core {
     token.owner = _to;
 
     // update token ownership transfer date
-    token.ownershipModified = uint32(now);
+    token.ownershipModified = now32();
 
     // push token into destination collection
     destination.push(tokenId);
@@ -970,7 +970,7 @@ contract PlotERC721 is ERC721Core {
       offsetModified: 0,
       state: 0,
       stateModified: 0,
-      creationTime: uint32(now),
+      creationTime: now32(),
       index: uint24(collections[_to].length),
       ownershipModified: 0,
       owner: _to

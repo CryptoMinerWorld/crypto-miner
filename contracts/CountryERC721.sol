@@ -651,7 +651,7 @@ contract CountryERC721 is ERC721Core {
     token.owner = _to;
 
     // update token ownership transfer date
-    token.ownershipModified = uint32(now);
+    token.ownershipModified = now32();
 
     // push token into destination collection
     destination.push(tokenId);

@@ -581,7 +581,7 @@ contract GemERC721 is ERC721Core {
     tokens[_tokenId].state = _state;
 
     // update the state modification date
-    tokens[_tokenId].stateModified = uint32(now);
+    tokens[_tokenId].stateModified = now32();
 
     // emit an event
     emit StateModified(msg.sender, ownerOf(_tokenId), _tokenId, state, _state);
@@ -735,7 +735,7 @@ contract GemERC721 is ERC721Core {
     tokens[_tokenId].level = _level;
 
     // update the level modification date
-    tokens[_tokenId].propertiesModified = uint32(now);
+    tokens[_tokenId].propertiesModified = now32();
 
     // emit an event
     emit LevelUp(msg.sender, ownerOf(_tokenId), _tokenId, level, _level);
@@ -763,7 +763,7 @@ contract GemERC721 is ERC721Core {
     tokens[_tokenId].level += _by;
 
     // update the level modification date
-    tokens[_tokenId].propertiesModified = uint32(now);
+    tokens[_tokenId].propertiesModified = now32();
 
     // emit an event
     emit LevelUp(msg.sender, ownerOf(_tokenId), _tokenId, level, level + _by);
@@ -828,7 +828,7 @@ contract GemERC721 is ERC721Core {
     tokens[_tokenId].grade = _grade;
 
     // update the grade modification date
-    tokens[_tokenId].propertiesModified = uint32(now);
+    tokens[_tokenId].propertiesModified = now32();
 
     // emit an event
     emit Upgraded(msg.sender, ownerOf(_tokenId), _tokenId, grade, _grade);
@@ -883,7 +883,7 @@ contract GemERC721 is ERC721Core {
     tokens[_tokenId].blocksMined += _blocks;
 
     // update the state modification date
-    tokens[_tokenId].stateModified = uint32(now);
+    tokens[_tokenId].stateModified = now32();
 
     // emit en event
     emit MinedStatsModified(msg.sender, ownerOf(_tokenId), _tokenId, plotsMined, plotsMined + _plots, blocksMined, blocksMined + _blocks);
@@ -922,7 +922,7 @@ contract GemERC721 is ERC721Core {
     tokens[_tokenId].age = _age;
 
     // update the state modification date
-    tokens[_tokenId].stateModified = uint32(now);
+    tokens[_tokenId].stateModified = now32();
 
     // emit an event
     emit EnergeticAgeModified(msg.sender, ownerOf(_tokenId), _tokenId, age, _age);
@@ -1155,7 +1155,7 @@ contract GemERC721 is ERC721Core {
     token.owner = _to;
 
     // update token ownership transfer date
-    token.ownershipModified = uint32(now);
+    token.ownershipModified = now32();
 
     // push token into destination collection
     destination.push(tokenId);
@@ -1208,7 +1208,7 @@ contract GemERC721 is ERC721Core {
       age: _age,
       state: 0,
       stateModified: 0,
-      creationTime: uint32(now),
+      creationTime: now32(),
       index: uint32(collections[_to].length),
       ownershipModified: 0,
       owner: _to
