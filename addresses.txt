@@ -9,7 +9,7 @@ Monthly Chest:      0x2906DA90D3f99D5913bB3461183682951ca7280c
 FoundersPlots:      0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1
 BalanceProxy:       0xbd7Ca763E12d23535B59949ade53c104BD88d42F
 
-TokenReader:        0xD51ae49aDDa7CBaa6d070EA933AAaBf68a24C264
+TokenReader:        0x29a9996Dc4863b5918E6132F644d7c19279fdDd5
 ==============================================================
 
 
@@ -39,7 +39,7 @@ Miner:              0xE8D5c5Ed1629E7b6114d5d8Da0899b2278824370
 PlotSale:           0x5Ed6aDF21a9Ceac6356FE4E80653dC07DD3a86ae
 PlotAntarctica:     0xDdEe3Df8516b7ED0CeFb7017b2D7704D17102075
 
-TokenReader:        0x7DA1b0552c0CAf7A72d8a7bc7F7813B3AC2FcC35
+TokenReader:        0x14B02B4297E7ABEbC06019CC6529a86323E9A20A
 TokenWriter:        0xdb4f3644e05E6fB6BB7426A4f258356b728AB720
 --------------------------------------------------------------
 
