@@ -24,7 +24,7 @@ import {ROLE_OFFSET_PROVIDER} from "./erc721_core";
 const FEATURE_MINING_ENABLED = 0x00000001;
 
 // Miner smart contract tests requiring time manipulation
-contract('Miner (Time Increase)', (accounts) => {
+contract('Miner (NowProvider)', (accounts) => {
 	it("mining: mining properties of the 25 min old gem(s)", async() => {
 		// now provider
 		const np = await NowProvider.new();
