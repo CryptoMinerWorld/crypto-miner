@@ -21,12 +21,12 @@ module.exports = async function(deployer, network, accounts) {
 	}
 
 	// deployed instances' addresses
-	const conf = network === "mainnet"?
-		{ // Mainnet Addresses
+	const conf = network.indexOf("mainnet") === 0?
+		{ // Mainnet Class Addresses
 
 		}:
-		{ // Ropsten Addresses
-			GemERC721:          "0xFe71e1d0c1f678b94B5fa7542071CfFE2DEa4E31",
+		{ // Ropsten Class Addresses
+			GemERC721:          "0xBe3076e7Ab71c78Db1F0CC79209CA4ef2fee0B89",
 			TokenWriter:        "0xdb4f3644e05E6fB6BB7426A4f258356b728AB720",
 		};
 
