@@ -22,6 +22,7 @@ import {ROLE_AGE_PROVIDER} from "./erc721_core";
 const FEATURE_MINING_ENABLED = 0x00000001;
 const ROLE_MINING_OPERATOR = 0x00000001;
 const ROLE_ROLLBACK_OPERATOR = 0x00000002;
+const ROLE_GEM_COLORS_PROVIDER = 0x00000004;
 
 // Miner smart contract tests
 contract('Miner', (accounts) => {
@@ -58,6 +59,85 @@ contract('Miner', (accounts) => {
 		assert.equal(e.address, await miner.artifactErc20Instance(), "wrong artifact ERC20 instance address");
 		assert.equal(f.address, await miner.foundersKeyInstance(), "wrong founder's key instance address");
 		assert.equal(c.address, await miner.chestKeyInstance(), "wrong chest key instance address");
+		assertArraysEqual([1, 2, 5, 6, 7, 9, 10], await miner.getGemColors(), "incorrect initial value for gem colors array");
+	});
+	it("security: setGemColors requires ROLE_GEM_COLORS_PROVIDER permission", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// define an address to act as an operator
+		const operator = accounts[1];
+
+		// define the function to check permissions for
+		const fn = async() => await miner.setGemColors([1, 2, 3], {from: operator});
+
+		// initially fn throws
+		await assertThrows(fn);
+		// after setting the required permission to operator
+		await miner.updateRole(operator, ROLE_GEM_COLORS_PROVIDER);
+		// fn succeeds
+		await fn();
+
+		// available colors array updated
+		assertArraysEqual([1, 2, 3], await miner.getGemColors(), "incorrect value for gem colors array");
+	});
+	it("colors: verify integrity of set/get available colors operation", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// ensure empty colors array cannot be set
+		await assertThrows(miner.setGemColors, []);
+
+		// set and get several colors randomly
+		for(let i = 0; i < 10; i++) {
+			const length = Math.ceil(Math.random() * 12);
+			const colors = new Array(length);
+			for(let j = 0; j < length; j++) {
+				colors[j] = Math.ceil(Math.random() * 12);
+			}
+			// set the available colors
+			await miner.setGemColors(colors);
+			// verify available colors are set correctly
+			assertArraysEqual(colors, await miner.getGemColors(), "incorrect gem colors array " + i);
+		}
 	});
 
 	it("mining: mining properties of the new gem(s)", async() => {
@@ -211,7 +291,7 @@ contract('Miner', (accounts) => {
 		);
 
 		// we are using 6 different colors for the test
-		await gem.setAvailableColors([1, 2, 3, 4, 5, 6]);
+		await miner.setGemColors([1, 2, 3, 4, 5, 6]);
 
 		// we use following array to capture statistics
 		const colors = new Array(6).fill(0);
@@ -234,4 +314,4 @@ contract('Miner', (accounts) => {
 
 
 // import auxiliary function to ensure function `fn` throws
-import {assertThrows} from "../scripts/shared_functions";
+import {assertArraysEqual, assertThrows} from "../scripts/shared_functions";

@@ -19,8 +19,7 @@ import {
 	ROLE_LEVEL_PROVIDER,
 	ROLE_GRADE_PROVIDER,
 	ROLE_AGE_PROVIDER,
-	ROLE_NEXT_ID_INC,
-	ROLE_AVAILABLE_COLORS_PROVIDER
+	ROLE_NEXT_ID_INC
 } from "./erc721_core";
 
 // some default gem props
@@ -71,7 +70,6 @@ contract('GemERC721', function(accounts) {
 
 		// extended functions
 		assert.equal(0x12500, await tk.nextId(), "wrong initial value of nextId");
-		assertArraysEqual([1, 2, 5, 6, 7, 9, 10], await tk.getAvailableColors(), "incorrect initial value for available colors array");
 		assert.equal(0, await tk.read(1, 0, 8), "wrong initial read for 1/0/8");
 		assert.equal(0, await tk.read(1, 0, 256), "wrong initial read for 1/0/256");
 	});
@@ -414,15 +412,15 @@ contract('GemERC721', function(accounts) {
 		await assertThrows(tk.ownerOf, 0x401);
 	});
 
-	it("security: incrementId requires ROLE_NEXT_ID_INC permission", async() => {
-		// deploy Gem Extension
+	it("security: incNextId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
+		// deploy token
 		const tk = await Token.new();
 
 		// define an address to act as an operator
 		const operator = accounts[1];
 
 		// define the function to check permissions for
-		const fn = async() => await tk.incrementId({from: operator});
+		const fn = async() => await tk.incNextId({from: operator});
 
 		// initially fn throws
 		await assertThrows(fn);
@@ -434,8 +432,55 @@ contract('GemERC721', function(accounts) {
 		// next Id counter incremented by one
 		assert.equal(0x12501, await tk.nextId(), "wrong nextId counter value");
 	});
+	it("security: setNextId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
+		// deploy token
+		const tk = await Token.new();
+
+		// define an address to act as an operator
+		const operator = accounts[1];
+
+		// define the function to check permissions for
+		const fn = async() => await tk.setNextId(1, {from: operator});
+
+		// initially fn throws
+		await assertThrows(fn);
+		// after setting the required permission to operator
+		await tk.updateRole(operator, ROLE_NEXT_ID_INC);
+		// fn succeeds
+		await fn();
+
+		// next Id counter incremented by one
+		assert.equal(1, await tk.nextId(), "wrong nextId counter value");
+	});
+	it("security: incNextId/setNextId arithmetic overflow checks", async() => {
+		// deploy token
+		const tk = await Token.new();
+
+		// define the function to check permissions for
+		const fn1 = async() => await tk.setNextId(16777214);
+		const fn2 = async() => await tk.incNextId();
+		const fn3 = async() => await tk.setNextId(0);
+
+		// fn3 always throws
+		await assertThrows(fn3);
+		// fn1 and fn2 initially succeed
+		await fn1();
+		await fn2();
+
+		// now counter is 16777215 and is ready to overflow
+		await assertThrows(fn2);
+		// fn3 always throws
+		await assertThrows(fn3);
+
+		// fn2 succeed again after call to fn1
+		await fn1();
+		await fn2();
+
+		// next Id counter reached its maximum
+		assert.equal(16777215, await tk.nextId(), "wrong nextId counter value");
+	});
 	it("security: write requires ROLE_EXT_WRITER permission", async() => {
-		// deploy Gem Extension
+		// deploy token
 		const tk = await Token.new();
 
 		// define an address to act as an operator
@@ -454,29 +499,9 @@ contract('GemERC721', function(accounts) {
 		// verify read returns 17
 		assert.equal(17, await tk.read(1, 0, 8), "wrong value read");
 	});
-	it("security: setAvailableColors requires ROLE_AVAILABLE_COLORS_PROVIDER permission", async() => {
-		// deploy Gem Extension
-		const tk = await Token.new();
-
-		// define an address to act as an operator
-		const operator = accounts[1];
-
-		// define the function to check permissions for
-		const fn = async() => await tk.setAvailableColors([1, 2, 3], {from: operator});
-
-		// initially fn throws
-		await assertThrows(fn);
-		// after setting the required permission to operator
-		await tk.updateRole(operator, ROLE_AVAILABLE_COLORS_PROVIDER);
-		// fn succeeds
-		await fn();
-
-		// available colors array updated
-		assertArraysEqual([1, 2, 3], await tk.getAvailableColors(), "incorrect value for available colors array");
-	});
 
 	it("read/write: verify integrity of read/write operation", async() => {
-		// deploy Gem Extension
+		// deploy token
 		const tk = await Token.new();
 
 		// operate on the first bit
@@ -529,27 +554,6 @@ contract('GemERC721', function(accounts) {
 		// erase everything
 		await tk.write(1, 0, 0, 256);
 		assert.equal(0, await tk.read(1, 0, 0), "wrong read 1, 0/0 (after erase)");
-	});
-
-	it("colors: verify integrity of set/get available colors operation", async() => {
-		// deploy Gem Extension
-		const tk = await Token.new();
-
-		// ensure empty colors array cannot be set
-		await assertThrows(tk.setAvailableColors, []);
-
-		// set and get several colors randomly
-		for(let i = 0; i < 10; i++) {
-			const length = Math.ceil(Math.random() * 12);
-			const colors = new Array(length);
-			for(let j = 0; j < length; j++) {
-				colors[j] = Math.ceil(Math.random() * 12);
-			}
-			// set the available colors
-			await tk.setAvailableColors(colors);
-			// verify available colors are set correctly
-			assertArraysEqual(colors, await tk.getAvailableColors(), "incorrect available colors array " + i);
-		}
 	});
 });
 

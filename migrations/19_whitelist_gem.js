@@ -24,7 +24,7 @@ module.exports = async function(deployer, network, accounts) {
 		}:
 		{ // Ropsten addresses
 			DutchAuction:       "0xA55bf145A6199da39fc83F1612FFD0317F85aB72",
-			GemERC721:          "0xFe71e1d0c1f678b94B5fa7542071CfFE2DEa4E31",
+			GemERC721:          "0xBe3076e7Ab71c78Db1F0CC79209CA4ef2fee0B89",
 		};
 
 	// for test network whitelist the gem automatically

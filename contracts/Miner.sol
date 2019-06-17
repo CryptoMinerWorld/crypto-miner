@@ -52,13 +52,13 @@ contract Miner is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x29cc7a4c1c353b1aae9068258606fb1c7a65697500226c215514241f143a84f5;
+  uint256 public constant MINER_UID = 0x9c967656fc89a49245aed6d1eeec4fb7b145558d4f34f0a9faaa663ad0a1d000;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_UID_REQUIRED = 0x66fb61e14900ebf44ba5bd2da5e3adf87793bc5af28b5761f26c96972b73ec50;
+  uint256 public constant GEM_UID_REQUIRED = 0xeae73a7c4d19a01b3c8abe213dd9f4ad51bf6d82bea6d4be2b2e408bdd89a2b2;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
@@ -238,6 +238,11 @@ contract Miner is AccessMultiSig {
   uint232[] public allTokens;
 
   /**
+   * @dev Gem colors available to be set for the gems
+   */
+  uint8[] public gemColors = [1, 2, 5, 6, 7, 9, 10];
+
+  /**
    * @dev How many minutes of mining (resting) energy it takes
    *      to mine block of land depending on the tier number
    * @dev Array is zero-indexed, index 0 corresponds to Tier 1,
@@ -262,6 +267,11 @@ contract Miner is AccessMultiSig {
    * @dev Allows to call `rollback()` function
    */
   uint32 public constant ROLE_ROLLBACK_OPERATOR = 0x00000002;
+
+  /**
+   * @dev Gem colors provider may change the `gemColors` array
+   */
+  uint32 public constant ROLE_GEM_COLORS_PROVIDER = 0x00000004;
 
   /**
    * @dev A bitmask indicating locked state of the ERC721 token
@@ -446,6 +456,33 @@ contract Miner is AccessMultiSig {
   function getGemBinding(uint24 gemId) public view returns(uint24 plotId, uint24 artifactId) {
     // read and return the result
     return (gems[gemId], 0);
+  }
+
+  /**
+   * @dev Updates `availableColors` array
+   * @dev Requires sender to have `ROLE_AVAILABLE_COLORS_PROVIDER` permission
+   * @dev Requires input array not to be empty
+   * @param colors array of available colors to set
+   */
+  function setGemColors(uint8[] memory colors) public {
+    // ensure sender has permission to set colors
+    require(isSenderInRole(ROLE_GEM_COLORS_PROVIDER));
+
+    // ensure array is not empty and number of colors
+    // doesn't exceed 12
+    require(colors.length != 0 && colors.length <= 12);
+
+    // set `availableColors` array
+    gemColors = colors;
+  }
+
+  /**
+   * @dev Getter for an entire `availableColors` array
+   * @return array of available colors - `availableColors`
+   */
+  function getGemColors() public view returns(uint8[] memory) {
+    // just return an array as is
+    return gemColors;
   }
 
   /**
@@ -945,7 +982,7 @@ contract Miner is AccessMultiSig {
       // mint the gem with randomized properties
       gemInstance.mint(
         msg.sender,
-        gemInstance.incrementId(),
+        gemInstance.incNextId(),
         plotId,
         randomColor(rnd65k),
         level,
@@ -962,11 +999,8 @@ contract Miner is AccessMultiSig {
    * @return gem color, an integer [1, 12]
    */
     function randomColor(uint16 randomness) public view returns(uint8) {
-      // get available colors array
-      uint8[] memory availableColors = gemInstance.getAvailableColors();
-
       // generate random index and return random number from the array
-      return availableColors[Random.uniform(randomness, 16, availableColors.length)];
+      return gemColors[Random.uniform(randomness, 16, gemColors.length)];
     }
 
   /**

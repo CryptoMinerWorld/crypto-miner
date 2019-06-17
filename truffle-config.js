@@ -34,9 +34,10 @@ module.exports = {
 			gas: 7500000,
 			gasPrice: 2000000000, // 2 GWei
 			// skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
-			// timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
+			timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
 		},
 
+/*
 		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
 		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
 		development: {
@@ -45,19 +46,18 @@ module.exports = {
 					keys.mnemonic4, // create 12 words: https://metamask.io/
 					"https://rinkeby.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
-/*
 				const nonceTracker = new NonceTrackerSubprovider();
 				wallet.engine._providers.unshift(nonceTracker);
 				nonceTracker.setEngine(wallet.engine);
-*/
 				return wallet;
 			},
 			network_id: "4", // Rinkeby
 			gas: 6500000,
 			gasPrice: 2000000000, // 2 GWei
 			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
-			// timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
+			timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
 		},
+*/
 
 		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
 		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
@@ -78,7 +78,107 @@ module.exports = {
 			gas: 7500000,
 			gasPrice: 2000000000, // 2 GWei
 			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
-			// timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
+			timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
+		},
+
+		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
+		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
+		ropsten0: {
+			provider: function () {
+				const wallet = new HDWalletProvider(
+					keys.mnemonic3, // create 12 words: https://metamask.io/
+					"https://ropsten.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
+				);
+				const nonceTracker = new NonceTrackerSubprovider();
+				wallet.engine._providers.unshift(nonceTracker);
+				nonceTracker.setEngine(wallet.engine);
+				return wallet;
+			},
+			network_id: "3", // Ropsten
+			gas: 7500000,
+			gasPrice: 2000000000, // 2 GWei
+			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
+			timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
+		},
+
+		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
+		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
+		ropsten1: {
+			provider: function () {
+				const wallet = new HDWalletProvider(
+					keys.mnemonic3, // create 12 words: https://metamask.io/
+					"https://ropsten.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
+				);
+				const nonceTracker = new NonceTrackerSubprovider();
+				wallet.engine._providers.unshift(nonceTracker);
+				nonceTracker.setEngine(wallet.engine);
+				return wallet;
+			},
+			network_id: "3", // Ropsten
+			gas: 7500000,
+			gasPrice: 2000000000, // 2 GWei
+			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
+			timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
+		},
+
+		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
+		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
+		ropsten2: {
+			provider: function () {
+				const wallet = new HDWalletProvider(
+					keys.mnemonic3, // create 12 words: https://metamask.io/
+					"https://ropsten.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
+				);
+				const nonceTracker = new NonceTrackerSubprovider();
+				wallet.engine._providers.unshift(nonceTracker);
+				nonceTracker.setEngine(wallet.engine);
+				return wallet;
+			},
+			network_id: "3", // Ropsten
+			gas: 7500000,
+			gasPrice: 2000000000, // 2 GWei
+			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
+			timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
+		},
+
+		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
+		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
+		ropsten3: {
+			provider: function () {
+				const wallet = new HDWalletProvider(
+					keys.mnemonic3, // create 12 words: https://metamask.io/
+					"https://ropsten.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
+				);
+				const nonceTracker = new NonceTrackerSubprovider();
+				wallet.engine._providers.unshift(nonceTracker);
+				nonceTracker.setEngine(wallet.engine);
+				return wallet;
+			},
+			network_id: "3", // Ropsten
+			gas: 7500000,
+			gasPrice: 2000000000, // 2 GWei
+			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
+			timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
+		},
+
+		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
+		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
+		ropsten4: {
+			provider: function () {
+				const wallet = new HDWalletProvider(
+					keys.mnemonic3, // create 12 words: https://metamask.io/
+					"https://ropsten.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
+				);
+				const nonceTracker = new NonceTrackerSubprovider();
+				wallet.engine._providers.unshift(nonceTracker);
+				nonceTracker.setEngine(wallet.engine);
+				return wallet;
+			},
+			network_id: "3", // Ropsten
+			gas: 7500000,
+			gasPrice: 2000000000, // 2 GWei
+			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
+			timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
 		},
 
 		// run with ./coverage.sh, read more: https://www.npmjs.com/package/solidity-coverage

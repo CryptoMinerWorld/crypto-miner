@@ -42,7 +42,7 @@ module.exports = async function(deployer, network, accounts) {
 			SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
 			GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
 			PlotERC721:         "0x1C3634f7345fd3f3884C5D6FF1F96E16A69b40Ea",
-			GemERC721:          "0xFe71e1d0c1f678b94B5fa7542071CfFE2DEa4E31",
+			GemERC721:          "0xBe3076e7Ab71c78Db1F0CC79209CA4ef2fee0B89",
 		};
 
 	// deployed instances

@@ -23,7 +23,7 @@ contract GemERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0x66fb61e14900ebf44ba5bd2da5e3adf87793bc5af28b5761f26c96972b73ec50;
+  uint256 public constant TOKEN_UID = 0xeae73a7c4d19a01b3c8abe213dd9f4ad51bf6d82bea6d4be2b2e408bdd89a2b2;
 
   /**
    * @dev ERC20 compliant token symbol
@@ -166,11 +166,6 @@ contract GemERC721 is ERC721Core {
   uint24[] public allTokens;
 
   /**
-   * @dev Gem colors available in the system
-   */
-  uint8[] public availableColors = [1, 2, 5, 6, 7, 9, 10];
-
-  /**
    * @dev Next token (gem) ID
    */
   uint24 public nextId = 0x12500;
@@ -232,15 +227,10 @@ contract GemERC721 is ERC721Core {
   uint32 public constant ROLE_MINED_STATS_PROVIDER = 0x00000200;
 
   /**
-   * @dev Next ID Inc is responsible for incrementing `nextId`,
-   *      permission allows to call `incrementId`
+   * @dev Next ID Provider is responsible for changing `nextId`,
+   *      permission allows to call `incNextId`, `setNextId`
    */
-  uint32 public constant ROLE_NEXT_ID_INC = 0x00001000;
-
-  /**
-   * @dev Available colors provider may change the `availableColors` array
-   */
-  uint32 public constant ROLE_AVAILABLE_COLORS_PROVIDER = 0x00002000;
+  uint32 public constant ROLE_NEXT_ID_PROVIDER = 0x00001000;
 
   /**
    * @dev Fired in setState()
@@ -362,38 +352,30 @@ contract GemERC721 is ERC721Core {
    * @dev Returns current value of `nextId` and increments it by one
    * @return next token ID
    */
-  function incrementId() public returns(uint24) {
+  function incNextId() public returns(uint24) {
     // ensure sender has permission to increment `nextId`
-    require(isSenderInRole(ROLE_NEXT_ID_INC));
+    require(isSenderInRole(ROLE_NEXT_ID_PROVIDER));
+
+    // arithmetic overflow check
+    require(nextId + 1 > nextId);
 
     // return `nextId` and increment it after
     return nextId++;
   }
 
   /**
-   * @dev Updates `availableColors` array
-   * @dev Requires sender to have `ROLE_AVAILABLE_COLORS_PROVIDER` permission
-   * @dev Requires input array not to be empty
-   * @param colors array of available colors to set
+   * @dev Updates current value of `nextId`
+   * @param _nextId next token ID value to set
    */
-  function setAvailableColors(uint8[] memory colors) public {
-    // ensure sender has permission to set colors
-    require(isSenderInRole(ROLE_AVAILABLE_COLORS_PROVIDER));
+  function setNextId(uint24 _nextId) public {
+    // ensure sender has permission to increment `nextId`
+    require(isSenderInRole(ROLE_NEXT_ID_PROVIDER));
 
-    // ensure array is not empty
-    require(colors.length != 0);
+    // ensure we do not set it to zero
+    require(_nextId != 0);
 
-    // set `availableColors` array
-    availableColors = colors;
-  }
-
-  /**
-   * @dev Getter for an entire `availableColors` array
-   * @return array of available colors - `availableColors`
-   */
-  function getAvailableColors() public view returns(uint8[] memory) {
-    // just return an array as is
-    return availableColors;
+    // update nextId
+    nextId = _nextId;
   }
 
   /**
@@ -970,6 +952,17 @@ contract GemERC721 is ERC721Core {
   ) public {
     // delegate call to `mintWith`
     mintWith(_to, _tokenId, _plotId, _color, _level, _grade, 0);
+  }
+
+  function mintNext(
+    address _to,
+    uint24 _plotId,
+    uint8 _color,
+    uint8 _level,
+    uint32 _grade
+  ) public returns(uint24 _tokenId) {
+    _tokenId = incNextId();
+    mint(_to, _tokenId, _plotId, _color, _level, _grade);
   }
 
   /**
