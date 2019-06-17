@@ -954,6 +954,22 @@ contract GemERC721 is ERC721Core {
     mintWith(_to, _tokenId, _plotId, _color, _level, _grade, 0);
   }
 
+  /**
+   * @dev Creates new token without token ID specified
+   *      and assigns an ownership `_to` for this token
+   * @dev Token ID is taken from `nextId` and `nextId` is incremented after
+   * @dev Allows setting initial token's properties
+   * @dev Requires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)
+   *      and next ID provider (have `ROLE_NEXT_ID_PROVIDER` permission)
+   * @param _to an address to mint token to (first owner of the token)
+   * @param _plotId ID of the plot that gem "belongs to" (was found in)
+   * @param _color gem color
+   * @param _level gem level
+   * @param _grade grade of the gem,
+   *      high 8 bits represent grade type,
+   *      low 24 bits - grade value
+   * @return ID of the token minted
+   */
   function mintNext(
     address _to,
     uint24 _plotId,
@@ -961,8 +977,13 @@ contract GemERC721 is ERC721Core {
     uint8 _level,
     uint32 _grade
   ) public returns(uint24 _tokenId) {
+    // read nextId and increment it
     _tokenId = incNextId();
+
+    // mint the token in a usual way
     mint(_to, _tokenId, _plotId, _color, _level, _grade);
+
+    // note: _tokenId is already set and will be returned automatically
   }
 
   /**

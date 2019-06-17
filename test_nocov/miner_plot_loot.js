@@ -14,7 +14,7 @@ const Miner = artifacts.require("./Miner.sol");
 // import ERC721Core dependencies
 import {ROLE_STATE_PROVIDER, ROLE_TOKEN_CREATOR} from "../test/erc721_core";
 // import GemERC721 dependencies
-import {ROLE_AGE_PROVIDER, ROLE_MINED_STATS_PROVIDER, ROLE_NEXT_ID_INC} from "../test/erc721_core";
+import {ROLE_AGE_PROVIDER, ROLE_MINED_STATS_PROVIDER, ROLE_NEXT_ID_PROVIDER} from "../test/erc721_core";
 // import PlotERC721 dependencies
 import {ROLE_OFFSET_PROVIDER} from "../test/erc721_core";
 // import Miner dependencies
@@ -168,7 +168,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		// enable mining feature on the miner
 		await miner.updateFeatures(FEATURE_MINING_ENABLED);
 		// grant miner permissions to modify gem's state and mint gems
-		await gem.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_INC | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
+		await gem.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_PROVIDER | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
 		// grant miner permission(s) to update plot
 		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
 		// grant miner permission(s) to mint silver
@@ -367,7 +367,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		// enable mining feature on the miner
 		await miner.updateFeatures(FEATURE_MINING_ENABLED);
 		// grant miner permissions to modify gem's state and mint gems
-		await gem.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_INC | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
+		await gem.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_PROVIDER | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
 		// grant miner permission(s) to update plot
 		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
 		// grant miner permission(s) to mint silver

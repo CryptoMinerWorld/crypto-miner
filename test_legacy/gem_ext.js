@@ -23,7 +23,7 @@ contract('GemExtension', function(accounts) {
 		assert.equal(0, await ext.read(1, 0, 256), "wrong initial read for 1/0/256");
 	});
 
-	it("security: incrementId requires ROLE_NEXT_ID_INC permission", async() => {
+	it("security: incrementId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
 		// deploy Gem Extension
 		const ext = await Ext.new();
 

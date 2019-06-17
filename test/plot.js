@@ -49,6 +49,11 @@ const layers1 = [
 const tiers0 = tiers(layers0);
 const tiers1 = tiers(layers1);
 
+// a function to mint some default token
+async function mint1(tk, acc) {
+	await await tk.mint(acc, 1, tiers1);
+}
+
 // timestamp right before the test begins
 const now = new Date().getTime() / 1000 | 0;
 
@@ -78,7 +83,7 @@ contract('PlotERC721', (accounts) => {
 		assert(!await tk.exists(token1), "token 1 already exists initially");
 
 		// create one token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// verify same values to be equal one
 		assert.equal(1, (await tk.getAllTokens()).length, "empty all tokens collection");
@@ -141,7 +146,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrows(tokenURI);
 
 		// create one token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// now the functions which throw should not throw anymore
 		await getPacked();
@@ -173,7 +178,7 @@ contract('PlotERC721', (accounts) => {
 
 		// create two tokens
 		await tk.mint(account1, 0, tiers0);
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// verify simple (non-packed) getters
 		assert(tiers0.eq(await tk.getTiers(token0)), "token0 has wrong tiers struct");
@@ -264,7 +269,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrows(transfer2);
 
 		// create one token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// wrong inputs check
 		await assertThrows(tk.transfer, 0, token1, {from: account1});
@@ -314,7 +319,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrows(transfer2);
 
 		// create one token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// transferring someone's else token throws
 		await assertThrows(transfer2);
@@ -367,7 +372,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrows(transfer2);
 
 		// create one token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// transferring someone's else token throws
 		await assertThrows(transfer2);
@@ -422,7 +427,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrows(approve1);
 
 		// create a token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// wrong inputs check
 		await assertThrows(tk.approve, 0, token1, {from: account1});
@@ -508,7 +513,7 @@ contract('PlotERC721', (accounts) => {
 		const intruder = accounts[5]; // someone who pretends to be an operator
 
 		// create a token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// approve an operator for account 1
 		await tk.setApprovalForAll(operator, true, {from: account1});
@@ -562,7 +567,7 @@ contract('PlotERC721', (accounts) => {
 		const intruder = accounts[5]; // someone who pretends to be an operator
 
 		// create a token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// define approval functions
 		const approve1 = async(account) => await tk.approve(account, token1, {from: account1});
@@ -632,7 +637,7 @@ contract('PlotERC721', (accounts) => {
 		const intruder = accounts[5]; // someone who pretends to be an operator
 
 		// create a token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// define approval function
 		const approve = async(owner, operator) => await tk.approve(operator, token1, {from: owner});
@@ -725,7 +730,7 @@ contract('PlotERC721', (accounts) => {
 		const account1 = accounts[1];
 
 		// mint some token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// define a function to check
 		const fn = async() => await tk.mineTo(token1, 1, {from: account1});
@@ -747,7 +752,7 @@ contract('PlotERC721', (accounts) => {
 		const account1 = accounts[1];
 
 		// mint some token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// define a function to check
 		const fn = async() => await tk.mineBy(token1, 1, {from: account1});
@@ -769,7 +774,7 @@ contract('PlotERC721', (accounts) => {
 		const account1 = accounts[1];
 
 		// mint some token
-		await tk.mint(account1, 1, tiers1);
+		await mint1(tk, account1);
 
 		// define a function to check
 		const fn = async() => await tk.setState(token1, 1, {from: account1});
@@ -809,6 +814,100 @@ contract('PlotERC721', (accounts) => {
 		assert.equal(lock, await tk.transferLock(), "incorrect value for transfer lock");
 	});
 
+	it("state: modify token state and check", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// some random state value
+		const state = Math.floor(Math.random() * 4294967296);
+
+		// a function to set new token state
+		const setState = async() => await tk.setState(token1, state);
+
+		// impossible to set state for non-existent token
+		await assertThrows(setState);
+
+		// create one token
+		await mint1(tk, accounts[1]);
+
+		// first time setting a state succeeds
+		await setState();
+
+		// next time setting a state succeeds again - state modification date only
+		await setState();
+
+		// verify new state
+		assert.equal(state, await tk.getState(token1), "wrong token1 state");
+
+		// verify state modification date
+		assert(await tk.getStateModified(token1) > now, "wrong token1 state modification date");
+	});
+
+	it("transfer locking: impossible to transfer locked token", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// enable transfers
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const account2 = accounts[2];
+
+		// define transfer token functions
+		const transfer1 = async() => await tk.transfer(account2, token1, {from: account1});
+
+		// create one token
+		await mint1(tk, account1);
+
+		// set token state to 2
+		await tk.setState(token1, 2);
+
+		// set token transfer lock to 2 as well
+		await tk.setTransferLock(2);
+
+		// ensure token cannot be transferred
+		assert(!await tk.isTransferable(token1), "token1 is still transferable");
+
+		// locked token (state & transferLock != 0) cannot be transferred
+		await assertThrows(transfer1);
+
+		// set token transfer lock to 4
+		await tk.setTransferLock(4);
+
+		// ensure token can be transferred
+		assert(await tk.isTransferable(token1), "token1 is not transferable");
+		// once token is unlocked (state & transferLock == 0) it can be transferred
+		await transfer1();
+		// verify token ownership
+		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
+	});
+	it("transfer locking: change transfer lock and check", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// some random transfer lock value
+		const lock = Math.floor(Math.random() * 4294967296);
+
+		// a function to set transfer lock
+		const setLock = async() => await tk.setTransferLock(lock);
+
+		// first time setting a lock succeeds
+		const gasUsed1 = (await setLock()).receipt.gasUsed;
+
+		// next time setting a lock succeeds again,
+		// but doesn't modify storage, so the gas consumption is low
+		const gasUsed2 = (await setLock()).receipt.gasUsed;
+
+		// verify gas consumption is at least 5,000 lower
+		assert(gasUsed1 - gasUsed2 >= 5000, "wrong gas consumption difference");
+
+		// verify new transfer lock
+		assert.equal(lock, await tk.transferLock(), "wrong transfer lock");
+	});
+
 	it("minting: mint() constraints", async() => {
 		// analogue to smart contract deployment
 		const tk = await Token.new();
@@ -843,48 +942,6 @@ contract('PlotERC721', (accounts) => {
 		await tk.mint(account1, 0, tiers1);
 	});
 
-	it("transfer locking: impossible to transfer locked token", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// enable transfers
-		await tk.updateFeatures(FEATURE_TRANSFERS);
-
-		// some accounts to work with
-		const account1 = accounts[1];
-		const account2 = accounts[2];
-
-		// define transfer token functions
-		const transfer1 = async() => await tk.transfer(account2, token1, {from: account1});
-
-		// create one token
-		await tk.mint(account1, 1, tiers1);
-
-		// set token state to 2
-		await tk.setState(token1, 2);
-
-		// set token transfer lock to 2 as well
-		await tk.setTransferLock(2);
-
-		// ensure token cannot be transferred
-		assert(!await tk.isTransferable(token1), "token1 is still transferable");
-
-		// locked token (state & transferLock != 0) cannot be transferred
-		await assertThrows(transfer1);
-
-		// set token transfer lock to 4
-		await tk.setTransferLock(4);
-
-		// ensure token can be transferred
-		assert(await tk.isTransferable(token1), "token1 is not transferable");
-		// once token is unlocked (state & transferLock == 0) it can be transferred
-		await transfer1();
-		// verify token ownership
-		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
-		// verify token ownership transfer date
-		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
-	});
-
 	it("mining: mine to token and check", async() => {
 		// analogue to smart contract deployment
 		const tk = await Token.new();
@@ -896,7 +953,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrows(mineTo);
 
 		// create one token
-		await tk.mint(accounts[1], 1, tiers1);
+		await mint1(tk, accounts[1]);
 
 		// first time mining to succeeds
 		await mineTo();
@@ -924,7 +981,7 @@ contract('PlotERC721', (accounts) => {
 		await assertThrows(mineBy);
 
 		// create one token
-		await tk.mint(accounts[1], 1, tiers1);
+		await mint1(tk, accounts[1]);
 
 		// first time mining by succeeds
 		await mineBy();
@@ -966,59 +1023,6 @@ contract('PlotERC721', (accounts) => {
 		assert(await tk.isFullyMined(token1), "token1 is not fully mined");
 		assert.equal(DEPTH, await tk.getOffset(token0), "token0 offset is different from DEPTH");
 		assert.equal(DEPTH, await tk.getOffset(token1), "token1 offset is different from DEPTH");
-	});
-
-	it("modifying state: modify token state and check", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// some random state value
-		const state = Math.floor(Math.random() * 4294967296);
-
-		// a function to set new token state
-		const setState = async() => await tk.setState(token1, state);
-
-		// impossible to set state for non-existent token
-		await assertThrows(setState);
-
-		// create one token
-		await tk.mint(accounts[1], 1, tiers1);
-
-		// first time setting a state succeeds
-		await setState();
-
-		// next time setting a state succeeds again - state modification date only
-		await setState();
-
-		// verify new state
-		assert.equal(state, await tk.getState(token1), "wrong token1 state");
-
-		// verify state modification date
-		assert(await tk.getStateModified(token1) > now, "wrong token1 state modification date");
-	});
-
-	it("transfer lock: change transfer lock and check", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// some random transfer lock value
-		const lock = Math.floor(Math.random() * 4294967296);
-
-		// a function to set transfer lock
-		const setLock = async() => await tk.setTransferLock(lock);
-
-		// first time setting a lock succeeds
-		const gasUsed1 = (await setLock()).receipt.gasUsed;
-
-		// next time setting a lock succeeds again,
-		// but doesn't modify storage, so the gas consumption is low
-		const gasUsed2 = (await setLock()).receipt.gasUsed;
-
-		// verify gas consumption is at least 5,000 lower
-		assert(gasUsed1 - gasUsed2 >= 5000, "wrong gas consumption difference");
-
-		// verify new transfer lock
-		assert.equal(lock, await tk.transferLock(), "wrong transfer lock");
 	});
 
 });

@@ -2,9 +2,11 @@ const Token = artifacts.require("./GemERC721.sol");
 
 // import ERC721Core dependencies
 import {
+	ERC721Receiver,
 	InterfaceId_ERC165,
-	InterfaceId_ERC721Enumerable,
+	InterfaceId_ERC721,
 	InterfaceId_ERC721Exists,
+	InterfaceId_ERC721Enumerable,
 	InterfaceId_ERC721Metadata,
 	FEATURE_TRANSFERS,
 	FEATURE_TRANSFERS_ON_BEHALF,
@@ -19,18 +21,22 @@ import {
 	ROLE_LEVEL_PROVIDER,
 	ROLE_GRADE_PROVIDER,
 	ROLE_AGE_PROVIDER,
-	ROLE_NEXT_ID_INC
+	ROLE_NEXT_ID_PROVIDER
 } from "./erc721_core";
 
 // some default gem props
 const token1 = 0x401;
 const token2 = 0x402;
 const grade1 = 0x1000001;
-// a function to mint default grade gem
+// a function to mint some default token
 async function mint1(tk, acc) {
 	await tk.mint(acc, token1, 1, 1, 1, grade1);
 }
 
+// timestamp right before the test begins
+const now = new Date().getTime() / 1000 | 0;
+
+// tests for Gem ERC721 token
 contract('GemERC721', function(accounts) {
 
 	it("initial state: initial zero values, supported interfaces", async() => {
@@ -225,6 +231,604 @@ contract('GemERC721', function(accounts) {
 		// compare with the packed getter
 		assertArraysEqual(fullPacked1, await tk.getPacked(token1), "token1 wrong getPacked");
 	});
+
+	it("unsafe transfer: transferring a token", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// enable transfers
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const account2 = accounts[2];
+		const account3 = accounts[3];
+
+		// define transfer token functions
+		const transfer1 = async() => await tk.transfer(account2, token1, {from: account1});
+		const transfer2 = async() => await tk.transfer(account3, token1, {from: account2});
+
+		// initially transfer fails (no token minted)
+		await assertThrows(transfer1);
+		await assertThrows(transfer2);
+
+		// create one token
+		await mint1(tk, account1);
+
+		// wrong inputs check
+		await assertThrows(tk.transfer, 0, token1, {from: account1});
+		await assertThrows(tk.transfer, account1, token1, {from: account1});
+
+		// transferring someone's else token throws
+		await assertThrows(transfer2);
+		// once token is minted it can be transferred by its owner
+		await transfer1();
+		// verify token ownership
+		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
+
+		// disable transfers
+		await tk.updateFeatures(0);
+		// ensure transfer will fail now
+		await assertThrows(transfer2);
+		// enable transfers back
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+		// transfer token to account3
+		await transfer2();
+		// verify token ownership
+		assert.equal(account3, await tk.ownerOf(token1), "wrong token1 owner after transfer2");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer2");
+	});
+
+	it("unsafe transfer: transferring own token using transferFrom", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// enable transfers
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const account2 = accounts[2];
+		const account3 = accounts[3];
+
+		// define transfer token functions
+		const transfer1 = async() => await tk.transferFrom(account1, account2, token1, {from: account1});
+		const transfer2 = async() => await tk.transferFrom(account2, account3, token1, {from: account2});
+
+		// initially transfer fails (no token minted)
+		await assertThrows(transfer1);
+		await assertThrows(transfer2);
+
+		// create one token
+		await mint1(tk, account1);
+
+		// transferring someone's else token throws
+		await assertThrows(transfer2);
+		// once token is minted it can be transferred by its owner
+		await transfer1();
+		// verify token ownership
+		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
+
+		// disable transfers, leaving transfers on behalf enabled
+		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
+		// ensure transfer will fail now
+		await assertThrows(transfer2);
+		// enable transfers back
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+		// transfer token to account3
+		await transfer2();
+		// verify token ownership
+		assert.equal(account3, await tk.ownerOf(token1), "wrong token1 owner after transfer2");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer2");
+	});
+
+	it("safe transfer: transferring a token", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+		// another instance will be used to verify ERC721 Receiver requirement
+		const blackHole = await Token.new();
+		// ERC721 valid receiver
+		const erc721Rc = (await ERC721Receiver.new()).address;
+
+		// enable transfers
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const account2 = accounts[2];
+		const account3 = accounts[3];
+
+		// define transfer token functions
+		const transfer1 = async() => await tk.safeTransferFrom(account1, account2, token1, {from: account1});
+		const transfer2 = async() => await tk.safeTransferFrom(account2, account3, token1, {from: account2});
+		const transfer3 = async() => await tk.safeTransferFrom(account3, erc721Rc, token1, {from: account3});
+		const unsafeTransfer1 = async() => await tk.safeTransferFrom(account1, blackHole, token1, {from: account1});
+		const unsafeTransfer2 = async() => await tk.safeTransferFrom(account2, blackHole, token1, {from: account2});
+
+		// initially transfer fails (no token minted)
+		await assertThrows(transfer1);
+		await assertThrows(transfer2);
+
+		// create one token
+		await mint1(tk, account1);
+
+		// transferring someone's else token throws
+		await assertThrows(transfer2);
+		// unsafe transfer will always fail
+		await assertThrows(unsafeTransfer1);
+		// token can be transferred safely by its owner
+		await transfer1();
+		// verify token ownership
+		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
+
+		// disable transfers, leaving transfers on behalf enabled
+		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
+		// ensure transfer will fail now
+		await assertThrows(transfer2);
+		// enable transfers back
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+		// unsafe transfer will always fail
+		await assertThrows(unsafeTransfer2);
+		// transfer token to account3
+		await transfer2();
+		// verify token ownership
+		assert.equal(account3, await tk.ownerOf(token1), "wrong token1 owner after transfer2");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer2");
+
+		// now transfer token to the smart contract supporting ERC721
+		await transfer3();
+		// verify token ownership
+		assert.equal(erc721Rc, await tk.ownerOf(token1), "wrong token1 owner after transfer3");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer3");
+	});
+
+	it("approvals: grant and revoke token approval", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const account2 = accounts[2];
+		const operator = accounts[4]; // approved operator
+
+		// approve functions
+		const approve1 = async() => await tk.approve(operator, token1, {from: account1});
+		const approve2 = async() => await tk.approve(operator, token1, {from: account2});
+		const revoke1 = async() => await tk.revokeApproval(token1, {from: account1});
+		const revoke2 = async() => await tk.revokeApproval(token1, {from: account2});
+
+		// impossible to approve non-existent token
+		await assertThrows(approve1);
+
+		// create a token
+		await mint1(tk, account1);
+
+		// wrong inputs check
+		await assertThrows(tk.approve, 0, token1, {from: account1});
+		await assertThrows(tk.approve, account1, token1, {from: account1});
+
+		// impossible to approve token which belongs to someone else
+		await assertThrows(approve2);
+		// impossible to revoke a non-existent approval
+		await assertThrows(revoke1);
+		// approve own token
+		await approve1();
+		// verify approval state
+		assert.equal(operator, await tk.getApproved(token1), "token1 is not approved");
+
+		// impossible to revoke approval on the token which belongs to someone else
+		await assertThrows(revoke2);
+		// revoke an approval
+		await revoke1();
+		// verify approval state
+		assert.equal(0, await tk.getApproved(token1), "token1 is still approved");
+
+		// approve own token again
+		await approve1();
+		// enable transfers
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+		// transfer it to account2
+		await tk.transfer(account2, token1, {from: account1});
+		// ensure an approval is erased
+		assert.equal(0, await tk.getApproved(token1), "token1 is approval is not erased");
+
+		// impossible to approve token which belongs to someone else
+		await assertThrows(approve1);
+		// impossible to revoke a non-existent approval
+		await assertThrows(revoke2);
+		// approve the token
+		await approve2();
+		// verify approval state
+		assert.equal(operator, await tk.getApproved(token1), "token1 is not approved (2)");
+
+		// impossible to revoke approval on the token which belongs to someone else
+		await assertThrows(revoke1);
+		// revoke an approval
+		await revoke2();
+		// verify approval state
+		assert.equal(0, await tk.getApproved(token1), "token1 is still approved (2)");
+	});
+
+	it("approvals: add and remove operator", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const operator = accounts[4]; // approved operator
+
+		// wrong inputs check
+		await assertThrows(tk.setApprovalForAll, 0, true, {from: account1});
+		await assertThrows(tk.setApprovalForAll, account1, true, {from: account1});
+
+		// approve an operator for account 1
+		await tk.setApprovalForAll(operator, true, {from: account1});
+		// verify operator state
+		assert(await tk.isApprovedForAll(account1, operator), "operator is not approved to act on behalf of account1");
+
+		// revoke an approval
+		await tk.setApprovalForAll(operator, false, {from: account1});
+		// verify approval state
+		assert(!await tk.isApprovedForAll(account1, operator), "operator is still approved to act on behalf of account1");
+	});
+
+	it("approvals: operator in action", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// enable transfers on behalf
+		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const account2 = accounts[2];
+		const account3 = accounts[3];
+		const operator = accounts[4]; // approved operator
+		const intruder = accounts[5]; // someone who pretends to be an operator
+
+		// create a token
+		await mint1(tk, account1);
+
+		// approve an operator for account 1
+		await tk.setApprovalForAll(operator, true, {from: account1});
+
+		// define some functions to perform transfer on behalf
+		const transfer1 = async(account) => await tk.transferFrom(account1, account2, token1, {from: account});
+		const transfer2 = async(account) => await tk.transferFrom(account2, account3, token1, {from: account});
+
+		// intruder cannot perform transfer on behalf
+		await assertThrows(transfer1, intruder);
+		// nor intruder neither operator cannot transfer token
+		// which doesn't belong to an owner specified
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
+		// operator can make a transfer
+		await transfer1(operator);
+		// verify token ownership
+		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
+
+		// account 2 didn't get any approval to an operator
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
+
+		// approve an operator for account 2
+		await tk.setApprovalForAll(operator, true, {from: account2});
+
+		// intruder cannot perform the transfer
+		await assertThrows(transfer1, intruder);
+		// and operator can
+		await transfer2(operator);
+		// verify token ownership
+		assert.equal(account3, await tk.ownerOf(token1), "wrong token1 owner after transfer2");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer2");
+	});
+
+	it("transfer on behalf: transferring a token", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// enable transfers on behalf
+		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const account2 = accounts[2];
+		const account3 = accounts[3];
+		const operator = accounts[4]; // approved operator
+		const intruder = accounts[5]; // someone who pretends to be an operator
+
+		// create a token
+		await mint1(tk, account1);
+
+		// define approval functions
+		const approve1 = async(account) => await tk.approve(account, token1, {from: account1});
+		const approve2 = async(account) => await tk.approve(account, token1, {from: account2});
+
+		// approve transfer on behalf
+		await approve1(operator);
+
+		// define some functions to perform transfer on behalf
+		const transfer1 = async(account) => await tk.transferFrom(account1, account2, token1, {from: account});
+		const transfer2 = async(account) => await tk.transferFrom(account2, account3, token1, {from: account});
+
+		// intruder cannot perform transfer on behalf
+		await assertThrows(transfer1, intruder);
+		// nor intruder neither operator cannot transfer token
+		// which doesn't belong to an owner specified
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
+		// operator can make a transfer
+		await transfer1(operator);
+		// verify token ownership
+		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
+
+		// approval is erased after the transfer, transfer on behalf is impossible
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
+
+		// first token owner cannot approve transfers anymore
+		await assertThrows(approve1, intruder);
+		// but token owner can
+		await approve2(operator);
+		// disable transfers on behalf, leaving transfers enabled
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+		// ensure transfer will fail now
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
+		// enable transfers back
+		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
+		// intruder cannot perform the transfer
+		await assertThrows(transfer1, intruder);
+		// and operator can
+		await transfer2(operator);
+		// verify token ownership
+		assert.equal(account3, await tk.ownerOf(token1), "wrong token1 owner after transfer2");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer2");
+	});
+
+	it("safe transfer on behalf: transferring a token", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+		// another instance will be used to verify ERC721 Receiver requirement
+		const blackHole = await Token.new();
+		// ERC721 valid receiver
+		const erc721Rc = (await ERC721Receiver.new()).address;
+
+		// enable transfers on behalf
+		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const account2 = accounts[2];
+		const account3 = accounts[3];
+		const operator = accounts[4]; // approved operator
+		const intruder = accounts[5]; // someone who pretends to be an operator
+
+		// create a token
+		await mint1(tk, account1);
+
+		// define approval function
+		const approve = async(owner, operator) => await tk.approve(operator, token1, {from: owner});
+
+		// approve transfer on behalf
+		await approve(account1, operator);
+
+		// define some functions to perform transfer on behalf
+		const transfer1 = async(account) => await tk.safeTransferFrom(account1, account2, token1, {from: account});
+		const transfer2 = async(account) => await tk.safeTransferFrom(account2, account3, token1, {from: account});
+		const transfer3 = async(account) => await tk.safeTransferFrom(account3, erc721Rc, token1, {from: account});
+		const unsafeTransfer1 = async(account) => await tk.safeTransferFrom(account1, blackHole, token1, {from: account});
+		const unsafeTransfer2 = async(account) => await tk.safeTransferFrom(account2, blackHole, token1, {from: account});
+
+		// unsafe transfer will always fail
+		await assertThrows(unsafeTransfer1, operator);
+		// intruder cannot perform transfer on behalf
+		await assertThrows(transfer1, intruder);
+		// nor intruder neither operator cannot transfer token
+		// which doesn't belong to an owner specified
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
+		// operator can make a transfer
+		await transfer1(operator);
+		// verify token ownership
+		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
+
+		// operator is erased after the transfer, transfer on behalf is impossible
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
+
+		// first token owner cannot approve transfers anymore
+		await assertThrows(approve, account1, intruder);
+		// but token owner can
+		await approve(account2, operator);
+		// disable transfers on behalf, leaving transfers enabled
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+		// ensure transfer will fail now
+		await assertThrows(transfer2, intruder);
+		await assertThrows(transfer2, operator);
+		// enable transfers back
+		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
+		// unsafe transfer will always fail
+		await assertThrows(unsafeTransfer2, operator);
+		// intruder cannot perform the transfer
+		await assertThrows(transfer1, intruder);
+		// and operator can
+		await transfer2(operator);
+		// verify token ownership
+		assert.equal(account3, await tk.ownerOf(token1), "wrong token1 owner after transfer2");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer2");
+
+		// approve operator again
+		await approve(account3, operator);
+		// and transfer token to the smart contract supporting ERC721
+		await transfer3(operator);
+		// verify token ownership
+		assert.equal(erc721Rc, await tk.ownerOf(token1), "wrong token1 owner after transfer3");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer3");
+	});
+
+	it("security: changing token state requires ROLE_STATE_PROVIDER role", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// define a function to check
+		const fn = async() => await tk.setState(token1, 1, {from: account1});
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_STATE_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("security: modifying transfer lock requires ROLE_TRANSFER_LOCK_PROVIDER role", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// transfer lock value to set
+		const lock = Math.floor(Math.random() * 4294967296);
+
+		// define a function to check
+		const fn = async() => await tk.setTransferLock(lock, {from: account1});
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_TRANSFER_LOCK_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+
+		// verify transfer lock was set correctly
+		assert.equal(lock, await tk.transferLock(), "incorrect value for transfer lock");
+	});
+
+	it("state: modify token state and check", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// some random state value
+		const state = Math.floor(Math.random() * 4294967296);
+
+		// a function to set new token state
+		const setState = async() => await tk.setState(token1, state);
+
+		// impossible to set state for non-existent token
+		await assertThrows(setState);
+
+		// create one token
+		await mint1(tk, accounts[1]);
+
+		// first time setting a state succeeds
+		await setState();
+
+		// next time setting a state succeeds again - state modification date only
+		await setState();
+
+		// verify new state
+		assert.equal(state, await tk.getState(token1), "wrong token1 state");
+
+		// verify state modification date
+		assert(await tk.getStateModified(token1) > now, "wrong token1 state modification date");
+	});
+
+	it("transfer locking: impossible to transfer locked token", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// enable transfers
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const account2 = accounts[2];
+
+		// define transfer token functions
+		const transfer1 = async() => await tk.transfer(account2, token1, {from: account1});
+
+		// create one token
+		await mint1(tk, account1);
+
+		// set token state to 2
+		await tk.setState(token1, 2);
+
+		// set token transfer lock to 2 as well
+		await tk.setTransferLock(2);
+
+		// ensure token cannot be transferred
+		assert(!await tk.isTransferable(token1), "token1 is still transferable");
+
+		// locked token (state & transferLock != 0) cannot be transferred
+		await assertThrows(transfer1);
+
+		// set token transfer lock to 4
+		await tk.setTransferLock(4);
+
+		// ensure token can be transferred
+		assert(await tk.isTransferable(token1), "token1 is not transferable");
+		// once token is unlocked (state & transferLock == 0) it can be transferred
+		await transfer1();
+		// verify token ownership
+		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
+	});
+	it("transfer locking: change transfer lock and check", async() => {
+		// analogue to smart contract deployment
+		const tk = await Token.new();
+
+		// some random transfer lock value
+		const lock = Math.floor(Math.random() * 4294967296);
+
+		// a function to set transfer lock
+		const setLock = async() => await tk.setTransferLock(lock);
+
+		// first time setting a lock succeeds
+		const gasUsed1 = (await setLock()).receipt.gasUsed;
+
+		// next time setting a lock succeeds again,
+		// but doesn't modify storage, so the gas consumption is low
+		const gasUsed2 = (await setLock()).receipt.gasUsed;
+
+		// verify gas consumption is at least 5,000 lower
+		assert(gasUsed1 - gasUsed2 >= 5000, "wrong gas consumption difference");
+
+		// verify new transfer lock
+		assert.equal(lock, await tk.transferLock(), "wrong transfer lock");
+	});
+
 	it("mint: creating a token", async function() {
 		const tk = await Token.new();
 		await tk.mint(accounts[0], 0x401, 1, 1, 1, grade1);
@@ -241,6 +845,7 @@ contract('GemERC721', function(accounts) {
 		assert.equal(0, await tk.balanceOf(accounts[2]), accounts[2] + " has wrong initial balance");
 	});
 
+	// BEGIN: legacy tests section
 	it("transfer: transferring a token", async function() {
 		const tk = await Token.new();
 		await tk.updateFeatures(FEATURE_TRANSFERS);
@@ -360,6 +965,7 @@ contract('GemERC721', function(accounts) {
 		await tk.setApprovalForAll(accounts[1], false);
 		assert(!await tk.isApprovedForAll(accounts[0], accounts[1]), "should not be approved operator");
 	});
+	// END: legacy tests section
 
 	it("level up: full cycle", async function() {
 		const tk = await Token.new();
@@ -393,25 +999,6 @@ contract('GemERC721', function(accounts) {
 		await tk.setState(0x401, 0x0103);
 	});
 
-	it("getters: throw on non-existent token", async function() {
-		const tk = await Token.new();
-		await assertThrows(tk.getPacked, 0x401);
-		await assertThrows(tk.getPlotId, 0x401);
-		await assertThrows(tk.getProperties, 0x401);
-		await assertThrows(tk.getColor, 0x401);
-		await assertThrows(tk.getLevelModified, 0x401);
-		await assertThrows(tk.getLevel, 0x401);
-		await assertThrows(tk.getGradeModified, 0x401);
-		await assertThrows(tk.getGrade, 0x401);
-		await assertThrows(tk.getAgeModified, 0x401);
-		await assertThrows(tk.getAge, 0x401);
-		await assertThrows(tk.getStateModified, 0x401);
-		await assertThrows(tk.getState, 0x401);
-		await assertThrows(tk.getCreationTime, 0x401);
-		await assertThrows(tk.getOwnershipModified, 0x401);
-		await assertThrows(tk.ownerOf, 0x401);
-	});
-
 	it("security: incNextId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
 		// deploy token
 		const tk = await Token.new();
@@ -425,7 +1012,7 @@ contract('GemERC721', function(accounts) {
 		// initially fn throws
 		await assertThrows(fn);
 		// after setting the required permission to operator
-		await tk.updateRole(operator, ROLE_NEXT_ID_INC);
+		await tk.updateRole(operator, ROLE_NEXT_ID_PROVIDER);
 		// fn succeeds
 		await fn();
 
@@ -445,7 +1032,7 @@ contract('GemERC721', function(accounts) {
 		// initially fn throws
 		await assertThrows(fn);
 		// after setting the required permission to operator
-		await tk.updateRole(operator, ROLE_NEXT_ID_INC);
+		await tk.updateRole(operator, ROLE_NEXT_ID_PROVIDER);
 		// fn succeeds
 		await fn();
 

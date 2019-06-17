@@ -53,7 +53,7 @@ export const ROLE_LEVEL_PROVIDER = 0x00000040;
 export const ROLE_GRADE_PROVIDER = 0x00000080;
 export const ROLE_AGE_PROVIDER = 0x00000100;
 export const ROLE_MINED_STATS_PROVIDER = 0x00000200;
-export const ROLE_NEXT_ID_INC = 0x00001000;
+export const ROLE_NEXT_ID_PROVIDER = 0x00001000;
 
 // CountryERC721 specific Features and Roles
 export const FEATURE_ALLOW_TAX_UPDATE = 0x00000010;
