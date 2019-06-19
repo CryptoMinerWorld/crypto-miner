@@ -30,19 +30,19 @@ contract Workshop is AccessMultiSig {
   uint256 public constant WORKSHOP_UID = 0x475f566b2f52a81a2515beed4acdd083ae4da2861d4df786d9a1a0daa87702dc;
 
   /**
-   * @dev Expected version of the deployed GemERC721 instance
+   * @dev Expected version (UID) of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
   uint256 public constant GEM_UID_REQUIRED = 0xeae73a7c4d19a01b3c8abe213dd9f4ad51bf6d82bea6d4be2b2e408bdd89a2b2;
 
   /**
-   * @dev Expected version of the deployed SilverERC20 instance
+   * @dev Expected version (UID) of the deployed SilverERC20 instance
    *      this smart contract is designed to work with
    */
   uint256 public constant SILVER_UID_REQUIRED = 0xd2ed13751444fdd75b1916ee718753f38af6537fca083868a151de23e07751af;
 
   /**
-   * @dev Expected version of the deployed GoldERC20 instance
+   * @dev Expected version (UID) of the deployed GoldERC20 instance
    *      this smart contract is designed to work with
    */
   uint256 public constant GOLD_UID_REQUIRED = 0xfaa04f5eafa80e0f8b560c49d4dffb3ca7e34fd289606af21700ba5685db87bc;

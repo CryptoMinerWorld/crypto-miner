@@ -49,7 +49,7 @@ contract PlotSale is AccessMultiSig {
   uint256 public constant SALE_UID = 0xb5583de7cc68d93ea1cfd4d99c24e0494b1b6fef33f277b5cff7493e3eef4153;
 
   /**
-   * @dev Expected version (UID) of the deployed PlotERC721 instance
+   * @dev Expected version (UID) of the deployed RefPointsTracker instance
    *      this smart contract is designed to work with
    */
   uint256 public constant REF_TRACKER_UID_REQUIRED = 0xe2e757604d700ca3a2a49e36a752c3974a10fd4fea31f1fe3ee944eaa535513c;
