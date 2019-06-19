@@ -17,8 +17,12 @@ const FINAL_PRICES  = [120000000000000000, 400000000000000000, 95000000000000000
 const SILVER_MIN = [20, 70, 150, 100];
 // Maximum amounts of silver each box type can have
 const SILVER_MAX = [30, 90, 200, 120];
+// initially sold (sold in February–March 2019)
+const INITIALLY_SOLD = [13, 6, 22];
 // hard cap for each of the box types
 const BOXES_TO_SELL = [500, 300, 150];
+// initially available on sale (derived value)
+const INITIALLY_AVAILABLE = BOXES_TO_SELL.map((e, i) => e - INITIALLY_SOLD[i]);
 // ref points gained for each box type
 const REF_POINTS = [1, 4, 10];
 // ref points price for each box type
@@ -52,7 +56,9 @@ contract('SilverSale', (accounts) => {
 	it("config: verify proper test configuration", async() => {
 		assert.equal(BOX_TYPES.length, INITIAL_PRICES.length, "BOX_TYPES/INITIAL_PRICES length mismatch");
 		assert.equal(BOX_TYPES.length, FINAL_PRICES.length, "BOX_TYPES/FINAL_PRICES length mismatch");
+		assert.equal(BOX_TYPES.length, INITIALLY_SOLD.length, "BOX_TYPES/INITIALLY_SOLD length mismatch");
 		assert.equal(BOX_TYPES.length, BOXES_TO_SELL.length, "BOX_TYPES/BOXES_TO_SELL length mismatch");
+		assert.equal(BOX_TYPES.length, INITIALLY_AVAILABLE.length, "BOX_TYPES/INITIALLY_AVAILABLE length mismatch");
 		assert.equal(BOX_TYPES.length, REF_POINTS.length, "BOX_TYPES/REF_POINTS length mismatch");
 		assert.equal(BOX_TYPES.length, REF_PRICES.length, "BOX_TYPES/REF_PRICES length mismatch");
 		assert.equal(BOX_TYPES.length + 1, SILVER_MIN.length, "BOX_TYPES/SILVER_MIN length mismatch");
@@ -83,7 +89,7 @@ contract('SilverSale', (accounts) => {
 
 		// verify the setup
 		for(let i = 0; i < BOX_TYPES[i]; i++) {
-			assert.equal(0, await sale.boxesSold(i), "non-zero boxes sold counter for " + BOX_TYPES[i]);
+			assert.equal(INITIALLY_SOLD[i], await sale.boxesSold(i), "wrong boxes sold counter for " + BOX_TYPES[i]);
 		}
 		assert.equal(silver.address, await sale.silverInstance(), "wrong silver instance address");
 		assert.equal(gold.address, await sale.goldInstance(), "wrong gold instance address");
@@ -536,14 +542,14 @@ contract('SilverSale', (accounts) => {
 			assert.equal(1, header1, "wrong final sale header " + i);
 			assert.equal(i, boxType0, "wrong initial box type at " + i);
 			assert.equal(i, boxType1, "wrong final box type at " + i);
-			assert.equal(BOXES_TO_SELL[i], available0, "wrong initial boxes available at " + i);
-			assert.equal(BOXES_TO_SELL[i], boxesAvailable0[i], "wrong initial boxes available arr at " + i);
-			assert.equal(BOXES_TO_SELL[i] - boxesToBuy[i], available1, "wrong initial boxes available at " + i);
-			assert.equal(BOXES_TO_SELL[i] - boxesToBuy[i], boxesAvailable1[i], "wrong final boxes available arr at " + i);
-			assert.equal(0, sold0, "wrong initial boxes sold at " + i);
-			assert.equal(0, boxesSold0[i], "wrong initial boxes sold arr at " + i);
-			assert.equal(boxesToBuy[i], sold1, "wrong final boxes sold at " + i);
-			assert.equal(boxesToBuy[i], boxesSold1[i], "wrong final boxes sold arr at " + i);
+			assert.equal(INITIALLY_AVAILABLE[i], available0, "wrong initial boxes available at " + i);
+			assert.equal(INITIALLY_AVAILABLE[i], boxesAvailable0[i], "wrong initial boxes available arr at " + i);
+			assert.equal(INITIALLY_AVAILABLE[i] - boxesToBuy[i], available1, "wrong initial boxes available at " + i);
+			assert.equal(INITIALLY_AVAILABLE[i] - boxesToBuy[i], boxesAvailable1[i], "wrong final boxes available arr at " + i);
+			assert.equal(INITIALLY_SOLD[i], sold0, "wrong initial boxes sold at " + i);
+			assert.equal(INITIALLY_SOLD[i], boxesSold0[i], "wrong initial boxes sold arr at " + i);
+			assert.equal(INITIALLY_SOLD[i] + boxesToBuy[i], sold1, "wrong final boxes sold at " + i);
+			assert.equal(INITIALLY_SOLD[i] + boxesToBuy[i], boxesSold1[i], "wrong final boxes sold arr at " + i);
 			assert.equal(BOXES_TO_SELL[i], initiallyAvailable0, "wrong initial BOXES_TO_SELL at " + i);
 			assert.equal(BOXES_TO_SELL[i], initiallyAvailable1, "wrong final BOXES_TO_SELL at " + i);
 			assert.equal(INITIAL_PRICES[i], currentPrice0, "wrong initial current price at " + i);
@@ -721,7 +727,7 @@ contract('SilverSale', (accounts) => {
 		assert(beneficiaryBalance.lt(await getBalanceBN(beneficiary)), "beneficiary balance didn't increase");
 
 		// verify the boxes sold counter has changed properly
-		assert.equal(32, await sale.boxesSold(2), "incorrect boxes sold counter");
+		assert.equal(INITIALLY_SOLD[2] + 32, await sale.boxesSold(2), "incorrect boxes sold counter for " + BOXES_TO_SELL[2]);
 	});
 	it("buy: buying all the boxes", async() => {
 		// define silver sale dependencies
@@ -747,7 +753,7 @@ contract('SilverSale', (accounts) => {
 		// function equal 10% of hard cap
 		const eq10 = async(boxType) => await fn(boxType, BOXES_TO_SELL[boxType] / 10);
 		// function to sum quantity bought
-		const qt = (boxType) => BOXES_TO_SELL[boxType] * 1.2 + 1;
+		const qt = (boxType) => INITIALLY_SOLD[boxType] + BOXES_TO_SELL[boxType] * 1.2 + 1;
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
@@ -756,9 +762,9 @@ contract('SilverSale', (accounts) => {
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		// verify initial sale status
-		assert.equal(0, await sale.boxesSold(0), "wrong initial sold counter for Silver Box");
-		assert.equal(0, await sale.boxesSold(1), "wrong initial sold counter for Rotund Silver Box");
-		assert.equal(0, await sale.boxesSold(2), "wrong initial sold counter for Goldish Silver Box");
+		for(let i = 0; i < BOX_TYPES.length; i++) {
+			assert.equal(INITIALLY_SOLD[i], await sale.boxesSold(i), "wrong initial sold counter for " + BOX_TYPES[i]);
+		}
 
 		// 1) impossible to buy more than hard cap at any time
 		await assertThrows(gt100, 0);
@@ -786,9 +792,9 @@ contract('SilverSale', (accounts) => {
 		await eq10(2);
 
 		// verify final sale status
-		assert.equal(qt(0), await sale.boxesSold(0), "wrong final sold counter for Silver Box");
-		assert.equal(qt(1), await sale.boxesSold(1), "wrong final sold counter for Rotund Silver Box");
-		assert.equal(qt(2), await sale.boxesSold(2), "wrong final sold counter for Goldish Silver Box");
+		for(let i = 0; i < BOX_TYPES.length; i++) {
+			assert.equal(qt(i), await sale.boxesSold(i), "wrong final sold counter for " + BOX_TYPES[i]);
+		}
 	});
 	it("buy: validate balances after buying some boxes", async() => {
 		// define silver sale dependencies
@@ -897,9 +903,9 @@ contract('SilverSale', (accounts) => {
 		assert((await gold.balanceOf(player)).gt(0), "zero gold player balance");
 
 		// verify the boxes sold counters have changed properly
-		assert.equal(128, await sale.boxesSold(0), "incorrect boxes sold counter for " + BOX_TYPES[0]);
-		assert.equal(64, await sale.boxesSold(1), "incorrect boxes sold counter for " + BOX_TYPES[1]);
-		assert.equal(32, await sale.boxesSold(2), "incorrect boxes sold counter for" + BOX_TYPES[2]);
+		assert.equal(INITIALLY_SOLD[0] + 128, await sale.boxesSold(0), "incorrect boxes sold counter for " + BOX_TYPES[0]);
+		assert.equal(INITIALLY_SOLD[1] + 64, await sale.boxesSold(1), "incorrect boxes sold counter for " + BOX_TYPES[1]);
+		assert.equal(INITIALLY_SOLD[2] + 32, await sale.boxesSold(2), "incorrect boxes sold counter for" + BOX_TYPES[2]);
 	});
 	it("bulk buy: bulk boxes of different types", async() => {
 		// define silver sale dependencies
@@ -959,9 +965,9 @@ contract('SilverSale', (accounts) => {
 		assert(beneficiaryBalance.lt(await getBalanceBN(beneficiary)), "beneficiary balance didn't increase");
 
 		// verify the boxes sold counters have changed properly
-		assert.equal(128, await sale.boxesSold(0), "incorrect boxes sold counter for " + BOX_TYPES[0]);
-		assert.equal(64, await sale.boxesSold(1), "incorrect boxes sold counter for " + BOX_TYPES[1]);
-		assert.equal(32, await sale.boxesSold(2), "incorrect boxes sold counter for" + BOX_TYPES[2]);
+		assert.equal(INITIALLY_SOLD[0] + 128, await sale.boxesSold(0), "incorrect boxes sold counter for " + BOX_TYPES[0]);
+		assert.equal(INITIALLY_SOLD[1] + 64, await sale.boxesSold(1), "incorrect boxes sold counter for " + BOX_TYPES[1]);
+		assert.equal(INITIALLY_SOLD[2] + 32, await sale.boxesSold(2), "incorrect boxes sold counter for" + BOX_TYPES[2]);
 	});
 	it("bulk buy: buying all the boxes", async() => {
 		// define silver sale dependencies
@@ -987,7 +993,7 @@ contract('SilverSale', (accounts) => {
 		// function equal 10% of hard cap
 		const eq10 = async() => await fn(BOXES_TO_SELL.map((a) => a / 10));
 		// function to sum quantity bought
-		const qt = (boxType) => BOXES_TO_SELL[boxType] * 1.2 + 1;
+		const qt = (boxType) => INITIALLY_SOLD[boxType] + BOXES_TO_SELL[boxType] * 1.2 + 1;
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
@@ -996,9 +1002,9 @@ contract('SilverSale', (accounts) => {
 		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		// verify initial sale status
-		assert.equal(0, await sale.boxesSold(0), "wrong initial sold counter for Silver Box");
-		assert.equal(0, await sale.boxesSold(1), "wrong initial sold counter for Rotund Silver Box");
-		assert.equal(0, await sale.boxesSold(2), "wrong initial sold counter for Goldish Silver Box");
+		for(let i = 0; i < BOX_TYPES.length; i++) {
+			assert.equal(INITIALLY_SOLD[i], await sale.boxesSold(i), "wrong initial sold counter for " + BOX_TYPES[i]);
+		}
 
 		// 1) impossible to buy more than hard cap at any time
 		await assertThrows(gt100);
@@ -1016,9 +1022,9 @@ contract('SilverSale', (accounts) => {
 		await eq10();
 
 		// verify final sale status
-		assert.equal(qt(0), await sale.boxesSold(0), "wrong final sold counter for Silver Box");
-		assert.equal(qt(1), await sale.boxesSold(1), "wrong final sold counter for Rotund Silver Box");
-		assert.equal(qt(2), await sale.boxesSold(2), "wrong final sold counter for Goldish Silver Box");
+		for(let i = 0; i < BOX_TYPES.length; i++) {
+			assert.equal(qt(i), await sale.boxesSold(i), "wrong final sold counter for " + BOX_TYPES[i]);
+		}
 	});
 
 	it("ref points: getting known", async() => {

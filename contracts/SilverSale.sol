@@ -211,7 +211,7 @@ contract SilverSale is AccessMultiSig {
    * @dev Number of boxes of each type already sold
    */
   // TODO: this should be updated to be equal to current mainnet version
-  uint16[] public boxesSold = [0, 0, 0];
+  uint16[] public boxesSold = [13, 6, 22];
 
   /**
    * @dev RefPointsTracker deployed instance to issue referral points to
