@@ -1,0 +1,1612 @@
+{
+  "contractName": "SilverSale",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "GOLD_PROBABILITY",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isUserInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "PRICE_INCREASE_EVERY",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "BOX_TYPE_GOLDISH_SILVER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "refPointsTracker",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_MSIG_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "SILVER_MIN",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "LENGTH",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "SALE_VERSION",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "beneficiary",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "boxesSold",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        }
+      ],
+      "name": "constructUpdateMsigRequest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "chest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "REF_TRACKER_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MSIG_QUORUM",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "REF_PRICES",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "BOXES_TO_SELL",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_by",
+          "type": "address[]"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_GET_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "REF_POINTS",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "GOLD_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_SALE_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_ACCESS_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "SILVER_MAX",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "goldInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "FINAL_PRICES",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "offset",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "INITIAL_PRICES",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        },
+        {
+          "name": "v",
+          "type": "uint8[]"
+        },
+        {
+          "name": "r",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "s",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "updateMsig",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "silverInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "SILVER_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_ref",
+          "type": "address"
+        },
+        {
+          "name": "_silver",
+          "type": "address"
+        },
+        {
+          "name": "_gold",
+          "type": "address"
+        },
+        {
+          "name": "_chest",
+          "type": "address"
+        },
+        {
+          "name": "_beneficiary",
+          "type": "address"
+        },
+        {
+          "name": "_offset",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "silver",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "gold",
+          "type": "uint24"
+        }
+      ],
+      "name": "Unboxed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "state",
+          "type": "uint192[]"
+        }
+      ],
+      "name": "SaleStateChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getState",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint192[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "boxTypesNum",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        }
+      ],
+      "name": "boxesAvailable",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "boxesAvailableArray",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "boxesSoldArray",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        },
+        {
+          "name": "quantity",
+          "type": "uint16"
+        }
+      ],
+      "name": "getBoxesPriceRef",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "boxTypes",
+          "type": "uint8[]"
+        },
+        {
+          "name": "quantities",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "bulkPriceRef",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        },
+        {
+          "name": "quantity",
+          "type": "uint16"
+        }
+      ],
+      "name": "buy",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        },
+        {
+          "name": "quantity",
+          "type": "uint16"
+        },
+        {
+          "name": "referrer",
+          "type": "address"
+        }
+      ],
+      "name": "buyRef",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        },
+        {
+          "name": "quantity",
+          "type": "uint16"
+        }
+      ],
+      "name": "get",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "boxTypes",
+          "type": "uint8[]"
+        },
+        {
+          "name": "quantities",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "bulkBuy",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "boxTypes",
+          "type": "uint8[]"
+        },
+        {
+          "name": "quantities",
+          "type": "uint16[]"
+        },
+        {
+          "name": "referrer",
+          "type": "address"
+        }
+      ],
+      "name": "bulkBuyRef",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "boxTypes",
+          "type": "uint8[]"
+        },
+        {
+          "name": "quantities",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "bulkGet",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        },
+        {
+          "name": "quantity",
+          "type": "uint16"
+        }
+      ],
+      "name": "unbox",
+      "outputs": [
+        {
+          "name": "silver",
+          "type": "uint24"
+        },
+        {
+          "name": "gold",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "boxTypes",
+          "type": "uint8[]"
+        },
+        {
+          "name": "quantities",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "bulkUnbox",
+      "outputs": [
+        {
+          "name": "silver",
+          "type": "uint32"
+        },
+        {
+          "name": "gold",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "priceIncreaseIn",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "nextPriceIncrease",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "saleEndsIn",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "saleEndTime",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        }
+      ],
+      "name": "getBoxPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        }
+      ],
+      "name": "getNextPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        },
+        {
+          "name": "t",
+          "type": "uint32"
+        }
+      ],
+      "name": "getBoxPriceAt",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getBoxPrices",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "boxType",
+          "type": "uint8"
+        },
+        {
+          "name": "quantity",
+          "type": "uint16"
+        }
+      ],
+      "name": "getBoxesPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "boxTypes",
+          "type": "uint8[]"
+        },
+        {
+          "name": "quantities",
+          "type": "uint16[]"
+        }
+      ],
+      "name": "bulkPrice",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "t0",
+          "type": "uint32"
+        },
+        {
+          "name": "v0",
+          "type": "uint64"
+        },
+        {
+          "name": "t1",
+          "type": "uint32"
+        },
+        {
+          "name": "v1",
+          "type": "uint64"
+        },
+        {
+          "name": "dt",
+          "type": "uint32"
+        },
+        {
+          "name": "t",
+          "type": "uint32"
+        }
+      ],
+      "name": "linearStepwise",
+      "outputs": [
+        {
+          "name": "v",
+          "type": "uint64"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-06-20T07:01:08.949Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "Sale start timestamp (offset) and sale duration (length) are set in     the smart contract on deploymentSale is active during the time frame [offset, offset + length),     where `offset` is a unix timestamp of the sale start and `length`     is length of the sale in secondsSilver Sale acts as `ROLE_TOKEN_CREATOR` for both   Silver (SilverERC20) and Gold (GoldERC20) ERC20 tokensAll the random distributions used in sale are uniform",
+    "methods": {
+      "balanceOf(address)": {
+        "details": "Convenient way to get referral points, silver and gold balances     of a particular address",
+        "params": {
+          "owner": "an address to query balances for"
+        },
+        "return": "tuple of three elements, containing balances for a given address:     1. number of available referral points     2. amount of silver tokens on the balance     3. amount of gold tokens on the balance"
+      },
+      "boxTypesNum()": {
+        "details": "Deduces number of box types from `BOXES_TO_SELL` array",
+        "return": "number of different box types available on sale"
+      },
+      "boxesAvailable(uint8)": {
+        "details": "For a given box type determines amount of boxes available     on sale based on initial `BOXES_TO_SELL` value and     current amount of boxes sold `boxesSold` valueIf boxes sold exceeds initially available amount - returns zero",
+        "params": {
+          "boxType": "type of the box to calculate ref points for:     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box"
+        },
+        "return": "amount of boxes available on sale"
+      },
+      "boxesAvailableArray()": {
+        "details": "Convenient way to get information on all the boxes available     in a single function call",
+        "return": "an array of available boxes quantities by type"
+      },
+      "boxesSoldArray()": {
+        "details": "Convenient way to get information on all the boxes sold     in a single function call",
+        "return": "an array of sold boxes quantities by type"
+      },
+      "bulkBuy(uint8[],uint16[])": {
+        "details": "Throws if input arrays have different lengthThrows if any of the input arrays are emptyThrows if input arrays size is bigger than three (3)Throws if any of the box types specified is invalidThrows if any of the quantities specified is zeroThrows if transaction has not enough value (ETH)     to buy the boxes requested",
+        "params": {
+          "boxTypes": "an array of box types, each box type is one of     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantities": "an array of amounts of boxes for each     corresponding type to buy"
+        }
+      },
+      "bulkBuyRef(uint8[],uint16[],address)": {
+        "details": "Throws if input arrays have different lengthThrows if any of the input arrays are emptyThrows if input arrays size is bigger than three (3)Throws if any of the box types specified is invalidThrows if any of the quantities specified is zeroThrows if transaction has not enough value (ETH)     to buy the boxes requested",
+        "params": {
+          "boxTypes": "an array of box types, each box type is one of     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantities": "an array of amounts of boxes for each     corresponding type to buy",
+          "referrer": "[optional] referral address of the player     who already bought some silver boxes,     set to zero to specify no referral"
+        }
+      },
+      "bulkGet(uint8[],uint16[])": {
+        "details": "Throws if input arrays have different lengthThrows if any of the input arrays are emptyThrows if input arrays size is bigger than three (3)Throws if any of the box types specified is invalidThrows if any of the quantities specified is zeroThrows if sender has not enough referral points     to get the boxes requested, see `REF_PRICES`",
+        "params": {
+          "boxTypes": "an array of box types, each box type is one of     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantities": "an array of amounts of boxes for each     corresponding type to buy"
+        }
+      },
+      "bulkPrice(uint8[],uint16[])": {
+        "details": "Calculates price of different silver boxes based on the initial,     final prices and current timestamp (`now`)Returns initial price of the boxes if sale didn't startReturns final price of the boxes if the sale has already endedThrows if input arrays have different lengthThrows if any of the input arrays are emptyThrows if input arrays size is bigger than three (3)Throws if any of the box types specified is invalidThrows if any of the quantities specified is zero",
+        "params": {
+          "boxTypes": "array of box types to query price for, containing:     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantities": "array of amounts of boxes for each of corresponding types"
+        },
+        "return": "current price (in moment `now`) of the box type requested"
+      },
+      "bulkPriceRef(uint8[],uint16[])": {
+        "details": "Throws if input arrays have different lengthThrows if any of the input arrays are emptyThrows if input arrays size is bigger than three (3)Throws if any of the box types specified is invalidThrows if any of the quantities specified is zero",
+        "params": {
+          "boxTypes": "array of box to calculate ref points for:     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantities": "array of amounts of boxes for each of corresponding types"
+        },
+        "return": "amount of referral points required to get the boxes requested"
+      },
+      "bulkUnbox(uint8[],uint16[])": {
+        "details": "Auxiliary function to evaluate random amount of silver and gold     in the array of boxes of the given typesDoesn't modify storage, left public to be easily tested     and verified by third parties for random distribution",
+        "params": {
+          "boxTypes": "array of box types to generate amounts for, containing:     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantities": "array of amounts of boxes of these types to unbox"
+        },
+        "return": "tuple containing random silver and gold amounts     for the given box types and amounts"
+      },
+      "buy(uint8,uint16)": {
+        "details": "Throws if box type is invalidThrows if quantity is invalid (zero)Throws if transaction has not enough value (ETH)     to buy the boxes requested",
+        "params": {
+          "boxType": "box type, must be one of     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantity": "amount of boxes to buy"
+        }
+      },
+      "buyRef(uint8,uint16,address)": {
+        "details": "Throws if box type is invalidThrows if quantity is invalid (zero)Throws if transaction has not enough value (ETH)     to buy the boxes requested",
+        "params": {
+          "boxType": "box type, must be one of     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantity": "amount of boxes to buy",
+          "referrer": "[optional] referrer address of the player     who already bought some silver boxes,     set to zero to specify no referral"
+        }
+      },
+      "constructUpdateMsigRequest(address,uint256,uint256)": {
+        "details": "Used to create an update role request to be signed by the userOnce signed by at least 2 users, the request can be executed     using `updateRoleMsig` function",
+        "params": {
+          "_expiresOn": "an expiration date of the request",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "constructor": {
+        "details": "Creates a Silver/Gold Sale instance, binding it to     referral points tracker, chest, beneficiary,     silver (ERC20 token) and gold (ERC20 token) instances specified",
+        "params": {
+          "_beneficiary": "an address to send 95% of incoming funds to",
+          "_chest": "an address to send 5% of incoming funds to",
+          "_gold": "address of the deployed GoldERC20 instance with     the `TOKEN_VERSION` equal to `GOLD_TOKEN_VERSION_REQUIRED`",
+          "_offset": "sale start date as a unix timestamp, the sale lasts     from `offset` (inclusive) to `offset + LENGTH` (exclusive)",
+          "_ref": "address of the deployed RefPointsTracker instance with     the `TRACKER_VERSION` equal to `REF_POINTS_TRACKER_VERSION_REQUIRED`",
+          "_silver": "address of the deployed SilverERC20 instance with     the `TOKEN_VERSION` equal to `SILVER_TOKEN_VERSION_REQUIRED`"
+        }
+      },
+      "evaluateBy(address[],uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator addresses,     and role required (set of permissions), calculate the resulting     set of permissions (role).If all operators are super admins and have full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operators have no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+        "params": {
+          "_by": "non-empty array of addresses of the contract operators     to use permissions of for evaluation",
+          "actual": "input set of permissions to evaluate against",
+          "required": "desired set of permissions to have"
+        },
+        "return": "resulting set of permissions which can be set"
+      },
+      "features()": {
+        "details": "Auxiliary getter function to maintain compatibility with previous     versions of the Access Control List smart contract, where     features was a separate uint256 public field"
+      },
+      "get(uint8,uint16)": {
+        "details": "Throws if box type is invalidThrows if quantity is invalid (zero)Throws if sender has not enough referral points     to get the boxes requested, see `REF_PRICES`",
+        "params": {
+          "boxType": "box type, must be one of     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantity": "amount of boxes to buy"
+        }
+      },
+      "getBoxPrice(uint8)": {
+        "details": "Calculates silver box price based on the initial,     final prices and current timestamp (`now`)Returns initial price if sale didn't startReturns final price if the sale has already endedThrows if the box type specified is invalid",
+        "params": {
+          "boxType": "type of the box to query price for:     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box"
+        },
+        "return": "current price (in moment `now`) of the box type requested"
+      },
+      "getBoxPriceAt(uint8,uint32)": {
+        "details": "Calculates silver box price based on the initial,     final prices and given unix timestamp (`t`)Returns initial price if `t` is before sale startsReturns final price if `t` is after sale endsThrows if the box type specified is invalid",
+        "params": {
+          "boxType": "type of the box to query price for:     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "t": "unix timestamp of interest"
+        },
+        "return": "current price (in moment `now`) of the box type requested"
+      },
+      "getBoxPrices()": {
+        "details": "Calculates all the prices based on the initial,     final prices and current timestamp (`now`)Returns initial prices if sale didn't startReturns final prices if the sale has already ended",
+        "return": "an array of current prices (in moment `now`)     for each box type"
+      },
+      "getBoxesPrice(uint8,uint16)": {
+        "details": "Calculates price of several silver boxes based on the initial,     final prices and current timestamp (`now`)Returns initial price of the boxes if sale didn't startReturns final price of the boxes if the sale has already endedThrows if the box type specified is invalidThrows if quantity (amount of boxes) is zero",
+        "params": {
+          "boxType": "type of the box to query price for:     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantity": "amount of boxes of that type"
+        },
+        "return": "current price (in moment `now`) of the boxes requested"
+      },
+      "getBoxesPriceRef(uint8,uint16)": {
+        "details": "Throws if the box type specified is invalidThrows if quantity (amount of boxes) is zero",
+        "params": {
+          "boxType": "type of the box to calculate ref points for:     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantity": "amount of boxes of that type"
+        },
+        "return": "amount of referral points required to get the boxes requested"
+      },
+      "getNextPrice(uint8)": {
+        "details": "Calculates silver box price based on the initial,     final prices and timestamp one day ('PRICE_INCREASE_EVERY')     after current (`now`)Returns initial price if sale didn't startReturns final price if the sale has already endedThrows if the box type specified is invalid",
+        "params": {
+          "boxType": "type of the box to query price for:     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box"
+        },
+        "return": "next price (in one day (`PRICE_INCREASE_EVERY`) after `now`)     of the box type requested"
+      },
+      "getState()": {
+        "details": "Constructs an array, containing info for each box type:     * Header (8 bits), containing:         one - if an element contains box-specific info         two - if an element contains general sale info     For box-specific elements following box-specific information is packed:       * Box Type ID (8 bits), containing:           [0] - Silver Box           [1] - Rotund Silver Box           [2] - Goldish Silver Box       * Boxes Available (16 bits), initially equal to `BOXES_TO_SELL`,           and going down to zero as sale progresses       * Boxes Sold (16 bits), initially zero and going up to,           `BOXES_TO_SELL` as sale progresses, may exceed `BOXES_TO_SELL`       * Boxes Initially Available (16 bits), equal to `BOXES_TO_SELL`       * Current Box Price (64 bits), initially equal to `INITIAL_PRICES`           and going up as sale progresses to `FINAL_PRICES`       * Next Box Price (64 bits), initially equal to `INITIAL_PRICES`           and going up as sale progresses to `FINAL_PRICES`     For general sale info element following information is packed:       * Sparse Space, zeros, (24 bits)       * Sale Start, unix timestamp (32 bits)       * Sale End, unix timestamp (32 bits)       * Current Time, unix timestamp (32 bits)       * Next Price Increase Time, unix timestamp (32 bits)       * Price Increase In, seconds (32 bits)",
+        "return": "sale state as an array of packed data structures"
+      },
+      "isFeatureEnabled(uint256)": {
+        "details": "Checks if requested set of features is enabled globally on the contract",
+        "params": {
+          "required": "set of features to check against"
+        },
+        "return": "true if all the features requested are enabled, false otherwise"
+      },
+      "isSenderInRole(uint256)": {
+        "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isUserInRole(address,uint256)": {
+        "details": "Checks if user `user` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against",
+          "user": "address of the user to check role for"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "linearStepwise(uint32,uint64,uint32,uint64,uint32,uint32)": {
+        "details": "Calculates value `v` at the given point in time `t`,     given that the initial value at the moment 't0' is `v0`     and the final value at the moment `t1` is `v1`The value is changed stepwise linearly in time,     step size is defined by `_dt` (seconds)",
+        "params": {
+          "dt": "time step size (seconds)",
+          "t": "moment of interest (unix timestamp)",
+          "t0": "initial moment (unix timestamp)",
+          "t1": "final moment (unix timestamp)",
+          "v0": "initial value",
+          "v1": "final value"
+        },
+        "return": "value in the moment of interest `t`"
+      },
+      "nextPriceIncrease()": {
+        "details": "Price increases every day (`PRICE_INCREASE_EVERY`)Sale starts on `offset` timestamp and lasts     for `LENGTH + 1` days (21 days)Price increases 20 times during this period,     first price increase happens 24 hours sale starts, and     the last price increase happens 24 hours before sale endsSee also `priceIncreaseIn()`, `saleEndsIn()`",
+        "return": "next price increase date and time as unix timestamp"
+      },
+      "priceIncreaseIn()": {
+        "details": "Price increases every day (`PRICE_INCREASE_EVERY`)Sale starts on `offset` timestamp and lasts     for `LENGTH + 1` days (21 days)Price increases 20 times during this period,     first price increase happens 24 hours sale starts, and     the last price increase happens 24 hours before sale endsSee also `saleEndsIn()`",
+        "return": "number of seconds left before next price increase"
+      },
+      "saleEndTime()": {
+        "details": "Sale goes on for `LENGTH + 1` days from the beginning (`offset`)",
+        "return": "sale end date and time as a unix timestamp"
+      },
+      "saleEndsIn()": {
+        "details": "Sale starts on `offset` timestamp and lasts     for `LENGTH + 1` days (21 days)Price increases 20 times during this period,     first price increase happens 24 hours sale starts, and     the last price increase happens 24 hours before sale endsSee also `priceIncreaseIn()`",
+        "return": "number of seconds left before sale ends"
+      },
+      "unbox(uint8,uint16)": {
+        "details": "Auxiliary function to evaluate random amount of silver and gold     in the box of the given typeDoesn't modify storage, left public to be easily tested     and verified by third parties for random distribution",
+        "params": {
+          "boxType": "box type to generate amounts for:     0 – Silver Box     1 - Rotund Silver Box     2 - Goldish Silver Box",
+          "quantity": "amount of boxes of that type to unbox"
+        },
+        "return": "tuple containing random silver and gold amounts     for the given box type and amount"
+      },
+      "updateFeatures(uint256)": {
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissionsRequires transaction sender to have `ROLE_ACCESS_MANAGER` permissionFunction is left for backward compatibility with older versions",
+        "params": {
+          "_mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateMsig(address,uint256,uint256,uint8[],bytes32[],bytes32[])": {
+        "details": "MultiSig version of the `updateRole` functionUpdates set of permissions (role) for a given user,     taking into account signers' permissionsSetting role to zero is equivalent to removing all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying signers' permissions (roles intersection) to the userRequires transaction signers to have `ROLE_ROLE_MANAGER` permissionRequires `MSIG_QUORUM` signatures in MultiSig mode –     if `FEATURE_MSIG_ENABLED` is enabled",
+        "params": {
+          "_expiresOn": "an expiration date of the request,     optional, required in MultiSig mode only",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract",
+          "r": "an array of ECDSA signature outputs, \"r\",     optional, required in MultiSig mode only",
+          "s": "an array of ECDSA signature outputs, \"s\",     optional, required in MultiSig mode only",
+          "v": "an array of ECDSA signature outputs, \"v\",     optional, required in MultiSig mode only"
+        }
+      },
+      "updateRole(address,uint256)": {
+        "details": "Updates set of permissions (role) for a given user,     taking into account sender's permissions.Setting role to zero is equivalent to removing an all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders' permissions (role) to the userRequires transaction sender to have `ROLE_ACCESS_MANAGER` permission",
+        "params": {
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      }
+    },
+    "title": "Silver Box Sale"
+  },
+  "userdoc": {
+    "methods": {
+      "boxTypesNum()": {
+        "notice": "Number of different box types available on sale (3):     [0] - Silver Box     [1] - Rotund Silver Box     [2] - Goldish Silver Box"
+      },
+      "boxesAvailable(uint8)": {
+        "notice": "Calculates boxes available on sale"
+      },
+      "bulkBuy(uint8[],uint16[])": {
+        "notice": "Buys boxes of different types in single transaction     (Silver, Rotund Silver, Goldish Silver)"
+      },
+      "bulkBuyRef(uint8[],uint16[],address)": {
+        "notice": "Buys boxes of different types in single transaction     (Silver, Rotund Silver, Goldish Silver) and allows     specify a referrer address of the existing buyerIf referrer address is correct (specifies existing buyer)     and if new buyer is indeed new one (is not an existing buyer)     then both referrer and referred will get referral points"
+      },
+      "bulkGet(uint8[],uint16[])": {
+        "notice": "Gets boxes of different types in single transaction     (Silver, Rotund Silver, Goldish Silver)     by spending referral points"
+      },
+      "bulkPrice(uint8[],uint16[])": {
+        "notice": "Calculates current price of different boxes of different types     (Silver, Rotund Silver or Goldish Silver) and quantities specified"
+      },
+      "bulkPriceRef(uint8[],uint16[])": {
+        "notice": "Calculates how many referral points is needed to get     different boxes of different types (Silver, Rotund Silver     or Goldish Silver) and quantities specified"
+      },
+      "buy(uint8,uint16)": {
+        "notice": "Buys several boxes of a single type     (Silver, Rotund Silver, Goldish Silver)"
+      },
+      "buyRef(uint8,uint16,address)": {
+        "notice": "Buys several boxes of a single type     (Silver, Rotund Silver, Goldish Silver) and allows     to specify a referrer address of the existing buyerIf referrer address is correct (specifies existing buyer)     and if new buyer is indeed new one (is not an existing buyer)     then both referrer and referred will get referral points"
+      },
+      "get(uint8,uint16)": {
+        "notice": "Gets several boxes of a single type     (Silver, Rotund Silver, Goldish Silver)     by spending referral points"
+      },
+      "getBoxPrice(uint8)": {
+        "notice": "Calculates current box price of the type specified     (Silver, Rotund Silver or Goldish Silver)"
+      },
+      "getBoxPriceAt(uint8,uint32)": {
+        "notice": "Calculates box price of the type specified     (Silver, Rotund Silver or Goldish Silver)     at some given moment"
+      },
+      "getBoxPrices()": {
+        "notice": "Calculates current prices for all box types     (Silver, Rotund Silver or Goldish Silver)"
+      },
+      "getBoxesPrice(uint8,uint16)": {
+        "notice": "Calculates current box price of the type     (Silver, Rotund Silver or Goldish Silver) and quantity specified"
+      },
+      "getBoxesPriceRef(uint8,uint16)": {
+        "notice": "Calculates how many referral points is needed to get     few boxes of the type (Silver, Rotund Silver or Goldish Silver)     and quantity specified"
+      },
+      "getNextPrice(uint8)": {
+        "notice": "Calculates next box price of the type specified     (Silver, Rotund Silver or Goldish Silver)"
+      },
+      "getState()": {
+        "notice": "Provides a convenient way to get sale related information     in a single function call"
+      },
+      "nextPriceIncrease()": {
+        "notice": "Calculates the next time increase timestamp"
+      },
+      "priceIncreaseIn()": {
+        "notice": "Calculates time before next price increase"
+      },
+      "saleEndTime()": {
+        "notice": "Calculates sale end time as unix timestamp"
+      },
+      "saleEndsIn()": {
+        "notice": "Calculates time before the sale ends"
+      }
+    },
+    "notice": "Silver Box Sale is responsible for selling Silver and Gold ERC20     tokens to the playersThe sale already took place from 02/21/2019 @ 6:00pm UTC (unix 1550772000) 6:00pm UTC (unix 1552500000) and this smart contract     is designed to sell all the boxes which were not sold in the original version.     This version is required to start in already finished state when the price     doesn't increase over time.Sale prices are not fixed and increase over time:     the price goes up by 1.25% every 24 hoursThe sale happens in an open time frame with a strict start     but no strict end, it is impossible to buy a box before the sale startsSale lasts for 20 days (480 hours). During this time the price decreases.Sell mechanism is implemented through the loot box mechanism:     there are three kinds of boxes which can be bought:       1. Silver Box       2. Rotund Silver Box       3. Goldish Silver BoxSilver Box contains only silver, amount of silver in the box     is randomized and varies in a range from 20 to 30 piecesSilver Box initial price is 0.096 ETH, final price is 0.12 ETHRotund Silver Box contains only silver, amount of silver in the box     is randomized and varies in a range from 70 to 90 piecesRotund Silver Box initial price is 0.32 ETH, final price is 0.4 ETHGoldish Silver Box contains 100-200 pieces of silver,     and in contrast to the silver box, it may also contain one gold pieceGoldish Silver Box initial price is 0.76ETH, final price is 0.95 ETHThe chance of getting gold piece in Goldish Silver Box is 42%Goldish Silver Box with a piece of gold in it contains 100-120 pieces of silver,     while the box without gold piece contains 150-200 pieces of silver"
+  }
+}
