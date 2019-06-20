@@ -55,6 +55,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "ROLE_COUPON_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "BOX_TYPE_GOLDISH_SILVER",
       "outputs": [
         {
@@ -157,6 +171,25 @@
     },
     {
       "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "coupons",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [],
       "name": "beneficiary",
       "outputs": [
@@ -223,6 +256,20 @@
         {
           "name": "",
           "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_USING_COUPONS_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -688,7 +735,7 @@
       "inputs": [
         {
           "indexed": true,
-          "name": "by",
+          "name": "_by",
           "type": "address"
         },
         {
@@ -715,6 +762,77 @@
         }
       ],
       "name": "SaleStateChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_key",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "boxType",
+          "type": "uint8"
+        }
+      ],
+      "name": "CouponAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_key",
+          "type": "uint256"
+        }
+      ],
+      "name": "CouponRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_key",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "boxType",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "silver",
+          "type": "uint24"
+        },
+        {
+          "indexed": false,
+          "name": "gold",
+          "type": "uint16"
+        }
+      ],
+      "name": "CouponConsumed",
       "type": "event"
     },
     {
@@ -1277,14 +1395,118 @@
       "payable": false,
       "stateMutability": "pure",
       "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "code",
+          "type": "string"
+        }
+      ],
+      "name": "isCouponValid",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "code",
+          "type": "string"
+        }
+      ],
+      "name": "useCoupon",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "key",
+          "type": "uint256"
+        },
+        {
+          "name": "boxType",
+          "type": "uint8"
+        }
+      ],
+      "name": "addCoupon",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "key",
+          "type": "uint256"
+        }
+      ],
+      "name": "removeCoupon",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "keys",
+          "type": "uint256[]"
+        },
+        {
+          "name": "boxType",
+          "type": "uint8"
+        }
+      ],
+      "name": "bulkAddCoupons",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "keys",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "bulkRemoveCoupons",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-20T07:01:08.949Z",
+  "updatedAt": "2019-06-20T12:27:52.551Z",
   "devdoc": {
     "author": "Basil Gorin",
-    "details": "Sale start timestamp (offset) and sale duration (length) are set in     the smart contract on deploymentSale is active during the time frame [offset, offset + length),     where `offset` is a unix timestamp of the sale start and `length`     is length of the sale in secondsSilver Sale acts as `ROLE_TOKEN_CREATOR` for both   Silver (SilverERC20) and Gold (GoldERC20) ERC20 tokensAll the random distributions used in sale are uniform",
+    "details": "Sale start timestamp (offset) and sale duration (length) are set in     the smart contract on deploymentSale is active during the time frame [offset, offset + length),     where `offset` is a unix timestamp of the sale start and `length`     is length of the sale in secondsSilver Sale acts as `ROLE_TOKEN_CREATOR` for both     Silver (SilverERC20) and Gold (GoldERC20) ERC20 tokensAll the random distributions used in sale are uniformAllows adding coupons by coupon manager(s) (`ROLE_COUPON_MANAGER`)     and getting silver boxes by player in exchange to the coupons added     as long as 'using coupons' (`FEATURE_USING_COUPONS_ENABLED`) feature is enabled *",
     "methods": {
+      "addCoupon(uint256,uint8)": {
+        "details": "Requires sender to have `ROLE_COUPON_MANAGER` permission",
+        "params": {
+          "boxType": "valid box type to be given freely for this coupon",
+          "key": "coupon code hash"
+        }
+      },
       "balanceOf(address)": {
         "details": "Convenient way to get referral points, silver and gold balances     of a particular address",
         "params": {
@@ -1310,6 +1532,13 @@
       "boxesSoldArray()": {
         "details": "Convenient way to get information on all the boxes sold     in a single function call",
         "return": "an array of sold boxes quantities by type"
+      },
+      "bulkAddCoupons(uint256[],uint8)": {
+        "details": "Requires sender to have `ROLE_COUPON_MANAGER` permissionOverwrites the coupons if they already exist",
+        "params": {
+          "boxType": "valid box type to be given freely for coupons",
+          "keys": "array of coupon codes hashes (keccak256)"
+        }
       },
       "bulkBuy(uint8[],uint16[])": {
         "details": "Throws if input arrays have different lengthThrows if any of the input arrays are emptyThrows if input arrays size is bigger than three (3)Throws if any of the box types specified is invalidThrows if any of the quantities specified is zeroThrows if transaction has not enough value (ETH)     to buy the boxes requested",
@@ -1348,6 +1577,12 @@
           "quantities": "array of amounts of boxes for each of corresponding types"
         },
         "return": "amount of referral points required to get the boxes requested"
+      },
+      "bulkRemoveCoupons(uint256[])": {
+        "details": "Requires sender to have `ROLE_COUPON_MANAGER` permission",
+        "params": {
+          "keys": "array of coupon codes hashes (keccak256)"
+        }
       },
       "bulkUnbox(uint8[],uint16[])": {
         "details": "Auxiliary function to evaluate random amount of silver and gold     in the array of boxes of the given typesDoesn't modify storage, left public to be easily tested     and verified by third parties for random distribution",
@@ -1456,6 +1691,12 @@
         "details": "Constructs an array, containing info for each box type:     * Header (8 bits), containing:         one - if an element contains box-specific info         two - if an element contains general sale info     For box-specific elements following box-specific information is packed:       * Box Type ID (8 bits), containing:           [0] - Silver Box           [1] - Rotund Silver Box           [2] - Goldish Silver Box       * Boxes Available (16 bits), initially equal to `BOXES_TO_SELL`,           and going down to zero as sale progresses       * Boxes Sold (16 bits), initially zero and going up to,           `BOXES_TO_SELL` as sale progresses, may exceed `BOXES_TO_SELL`       * Boxes Initially Available (16 bits), equal to `BOXES_TO_SELL`       * Current Box Price (64 bits), initially equal to `INITIAL_PRICES`           and going up as sale progresses to `FINAL_PRICES`       * Next Box Price (64 bits), initially equal to `INITIAL_PRICES`           and going up as sale progresses to `FINAL_PRICES`     For general sale info element following information is packed:       * Sparse Space, zeros, (24 bits)       * Sale Start, unix timestamp (32 bits)       * Sale End, unix timestamp (32 bits)       * Current Time, unix timestamp (32 bits)       * Next Price Increase Time, unix timestamp (32 bits)       * Price Increase In, seconds (32 bits)",
         "return": "sale state as an array of packed data structures"
       },
+      "isCouponValid(string)": {
+        "params": {
+          "code": "coupon code to validate"
+        },
+        "return": "box type corresponding to this coupon or 255 if coupon is not valid"
+      },
       "isFeatureEnabled(uint256)": {
         "details": "Checks if requested set of features is enabled globally on the contract",
         "params": {
@@ -1498,6 +1739,12 @@
         "details": "Price increases every day (`PRICE_INCREASE_EVERY`)Sale starts on `offset` timestamp and lasts     for `LENGTH + 1` days (21 days)Price increases 20 times during this period,     first price increase happens 24 hours sale starts, and     the last price increase happens 24 hours before sale endsSee also `saleEndsIn()`",
         "return": "number of seconds left before next price increase"
       },
+      "removeCoupon(uint256)": {
+        "details": "Requires sender to have `ROLE_COUPON_MANAGER` permission",
+        "params": {
+          "key": "coupon code hash"
+        }
+      },
       "saleEndTime()": {
         "details": "Sale goes on for `LENGTH + 1` days from the beginning (`offset`)",
         "return": "sale end date and time as a unix timestamp"
@@ -1537,17 +1784,29 @@
           "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
           "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
         }
+      },
+      "useCoupon(string)": {
+        "details": "Throws if coupon is invalid, `FEATURE_USING_COUPONS_ENABLED` is not enabled    or if the silver sale this smart contract is bound to already finished",
+        "params": {
+          "code": "coupon code to use"
+        }
       }
     },
     "title": "Silver Box Sale"
   },
   "userdoc": {
     "methods": {
+      "addCoupon(uint256,uint8)": {
+        "notice": "Allows adding coupons for free silver box retrievalRequires a sender to have a permission to add a coupon"
+      },
       "boxTypesNum()": {
         "notice": "Number of different box types available on sale (3):     [0] - Silver Box     [1] - Rotund Silver Box     [2] - Goldish Silver Box"
       },
       "boxesAvailable(uint8)": {
         "notice": "Calculates boxes available on sale"
+      },
+      "bulkAddCoupons(uint256[],uint8)": {
+        "notice": "Allows adding coupons for free silver box retrievalRequires a sender to have a permission to add a coupon"
       },
       "bulkBuy(uint8[],uint16[])": {
         "notice": "Buys boxes of different types in single transaction     (Silver, Rotund Silver, Goldish Silver)"
@@ -1563,6 +1822,9 @@
       },
       "bulkPriceRef(uint8[],uint16[])": {
         "notice": "Calculates how many referral points is needed to get     different boxes of different types (Silver, Rotund Silver     or Goldish Silver) and quantities specified"
+      },
+      "bulkRemoveCoupons(uint256[])": {
+        "notice": "Allows removing previously added couponsRequires a sender to have a permission to remove a coupon"
       },
       "buy(uint8,uint16)": {
         "notice": "Buys several boxes of a single type     (Silver, Rotund Silver, Goldish Silver)"
@@ -1594,19 +1856,28 @@
       "getState()": {
         "notice": "Provides a convenient way to get sale related information     in a single function call"
       },
+      "isCouponValid(string)": {
+        "notice": "Allows validating a coupon, returns valid box type if coupon is valid"
+      },
       "nextPriceIncrease()": {
         "notice": "Calculates the next time increase timestamp"
       },
       "priceIncreaseIn()": {
         "notice": "Calculates time before next price increase"
       },
+      "removeCoupon(uint256)": {
+        "notice": "Allows removing previously added couponsRequires a sender to have a permission to remove a coupon"
+      },
       "saleEndTime()": {
         "notice": "Calculates sale end time as unix timestamp"
       },
       "saleEndsIn()": {
         "notice": "Calculates time before the sale ends"
+      },
+      "useCoupon(string)": {
+        "notice": "Allows using a coupon, unboxes corresponding silver box if coupon is valid"
       }
     },
-    "notice": "Silver Box Sale is responsible for selling Silver and Gold ERC20     tokens to the playersThe sale already took place from 02/21/2019 @ 6:00pm UTC (unix 1550772000) 6:00pm UTC (unix 1552500000) and this smart contract     is designed to sell all the boxes which were not sold in the original version.     This version is required to start in already finished state when the price     doesn't increase over time.Sale prices are not fixed and increase over time:     the price goes up by 1.25% every 24 hoursThe sale happens in an open time frame with a strict start     but no strict end, it is impossible to buy a box before the sale startsSale lasts for 20 days (480 hours). During this time the price decreases.Sell mechanism is implemented through the loot box mechanism:     there are three kinds of boxes which can be bought:       1. Silver Box       2. Rotund Silver Box       3. Goldish Silver BoxSilver Box contains only silver, amount of silver in the box     is randomized and varies in a range from 20 to 30 piecesSilver Box initial price is 0.096 ETH, final price is 0.12 ETHRotund Silver Box contains only silver, amount of silver in the box     is randomized and varies in a range from 70 to 90 piecesRotund Silver Box initial price is 0.32 ETH, final price is 0.4 ETHGoldish Silver Box contains 100-200 pieces of silver,     and in contrast to the silver box, it may also contain one gold pieceGoldish Silver Box initial price is 0.76ETH, final price is 0.95 ETHThe chance of getting gold piece in Goldish Silver Box is 42%Goldish Silver Box with a piece of gold in it contains 100-120 pieces of silver,     while the box without gold piece contains 150-200 pieces of silver"
+    "notice": "Silver Box Sale is responsible for selling Silver and Gold ERC20     tokens to the playersThe sale already took place from 02/21/2019 @ 6:00pm UTC (unix 1550772000) 6:00pm UTC (unix 1552500000) and this smart contract     is designed to sell all the boxes which were not sold in the original version.     This version is required to start in already finished state when the price     doesn't increase over time.Sale prices are not fixed and increase over time:     the price goes up by 1.25% every 24 hoursThe sale happens in an open time frame with a strict start     but no strict end, it is impossible to buy a box before the sale startsSale lasts for 20 days (480 hours). During this time the price decreases.Sell mechanism is implemented through the loot box mechanism:     there are three kinds of boxes which can be bought:       1. Silver Box       2. Rotund Silver Box       3. Goldish Silver BoxSilver Box contains only silver, amount of silver in the box     is randomized and varies in a range from 20 to 30 piecesSilver Box initial price is 0.096 ETH, final price is 0.12 ETHRotund Silver Box contains only silver, amount of silver in the box     is randomized and varies in a range from 70 to 90 piecesRotund Silver Box initial price is 0.32 ETH, final price is 0.4 ETHGoldish Silver Box contains 100-200 pieces of silver,     and in contrast to the silver box, it may also contain one gold pieceGoldish Silver Box initial price is 0.76ETH, final price is 0.95 ETHThe chance of getting gold piece in Goldish Silver Box is 42%Goldish Silver Box with a piece of gold in it contains 100-120 pieces of silver,     while the box without gold piece contains 150-200 pieces of silverIncludes coupon related functionality – allows to get silver boxes using coupons"
   }
 }
