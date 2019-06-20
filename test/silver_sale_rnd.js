@@ -35,15 +35,15 @@ const GOLD_PROBABILITY = 42; // 42%
 contract('SilverSale (RND)', (accounts) => {
 	it("random: Silver Box and Rotund Silver Box averages", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
@@ -72,15 +72,15 @@ contract('SilverSale (RND)', (accounts) => {
 	});
 	it("random: Goldish Silver Box averages", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);

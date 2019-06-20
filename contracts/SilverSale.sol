@@ -278,9 +278,9 @@ contract SilverSale is AccessMultiSig {
    *      from `offset` (inclusive) to `offset + LENGTH` (exclusive)
    */
   constructor(
+    address _ref,
     address _silver,
     address _gold,
-    address _ref,
     address payable _chest,
     address payable _beneficiary,
     uint32 _offset
@@ -293,14 +293,14 @@ contract SilverSale is AccessMultiSig {
     require(_beneficiary != address(0));
 
     // bind smart contract instances
+    refPointsTracker = RefPointsTracker(_ref);
     silverInstance = SilverERC20(_silver);
     goldInstance = GoldERC20(_gold);
-    refPointsTracker = RefPointsTracker(_ref);
 
     // verify smart contract versions
+    require(refPointsTracker.TRACKER_UID() == REF_TRACKER_UID_REQUIRED);
     require(silverInstance.TOKEN_UID() == SILVER_UID_REQUIRED);
     require(goldInstance.TOKEN_UID() == GOLD_UID_REQUIRED);
-    require(refPointsTracker.TRACKER_UID() == REF_TRACKER_UID_REQUIRED);
 
     // set up chest vault, beneficiary and sale start
     chest = _chest;

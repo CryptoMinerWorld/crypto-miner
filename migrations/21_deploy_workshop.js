@@ -56,4 +56,6 @@ module.exports = async function(deployer, network, accounts) {
 		console.log("enabling workshop features");
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
 	}
+
+	console.log("execution complete");
 };

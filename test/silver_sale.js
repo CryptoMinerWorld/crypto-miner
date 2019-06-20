@@ -66,34 +66,34 @@ contract('SilverSale', (accounts) => {
 	});
 	it("deployment: verify deployment routine", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// bad constructor parameters doesn't work
-		await assertThrows(Sale.new, 0, gold.address, ref.address, chest, beneficiary, offset);
-		await assertThrows(Sale.new, silver.address, 0, ref.address, chest, beneficiary, offset);
-		await assertThrows(Sale.new, silver.address, gold.address, 0, chest, beneficiary, offset);
-		await assertThrows(Sale.new, silver.address, gold.address, ref.address, 0, beneficiary, offset);
-		await assertThrows(Sale.new, silver.address, gold.address, ref.address, chest, 0, offset);
-		// await assertThrows(Sale.new, silver.address, gold.address, ref.address, chest, beneficiary, 0);
-		await assertThrows(Sale.new, accounts[0], gold.address, ref.address, chest, beneficiary, offset);
-		await assertThrows(Sale.new, silver.address, accounts[0], ref.address, chest, beneficiary, offset);
-		await assertThrows(Sale.new, silver.address, gold.address, accounts[0], chest, beneficiary, offset);
+		await assertThrows(Sale.new, 0, silver.address, gold.address, chest, beneficiary, offset);
+		await assertThrows(Sale.new, ref.address, 0, gold.address, chest, beneficiary, offset);
+		await assertThrows(Sale.new, ref.address, silver.address, 0, chest, beneficiary, offset);
+		await assertThrows(Sale.new, ref.address, silver.address, gold.address, 0, beneficiary, offset);
+		await assertThrows(Sale.new, ref.address, silver.address, gold.address, chest, 0, offset);
+		// await assertThrows(Sale.new, ref.address, silver.address, gold.address, chest, beneficiary, 0);
+		await assertThrows(Sale.new, accounts[0], silver.address, gold.address, chest, beneficiary, offset);
+		await assertThrows(Sale.new, ref.address, accounts[0], gold.address, chest, beneficiary, offset);
+		await assertThrows(Sale.new, ref.address, silver.address, accounts[0], chest, beneficiary, offset);
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// verify the setup
 		for(let i = 0; i < BOX_TYPES[i]; i++) {
 			assert.equal(INITIALLY_SOLD[i], await sale.boxesSold(i), "wrong boxes sold counter for " + BOX_TYPES[i]);
 		}
+		assert.equal(ref.address, await sale.refPointsTracker(), "wrong ref points tracker address");
 		assert.equal(silver.address, await sale.silverInstance(), "wrong silver instance address");
 		assert.equal(gold.address, await sale.goldInstance(), "wrong gold instance address");
-		assert.equal(ref.address, await sale.refPointsTracker(), "wrong ref points tracker address");
 		assert.equal(chest, await sale.chest(), "wrong chest address");
 		assert.equal(beneficiary, await sale.beneficiary(), "wrong beneficiary address");
 		assert.equal(offset, await sale.offset(), "wrong offset value");
@@ -132,15 +132,15 @@ contract('SilverSale', (accounts) => {
 	});
 	it("price: verify remote price increase formula (Solidity)", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define constant function arguments
 		const t0 = 1548979200; // February 1, 2019
@@ -174,15 +174,15 @@ contract('SilverSale', (accounts) => {
 	});
 	it("price: verify remote price increase formula (random points)", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define constant function arguments
 		const t0 = 1548979200; // February 1, 2019
@@ -211,9 +211,9 @@ contract('SilverSale', (accounts) => {
 	});
 	it("price: verify current price calculation", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset1 = 3600 + new Date().getTime() / 1000 | 0;
@@ -260,15 +260,15 @@ contract('SilverSale', (accounts) => {
 	});
 	it("price: verify bulk price calculation (initial)", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define bulk price function
 		const fn0 = async(boxTypes, quantities) => await sale.bulkPrice(boxTypes, quantities);
@@ -290,9 +290,9 @@ contract('SilverSale', (accounts) => {
 	});
 	it('price: verify priceIncreaseIn()', async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const now = new Date().getTime() / 1000 | 0;
@@ -330,9 +330,9 @@ contract('SilverSale', (accounts) => {
 	});
 	it('price: verify nextPriceIncrease()', async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const now = new Date().getTime() / 1000 | 0;
@@ -370,15 +370,15 @@ contract('SilverSale', (accounts) => {
 	});
 	it("ref price: wrong inputs", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define regular ref price calculation function
 		const fn1 = async(boxType, qty) => await sale.getBoxesPriceRef(boxType, qty);
@@ -413,15 +413,15 @@ contract('SilverSale', (accounts) => {
 	});
 	it("ref price: verify ref points price calculation", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define regular ref price calculation function
 		const fn1 = async(boxType) => await sale.getBoxesPriceRef(boxType, 1);
@@ -442,22 +442,22 @@ contract('SilverSale', (accounts) => {
 
 	it("buy: verify sale state", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED);
+		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 
 		// obtain initial status values
 		const state0 = await sale.getState();
@@ -562,9 +562,9 @@ contract('SilverSale', (accounts) => {
 
 	it("buy: impossible to buy boxes before sale starts", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
@@ -609,16 +609,16 @@ contract('SilverSale', (accounts) => {
 	});
 	it("buy: impossible to buy boxes without supplying enough value", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define buy and bulk buy functions
 		const fn1 = async(delta) => await sale.buy(0, 1, {from: player, value: INITIAL_PRICES[0] + delta});
@@ -637,15 +637,15 @@ contract('SilverSale', (accounts) => {
 	});
 	it("buy: impossible to buy boxes without `FEATURE_SALE_ENABLED` feature enabled", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define buy and bulk buy functions
 		const fn1 = async() => await sale.buy(0, 1, {from: player, value: INITIAL_PRICES[0]});
@@ -666,9 +666,9 @@ contract('SilverSale', (accounts) => {
 	});
 	it("buy: buying few boxes of the same type", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
@@ -679,7 +679,7 @@ contract('SilverSale', (accounts) => {
 		const beneficiaryBalance = await getBalanceBN(beneficiary);
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define a function to buy a Silver Box
 		// when buying 32 goldish boxes, chance of not getting
@@ -731,16 +731,16 @@ contract('SilverSale', (accounts) => {
 	});
 	it("buy: buying all the boxes", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const player = accounts[2];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define general function to buy Silver Boxes
 		const fn = async(boxType, qty) => await sale.buy(boxType, qty, {from: player, value: 114000000000000000000});
@@ -798,21 +798,21 @@ contract('SilverSale', (accounts) => {
 	});
 	it("buy: validate balances after buying some boxes", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// enable all features and permissions required to enable buy
+		await ref.updateRole(sale.address, ROLE_SELLER);
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		// define buy properties
 		const boxType = 1;
@@ -865,25 +865,25 @@ contract('SilverSale', (accounts) => {
 	});
 	it("bulk buy: bulk specific validations", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define a function to buy a Silver Box, 57.088 ETH within transaction should be enough
 		const fn = async(boxTypes, quantities) => await sale.bulkBuy(boxTypes, quantities, {from: player, value: 57088000000000000000});
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		// verify wrong parameters don't work
 		await assertThrows(fn, [], []);
@@ -909,9 +909,9 @@ contract('SilverSale', (accounts) => {
 	});
 	it("bulk buy: bulk boxes of different types", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
@@ -922,7 +922,7 @@ contract('SilverSale', (accounts) => {
 		const beneficiaryBalance = await getBalanceBN(beneficiary);
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define a function to buy a Silver Box
 		// when buying 32 goldish boxes, chance of not getting
@@ -971,16 +971,16 @@ contract('SilverSale', (accounts) => {
 	});
 	it("bulk buy: buying all the boxes", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const player = accounts[3];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
 		const offset = new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define general function to buy Silver Boxes
 		const fn = async(quantities) => await sale.bulkBuy([0, 1, 2], quantities, {from: player, value: 310776000000000000000});
@@ -997,9 +997,9 @@ contract('SilverSale', (accounts) => {
 
 		// enable all features and permissions required to enable buy
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		// verify initial sale status
 		for(let i = 0; i < BOX_TYPES.length; i++) {
@@ -1029,9 +1029,9 @@ contract('SilverSale', (accounts) => {
 
 	it("ref points: getting known", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const referrer1 = accounts[1];
 		const referrer2 = accounts[2];
 		const referrer3 = accounts[1];
@@ -1041,13 +1041,13 @@ contract('SilverSale', (accounts) => {
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// enable all features and permissions required to enable buy with referral points
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await ref.updateRole(sale.address, ROLE_SELLER);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-		await ref.updateRole(sale.address, ROLE_SELLER);
 
 		// getting know using simple buy
 		await sale.buy(0, 1, {from: referrer1, value: INITIAL_PRICES[0]});
@@ -1071,9 +1071,9 @@ contract('SilverSale', (accounts) => {
 	});
 	it("ref points: issuing referral points", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const referrer = accounts[1];
 		const referred = accounts[2];
 		const chest = accounts[7];
@@ -1081,16 +1081,16 @@ contract('SilverSale', (accounts) => {
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define functions to buy with referral points
 		const fn1 = async() => await sale.buyRef(0, 1, referrer, {from: referrer, value: INITIAL_PRICES[0]});
 		const fn2 = async() => await sale.buyRef(0, 1, referrer, {from: referred, value: INITIAL_PRICES[0]});
 
 		// enable all features and permissions required to enable buy with referral points
+		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_SELLER);
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_SELLER);
 
 		// verify initial state of the referral points tracker
 		assert(!await ref.isKnown(referrer), "referrer address is known initially");
@@ -1129,9 +1129,9 @@ contract('SilverSale', (accounts) => {
 	});
 	it("ref points: bulk issuing referral points", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const referrer = accounts[1];
 		const referred = accounts[2];
 		const chest = accounts[7];
@@ -1139,16 +1139,16 @@ contract('SilverSale', (accounts) => {
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// define functions to buy with referral points
 		const fn1 = async() => await sale.bulkBuyRef([0], [1], referrer, {from: referrer, value: INITIAL_PRICES[0]});
 		const fn2 = async() => await sale.bulkBuyRef([0], [1], referrer, {from: referred, value: INITIAL_PRICES[0]});
 
 		// enable all features and permissions required to enable buy with referral points
+		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_SELLER);
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_SELLER);
 
 		// verify initial state of the referral points tracker
 		assert(!await ref.isKnown(referrer), "referrer address is known initially");
@@ -1187,9 +1187,9 @@ contract('SilverSale', (accounts) => {
 	});
 	it("ref points: impossible to get boxes before sale starts", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const player = accounts[1];
 		const chest = accounts[7];
 		const beneficiary = accounts[8];
@@ -1200,9 +1200,9 @@ contract('SilverSale', (accounts) => {
 			const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, now + offset);
 			// enable all features and permissions required to enable get
 			await sale.updateFeatures(FEATURE_GET_ENABLED);
+			await ref.updateRole(sale.address, ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 			await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 			await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-			await ref.updateRole(sale.address, ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 			// return the prepared sale instance
 			return sale;
 		};
@@ -1241,9 +1241,9 @@ contract('SilverSale', (accounts) => {
 	});
 	it("ref points: getting boxes for points (consuming ref points)", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const referrer = accounts[1];
 		const referred = [accounts[2], accounts[3], accounts[4]]; // length must be compliant with BOX_TYPES
 		const chest = accounts[7];
@@ -1251,13 +1251,13 @@ contract('SilverSale', (accounts) => {
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// enable all features and permissions required to enable buy with referral points
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-		await ref.updateRole(sale.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 
 		// buying different boxes of different types and earning points
 		await sale.buy(0, 1, {from: referrer, value: INITIAL_PRICES[0]});
@@ -1306,9 +1306,9 @@ contract('SilverSale', (accounts) => {
 	});
 	it("ref points: bulk get boxes for points", async() => {
 		// define silver sale dependencies
+		const ref = await Tracker.new();
 		const silver = await Silver.new();
 		const gold = await Gold.new();
-		const ref = await Tracker.new();
 		const referrer = accounts[1];
 		const referred = [accounts[2], accounts[3], accounts[4]]; // length must be compliant with BOX_TYPES
 		const chest = accounts[7];
@@ -1316,12 +1316,12 @@ contract('SilverSale', (accounts) => {
 		const offset = -3600 + new Date().getTime() / 1000 | 0;
 
 		// instantiate silver sale smart contract
-		const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset);
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
 
 		// enable all features and permissions required to enable buy with referral points
+		await ref.updateRole(sale.address, ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
-		await ref.updateRole(sale.address, ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 
 		// issue some referral points to referrer and referred
 		await ref.issueTo(referrer, 6400);    // equal to referring some who bought all the boxes
