@@ -47,14 +47,21 @@ import "./Random.sol";
  * @notice Goldish Silver Box with a piece of gold in it contains 100-120 pieces of silver,
  *      while the box without gold piece contains 150-200 pieces of silver
  *
+ * @notice Includes coupon related functionality – allows to get silver boxes using coupons
+ *
  * @dev Sale start timestamp (offset) and sale duration (length) are set in
  *      the smart contract on deployment
  * @dev Sale is active during the time frame [offset, offset + length),
  *      where `offset` is a unix timestamp of the sale start and `length`
  *      is length of the sale in seconds
  * @dev Silver Sale acts as `ROLE_TOKEN_CREATOR` for both
- *    Silver (SilverERC20) and Gold (GoldERC20) ERC20 tokens
+ *      Silver (SilverERC20) and Gold (GoldERC20) ERC20 tokens
  * @dev All the random distributions used in sale are uniform
+ *
+ * @dev Allows adding coupons by coupon manager(s) (`ROLE_COUPON_MANAGER`)
+ *      and getting silver boxes by player in exchange to the coupons added
+ *      as long as 'using coupons' (`FEATURE_USING_COUPONS_ENABLED`) feature is enabled
+ *
  *
  * @author Basil Gorin
  */
@@ -64,7 +71,7 @@ contract SilverSale is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant SALE_VERSION = 0xf935bcd014f6db926a4e57d87b63fda90a2719834f554e160b68818403b5da87;
+  uint256 public constant SALE_VERSION = 0xd0dabc93bf32e67a1256e044aa2d9e971a4dcb0c043c56c2ad46f23889dfc369;
 
   /**
    * @dev Expected version (UID) of the deployed RefPointsTracker instance
@@ -98,6 +105,20 @@ contract SilverSale is AccessMultiSig {
    *      call the `get()` and `bulkGet()` functions
    */
   uint32 public constant FEATURE_GET_ENABLED = 0x00000002;
+
+  /**
+   * @notice Enables using coupons i.e. exchanging them for boxes
+   * @dev Feature FEATURE_USING_COUPONS_ENABLED must be enabled to
+   *      call the `useCoupon()` function
+   */
+  uint32 public constant FEATURE_USING_COUPONS_ENABLED = 0x00000004;
+
+  /**
+   * @notice Coupon creator is responsible for adding and removing coupons
+   * @dev Role ROLE_COUPON_CREATOR allows adding and removing coupons
+   *      (calling `addCoupon()` and removeCoupon() functions)
+   */
+  uint32 public constant ROLE_COUPON_MANAGER = 0x00000001;
 
   /**
    * @notice Duration of the sale.
@@ -214,6 +235,16 @@ contract SilverSale is AccessMultiSig {
   uint16[] public boxesSold = [13, 6, 22];
 
   /**
+   * @dev Coupon storage, maps keccak256 hash of the coupon code to
+   *      the box type the coupons can be exchanged to
+   * @dev Since zero box type is valid and is the default value for mapping
+   *      values, box type is stored incremented by one to distinguish from
+   *      unset mapping mapping values (unset or invalid coupons)
+   * @dev sha3(code) => boxType + 1
+   */
+  mapping(uint256 => uint8) public coupons;
+
+  /**
    * @dev RefPointsTracker deployed instance to issue referral points to
    *      and to consume referral points from
    */
@@ -249,18 +280,43 @@ contract SilverSale is AccessMultiSig {
 
   /**
    * @dev Fired in buy(), bulkBuy(), get() and bulkGet()
-   * @param by address which sent the transaction, spent some value
+   * @param _by address which sent the transaction, spent some value
    *      and got some silver or/and gold in return
    * @param silver amount of silver obtained
    * @param gold amount of gold obtained (zero or one)
    */
-  event Unboxed(address indexed by, uint32 silver, uint24 gold);
+  event Unboxed(address indexed _by, uint32 silver, uint24 gold);
 
   /**
    * @dev Fired in buy(), bulkBuy(), get() and bulkGet()
    * @param state packed sale state structure as in `getState()`
    */
   event SaleStateChanged(uint192[] state);
+
+  /**
+   * @dev Fired in addCoupon()
+   * @param _by coupon manager who added the coupon
+   * @param _key keccak256 hash of the coupon code added
+   * @param boxType type of the box coupon allows to get
+   */
+  event CouponAdded(address indexed _by, uint256 indexed _key, uint8 boxType);
+
+  /**
+   * @dev Fired in removeCoupon()
+   * @param _by coupon manager who removed the coupon
+   * @param _key keccak256 hash of the coupon code removed
+   */
+  event CouponRemoved(address indexed _by, uint256 indexed _key);
+
+  /**
+   * @dev Fired in useCoupon()
+   * @param _by an address (player) who used the coupon
+   * @param _key keccak256 hash of the coupon code used
+   * @param boxType type of the box coupon was exchanged to
+   * @param silver amount of silver obtained by the player
+   * @param gold amount of gold obtained by the player
+   */
+  event CouponConsumed(address indexed _by, uint256 indexed _key, uint8 boxType, uint24 silver, uint16 gold);
 
   /**
    * @dev Creates a Silver/Gold Sale instance, binding it to
@@ -1195,6 +1251,143 @@ contract SilverSale is AccessMultiSig {
 
 
   /**
+   * @notice Allows validating a coupon, returns valid box type if coupon is valid
+   * @param code coupon code to validate
+   * @return box type corresponding to this coupon or 255 if coupon is not valid
+   */
+  function isCouponValid(string memory code) public view returns(uint8) {
+    // calculate the key to fetch the coupon
+    uint256 key = uint256(keccak256(abi.encode(code)));
+
+    // get box type corresponding to this coupon and return
+    // invalid coupon produces 255 as a result
+    return coupons[key] - 1;
+  }
+
+  /**
+   * @notice Allows using a coupon, unboxes corresponding silver box if coupon is valid
+   * @dev Throws if coupon is invalid, `FEATURE_USING_COUPONS_ENABLED` is not enabled
+    *     or if the silver sale this smart contract is bound to already finished
+   * @param code coupon code to use
+   */
+  function useCoupon(string memory code) public {
+    // check using coupons feature is enabled
+    require(isFeatureEnabled(FEATURE_USING_COUPONS_ENABLED));
+
+    // calculate the key to fetch the coupon
+    uint256 key = uint256(keccak256(abi.encode(code)));
+
+    // get box type corresponding to this coupon
+    uint8 boxType = coupons[key] - 1;
+
+    // remove the coupon from storage
+    delete coupons[key];
+
+    // box type validation is not required, wrong box type won't be unboxed
+    // perform unboxing by delegating call to `SilverSale.unbox()`
+
+    // to assign tuple return value from `silverInstance.unbox`
+    // we need to define auxiliary the variables first, compatible with
+    // `silverInstance.unbox` return type - (uint24, uint16)
+    uint24 silver;
+    uint16 gold;
+
+    // evaluate silver and gold values for a single box
+    (silver, gold) = unbox(boxType, 1);
+
+    // delegate call to `__mint` to perform token minting,
+    // specifying "coupons consuming mode"
+    __mint(0, 0, silver, gold);
+
+    // emit an event
+    emit CouponConsumed(msg.sender, key, boxType, silver, gold);
+  }
+
+  /**
+   * @notice Allows adding coupons for free silver box retrieval
+   * @notice Requires a sender to have a permission to add a coupon
+   * @dev Requires sender to have `ROLE_COUPON_MANAGER` permission
+   * @param key coupon code hash
+   * @param boxType valid box type to be given freely for this coupon
+   */
+  function addCoupon(uint256 key, uint8 boxType) public {
+    // check sender has permissions to create a coupon
+    require(isSenderInRole(ROLE_COUPON_MANAGER));
+
+    // ensure coupon doesn't exist yet
+    require(coupons[key] == 0);
+
+    // add a coupon
+    coupons[key] = boxType + 1;
+
+    // emit an event
+    emit CouponAdded(msg.sender, key, boxType);
+  }
+
+  /**
+   * @notice Allows removing previously added coupons
+   * @notice Requires a sender to have a permission to remove a coupon
+   * @dev Requires sender to have `ROLE_COUPON_MANAGER` permission
+   * @param key coupon code hash
+   */
+  function removeCoupon(uint256 key) public {
+    // check sender has permissions to create a coupon
+    require(isSenderInRole(ROLE_COUPON_MANAGER));
+
+    // ensure coupon exists
+    require(coupons[key] != 0);
+
+    // remove the coupon
+    delete coupons[key];
+
+    // emit an event
+    emit CouponRemoved(msg.sender, key);
+  }
+
+  /**
+   * @notice Allows adding coupons for free silver box retrieval
+   * @notice Requires a sender to have a permission to add a coupon
+   * @dev Requires sender to have `ROLE_COUPON_MANAGER` permission
+   * @dev Overwrites the coupons if they already exist
+   * @param keys array of coupon codes hashes (keccak256)
+   * @param boxType valid box type to be given freely for coupons
+   */
+  function bulkAddCoupons(uint256[] memory keys, uint8 boxType) public {
+    // check sender has permissions to create a coupon
+    require(isSenderInRole(ROLE_COUPON_MANAGER));
+
+    // iterate over the keys array
+    for(uint256 i = 0; i < keys.length; i++) {
+      // add a coupon
+      coupons[keys[i]] = boxType + 1;
+
+      // emit an event
+      emit CouponAdded(msg.sender, keys[i], boxType);
+    }
+  }
+
+  /**
+   * @notice Allows removing previously added coupons
+   * @notice Requires a sender to have a permission to remove a coupon
+   * @dev Requires sender to have `ROLE_COUPON_MANAGER` permission
+   * @param keys array of coupon codes hashes (keccak256)
+   */
+  function bulkRemoveCoupons(uint256[] memory keys) public {
+    // check sender has permissions to create a coupon
+    require(isSenderInRole(ROLE_COUPON_MANAGER));
+
+    // iterate over the keys array
+    for(uint256 i = 0; i < keys.length; i++) {
+      // remove the coupon
+      delete coupons[keys[i]];
+
+      // emit an event
+      emit CouponRemoved(msg.sender, keys[i]);
+    }
+  }
+
+
+  /**
    * @dev Auxiliary function to verify hard cap status and increase
    *      `boxesSold` counter based on box type and quantity
    * @dev Throws if quantity exceeds total initial amount of boxes on sale
@@ -1245,7 +1438,9 @@ contract SilverSale is AccessMultiSig {
       goldInstance.mint(player, gold);
     }
 
-    // if price is not zero (if this is not referral points spending)
+    // if price is not zero – it's a regular sale
+    // (not not referral points spending)
+    // (not coupon consumption spending)
     if(price != 0) {
       // calculate the change to send back to player
       uint256 change = msg.value - price;
@@ -1267,7 +1462,7 @@ contract SilverSale is AccessMultiSig {
       }
     }
 
-    // if refs is not zero (if this is referral points spending)
+    // if refs is not zero – it's a referral points spending
     if(refs != 0) {
       // consume referral points from the player
       refPointsTracker.consumeFrom(player, refs);

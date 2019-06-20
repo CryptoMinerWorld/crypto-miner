@@ -1,3 +1,6 @@
+// using secure random generator instead of default Math.random()
+const secureRandomInRange = require("random-number-csprng");
+
 // Silver smart contract
 const Silver = artifacts.require("./SilverERC20.sol");
 // GoldERC20 smart contract
@@ -10,6 +13,8 @@ const Sale = artifacts.require("./SilverSale.sol");
 
 // box types
 const BOX_TYPES = ["Silver Box", "Rotund Silver Box", "Goldish Silver Box"];
+// amount of coupons for each type to create
+const COUPONS_BOX_AMOUNTS = [30, 20, 10];
 // initial and final prices of the boxes
 const INITIAL_PRICES = [96000000000000000, 320000000000000000, 760000000000000000];
 const FINAL_PRICES  = [120000000000000000, 400000000000000000, 950000000000000000];
@@ -28,17 +33,14 @@ const REF_POINTS = [1, 4, 10];
 // ref points price for each box type
 const REF_PRICES = [20, 80, 200];
 
-// Enables the silver / gold sale
+// features and roles to be used in sale
 const FEATURE_SALE_ENABLED = 0x00000001;
-// Enables the silver / gold sale
 const FEATURE_GET_ENABLED = 0x00000002;
-// Token creator is responsible for creating tokens
+const FEATURE_USING_COUPONS_ENABLED = 0x00000004;
+const ROLE_COUPON_MANAGER = 0x00000001;
 const ROLE_TOKEN_CREATOR = 0x00000001;
-// Allows issuing referral points
 const ROLE_REF_POINTS_ISSUER = 0x00000001;
-// Allows consuming referral points
 const ROLE_REF_POINTS_CONSUMER = 0x00000002;
-// Allows setting an address as known
 const ROLE_SELLER = 0x00000004;
 
 // maximum possible quantity of boxes to buy
@@ -222,10 +224,10 @@ contract('SilverSale', (accounts) => {
 		const offset4 = -1728000 + new Date().getTime() / 1000 | 0;
 
 		// instantiate few silver sales
-		const sale1 = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset1);
-		const sale2 = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset2);
-		const sale3 = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset3);
-		const sale4 = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, offset4);
+		const sale1 = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset1);
+		const sale2 = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset2);
+		const sale3 = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset3);
+		const sale4 = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset4);
 
 		// get all current prices in a single bulk operation
 		const boxPrices1 = await sale1.getBoxPrices();
@@ -298,7 +300,7 @@ contract('SilverSale', (accounts) => {
 		const now = new Date().getTime() / 1000 | 0;
 
 		// function to instantiate silver sale with the desired offset
-		const getSale = async(offset) => await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, now + offset);
+		const getSale = async(offset) => await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, now + offset);
 
 		// get few price increase in functions results
 		const increase0 = (await (await getSale(0)).priceIncreaseIn()).toNumber();
@@ -338,7 +340,7 @@ contract('SilverSale', (accounts) => {
 		const now = new Date().getTime() / 1000 | 0;
 
 		// function to instantiate silver sale with the desired offset
-		const getSale = async(offset) => await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, now + offset);
+		const getSale = async(offset) => await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, now + offset);
 
 		// get few price increase in functions results
 		const increase0 = (await (await getSale(0)).nextPriceIncrease()).toNumber();
@@ -572,7 +574,7 @@ contract('SilverSale', (accounts) => {
 
 		// function to instantiate silver sale with the desired offset
 		const getSale = async(offset) => {
-			const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, now + offset);
+			const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, now + offset);
 			// enable all features and permissions required to enable buy
 			await sale.updateFeatures(FEATURE_SALE_ENABLED);
 			await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
@@ -1197,7 +1199,7 @@ contract('SilverSale', (accounts) => {
 
 		// function to instantiate silver sale with the desired offset
 		const getSale = async(offset) => {
-			const sale = await Sale.new(silver.address, gold.address, ref.address, chest, beneficiary, now + offset);
+			const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, now + offset);
 			// enable all features and permissions required to enable get
 			await sale.updateFeatures(FEATURE_GET_ENABLED);
 			await ref.updateRole(sale.address, ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
@@ -1349,6 +1351,153 @@ contract('SilverSale', (accounts) => {
 		// ensure referrer cannot get more boxes
 		await assertThrows(fn);
 	});
+
+	it("coupons: issuing and removing coupons", async() => {
+		// create silver coupons dependencies
+		const ref = await Tracker.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
+		const offset = new Date().getTime() / 1000 | 0;
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
+
+		// coupon manager
+		const manager = accounts[5];
+
+		// generate random coupon code for Silver Box
+		const boxType = 0;
+		const code = await generateCouponCode(boxType);
+		const key = keccak256(code);
+
+		// define functions to add and remove coupons
+		const fn1 = async() => await sale.addCoupon(key, boxType, {from: manager});
+		const fn2 = async() => await sale.removeCoupon(key, {from: manager});
+
+		// first verify the permissions
+		await assertThrows(fn1);
+		await assertThrows(fn2);
+		await sale.updateRole(manager, ROLE_COUPON_MANAGER);
+
+		// add this code into the coupons
+		await fn1();
+		// ensure coupon was added and is valid
+		assert.equal(boxType, await sale.isCouponValid(code), "invalid coupon");
+
+		// ensure some random coupon is not valid
+		assert.equal(0xFF, await sale.isCouponValid(""), "arbitrary string produced valid coupon");
+
+		// verify removing coupon permissions
+		await sale.updateRole(manager, 0);
+		await assertThrows(fn2);
+		await sale.updateRole(manager, ROLE_COUPON_MANAGER);
+
+		// remove the coupon
+		await fn2();
+		// ensure removed coupon is not valid anymore
+		assert.equal(0xFF, await sale.isCouponValid(code), "coupon is still valid after removing it");
+	});
+
+	it("coupons: using coupons", async() => {
+		// create silver coupons dependencies
+		const ref = await Tracker.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
+		const offset = new Date().getTime() / 1000 | 0;
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
+
+		// coupon manager
+		const manager = accounts[5];
+		// player
+		const player = accounts[1];
+
+		// enable required features and give the coupons all the required permissions
+		await sale.updateFeatures(FEATURE_USING_COUPONS_ENABLED);
+		await sale.updateRole(manager, ROLE_COUPON_MANAGER);
+		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		// await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR); // gold is not required for silver box coupon
+		await ref.updateRole(sale.address, ROLE_SELLER);
+
+		// generate random coupon code for Silver Box
+		const boxType = 0;
+		const code = await generateCouponCode(boxType);
+		const key = keccak256(code);
+		// issue the coupon
+		await sale.addCoupon(key, boxType, {from: manager});
+
+		// define a function to use the coupon
+		const fn = async() => await sale.useCoupon(code, {from: player});
+
+		// ensure all the permissions and features are required to use a coupon
+		await sale.updateFeatures(0);
+		await assertThrows(fn);
+		await sale.updateFeatures(FEATURE_USING_COUPONS_ENABLED);
+		await silver.updateRole(sale.address, 0);
+		await assertThrows(fn);
+		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await ref.updateRole(sale.address, 0);
+		await assertThrows(fn);
+		await ref.updateRole(sale.address, ROLE_SELLER);
+
+		// now use the coupon
+		await fn();
+		// cannot double spend the coupon
+		await assertThrows(fn);
+
+		// verify silver appeared on the player balance
+		assert((await silver.balanceOf(player)).gte(SILVER_MIN[0]), "silver balance is too low after using the coupon");
+	});
+	it("coupons: using 30/20/10 coupons", async() => {
+		// create silver coupons dependencies
+		const ref = await Tracker.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const chest = accounts[7];
+		const beneficiary = accounts[8];
+		const offset = new Date().getTime() / 1000 | 0;
+		const sale = await Sale.new(ref.address, silver.address, gold.address, chest, beneficiary, offset);
+
+		// coupon manager
+		const manager = accounts[5];
+		// player
+		const player = accounts[1];
+
+		// enable required features and give the coupons all the required permissions
+		await sale.updateFeatures(FEATURE_USING_COUPONS_ENABLED);
+		await sale.updateRole(manager, ROLE_COUPON_MANAGER);
+		await silver.updateRole(sale.address, ROLE_TOKEN_CREATOR);
+		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR); // gold is not required for silver box coupon
+		await ref.updateRole(sale.address, ROLE_SELLER);
+
+		// generate random coupon codes for all the box types
+		const couponCodes = [];
+		const couponKeys = [];
+		for(let boxType = 0; boxType < COUPONS_BOX_AMOUNTS.length; boxType++) {
+			for(let i = 0; i < COUPONS_BOX_AMOUNTS[boxType]; i++) {
+				const code = await generateCouponCode(boxType);
+				const key = keccak256(code);
+				couponCodes.push(code);
+				couponKeys.push(key);
+			}
+			// issue the coupons (bulk mode)
+			await sale.bulkAddCoupons(couponKeys, boxType, {from: manager});
+		}
+
+		// use the all coupons one by one
+		for(let i = 0; i < couponCodes.length; i++) {
+			await sale.useCoupon(couponCodes[i], {from: player});
+		}
+
+		// minimum silver expected
+		const silverMin = SILVER_MIN[0] * COUPONS_BOX_AMOUNTS[0] + SILVER_MIN[1] * COUPONS_BOX_AMOUNTS[1] + SILVER_MIN[3] * COUPONS_BOX_AMOUNTS[2];
+
+		// verify silver and gold appeared on the player balance
+		assert((await silver.balanceOf(player)).gte(silverMin), "silver balance is too low after using 30/20/10 coupons");
+		assert((await gold.balanceOf(player)).gt(0), "gold balance is zero after using 30/20/10 coupons");
+	});
+
 });
 
 /**
@@ -1385,6 +1534,16 @@ function assertEqualWith(expected, actual, leeway, msg) {
 	assert(expected - leeway < actual && expected + leeway > actual, msg);
 }
 
+// generate a secure random coupon code for box type `boxType`
+async function generateCouponCode(boxType) {
+	let couponCode = "";
+	for(let j = 0; j < 16; j++) {
+		couponCode += String.fromCharCode(await secureRandomInRange(65, 90));
+	}
+	couponCode += "_" + BOX_TYPES[boxType].replace(/\s/, "_");
+	return couponCode;
+}
 
-// import auxiliary function to ensure function `fn` throws
-import {assertThrows, toBN, getBalanceBN, gasUsedBN} from "../scripts/shared_functions";
+
+// import auxiliary functions
+import {assertThrows, toBN, keccak256, sha3, getBalanceBN, gasUsedBN} from "../scripts/shared_functions";

@@ -144,4 +144,22 @@ contract TokenHelper {
     return extended;
   }
 
+  /**
+   * @notice Provides current unix timestamp
+   * @return current time as a unix timestamp
+   */
+  function getNow() public view returns(uint256) {
+    // just return the built-in constant
+    return now;
+  }
+
+  /**
+   * @notice Calculate keccak256 of a single string argument
+   * @param code a string to calculate hash for
+   * @return keccak256 hash of the input string
+   */
+  function getKeccak256(string memory code) public view returns(uint256) {
+    // calculate the keccak256 and return
+    return uint256(keccak256(abi.encode(code)));
+  }
 }

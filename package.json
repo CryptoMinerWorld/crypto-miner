@@ -8,6 +8,7 @@
     "test": "test"
   },
   "dependencies": {
+    "random-number-csprng": "^1.0.2",
     "truffle-hdwallet-provider": "^1.0.9"
   },
   "devDependencies": {
