@@ -10,8 +10,8 @@ import {
 	InterfaceId_ERC721Metadata,
 	FEATURE_TRANSFERS,
 	FEATURE_TRANSFERS_ON_BEHALF,
-	ROLE_TOKEN_CREATOR,
 	ROLE_EXT_WRITER,
+	ROLE_TOKEN_CREATOR,
 	ROLE_STATE_PROVIDER,
 	ROLE_TRANSFER_LOCK_PROVIDER
 } from "./erc721_core";
@@ -33,6 +33,11 @@ async function mint1(tk, acc) {
 	await tk.mint(acc, token1, 1, 1, 1, grade1);
 }
 
+// standard function to instantiate token
+async function deployToken() {
+	return await Token.new();
+}
+
 // timestamp right before the test begins
 const now = new Date().getTime() / 1000 | 0;
 
@@ -41,7 +46,7 @@ contract('GemERC721', function(accounts) {
 
 	it("initial state: initial zero values, supported interfaces", async() => {
 		// instantiate token instance
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// some account to work with
 		const account1 = accounts[1];
@@ -81,7 +86,7 @@ contract('GemERC721', function(accounts) {
 	});
 	it("initial state: throwable functions", async() => {
 		// instantiate token instance
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// some account to work with
 		const account1 = accounts[1];
@@ -167,7 +172,7 @@ contract('GemERC721', function(accounts) {
 
 	it("integrity: verify minted token data integrity", async() => {
 		// instantiate token instance
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// some account to work with
 		const account1 = accounts[1];
@@ -232,9 +237,471 @@ contract('GemERC721', function(accounts) {
 		assertArraysEqual(fullPacked1, await tk.getPacked(token1), "token1 wrong getPacked");
 	});
 
+	it("mint: creating a token", async function() {
+		const tk = await deployToken();
+		await tk.mint(accounts[0], 0x401, 1, 1, 1, grade1);
+		await assertThrows(tk.mint, accounts[0], 0x000, 1, 1, 1, grade1);
+		await assertThrows(tk.mint, accounts[0], 0x401, 1, 1, 1, grade1);
+		await assertThrows(tk.mint, 0, 0x402, 1, 1, 1, grade1);
+		await assertThrows(tk.mint, tk.address, 0x403, 1, 1, 1, grade1);
+		assert.equal(1, await tk.totalSupply(), "wrong totalSupply value after minting a token");
+		await assertThrows(tk.mint, accounts[1], 0x402, 1, 1, 1, grade1, {from: accounts[1]});
+		await tk.mint(accounts[1], 0x402, 1, 1, 1, grade1);
+		assert.equal(2, await tk.totalSupply(), "wrong totalSupply value after minting two tokens");
+		assert.equal(1, await tk.balanceOf(accounts[0]), accounts[0] + " has wrong balance after minting a token");
+		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " has wrong balance after minting a token");
+		assert.equal(0, await tk.balanceOf(accounts[2]), accounts[2] + " has wrong initial balance");
+	});
+
+	// BEGIN: legacy tests section
+	it("transfer: transferring a token", async function() {
+		const tk = await deployToken();
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+		const fn = async () => await tk.transfer(accounts[1], 0x401);
+		await assertThrows(fn);
+		await tk.updateFeatures(0);
+		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
+		assert.equal(1, await tk.balanceOf(accounts[0]), accounts[0] + " wrong balance before token transfer");
+		assert.equal(0, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
+		await assertThrows(fn);
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+		await assertThrows(tk.transfer, 0x0, 0x401);
+		await assertThrows(tk.transfer, accounts[0], 0x401);
+		await fn();
+		assert.equal(0, await tk.balanceOf(accounts[0]), accounts[0] + " wrong balance after token transfer");
+		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
+		assert.equal(accounts[1], await tk.ownerOf(0x401), "wrong token 0x401 owner after token transfer");
+	});
+	it("transfer: transferring a locked token", async function() {
+		const tk = await deployToken();
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
+		await tk.mint(accounts[0], 0x402, 1, 1, 1, 1);
+		await assertThrows(tk.setTransferLock, 0x1, {from: accounts[1]});
+		await tk.setTransferLock(0x1);
+		await tk.setState(0x401, 0x1);
+		await tk.setState(0x402, 0x1);
+		const fn1 = async () => await tk.transfer(accounts[1], 0x401);
+		const fn2 = async () => await tk.transfer(accounts[1], 0x402);
+		await assertThrows(fn1);
+		await assertThrows(fn2);
+		await tk.setState(0x401, 0x2);
+		await fn1();
+		await tk.setTransferLock(0x2);
+		await fn2();
+		const fn = async () => await tk.transfer(accounts[2], 0x401, {from: accounts[1]});
+		await assertThrows(fn);
+		await tk.setTransferLock(0x3);
+		await assertThrows(fn);
+		await tk.setTransferLock(0x4);
+		await fn();
+		assert.equal(accounts[1], await tk.ownerOf(0x402), "wrong token 0x402 owner");
+		assert.equal(accounts[2], await tk.ownerOf(0x401), "wrong token 0x401 owner");
+	});
+
+	it("transferFrom: transferring on behalf", async function() {
+		const tk = await deployToken();
+		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.mint(accounts[1], 0x401, 1, 1, 1, 1);
+		await tk.mint(accounts[0], 0x402, 1, 1, 1, 1);
+		const fn1 = async () => await tk.transferFrom(accounts[1], accounts[2], 0x401);
+		await assertThrows(tk.approve, accounts[0], 0x401);
+		await assertThrows(tk.approve, accounts[0], 0x402);
+		await assertThrows(fn1);
+		await tk.approve(accounts[0], 0x401, {from: accounts[1]});
+		await tk.revokeApproval(0x401, {from: accounts[1]});
+		await assertThrows(tk.revokeApproval, 0x401, {from: accounts[1]});
+		await tk.approve(accounts[0], 0x401, {from: accounts[1]});
+		await fn1();
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+		await tk.approve(accounts[2], 0x402);
+		const fn = async () => await tk.transferFrom(accounts[0], accounts[1], 0x402, {from: accounts[2]});
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+		await assertThrows(fn);
+		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
+		await fn();
+		assert.equal(accounts[1], await tk.ownerOf(0x402), "wrong token 0x402 owner after transfer on behalf");
+		assert.equal(accounts[2], await tk.ownerOf(0x401), "wrong token 0x401 owner after transfer on behalf");
+	});
+
+	it("safeTransferFrom: safe transfer token to address", async function() {
+		const tk = await deployToken();
+		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
+		await tk.safeTransferFrom(accounts[0], accounts[1], 0x401);
+		assert.equal(accounts[1], await tk.ownerOf(0x401), "token 0x401 has wrong owner after safely transferring it");
+	});
+	it("safeTransferFrom: impossible to safe transfer to a smart contract", async function() {
+		const tk = await deployToken();
+		const another = await deployToken();
+		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
+		await assertThrows(tk.safeTransferFrom, accounts[0], another.address, 0x401);
+		await assertThrows(tk.safeTransferFrom, accounts[0], tk.address, 0x401);
+		assert.equal(accounts[0], await tk.ownerOf(0x401), "card 0x401 has wrong owner after bad attempt to transfer it");
+		await tk.safeTransferFrom(accounts[0], accounts[1], 0x401);
+		assert.equal(accounts[1], await tk.ownerOf(0x401), "token 0x401 has wrong owner after safely transferring it");
+	});
+
+	it("approve: approve and transfer on behalf", async function () {
+		const tk = await deployToken();
+		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
+		await tk.mint(accounts[0], 0x402, 1, 1, 1, 1);
+		await tk.mint(accounts[0], 0x403, 1, 1, 1, 1);
+		await assertThrows(tk.approve, 0x0, 0x0);
+		await assertThrows(tk.approve, accounts[0], 0x401);
+		await tk.approve(accounts[1], 0x401);
+		await tk.approve(accounts[1], 0x402);
+		assert.equal(accounts[1], await tk.getApproved(0x401), "wrong approved operator for token 0x401");
+		await tk.transferFrom(accounts[0], accounts[1], 0x401, {from: accounts[1]});
+		await tk.transferFrom(accounts[0], accounts[1], 0x402, {from: accounts[1]});
+		assert.equal(0, await tk.getApproved(0x401), "wrong approved operator for token 0x401 after transfer");
+	});
+	it("approve: approve all and transfer on behalf", async function () {
+		const tk = await deployToken();
+		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
+		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
+		await tk.mint(accounts[0], 0x402, 1, 1, 1, 1);
+		await tk.mint(accounts[0], 0x403, 1, 1, 1, 1);
+		await assertThrows(tk.setApprovalForAll, 0x0, true);
+		await assertThrows(tk.setApprovalForAll, accounts[0], true);
+		await tk.setApprovalForAll(accounts[1], true);
+		await tk.transferFrom(accounts[0], accounts[1], 0x401, {from: accounts[1]});
+		await tk.transferFrom(accounts[0], accounts[1], 0x402, {from: accounts[1]});
+		assert(await tk.isApprovedForAll(accounts[0], accounts[1]), "should be approved operator");
+		await tk.setApprovalForAll(accounts[1], false);
+		assert(!await tk.isApprovedForAll(accounts[0], accounts[1]), "should not be approved operator");
+	});
+	// END: legacy tests section
+
+	it("level up: full cycle", async function() {
+		const tk = await deployToken();
+		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
+		await tk.levelUpBy(0x401, 1);
+		assert.equal(2, await tk.getLevel(0x401), "wrong gem 0x401 level after leveling up");
+		await assertThrows(tk.levelUpBy, 0x402, 1);
+		await assertThrows(tk.levelUpBy, 0x402, 1, {from: accounts[1]});
+	});
+
+	it("update grade: full cycle", async function() {
+		const tk = await deployToken();
+		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
+		await tk.upgrade(0x401, 0x01000002);
+		assert.equal(0x01000002, await tk.getGrade(0x401), "wrong gem 0x401 grade after modifying a grade");
+		assert.equal(0x01, await tk.getGradeType(0x401), "wrong gem 0x401 grade level after modifying a grade");
+		assert.equal(0x02, await tk.getGradeValue(0x401), "wrong gem 0x401 grade value after modifying a grade");
+		await assertThrows(tk.upgrade, 0x401, 0x01000002);
+		await assertThrows(tk.upgrade, 0x402, 0x01000003);
+		await assertThrows(tk.upgrade, 0x401, 0x01000003, {from: accounts[1]});
+		await tk.upgrade(0x401, 0x01000003);
+	});
+
+	it("set state: full cycle", async function() {
+		const tk = await deployToken();
+		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
+		await tk.setState(0x401, 0x0102);
+		assert.equal(0x0102, await tk.getState(0x401), "wrong gem 0x401 state after setting a state");
+		await assertThrows(tk.setState, 0x402, 0x0103);
+		await assertThrows(tk.setState, 0x401, 0x0103, {from: accounts[1]});
+		await tk.setState(0x401, 0x0103);
+	});
+
+	it("security: incNextId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// define an address to act as an operator
+		const operator = accounts[1];
+
+		// define the function to check permissions for
+		const fn = async() => await tk.incNextId({from: operator});
+
+		// initially fn throws
+		await assertThrows(fn);
+		// after setting the required permission to operator
+		await tk.updateRole(operator, ROLE_NEXT_ID_PROVIDER);
+		// fn succeeds
+		await fn();
+
+		// next Id counter incremented by one
+		assert.equal(0x12501, await tk.nextId(), "wrong nextId counter value");
+	});
+	it("security: setNextId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// define an address to act as an operator
+		const operator = accounts[1];
+
+		// define the function to check permissions for
+		const fn = async() => await tk.setNextId(1, {from: operator});
+
+		// initially fn throws
+		await assertThrows(fn);
+		// after setting the required permission to operator
+		await tk.updateRole(operator, ROLE_NEXT_ID_PROVIDER);
+		// fn succeeds
+		await fn();
+
+		// next Id counter incremented by one
+		assert.equal(1, await tk.nextId(), "wrong nextId counter value");
+	});
+	it("security: incNextId/setNextId arithmetic overflow checks", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// define the function to check permissions for
+		const fn1 = async() => await tk.setNextId(16777214);
+		const fn2 = async() => await tk.incNextId();
+		const fn3 = async() => await tk.setNextId(0);
+
+		// fn3 always throws
+		await assertThrows(fn3);
+		// fn1 and fn2 initially succeed
+		await fn1();
+		await fn2();
+
+		// now counter is 16777215 and is ready to overflow
+		await assertThrows(fn2);
+		// fn3 always throws
+		await assertThrows(fn3);
+
+		// fn2 succeed again after call to fn1
+		await fn1();
+		await fn2();
+
+		// next Id counter reached its maximum
+		assert.equal(16777215, await tk.nextId(), "wrong nextId counter value");
+	});
+
+
+	// ========== ERC721 Locking tests ==========
+
+	it("state: changing token state requires ROLE_STATE_PROVIDER role", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// define a function to check
+		const fn = async() => await tk.setState(token1, 1, {from: account1});
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_STATE_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("state: modify token state and check", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// some random state value
+		const state = Math.floor(Math.random() * 4294967296);
+
+		// a function to set new token state
+		const setState = async() => await tk.setState(token1, state);
+
+		// impossible to set state for non-existent token
+		await assertThrows(setState);
+
+		// create one token
+		await mint1(tk, accounts[1]);
+
+		// first time setting a state succeeds
+		await setState();
+
+		// next time setting a state succeeds again - state modification date only
+		await setState();
+
+		// verify new state
+		assert.equal(state, await tk.getState(token1), "wrong token1 state");
+
+		// verify state modification date
+		assert(await tk.getStateModified(token1) > now, "wrong token1 state modification date");
+	});
+
+	it("transfer locking: modifying transfer lock requires ROLE_TRANSFER_LOCK_PROVIDER role", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// transfer lock value to set
+		const lock = Math.floor(Math.random() * 4294967296);
+
+		// define a function to check
+		const fn = async() => await tk.setTransferLock(lock, {from: account1});
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_TRANSFER_LOCK_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+
+		// verify transfer lock was set correctly
+		assert.equal(lock, await tk.transferLock(), "incorrect value for transfer lock");
+	});
+	it("transfer locking: impossible to transfer locked token", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// enable transfers
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const account2 = accounts[2];
+
+		// define transfer token functions
+		const transfer1 = async() => await tk.transfer(account2, token1, {from: account1});
+
+		// create one token
+		await mint1(tk, account1);
+
+		// set token state to 2
+		await tk.setState(token1, 2);
+
+		// set token transfer lock to 2 as well
+		await tk.setTransferLock(2);
+
+		// ensure token cannot be transferred
+		assert(!await tk.isTransferable(token1), "token1 is still transferable");
+
+		// locked token (state & transferLock != 0) cannot be transferred
+		await assertThrows(transfer1);
+
+		// set token transfer lock to 4
+		await tk.setTransferLock(4);
+
+		// ensure token can be transferred
+		assert(await tk.isTransferable(token1), "token1 is not transferable");
+		// once token is unlocked (state & transferLock == 0) it can be transferred
+		await transfer1();
+		// verify token ownership
+		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
+	});
+	it("transfer locking: change transfer lock and check", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// some random transfer lock value
+		const lock = Math.floor(Math.random() * 4294967296);
+
+		// a function to set transfer lock
+		const setLock = async() => await tk.setTransferLock(lock);
+
+		// first time setting a lock succeeds
+		const gasUsed1 = (await setLock()).receipt.gasUsed;
+
+		// next time setting a lock succeeds again,
+		// but doesn't modify storage, so the gas consumption is low
+		const gasUsed2 = (await setLock()).receipt.gasUsed;
+
+		// verify gas consumption is at least 5,000 lower
+		assert(gasUsed1 - gasUsed2 >= 5000, "wrong gas consumption difference");
+
+		// verify new transfer lock
+		assert.equal(lock, await tk.transferLock(), "wrong transfer lock");
+	});
+
+	// ========== ERC721 ext256 tests ==========
+
+	it("ext256: write requires ROLE_EXT_WRITER permission", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// define an address to act as an operator
+		const operator = accounts[1];
+
+		// define the function to check permissions for
+		const fn = async() => await tk.write(1, 17, 0, 8, {from: operator});
+
+		// initially fn throws
+		await assertThrows(fn);
+		// after setting the required permission to operator
+		await tk.updateRole(operator, ROLE_EXT_WRITER);
+		// fn succeeds
+		await fn();
+
+		// verify read returns 17
+		assert.equal(17, await tk.read(1, 0, 8), "wrong value read");
+	});
+	it("ext265: verify integrity of read/write operation", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// operate on the first bit
+		assert.equal(0, await tk.read(1, 0, 1), "wrong read 0, 0/1");
+		await tk.write(1, 1, 0, 1);
+		assert.equal(1, await tk.read(1, 0, 1), "wrong read 1, 0/1");
+
+		// operate on the first byte
+		assert.equal(1, await tk.read(1, 0, 8), "wrong read 0, 0/8");
+		await tk.write(1, 17, 0, 8); // 0x11
+		assert.equal(17, await tk.read(1, 0, 8), "wrong read 1, 0/8");
+
+		// operate on the n-th byte
+		assert.equal(0, await tk.read(1, 16, 8), "wrong read 0, 16/8");
+		await tk.write(1, 117, 16, 8); // 0x750000
+		assert.equal(117, await tk.read(1, 16, 8), "wrong read 1, 16/8");
+
+		// operate on n-th bits
+		assert.equal(0, await tk.read(1, 7, 5), "wrong read 0, 7/5");
+		await tk.write(1, 112, 7, 5); // 112 will be truncated to 5 bits which is 16
+		assert.equal(16, await tk.read(1, 7, 5), "wrong read 1, 7/5");
+		assert.equal(16, await tk.read(1, 7, 8), "wrong read 2, 7/8");
+		await tk.write(1, 112, 7, 8); // 0x3800
+		assert.equal(16, await tk.read(1, 7, 5), "wrong read 3, 171/5");
+		assert.equal(112, await tk.read(1, 7, 8), "wrong read 4, 171/8");
+
+		// erase some bits
+		assert.equal(0, await tk.read(1, 24, 32), "wrong read 0, 32/32");
+		await tk.write(1, 65537, 24, 32); // write 0x00010001000000
+		await tk.write(1, 0, 40, 16); // erase high 16 bits of the written data - 0x00010000
+		assert.equal(1, await tk.read(1, 24, 32), "wrong read 1, 32/32");
+
+		// verify whole number
+		assert.equal(0x1753811, await tk.read(1, 0, 256), "wrong whole read");
+
+		// perform few random read/write operations
+		for(let i = 0; i < 32; i++) {
+			const value = Math.floor(Math.random() * 256);
+			const offset = Math.floor(Math.random() * 248);
+			const length = Math.ceil(Math.random() * 8);
+			await tk.write(1, value, offset, length);
+			assert.equal(
+				value & ((1 << length) - 1),
+				await tk.read(1, offset, length),
+				`wrong read ${i}, ${value}/${offset}/${length}`
+			);
+		}
+		console.log(`\t0x${(await tk.read(1, 0, 0)).toString(16)}`);
+
+		// erase everything
+		await tk.write(1, 0, 0, 256);
+		assert.equal(0, await tk.read(1, 0, 0), "wrong read 1, 0/0 (after erase)");
+	});
+
+	// ---------- ERC721 tests ----------
+
 	it("unsafe transfer: transferring a token", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// enable transfers
 		await tk.updateFeatures(FEATURE_TRANSFERS);
@@ -281,10 +748,9 @@ contract('GemERC721', function(accounts) {
 		// verify token ownership transfer date
 		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer2");
 	});
-
 	it("unsafe transfer: transferring own token using transferFrom", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// enable transfers
 		await tk.updateFeatures(FEATURE_TRANSFERS);
@@ -330,9 +796,9 @@ contract('GemERC721', function(accounts) {
 
 	it("safe transfer: transferring a token", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 		// another instance will be used to verify ERC721 Receiver requirement
-		const blackHole = await Token.new();
+		const blackHole = await deployToken();
 		// ERC721 valid receiver
 		const erc721Rc = (await ERC721Receiver.new()).address;
 
@@ -394,7 +860,7 @@ contract('GemERC721', function(accounts) {
 
 	it("approvals: grant and revoke token approval", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// some accounts to work with
 		const account1 = accounts[1];
@@ -461,7 +927,7 @@ contract('GemERC721', function(accounts) {
 
 	it("approvals: add and remove operator", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// some accounts to work with
 		const account1 = accounts[1];
@@ -481,10 +947,9 @@ contract('GemERC721', function(accounts) {
 		// verify approval state
 		assert(!await tk.isApprovedForAll(account1, operator), "operator is still approved to act on behalf of account1");
 	});
-
 	it("approvals: operator in action", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// enable transfers on behalf
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
@@ -538,7 +1003,7 @@ contract('GemERC721', function(accounts) {
 
 	it("transfer on behalf: transferring a token", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// enable transfers on behalf
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
@@ -604,9 +1069,9 @@ contract('GemERC721', function(accounts) {
 
 	it("safe transfer on behalf: transferring a token", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 		// another instance will be used to verify ERC721 Receiver requirement
-		const blackHole = await Token.new();
+		const blackHole = await deployToken();
 		// ERC721 valid receiver
 		const erc721Rc = (await ERC721Receiver.new()).address;
 
@@ -687,463 +1152,8 @@ contract('GemERC721', function(accounts) {
 		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer3");
 	});
 
-	it("security: changing token state requires ROLE_STATE_PROVIDER role", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// non-admin account to act on behalf of
-		const account1 = accounts[1];
-
-		// mint some token
-		await mint1(tk, account1);
-
-		// define a function to check
-		const fn = async() => await tk.setState(token1, 1, {from: account1});
-
-		// ensure function fails if account has no role required
-		await assertThrows(fn);
-
-		// give a permission required to the account
-		await tk.updateRole(account1, ROLE_STATE_PROVIDER);
-
-		// verify that given the permissions required function doesn't fail
-		await fn();
-	});
-	it("security: modifying transfer lock requires ROLE_TRANSFER_LOCK_PROVIDER role", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// non-admin account to act on behalf of
-		const account1 = accounts[1];
-
-		// transfer lock value to set
-		const lock = Math.floor(Math.random() * 4294967296);
-
-		// define a function to check
-		const fn = async() => await tk.setTransferLock(lock, {from: account1});
-
-		// ensure function fails if account has no role required
-		await assertThrows(fn);
-
-		// give a permission required to the account
-		await tk.updateRole(account1, ROLE_TRANSFER_LOCK_PROVIDER);
-
-		// verify that given the permissions required function doesn't fail
-		await fn();
-
-		// verify transfer lock was set correctly
-		assert.equal(lock, await tk.transferLock(), "incorrect value for transfer lock");
-	});
-
-	it("state: modify token state and check", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// some random state value
-		const state = Math.floor(Math.random() * 4294967296);
-
-		// a function to set new token state
-		const setState = async() => await tk.setState(token1, state);
-
-		// impossible to set state for non-existent token
-		await assertThrows(setState);
-
-		// create one token
-		await mint1(tk, accounts[1]);
-
-		// first time setting a state succeeds
-		await setState();
-
-		// next time setting a state succeeds again - state modification date only
-		await setState();
-
-		// verify new state
-		assert.equal(state, await tk.getState(token1), "wrong token1 state");
-
-		// verify state modification date
-		assert(await tk.getStateModified(token1) > now, "wrong token1 state modification date");
-	});
-
-	it("transfer locking: impossible to transfer locked token", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// enable transfers
-		await tk.updateFeatures(FEATURE_TRANSFERS);
-
-		// some accounts to work with
-		const account1 = accounts[1];
-		const account2 = accounts[2];
-
-		// define transfer token functions
-		const transfer1 = async() => await tk.transfer(account2, token1, {from: account1});
-
-		// create one token
-		await mint1(tk, account1);
-
-		// set token state to 2
-		await tk.setState(token1, 2);
-
-		// set token transfer lock to 2 as well
-		await tk.setTransferLock(2);
-
-		// ensure token cannot be transferred
-		assert(!await tk.isTransferable(token1), "token1 is still transferable");
-
-		// locked token (state & transferLock != 0) cannot be transferred
-		await assertThrows(transfer1);
-
-		// set token transfer lock to 4
-		await tk.setTransferLock(4);
-
-		// ensure token can be transferred
-		assert(await tk.isTransferable(token1), "token1 is not transferable");
-		// once token is unlocked (state & transferLock == 0) it can be transferred
-		await transfer1();
-		// verify token ownership
-		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
-		// verify token ownership transfer date
-		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
-	});
-	it("transfer locking: change transfer lock and check", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// some random transfer lock value
-		const lock = Math.floor(Math.random() * 4294967296);
-
-		// a function to set transfer lock
-		const setLock = async() => await tk.setTransferLock(lock);
-
-		// first time setting a lock succeeds
-		const gasUsed1 = (await setLock()).receipt.gasUsed;
-
-		// next time setting a lock succeeds again,
-		// but doesn't modify storage, so the gas consumption is low
-		const gasUsed2 = (await setLock()).receipt.gasUsed;
-
-		// verify gas consumption is at least 5,000 lower
-		assert(gasUsed1 - gasUsed2 >= 5000, "wrong gas consumption difference");
-
-		// verify new transfer lock
-		assert.equal(lock, await tk.transferLock(), "wrong transfer lock");
-	});
-
-	it("mint: creating a token", async function() {
-		const tk = await Token.new();
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, grade1);
-		await assertThrows(tk.mint, accounts[0], 0x000, 1, 1, 1, grade1);
-		await assertThrows(tk.mint, accounts[0], 0x401, 1, 1, 1, grade1);
-		await assertThrows(tk.mint, 0, 0x402, 1, 1, 1, grade1);
-		await assertThrows(tk.mint, tk.address, 0x403, 1, 1, 1, grade1);
-		assert.equal(1, await tk.totalSupply(), "wrong totalSupply value after minting a token");
-		await assertThrows(tk.mint, accounts[1], 0x402, 1, 1, 1, grade1, {from: accounts[1]});
-		await tk.mint(accounts[1], 0x402, 1, 1, 1, grade1);
-		assert.equal(2, await tk.totalSupply(), "wrong totalSupply value after minting two tokens");
-		assert.equal(1, await tk.balanceOf(accounts[0]), accounts[0] + " has wrong balance after minting a token");
-		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " has wrong balance after minting a token");
-		assert.equal(0, await tk.balanceOf(accounts[2]), accounts[2] + " has wrong initial balance");
-	});
-
-	// BEGIN: legacy tests section
-	it("transfer: transferring a token", async function() {
-		const tk = await Token.new();
-		await tk.updateFeatures(FEATURE_TRANSFERS);
-		const fn = async () => await tk.transfer(accounts[1], 0x401);
-		await assertThrows(fn);
-		await tk.updateFeatures(0);
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		assert.equal(1, await tk.balanceOf(accounts[0]), accounts[0] + " wrong balance before token transfer");
-		assert.equal(0, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
-		await assertThrows(fn);
-		await tk.updateFeatures(FEATURE_TRANSFERS);
-		await assertThrows(tk.transfer, 0x0, 0x401);
-		await assertThrows(tk.transfer, accounts[0], 0x401);
-		await fn();
-		assert.equal(0, await tk.balanceOf(accounts[0]), accounts[0] + " wrong balance after token transfer");
-		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " wrong balance before token transfer");
-		assert.equal(accounts[1], await tk.ownerOf(0x401), "wrong token 0x401 owner after token transfer");
-	});
-	it("transfer: transferring a locked token", async function() {
-		const tk = await Token.new();
-		await tk.updateFeatures(FEATURE_TRANSFERS);
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		await tk.mint(accounts[0], 0x402, 1, 1, 1, 1);
-		await assertThrows(tk.setTransferLock, 0x1, {from: accounts[1]});
-		await tk.setTransferLock(0x1);
-		await tk.setState(0x401, 0x1);
-		await tk.setState(0x402, 0x1);
-		const fn1 = async () => await tk.transfer(accounts[1], 0x401);
-		const fn2 = async () => await tk.transfer(accounts[1], 0x402);
-		await assertThrows(fn1);
-		await assertThrows(fn2);
-		await tk.setState(0x401, 0x2);
-		await fn1();
-		await tk.setTransferLock(0x2);
-		await fn2();
-		const fn = async () => await tk.transfer(accounts[2], 0x401, {from: accounts[1]});
-		await assertThrows(fn);
-		await tk.setTransferLock(0x3);
-		await assertThrows(fn);
-		await tk.setTransferLock(0x4);
-		await fn();
-		assert.equal(accounts[1], await tk.ownerOf(0x402), "wrong token 0x402 owner");
-		assert.equal(accounts[2], await tk.ownerOf(0x401), "wrong token 0x401 owner");
-	});
-
-	it("transferFrom: transferring on behalf", async function() {
-		const tk = await Token.new();
-		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
-		await tk.mint(accounts[1], 0x401, 1, 1, 1, 1);
-		await tk.mint(accounts[0], 0x402, 1, 1, 1, 1);
-		const fn1 = async () => await tk.transferFrom(accounts[1], accounts[2], 0x401);
-		await assertThrows(tk.approve, accounts[0], 0x401);
-		await assertThrows(tk.approve, accounts[0], 0x402);
-		await assertThrows(fn1);
-		await tk.approve(accounts[0], 0x401, {from: accounts[1]});
-		await tk.revokeApproval(0x401, {from: accounts[1]});
-		await assertThrows(tk.revokeApproval, 0x401, {from: accounts[1]});
-		await tk.approve(accounts[0], 0x401, {from: accounts[1]});
-		await fn1();
-		await tk.updateFeatures(FEATURE_TRANSFERS);
-		await tk.approve(accounts[2], 0x402);
-		const fn = async () => await tk.transferFrom(accounts[0], accounts[1], 0x402, {from: accounts[2]});
-		await tk.updateFeatures(FEATURE_TRANSFERS);
-		await assertThrows(fn);
-		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
-		await fn();
-		assert.equal(accounts[1], await tk.ownerOf(0x402), "wrong token 0x402 owner after transfer on behalf");
-		assert.equal(accounts[2], await tk.ownerOf(0x401), "wrong token 0x401 owner after transfer on behalf");
-	});
-
-	it("safeTransferFrom: safe transfer token to address", async function() {
-		const tk = await Token.new();
-		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		await tk.safeTransferFrom(accounts[0], accounts[1], 0x401);
-		assert.equal(accounts[1], await tk.ownerOf(0x401), "token 0x401 has wrong owner after safely transferring it");
-	});
-	it("safeTransferFrom: impossible to safe transfer to a smart contract", async function() {
-		const tk = await Token.new();
-		const another = await Token.new();
-		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		await assertThrows(tk.safeTransferFrom, accounts[0], another.address, 0x401);
-		await assertThrows(tk.safeTransferFrom, accounts[0], tk.address, 0x401);
-		assert.equal(accounts[0], await tk.ownerOf(0x401), "card 0x401 has wrong owner after bad attempt to transfer it");
-		await tk.safeTransferFrom(accounts[0], accounts[1], 0x401);
-		assert.equal(accounts[1], await tk.ownerOf(0x401), "token 0x401 has wrong owner after safely transferring it");
-	});
-
-	it("approve: approve and transfer on behalf", async function () {
-		const tk = await Token.new();
-		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		await tk.mint(accounts[0], 0x402, 1, 1, 1, 1);
-		await tk.mint(accounts[0], 0x403, 1, 1, 1, 1);
-		await assertThrows(tk.approve, 0x0, 0x0);
-		await assertThrows(tk.approve, accounts[0], 0x401);
-		await tk.approve(accounts[1], 0x401);
-		await tk.approve(accounts[1], 0x402);
-		assert.equal(accounts[1], await tk.getApproved(0x401), "wrong approved operator for token 0x401");
-		await tk.transferFrom(accounts[0], accounts[1], 0x401, {from: accounts[1]});
-		await tk.transferFrom(accounts[0], accounts[1], 0x402, {from: accounts[1]});
-		assert.equal(0, await tk.getApproved(0x401), "wrong approved operator for token 0x401 after transfer");
-	});
-	it("approve: approve all and transfer on behalf", async function () {
-		const tk = await Token.new();
-		await tk.updateFeatures(ROLE_TOKEN_CREATOR | FEATURE_TRANSFERS_ON_BEHALF);
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		await tk.mint(accounts[0], 0x402, 1, 1, 1, 1);
-		await tk.mint(accounts[0], 0x403, 1, 1, 1, 1);
-		await assertThrows(tk.setApprovalForAll, 0x0, true);
-		await assertThrows(tk.setApprovalForAll, accounts[0], true);
-		await tk.setApprovalForAll(accounts[1], true);
-		await tk.transferFrom(accounts[0], accounts[1], 0x401, {from: accounts[1]});
-		await tk.transferFrom(accounts[0], accounts[1], 0x402, {from: accounts[1]});
-		assert(await tk.isApprovedForAll(accounts[0], accounts[1]), "should be approved operator");
-		await tk.setApprovalForAll(accounts[1], false);
-		assert(!await tk.isApprovedForAll(accounts[0], accounts[1]), "should not be approved operator");
-	});
-	// END: legacy tests section
-
-	it("level up: full cycle", async function() {
-		const tk = await Token.new();
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		await tk.levelUpBy(0x401, 1);
-		assert.equal(2, await tk.getLevel(0x401), "wrong gem 0x401 level after leveling up");
-		await assertThrows(tk.levelUpBy, 0x402, 1);
-		await assertThrows(tk.levelUpBy, 0x402, 1, {from: accounts[1]});
-	});
-
-	it("update grade: full cycle", async function() {
-		const tk = await Token.new();
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		await tk.upgrade(0x401, 0x01000002);
-		assert.equal(0x01000002, await tk.getGrade(0x401), "wrong gem 0x401 grade after modifying a grade");
-		assert.equal(0x01, await tk.getGradeType(0x401), "wrong gem 0x401 grade level after modifying a grade");
-		assert.equal(0x02, await tk.getGradeValue(0x401), "wrong gem 0x401 grade value after modifying a grade");
-		await assertThrows(tk.upgrade, 0x401, 0x01000002);
-		await assertThrows(tk.upgrade, 0x402, 0x01000003);
-		await assertThrows(tk.upgrade, 0x401, 0x01000003, {from: accounts[1]});
-		await tk.upgrade(0x401, 0x01000003);
-	});
-
-	it("set state: full cycle", async function() {
-		const tk = await Token.new();
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		await tk.setState(0x401, 0x0102);
-		assert.equal(0x0102, await tk.getState(0x401), "wrong gem 0x401 state after setting a state");
-		await assertThrows(tk.setState, 0x402, 0x0103);
-		await assertThrows(tk.setState, 0x401, 0x0103, {from: accounts[1]});
-		await tk.setState(0x401, 0x0103);
-	});
-
-	it("security: incNextId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
-		// deploy token
-		const tk = await Token.new();
-
-		// define an address to act as an operator
-		const operator = accounts[1];
-
-		// define the function to check permissions for
-		const fn = async() => await tk.incNextId({from: operator});
-
-		// initially fn throws
-		await assertThrows(fn);
-		// after setting the required permission to operator
-		await tk.updateRole(operator, ROLE_NEXT_ID_PROVIDER);
-		// fn succeeds
-		await fn();
-
-		// next Id counter incremented by one
-		assert.equal(0x12501, await tk.nextId(), "wrong nextId counter value");
-	});
-	it("security: setNextId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
-		// deploy token
-		const tk = await Token.new();
-
-		// define an address to act as an operator
-		const operator = accounts[1];
-
-		// define the function to check permissions for
-		const fn = async() => await tk.setNextId(1, {from: operator});
-
-		// initially fn throws
-		await assertThrows(fn);
-		// after setting the required permission to operator
-		await tk.updateRole(operator, ROLE_NEXT_ID_PROVIDER);
-		// fn succeeds
-		await fn();
-
-		// next Id counter incremented by one
-		assert.equal(1, await tk.nextId(), "wrong nextId counter value");
-	});
-	it("security: incNextId/setNextId arithmetic overflow checks", async() => {
-		// deploy token
-		const tk = await Token.new();
-
-		// define the function to check permissions for
-		const fn1 = async() => await tk.setNextId(16777214);
-		const fn2 = async() => await tk.incNextId();
-		const fn3 = async() => await tk.setNextId(0);
-
-		// fn3 always throws
-		await assertThrows(fn3);
-		// fn1 and fn2 initially succeed
-		await fn1();
-		await fn2();
-
-		// now counter is 16777215 and is ready to overflow
-		await assertThrows(fn2);
-		// fn3 always throws
-		await assertThrows(fn3);
-
-		// fn2 succeed again after call to fn1
-		await fn1();
-		await fn2();
-
-		// next Id counter reached its maximum
-		assert.equal(16777215, await tk.nextId(), "wrong nextId counter value");
-	});
-	it("security: write requires ROLE_EXT_WRITER permission", async() => {
-		// deploy token
-		const tk = await Token.new();
-
-		// define an address to act as an operator
-		const operator = accounts[1];
-
-		// define the function to check permissions for
-		const fn = async() => await tk.write(1, 17, 0, 8, {from: operator});
-
-		// initially fn throws
-		await assertThrows(fn);
-		// after setting the required permission to operator
-		await tk.updateRole(operator, ROLE_EXT_WRITER);
-		// fn succeeds
-		await fn();
-
-		// verify read returns 17
-		assert.equal(17, await tk.read(1, 0, 8), "wrong value read");
-	});
-
-	it("read/write: verify integrity of read/write operation", async() => {
-		// deploy token
-		const tk = await Token.new();
-
-		// operate on the first bit
-		assert.equal(0, await tk.read(1, 0, 1), "wrong read 0, 0/1");
-		await tk.write(1, 1, 0, 1);
-		assert.equal(1, await tk.read(1, 0, 1), "wrong read 1, 0/1");
-
-		// operate on the first byte
-		assert.equal(1, await tk.read(1, 0, 8), "wrong read 0, 0/8");
-		await tk.write(1, 17, 0, 8); // 0x11
-		assert.equal(17, await tk.read(1, 0, 8), "wrong read 1, 0/8");
-
-		// operate on the n-th byte
-		assert.equal(0, await tk.read(1, 16, 8), "wrong read 0, 16/8");
-		await tk.write(1, 117, 16, 8); // 0x750000
-		assert.equal(117, await tk.read(1, 16, 8), "wrong read 1, 16/8");
-
-		// operate on n-th bits
-		assert.equal(0, await tk.read(1, 7, 5), "wrong read 0, 7/5");
-		await tk.write(1, 112, 7, 5); // 112 will be truncated to 5 bits which is 16
-		assert.equal(16, await tk.read(1, 7, 5), "wrong read 1, 7/5");
-		assert.equal(16, await tk.read(1, 7, 8), "wrong read 2, 7/8");
-		await tk.write(1, 112, 7, 8); // 0x3800
-		assert.equal(16, await tk.read(1, 7, 5), "wrong read 3, 171/5");
-		assert.equal(112, await tk.read(1, 7, 8), "wrong read 4, 171/8");
-
-		// erase some bits
-		assert.equal(0, await tk.read(1, 24, 32), "wrong read 0, 32/32");
-		await tk.write(1, 65537, 24, 32); // write 0x00010001000000
-		await tk.write(1, 0, 40, 16); // erase high 16 bits of the written data - 0x00010000
-		assert.equal(1, await tk.read(1, 24, 32), "wrong read 1, 32/32");
-
-		// verify whole number
-		assert.equal(0x1753811, await tk.read(1, 0, 256), "wrong whole read");
-
-		// perform few random read/write operations
-		for(let i = 0; i < 32; i++) {
-			const value = Math.floor(Math.random() * 256);
-			const offset = Math.floor(Math.random() * 248);
-			const length = Math.ceil(Math.random() * 8);
-			await tk.write(1, value, offset, length);
-			assert.equal(
-				value & ((1 << length) - 1),
-				await tk.read(1, offset, length),
-				`wrong read ${i}, ${value}/${offset}/${length}`
-			);
-		}
-		console.log(`\t0x${(await tk.read(1, 0, 0)).toString(16)}`);
-
-		// erase everything
-		await tk.write(1, 0, 0, 256);
-		assert.equal(0, await tk.read(1, 0, 0), "wrong read 1, 0/0 (after erase)");
-	});
 });
 
 
-// import auxiliary function to ensure function `fn` throws
+// import auxiliary functions
 import {assertThrows, assertArraysEqual, toBN} from "../scripts/shared_functions";

@@ -24,6 +24,7 @@ const BOX_TYPES = ["Silver Box", "Rotund Silver Box", "Goldish Silver Box"];
 // Minimum and maximum amounts of silver in the boxes
 const SILVER_MIN = [20, 70, 150, 100];
 const SILVER_MAX = [30, 90, 200, 120];
+const SILVER_AVG = SILVER_MIN.map((e, i) => (e + SILVER_MAX[i]) / 2);
 
 // Chances of getting one piece of gold in Goldish Silver Box, percent
 const GOLD_PROBABILITY = 42; // 42%
@@ -63,10 +64,13 @@ contract('SilverSale (RND)', (accounts) => {
 			const goldPieces = unboxResult[1].toNumber();
 
 			// expected silver average
-			const expectedSilver = n * silverAverage(i);
+			const expectedSilver = n * SILVER_AVG[i];
 
 			// verify the results
-			assertEqual(expectedSilver, silverPieces, "silver avg not in expected bounds for " + BOX_TYPES[i]);
+			assert(
+				expectedSilver * 0.9 < silverPieces && silverPieces < expectedSilver * 1.1,
+				"silver avg not in expected bounds for " + BOX_TYPES[i]
+			);
 			assert.equal(0, goldPieces, "non-zero gold pieces for " + BOX_TYPES[i]);
 		}
 	});
@@ -104,26 +108,18 @@ contract('SilverSale (RND)', (accounts) => {
 		const expectedGold = GOLD_PROBABILITY / 100 * n;
 
 		// calculate expected number of silver pieces
-		const expectedSilver = goldPieces * silverAverage(boxType + 1) + (n - goldPieces) * silverAverage(boxType);
+		const expectedSilver = goldPieces * SILVER_AVG[boxType + 1] + (n - goldPieces) * SILVER_AVG[boxType];
 
 		// verify the results
-		assertEqual(expectedSilver, silverPieces, "silver pieces not in expected bounds for " + BOX_TYPES[boxType]);
-		assertEqual(expectedGold, goldPieces, "gold pieces not in expected bounds for " + BOX_TYPES[boxType]);
+		assert(
+			expectedSilver * 0.9 < silverPieces && silverPieces < expectedSilver * 1.1,
+			"silver pieces not in expected bounds for " + BOX_TYPES[boxType]
+		);
+		assert(
+			// 0.6% chance of getting out of the bounds
+			expectedGold * 0.9 < goldPieces && goldPieces < expectedGold * 1.1,
+			"gold pieces not in expected bounds for " + BOX_TYPES[boxType]
+		);
 	});
 });
 
-
-// check if 2 values are equal with a 5% precision
-function assertEqual(expected, actual, msg) {
-	assertEqualWith(expected, actual, 0.05, msg);
-}
-
-// check if 2 values are equal with the 'leeway' precision
-function assertEqualWith(expected, actual, leeway, msg) {
-	assert(expected * (1 - leeway) < actual && expected * (1 + leeway) > actual, msg);
-}
-
-// calculates an arithmetic average between max and min bounds of silver
-function silverAverage(boxType) {
-	return (SILVER_MAX[boxType] + SILVER_MIN[boxType]) / 2;
-}

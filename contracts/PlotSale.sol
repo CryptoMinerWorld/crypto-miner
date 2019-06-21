@@ -58,7 +58,7 @@ contract PlotSale is AccessMultiSig {
    * @dev Expected version (UID) of the deployed CountryERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant COUNTRY_UID_REQUIRED = 0xd4e385d974863e26814816b3604ac1351462df3f07fe434451a4beacd376fad6;
+  uint256 public constant COUNTRY_UID_REQUIRED = 0xcb25803e42674768d12cca47c594df3e4b95a3371e6c941e37daa1be63cc1a7f;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance

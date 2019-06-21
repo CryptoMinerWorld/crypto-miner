@@ -11,9 +11,10 @@ import {
 	InterfaceId_ERC721Metadata,
 	FEATURE_TRANSFERS,
 	FEATURE_TRANSFERS_ON_BEHALF,
+	ROLE_EXT_WRITER,
 	ROLE_TOKEN_CREATOR,
 	ROLE_STATE_PROVIDER,
-	ROLE_TRANSFER_LOCK_PROVIDER
+	ROLE_TRANSFER_LOCK_PROVIDER,
 } from "./erc721_core";
 
 // PlotERC721 specific Features and Roles:
@@ -23,9 +24,7 @@ import {ROLE_OFFSET_PROVIDER} from "./erc721_core";
 // default depth of the land plot
 const DEPTH = 100;
 
-// some token to work with
-const token0 = 1; // first land plot in Antarctica
-const token1 = 65537; // first land plot in Russia
+// token configuration(s)
 const layers0 = [
 	2,
 	0,
@@ -49,9 +48,19 @@ const layers1 = [
 const tiers0 = tiers(layers0);
 const tiers1 = tiers(layers1);
 
+// some tokens to work with
+const token0 = 1; // first land plot in Antarctica
+const token1 = 65537; // first land plot in Russia
+
 // a function to mint some default token
+// returns token1
 async function mint1(tk, acc) {
 	await await tk.mint(acc, 1, tiers1);
+}
+
+// standard function to instantiate token
+async function deployToken() {
+	return await Token.new();
 }
 
 // timestamp right before the test begins
@@ -62,7 +71,7 @@ contract('PlotERC721', (accounts) => {
 
 	it("initial state: initial zero values, supported interfaces", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// some account to work with
 		const account1 = accounts[1];
@@ -100,7 +109,7 @@ contract('PlotERC721', (accounts) => {
 
 	it("initial state: throwable functions", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// some account to work with
 		const account1 = accounts[1];
@@ -171,7 +180,7 @@ contract('PlotERC721', (accounts) => {
 
 	it("integrity: verify minted token data integrity", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// some account to work with
 		const account1 = accounts[1];
@@ -248,9 +257,414 @@ contract('PlotERC721', (accounts) => {
 		assertArraysEqual(fullPacked1, await tk.getPacked(token1), "token1 has wrong packed data");
 	});
 
+	it("security: minting a token requires ROLE_TOKEN_CREATOR role", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// define a function to check
+		const fn = async() => await tk.mint(account1, 1, tiers1, {from: account1});
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_TOKEN_CREATOR);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("security: mining token to requires ROLE_OFFSET_PROVIDER role", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// define a function to check
+		const fn = async() => await tk.mineTo(token1, 1, {from: account1});
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_OFFSET_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("security: mining token by style requires ROLE_OFFSET_PROVIDER role", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// define a function to check
+		const fn = async() => await tk.mineBy(token1, 1, {from: account1});
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_OFFSET_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+
+	it("minting: mint() constraints", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// some valid address
+		const account1 = accounts[1];
+
+		// wrong input parameters fail
+		await assertThrows(tk.mint, tk.address, 1, tiers1);
+		await assertThrows(tk.mint, 0, 1, tiers1);
+		for(let i = 0; i < 5; i++) {
+			await assertThrows(tk.mint, account1, 1, tiers([i, 0, 35, 65, 85, 95, DEPTH, 0]));
+		}
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH - 1, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH - 1, DEPTH, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH - 1, DEPTH, DEPTH, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH - 1, DEPTH, DEPTH, DEPTH, 0]));
+
+		// valid inputs
+		await tk.mint(account1, 0, tiers0);
+		await tk.mint(account1, 1, tiers1);
+
+		// minting in same country is still possible
+		await tk.mint(account1, 0, tiers0);
+		await tk.mint(account1, 1, tiers1);
+		await tk.mint(account1, 1, tiers0);
+		await tk.mint(account1, 0, tiers1);
+	});
+
+	it("mining: mine to token and check", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// a function to mine token to some offset
+		const mineTo = async() => await tk.mineTo(token1, 1);
+
+		// impossible to mine non-existent token
+		await assertThrows(mineTo);
+
+		// create one token
+		await mint1(tk, accounts[1]);
+
+		// first time mining to succeeds
+		await mineTo();
+
+		// next time mining to fails (offset 1 already reached)
+		await assertThrows(mineTo);
+
+		// decreasing token offset is also impossible
+		await assertThrows(tk.mineTo, token1, 0);
+
+		// verify new offset
+		assert.equal(1, await tk.getOffset(token1), "wrong token1 offset");
+
+		// verify offset modification date
+		assert(await tk.getOffsetModified(token1) > now, "wrong token1 offset modification date");
+	});
+	it("mining: mine by token and check", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// a function to mine token by some depth
+		const mineBy = async() => await tk.mineBy(token1, 55);
+
+		// impossible to mine non-existent token
+		await assertThrows(mineBy);
+
+		// create one token
+		await mint1(tk, accounts[1]);
+
+		// first time mining by succeeds
+		await mineBy();
+
+		// next time mining by fails (token is already mined to depth 55 and cannot go to 110)
+		await assertThrows(mineBy);
+
+		// mining by zero is also impossible
+		await assertThrows(tk.mineBy, token1, 0);
+
+		// verify new offset
+		assert.equal(55, await tk.getOffset(token1), "wrong token1 offset");
+
+		// verify offset modification date
+		assert(await tk.getOffsetModified(token1) > now, "wrong token1 offset modification date");
+	});
+	it("mining: all the way to the bottom", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// create two tokens
+		await tk.mint(accounts[1], 0, tiers0);
+		await tk.mint(accounts[1], 1, tiers1);
+
+		// perform several random mines to reach the very bottom of both tokens
+		for(let offset = 0, delta; offset < DEPTH; offset += delta) {
+			delta = Math.min(Math.ceil(Math.random() * DEPTH), DEPTH - offset);
+			await tk.mineBy(token0, delta);
+			await tk.mineTo(token1, offset + delta);
+		}
+
+		// ensure mining is not possible anymore
+		await assertThrows(tk.mineBy, token0, 1);
+		await assertThrows(tk.mineTo, token1, DEPTH);
+		await assertThrows(tk.mineTo, token1, DEPTH + 1);
+
+		// verify both tokens are fully mined
+		assert(await tk.isFullyMined(token0), "token0 is not fully mined");
+		assert(await tk.isFullyMined(token1), "token1 is not fully mined");
+		assert.equal(DEPTH, await tk.getOffset(token0), "token0 offset is different from DEPTH");
+		assert.equal(DEPTH, await tk.getOffset(token1), "token1 offset is different from DEPTH");
+	});
+
+
+	// ========== ERC721 Locking tests ==========
+
+	it("state: changing token state requires ROLE_STATE_PROVIDER role", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// define a function to check
+		const fn = async() => await tk.setState(token1, 1, {from: account1});
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_STATE_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("state: modify token state and check", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// some random state value
+		const state = Math.floor(Math.random() * 4294967296);
+
+		// a function to set new token state
+		const setState = async() => await tk.setState(token1, state);
+
+		// impossible to set state for non-existent token
+		await assertThrows(setState);
+
+		// create one token
+		await mint1(tk, accounts[1]);
+
+		// first time setting a state succeeds
+		await setState();
+
+		// next time setting a state succeeds again - state modification date only
+		await setState();
+
+		// verify new state
+		assert.equal(state, await tk.getState(token1), "wrong token1 state");
+
+		// verify state modification date
+		assert(await tk.getStateModified(token1) > now, "wrong token1 state modification date");
+	});
+
+	it("transfer locking: modifying transfer lock requires ROLE_TRANSFER_LOCK_PROVIDER role", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// transfer lock value to set
+		const lock = Math.floor(Math.random() * 4294967296);
+
+		// define a function to check
+		const fn = async() => await tk.setTransferLock(lock, {from: account1});
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_TRANSFER_LOCK_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+
+		// verify transfer lock was set correctly
+		assert.equal(lock, await tk.transferLock(), "incorrect value for transfer lock");
+	});
+	it("transfer locking: impossible to transfer locked token", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// enable transfers
+		await tk.updateFeatures(FEATURE_TRANSFERS);
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const account2 = accounts[2];
+
+		// define transfer token functions
+		const transfer1 = async() => await tk.transfer(account2, token1, {from: account1});
+
+		// create one token
+		await mint1(tk, account1);
+
+		// set token state to 2
+		await tk.setState(token1, 2);
+
+		// set token transfer lock to 2 as well
+		await tk.setTransferLock(2);
+
+		// ensure token cannot be transferred
+		assert(!await tk.isTransferable(token1), "token1 is still transferable");
+
+		// locked token (state & transferLock != 0) cannot be transferred
+		await assertThrows(transfer1);
+
+		// set token transfer lock to 4
+		await tk.setTransferLock(4);
+
+		// ensure token can be transferred
+		assert(await tk.isTransferable(token1), "token1 is not transferable");
+		// once token is unlocked (state & transferLock == 0) it can be transferred
+		await transfer1();
+		// verify token ownership
+		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
+		// verify token ownership transfer date
+		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
+	});
+	it("transfer locking: change transfer lock and check", async() => {
+		// analogue to smart contract deployment
+		const tk = await deployToken();
+
+		// some random transfer lock value
+		const lock = Math.floor(Math.random() * 4294967296);
+
+		// a function to set transfer lock
+		const setLock = async() => await tk.setTransferLock(lock);
+
+		// first time setting a lock succeeds
+		const gasUsed1 = (await setLock()).receipt.gasUsed;
+
+		// next time setting a lock succeeds again,
+		// but doesn't modify storage, so the gas consumption is low
+		const gasUsed2 = (await setLock()).receipt.gasUsed;
+
+		// verify gas consumption is at least 5,000 lower
+		assert(gasUsed1 - gasUsed2 >= 5000, "wrong gas consumption difference");
+
+		// verify new transfer lock
+		assert.equal(lock, await tk.transferLock(), "wrong transfer lock");
+	});
+
+	// ========== ERC721 ext256 tests ==========
+
+	it("ext256: write requires ROLE_EXT_WRITER permission", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// define an address to act as an operator
+		const operator = accounts[1];
+
+		// define the function to check permissions for
+		const fn = async() => await tk.write(1, 17, 0, 8, {from: operator});
+
+		// initially fn throws
+		await assertThrows(fn);
+		// after setting the required permission to operator
+		await tk.updateRole(operator, ROLE_EXT_WRITER);
+		// fn succeeds
+		await fn();
+
+		// verify read returns 17
+		assert.equal(17, await tk.read(1, 0, 8), "wrong value read");
+	});
+	it("ext265: verify integrity of read/write operation", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// operate on the first bit
+		assert.equal(0, await tk.read(1, 0, 1), "wrong read 0, 0/1");
+		await tk.write(1, 1, 0, 1);
+		assert.equal(1, await tk.read(1, 0, 1), "wrong read 1, 0/1");
+
+		// operate on the first byte
+		assert.equal(1, await tk.read(1, 0, 8), "wrong read 0, 0/8");
+		await tk.write(1, 17, 0, 8); // 0x11
+		assert.equal(17, await tk.read(1, 0, 8), "wrong read 1, 0/8");
+
+		// operate on the n-th byte
+		assert.equal(0, await tk.read(1, 16, 8), "wrong read 0, 16/8");
+		await tk.write(1, 117, 16, 8); // 0x750000
+		assert.equal(117, await tk.read(1, 16, 8), "wrong read 1, 16/8");
+
+		// operate on n-th bits
+		assert.equal(0, await tk.read(1, 7, 5), "wrong read 0, 7/5");
+		await tk.write(1, 112, 7, 5); // 112 will be truncated to 5 bits which is 16
+		assert.equal(16, await tk.read(1, 7, 5), "wrong read 1, 7/5");
+		assert.equal(16, await tk.read(1, 7, 8), "wrong read 2, 7/8");
+		await tk.write(1, 112, 7, 8); // 0x3800
+		assert.equal(16, await tk.read(1, 7, 5), "wrong read 3, 171/5");
+		assert.equal(112, await tk.read(1, 7, 8), "wrong read 4, 171/8");
+
+		// erase some bits
+		assert.equal(0, await tk.read(1, 24, 32), "wrong read 0, 32/32");
+		await tk.write(1, 65537, 24, 32); // write 0x00010001000000
+		await tk.write(1, 0, 40, 16); // erase high 16 bits of the written data - 0x00010000
+		assert.equal(1, await tk.read(1, 24, 32), "wrong read 1, 32/32");
+
+		// verify whole number
+		assert.equal(0x1753811, await tk.read(1, 0, 256), "wrong whole read");
+
+		// perform few random read/write operations
+		for(let i = 0; i < 32; i++) {
+			const value = Math.floor(Math.random() * 256);
+			const offset = Math.floor(Math.random() * 248);
+			const length = Math.ceil(Math.random() * 8);
+			await tk.write(1, value, offset, length);
+			assert.equal(
+				value & ((1 << length) - 1),
+				await tk.read(1, offset, length),
+				`wrong read ${i}, ${value}/${offset}/${length}`
+			);
+		}
+		console.log(`\t0x${(await tk.read(1, 0, 0)).toString(16)}`);
+
+		// erase everything
+		await tk.write(1, 0, 0, 256);
+		assert.equal(0, await tk.read(1, 0, 0), "wrong read 1, 0/0 (after erase)");
+	});
+
+	// ---------- ERC721 tests ----------
+
 	it("unsafe transfer: transferring a token", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// enable transfers
 		await tk.updateFeatures(FEATURE_TRANSFERS);
@@ -300,7 +714,7 @@ contract('PlotERC721', (accounts) => {
 
 	it("unsafe transfer: transferring own token using transferFrom", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// enable transfers
 		await tk.updateFeatures(FEATURE_TRANSFERS);
@@ -346,9 +760,9 @@ contract('PlotERC721', (accounts) => {
 
 	it("safe transfer: transferring a token", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 		// another instance will be used to verify ERC721 Receiver requirement
-		const blackHole = await Token.new();
+		const blackHole = await deployToken();
 		// ERC721 valid receiver
 		const erc721Rc = (await ERC721Receiver.new()).address;
 
@@ -410,7 +824,7 @@ contract('PlotERC721', (accounts) => {
 
 	it("approvals: grant and revoke token approval", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// some accounts to work with
 		const account1 = accounts[1];
@@ -477,7 +891,7 @@ contract('PlotERC721', (accounts) => {
 
 	it("approvals: add and remove operator", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// some accounts to work with
 		const account1 = accounts[1];
@@ -500,7 +914,7 @@ contract('PlotERC721', (accounts) => {
 
 	it("approvals: operator in action", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// enable transfers on behalf
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
@@ -554,7 +968,7 @@ contract('PlotERC721', (accounts) => {
 
 	it("transfer on behalf: transferring a token", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 
 		// enable transfers on behalf
 		await tk.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
@@ -620,9 +1034,9 @@ contract('PlotERC721', (accounts) => {
 
 	it("safe transfer on behalf: transferring a token", async() => {
 		// analogue to smart contract deployment
-		const tk = await Token.new();
+		const tk = await deployToken();
 		// another instance will be used to verify ERC721 Receiver requirement
-		const blackHole = await Token.new();
+		const blackHole = await deployToken();
 		// ERC721 valid receiver
 		const erc721Rc = (await ERC721Receiver.new()).address;
 
@@ -703,329 +1117,11 @@ contract('PlotERC721', (accounts) => {
 		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer3");
 	});
 
-	it("security: minting a token requires ROLE_TOKEN_CREATOR role", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// non-admin account to act on behalf of
-		const account1 = accounts[1];
-
-		// define a function to check
-		const fn = async() => await tk.mint(account1, 1, tiers1, {from: account1});
-
-		// ensure function fails if account has no role required
-		await assertThrows(fn);
-
-		// give a permission required to the account
-		await tk.updateRole(account1, ROLE_TOKEN_CREATOR);
-
-		// verify that given the permissions required function doesn't fail
-		await fn();
-	});
-	it("security: mining token to requires ROLE_OFFSET_PROVIDER role", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// non-admin account to act on behalf of
-		const account1 = accounts[1];
-
-		// mint some token
-		await mint1(tk, account1);
-
-		// define a function to check
-		const fn = async() => await tk.mineTo(token1, 1, {from: account1});
-
-		// ensure function fails if account has no role required
-		await assertThrows(fn);
-
-		// give a permission required to the account
-		await tk.updateRole(account1, ROLE_OFFSET_PROVIDER);
-
-		// verify that given the permissions required function doesn't fail
-		await fn();
-	});
-	it("security: mining token by style requires ROLE_OFFSET_PROVIDER role", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// non-admin account to act on behalf of
-		const account1 = accounts[1];
-
-		// mint some token
-		await mint1(tk, account1);
-
-		// define a function to check
-		const fn = async() => await tk.mineBy(token1, 1, {from: account1});
-
-		// ensure function fails if account has no role required
-		await assertThrows(fn);
-
-		// give a permission required to the account
-		await tk.updateRole(account1, ROLE_OFFSET_PROVIDER);
-
-		// verify that given the permissions required function doesn't fail
-		await fn();
-	});
-	it("security: changing token state requires ROLE_STATE_PROVIDER role", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// non-admin account to act on behalf of
-		const account1 = accounts[1];
-
-		// mint some token
-		await mint1(tk, account1);
-
-		// define a function to check
-		const fn = async() => await tk.setState(token1, 1, {from: account1});
-
-		// ensure function fails if account has no role required
-		await assertThrows(fn);
-
-		// give a permission required to the account
-		await tk.updateRole(account1, ROLE_STATE_PROVIDER);
-
-		// verify that given the permissions required function doesn't fail
-		await fn();
-	});
-	it("security: modifying transfer lock requires ROLE_TRANSFER_LOCK_PROVIDER role", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// non-admin account to act on behalf of
-		const account1 = accounts[1];
-
-		// transfer lock value to set
-		const lock = Math.floor(Math.random() * 4294967296);
-
-		// define a function to check
-		const fn = async() => await tk.setTransferLock(lock, {from: account1});
-
-		// ensure function fails if account has no role required
-		await assertThrows(fn);
-
-		// give a permission required to the account
-		await tk.updateRole(account1, ROLE_TRANSFER_LOCK_PROVIDER);
-
-		// verify that given the permissions required function doesn't fail
-		await fn();
-
-		// verify transfer lock was set correctly
-		assert.equal(lock, await tk.transferLock(), "incorrect value for transfer lock");
-	});
-
-	it("state: modify token state and check", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// some random state value
-		const state = Math.floor(Math.random() * 4294967296);
-
-		// a function to set new token state
-		const setState = async() => await tk.setState(token1, state);
-
-		// impossible to set state for non-existent token
-		await assertThrows(setState);
-
-		// create one token
-		await mint1(tk, accounts[1]);
-
-		// first time setting a state succeeds
-		await setState();
-
-		// next time setting a state succeeds again - state modification date only
-		await setState();
-
-		// verify new state
-		assert.equal(state, await tk.getState(token1), "wrong token1 state");
-
-		// verify state modification date
-		assert(await tk.getStateModified(token1) > now, "wrong token1 state modification date");
-	});
-
-	it("transfer locking: impossible to transfer locked token", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// enable transfers
-		await tk.updateFeatures(FEATURE_TRANSFERS);
-
-		// some accounts to work with
-		const account1 = accounts[1];
-		const account2 = accounts[2];
-
-		// define transfer token functions
-		const transfer1 = async() => await tk.transfer(account2, token1, {from: account1});
-
-		// create one token
-		await mint1(tk, account1);
-
-		// set token state to 2
-		await tk.setState(token1, 2);
-
-		// set token transfer lock to 2 as well
-		await tk.setTransferLock(2);
-
-		// ensure token cannot be transferred
-		assert(!await tk.isTransferable(token1), "token1 is still transferable");
-
-		// locked token (state & transferLock != 0) cannot be transferred
-		await assertThrows(transfer1);
-
-		// set token transfer lock to 4
-		await tk.setTransferLock(4);
-
-		// ensure token can be transferred
-		assert(await tk.isTransferable(token1), "token1 is not transferable");
-		// once token is unlocked (state & transferLock == 0) it can be transferred
-		await transfer1();
-		// verify token ownership
-		assert.equal(account2, await tk.ownerOf(token1), "wrong token1 owner after transfer1");
-		// verify token ownership transfer date
-		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
-	});
-	it("transfer locking: change transfer lock and check", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// some random transfer lock value
-		const lock = Math.floor(Math.random() * 4294967296);
-
-		// a function to set transfer lock
-		const setLock = async() => await tk.setTransferLock(lock);
-
-		// first time setting a lock succeeds
-		const gasUsed1 = (await setLock()).receipt.gasUsed;
-
-		// next time setting a lock succeeds again,
-		// but doesn't modify storage, so the gas consumption is low
-		const gasUsed2 = (await setLock()).receipt.gasUsed;
-
-		// verify gas consumption is at least 5,000 lower
-		assert(gasUsed1 - gasUsed2 >= 5000, "wrong gas consumption difference");
-
-		// verify new transfer lock
-		assert.equal(lock, await tk.transferLock(), "wrong transfer lock");
-	});
-
-	it("minting: mint() constraints", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// some valid address
-		const account1 = accounts[1];
-
-		// wrong input parameters fail
-		await assertThrows(tk.mint, tk.address, 1, tiers1);
-		await assertThrows(tk.mint, 0, 1, tiers1);
-		for(let i = 0; i < 5; i++) {
-			await assertThrows(tk.mint, account1, 1, tiers([i, 0, 35, 65, 85, 95, DEPTH, 0]));
-		}
-		//await assertThrows(tk.mint, account1, 1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
-		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
-		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
-		//await assertThrows(tk.mint, account1, 1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
-		//await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH - 1, 0]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH - 1, DEPTH, 0]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH - 1, DEPTH, DEPTH, 0]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH - 1, DEPTH, DEPTH, DEPTH, 0]));
-
-		// valid inputs
-		await tk.mint(account1, 0, tiers0);
-		await tk.mint(account1, 1, tiers1);
-
-		// minting in same country is still possible
-		await tk.mint(account1, 0, tiers0);
-		await tk.mint(account1, 1, tiers1);
-		await tk.mint(account1, 1, tiers0);
-		await tk.mint(account1, 0, tiers1);
-	});
-
-	it("mining: mine to token and check", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// a function to mine token to some offset
-		const mineTo = async() => await tk.mineTo(token1, 1);
-
-		// impossible to mine non-existent token
-		await assertThrows(mineTo);
-
-		// create one token
-		await mint1(tk, accounts[1]);
-
-		// first time mining to succeeds
-		await mineTo();
-
-		// next time mining to fails (offset 1 already reached)
-		await assertThrows(mineTo);
-
-		// decreasing token offset is also impossible
-		await assertThrows(tk.mineTo, token1, 0);
-
-		// verify new offset
-		assert.equal(1, await tk.getOffset(token1), "wrong token1 offset");
-
-		// verify offset modification date
-		assert(await tk.getOffsetModified(token1) > now, "wrong token1 offset modification date");
-	});
-	it("mining: mine by token and check", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// a function to mine token by some depth
-		const mineBy = async() => await tk.mineBy(token1, 55);
-
-		// impossible to mine non-existent token
-		await assertThrows(mineBy);
-
-		// create one token
-		await mint1(tk, accounts[1]);
-
-		// first time mining by succeeds
-		await mineBy();
-
-		// next time mining by fails (token is already mined to depth 55 and cannot go to 110)
-		await assertThrows(mineBy);
-
-		// mining by zero is also impossible
-		await assertThrows(tk.mineBy, token1, 0);
-
-		// verify new offset
-		assert.equal(55, await tk.getOffset(token1), "wrong token1 offset");
-
-		// verify offset modification date
-		assert(await tk.getOffsetModified(token1) > now, "wrong token1 offset modification date");
-	});
-	it("mining: all the way to the bottom", async() => {
-		// analogue to smart contract deployment
-		const tk = await Token.new();
-
-		// create two tokens
-		await tk.mint(accounts[1], 0, tiers0);
-		await tk.mint(accounts[1], 1, tiers1);
-
-		// perform several random mines to reach the very bottom of both tokens
-		for(let offset = 0, delta; offset < DEPTH; offset += delta) {
-			delta = Math.min(Math.ceil(Math.random() * DEPTH), DEPTH - offset);
-			await tk.mineBy(token0, delta);
-			await tk.mineTo(token1, offset + delta);
-		}
-
-		// ensure mining is not possible anymore
-		await assertThrows(tk.mineBy, token0, 1);
-		await assertThrows(tk.mineTo, token1, DEPTH);
-		await assertThrows(tk.mineTo, token1, DEPTH + 1);
-
-		// verify both tokens are fully mined
-		assert(await tk.isFullyMined(token0), "token0 is not fully mined");
-		assert(await tk.isFullyMined(token1), "token1 is not fully mined");
-		assert.equal(DEPTH, await tk.getOffset(token0), "token0 offset is different from DEPTH");
-		assert.equal(DEPTH, await tk.getOffset(token1), "token1 offset is different from DEPTH");
-	});
-
 });
+
+
+// import auxiliary functions
+import {assertThrows, assertArraysEqual, toBN} from "../scripts/shared_functions";
 
 // function to build tiers packed structure from tiers array
 function tiers(layers) {
@@ -1040,6 +1136,3 @@ function tiers(layers) {
 
 	return result;
 }
-
-// import auxiliary functions
-import {assertThrows, assertArraysEqual, toBN} from "../scripts/shared_functions";

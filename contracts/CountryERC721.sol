@@ -23,7 +23,7 @@ contract CountryERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0xd4e385d974863e26814816b3604ac1351462df3f07fe434451a4beacd376fad6;
+  uint256 public constant TOKEN_UID = 0xcb25803e42674768d12cca47c594df3e4b95a3371e6c941e37daa1be63cc1a7f;
 
   /**
    * @dev ERC20 compliant token symbol
@@ -354,6 +354,20 @@ contract CountryERC721 is ERC721Core {
   }
 
   /**
+   * @dev Gets the ownership modified time of a token
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get ownership modified time for
+   * @return a token ownership modified time as a unix timestamp
+   */
+  function getOwnershipModified(uint256 _tokenId) public view returns(uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's ownership modified time from storage and return
+    return tokens[_tokenId].ownershipModified;
+  }
+
+  /**
    * @notice Returns number of plots for the given country, defined by `_tokenId`
    * @param _tokenId country id to query number of plots for
    * @return number of plots given country has
@@ -364,6 +378,20 @@ contract CountryERC721 is ERC721Core {
 
     // obtain token's number of plots from storage and return
     return tokens[_tokenId].plots;
+  }
+
+  /**
+   * @dev Gets the tax modified time of a token
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the token to get tax modified time for
+   * @return a token tax modified time as a unix timestamp
+   */
+  function getTaxModified(uint256 _tokenId) public view returns(uint32) {
+    // validate token existence
+    require(exists(_tokenId));
+
+    // obtain token's tax modified time from storage and return
+    return tokens[_tokenId].taxModified;
   }
 
   /**
