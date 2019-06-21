@@ -39,6 +39,8 @@ module.exports = async function(deployer, network, accounts) {
 		await instances.GemERC721.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
 		console.log("whitelisting GemERC721 smart contract address on the auction");
 		await instances.DutchAuction.whitelist(conf.GemERC721, true);
+
+		console.log("execution complete");
 	}
 
 };

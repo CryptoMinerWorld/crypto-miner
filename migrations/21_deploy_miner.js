@@ -91,5 +91,7 @@ module.exports = async function(deployer, network, accounts) {
 		await instances.GemERC721.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_INC | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
 		console.log("updating miner features");
 		await miner.updateFeatures(FEATURE_MINING_ENABLED);
+
+		console.log("execution complete");
 	}
 };

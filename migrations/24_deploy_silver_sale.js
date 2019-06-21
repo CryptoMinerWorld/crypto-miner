@@ -75,7 +75,7 @@ module.exports = async function(deployer, network, accounts) {
 		await instances.GoldERC20.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		console.log("enabling sale features");
 		await sale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED);
-	}
 
-	console.log("execution complete");
+		console.log("execution complete");
+	}
 };

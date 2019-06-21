@@ -68,6 +68,8 @@ module.exports = async function(deployer, network, accounts) {
 		await instances.PlotERC721.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		console.log("updating sale features");
 		await sale.updateFeatures(FEATURE_SALE_ENABLED);
+
+		console.log("execution complete");
 	}
 
 };

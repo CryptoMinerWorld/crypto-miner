@@ -55,7 +55,7 @@ module.exports = async function(deployer, network, accounts) {
 		await instances.GemERC721.updateRole(workshop.address, ROLE_LEVEL_PROVIDER | ROLE_GRADE_PROVIDER);
 		console.log("enabling workshop features");
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
-	}
 
-	console.log("execution complete");
+		console.log("execution complete");
+	}
 };

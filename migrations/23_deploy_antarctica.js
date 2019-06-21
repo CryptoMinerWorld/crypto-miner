@@ -54,5 +54,7 @@ module.exports = async function(deployer, network, accounts) {
 		await instances.PlotERC721.updateRole(antarctica.address, ROLE_TOKEN_CREATOR);
 		console.log("updating Antarctica features");
 		await antarctica.updateFeatures(FEATURE_GET_ENABLED);
+
+		console.log("execution complete");
 	}
 };
