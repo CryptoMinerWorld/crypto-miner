@@ -27,9 +27,14 @@ module.exports = async function(deployer, network, accounts) {
 	// for test networks enable all the features automatically
 	if(network !== "mainnet") {
 		const auction = await Auction.deployed();
+
+		console.log("updating auction features");
 		await auction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
 
 		// update tax rate and beneficiary
+		console.log("updating tax and beneficiary");
 		await auction.setFeeAndBeneficiary(1, 20, BASIL_ADDR, ROMAN_ADDR);
+
+		console.log("execution complete");
 	}
 };

@@ -298,16 +298,7 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "address"
-        },
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
+      "inputs": [],
       "name": "ROLE_FEE_MANAGER",
       "outputs": [
         {
@@ -355,24 +346,14 @@
         }
       ],
       "name": "updateRole",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
+      "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
+      "inputs": [],
       "name": "ROLE_ACCESS_MANAGER",
       "outputs": [
         {
@@ -433,12 +414,7 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "_mask",
-          "type": "uint256"
-        }
-      ],
+      "inputs": [],
       "name": "FEATURE_BUY",
       "outputs": [
         {
@@ -459,44 +435,14 @@
         }
       ],
       "name": "updateFeatures",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint8"
-        }
-      ],
+      "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "_to",
-          "type": "address"
-        },
-        {
-          "name": "_role",
-          "type": "uint256"
-        },
-        {
-          "name": "_expiresOn",
-          "type": "uint256"
-        },
-        {
-          "name": "v",
-          "type": "uint8[]"
-        },
-        {
-          "name": "r",
-          "type": "bytes32[]"
-        },
-        {
-          "name": "s",
-          "type": "bytes32[]"
-        }
-      ],
+      "inputs": [],
       "name": "fee",
       "outputs": [
         {
@@ -537,6 +483,20 @@
         }
       ],
       "name": "updateMsig",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
       "outputs": [
         {
           "name": "",
@@ -544,90 +504,24 @@
         }
       ],
       "payable": false,
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
-          "name": "required",
-          "type": "uint256"
-        },
-        {
           "indexed": false,
-          "name": "_from",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "name": "_tokenAddress",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "name": "_tokenId",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "t0",
-          "type": "uint32"
-        },
-        {
-          "indexed": false,
-          "name": "t1",
-          "type": "uint32"
-        },
-        {
-          "indexed": false,
-          "name": "t",
-          "type": "uint32"
-        },
-        {
-          "indexed": false,
-          "name": "p0",
-          "type": "uint96"
-        },
-        {
-          "indexed": false,
-          "name": "p1",
-          "type": "uint96"
-        },
-        {
-          "indexed": false,
-          "name": "p",
-          "type": "uint96"
-        }
-      ],
-      "name": "isSenderInRole",
-      "type": "function",
-      "constant": true,
-      "outputs": [
-        {
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
           "name": "_by",
           "type": "address"
         },
         {
-          "indexed": false,
+          "indexed": true,
           "name": "_from",
           "type": "address"
         },
         {
-          "indexed": true,
+          "indexed": false,
           "name": "_tokenAddress",
           "type": "address"
         },
@@ -674,12 +568,17 @@
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
+          "indexed": false,
           "name": "_by",
           "type": "address"
         },
         {
           "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
           "name": "_tokenAddress",
           "type": "address"
         },
@@ -687,51 +586,6 @@
           "indexed": true,
           "name": "_tokenId",
           "type": "uint256"
-        },
-        {
-          "indexed": true,
-          "name": "_tokenAddress",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "name": "_tokenId",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "t0",
-          "type": "uint32"
-        },
-        {
-          "indexed": false,
-          "name": "t1",
-          "type": "uint32"
-        },
-        {
-          "indexed": false,
-          "name": "t",
-          "type": "uint32"
-        },
-        {
-          "indexed": false,
-          "name": "p0",
-          "type": "uint96"
-        },
-        {
-          "indexed": false,
-          "name": "p1",
-          "type": "uint96"
-        },
-        {
-          "indexed": false,
-          "name": "p",
-          "type": "uint96"
-        },
-        {
-          "indexed": false,
-          "name": "fee",
-          "type": "uint96"
         }
       ],
       "name": "ItemRemoved",
@@ -741,22 +595,22 @@
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
+          "indexed": false,
           "name": "_by",
           "type": "address"
         },
         {
-          "indexed": false,
+          "indexed": true,
           "name": "_from",
           "type": "address"
         },
         {
-          "indexed": false,
+          "indexed": true,
           "name": "_to",
           "type": "address"
         },
         {
-          "indexed": true,
+          "indexed": false,
           "name": "_tokenAddress",
           "type": "address"
         },
@@ -832,17 +686,17 @@
       "type": "event"
     },
     {
-      "constant": false,
+      "anonymous": false,
       "inputs": [
         {
+          "indexed": true,
           "name": "_by",
-          "type": "address",
-          "indexed": true
+          "type": "address"
         },
         {
+          "indexed": true,
           "name": "_to",
-          "type": "address",
-          "indexed": true
+          "type": "address"
         },
         {
           "indexed": false,
@@ -856,11 +710,7 @@
         }
       ],
       "name": "RoleUpdated",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "event",
-      "anonymous": false
+      "type": "event"
     },
     {
       "constant": false,
@@ -872,18 +722,6 @@
         {
           "name": "supported",
           "type": "bool"
-        },
-        {
-          "name": "duration",
-          "type": "uint32"
-        },
-        {
-          "name": "p0",
-          "type": "uint96"
-        },
-        {
-          "name": "p1",
-          "type": "uint96"
         }
       ],
       "name": "whitelist",
@@ -909,10 +747,6 @@
         },
         {
           "name": "p0",
-          "type": "uint96"
-        },
-        {
-          "name": "p1",
           "type": "uint96"
         },
         {
@@ -988,10 +822,6 @@
         {
           "name": "_tokenId",
           "type": "uint256"
-        },
-        {
-          "name": "_to",
-          "type": "address"
         }
       ],
       "name": "buy",
@@ -1014,19 +844,10 @@
         {
           "name": "_to",
           "type": "address"
-        },
-        {
-          "name": "_data",
-          "type": "bytes"
         }
       ],
       "name": "buyTo",
-      "outputs": [
-        {
-          "name": "",
-          "type": "bytes4"
-        }
-      ],
+      "outputs": [],
       "payable": true,
       "stateMutability": "payable",
       "type": "function"
@@ -1090,14 +911,6 @@
         {
           "name": "_chest",
           "type": "address"
-        },
-        {
-          "name": "_beneficiary",
-          "type": "address"
-        },
-        {
-          "name": "_chest",
-          "type": "address"
         }
       ],
       "name": "setBeneficiary",
@@ -1127,32 +940,7 @@
         }
       ],
       "name": "setFeeAndBeneficiary",
-      "outputs": [
-        {
-          "name": "t0",
-          "type": "uint32"
-        },
-        {
-          "name": "t1",
-          "type": "uint32"
-        },
-        {
-          "name": "p0",
-          "type": "uint96"
-        },
-        {
-          "name": "p1",
-          "type": "uint96"
-        },
-        {
-          "name": "p",
-          "type": "uint96"
-        },
-        {
-          "name": "owner",
-          "type": "address"
-        }
-      ],
+      "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
@@ -1260,14 +1048,6 @@
         {
           "name": "_tokenId",
           "type": "uint256"
-        },
-        {
-          "name": "p0",
-          "type": "uint96"
-        },
-        {
-          "name": "p1",
-          "type": "uint96"
         }
       ],
       "name": "getCurrentPrice",
@@ -1317,22 +1097,6 @@
       "inputs": [
         {
           "name": "price",
-          "type": "uint96"
-        },
-        {
-          "name": "_t1",
-          "type": "uint32"
-        },
-        {
-          "name": "_t",
-          "type": "uint32"
-        },
-        {
-          "name": "_p0",
-          "type": "uint96"
-        },
-        {
-          "name": "_p1",
           "type": "uint96"
         }
       ],
@@ -1403,7 +1167,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-16T14:14:45.223Z",
+  "updatedAt": "2019-06-21T10:32:39.182Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "For each item on sale the following parameters are defined:     * sale start time - t0     * sale start price - p0     * sale end time - t1     * sale end price - p1     * item ID (ERC721 token ID)     * ERC721 instance addressCurrent price `p` of each item is calculated linearly based     on the sale parameters:     a) if current time `t` is in range (t0, t1):         `p = p0 - (t - t0) * (p0 - p1) / (t1 - t0)`     b) if current time `t` is lower than  or equal to`t0`:         `p = p0`     c) if current time `t` is greater than or equal to `t1`:         `p = p1`Following constraints when adding item for sale must be met:     * t1 > t0: sale starts before it ends     * p0 ≥ p1: start price is higher than end priceFollowing constraints when buying item on sale must be met:     * msg.value ≥ p: price constraintThis implementation operates with an arbitrary ERC721 token as an item,     with the only limitation: token ID space is expected to be uint32",

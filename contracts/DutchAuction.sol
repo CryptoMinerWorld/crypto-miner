@@ -74,7 +74,7 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant AUCTION_UID = 0xb2fa7d42bfef09b4c1b69db4ed0af2a0fabcf8904ae11d61419584f96d282e7b;
+  uint256 public constant AUCTION_UID = 0x2cf17df76ceaa5ed9a7532df201280a827129460499fe9d4600ec742501d40de;
 
   /**
    * @dev Base structure representing an item for sale on the auction
@@ -192,9 +192,9 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
    * @param p current price
    */
   event ItemAdded(
-    address indexed _by,
-    address _from,
-    address indexed _tokenAddress,
+    address _by,
+    address indexed _from,
+    address _tokenAddress,
     uint256 indexed _tokenId,
     uint32 t0,
     uint32 t1,
@@ -207,10 +207,16 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
   /**
    * @dev Fired in remove()
    * @param _by auction manager who sent a transaction (ROLE_AUCTION_MANAGER)
+   * @param _to an address which received a token after removal
    * @param _tokenAddress smart contract address representing this ERC721 token
    * @param _tokenId unique item ID (token ID)
    */
-  event ItemRemoved(address indexed _by, address indexed _tokenAddress, uint256 indexed _tokenId);
+  event ItemRemoved(
+    address _by,
+    address indexed _to,
+    address _tokenAddress,
+    uint256 indexed _tokenId
+  );
 
   /**
    * @dev Fired in buyItem()
@@ -228,10 +234,10 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
    * @param fee fee paid
    */
   event ItemBought(
-    address indexed _by,
-    address _from,
-    address _to,
-    address indexed _tokenAddress,
+    address _by,
+    address indexed _from,
+    address indexed _to,
+    address _tokenAddress,
     uint256 indexed _tokenId,
     uint32 t0,
     uint32 t1,
@@ -413,7 +419,7 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
     delete items[tokenAddress][_tokenId];
 
     // emit an event
-    emit ItemRemoved(operator, tokenAddress, _tokenId);
+    emit ItemRemoved(operator, owner, tokenAddress, _tokenId);
   }
 
   /**
