@@ -847,6 +847,7 @@ contract GemERC721 is ERC721Core {
   /**
    * @dev Increases plots mined and blocks mined counters of the gem
    */
+  // TODO: rename to increaseMinedStats
   function updateMinedStats(uint256 _tokenId, uint24 _plots, uint32 _blocks) public {
     // check that the call is made by a state provider
     require(isSenderInRole(ROLE_MINED_STATS_PROVIDER));

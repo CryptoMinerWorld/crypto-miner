@@ -13,7 +13,7 @@ import {
 	ROLE_EXT_WRITER,
 	ROLE_TOKEN_CREATOR,
 	ROLE_STATE_PROVIDER,
-	ROLE_TRANSFER_LOCK_PROVIDER
+	ROLE_TRANSFER_LOCK_PROVIDER,
 } from "./erc721_core";
 
 // GemERC721 specific Features and Roles
@@ -21,13 +21,19 @@ import {
 	ROLE_LEVEL_PROVIDER,
 	ROLE_GRADE_PROVIDER,
 	ROLE_AGE_PROVIDER,
-	ROLE_NEXT_ID_PROVIDER
+	ROLE_MINED_STATS_PROVIDER,
+	ROLE_NEXT_ID_PROVIDER,
 } from "./erc721_core";
+
+// initial nextId is 0x12500
+const NEXT_ID = 0x12500;
 
 // some default gem props
 const token1 = 0x401;
 const token2 = 0x402;
-const grade1 = 0x1000001;
+const gradeType1 = 1;
+const gradeValue1 = 1;
+const grade1 = gradeType1 << 24 | gradeValue1;
 // a function to mint some default token
 async function mint1(tk, acc) {
 	await tk.mint(acc, token1, 1, 1, 1, grade1);
@@ -80,7 +86,7 @@ contract('GemERC721', function(accounts) {
 		await assertThrows(tk.balanceOf, 0);
 
 		// extended functions
-		assert.equal(0x12500, await tk.nextId(), "wrong initial value of nextId");
+		assert.equal(NEXT_ID, await tk.nextId(), "wrong initial value of nextId");
 		assert.equal(0, await tk.read(1, 0, 8), "wrong initial read for 1/0/8");
 		assert.equal(0, await tk.read(1, 0, 256), "wrong initial read for 1/0/256");
 	});
@@ -237,55 +243,7 @@ contract('GemERC721', function(accounts) {
 		assertArraysEqual(fullPacked1, await tk.getPacked(token1), "token1 wrong getPacked");
 	});
 
-	it("mint: creating a token", async function() {
-		const tk = await deployToken();
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, grade1);
-		await assertThrows(tk.mint, accounts[0], 0x000, 1, 1, 1, grade1);
-		await assertThrows(tk.mint, accounts[0], 0x401, 1, 1, 1, grade1);
-		await assertThrows(tk.mint, 0, 0x402, 1, 1, 1, grade1);
-		await assertThrows(tk.mint, tk.address, 0x403, 1, 1, 1, grade1);
-		assert.equal(1, await tk.totalSupply(), "wrong totalSupply value after minting a token");
-		await assertThrows(tk.mint, accounts[1], 0x402, 1, 1, 1, grade1, {from: accounts[1]});
-		await tk.mint(accounts[1], 0x402, 1, 1, 1, grade1);
-		assert.equal(2, await tk.totalSupply(), "wrong totalSupply value after minting two tokens");
-		assert.equal(1, await tk.balanceOf(accounts[0]), accounts[0] + " has wrong balance after minting a token");
-		assert.equal(1, await tk.balanceOf(accounts[1]), accounts[1] + " has wrong balance after minting a token");
-		assert.equal(0, await tk.balanceOf(accounts[2]), accounts[2] + " has wrong initial balance");
-	});
-
-	it("level up: full cycle", async function() {
-		const tk = await deployToken();
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		await tk.levelUpBy(0x401, 1);
-		assert.equal(2, await tk.getLevel(0x401), "wrong gem 0x401 level after leveling up");
-		await assertThrows(tk.levelUpBy, 0x402, 1);
-		await assertThrows(tk.levelUpBy, 0x402, 1, {from: accounts[1]});
-	});
-
-	it("update grade: full cycle", async function() {
-		const tk = await deployToken();
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		await tk.upgrade(0x401, 0x01000002);
-		assert.equal(0x01000002, await tk.getGrade(0x401), "wrong gem 0x401 grade after modifying a grade");
-		assert.equal(0x01, await tk.getGradeType(0x401), "wrong gem 0x401 grade level after modifying a grade");
-		assert.equal(0x02, await tk.getGradeValue(0x401), "wrong gem 0x401 grade value after modifying a grade");
-		await assertThrows(tk.upgrade, 0x401, 0x01000002);
-		await assertThrows(tk.upgrade, 0x402, 0x01000003);
-		await assertThrows(tk.upgrade, 0x401, 0x01000003, {from: accounts[1]});
-		await tk.upgrade(0x401, 0x01000003);
-	});
-
-	it("set state: full cycle", async function() {
-		const tk = await deployToken();
-		await tk.mint(accounts[0], 0x401, 1, 1, 1, 1);
-		await tk.setState(0x401, 0x0102);
-		assert.equal(0x0102, await tk.getState(0x401), "wrong gem 0x401 state after setting a state");
-		await assertThrows(tk.setState, 0x402, 0x0103);
-		await assertThrows(tk.setState, 0x401, 0x0103, {from: accounts[1]});
-		await tk.setState(0x401, 0x0103);
-	});
-
-	it("security: incNextId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
+	it("nextId: incNextId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
 		// deploy token
 		const tk = await deployToken();
 
@@ -303,9 +261,9 @@ contract('GemERC721', function(accounts) {
 		await fn();
 
 		// next Id counter incremented by one
-		assert.equal(0x12501, await tk.nextId(), "wrong nextId counter value");
+		assert.equal(NEXT_ID + 1, await tk.nextId(), "wrong nextId counter value");
 	});
-	it("security: setNextId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
+	it("nextId: setNextId requires ROLE_NEXT_ID_PROVIDER permission", async() => {
 		// deploy token
 		const tk = await deployToken();
 
@@ -322,10 +280,10 @@ contract('GemERC721', function(accounts) {
 		// fn succeeds
 		await fn();
 
-		// next Id counter incremented by one
+		// next Id counter set to one
 		assert.equal(1, await tk.nextId(), "wrong nextId counter value");
 	});
-	it("security: incNextId/setNextId arithmetic overflow checks", async() => {
+	it("nextId: incNextId/setNextId arithmetic overflow checks", async() => {
 		// deploy token
 		const tk = await deployToken();
 
@@ -353,11 +311,372 @@ contract('GemERC721', function(accounts) {
 		assert.equal(16777215, await tk.nextId(), "wrong nextId counter value");
 	});
 
+	it("minting: minting a token requires ROLE_TOKEN_CREATOR role", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// define a function to check
+		const fn = async() => await tk.mint(account1, token1, 1, 1, 1, grade1, {from: account1});
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_TOKEN_CREATOR);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("minting: mintWith() requires ROLE_AGE_PROVIDER role if age is set", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// define a function to check
+		const fn = async() => await tk.mintWith(account1, token1, 1, 1, 1, grade1, 1, {from: account1});
+
+		// give a permission required to create token
+		await tk.updateRole(account1, ROLE_TOKEN_CREATOR);
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("minting: mintNext() requires ROLE_NEXT_ID_PROVIDER role", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// define a function to check
+		const fn = async() => await tk.mintNext(account1, 1, 1, 1, grade1, {from: account1});
+
+		// give a permission required to create token
+		await tk.updateRole(account1, ROLE_TOKEN_CREATOR);
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		// TODO: according to the ABI, this function returns tokenId – can we validate it?
+		await fn();
+
+		// verify token NEXT_ID exists
+		assert(await tk.exists(NEXT_ID), "token NEXT_ID doesn't exist after mintNext()");
+	});
+	it("minting: mint() constraints and function", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some valid owner address
+		const account1 = accounts[1];
+
+		// wrong input parameters fail
+		await assertThrows(tk.mint, account1, 0, 1, 1, 1, grade1);
+		await assertThrows(tk.mint, ZERO_ADDR, 1, 1, 1, 1, grade1);
+		await assertThrows(tk.mint, tk.address, 1, 1, 1, 1, grade1);
+
+		// a function to mint valid token
+		const fn = async() => await tk.mint(account1, 1, 1, 1, 1, grade1);
+
+		// valid input succeeds
+		await fn();
+		// minting same token twice is impossible
+		await assertThrows(fn);
+
+		// verify token existence
+		assert(await tk.exists(1), "token 1 doesn't exist after minting");
+	});
+	it("minting: mintNext() increases nextId", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some valid owner address
+		const account1 = accounts[1];
+
+		// define a function to mint next token in a sequence
+		const fn = async() => await tk.mintNext(account1, 1, 1, 1, grade1);
+
+		// execute this function few times
+		await fn();
+		await fn();
+		await fn();
+
+		// verify NEXT_ID token existence
+		assert(await tk.exists(NEXT_ID), "token NEXT_ID doesn't exist");
+		// verify nextId counter increased properly
+		assert.equal(NEXT_ID + 3, await tk.nextId(), "wrong nextId() after minting 3 tokens")
+	});
+
+	it("leveling: levelUpTo() requires ROLE_LEVEL_PROVIDER role", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some valid owner address
+		const account1 = accounts[1];
+
+		// non-admin account to act on behalf of
+		const operator = accounts[2];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// define a function to check
+		const fn = async() => await tk.levelUpTo(token1, 2, {from: operator});
+
+		// ensure function fails if operator has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the operator
+		await tk.updateRole(operator, ROLE_LEVEL_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("leveling: levelUpTo() constraints and function", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some account to mint token to
+		const account1 = accounts[1];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// try wrong inputs
+		await assertThrows(tk.levelUpTo, token1, 0); // level must increase
+		await assertThrows(tk.levelUpTo, token1, 1); // level must increase
+
+		// define a correct level up function
+		const fn = async() => await tk.levelUpTo(token1, 2);
+
+		// execute correct function
+		await fn();
+		// second call fails - level must increase
+		await assertThrows(fn);
+
+		// verify the execution result
+		assert.equal(2, await tk.getLevel(token1), "wrong token level after leveling up");
+		assert((await tk.getPropertiesModified(token1)).gt(toBN(now)), "wrong properties modified after leveling up");
+	});
+	it("leveling: levelUpBy() requires ROLE_LEVEL_PROVIDER role", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some valid owner address
+		const account1 = accounts[1];
+
+		// non-admin account to act on behalf of
+		const operator = accounts[2];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// define a function to check
+		const fn = async() => await tk.levelUpBy(token1, 1, {from: operator});
+
+		// ensure function fails if operator has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the operator
+		await tk.updateRole(operator, ROLE_LEVEL_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("leveling: levelUpBy() constraints and function", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some account to mint token to
+		const account1 = accounts[1];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// try wrong inputs
+		await assertThrows(tk.levelUpBy, token1, 0); // level must increase
+
+		// define a correct level up function
+		const fn = async() => await tk.levelUpBy(token1, 200);
+
+		// execute correct function
+		await fn();
+		// second call fails due to int overflow
+		await assertThrows(fn);
+
+		// verify the execution result
+		assert.equal(201, await tk.getLevel(token1), "wrong token level after leveling up");
+		assert((await tk.getPropertiesModified(token1)).gt(toBN(now)), "wrong properties modified after leveling up");
+	});
+
+	it("upgrading: upgrade() requires ROLE_GRADE_PROVIDER role", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some valid owner address
+		const player = accounts[1];
+
+		// non-admin account to act on behalf of
+		const operator = accounts[2];
+
+		// mint some token
+		await mint1(tk, player);
+
+		// define a function to check
+		const fn = async() => await tk.upgrade(token1, grade1 + 1, {from: operator});
+
+		// ensure function fails if operator has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the operator
+		await tk.updateRole(operator, ROLE_GRADE_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("upgrading: upgrade() constraints and function", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some account to mint token to
+		const account1 = accounts[1];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// try wrong inputs
+		await assertThrows(tk.upgrade, token1, 1); // grade must increase
+		await assertThrows(tk.upgrade, token1, grade1); // grade must increase
+
+		// define a correct upgrade function
+		const fn = async() => await tk.upgrade(token1, grade1 + 1);
+
+		// execute correct function
+		await fn();
+		// second call fails - grade must increase
+		await assertThrows(fn);
+
+		// verify the execution result
+		assert.equal(grade1 + 1, await tk.getGrade(token1), "wrong token grade after upgrading");
+		assert.equal(gradeType1, await tk.getGradeType(token1), "wrong token grade type after upgrading");
+		assert.equal(gradeValue1 + 1, await tk.getGradeValue(token1), "wrong token grade value after upgrading");
+		assert((await tk.getPropertiesModified(token1)).gt(toBN(now)), "wrong properties modified after upgrading");
+	});
+
+	it("mining stats: updateMinedStats() requires ROLE_MINED_STATS_PROVIDER role", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some valid owner address
+		const account1 = accounts[1];
+
+		// non-admin account to act on behalf of
+		const operator = accounts[2];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// define a function to check
+		const fn = async() => await tk.updateMinedStats(token1, 1, 1, {from: operator});
+
+		// ensure function fails if operator has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the operator
+		await tk.updateRole(operator, ROLE_MINED_STATS_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("mining stats: updateMinedStats() constraints and function", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some account to mint token to
+		const account1 = accounts[1];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// the only check here is int overflow check
+		// define few correct functions which overflow if executed twice
+		const fn1 = async() => await tk.updateMinedStats(token1, 0, 0xABCDEF00);
+		const fn2 = async() => await tk.updateMinedStats(token1, 0xABCDEF, 0);
+
+		// in both cases first call succeeds, second overflows
+		await fn1();
+		await assertThrows(fn1);
+		await fn2();
+		await assertThrows(fn2);
+
+		// verify the results
+		assert.equal(0xABCDEF, await tk.getPlotsMined(token1), "wrong plots mined counter");
+		assert.equal(0xABCDEF00, await tk.getBlocksMined(token1), "wrong blocks mined counter");
+		assert((await tk.getStateModified(token1)).gt(toBN(now)), "wrong state modified after updating mining stats");
+	});
+
+	it("age: setAge() requires ROLE_AGE_PROVIDER role", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some valid owner address
+		const account1 = accounts[1];
+
+		// non-admin account to act on behalf of
+		const operator = accounts[2];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// define a function to check
+		const fn = async() => await tk.setAge(token1, 1, {from: operator});
+
+		// ensure function fails if operator has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the operator
+		await tk.updateRole(operator, ROLE_AGE_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
+	it("age: setAge() constraints and function", async() => {
+		const tk = await deployToken();
+
+		// some account to mint token to
+		const account1 = accounts[1];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// set the age
+		await tk.setAge(token1, 1);
+
+		// verify the result
+		assert.equal(1, await tk.getAge(token1), "wrong token age after setting it to 1");
+		assert((await tk.getStateModified(token1)).gt(toBN(now)), "wrong state modified after setting the age");
+	});
+
 
 	// ========== ERC721 Locking tests ==========
 
 	it("state: changing token state requires ROLE_STATE_PROVIDER role", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// non-admin account to act on behalf of
@@ -379,7 +698,7 @@ contract('GemERC721', function(accounts) {
 		await fn();
 	});
 	it("state: modify token state and check", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some random state value
@@ -408,7 +727,7 @@ contract('GemERC721', function(accounts) {
 	});
 
 	it("transfer locking: modifying transfer lock requires ROLE_TRANSFER_LOCK_PROVIDER role", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// non-admin account to act on behalf of
@@ -433,7 +752,7 @@ contract('GemERC721', function(accounts) {
 		assert.equal(lock, await tk.transferLock(), "incorrect value for transfer lock");
 	});
 	it("transfer locking: impossible to transfer locked token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers
@@ -474,7 +793,7 @@ contract('GemERC721', function(accounts) {
 		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
 	});
 	it("transfer locking: change transfer lock and check", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some random transfer lock value
@@ -578,7 +897,7 @@ contract('GemERC721', function(accounts) {
 	// ---------- ERC721 tests ----------
 
 	it("unsafe transfer: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers
@@ -627,7 +946,7 @@ contract('GemERC721', function(accounts) {
 		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer2");
 	});
 	it("unsafe transfer: transferring own token using transferFrom", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers
@@ -673,7 +992,7 @@ contract('GemERC721', function(accounts) {
 	});
 
 	it("safe transfer: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 		// another instance will be used to verify ERC721 Receiver requirement
 		const blackHole = await deployToken();
@@ -737,7 +1056,7 @@ contract('GemERC721', function(accounts) {
 	});
 
 	it("approvals: grant and revoke token approval", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some accounts to work with
@@ -804,7 +1123,7 @@ contract('GemERC721', function(accounts) {
 	});
 
 	it("approvals: add and remove operator", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some accounts to work with
@@ -826,7 +1145,7 @@ contract('GemERC721', function(accounts) {
 		assert(!await tk.isApprovedForAll(account1, operator), "operator is still approved to act on behalf of account1");
 	});
 	it("approvals: operator in action", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers on behalf
@@ -880,7 +1199,7 @@ contract('GemERC721', function(accounts) {
 	});
 
 	it("transfer on behalf: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers on behalf
@@ -946,7 +1265,7 @@ contract('GemERC721', function(accounts) {
 	});
 
 	it("safe transfer on behalf: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 		// another instance will be used to verify ERC721 Receiver requirement
 		const blackHole = await deployToken();
@@ -1034,4 +1353,4 @@ contract('GemERC721', function(accounts) {
 
 
 // import auxiliary functions
-import {assertThrows, assertArraysEqual, toBN} from "../scripts/shared_functions";
+import {assertThrows, assertArraysEqual, toBN, ZERO_ADDR} from "../scripts/shared_functions";

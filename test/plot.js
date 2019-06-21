@@ -55,7 +55,7 @@ const token1 = 65537; // first land plot in Russia
 // a function to mint some default token
 // returns token1
 async function mint1(tk, acc) {
-	await await tk.mint(acc, 1, tiers1);
+	await tk.mint(acc, 1, tiers1);
 }
 
 // standard function to instantiate token
@@ -70,7 +70,7 @@ const now = new Date().getTime() / 1000 | 0;
 contract('PlotERC721', (accounts) => {
 
 	it("initial state: initial zero values, supported interfaces", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some account to work with
@@ -108,7 +108,7 @@ contract('PlotERC721', (accounts) => {
 	});
 
 	it("initial state: throwable functions", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some account to work with
@@ -179,7 +179,7 @@ contract('PlotERC721', (accounts) => {
 	});
 
 	it("integrity: verify minted token data integrity", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some account to work with
@@ -257,8 +257,8 @@ contract('PlotERC721', (accounts) => {
 		assertArraysEqual(fullPacked1, await tk.getPacked(token1), "token1 has wrong packed data");
 	});
 
-	it("security: minting a token requires ROLE_TOKEN_CREATOR role", async() => {
-		// analogue to smart contract deployment
+	it("minting: minting a token requires ROLE_TOKEN_CREATOR role", async() => {
+		// deploy token
 		const tk = await deployToken();
 
 		// non-admin account to act on behalf of
@@ -276,8 +276,44 @@ contract('PlotERC721', (accounts) => {
 		// verify that given the permissions required function doesn't fail
 		await fn();
 	});
-	it("security: mining token to requires ROLE_OFFSET_PROVIDER role", async() => {
-		// analogue to smart contract deployment
+	it("minting: mint() constraints", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some valid owner address
+		const account1 = accounts[1];
+
+		// wrong input parameters fail
+		await assertThrows(tk.mint, tk.address, 1, tiers1);
+		await assertThrows(tk.mint, 0, 1, tiers1);
+		for(let i = 0; i < 5; i++) {
+			await assertThrows(tk.mint, account1, 1, tiers([i, 0, 35, 65, 85, 95, DEPTH, 0]));
+		}
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH - 1, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH - 1, DEPTH, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH - 1, DEPTH, DEPTH, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH - 1, DEPTH, DEPTH, DEPTH, 0]));
+		await assertThrows(tk.mint, ZERO_ADDR, 0, tiers0);
+		await assertThrows(tk.mint, tk.address, 0, tiers0);
+
+		// valid inputs
+		await tk.mint(account1, 0, tiers0);
+		await tk.mint(account1, 1, tiers1);
+
+		// minting in same country is still possible
+		await tk.mint(account1, 0, tiers0);
+		await tk.mint(account1, 1, tiers1);
+		await tk.mint(account1, 1, tiers0);
+		await tk.mint(account1, 0, tiers1);
+	});
+
+	it("mining: mining token to requires ROLE_OFFSET_PROVIDER role", async() => {
+		// deploy token
 		const tk = await deployToken();
 
 		// non-admin account to act on behalf of
@@ -298,65 +334,8 @@ contract('PlotERC721', (accounts) => {
 		// verify that given the permissions required function doesn't fail
 		await fn();
 	});
-	it("security: mining token by style requires ROLE_OFFSET_PROVIDER role", async() => {
-		// analogue to smart contract deployment
-		const tk = await deployToken();
-
-		// non-admin account to act on behalf of
-		const account1 = accounts[1];
-
-		// mint some token
-		await mint1(tk, account1);
-
-		// define a function to check
-		const fn = async() => await tk.mineBy(token1, 1, {from: account1});
-
-		// ensure function fails if account has no role required
-		await assertThrows(fn);
-
-		// give a permission required to the account
-		await tk.updateRole(account1, ROLE_OFFSET_PROVIDER);
-
-		// verify that given the permissions required function doesn't fail
-		await fn();
-	});
-
-	it("minting: mint() constraints", async() => {
-		// analogue to smart contract deployment
-		const tk = await deployToken();
-
-		// some valid address
-		const account1 = accounts[1];
-
-		// wrong input parameters fail
-		await assertThrows(tk.mint, tk.address, 1, tiers1);
-		await assertThrows(tk.mint, 0, 1, tiers1);
-		for(let i = 0; i < 5; i++) {
-			await assertThrows(tk.mint, account1, 1, tiers([i, 0, 35, 65, 85, 95, DEPTH, 0]));
-		}
-		//await assertThrows(tk.mint, account1, 1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
-		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
-		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
-		//await assertThrows(tk.mint, account1, 1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
-		//await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH - 1, 0]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH - 1, DEPTH, 0]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH - 1, DEPTH, DEPTH, 0]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH - 1, DEPTH, DEPTH, DEPTH, 0]));
-
-		// valid inputs
-		await tk.mint(account1, 0, tiers0);
-		await tk.mint(account1, 1, tiers1);
-
-		// minting in same country is still possible
-		await tk.mint(account1, 0, tiers0);
-		await tk.mint(account1, 1, tiers1);
-		await tk.mint(account1, 1, tiers0);
-		await tk.mint(account1, 0, tiers1);
-	});
-
 	it("mining: mine to token and check", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// a function to mine token to some offset
@@ -383,8 +362,30 @@ contract('PlotERC721', (accounts) => {
 		// verify offset modification date
 		assert(await tk.getOffsetModified(token1) > now, "wrong token1 offset modification date");
 	});
+	it("mining: mining token by requires ROLE_OFFSET_PROVIDER role", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// non-admin account to act on behalf of
+		const account1 = accounts[1];
+
+		// mint some token
+		await mint1(tk, account1);
+
+		// define a function to check
+		const fn = async() => await tk.mineBy(token1, 1, {from: account1});
+
+		// ensure function fails if account has no role required
+		await assertThrows(fn);
+
+		// give a permission required to the account
+		await tk.updateRole(account1, ROLE_OFFSET_PROVIDER);
+
+		// verify that given the permissions required function doesn't fail
+		await fn();
+	});
 	it("mining: mine by token and check", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// a function to mine token by some depth
@@ -412,7 +413,7 @@ contract('PlotERC721', (accounts) => {
 		assert(await tk.getOffsetModified(token1) > now, "wrong token1 offset modification date");
 	});
 	it("mining: all the way to the bottom", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// create two tokens
@@ -442,7 +443,7 @@ contract('PlotERC721', (accounts) => {
 	// ========== ERC721 Locking tests ==========
 
 	it("state: changing token state requires ROLE_STATE_PROVIDER role", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// non-admin account to act on behalf of
@@ -464,7 +465,7 @@ contract('PlotERC721', (accounts) => {
 		await fn();
 	});
 	it("state: modify token state and check", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some random state value
@@ -493,7 +494,7 @@ contract('PlotERC721', (accounts) => {
 	});
 
 	it("transfer locking: modifying transfer lock requires ROLE_TRANSFER_LOCK_PROVIDER role", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// non-admin account to act on behalf of
@@ -518,7 +519,7 @@ contract('PlotERC721', (accounts) => {
 		assert.equal(lock, await tk.transferLock(), "incorrect value for transfer lock");
 	});
 	it("transfer locking: impossible to transfer locked token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers
@@ -559,7 +560,7 @@ contract('PlotERC721', (accounts) => {
 		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer1");
 	});
 	it("transfer locking: change transfer lock and check", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some random transfer lock value
@@ -663,7 +664,7 @@ contract('PlotERC721', (accounts) => {
 	// ---------- ERC721 tests ----------
 
 	it("unsafe transfer: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers
@@ -713,7 +714,7 @@ contract('PlotERC721', (accounts) => {
 	});
 
 	it("unsafe transfer: transferring own token using transferFrom", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers
@@ -759,7 +760,7 @@ contract('PlotERC721', (accounts) => {
 	});
 
 	it("safe transfer: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 		// another instance will be used to verify ERC721 Receiver requirement
 		const blackHole = await deployToken();
@@ -823,7 +824,7 @@ contract('PlotERC721', (accounts) => {
 	});
 
 	it("approvals: grant and revoke token approval", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some accounts to work with
@@ -890,7 +891,7 @@ contract('PlotERC721', (accounts) => {
 	});
 
 	it("approvals: add and remove operator", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some accounts to work with
@@ -913,7 +914,7 @@ contract('PlotERC721', (accounts) => {
 	});
 
 	it("approvals: operator in action", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers on behalf
@@ -967,7 +968,7 @@ contract('PlotERC721', (accounts) => {
 	});
 
 	it("transfer on behalf: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers on behalf
@@ -1033,7 +1034,7 @@ contract('PlotERC721', (accounts) => {
 	});
 
 	it("safe transfer on behalf: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 		// another instance will be used to verify ERC721 Receiver requirement
 		const blackHole = await deployToken();
@@ -1121,7 +1122,7 @@ contract('PlotERC721', (accounts) => {
 
 
 // import auxiliary functions
-import {assertThrows, assertArraysEqual, toBN} from "../scripts/shared_functions";
+import {assertThrows, assertArraysEqual, toBN, ZERO_ADDR} from "../scripts/shared_functions";
 
 // function to build tiers packed structure from tiers array
 function tiers(layers) {

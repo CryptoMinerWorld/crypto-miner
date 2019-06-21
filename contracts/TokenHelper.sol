@@ -158,7 +158,7 @@ contract TokenHelper {
    * @param code a string to calculate hash for
    * @return keccak256 hash of the input string
    */
-  function getKeccak256(string memory code) public view returns(uint256) {
+  function getKeccak256(string memory code) public pure returns(uint256) {
     // calculate the keccak256 and return
     return uint256(keccak256(abi.encode(code)));
   }

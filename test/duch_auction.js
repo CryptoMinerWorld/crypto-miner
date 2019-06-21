@@ -52,23 +52,23 @@ contract('Dutch Auction', accounts => {
 		await tk.approve(auction.address, token0x401, {from: accounts[1]});
 
 		// adding token to an auction - wrong parameters
-		await assertThrows(async () => await auction.addWith(0, token0x401, now, now + 60, P0, P1));
-		await assertThrows(async () => await auction.addWith(accounts[0], token0x401, now, now + 60, P0, P1));
-		await assertThrows(async () => await auction.addWith(tk.address, token0x401, now, now + 60, P1, P0));
-		await assertThrows(async () => await auction.addWith(tk.address, token0x401, now, now, P0, P1));
-		await assertThrows(async () => await auction.addNow(tk.address, token0x401, 0, P0, P1));
-		await assertThrows(async () => await auction.addNow(tk.address, token0x401, 60, P1, P0));
-		await assertThrows(async () => await auction.addWith(tk.address, token0x401, now - 60, now, P0, P1));
-		await assertThrows(async () => await auction.addWith(tk.address, token0x401, 0, now + 60, P0, P1));
-		await assertThrows(async () => await auction.addNow(tk.address, 0, 60, P0, P1));
-		await assertThrows(async () => await auction.addNow(tk.address, token0x401, 60, P0 / 1000, P1 / 1000));
-		await assertThrows(async () => await auction.addNow(tk.address, token0x401, 60, P0 + 17, P1));
-		await assertThrows(async () => await auction.addNow(tk.address, token0x401, 60, P0, P1 + 17));
+		await assertThrows(auction.addWith, 0, token0x401, now, now + 60, P0, P1);
+		await assertThrows(auction.addWith, accounts[0], token0x401, now, now + 60, P0, P1);
+		await assertThrows(auction.addWith, tk.address, token0x401, now, now + 60, P1, P0);
+		await assertThrows(auction.addWith, tk.address, token0x401, now, now, P0, P1);
+		await assertThrows(auction.addNow, tk.address, token0x401, 0, P0, P1);
+		await assertThrows(auction.addNow, tk.address, token0x401, 60, P1, P0);
+		await assertThrows(auction.addWith, tk.address, token0x401, now - 60, now, P0, P1);
+		await assertThrows(auction.addWith, tk.address, token0x401, 0, now + 60, P0, P1);
+		await assertThrows(auction.addNow, tk.address, 0, 60, P0, P1);
+		await assertThrows(auction.addNow, tk.address, token0x401, 60, P0 / 1000, P1 / 1000);
+		await assertThrows(auction.addNow, tk.address, token0x401, 60, P0 + 17, P1);
+		await assertThrows(auction.addNow, tk.address, token0x401, 60, P0, P1 + 17);
 
 		// few wrong whitelisting attempts
-		await assertThrows(async () => await auction.whitelist(tk.address, true, {from: accounts[1]}));
-		await assertThrows(async () => await auction.whitelist(0, true));
-		await assertThrows(async () => await auction.whitelist(auction.address, true));
+		await assertThrows(auction.whitelist, tk.address, true, {from: accounts[1]});
+		await assertThrows(auction.whitelist, 0, true);
+		await assertThrows(auction.whitelist, auction.address, true);
 
 		// remove token from whitelist
 		await auction.whitelist(tk.address, false);

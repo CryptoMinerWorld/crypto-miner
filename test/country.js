@@ -26,7 +26,7 @@ const token3 = 3;
 
 // a function to mint some default token
 async function mint1(tk, acc) {
-	await await tk.mint(acc, token1);
+	await tk.mint(acc, token1);
 }
 
 // standard function to instantiate token
@@ -61,14 +61,14 @@ contract('CountryERC721', (accounts) => {
 		assert.equal(0, await tk.balanceOf(accounts[0]), "wrong initial balanceOf() value");
 
 		// balanceOf(0) throws:
-		await assertThrows(async () => await tk.balanceOf(0));
+		await assertThrows(tk.balanceOf, 0);
 
 		// check the token map
 		assert.equal(0, await tk.tokenMap(), "wrong initial token map");
 
 		// ensure it is not possible to get token at index 0
-		await assertThrows(async () => await tk.tokenByIndex(0));
-		await assertThrows(async () => await tk.tokenOfOwnerByIndex(accounts[0], 0));
+		await assertThrows(tk.tokenByIndex, 0);
+		await assertThrows(tk.tokenOfOwnerByIndex, accounts[0], 0);
 	});
 
 	it("mint: creating a token", async () => {
@@ -82,9 +82,11 @@ contract('CountryERC721', (accounts) => {
 		await mint1(tk, accounts[0]);
 
 		// check its impossible to mint with incorrect params
-		await assertThrows(async () => await tk.mint(accounts[0], 0));
-		await assertThrows(async () => await tk.mint(accounts[0], 191));
-		await assertThrows(async () => await tk.mint(accounts[1], token2, {from: accounts[1]}));
+		await assertThrows(tk.mint, accounts[0], 0);
+		await assertThrows(tk.mint, accounts[0], 191);
+		await assertThrows(tk.mint, accounts[1], token2, {from: accounts[1]});
+		await assertThrows(tk.mint, ZERO_ADDR, token2);
+		await assertThrows(tk.mint, tk.address, token2);
 
 		// ensure total supply is 1
 		assert.equal(1, await tk.totalSupply(), "wrong totalSupply value after minting a token");
@@ -312,7 +314,7 @@ contract('CountryERC721', (accounts) => {
 	// ---------- ERC721 tests ----------
 
 	it("unsafe transfer: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers
@@ -362,7 +364,7 @@ contract('CountryERC721', (accounts) => {
 	});
 
 	it("unsafe transfer: transferring own token using transferFrom", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers
@@ -408,7 +410,7 @@ contract('CountryERC721', (accounts) => {
 	});
 
 	it("safe transfer: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 		// another instance will be used to verify ERC721 Receiver requirement
 		const blackHole = await deployToken();
@@ -472,7 +474,7 @@ contract('CountryERC721', (accounts) => {
 	});
 
 	it("approvals: grant and revoke token approval", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some accounts to work with
@@ -539,7 +541,7 @@ contract('CountryERC721', (accounts) => {
 	});
 
 	it("approvals: add and remove operator", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// some accounts to work with
@@ -562,7 +564,7 @@ contract('CountryERC721', (accounts) => {
 	});
 
 	it("approvals: operator in action", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers on behalf
@@ -616,7 +618,7 @@ contract('CountryERC721', (accounts) => {
 	});
 
 	it("transfer on behalf: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 
 		// enable transfers on behalf
@@ -682,7 +684,7 @@ contract('CountryERC721', (accounts) => {
 	});
 
 	it("safe transfer on behalf: transferring a token", async() => {
-		// analogue to smart contract deployment
+		// deploy token
 		const tk = await deployToken();
 		// another instance will be used to verify ERC721 Receiver requirement
 		const blackHole = await deployToken();
@@ -770,4 +772,4 @@ contract('CountryERC721', (accounts) => {
 
 
 // import auxiliary functions
-import {assertThrows, toBN} from "../scripts/shared_functions";
+import {assertThrows, toBN, ZERO_ADDR} from "../scripts/shared_functions";
