@@ -52,7 +52,7 @@ contract Miner is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x9c967656fc89a49245aed6d1eeec4fb7b145558d4f34f0a9faaa663ad0a1d000;
+  uint256 public constant MINER_UID = 0xf935de7a4cd923ef022933c4802c855e68559d57344ac1e2492f6c7b7fca4ac4;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
@@ -248,7 +248,7 @@ contract Miner is AccessMultiSig {
    * @dev Array is zero-indexed, index 0 corresponds to Tier 1,
    *      index 4 corresponds to Tier 5
    */
-  uint16[] public MINUTES_TO_MINE = [30, 240, 720, 1440, 2880];
+  uint16[] public MINUTES_TO_MINE = [90, 720, 2160, 4320, 8640];
 
   /**
    * @notice Enables mining, that is the main feature of miner
@@ -516,9 +516,6 @@ contract Miner is AccessMultiSig {
     // determine maximum depth this gem can mine to (by level)
     uint8 maxOffset = TierMath.getTierDepthOrMined(tiers, gemInstance.getLevel(gemId));
 
-    // determine gem's mining rate
-    uint32 rate100000000 = miningRateOf(gemId);
-
     // calculate effective energy
     uint32 effectiveEnergy = effectiveRestingEnergyOf(gemId);
 
@@ -534,8 +531,8 @@ contract Miner is AccessMultiSig {
       // delegate call to `__mine` to update plot and mint loot
       __mine(plotId, gemId, offset);
 
-      // recalculate energy left
-      uint32 energy = uint32(uint64(effectiveEnergy) * 100000000 / rate100000000);
+      // recalculate energy left taking into account gem's mining rate
+      uint32 energy = uint32(uint64(effectiveEnergy) * 1000000 / miningRateOf(gemId));
 
       // save unused energetic age of the gem, in seconds
       gemInstance.setAge(gemId, unusedEnergeticAge(energy));
@@ -1595,14 +1592,10 @@ contract Miner is AccessMultiSig {
    * @return effective energy of the gem in minutes
    */
   function effectiveEnergy(uint32 energy, uint32 grade) public pure returns(uint32) {
-    // calculate mining rate of the gem
-    // delegate call to `miningRate`
-    uint32 r = miningRate(grade);
-
     // determine effective gem energy of the gem,
     // taking into account its mining rate,
     // and return the result
-    return uint32(uint64(energy) * r / 100000000);
+    return uint32(uint64(energy) * miningRate(grade) / 1000000);
   }
 
   /**
@@ -1610,7 +1603,7 @@ contract Miner is AccessMultiSig {
    * @dev See `miningRate` function for more details
    * @dev Throws if gem specified doesn't exist
    * @param gemId ID of the gem to calculate mining rate for
-   * @return mining rate of the gem multiplied by 10^8
+   * @return mining rate of the gem multiplied by 10^6
    */
   function miningRateOf(uint24 gemId) public view returns(uint32) {
     // read the color of the gem
@@ -1623,23 +1616,28 @@ contract Miner is AccessMultiSig {
     // taking into account current month and gem color 5% mining rate bonus
     // calculate mining rate - delegate call to `miningRate`
     // multiplication by 21 may overflow uint32 in this particular case
-    return TimeUtils.monthIndex() == color? uint32(uint64(miningRate(grade)) * 21 / 20): miningRate(grade);
+    // since maximum value which `miningRate` may produce is 268103808,
+    // multiplied by 21 is 5630179968 (0x1 4F 95 BA 80)
+    // therefore do division first and multiplication next
+    return TimeUtils.monthIndex() == color? miningRate(grade) / 20 * 21: miningRate(grade);
   }
 
   /**
    * @notice Calculates mining rate of the gem by its grade
    * @dev Calculates mining rate `r` of the gem, based on its grade type `e`
    *      and grade value `u` according to the formulas:
-   *        r = 1 + (e - 1) * 10^-1 + 5 * u * 10^-8, e = [1, 2, 3]
-   *        r = 1.4 + 15 * u * 10^-8, e = 4
-   *        r = 2 + 2 * u * 10^-7, e = 5
-   *        r = 4 + u * 10^-6, e = 6
+   *        r = 1.0 + 0.25 * u * 10^-6, e = 1
+   *        r = 2.0 + 0.5  * u * 10^-6, e = 2
+   *        r = 3.3 + 0.9  * u * 10^-6, e = 3
+   *        r = 7.2 + 1.8  * u * 10^-6, e = 4
+   *        r = 25  + 6    * u * 10^-6, e = 5
+   *        r = 50  + 13   * u * 10^-6, e = 6
    * @dev Gem's grade type and value are extracted from the packed `grade`
    * @dev The value returned is multiplied by 10^8
    * @param grade grade of the gem,
    *      high 8 bits of which contain grade type e = [1, 2, 3, 4, 5, 6]
    *      low 24 bits contain grade value u = [0, 1000000)
-   * @return `r * 10^8`, where `r` is the mining rate of the gem of grade `grade`
+   * @return `r * 10^6`, where `r` is the mining rate of the gem of grade `grade`
    */
   function miningRate(uint32 grade) public pure returns(uint32) {
     // extract grade type of the gem - high 8 bits
@@ -1648,28 +1646,40 @@ contract Miner is AccessMultiSig {
     // extract grade value of the gem - low 24 bits
     uint32 u = 0xFFFFFF & grade;
 
-    // for grades D, C, B: e = [1, 2, 3]
-    if(e == 1 || e == 2 || e == 3) {
-      // r = 1 + (e - 1) * 10^-1 + 5 * u * 10^-8
-      return 100000000 + 10000000 * (e - 1) + 5 * u;
+    // for grade D: e = 1
+    if(e == 1) {
+      // r = 1 + 0.25 * u * 10^-6
+      return 1000000 + u / 4;
+    }
+
+    // for grade C: e = 2
+    if(e == 2) {
+      // r = 2 + 0.5 * u * 10^-6
+      return 2000000 + u / 2;
+    }
+
+    // for grade B: e = 3
+    if(e == 3) {
+      // r = 3.3 + 0.9 * u * 10^-6
+      return 3300000 + 9 * u / 10;
     }
 
     // for grade A: e = 4
     if(e == 4) {
-      // r = 1.4 + 15 * u * 10^-8
-      return 140000000 + 15 * u;
+      // r = 7.2 + 1.8 * u * 10^-6
+      return 7200000 + 9 * u / 5;
     }
 
     // for grade AA: e = 5
     if(e == 5) {
-      // r = 2 + 2 * u * 10^-7
-      return 200000000 + 20 * u;
+      // r = 25 + 6 * u * 10^-6
+      return 25000000 + 6 * u;
     }
 
     // for grade AAA: e = 6
     if(e == 6) {
-      // r = 4 + u * 10^-6
-      return 400000000 + 100 * u;
+      // r = 50 + 13 * u * 10^-6
+      return 50000000 + 13 * u;
     }
 
     // if we get here it means the grade is not valid
@@ -1678,7 +1688,7 @@ contract Miner is AccessMultiSig {
     require(false);
 
     // return fallback default value equal to one
-    return 100000000;
+    return 1000000;
   }
 
   /**

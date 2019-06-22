@@ -164,11 +164,11 @@ contract('Miner', (accounts) => {
 		);
 
 		// create few different gems
-		// low grade high level gem (level 5, grade D)
+		// low grade high level gem (level 5, grade D, value 0.8)
 		await gem.mint(accounts[0], 1, 1, 1, 5, 0x10C3500);
-		// mid level mid grade gem (level 3, grade A)
+		// mid level mid grade gem (level 3, grade A, value 0.4)
 		await gem.mint(accounts[0], 2, 1, 1, 3, 0x4061A80);
-		// high grade low level gem (level 1, grade AAA+)
+		// high grade low level gem (level 1, grade AAA+, value 0.99..)
 		await gem.mint(accounts[0], 3, 1, 1, 1, 0x60F423F);
 
 		// energetic age of all gems is zero
@@ -182,9 +182,9 @@ contract('Miner', (accounts) => {
 		assert.equal(0, await miner.restingEnergyOf(3), "non-zero resting energy for gem ID 3");
 
 		// verify mining rate
-		assert.equal(104000000, await miner.miningRateOf(1), "incorrect mining rate for gem ID 1");
-		assert.equal(146000000, await miner.miningRateOf(2), "incorrect mining rate for gem ID 2");
-		assert.equal(499999900, await miner.miningRateOf(3), "incorrect mining rate for gem ID 3");
+		assert.equal(1200000, await miner.miningRateOf(1), "incorrect mining rate for gem ID 1");
+		assert.equal(7920000, await miner.miningRateOf(2), "incorrect mining rate for gem ID 2");
+		assert.equal(62999987, await miner.miningRateOf(3), "incorrect mining rate for gem ID 3");
 
 		// verify effective resting energy is zero
 		assert.equal(0, await miner.effectiveRestingEnergyOf(1), "non-zero effective resting energy for gem ID 1");

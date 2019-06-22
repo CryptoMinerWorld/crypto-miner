@@ -53,12 +53,12 @@ contract('Miner (NowProvider)', (accounts) => {
 		);
 
 		// create few different gems
-		// low grade high level gem (level 5, grade D)
-		await gem.mint(accounts[0], 1, 1, 1, 5, 0x10C3500);
-		// mid level mid grade gem (level 3, grade A)
-		await gem.mint(accounts[0], 2, 1, 1, 3, 0x4061A80);
-		// high grade low level gem (level 1, grade AAA+)
-		await gem.mint(accounts[0], 3, 1, 1, 1, 0x60F423F);
+		// low grade high level gem (level 5, grade D, value 0.8)
+		await gem.mint(accounts[0], 1, 0, 1, 5, 0x10C3500);
+		// mid level mid grade gem (level 3, grade A, value 0.4)
+		await gem.mint(accounts[0], 2, 0, 1, 3, 0x4061A80);
+		// high grade low level gem (level 1, grade AAA+, value 0.99..)
+		await gem.mint(accounts[0], 3, 0, 1, 1, 0x60F423F);
 
 		// rewind 25 minutes forward
 		await np.incTime(1500);
@@ -79,17 +79,17 @@ contract('Miner (NowProvider)', (accounts) => {
 
 		// verify effective resting energy
 		assert.equal(0, await miner.effectiveRestingEnergyOf(1), "non-zero effective resting energy for gem ID 1 after 5 minutes");
-		assert.equal(Math.floor(1.46 * R), await miner.effectiveRestingEnergyOf(2), "wrong effective resting energy for gem ID 2 after 5 minutes");
-		assert.equal(Math.floor(4.99 * R), await miner.effectiveRestingEnergyOf(3), "wrong effective resting energy for gem ID 3 after 5 minutes");
+		assert.equal(Math.floor(7.92 * R), await miner.effectiveRestingEnergyOf(2), "wrong effective resting energy for gem ID 2 after 5 minutes");
+		assert.equal(Math.floor(62.99 * R), await miner.effectiveRestingEnergyOf(3), "wrong effective resting energy for gem ID 3 after 5 minutes");
 
 		// verify effective mining energy
-		assert(Math.floor(1.04 * a) > a, "not enough precision for effective mining energy test");
-		assert.equal(Math.floor(1.04 * a), await miner.effectiveMiningEnergyOf(1), "wrong effective mining energy for gem ID 1 after 5 minutes");
-		assert.equal(Math.floor(1.46 * a), await miner.effectiveMiningEnergyOf(2), "wrong effective mining energy for gem ID 2 after 5 minutes");
-		assert.equal(Math.floor(4.99 * a), await miner.effectiveMiningEnergyOf(3), "wrong effective mining energy for gem ID 3 after 5 minutes");
+		assert(Math.floor(1.2 * a) > a, "not enough precision for effective mining energy test");
+		assert.equal(Math.floor(1.2 * a), await miner.effectiveMiningEnergyOf(1), "wrong effective mining energy for gem ID 1 after 5 minutes");
+		assert.equal(Math.floor(7.92 * a), await miner.effectiveMiningEnergyOf(2), "wrong effective mining energy for gem ID 2 after 5 minutes");
+		assert.equal(Math.floor(62.99 * a), await miner.effectiveMiningEnergyOf(3), "wrong effective mining energy for gem ID 3 after 5 minutes");
 	});
 
-	it("mining: mining with resting energy only (bind without locking)", async() => {
+	it("mining: mining with resting energy only (bind with and without locking)", async() => {
 		// now provider
 		const np = await NowProvider.new();
 
@@ -133,43 +133,73 @@ contract('Miner (NowProvider)', (accounts) => {
 		// grant miner permission(s) to mint chest keys
 		await chestKey.updateRole(miner.address, ROLE_TOKEN_CREATOR);
 
-		// create plot in Antarctica with only 1 block of snow and 99 blocks of ice
+		// create 2 plots in Antarctica with only 1 block of snow and 99 blocks of ice
 		await plot.mint(accounts[0], 0, toBN("0x0200016464646400"));
-		// create a high grade low level gem
-		await gem.mint(accounts[0], 1, 1, 1, 1,0x60F423F);
+		await plot.mint(accounts[0], 0, toBN("0x0200016464646400"));
+		// create a high grade low level gem and high grade high level gem
+		await gem.mint(accounts[0], 1, 0, 1, 1, 0x60F423F);
+		await gem.mint(accounts[0], 2, 0, 1, 5, 0x60F423F);
 
-		// rewind 13 minutes forward to accumulate enough resting energy
-		await np.incTime(780);
+		// rewind 4 minutes forward to accumulate enough resting energy
+		await np.incTime(240);
 
-		// verify plot is mined by one block
-		assert.equal(0, await plot.getOffset(1), "wrong initial plot offset");
+		// verify plots are not mined initially
+		assert.equal(0, await plot.getOffset(1), "wrong initial plot 1 offset");
+		assert.equal(0, await plot.getOffset(2), "wrong initial plot 1 offset");
 
 		// verify initially states are zeros and tokens are transferable
-		assert.equal(0, await gem.getState(1), "non-zero gem's state");
-		assert.equal(0, await plot.getState(1), "non-zero plot's state");
-		assert(await plot.isTransferable(1), "plot is not transferable");
+		assert.equal(0, await gem.getState(1), "non-zero gem's 1 state");
+		assert.equal(0, await gem.getState(2), "non-zero gem's 2 state");
+		assert.equal(0, await plot.getState(1), "non-zero plot's 1 state");
+		assert.equal(0, await plot.getState(2), "non-zero plot's 2 state");
+		assert(await gem.isTransferable(1), "gem 1 is not transferable");
+		assert(await gem.isTransferable(2), "gem 2 is not transferable");
+		assert(await plot.isTransferable(1), "plot 1 is not transferable");
+		assert(await plot.isTransferable(2), "plot 2 is not transferable");
 
-		// verify gem level allows to mine only one block
-		assert.equal(1, await miner.gemMinesTo(1, 1), "wrong gem mines to calc");
-		// verify energetic properties of the gem and mining rate
-		assert.equal(13, await miner.energeticAgeOf(1), "wrong energetic age of");
-		assert.equal(7, await miner.restingEnergyOf(1), "wrong resting energy of");
-		assert.equal(499999900, await miner.miningRateOf(1), "wrong mining rate of a gem");
-		assert.equal(34, await miner.effectiveRestingEnergyOf(1), "wrong effective resting energy of a gem");
 		// verify plot structure
-		assert.equal(1, await plot.getTierDepth(1, 1), "wrong tier 1 depth");
+		assert.equal(1, await plot.getTierDepth(1, 1), "wrong tier 1 depth plot 1");
+		assert.equal(100, await plot.getTierDepth(1, 2), "wrong tier 2 depth plot 1");
+		assert.equal(1, await plot.getTierDepth(2, 1), "wrong tier 1 depth plot 2");
+		assert.equal(100, await plot.getTierDepth(2, 2), "wrong tier 2 depth plot 2");
 
-		// bind gem to a plot, it should release immediately (resting energy mining)
+		// verify gem level allows to mine only one block for low level gem
+		assert.equal(1, await miner.gemMinesTo(1, 1), "wrong gem 1 mines to calc");
+		// verify gem level allows to mine many blocks for high level gem
+		assert.equal(100, await miner.gemMinesTo(2, 1), "wrong gem 2 mines to calc");
+		// verify energetic properties of the gem and mining rate
+		assert.equal(4, await miner.energeticAgeOf(1), "wrong energetic age of gem 1");
+		assert.equal(4, await miner.energeticAgeOf(2), "wrong energetic age of gem 2");
+		assert.equal(2, await miner.restingEnergyOf(1), "wrong resting energy of gem 1");
+		assert.equal(2, await miner.restingEnergyOf(2), "wrong resting energy of gem 2");
+		assert.equal(62999987, await miner.miningRateOf(1), "wrong mining rate of a gem 1");
+		assert.equal(62999987, await miner.miningRateOf(2), "wrong mining rate of a gem 2");
+		assert.equal(125, await miner.effectiveRestingEnergyOf(1), "wrong effective resting energy of a gem 1");
+		assert.equal(125, await miner.effectiveRestingEnergyOf(2), "wrong effective resting energy of a gem 2");
+
+		// bind gem 1 to a plot, it should release immediately (resting energy mining)
 		await miner.bind(1, 1);
 
 		// verify all the tokens are still not locked
-		assert.equal(0, await gem.getState(1), "non-zero gem's state after mining");
-		assert(await gem.isTransferable(1), "gem is not transferable after mining");
-		assert.equal(0, await plot.getState(1), "non-zero plot's state after mining");
-		assert(await plot.isTransferable(1), "plot is not transferable after mining");
+		assert.equal(0, await gem.getState(1), "non-zero gem's 1 state after mining");
+		assert(await gem.isTransferable(1), "gem 1 is not transferable after mining");
+		assert.equal(0, await plot.getState(1), "non-zero plot's 1 state after mining");
+		assert(await plot.isTransferable(1), "plot 1 is not transferable after mining");
 
 		// verify plot is mined by one block
 		assert.equal(1, await plot.getOffset(1), "wrong plot offset after mining");
+
+		// bind gem 2 to a plot, it should fall into mining state
+		await miner.bind(2, 2);
+
+		// verify all the tokens are still not locked
+		assert.equal(1, await gem.getState(2), "zero gem's 2 state after binding");
+		assert(!await gem.isTransferable(2), "gem 2 is still transferable after binding");
+		assert.equal(1, await plot.getState(2), "zero plot's 2 state after binding");
+		assert(!await plot.isTransferable(2), "plot 2 is still transferable after binding");
+
+		// verify plot is mined by one block
+		assert.equal(1, await plot.getOffset(2), "wrong plot offset after binding");
 	});
 
 	it("mining: evaluating plot offset", async() => {
@@ -217,8 +247,8 @@ contract('Miner (NowProvider)', (accounts) => {
 		// initially evaluate returns zero
 		assert.equal(0, await miner.evaluate(1), "non-zero evaluated offset");
 
-		// rewind 7 minutes forward to mine one block
-		await np.incTime(420);
+		// rewind 2 minutes forward to mine one block
+		await np.incTime(120);
 
 		// evaluate now should return 1 block
 		assert.equal(1, await miner.evaluate(1), "wrong evaluated offset");
@@ -280,8 +310,8 @@ contract('Miner (NowProvider)', (accounts) => {
 		// initially update fails
 		await assertThrows(miner.update, 1);
 
-		// rewind 7 minutes forward to mine one block
-		await np.incTime(420);
+		// rewind 2 minutes forward to mine one block
+		await np.incTime(120);
 
 		// update succeeds now by mining one block
 		await miner.update(1);
