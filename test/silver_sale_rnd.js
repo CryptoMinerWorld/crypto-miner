@@ -1,9 +1,9 @@
 /**
  * Test depth defines how many random values will be generated
  * and analyzed to verify grade value random properties
- * Number of randoms to be generated is equal to 2^TEST_DEPTH
+ * Number of randoms to be generated is equal to 10^TEST_DEPTH
  */
-const TEST_DEPTH = 10;
+const TEST_DEPTH = 3;
 
 // Silver smart contract
 const Silver = artifacts.require("./SilverERC20.sol");
@@ -52,7 +52,7 @@ contract('SilverSale (RND)', (accounts) => {
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 
 		// number of random values to generate
-		const n = Math.pow(2, TEST_DEPTH);
+		const n = Math.pow(10, TEST_DEPTH);
 
 		// iterate over box types
 		for(let i = 0; i < BOX_TYPES.length - 1; i++) {
@@ -92,7 +92,7 @@ contract('SilverSale (RND)', (accounts) => {
 		await gold.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 
 		// number of random values to generate
-		const n = Math.pow(2, TEST_DEPTH);
+		const n = Math.pow(10, TEST_DEPTH);
 
 		// box type to verify random for - Goldish Silver Box
 		const boxType = BOX_TYPES.length - 1;
