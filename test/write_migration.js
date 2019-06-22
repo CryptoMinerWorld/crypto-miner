@@ -11,7 +11,7 @@ const Writer = artifacts.require("./TokenWriter.sol");
 import {COUNTRY_DATA} from "../data/country_data";
 
 // permissions
-import {ROLE_TOKEN_CREATOR, ROLE_AGE_PROVIDER} from "../test/erc721_core";
+import {ROLE_TOKEN_CREATOR, ROLE_AGE_PROVIDER} from "./erc721_core";
 const ROLE_REF_POINTS_ISSUER = 0x00000001;
 const ROLE_REF_POINTS_CONSUMER = 0x00000002;
 const ROLE_SELLER = 0x00000004;
