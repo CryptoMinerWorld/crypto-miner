@@ -22,17 +22,17 @@ import {
 import {ROLE_OFFSET_PROVIDER} from "./erc721_core";
 
 // default depth of the land plot
-const DEPTH = 100;
+const PLOT_DEPTH = 100;
 
 // token configuration(s)
 const layers0 = [
 	2,
 	0,
 	35 + (Math.floor(Math.random() * 11) - 5),
-	DEPTH,
-	DEPTH,
-	DEPTH,
-	DEPTH,
+	PLOT_DEPTH,
+	PLOT_DEPTH,
+	PLOT_DEPTH,
+	PLOT_DEPTH,
 	0
 ];
 const layers1 = [
@@ -42,7 +42,7 @@ const layers1 = [
 	65 + (Math.floor(Math.random() * 11) - 5),
 	85 + (Math.floor(Math.random() * 9) - 4),
 	95 + (Math.floor(Math.random() * 7) - 3),
-	DEPTH,
+	PLOT_DEPTH,
 	0
 ];
 const tiers0 = tiers(layers0);
@@ -193,8 +193,8 @@ contract('PlotERC721', (accounts) => {
 		assert(tiers0.eq(await tk.getTiers(token0)), "token0 has wrong tiers struct");
 		assert(tiers1.eq(await tk.getTiers(token1)), "token1 has wrong tiers struct");
 		assert.equal(2, await tk.getNumberOfTiers(token0), "token0 has wrong number of tiers");
-		assert.equal(DEPTH, await tk.getDepth(token0), "token0 has wrong depth");
-		assert.equal(DEPTH, await tk.getDepth(token1), "token1 has wrong depth");
+		assert.equal(PLOT_DEPTH, await tk.getDepth(token0), "token0 has wrong depth");
+		assert.equal(PLOT_DEPTH, await tk.getDepth(token1), "token1 has wrong depth");
 		assert.equal(0, await tk.getTierDepth(token0, 0), "token0 has wrong tier0 depth");
 		assert.equal(0, await tk.getTierDepth(token1, 0), "token1 has wrong tier0 depth");
 		assert.equal(1, await tk.getTierIndex(token0, 0), "token0 has wrong tier index 1");
@@ -225,7 +225,7 @@ contract('PlotERC721', (accounts) => {
 
 		// validate getTierDepth/getTierIndex compatibility
 		// for each possible offset `i`
-		for(let i = 0; i < DEPTH + 1; i++) {
+		for(let i = 0; i < PLOT_DEPTH + 1; i++) {
 			// determine what tier it is
 			const index0 = (await tk.getTierIndex(token0, i)).toNumber();
 			const index1 = (await tk.getTierIndex(token1, i)).toNumber();
@@ -287,17 +287,17 @@ contract('PlotERC721', (accounts) => {
 		await assertThrows(tk.mint, tk.address, 1, tiers1);
 		await assertThrows(tk.mint, 0, 1, tiers1);
 		for(let i = 0; i < 5; i++) {
-			await assertThrows(tk.mint, account1, 1, tiers([i, 0, 35, 65, 85, 95, DEPTH, 0]));
+			await assertThrows(tk.mint, account1, 1, tiers([i, 0, 35, 65, 85, 95, PLOT_DEPTH, 0]));
 		}
-		//await assertThrows(tk.mint, account1, 1, tiers([5, 1, 35, 65, 85, 95, DEPTH, 0]));
-		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 65, 85, 95, DEPTH, 1]));
-		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 35, 85, 95, DEPTH, 0]));
-		//await assertThrows(tk.mint, account1, 1, tiers([2, 1, 35, DEPTH, DEPTH, DEPTH, DEPTH, 0]));
-		//await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH, 1]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH, DEPTH - 1, 0]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH, DEPTH - 1, DEPTH, 0]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH, DEPTH - 1, DEPTH, DEPTH, 0]));
-		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, DEPTH - 1, DEPTH, DEPTH, DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 1, 35, 65, 85, 95, PLOT_DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 65, 85, 95, PLOT_DEPTH, 1]));
+		//await assertThrows(tk.mint, account1, 1, tiers([5, 0, 35, 35, 85, 95, PLOT_DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([2, 1, 35, PLOT_DEPTH, PLOT_DEPTH, PLOT_DEPTH, PLOT_DEPTH, 0]));
+		//await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, PLOT_DEPTH, PLOT_DEPTH, PLOT_DEPTH, PLOT_DEPTH, 1]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, PLOT_DEPTH, PLOT_DEPTH, PLOT_DEPTH, PLOT_DEPTH - 1, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, PLOT_DEPTH, PLOT_DEPTH, PLOT_DEPTH - 1, PLOT_DEPTH, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, PLOT_DEPTH, PLOT_DEPTH - 1, PLOT_DEPTH, PLOT_DEPTH, 0]));
+		await assertThrows(tk.mint, account1, 1, tiers([2, 0, 35, PLOT_DEPTH - 1, PLOT_DEPTH, PLOT_DEPTH, PLOT_DEPTH, 0]));
 		await assertThrows(tk.mint, ZERO_ADDR, 0, tiers0);
 		await assertThrows(tk.mint, tk.address, 0, tiers0);
 
@@ -421,22 +421,22 @@ contract('PlotERC721', (accounts) => {
 		await tk.mint(accounts[1], 1, tiers1);
 
 		// perform several random mines to reach the very bottom of both tokens
-		for(let offset = 0, delta; offset < DEPTH; offset += delta) {
-			delta = Math.min(Math.ceil(Math.random() * DEPTH), DEPTH - offset);
+		for(let offset = 0, delta; offset < PLOT_DEPTH; offset += delta) {
+			delta = Math.min(Math.ceil(Math.random() * PLOT_DEPTH), PLOT_DEPTH - offset);
 			await tk.mineBy(token0, delta);
 			await tk.mineTo(token1, offset + delta);
 		}
 
 		// ensure mining is not possible anymore
 		await assertThrows(tk.mineBy, token0, 1);
-		await assertThrows(tk.mineTo, token1, DEPTH);
-		await assertThrows(tk.mineTo, token1, DEPTH + 1);
+		await assertThrows(tk.mineTo, token1, PLOT_DEPTH);
+		await assertThrows(tk.mineTo, token1, PLOT_DEPTH + 1);
 
 		// verify both tokens are fully mined
 		assert(await tk.isFullyMined(token0), "token0 is not fully mined");
 		assert(await tk.isFullyMined(token1), "token1 is not fully mined");
-		assert.equal(DEPTH, await tk.getOffset(token0), "token0 offset is different from DEPTH");
-		assert.equal(DEPTH, await tk.getOffset(token1), "token1 offset is different from DEPTH");
+		assert.equal(PLOT_DEPTH, await tk.getOffset(token0), "token0 offset is different from PLOT_DEPTH");
+		assert.equal(PLOT_DEPTH, await tk.getOffset(token1), "token1 offset is different from PLOT_DEPTH");
 	});
 
 
