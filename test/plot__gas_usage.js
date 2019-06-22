@@ -2,7 +2,7 @@
 const Token = artifacts.require("./PlotERC721.sol");
 
 // import features and roles required
-import {FEATURE_TRANSFERS, FEATURE_TRANSFERS_ON_BEHALF} from "../test/erc721_core";
+import {FEATURE_TRANSFERS, FEATURE_TRANSFERS_ON_BEHALF} from "./erc721_core";
 
 // gas usage tests
 contract("PlotERC721: Gas Usage", (accounts) => {

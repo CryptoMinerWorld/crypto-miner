@@ -2,7 +2,7 @@
 const Token = artifacts.require("./GemERC721.sol");
 
 // import features and roles required
-import {FEATURE_TRANSFERS} from "../test/erc721_core";
+import {FEATURE_TRANSFERS} from "./erc721_core";
 
 // gas usage tests
 contract('GemERC721: Gas Usage', (accounts) => {

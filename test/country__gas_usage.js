@@ -5,7 +5,7 @@ const Token = artifacts.require("./CountryERC721.sol");
 import {COUNTRY_DATA} from "../data/country_data";
 
 // import features and roles required
-import {FEATURE_TRANSFERS} from "../test/erc721_core";
+import {FEATURE_TRANSFERS} from "./erc721_core";
 
 // gas usage tests
 contract("CountrySale: Gas Usage", (accounts) => {
