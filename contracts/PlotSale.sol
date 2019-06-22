@@ -129,7 +129,7 @@ contract PlotSale is AccessMultiSig {
    *      the number of tokens coupon allows to obtain
    * @dev sha3(code) => n (number of tokens)
    */
-  mapping(uint256 => uint8) coupons;
+  mapping(uint256 => uint8) public coupons;
 
   /**
    * @dev RefPointsTracker deployed instance to issue referral points to
