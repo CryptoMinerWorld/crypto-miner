@@ -1,3 +1,10 @@
+/**
+ * Test depth defines how many random values will be generated
+ * and analyzed to verify loot generation random properties
+ * Number of plots to be processed is equal to 10^TEST_DEPTH
+ */
+const TEST_DEPTH = 3;
+
 // Miner smart contract dependencies
 const Gem = artifacts.require("./GemERC721.sol");
 const Plot = artifacts.require("./PlotERC721.sol");
@@ -12,11 +19,11 @@ const ChestKey = artifacts.require("./ChestKeyERC20.sol");
 const Miner = artifacts.require("./Miner.sol");
 
 // import ERC721Core dependencies
-import {ROLE_STATE_PROVIDER, ROLE_TOKEN_CREATOR} from "../test/erc721_core";
+import {ROLE_STATE_PROVIDER, ROLE_TOKEN_CREATOR} from "./erc721_core";
 // import GemERC721 dependencies
-import {ROLE_AGE_PROVIDER, ROLE_MINED_STATS_PROVIDER, ROLE_NEXT_ID_PROVIDER} from "../test/erc721_core";
+import {ROLE_AGE_PROVIDER, ROLE_MINED_STATS_PROVIDER, ROLE_NEXT_ID_PROVIDER} from "./erc721_core";
 // import PlotERC721 dependencies
-import {ROLE_OFFSET_PROVIDER} from "../test/erc721_core";
+import {ROLE_OFFSET_PROVIDER} from "./erc721_core";
 // import Miner dependencies
 const FEATURE_MINING_ENABLED = 0x00000001;
 
@@ -29,9 +36,9 @@ const CSV_HEADER = "plots,lv1,lv2,lv3,lv4,lv5,silver,gold,artifacts,keys";
 const CSV_HEADER_C = "plots,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,lv1,lv2,lv3,lv4,lv5,D,C,B,A,AA,AAA,silver,gold,artifacts,keys";
 
 // test depth - number of plots to simulate
-const PLOTS = 1000;
+const PLOTS = Math.pow(10, TEST_DEPTH);
 // number of plots in a batch
-const BULK_SIZE = 100;
+const BULK_SIZE = Math.pow(10, TEST_DEPTH - 1);
 
 // Loot Generator tests - plot simulation
 contract('Miner: Plot Loot', (accounts) => {
@@ -87,8 +94,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
 		assert(loot[7] > 0, "no artifacts");
-		// there is a 74% chance of not getting any keys in 1000 plots
-		//assert(loot[8] > 0, "no keys");
+		assert(loot[8] > 0, "no keys");
 	});
 	it("tiers loot – Antarctica (2 Tiers)", async() => {
 		// define miner dependencies
@@ -136,8 +142,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
 		assert(loot[7] > 0, "no artifacts");
-		// there is a 74% chance of not getting any keys in 1000 plots
-		//assert(loot[8] > 0, "no keys");
+		assert(loot[8] > 0, "no keys");
 	});
 	it("mining a plot – Antarctica (2 Tiers)", async() => {
 		// define miner dependencies
@@ -279,9 +284,11 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
 		assert(loot[7] > 0, "no artifacts");
-		// there is a 37% chance of not getting a key in tier 5 for 1000 plots
-		// and 74% chance of not finding a key in the bottom of the stack for 1000 plots
-		// 73% chance of getting at least one key
+		// item chance is 0.02% in tier 5
+		// 37% chance of not getting an item in 5,000 blocks (1,000 plots)
+		// item chance is 0.03% in BOS
+		// 41% chance of not getting an item in 3,000 rounds (1,000 plots)
+		// 15% cumulative chance of not getting an item
 		assert(loot[8] > 0, "no keys");
 	});
 	it("tiers loot – Rest of the World (5 Tiers)", async() => {
@@ -333,9 +340,11 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
 		assert(loot[7] > 0, "no artifacts");
-		// there is a 37% chance of not getting a key in tier 5 for 1000 plots
-		// and 74% chance of not finding a key in the bottom of the stack for 1000 plots
-		// 73% chance of getting at least one key
+		// item chance is 0.02% in tier 5
+		// 37% chance of not getting an item in 5,000 blocks (1,000 plots)
+		// item chance is 0.03% in BOS
+		// 41% chance of not getting an item in 3,000 rounds (1,000 plots)
+		// 15% cumulative chance of not getting an item
 		assert(loot[8] > 0, "no keys");
 	});
 	it("mining a plot – Rest of the World (5 Tiers)", async() => {
@@ -492,9 +501,9 @@ function verifyTheLoot(loot) {
 	assert(loot.silver > 0, "no silver");
 	assert(loot.gold > 0, "no gold");
 	assert(loot.artifacts20 > 0, "no artifacts");
-	// there is a 74% chance of not getting any keys in 1000 plots in Antarctica
-	// and 73% chance of finding at least one key in 1000 plots for the rest of the world
-	// assert(loot.chestKeys + loot.foundersKeys > 0, "no keys");
+	// 99.5% chance of finding a key in 1,000 blocks in Antarctica
+	// 85% chance of finding a key in 1,000 blocks in the Rest of the World plot
+	assert(loot.chestKeys + loot.foundersKeys > 0, "no keys");
 }
 
 
