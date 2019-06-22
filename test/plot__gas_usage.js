@@ -33,20 +33,20 @@ contract("PlotERC721: Gas Usage", (accounts) => {
 		assertEqual(72113, gasUsed, "transferring a token gas usage mismatch: " + gasUsed);
 	});
 
-	it("gas: mining a plot by 1 block requires 33352 gas", async() => {
+	it("gas: mining a plot by 1 block requires 37,263 gas", async() => {
 		const tk = await Token.new();
 		await tk.mint(accounts[0], 0, toBN("0x05002341555F6400"));
 		const gasUsed = (await tk.mineBy(1, 1)).receipt.gasUsed;
 
-		assertEqual(33352, gasUsed, "mining a plot by 1 block gas usage mismatch: " + gasUsed);
+		assertEqual(37263, gasUsed, "mining a plot by 1 block gas usage mismatch: " + gasUsed);
 	});
 
-	it("gas: mining a plot to block 1 requires 32230 gas", async() => {
+	it("gas: mining a plot to block 1 requires 37,186 gas", async() => {
 		const tk = await Token.new();
 		await tk.mint(accounts[0], 0, toBN("0x05002341555F6400"));
 		const gasUsed = (await tk.mineTo(1, 1)).receipt.gasUsed;
 
-		assertEqual(32230, gasUsed, "mining a plot to block 1 gas usage mismatch: " + gasUsed);
+		assertEqual(37186, gasUsed, "mining a plot to block 1 gas usage mismatch: " + gasUsed);
 	});
 });
 

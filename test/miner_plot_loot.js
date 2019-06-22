@@ -90,6 +90,8 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
 		assert(loot[3] > 0, "no level 4 gems");
+		// item chance is 0.1% in BOS
+		// 5% chance of not getting an item in 3,000 rounds (1,000 plots)
 		assert(loot[4] > 0, "no level 5 gems");
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
@@ -138,6 +140,8 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
 		assert(loot[3] > 0, "no level 4 gems");
+		// item chance is 0.1% in BOS
+		// 5% chance of not getting an item in 3,000 rounds (1,000 plots)
 		assert(loot[4] > 0, "no level 5 gems");
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
@@ -448,11 +452,11 @@ async function extractLoot(player, gem, silver, gold, artifactErc20, foundersKey
 	loot.gems = gems.length;
 	for(let i = 0; i < gems.length; i++) {
 		// verify gem ID is not one of the already existing ones
-		if(gems[i].shrn(176).gte(toBN(PLOTS))) {
+		if(gems[i].maskn(24).gte(toBN(PLOTS))) {
 			// and unpack each gem's color, level and grade individually
-			loot.colors[gems[i].shrn(168).maskn(8).toNumber() - 1]++;
-			loot.levels[gems[i].shrn(160).maskn(8).toNumber() - 1]++;
-			loot.grades[gems[i].shrn(152).maskn(8).toNumber() - 1]++;
+			loot.colors[gems[i].shrn(24).maskn(8).toNumber() - 1]++;
+			loot.levels[gems[i].shrn(152).maskn(8).toNumber() - 1]++;
+			loot.grades[gems[i].shrn(184).maskn(8).toNumber() - 1]++;
 		}
 	}
 	// for the rest of the tokens its straight forward
