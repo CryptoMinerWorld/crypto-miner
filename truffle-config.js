@@ -23,11 +23,9 @@ module.exports = {
 					keys.mnemonic1, // create 12 words: https://metamask.io/
 					"https://mainnet.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
-/*
 				const nonceTracker = new NonceTrackerSubprovider();
 				wallet.engine._providers.unshift(nonceTracker);
 				nonceTracker.setEngine(wallet.engine);
-*/
 				return wallet;
 			},
 			network_id: "1", // Mainnet
@@ -37,10 +35,9 @@ module.exports = {
 			timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
 		},
 
-/*
 		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
 		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
-		development: {
+		rinkeby: {
 			provider: function () {
 				const wallet = new HDWalletProvider(
 					keys.mnemonic4, // create 12 words: https://metamask.io/
@@ -57,7 +54,6 @@ module.exports = {
 			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
 			timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
 		},
-*/
 
 		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
 		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
@@ -67,11 +63,9 @@ module.exports = {
 					keys.mnemonic3, // create 12 words: https://metamask.io/
 					"https://ropsten.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
-/*
 				const nonceTracker = new NonceTrackerSubprovider();
 				wallet.engine._providers.unshift(nonceTracker);
 				nonceTracker.setEngine(wallet.engine);
-*/
 				return wallet;
 			},
 			network_id: "3", // Ropsten
