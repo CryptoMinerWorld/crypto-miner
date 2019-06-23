@@ -444,15 +444,20 @@ contract Miner is AccessMultiSig {
   }
 
   /**
-   * @dev Finds a gem bound to a particular plot
-   * @param plotId ID of the plot to query bound gem for
-   * @return ID of the bound gem
+   * @dev Finds a gem and artifact bound to a particular plot
+   * @param plotId ID of the plot to query bound gem/artifact for
+   * @return a tuple containing IDs of the bound gem and artifact
    */
   function getPlotBinding(uint24 plotId) public view returns(uint24 gemId, uint24 artifactId) {
     // read and return the result
     return (plots[plotId].gemId, 0);
   }
 
+  /**
+   * @dev Finds a plot and artifact bound to a particular gem
+   * @param gemId ID of the gem to query bound plot/artifact for
+   * @return a tuple containing IDs of the bound plot and artifact
+   */
   function getGemBinding(uint24 gemId) public view returns(uint24 plotId, uint24 artifactId) {
     // read and return the result
     return (gems[gemId], 0);
@@ -879,7 +884,7 @@ contract Miner is AccessMultiSig {
     // mint gems level 1, 2, 3, 4, 5
     for(uint8 i = 0; i < 5; i++) {
       // mint gems level `i`
-      __mintGems(256 * i, i + 1, loot[i], plotId);
+      __mintGems(15 * i, i + 1, loot[i], plotId);
     }
 
     // if there is silver to mint
@@ -955,23 +960,23 @@ contract Miner is AccessMultiSig {
       if(rnd10000 < 5000) {
         gradeType = 1;
       }
-      // grade C: 37%
-      else if(rnd10000 < 8700) {
+      // grade C: 25%
+      else if(rnd10000 < 7500) {
         gradeType = 2;
       }
-      // grade B: 10%
-      else if(rnd10000 < 9700) {
+      // grade B: 15%
+      else if(rnd10000 < 9000) {
         gradeType = 3;
       }
-      // grade A: 2.5%
-      else if(rnd10000 < 9950) {
+      // grade A: 7%
+      else if(rnd10000 < 9700) {
         gradeType = 4;
       }
-      // grade A: 0.49%
-      else if(rnd10000 < 9999) {
+      // grade A: 2%
+      else if(rnd10000 < 9900) {
         gradeType = 5;
       }
-      // grade AAA: 0.01%
+      // grade AAA: 1%
       else {
         gradeType = 6;
       }
@@ -1167,7 +1172,7 @@ contract Miner is AccessMultiSig {
             loot[0]++;
           }
           // gem (lvl 2): 1%
-          if(rnd10000 < 250) {
+          else if(rnd10000 < 250) {
             loot[1]++;
           }
           // gem (lvl 3): 0.5%
@@ -1306,7 +1311,7 @@ contract Miner is AccessMultiSig {
           loot[0]++;
         }
         // gem (lvl 2): 1%
-        if(rnd10000 < 268) {
+        else if(rnd10000 < 268) {
           loot[1]++;
         }
         // gem (lvl 3): 0.5%
