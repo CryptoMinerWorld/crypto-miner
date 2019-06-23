@@ -326,7 +326,7 @@ contract GemERC721 is ERC721Core {
    * @param _blocksFrom old minedBlocks value
    * @param _blocksTo new minedBlocks value
    */
-  event MinedStatsModified(
+  event MinedCountersModified(
     address indexed _by,
     address indexed _owner,
     uint256 indexed _tokenId,
@@ -873,7 +873,7 @@ contract GemERC721 is ERC721Core {
     tokens[_tokenId].stateModified = now32();
 
     // emit en event
-    emit MinedStatsModified(msg.sender, ownerOf(_tokenId), _tokenId, plotsMined, plotsMined + _plots, blocksMined, blocksMined + _blocks);
+    emit MinedCountersModified(msg.sender, ownerOf(_tokenId), _tokenId, plotsMined, plotsMined + _plots, blocksMined, blocksMined + _blocks);
   }
 
   /**

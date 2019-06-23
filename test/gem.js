@@ -592,7 +592,7 @@ contract('GemERC721', function(accounts) {
 		await mint1(tk, account1);
 
 		// define a function to check
-		const fn = async() => await tk.updateMinedStats(token1, 1, 1, {from: operator});
+		const fn = async() => await tk.increaseMinedCounters(token1, 1, 1, {from: operator});
 
 		// ensure function fails if operator has no role required
 		await assertThrows(fn);
@@ -615,8 +615,8 @@ contract('GemERC721', function(accounts) {
 
 		// the only check here is int overflow check
 		// define few correct functions which overflow if executed twice
-		const fn1 = async() => await tk.updateMinedStats(token1, 0, 0xABCDEF00);
-		const fn2 = async() => await tk.updateMinedStats(token1, 0xABCDEF, 0);
+		const fn1 = async() => await tk.increaseMinedCounters(token1, 0, 0xABCDEF00);
+		const fn2 = async() => await tk.increaseMinedCounters(token1, 0xABCDEF, 0);
 
 		// in both cases first call succeeds, second overflows
 		await fn1();
