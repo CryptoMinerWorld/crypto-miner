@@ -29,7 +29,7 @@ module.exports = async function(deployer, network, accounts) {
 	// determine if there are non-external addresses among owners
 	const contracts = await reader.isContract(uniqueOwners);
 	console.log(contracts.map((a) => a? "*": ".").join(""));
-	const hasContract = contracts.reduce((a, b) => a | b);
+	const hasContract = contracts.reduce((a, b) => a || b);
 	if(hasContract) {
 		console.log("WARNING: there are smart contracts among token owners!!!");
 	}

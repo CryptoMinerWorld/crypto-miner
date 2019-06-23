@@ -8,7 +8,9 @@
     "test": "test"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
     "random-number-csprng": "^1.0.2",
+    "request-promise-any": "^1.0.7",
     "truffle-hdwallet-provider": "^1.0.9"
   },
   "devDependencies": {
