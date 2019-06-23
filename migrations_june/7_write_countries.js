@@ -8,7 +8,7 @@ const TokenWriter = artifacts.require("./TokenWriter.sol");
 // Roles required for token minting
 const ROLE_TOKEN_CREATOR = 0x00000001;
 
-// a process to mint tokens in test network
+// a process to mint country tokens
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
 		console.log("[write countries] test network - skipping the migration script");
@@ -26,7 +26,7 @@ module.exports = async function(deployer, network, accounts) {
 		}:
 		{ // Ropsten Addresses
 			CountryERC721:      "0x7825f2bd389B8962F0578804D7B1c3FC03cF14f1",
-			TokenWriter:        "0xdb4f3644e05E6fB6BB7426A4f258356b728AB720",
+			TokenWriter:        "0x38f942f15Ec3Ce62B70e90fAca0d68B0dfAAAB53",
 		};
 
 	// deployed instances
@@ -49,9 +49,9 @@ module.exports = async function(deployer, network, accounts) {
 	const owners = [];
 	const ids = [];
 
-	// split CSV data by lines: each line is a token
+	// split CSV data by lines: each line is a record
 	const csv_lines = csv_data.split(/[\r\n]+/);
-	// iterate over array of tokens
+	// iterate over array of records
 	for(let i = 0; i < csv_lines.length; i++) {
 		// extract token properties
 		const props = csv_lines[i].split(",").map((a) => a.trim());

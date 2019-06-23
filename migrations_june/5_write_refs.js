@@ -10,7 +10,7 @@ const ROLE_REF_POINTS_ISSUER = 0x00000001;
 const ROLE_REF_POINTS_CONSUMER = 0x00000002;
 const ROLE_SELLER = 0x00000004;
 
-// a process to mint tokens in test network
+// a process to write ref points data
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
 		console.log("[write refs] test network - skipping the migration script");
@@ -28,7 +28,7 @@ module.exports = async function(deployer, network, accounts) {
 		}:
 		{ // Ropsten Addresses
 			RefPointsTracker:   "0xC97a91a4e1bfbf18a9038BAE649Fa92d0B242Cfb",
-			TokenWriter:        "0xdb4f3644e05E6fB6BB7426A4f258356b728AB720",
+			TokenWriter:        "0x38f942f15Ec3Ce62B70e90fAca0d68B0dfAAAB53",
 		};
 
 	// deployed instances
@@ -50,9 +50,9 @@ module.exports = async function(deployer, network, accounts) {
 	// define array to store the data
 	const data = [];
 
-	// split CSV data by lines: each line is a tracker
+	// split CSV data by lines: each line is a record
 	const csv_lines = csv_data.split(/[\r\n]+/);
-	// iterate over array of tokens
+	// iterate over array of records
 	for(let i = 0; i < csv_lines.length; i++) {
 		// extract tracker properties
 		const props = csv_lines[i].split(",").map((a) => a.trim());
@@ -115,7 +115,7 @@ function read_csv(path, header) {
 // TODO: import from shared_functions.js
 const toBN = web3.utils.toBN;
 
-// auxiliary function to pack gem data from array into uint128
+// auxiliary function to pack ref data from array into uint256
 function packRefData(p) {
 	// ensure all elements are converted to BNs
 	p = p.map((a) => toBN(a));

@@ -9,7 +9,7 @@ const TokenWriter = artifacts.require("./TokenWriter.sol");
 const ROLE_TOKEN_CREATOR = 0x00000001;
 const ROLE_AGE_PROVIDER = 0x00000100;
 
-// a process to mint tokens in test network
+// a process to mint gem tokens
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
 		console.log("[write gems] test network - skipping the migration script");
@@ -27,7 +27,7 @@ module.exports = async function(deployer, network, accounts) {
 		}:
 		{ // Ropsten Class Addresses
 			GemERC721:          "0xBe3076e7Ab71c78Db1F0CC79209CA4ef2fee0B89",
-			TokenWriter:        "0xdb4f3644e05E6fB6BB7426A4f258356b728AB720",
+			TokenWriter:        "0x38f942f15Ec3Ce62B70e90fAca0d68B0dfAAAB53",
 		};
 
 	// deployed instances
@@ -50,9 +50,9 @@ module.exports = async function(deployer, network, accounts) {
 	const owners = [];
 	const gems = [];
 
-	// split CSV data by lines: each line is a token
+	// split CSV data by lines: each line is a record
 	const csv_lines = csv_data.split(/[\r\n]+/);
-	// iterate over array of tokens
+	// iterate over array of records
 	for(let i = 0; i < csv_lines.length; i++) {
 		// extract token properties
 		const props = csv_lines[i].split(",").map((a) => a.trim());
