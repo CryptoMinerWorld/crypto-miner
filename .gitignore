@@ -7,4 +7,5 @@ coverageEnv/
 coverage.json
 *.iml
 *.csv
+*.log
 keys.js
