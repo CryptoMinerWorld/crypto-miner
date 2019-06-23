@@ -11,6 +11,7 @@ const SilverSale = artifacts.require("./SilverSale");
 // Features and Roles required to be enabled
 const FEATURE_SALE_ENABLED = 0x00000001;
 const FEATURE_GET_ENABLED = 0x00000002;
+const FEATURE_USING_COUPONS_ENABLED = 0x00000004;
 const ROLE_TOKEN_CREATOR = 0x00000001;
 const ROLE_REF_POINTS_ISSUER = 0x00000001;
 const ROLE_REF_POINTS_CONSUMER = 0x00000002;
@@ -32,16 +33,16 @@ module.exports = async function(deployer, network, accounts) {
 		{ // Mainnet addresses
 			chest:              "0xC352f692F55dEf49f0B736Ec1F7CA0F862eabD23", // MainNet Founder's Chest (MultiSig)
 			beneficiary:        "0xe0123204873fD29A29aEf3f99FaF1b1c45fe3B1E", // MainNet MultiSig
-			saleStartUTC:       1559844000, // 06/21/2019 @ 6:00pm UTC
+			saleStartUTC:       1550772000, // 02/21/2019 @ 6:00pm UTC
 
 		}:
 		{ // Ropsten addresses
-			RefPointsTracker:   "0xC97a91a4e1bfbf18a9038BAE649Fa92d0B242Cfb",
-			SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
-			GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
+			RefPointsTracker:   "0xF703407ADbFFC0d7f7Fe413eE86Cc82c9f51Df06",
+			SilverERC20:        "0xB373E86e650236CAf952F6cdE206dfe196FeEC35",
+			GoldERC20:          "0xbE713aC93fF6d7e0dA88e024DC9Cf0d5D05c3A5A",
 			chest:              "0xC352f692F55dEf49f0B736Ec1F7CA0F862eabD23",
 			beneficiary:        "0xe0123204873fD29A29aEf3f99FaF1b1c45fe3B1E",
-			saleStartUTC:       1559844000, // 06/21/2019 @ 6:00pm UTC
+			saleStartUTC:       1550772000, // 02/21/2019 @ 6:00pm UTC
 		};
 
 
@@ -74,7 +75,7 @@ module.exports = async function(deployer, network, accounts) {
 		console.log("updating gold access");
 		await instances.GoldERC20.updateRole(sale.address, ROLE_TOKEN_CREATOR);
 		console.log("enabling sale features");
-		await sale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED);
+		await sale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED | FEATURE_USING_COUPONS_ENABLED);
 
 		console.log("execution complete");
 	}

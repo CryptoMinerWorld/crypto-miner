@@ -27,8 +27,8 @@ module.exports = async function(deployer, network, accounts) {
 			FoundersPlots:      "0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1",
 		}:
 		{ // Ropsten Addresses
-			FoundersPlots:      "0xA7EAd1a2e9Ee57b97Fd0D96ce480a39C40ed67E9",
-			PlotERC721:         "0x1C3634f7345fd3f3884C5D6FF1F96E16A69b40Ea",
+			FoundersPlots:      "0xeD6E75F271E4Cd58b800a17240228F0C19C12550",
+			PlotERC721:         "0x33369f4870703489CE21B8BeF92ADa5820b5ffED",
 		};
 
 

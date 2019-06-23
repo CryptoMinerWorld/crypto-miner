@@ -29,9 +29,9 @@ module.exports = async function(deployer, network, accounts) {
 
 		}:
 		{ // Ropsten addresses
-			SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
-			GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
-			GemERC721:          "0xBe3076e7Ab71c78Db1F0CC79209CA4ef2fee0B89",
+			SilverERC20:        "0xB373E86e650236CAf952F6cdE206dfe196FeEC35",
+			GoldERC20:          "0xbE713aC93fF6d7e0dA88e024DC9Cf0d5D05c3A5A",
+			GemERC721:          "0x8ad156dA5ea1053D4858987Ca1165151B5702479",
 		};
 
 	// deploy workshop
@@ -47,13 +47,13 @@ module.exports = async function(deployer, network, accounts) {
 		};
 
 		const workshop = await Workshop.deployed();
-		console.log("updating silver access");
+		console.log("updating silver access " + conf.SilverERC20);
 		await instances.SilverERC20.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
-		console.log("updating gold access");
+		console.log("updating gold access " + conf.GoldERC20);
 		await instances.GoldERC20.updateRole(workshop.address, ROLE_TOKEN_DESTROYER);
-		console.log("updating gem access");
+		console.log("updating gem access " + conf.GemERC721);
 		await instances.GemERC721.updateRole(workshop.address, ROLE_LEVEL_PROVIDER | ROLE_GRADE_PROVIDER);
-		console.log("enabling workshop features");
+		console.log("enabling workshop features " + workshop.address);
 		await workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
 
 		console.log("execution complete");

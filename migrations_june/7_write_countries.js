@@ -25,7 +25,7 @@ module.exports = async function(deployer, network, accounts) {
 
 		}:
 		{ // Ropsten Addresses
-			CountryERC721:      "0x7825f2bd389B8962F0578804D7B1c3FC03cF14f1",
+			CountryERC721:      "0xdccf4653fc2F90e6fC0B151E0b9B7CFE4eF63402",
 			TokenWriter:        "0x38f942f15Ec3Ce62B70e90fAca0d68B0dfAAAB53",
 		};
 

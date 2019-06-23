@@ -23,8 +23,8 @@ module.exports = async function(deployer, network, accounts) {
 
 		}:
 		{ // Ropsten addresses
-			DutchAuction:       "0xA55bf145A6199da39fc83F1612FFD0317F85aB72",
-			GemERC721:          "0xBe3076e7Ab71c78Db1F0CC79209CA4ef2fee0B89",
+			DutchAuction:       "0x18D916BBDaABFd63384Bb8C4EAdFcd98b53B78eF",
+			GemERC721:          "0x8ad156dA5ea1053D4858987Ca1165151B5702479",
 		};
 
 	// for test network whitelist the gem automatically
@@ -35,9 +35,9 @@ module.exports = async function(deployer, network, accounts) {
 			GemERC721: await GemERC721.at(conf.GemERC721),
 		};
 
-		console.log("enabling transfers and transfers on behalf for GemERC721");
+		console.log("enabling transfers and transfers on behalf for GemERC721 " + conf.GemERC721);
 		await instances.GemERC721.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
-		console.log("whitelisting GemERC721 smart contract address on the auction");
+		console.log("whitelisting GemERC721 smart contract address on the auction " + conf.DutchAuction);
 		await instances.DutchAuction.whitelist(conf.GemERC721, true);
 
 		console.log("execution complete");

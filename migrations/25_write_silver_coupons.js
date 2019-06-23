@@ -27,7 +27,7 @@ module.exports = async function(deployer, network, accounts) {
 		// Mainnet addresses
 		"":
 		// Ropsten address
-		"0xf0632BBCF64edc726aC590A797bd2C2fCec4aE6E";
+		"0x7e48d4102de1Bd47aA456AAE21D899bd898B6954";
 
 	// link to the instance
 	const sale = await SilverSale.at(saleAddress);

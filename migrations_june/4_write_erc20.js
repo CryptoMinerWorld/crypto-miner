@@ -26,8 +26,8 @@ module.exports = async function(deployer, network, accounts) {
 
 		}:
 		{ // Ropsten Addresses
-			SilverERC20:        "0x7EDC3fea733E790814e3c2A9D997A55f531D8868",
-			GoldERC20:          "0x41FecF81B49B9Bc3eC80EdDdffe266922Ff2BD1f",
+			SilverERC20:        "0xB373E86e650236CAf952F6cdE206dfe196FeEC35",
+			GoldERC20:          "0xbE713aC93fF6d7e0dA88e024DC9Cf0d5D05c3A5A",
 			TokenWriter:        "0x38f942f15Ec3Ce62B70e90fAca0d68B0dfAAAB53",
 		};
 

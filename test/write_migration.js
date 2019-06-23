@@ -380,6 +380,7 @@ contract('V1 -> V2 Migration', (accounts) => {
 
 		// track cumulative gas usage
 		let cumulativeGasUsed = 0;
+		let gasMax = 0;
 
 		// now we have all the gems assigned to their owners in "owners" array
 		// iterate the array
@@ -395,12 +396,18 @@ contract('V1 -> V2 Migration', (accounts) => {
 			// update cumulative gas used
 			cumulativeGasUsed += gasUsed;
 
+			// update maximum gas used
+			gasMax = gasUsed > gasMax? gasUsed: gasMax;
+
 			// log the result
-			console.log("\t%o token(s) for %o written: %o gas used", tokens.length, owner, gasUsed);
+			//console.log("\t%o token(s) for %o written: %o gas used", tokens.length, owner, gasUsed);
 		}
 
 		// clean the permissions used
 		await token.updateRole(writer.address, 0);
+
+		// print the cumulative gas usage result
+		console.log("\tmaximum gas used: %o", gasMax);
 
 		// print the cumulative gas usage result
 		console.log("\tcumulative gas used: %o", cumulativeGasUsed);
