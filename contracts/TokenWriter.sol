@@ -83,6 +83,20 @@ interface RefV2 {
 }
 
 /**
+ * @dev Silver/Gold V2 interface (current),
+ *      works for any kind of mintable ERC20 token
+ */
+interface MintV2 {
+  /**
+   * @dev Mints (creates) some tokens to address specified
+   * @dev Requires sender to have `ROLE_TOKEN_CREATOR` permission
+   * @param _to an address to mint tokens to
+   * @param _value an amount of tokens to mint (create)
+   */
+  function mint(address _to, uint256 _value) external;
+}
+
+/**
  * @dev Helper smart contract to read Gem and Country ERC721 tokens
  */
 contract TokenWriter is AccessControl {
@@ -113,9 +127,15 @@ contract TokenWriter is AccessControl {
   uint32 public constant ROLE_REF_WRITER = 0x00000004;
 
   /**
+   * @dev ERC20 writer is responsible for issuing ERC20 tokens (Silver, Gold)
+   */
+  uint32 public constant ROLE_ERC20_WRITER = 0x00000008;
+
+  /**
    * @dev Creates several gems in single transaction
    * @dev Requires sender to have `ROLE_GEM_WRITER` permission
    * @dev Works only for 1 week after deployment (`SECURITY_TIMEOUT`)
+   * @dev Throws if input array is empty
    * @param gemAddress deployed Gem ERC721 v2 instance
    * @param _to an address to mint tokens to
    * @param _data an array of packed gem data
@@ -152,6 +172,7 @@ contract TokenWriter is AccessControl {
    * @dev Creates several gems in single transaction
    * @dev Requires sender to have `ROLE_GEM_WRITER` permission
    * @dev Works only for 1 week after deployment (`SECURITY_TIMEOUT`)
+   * @dev Throws if input array is empty
    * @param gemAddress deployed Gem ERC721 v2 instance
    * @param owners an array of addresses to mint tokens to
    * @param _data an array of packed gem data
@@ -188,6 +209,7 @@ contract TokenWriter is AccessControl {
    * @dev Creates several countries in single transaction
    * @dev Requires sender to have `ROLE_COUNTRY_WRITER` permission
    * @dev Works only for 1 week after deployment (`SECURITY_TIMEOUT`)
+   * @dev Throws if input array is empty
    * @param countryAddress deployed Gem ERC721 v2 instance
    * @param idOffset token ID offset to be used to, the token ID for
    *      an address at index `i` in `addresses` array is `offset + i + 1`
@@ -207,14 +229,17 @@ contract TokenWriter is AccessControl {
     for(uint8 i = 0; i < owners.length; i++) {
       // if owner address passed is zero no need to mint it - skip it
       if(owners[i] != address(0)) {
+        // this is required since an array index keeps track of country ID
         CountryV2(countryAddress).mint(owners[i], idOffset + i + 1);
       }
     }
   }
 
   /**
-   * @notice Issues referral points to players addresses
-   * @dev This is a bulk version of `issueTo` function
+   * @dev Issues referral points to players addresses
+   * @dev Requires sender to have `ROLE_REF_WRITER` permission
+   * @dev Works only for 1 week after deployment (`SECURITY_TIMEOUT`)
+   * @dev Throws if input array is empty
    * @param trackerAddress deployed RefPointsTracker v2 instance
    * @param _data array of packed data structures containing
    *      issued, 32 bits
@@ -256,11 +281,9 @@ contract TokenWriter is AccessControl {
   }
 
   /**
-   * @dev A callback function called by seller on successful sale
-   *      and some wei being spent by several players
-   * @dev Can be also used to initialize smart contract with a
-   *      bunch of initial data
    * @dev Adds addresses specified to `knownAddresses` mapping
+   * @dev Requires sender to have `ROLE_REF_WRITER` permission
+   * @dev Works only for 1 week after deployment (`SECURITY_TIMEOUT`)
    * @dev Throws if input array is empty
    * @param trackerAddress deployed RefPointsTracker v2 instance
    * @param _data array of packed data structures containing
@@ -287,6 +310,41 @@ contract TokenWriter is AccessControl {
       // and each one to the `knownAddresses` mapping
       RefV2(trackerAddress).addKnownAddress(address(_data[i]));
     }
+  }
+
+  /**
+   *
+   * @dev Requires sender to have `ROLE_GEM_WRITER` permission
+   * @dev Works only for 1 week after deployment (`SECURITY_TIMEOUT`)
+   * @dev Throws if input array is empty
+   * @param tokenAddress deployed ERC20 instance with mint() interface
+   * @param _data array of packed data structures containing
+   *      amount of tokens owned, 96 bits
+   *      owner address, 160
+   */
+  function writeERC20Data(address tokenAddress, uint256[] memory _data) public {
+    // ensure smart contract is fresh (security constraint)
+    require(now - deployed < SECURITY_TIMEOUT);
+
+    // verify sender permissions
+    require(isSenderInRole(ROLE_REF_WRITER));
+
+    // verify input array is not empty
+    require(_data.length != 0);
+
+    // iterate over the array
+    for(uint256 i = 0; i < _data.length; i++) {
+      // verify balance is not zero (amount of tokens owned)
+      require(_data[i] >> 160 != 0);
+
+      // verify the address itself is not zero, the data comes from
+      // external source and parsed so additional check would be good
+      require(uint160(_data[i]) != 0);
+
+      // mint required amount of ERC20 tokens
+      MintV2(tokenAddress).mint(address(_data[i]), _data[i] >> 160);
+    }
+
   }
 
 }

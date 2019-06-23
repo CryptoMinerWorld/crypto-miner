@@ -41,7 +41,7 @@ PlotSale:           0x5Ed6aDF21a9Ceac6356FE4E80653dC07DD3a86ae
 PlotAntarctica:     0xDdEe3Df8516b7ED0CeFb7017b2D7704D17102075
 
 TokenReader:        0x14B02B4297E7ABEbC06019CC6529a86323E9A20A
-TokenWriter:        0xdb4f3644e05E6fB6BB7426A4f258356b728AB720
+TokenWriter:        0x38f942f15Ec3Ce62B70e90fAca0d68B0dfAAAB53
 --------------------------------------------------------------
 
 
