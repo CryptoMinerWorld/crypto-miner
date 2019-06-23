@@ -23,7 +23,7 @@ contract GemERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0xeae73a7c4d19a01b3c8abe213dd9f4ad51bf6d82bea6d4be2b2e408bdd89a2b2;
+  uint256 public constant TOKEN_UID = 0x3e39a140cacf3b86b519fe83ca040e309892d7ec9b43a74a5387df2af019a3b1;
 
   /**
    * @dev ERC20 compliant token symbol
@@ -315,7 +315,7 @@ contract GemERC721 is ERC721Core {
   );
 
   /**
-   * @dev Fired in updateMinedStats()
+   * @dev Fired in increaseMinedCounters()
    * @param _by mined stats provider
    *      (an address having `ROLE_MINED_STATS_PROVIDER` permission)
    *      which modified token `_tokenId` energetic age
@@ -846,9 +846,13 @@ contract GemERC721 is ERC721Core {
 
   /**
    * @dev Increases plots mined and blocks mined counters of the gem
+   * @dev Requires sender to have `ROLE_MINED_STATS_PROVIDER` permission
+   * @dev Throws if token specified doesn't exist
+   * @param _tokenId ID of the gem to update mining stats of
+   * @param _plots amount of plots to increase gem's `plotsMined by
+   * @param _blocks amount of blocks to increase gem's `blocksMined` by
    */
-  // TODO: rename to increaseMinedStats
-  function updateMinedStats(uint256 _tokenId, uint24 _plots, uint32 _blocks) public {
+  function increaseMinedCounters(uint256 _tokenId, uint24 _plots, uint32 _blocks) public {
     // check that the call is made by a state provider
     require(isSenderInRole(ROLE_MINED_STATS_PROVIDER));
 

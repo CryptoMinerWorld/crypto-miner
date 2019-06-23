@@ -216,7 +216,7 @@ contract('GemERC721', function(accounts) {
 		assert.equal(0, await tk.getStateModified(token1), "token1 has wrong stateModified");
 		assert.equal(0, await tk.getState(token1), "token1 has non-zero state");
 		assert(await tk.isTransferable(token1), "token1 is not transferable");
-		assert(creation1.gt(toBN(0)), "token1 has zero creation time");
+		assert(!creation1.isZero(), "token1 has zero creation time");
 		assert.equal(0, await tk.getOwnershipModified(token1), "token1 1 has wrong ownershipModified");
 		assert.equal(token1, await tk.tokenByIndex(0), "wrong token ID at index 0");
 		assert.equal(token1, await tk.tokenOfOwnerByIndex(account1, 0), "wrong token ID at index 0 owned by account1");

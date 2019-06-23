@@ -52,13 +52,13 @@ contract Miner is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0xf935de7a4cd923ef022933c4802c855e68559d57344ac1e2492f6c7b7fca4ac4;
+  uint256 public constant MINER_UID = 0x442eab05cf57a5d4cd3c570cf64ef0c35dbfa0da351d81cfa5e021407277ea3a;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_UID_REQUIRED = 0xeae73a7c4d19a01b3c8abe213dd9f4ad51bf6d82bea6d4be2b2e408bdd89a2b2;
+  uint256 public constant GEM_UID_REQUIRED = 0x3e39a140cacf3b86b519fe83ca040e309892d7ec9b43a74a5387df2af019a3b1;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
@@ -858,7 +858,7 @@ contract Miner is AccessMultiSig {
     plotInstance.mineTo(plotId, offset);
 
     // update gem's stats
-    gemInstance.updateMinedStats(gemId, TierMath.isBottomOfStack(tiers, offset)? 1: 0, offset - offset0);
+    gemInstance.increaseMinedCounters(gemId, TierMath.isBottomOfStack(tiers, offset)? 1: 0, offset - offset0);
 
     // emit an event
     emit Updated(msg.sender, plotId, gemId, offset0, offset, loot);
