@@ -23,9 +23,11 @@ module.exports = {
 					keys.mnemonic1, // create 12 words: https://metamask.io/
 					"https://mainnet.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
+/*
 				const nonceTracker = new NonceTrackerSubprovider();
 				wallet.engine._providers.unshift(nonceTracker);
 				nonceTracker.setEngine(wallet.engine);
+*/
 				return wallet;
 			},
 			network_id: "1", // Mainnet
@@ -43,9 +45,11 @@ module.exports = {
 					keys.mnemonic4, // create 12 words: https://metamask.io/
 					"https://rinkeby.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
+/*
 				const nonceTracker = new NonceTrackerSubprovider();
 				wallet.engine._providers.unshift(nonceTracker);
 				nonceTracker.setEngine(wallet.engine);
+*/
 				return wallet;
 			},
 			network_id: "4", // Rinkeby
@@ -63,9 +67,11 @@ module.exports = {
 					keys.mnemonic3, // create 12 words: https://metamask.io/
 					"https://ropsten.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
+/*
 				const nonceTracker = new NonceTrackerSubprovider();
 				wallet.engine._providers.unshift(nonceTracker);
 				nonceTracker.setEngine(wallet.engine);
+*/
 				return wallet;
 			},
 			network_id: "3", // Ropsten
