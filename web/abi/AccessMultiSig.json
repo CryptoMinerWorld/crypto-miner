@@ -1,0 +1,396 @@
+{
+  "contractName": "AccessMultiSig",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_MSIG_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MSIG_QUORUM",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_ACCESS_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_by",
+          "type": "address[]"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isUserInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        },
+        {
+          "name": "v",
+          "type": "uint8[]"
+        },
+        {
+          "name": "r",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "s",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "updateMsig",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        }
+      ],
+      "name": "constructUpdateMsigRequest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "networks": {},
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-06-22T23:24:32.104Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "This smart contract is designed to be inherited by other     smart contracts which require access control management capabilities.MultiSig version allows features and roles management     on user's behalf and/or by users quorum.Current MultiSig implementation is limited to 2 users quorum.",
+    "methods": {
+      "constructUpdateMsigRequest(address,uint256,uint256)": {
+        "details": "Used to create an update role request to be signed by the userOnce signed by at least 2 users, the request can be executed     using `updateRoleMsig` function",
+        "params": {
+          "_expiresOn": "an expiration date of the request",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "constructor": {
+        "details": "Creates an access control instance,     setting contract creator to have full privileges"
+      },
+      "evaluateBy(address[],uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator addresses,     and role required (set of permissions), calculate the resulting     set of permissions (role).If all operators are super admins and have full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operators have no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+        "params": {
+          "_by": "non-empty array of addresses of the contract operators     to use permissions of for evaluation",
+          "actual": "input set of permissions to evaluate against",
+          "required": "desired set of permissions to have"
+        },
+        "return": "resulting set of permissions which can be set"
+      },
+      "features()": {
+        "details": "Auxiliary getter function to maintain compatibility with previous     versions of the Access Control List smart contract, where     features was a separate uint256 public field"
+      },
+      "isFeatureEnabled(uint256)": {
+        "details": "Checks if requested set of features is enabled globally on the contract",
+        "params": {
+          "required": "set of features to check against"
+        },
+        "return": "true if all the features requested are enabled, false otherwise"
+      },
+      "isSenderInRole(uint256)": {
+        "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isUserInRole(address,uint256)": {
+        "details": "Checks if user `user` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against",
+          "user": "address of the user to check role for"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "updateFeatures(uint256)": {
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissionsRequires transaction sender to have `ROLE_ACCESS_MANAGER` permissionFunction is left for backward compatibility with older versions",
+        "params": {
+          "_mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateMsig(address,uint256,uint256,uint8[],bytes32[],bytes32[])": {
+        "details": "MultiSig version of the `updateRole` functionUpdates set of permissions (role) for a given user,     taking into account signers' permissionsSetting role to zero is equivalent to removing all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying signers' permissions (roles intersection) to the userRequires transaction signers to have `ROLE_ROLE_MANAGER` permissionRequires `MSIG_QUORUM` signatures in MultiSig mode –     if `FEATURE_MSIG_ENABLED` is enabled",
+        "params": {
+          "_expiresOn": "an expiration date of the request,     optional, required in MultiSig mode only",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract",
+          "r": "an array of ECDSA signature outputs, \"r\",     optional, required in MultiSig mode only",
+          "s": "an array of ECDSA signature outputs, \"s\",     optional, required in MultiSig mode only",
+          "v": "an array of ECDSA signature outputs, \"v\",     optional, required in MultiSig mode only"
+        }
+      },
+      "updateRole(address,uint256)": {
+        "details": "Updates set of permissions (role) for a given user,     taking into account sender's permissions.Setting role to zero is equivalent to removing an all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders' permissions (role) to the userRequires transaction sender to have `ROLE_ACCESS_MANAGER` permission",
+        "params": {
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      }
+    },
+    "title": "Access Control List – MultiSig Edition"
+  },
+  "userdoc": {
+    "methods": {},
+    "notice": "Access control smart contract provides an API to check     if specific operation is permitted globally and/or     if particular user has a permission to execute it.It deals with two main entities: features and roles.Features are designed to be used to enable/disable specific     functions (public functions) of the smart contract for everyone.User roles are designed to restrict access to specific     functions (restricted functions) of the smart contract to some users.Terms \"role\", \"permissions\" and \"set of permissions\" have equal meaning     in the documentation text and may be used interchangeably."
+  }
+}
