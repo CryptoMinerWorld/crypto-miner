@@ -882,6 +882,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "now32",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "ROLE_TOKEN_DESTROYER",
       "outputs": [
         {
@@ -1715,7 +1729,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-13T00:47:13.914Z",
+  "updatedAt": "2019-06-23T13:41:52.122Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "A plot is an ERC721 non-fungible token, which maps Token ID -     a 24 bit number - to a set of plot properties -     attributes (mostly immutable by their nature) and state variables (mutable)Token ID consists of 24 bits, high 8 bits represent a country id     (see CountryERC721) this token belongs to, low 16 bits represent     an index number of the token within a countryContains information about tier structure (how many blocks of each tier exists),     current mining state (how many blocks is already mined, is block in mining state     or not, etc.)Doesn't contain information about the items to be mined     (silver, gold, artifacts, gems, keys, chests, etc.), this information     is stored in mining smart contractA plot token supports only minting, it can be created but not destroyed",
@@ -1938,6 +1952,10 @@
           "_to": "an address to assign created token ownership to"
         },
         "return": "generated token ID"
+      },
+      "now32()": {
+        "details": "Proxy function for built-in 'now', returns 'now' as uint32Testing time-dependent functionality in Solidity is challenging.     The time flows in unpredictable way, at variable speed     from block to block, from miner to miner.     Testrpc (ganache) doesn't solve the issue. It helps to unlock     the speed of time changes introducing though numerous testrpc-specific     problems.In most test cases, however, time change emulation on the block level     is not required and contract-based simulation is enough.To simulate time change on contract level we introduce a `now32`     proxy-function which proxies all calls to built-in 'now' function.     It doesn't modify time and doesn't affect smart contract logic by any means.     But it allows to extend this smart contract by a test smart contract,     which will allow time change simulation by overriding this function only.",
+        "return": "uint32(now) – current timestamp as uint32"
       },
       "ownerOf(uint256)": {
         "details": "Gets the owner of the specified token from the `tokens` mappingThrows if a token with the ID specified doesn't exist",

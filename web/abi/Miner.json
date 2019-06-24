@@ -96,6 +96,25 @@
     },
     {
       "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "gemColors",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [],
       "name": "features",
       "outputs": [
@@ -265,6 +284,20 @@
         },
         {
           "name": "bound",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_GEM_COLORS_PROVIDER",
+      "outputs": [
+        {
+          "name": "",
           "type": "uint32"
         }
       ],
@@ -598,20 +631,6 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "now32",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -964,6 +983,34 @@
         {
           "name": "artifactId",
           "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "colors",
+          "type": "uint8[]"
+        }
+      ],
+      "name": "setGemColors",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getGemColors",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8[]"
         }
       ],
       "payable": false,
@@ -1496,10 +1543,24 @@
       "payable": false,
       "stateMutability": "view",
       "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "now32",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-16T06:57:43.368Z",
+  "updatedAt": "2019-06-23T13:27:35.537Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "Miner may read, write, mint, lock and unlock tokens     (locked tokens cannot be transferred i.e. cannot change owner)Following tokens may be accessed for reading (token properties affect mining):     - ArtifactERC721     - GemERC721     - PlotERC721Following tokens may be accessed for writing (token properties change when mining):     - GemERC721, statistics updates - plots/blocks mined     - PlotERC721, offset updates – currently mined depthFollowing tokens may be created (token can be found in the land plot when mining):     - ArtifactERC721     - GemERC721     - SilverERC20     - GoldERC20     - ArtifactERC20     - FoundersKeyERC20     - ChestKeyERC20Following tokens may be locked or unlocked (tokens are locked when mining):     - ArtifactERC721     - GemERC721     - PlotERC721",
@@ -1600,7 +1661,7 @@
         "params": {
           "gemId": "ID of the gem to calculate energetic age for"
         },
-        "return": "energetic age of the gem in seconds"
+        "return": "energetic age of the gem in minutes"
       },
       "energyToBlocks(uint8,uint32)": {
         "details": "See also `blocksToEnergy` function",
@@ -1657,12 +1718,23 @@
         },
         "return": "an ordered unsorted list of binding UIDs:     artifact ID, 24 bits (reserved, not used yet)     gem ID, 24 bits     plot ID, 24 bits"
       },
-      "getPlotBinding(uint24)": {
-        "details": "Finds a gem bound to a particular plot",
+      "getGemBinding(uint24)": {
+        "details": "Finds a plot and artifact bound to a particular gem",
         "params": {
-          "plotId": "ID of the plot to query bound gem for"
+          "gemId": "ID of the gem to query bound plot/artifact for"
         },
-        "return": "ID of the bound gem"
+        "return": "a tuple containing IDs of the bound plot and artifact"
+      },
+      "getGemColors()": {
+        "details": "Getter for an entire `availableColors` array",
+        "return": "array of available colors - `availableColors`"
+      },
+      "getPlotBinding(uint24)": {
+        "details": "Finds a gem and artifact bound to a particular plot",
+        "params": {
+          "plotId": "ID of the plot to query bound gem/artifact for"
+        },
+        "return": "a tuple containing IDs of the bound gem and artifact"
       },
       "isFeatureEnabled(uint256)": {
         "details": "Checks if requested set of features is enabled globally on the contract",
@@ -1687,21 +1759,21 @@
         "return": "true if all the permissions requested are enabled, false otherwise"
       },
       "miningRate(uint32)": {
-        "details": "Calculates mining rate `r` of the gem, based on its grade type `e`     and grade value `u` according to the formulas:       r = 1 + (e - 1) * 10^-1 + 5 * u * 10^-8, e = [1, 2, 3]       r = 1.4 + 15 * u * 10^-8, e = 4       r = 2 + 2 * u * 10^-7, e = 5       r = 4 + u * 10^-6, e = 6Gem's grade type and value are extracted from the packed `grade`The value returned is multiplied by 10^8",
+        "details": "Calculates mining rate `r` of the gem, based on its grade type `e`     and grade value `u` according to the formulas:       r = 1.0 + 0.25 * u * 10^-6, e = 1       r = 2.0 + 0.5  * u * 10^-6, e = 2       r = 3.3 + 0.9  * u * 10^-6, e = 3       r = 7.2 + 1.8  * u * 10^-6, e = 4       r = 25  + 6    * u * 10^-6, e = 5       r = 50  + 13   * u * 10^-6, e = 6Gem's grade type and value are extracted from the packed `grade`The value returned is multiplied by 10^8",
         "params": {
           "grade": "grade of the gem,     high 8 bits of which contain grade type e = [1, 2, 3, 4, 5, 6]     low 24 bits contain grade value u = [0, 1000000)"
         },
-        "return": "`r * 10^8`, where `r` is the mining rate of the gem of grade `grade`"
+        "return": "`r * 10^6`, where `r` is the mining rate of the gem of grade `grade`"
       },
       "miningRateOf(uint24)": {
         "details": "See `miningRate` function for more detailsThrows if gem specified doesn't exist",
         "params": {
           "gemId": "ID of the gem to calculate mining rate for"
         },
-        "return": "mining rate of the gem multiplied by 10^8"
+        "return": "mining rate of the gem multiplied by 10^6"
       },
       "now32()": {
-        "details": "Proxy function for built-in 'now', returns 'now' as uint32",
+        "details": "Proxy function for built-in 'now', returns 'now' as uint32Testing time-dependent functionality in Solidity is challenging.     The time flows in unpredictable way, at variable speed     from block to block, from miner to miner.     Testrpc (ganache) doesn't solve the issue. It helps to unlock     the speed of time changes introducing though numerous testrpc-specific     problems.In most test cases, however, time change emulation on the block level     is not required and contract-based simulation is enough.To simulate time change on contract level we introduce a `now32`     proxy-function which proxies all calls to built-in 'now' function.     It doesn't modify time and doesn't affect smart contract logic by any means.     But it allows to extend this smart contract by a test smart contract,     which will allow time change simulation by overriding this function only.",
         "return": "uint32(now) – current timestamp as uint32"
       },
       "randomColor(uint16)": {
@@ -1743,6 +1815,12 @@
         "details": "Service function to unlock plot and associated gem and artifact if anyReverts the mining (doesn't update plot)May be executed only by rollback operator",
         "params": {
           "plotId": "ID of the plot to unlock"
+        }
+      },
+      "setGemColors(uint8[])": {
+        "details": "Updates `availableColors` arrayRequires sender to have `ROLE_AVAILABLE_COLORS_PROVIDER` permissionRequires input array not to be empty",
+        "params": {
+          "colors": "array of available colors to set"
         }
       },
       "tierLoot(uint8,uint16,bool,uint16,uint16[])": {

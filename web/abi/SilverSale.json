@@ -1495,7 +1495,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-20T12:27:52.551Z",
+  "updatedAt": "2019-06-23T15:08:54.308Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "Sale start timestamp (offset) and sale duration (length) are set in     the smart contract on deploymentSale is active during the time frame [offset, offset + length),     where `offset` is a unix timestamp of the sale start and `length`     is length of the sale in secondsSilver Sale acts as `ROLE_TOKEN_CREATOR` for both     Silver (SilverERC20) and Gold (GoldERC20) ERC20 tokensAll the random distributions used in sale are uniformAllows adding coupons by coupon manager(s) (`ROLE_COUPON_MANAGER`)     and getting silver boxes by player in exchange to the coupons added     as long as 'using coupons' (`FEATURE_USING_COUPONS_ENABLED`) feature is enabled *",

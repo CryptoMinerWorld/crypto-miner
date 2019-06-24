@@ -1167,7 +1167,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-21T10:32:39.182Z",
+  "updatedAt": "2019-06-23T12:46:52.927Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "For each item on sale the following parameters are defined:     * sale start time - t0     * sale start price - p0     * sale end time - t1     * sale end price - p1     * item ID (ERC721 token ID)     * ERC721 instance addressCurrent price `p` of each item is calculated linearly based     on the sale parameters:     a) if current time `t` is in range (t0, t1):         `p = p0 - (t - t0) * (p0 - p1) / (t1 - t0)`     b) if current time `t` is lower than  or equal to`t0`:         `p = p0`     c) if current time `t` is greater than or equal to `t1`:         `p = p1`Following constraints when adding item for sale must be met:     * t1 > t0: sale starts before it ends     * p0 ≥ p1: start price is higher than end priceFollowing constraints when buying item on sale must be met:     * msg.value ≥ p: price constraintThis implementation operates with an arbitrary ERC721 token as an item,     with the only limitation: token ID space is expected to be uint32",

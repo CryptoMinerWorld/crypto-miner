@@ -22,7 +22,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-13T00:47:13.867Z",
+  "updatedAt": "2019-06-22T23:24:32.246Z",
   "devdoc": {
     "details": "An auxiliary interface to extract single function `geodeBalances` from     Presale/Presale2 smart contracts to allow exchanging geodes to founders'     plots in Antarctica using PlotAntarctica smart contract",
     "methods": {

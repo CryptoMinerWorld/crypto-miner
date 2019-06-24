@@ -41,8 +41,8 @@ PlotAntarctica:     0xEc0510Cca7dA23f0aEcA3c0CCc9012B505435D04
 
 SilverSale:         0x7e48d4102de1Bd47aA456AAE21D899bd898B6954
 
-TokenReader:        0x14B02B4297E7ABEbC06019CC6529a86323E9A20A
-TokenWriter:        0x38f942f15Ec3Ce62B70e90fAca0d68B0dfAAAB53
+TokenReader:        0xA66e81eAa45F98D913CdAEc8FBE5c746769f58c7
+TokenWriter:        0x205b3c69C9Bbd5E0F65249a9785F36aF28ac9aAa
 --------------------------------------------------------------
 
 

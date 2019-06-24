@@ -64,10 +64,43 @@
       "payable": false,
       "stateMutability": "view",
       "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getNow",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "code",
+          "type": "string"
+        }
+      ],
+      "name": "getKeccak256",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-12T23:15:09.034Z",
+  "updatedAt": "2019-06-23T11:59:02.718Z",
   "devdoc": {
     "author": "Basil Gorin",
     "methods": {
@@ -87,12 +120,28 @@
           "token": "GemERC721 instance, providing `getPackedCollection(owner) => uint256` interface"
         },
         "return": "packed tokens collection structure, containing:     index 3i - 256 bits       max (state modified, creation time) (32 bits)       max (ownership modified, creation time) (32 bits)       grade (32 bits)       level (8 bits)       plots mined (24 bits)       blocks mined (32 bits)       energetic age (32 bits)       state (32 bits)       color (8 bits)       token ID (24 bits)     index 3i + 1 – 256 bits       auction start time, t0, 32 bits       auction end time, t1, 32 bits       starting price, p0, 96 bits       final price, p1, 96 bits     index 3i + 2       current price, p, 96 bits       token owner, 160 bits"
+      },
+      "getKeccak256(string)": {
+        "params": {
+          "code": "a string to calculate hash for"
+        },
+        "return": "keccak256 hash of the input string"
+      },
+      "getNow()": {
+        "return": "current time as a unix timestamp"
       }
     },
     "title": "Token Helper"
   },
   "userdoc": {
-    "methods": {},
+    "methods": {
+      "getKeccak256(string)": {
+        "notice": "Calculate keccak256 of a single string argument"
+      },
+      "getNow()": {
+        "notice": "Provides current unix timestamp"
+      }
+    },
     "notice": "Token Helper provides several convenient read-only methods to optimize     work with ERC721 and ERC20 tokens"
   }
 }

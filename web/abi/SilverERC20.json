@@ -768,7 +768,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-13T00:39:16.974Z",
+  "updatedAt": "2019-06-23T15:39:20.403Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "Silver is mintable and burnable entity,     meaning it can be created or destroyed by the authorized addressesAn address authorized can mint/burn its own tokens (own balance) as well     as tokens owned by another address (additional permission level required)",

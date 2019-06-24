@@ -27,7 +27,7 @@ module.exports = async function(deployer, network, accounts) {
 		}:
 		{ // Ropsten Class Addresses
 			GemERC721:          "0x8ad156dA5ea1053D4858987Ca1165151B5702479",
-			TokenWriter:        "0x38f942f15Ec3Ce62B70e90fAca0d68B0dfAAAB53",
+			TokenWriter:        "0x205b3c69C9Bbd5E0F65249a9785F36aF28ac9aAa",
 		};
 
 	// deployed instances

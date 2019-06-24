@@ -723,7 +723,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-13T00:43:59.936Z",
+  "updatedAt": "2019-06-23T16:14:48.267Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "Keeps track of issued and consumed referral points, calculates available referral     points as difference between issued and consumedBased on improved access control list (ACL Light), allowing issuers and consumers     to issue and consume respectively referral points to players' addresses",

@@ -935,6 +935,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "now32",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "ROLE_TOKEN_DESTROYER",
       "outputs": [
         {
@@ -1289,11 +1303,49 @@
           "type": "uint256"
         }
       ],
+      "name": "getOwnershipModified",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
       "name": "getNumberOfPlots",
       "outputs": [
         {
           "name": "",
           "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getTaxModified",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -1572,7 +1624,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-13T09:09:02.948Z",
+  "updatedAt": "2019-06-23T16:54:49.004Z",
   "devdoc": {
     "details": "A country is an ERC721 non-fungible token, which maps Token ID,     a 8 bit number in range [1, 192] to a set of country properties -     number of plots and owner's tax rate.Country token supports only minting of predefined countries,     its not possible to destroy a country.Up to 192 countries are defined during contract deployment and initialization.",
     "methods": {
@@ -1664,6 +1716,13 @@
         },
         "return": "sum of the countries number of plots owned by given address"
       },
+      "getOwnershipModified(uint256)": {
+        "details": "Gets the ownership modified time of a tokenThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to get ownership modified time for"
+        },
+        "return": "a token ownership modified time as a unix timestamp"
+      },
       "getPacked(uint256)": {
         "details": "Gets a country by ID, representing it as a single 32-bit integer.     The integer is tightly packed with the country data:       number of plots       tax nominator       tax denominatorThrows if country doesn't exist",
         "params": {
@@ -1683,6 +1742,13 @@
           "_tokenId": "country id to query tax for"
         },
         "return": "tax as a proper fraction (tuple containing nominator and denominator)"
+      },
+      "getTaxModified(uint256)": {
+        "details": "Gets the tax modified time of a tokenThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the token to get tax modified time for"
+        },
+        "return": "a token tax modified time as a unix timestamp"
       },
       "getTaxPacked(uint256)": {
         "params": {
@@ -1743,6 +1809,10 @@
           "_to": "an address to assign created token ownership to",
           "_tokenId": "ID of the token to create"
         }
+      },
+      "now32()": {
+        "details": "Proxy function for built-in 'now', returns 'now' as uint32Testing time-dependent functionality in Solidity is challenging.     The time flows in unpredictable way, at variable speed     from block to block, from miner to miner.     Testrpc (ganache) doesn't solve the issue. It helps to unlock     the speed of time changes introducing though numerous testrpc-specific     problems.In most test cases, however, time change emulation on the block level     is not required and contract-based simulation is enough.To simulate time change on contract level we introduce a `now32`     proxy-function which proxies all calls to built-in 'now' function.     It doesn't modify time and doesn't affect smart contract logic by any means.     But it allows to extend this smart contract by a test smart contract,     which will allow time change simulation by overriding this function only.",
+        "return": "uint32(now) – current timestamp as uint32"
       },
       "ownerOf(uint256)": {
         "details": "Gets the owner of the specified token from the `countries` mappingThrows if a token with the ID specified doesn't exist",

@@ -477,7 +477,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-13T00:47:13.937Z",
+  "updatedAt": "2019-06-22T23:24:32.250Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "5,000 constraint is not part of this smart contract, it is ensured in     Presale/Presale2 smart contracts executed earlierPlot Sale – Antarctica acts as `ROLE_TOKEN_CREATOR` for PlotERC721 token",

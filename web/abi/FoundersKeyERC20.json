@@ -718,7 +718,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-13T00:39:17.022Z",
+  "updatedAt": "2019-06-23T13:27:35.355Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "Founder's Chest Key is mintable and burnable entity,     meaning it can be created or destroyed by the authorized addressesAn address authorized can mint/burn its own tokens (own balance) as well     as tokens owned by another address (additional permission level required)",

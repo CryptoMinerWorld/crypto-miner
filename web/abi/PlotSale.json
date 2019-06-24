@@ -115,6 +115,25 @@
     },
     {
       "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "coupons",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [],
       "name": "beneficiary",
       "outputs": [
@@ -942,7 +961,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-13T00:44:00.072Z",
+  "updatedAt": "2019-06-23T13:41:52.185Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "Technically, 10% country tax value is not hardcoded into sale smart contract     and is accessed from each country token (see the CountryERC721)Land Plot Sale acts as `ROLE_TOKEN_CREATOR` for PlotERC721 token",

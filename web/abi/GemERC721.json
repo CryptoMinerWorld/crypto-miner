@@ -291,6 +291,20 @@
     },
     {
       "constant": true,
+      "inputs": [],
+      "name": "ROLE_NEXT_ID_PROVIDER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "",
@@ -306,20 +320,6 @@
         {
           "name": "",
           "type": "uint24"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "ROLE_NEXT_ID_INC",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
         }
       ],
       "payable": false,
@@ -854,25 +854,6 @@
       "type": "function"
     },
     {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "availableColors",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint8"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "constant": false,
       "inputs": [
         {
@@ -990,6 +971,20 @@
     {
       "constant": true,
       "inputs": [],
+      "name": "now32",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
       "name": "ROLE_TOKEN_DESTROYER",
       "outputs": [
         {
@@ -1018,20 +1013,6 @@
         {
           "name": "",
           "type": "bool"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "ROLE_AVAILABLE_COLORS_PROVIDER",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
         }
       ],
       "payable": false,
@@ -1252,7 +1233,7 @@
           "type": "uint32"
         }
       ],
-      "name": "MinedStatsModified",
+      "name": "MinedCountersModified",
       "type": "event"
     },
     {
@@ -1373,7 +1354,7 @@
     {
       "constant": false,
       "inputs": [],
-      "name": "incrementId",
+      "name": "incNextId",
       "outputs": [
         {
           "name": "",
@@ -1388,28 +1369,14 @@
       "constant": false,
       "inputs": [
         {
-          "name": "colors",
-          "type": "uint8[]"
+          "name": "_nextId",
+          "type": "uint24"
         }
       ],
-      "name": "setAvailableColors",
+      "name": "setNextId",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "getAvailableColors",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint8[]"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -1641,6 +1608,25 @@
           "type": "uint256"
         }
       ],
+      "name": "getPropertiesModified",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
       "name": "getProperties",
       "outputs": [
         {
@@ -1665,25 +1651,6 @@
         {
           "name": "",
           "type": "uint8"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "_tokenId",
-          "type": "uint256"
-        }
-      ],
-      "name": "getPropertiesModified",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
         }
       ],
       "payable": false,
@@ -1874,7 +1841,7 @@
           "type": "uint32"
         }
       ],
-      "name": "updateMinedStats",
+      "name": "increaseMinedCounters",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -1966,6 +1933,41 @@
       ],
       "name": "mint",
       "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_plotId",
+          "type": "uint24"
+        },
+        {
+          "name": "_color",
+          "type": "uint8"
+        },
+        {
+          "name": "_level",
+          "type": "uint8"
+        },
+        {
+          "name": "_grade",
+          "type": "uint32"
+        }
+      ],
+      "name": "mintNext",
+      "outputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint24"
+        }
+      ],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
@@ -2142,7 +2144,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-13T00:39:16.899Z",
+  "updatedAt": "2019-06-24T03:46:26.523Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "A gem is an ERC721 non-fungible token, which maps Token ID,     a 24 bit number to a set of gem properties -     attributes (mostly immutable by their nature) and state variables (mutable)A gem token supports only minting, it can be only created",
@@ -2208,10 +2210,6 @@
           "_tokenId": "ID of the token to find the approved address for"
         },
         "return": "the approved address for this token,     or the zero address if there is no approved address"
-      },
-      "getAvailableColors()": {
-        "details": "Getter for an entire `availableColors` array",
-        "return": "array of available colors - `availableColors`"
       },
       "getBlocksMined(uint256)": {
         "details": "Gets number of blocks mined by the gemThrows if token specified doesn't exist",
@@ -2337,9 +2335,17 @@
         },
         "return": "token state modification date as a unix timestamp"
       },
-      "incrementId()": {
+      "incNextId()": {
         "details": "Returns current value of `nextId` and increments it by one",
         "return": "next token ID"
+      },
+      "increaseMinedCounters(uint256,uint24,uint32)": {
+        "details": "Increases plots mined and blocks mined counters of the gemRequires sender to have `ROLE_MINED_STATS_PROVIDER` permissionThrows if token specified doesn't exist",
+        "params": {
+          "_blocks": "amount of blocks to increase gem's `blocksMined` by",
+          "_plots": "amount of plots to increase gem's `plotsMined by",
+          "_tokenId": "ID of the gem to update mining stats of"
+        }
       },
       "isApprovedForAll(address,address)": {
         "params": {
@@ -2402,6 +2408,17 @@
           "_tokenId": "ID of the token to mint"
         }
       },
+      "mintNext(address,uint24,uint8,uint8,uint32)": {
+        "details": "Creates new token without token ID specified     and assigns an ownership `_to` for this tokenToken ID is taken from `nextId` and `nextId` is incremented afterAllows setting initial token's propertiesRequires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)     and next ID provider (have `ROLE_NEXT_ID_PROVIDER` permission)",
+        "params": {
+          "_color": "gem color",
+          "_grade": "grade of the gem,     high 8 bits represent grade type,     low 24 bits - grade value",
+          "_level": "gem level",
+          "_plotId": "ID of the plot that gem \"belongs to\" (was found in)",
+          "_to": "an address to mint token to (first owner of the token)"
+        },
+        "return": "ID of the token minted"
+      },
       "mintWith(address,uint24,uint24,uint8,uint8,uint32,uint32)": {
         "details": "Creates new token with token ID specified     and assigns an ownership `_to` for this tokenAllows setting initial tokens' propertiesRequires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)Requires caller to be bulk token creator (have `ROLE_BULK_CREATOR` permission)     if creating more than one token in a single transactionRequires caller to be age provider (have `ROLE_AGE_PROVIDER` permission) -     if setting initial energetic age for the token",
         "params": {
@@ -2413,6 +2430,10 @@
           "_to": "an address to mint token to (first owner of the token)",
           "_tokenId": "ID of the token to mint"
         }
+      },
+      "now32()": {
+        "details": "Proxy function for built-in 'now', returns 'now' as uint32Testing time-dependent functionality in Solidity is challenging.     The time flows in unpredictable way, at variable speed     from block to block, from miner to miner.     Testrpc (ganache) doesn't solve the issue. It helps to unlock     the speed of time changes introducing though numerous testrpc-specific     problems.In most test cases, however, time change emulation on the block level     is not required and contract-based simulation is enough.To simulate time change on contract level we introduce a `now32`     proxy-function which proxies all calls to built-in 'now' function.     It doesn't modify time and doesn't affect smart contract logic by any means.     But it allows to extend this smart contract by a test smart contract,     which will allow time change simulation by overriding this function only.",
+        "return": "uint32(now) – current timestamp as uint32"
       },
       "ownerOf(uint256)": {
         "details": "Gets the owner of the specified token from the `gems` mappingThrows if a token with the ID specified doesn't exist",
@@ -2475,10 +2496,10 @@
           "_operator": "operator address to set the approval for"
         }
       },
-      "setAvailableColors(uint8[])": {
-        "details": "Updates `availableColors` arrayRequires sender to have `ROLE_AVAILABLE_COLORS_PROVIDER` permissionRequires input array not to be empty",
+      "setNextId(uint24)": {
+        "details": "Updates current value of `nextId`",
         "params": {
-          "colors": "array of available colors to set"
+          "_nextId": "next token ID value to set"
         }
       },
       "setState(uint256,uint32)": {
@@ -2546,9 +2567,6 @@
         "params": {
           "_mask": "bitmask representing a set of features to enable/disable"
         }
-      },
-      "updateMinedStats(uint256,uint24,uint32)": {
-        "details": "Increases plots mined and blocks mined counters of the gem"
       },
       "updateMsig(address,uint256,uint256,uint8[],bytes32[],bytes32[])": {
         "details": "MultiSig version of the `updateRole` functionUpdates set of permissions (role) for a given user,     taking into account signers' permissionsSetting role to zero is equivalent to removing all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying signers' permissions (roles intersection) to the userRequires transaction signers to have `ROLE_ROLE_MANAGER` permissionRequires `MSIG_QUORUM` signatures in MultiSig mode –     if `FEATURE_MSIG_ENABLED` is enabled",
