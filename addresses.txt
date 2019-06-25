@@ -8,7 +8,6 @@ Monthly Chest:      0x2906DA90D3f99D5913bB3461183682951ca7280c
 
 FoundersPlots:      0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1
 BalanceProxy:       0xbd7Ca763E12d23535B59949ade53c104BD88d42F
-
 TokenReader:        0x29a9996Dc4863b5918E6132F644d7c19279fdDd5
 ==============================================================
 
@@ -20,6 +19,8 @@ TokenReader:        0x29a9996Dc4863b5918E6132F644d7c19279fdDd5
 FoundersPlots:      0xeD6E75F271E4Cd58b800a17240228F0C19C12550
 BalanceProxy:       0xc90b90B764e0061C5e355d5101146580d17fBc9D
 TokenHelper:        0x040d04f1515BC4aF48CB3346Bb7fA5f2eD1d5Ea9
+TokenReader:        0xA66e81eAa45F98D913CdAEc8FBE5c746769f58c7
+TokenWriter:        0x205b3c69C9Bbd5E0F65249a9785F36aF28ac9aAa
 
 DutchAuction:       0x18D916BBDaABFd63384Bb8C4EAdFcd98b53B78eF
 
@@ -40,9 +41,6 @@ PlotSale:           0x97BC3d0248035cD16C972E73f7C62B7Bc85B6bb5
 PlotAntarctica:     0xEc0510Cca7dA23f0aEcA3c0CCc9012B505435D04
 
 SilverSale:         0x7e48d4102de1Bd47aA456AAE21D899bd898B6954
-
-TokenReader:        0xA66e81eAa45F98D913CdAEc8FBE5c746769f58c7
-TokenWriter:        0x205b3c69C9Bbd5E0F65249a9785F36aF28ac9aAa
 --------------------------------------------------------------
 
 
