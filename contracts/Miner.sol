@@ -52,7 +52,7 @@ contract Miner is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x442eab05cf57a5d4cd3c570cf64ef0c35dbfa0da351d81cfa5e021407277ea3a;
+  uint256 public constant MINER_UID = 0x47938c0ac73645dafe9eba8e6250e7c9f8f44b236bf569df1be8a9e65703cd7a;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
@@ -521,6 +521,9 @@ contract Miner is AccessMultiSig {
     // determine maximum depth this gem can mine to (by level)
     uint8 maxOffset = TierMath.getTierDepthOrMined(tiers, gemInstance.getLevel(gemId));
 
+    // ensure gem level allows mining deeper
+    require(TierMath.getOffset(tiers) < maxOffset);
+
     // calculate effective energy
     uint32 effectiveEnergy = effectiveRestingEnergyOf(gemId);
 
@@ -530,8 +533,8 @@ contract Miner is AccessMultiSig {
     // delegate call to `evaluateWith`
     (offset, effectiveEnergy) = evaluateWith(tiers, maxOffset, effectiveEnergy);
 
-    // in case when offset has increased, we perform initial mining
-    // in the same transaction
+    // if gem can mine with resting energy (offset increased)
+    // we perform initial mining in the same transaction
     if(offset > TierMath.getOffset(tiers)) {
       // delegate call to `__mine` to update plot and mint loot
       __mine(plotId, gemId, offset);
@@ -794,15 +797,12 @@ contract Miner is AccessMultiSig {
     // determine current plot offset, this will also be returned
     offset = TierMath.getOffset(tiers);
 
-    // verify the gem can mine that plot
-    require(offset < maxOffset);
-
     // init return energy value with an input one
     energyLeft = initialEnergy;
 
     // in case when energy is not zero, we perform initial mining
     // in the same transaction
-    if(energyLeft != 0) {
+    if(energyLeft != 0 && offset < maxOffset) {
       // iterate over all tiers
       for(uint8 i = 1; i <= TierMath.getNumberOfTiers(tiers); i++) {
         // determine tier offset
