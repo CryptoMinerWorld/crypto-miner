@@ -41,7 +41,7 @@ module.exports = async function(deployer, network, accounts) {
 	// process the data for silver
 	await processERC20Data("silver.csv", instances.SilverERC20, instances.TokenWriter);
 	// process the data for gold
-	await processERC20Data("silver.csv", instances.GoldERC20, instances.TokenWriter);
+	await processERC20Data("gold.csv", instances.GoldERC20, instances.TokenWriter);
 };
 
 
