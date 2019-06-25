@@ -824,17 +824,17 @@ async function enablePermissions(conf, instances) {
 	// allow Workshop to destroy SilverERC20
 	if((await instances.SilverERC20.userRoles(conf.Workshop)).isZero()) {
 		console.log("granting Workshop " + conf.Workshop + " permission to burn SilverERC20 " + conf.SilverERC20);
-		await instances.SilverERC20.updateRoles(conf.Workshop, ROLE_TOKEN_DESTROYER);
+		await instances.SilverERC20.updateRole(conf.Workshop, ROLE_TOKEN_DESTROYER);
 	}
 	// allow Workshop to destroy GoldERC20
 	if((await instances.GoldERC20.userRoles(conf.Workshop)).isZero()) {
 		console.log("granting Workshop " + conf.Workshop + " permission to burn GoldERC20 " + conf.GoldERC20);
-		await instances.GoldERC20.updateRoles(conf.Workshop, ROLE_TOKEN_DESTROYER);
+		await instances.GoldERC20.updateRole(conf.Workshop, ROLE_TOKEN_DESTROYER);
 	}
 	// allow Workshop to level up and upgrade GemERC721
 	if((await instances.GemERC721.userRoles(conf.Workshop)).isZero()) {
 		console.log("granting Workshop " + conf.Workshop + " permission to level up and upgrade GemERC721 " + conf.GemERC721);
-		await instances.GemERC721.updateRoles(conf.Workshop, ROLE_LEVEL_PROVIDER | ROLE_GRADE_PROVIDER);
+		await instances.GemERC721.updateRole(conf.Workshop, ROLE_LEVEL_PROVIDER | ROLE_GRADE_PROVIDER);
 	}
 	// enable Workshop (leveling up / upgrades)
 	if((await instances.Workshop.features()).isZero()) {
@@ -846,37 +846,37 @@ async function enablePermissions(conf, instances) {
 	// allow Miner to mint ArtifactERC20
 	if((await instances.ArtifactERC20.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint ArtifactERC20 " + conf.ArtifactERC20);
-		await instances.ArtifactERC20.updateRoles(conf.Miner, ROLE_TOKEN_CREATOR);
+		await instances.ArtifactERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR);
 	}
 	// allow Miner to mint FoundersKeyERC20
 	if((await instances.FoundersKeyERC20.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint FoundersKeyERC20 " + conf.FoundersKeyERC20);
-		await instances.FoundersKeyERC20.updateRoles(conf.Miner, ROLE_TOKEN_CREATOR);
+		await instances.FoundersKeyERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR);
 	}
 	// allow Miner to mint ChestKeyERC20
 	if((await instances.ChestKeyERC20.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint ChestKeyERC20 " + conf.ChestKeyERC20);
-		await instances.ChestKeyERC20.updateRoles(conf.Miner, ROLE_TOKEN_CREATOR);
+		await instances.ChestKeyERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR);
 	}
 	// allow Miner to mint SilverERC20
 	if((await instances.SilverERC20.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint SilverERC20 " + conf.SilverERC20);
-		await instances.SilverERC20.updateRoles(conf.Miner, ROLE_TOKEN_CREATOR);
+		await instances.SilverERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR);
 	}
 	// allow Miner to mint GoldERC20
 	if((await instances.GoldERC20.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint GoldERC20 " + conf.GoldERC20);
-		await instances.GoldERC20.updateRoles(conf.Miner, ROLE_TOKEN_CREATOR);
+		await instances.GoldERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR);
 	}
 	// allow Miner to update PlotERC721
 	if((await instances.PlotERC721.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to update PlotERC721 " + conf.PlotERC721);
-		await instances.PlotERC721.updateRoles(conf.Miner, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
+		await instances.PlotERC721.updateRole(conf.Miner, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
 	}
 	// allow Miner to update GemERC721
 	if((await instances.GemERC721.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint and update GemERC721 " + conf.GemERC721);
-		await instances.GemERC721.updateRoles(conf.Miner, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_PROVIDER | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
+		await instances.GemERC721.updateRole(conf.Miner, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_PROVIDER | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
 	}
 	// enable Miner (mining)
 	if((await instances.Miner.features()).isZero()) {
@@ -888,12 +888,12 @@ async function enablePermissions(conf, instances) {
 	// allow PlotSale to access (rw) RefPointsTracker
 	if((await instances.RefPointsTracker.userRoles(conf.PlotSale)).isZero()) {
 		console.log("granting PlotSale " + conf.PlotSale + " permissions on RefPointsTracker " + conf.RefPointsTracker);
-		await instances.RefPointsTracker.updateRoles(conf.PlotSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
+		await instances.RefPointsTracker.updateRole(conf.PlotSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 	}
 	// allow PlotSale to mint PlotERC721
 	if((await instances.PlotERC721.userRoles(conf.PlotSale)).isZero()) {
 		console.log("granting PlotSale " + conf.PlotSale + " permission to mint PlotERC721 " + conf.PlotERC721);
-		await instances.PlotERC721.updateRoles(conf.PlotSale, ROLE_TOKEN_CREATOR);
+		await instances.PlotERC721.updateRole(conf.PlotSale, ROLE_TOKEN_CREATOR);
 	}
 	// enable PlotSale (sell, get, coupons)
 	if((await instances.PlotSale.features()).isZero()) {
@@ -905,7 +905,7 @@ async function enablePermissions(conf, instances) {
 	// allow PlotAntarctica to mint PlotERC721
 	if((await instances.PlotERC721.userRoles(conf.PlotAntarctica)).isZero()) {
 		console.log("granting PlotAntarctica " + conf.PlotAntarctica + " permission to mint PlotERC721 " + conf.PlotERC721);
-		await instances.PlotERC721.updateRoles(conf.PlotAntarctica, ROLE_TOKEN_CREATOR);
+		await instances.PlotERC721.updateRole(conf.PlotAntarctica, ROLE_TOKEN_CREATOR);
 	}
 	// enable PlotAntarctica (getting founder's plots in Antarctica)
 	if((await instances.PlotAntarctica.features()).isZero()) {
@@ -917,17 +917,17 @@ async function enablePermissions(conf, instances) {
 	// allow SilverSale to access (rw) RefPointsTracker
 	if((await instances.RefPointsTracker.userRoles(conf.SilverSale)).isZero()) {
 		console.log("granting SilverSale " + conf.SilverSale + " permissions on RefPointsTracker " + conf.RefPointsTracker);
-		await instances.RefPointsTracker.updateRoles(conf.SilverSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
+		await instances.RefPointsTracker.updateRole(conf.SilverSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
 	}
 	// allow SilverSale to mint SilverERC20
 	if((await instances.SilverERC20.userRoles(conf.SilverSale)).isZero()) {
 		console.log("granting SilverSale " + conf.SilverSale + " permission to mint SilverERC20 " + conf.SilverERC20);
-		await instances.SilverERC20.updateRoles(conf.SilverSale, ROLE_TOKEN_CREATOR);
+		await instances.SilverERC20.updateRole(conf.SilverSale, ROLE_TOKEN_CREATOR);
 	}
 	// allow SilverSale to mint GoldERC20
 	if((await instances.GoldERC20.userRoles(conf.SilverSale)).isZero()) {
 		console.log("granting SilverSale " + conf.SilverSale + " permission to mint GoldERC20 " + conf.GoldERC20);
-		await instances.GoldERC20.updateRoles(conf.SilverSale, ROLE_TOKEN_CREATOR);
+		await instances.GoldERC20.updateRole(conf.SilverSale, ROLE_TOKEN_CREATOR);
 	}
 	// enable SilverSale (sell, get, coupons)
 	if((await instances.SilverSale.features()).isZero()) {
