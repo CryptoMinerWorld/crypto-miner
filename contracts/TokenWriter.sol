@@ -1,6 +1,6 @@
 pragma solidity 0.5.8;
 
-import "./AccessControl.sol";
+import "./AccessMultiSig.sol";
 
 /**
  * @dev Gem ERC721 v2 interface (current)
@@ -99,7 +99,7 @@ interface MintV2 {
 /**
  * @dev Helper smart contract to read Gem and Country ERC721 tokens
  */
-contract TokenWriter is AccessControl {
+contract TokenWriter is AccessMultiSig {
   /**
    * @dev Save the deployment time of the smart contract
    */
