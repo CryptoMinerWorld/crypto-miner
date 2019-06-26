@@ -114,27 +114,27 @@ module.exports = async function(deployer, network, accounts) {
 				BalanceProxy:       "0xc90b90B764e0061C5e355d5101146580d17fBc9D",
 				TokenHelper:        "0x040d04f1515BC4aF48CB3346Bb7fA5f2eD1d5Ea9",
 				TokenReader:        "0xA66e81eAa45F98D913CdAEc8FBE5c746769f58c7",
-				TokenWriter:        "0x205b3c69C9Bbd5E0F65249a9785F36aF28ac9aAa",
+				TokenWriter:        "0xDe59Bb209e41a2833B770b0340B25b58F7d3F1De",
 
-				DutchAuction:       "0x18D916BBDaABFd63384Bb8C4EAdFcd98b53B78eF",
+				DutchAuction:       "0x5A9Dcaf628D0C8F7C651ea6042fE4008EC97D302",
 
-				RefPointsTracker:   "0xF703407ADbFFC0d7f7Fe413eE86Cc82c9f51Df06",
-				ArtifactERC20:      "0xa14F80E7F7333122B634Fea9EA5990C53100fDa0",
-				FoundersKeyERC20:   "0x9bBEE0dA678FcDdf30b4D7e8434FeC3D45b4694F",
-				ChestKeyERC20:      "0x00D14DFB6a5A0a240700C563A732e71cDD2FF455",
-				SilverERC20:        "0xB373E86e650236CAf952F6cdE206dfe196FeEC35",
-				GoldERC20:          "0xbE713aC93fF6d7e0dA88e024DC9Cf0d5D05c3A5A",
-				CountryERC721:      "0xdccf4653fc2F90e6fC0B151E0b9B7CFE4eF63402",
-				PlotERC721:         "0x33369f4870703489CE21B8BeF92ADa5820b5ffED",
-				GemERC721:          "0x8ad156dA5ea1053D4858987Ca1165151B5702479",
+				RefPointsTracker:   "0x470E38483E1D97c3CABD1c212D83bd9C30e48555",
+				ArtifactERC20:      "0x97D30cF911Add4c923b9C4E9B67C8B51Bc98531E",
+				FoundersKeyERC20:   "0x02A34024D147D718C2826D2cc29F201f8AC54e6a",
+				ChestKeyERC20:      "0x6251a747De4A616827B4A32D44a7533b3e2257a8",
+				SilverERC20:        "0x87b5770b8491d473ffCdD5859849Be581B996C43",
+				GoldERC20:          "0x438BFdD3AAf39C2152bbb8aDb3B37E17Ff4a7CE7",
+				CountryERC721:      "0x542121F0B59611F59229c7352b312963C144Ad33",
+				PlotERC721:         "0x45fc65083B8f18375bF64f0681438b5B8A4eEB1a",
+				GemERC721:          "0xDF8966e356274782726B0697b1B0C95E204a2304",
 
-				Workshop:           "0x4412d4448AFe1c91B35d08d053c67e9C9914D622",
-				Miner:              "0x9Fcfa8dA04D8Ed637f98a331b892769a38f00c2F",
+				Workshop:           "0x4188C63d7ec82C232e38c1Ed98fa58698E900E7A",
+				Miner:              "0x7645BB6EaC6c487F31428c016BCA3d25800783c2",
 
-				PlotSale:           "0x97BC3d0248035cD16C972E73f7C62B7Bc85B6bb5",
-				PlotAntarctica:     "0xEc0510Cca7dA23f0aEcA3c0CCc9012B505435D04",
+				PlotSale:           "0xd53660411ed51C2b6b15E3645752c4561F9d8202",
+				PlotAntarctica:     "0x4D156D9e6c3D3e92fEA70032dD96aE81868DbFC3",
 
-				SilverSale:         "0x7e48d4102de1Bd47aA456AAE21D899bd898B6954",
+				SilverSale:         "0xA454083708b5E33492260e3EdD94AF2C7A31447C",
 
 				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
@@ -142,6 +142,7 @@ module.exports = async function(deployer, network, accounts) {
 				optionalPhases: {
 					writePlotSaleCoupons: true,
 					writeSilverSaleCoupons: true,
+/*
 					migration: {
 						SilverERC20: true,
 						GoldERC20: true,
@@ -149,6 +150,7 @@ module.exports = async function(deployer, network, accounts) {
 						CountryERC721: true,
 						GemERC721: true,
 					},
+*/
 					writeTestTokens: true,
 					enablePermissions: true,
 					disablePermissions: false,
@@ -209,6 +211,9 @@ module.exports = async function(deployer, network, accounts) {
 		if(conf.optionalPhases.migration.GemERC721) {
 			await migrateGemERC721(instances);
 		}
+	}
+	if(conf.optionalPhases.writeTestTokens) {
+		await mintTestTokens(instances);
 	}
 	if(conf.optionalPhases.enablePermissions) {
 		await enablePermissions(conf, instances);
@@ -795,6 +800,144 @@ async function migrateGemERC721(instances) {
 	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 }
 
+async function mintTestTokens(instances) {
+	console.log("optional phase: mint test tokens");
+
+	// testing addresses
+	const testers = [
+		"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
+		"0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
+		"0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
+	];
+
+	// mint few ERC721 tokens
+	// gems – GemERC721
+	if(!await instances.GemERC721.exists(1)) {
+		console.log("minting 45 gems for 3 test accounts (15 gems for each account)");
+		const colors = [1, 2, 5, 6, 7, 9, 10];
+		const owners = [];
+		const gems = [];
+
+		for(let i = 0; i < 15 * testers.length; i++) {
+			const to = testers[i % testers.length];
+			const color = colors[i % colors.length];
+			const level = 1 + i % 5;
+			const gradeType = 1 + i % 6;
+			const gradeValue = Math.floor(Math.random() * 1000000);
+			const grade = gradeType << 24 | gradeValue;
+
+			owners.push(to);
+			gems.push(packGemData([i + 1, i + 1, color, level, grade, 0]));
+		}
+
+		// get link to instances of interest
+		const writer = instances.TokenWriter;
+		const token = instances.GemERC721;
+
+		// grant writer permission to mint gems and set energetic age
+		if((await token.userRoles(writer.address)).isZero()) {
+			console.log("granting Writer " + writer.address + " permission to mint GemERC721 " + token.address);
+			await token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
+		}
+		// write all the gems
+		await writer.writeBulkGemV2Data(token.address, owners, gems);
+		// clean the permissions used
+		if(!(await token.userRoles(writer.address)).isZero()) {
+			console.log("revoking Writer " + writer.address + " permission to mint GemERC721 " + token.address);
+			await token.updateRole(writer.address, 0);
+		}
+	}
+	else {
+		console.log("skipping minting 45 gems – gems already exist");
+	}
+
+	// countries - CountryERC721
+	for(let i = 0; i < 3 * testers.length; i++) {
+		const exists = await instances.CountryERC721.exists(190 - i);
+		console.log("%s country %o", (exists? "skipping": "minting"), 190 - i);
+		if(!exists) {
+			await instances.CountryERC721.mint(testers[i % testers.length], 190 - i);
+		}
+	}
+	// plots - PlotERC721
+	// Antarctica - 2 tiers
+	for(let i = 0; i < 5 * testers.length; i++) {
+		const exists = await instances.PlotERC721.exists(i + 1);
+		console.log("%s Antarctica plot %o", (exists? "skipping": "minting"), i + 1);
+		if(!exists) {
+			await instances.PlotERC721.mint(testers[i % testers.length], 0, "0x0200236464646400");
+		}
+	}
+	// Rest of the World - 5 tiers
+	for(let i = 0; i < 10 * testers.length; i++) {
+		const exists = await instances.PlotERC721.exists(5 * testers.length + i + 1);
+		console.log("%s regular plot %o", (exists? "skipping": "minting"), 5 * testers.length + i + 1);
+		if(!exists) {
+			await instances.PlotERC721.mint(testers[i % testers.length], 0, "0x05002341555F6400");
+		}
+	}
+
+	// mint few ERC20 tokens
+	for(let i = 0; i < testers.length; i++) {
+		let exists;
+
+		// Silver ERC20
+		exists = !(await instances.SilverERC20.balanceOf(testers[i])).isZero();
+		console.log((exists? "skipping ": "") + "minting 10000 silver " + i);
+		if(!exists) {
+			await instances.SilverERC20.mint(testers[i], 10000);
+		}
+
+		// Gold ERC20
+		exists = !(await instances.GoldERC20.balanceOf(testers[i])).isZero();
+		console.log((exists? "skipping ": "") + "minting 1000 gold " + i);
+		if(!exists) {
+			await instances.GoldERC20.mint(testers[i], 1000);
+		}
+
+		// Artifacts ERC20
+		exists = !(await instances.ArtifactERC20.balanceOf(testers[i])).isZero();
+		console.log((exists? "skipping ": "") + "minting 10 artifacts " + i);
+		if(!exists) {
+			await instances.ArtifactERC20.mint(testers[i], 10);
+		}
+
+		// Founder's Keys ERC20
+		exists = !(await instances.FoundersKeyERC20.balanceOf(testers[i])).isZero();
+		console.log((exists? "skipping ": "") + "minting 10 founder's keys " + i);
+		if(exists) {
+			await instances.FoundersKeyERC20.mint(testers[i], 10);
+		}
+
+		// Chest Keys ERC20
+		exists = !(await instances.ChestKeyERC20.balanceOf(testers[i])).isZero();
+		console.log((exists? "skipping ": "") + "minting 10 chest keys " + i);
+		if(!exists) {
+			await instances.ChestKeyERC20.mint(testers[i], 10);
+		}
+	}
+
+	// issue some referral points
+	for(let i = 0; i < testers.length; i++) {
+		// check if points already issued
+		const exists = !(await instances.RefPointsTracker.balanceOf(testers[i])).isZero();
+
+		if(!exists) {
+			// issue some amount
+			console.log("issuing ref points " + i);
+			await instances.RefPointsTracker.issueTo(testers[i], 2000);
+			// consume twice less amount
+			console.log("consuming ref points " + i);
+			await instances.RefPointsTracker.consumeFrom(testers[i], 1000);
+		}
+		else {
+			console.log("skipping issuing and consuming ref points " + i);
+		}
+	}
+
+	console.log("optional phase [mint test tokens] complete");
+}
+
 
 async function enablePermissions(conf, instances) {
 	console.log("optional phase: enable permissions");
@@ -812,7 +955,7 @@ async function enablePermissions(conf, instances) {
 	// whitelist GemERC721 on the DutchAuction
 	if(!await instances.DutchAuction.supportedTokenAddresses(conf.GemERC721)) {
 		console.log("whitelisting GemERC721 " + conf.GemERC721 + " on the DutchAuction " + conf.DutchAuction);
-		await instances.DutchAuction.whitelist(conf.GemERC721);
+		await instances.DutchAuction.whitelist(conf.GemERC721, true);
 	}
 	// enable transfers and transfers on behalf for GemERC721
 	if((await instances.GemERC721.features()).isZero()) {
@@ -1169,10 +1312,7 @@ const COUNTRY_DATA = [62920,36777,35261,35084,31367,28333,12108,10241,10037,8773
 // appends data if CSV file already exists
 // TODO: import from shared_functions.js
 function write_csv(path, header, data) {
-	if(fs.existsSync(path)) {
-		header = "";
-	}
-	fs.appendFileSync(path, `${header}\n${data}`, {encoding: "utf8"});
+	fs.writeFileSync(path, `${header}\n${data}`, {encoding: "utf8"});
 }
 
 // auxiliary function to read data from CSV file
