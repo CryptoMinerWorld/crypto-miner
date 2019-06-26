@@ -607,16 +607,26 @@ async function writeSilverSaleCoupons(network, instances) {
 
 
 async function migrateSilverERC20(instances) {
+	console.log("optional phase: migrate SilverERC20 data");
+
 	// process the data for silver
 	await processERC20Data("silver.csv", instances.SilverERC20, instances.TokenWriter);
+
+	console.log("optional phase [migrate SilverERC20 data] complete");
 }
 
 async function migrateGoldERC20(instances) {
+	console.log("optional phase: migrate GoldERC20 data");
+
 	// process the data for gold
 	await processERC20Data("gold.csv", instances.GoldERC20, instances.TokenWriter);
+
+	console.log("optional phase [migrate GoldERC20 data] complete");
 }
 
 async function migrateRefPointsTracker(instances) {
+	console.log("optional phase: migrate RefPointsTracker data");
+
 	// redefine instances links
 	const tracker = instances.RefPointsTracker;
 	const writer = instances.TokenWriter;
@@ -624,9 +634,13 @@ async function migrateRefPointsTracker(instances) {
 	// write referral points and known addresses
 	await writeRefPoints(tracker, writer);
 	await writeKnownAddresses(tracker, writer);
+
+	console.log("optional phase [migrate RefPointsTracker] data");
 }
 
 async function migrateCountryERC721(instances) {
+	console.log("optional phase: migrate CountryERC721 data");
+
 	// redefine instances links
 	const token = instances.CountryERC721;
 	const writer = instances.TokenWriter;
@@ -713,9 +727,13 @@ async function migrateCountryERC721(instances) {
 
 	// print the cumulative gas usage result
 	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
+
+	console.log("optional phase [migrate CountryERC721] data");
 }
 
 async function migrateGemERC721(instances) {
+	console.log("optional phase: migrate GemERC721 data");
+
 	// redefine instances links
 	const token = instances.GemERC721;
 	const writer = instances.TokenWriter;
@@ -796,6 +814,8 @@ async function migrateGemERC721(instances) {
 
 	// print the cumulative gas usage result
 	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
+
+	console.log("optional phase [migrate GemERC721] data");
 }
 
 async function mintTestTokens(instances) {

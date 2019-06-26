@@ -28,9 +28,9 @@ module.exports = async function(deployer, network, accounts) {
 	const reader = await TokenReader.at(readerAddress);
 	// verify there are no contracts in the arrays
 	const silverContracts = await reader.isContract(silver.map((a) => a.replace(/,.*/g, "")));
-	console.log(silverContracts.map((a) => a? "*": ".").join(""));
+	console.log("silver: ", silverContracts.map((a) => a? "*": ".").join(""));
 	const goldContracts = await reader.isContract(gold.map((a) => a.replace(/,.*/g, "")));
-	console.log(goldContracts.map((a) => a? "*": ".").join(""));
+	console.log("gold: ", goldContracts.map((a) => a? "*": ".").join(""));
 	const silverHasContract = silverContracts.reduce((a, b) => a || b);
 	const goldHasContract = goldContracts.reduce((a, b) => a || b);
 	if(silverHasContract || goldHasContract) {
@@ -46,8 +46,12 @@ module.exports = async function(deployer, network, accounts) {
 
 // a function to fetch HTML, parse it and write CSV data into the file
 async function process(file_name, address) {
+	console.log("fetching data for " + address);
+
 	// fetch HTML data
 	const html = await request(`https://etherscan.io/token/generic-tokenholders2?a=${address}`);
+
+	console.log("got " + html.length + " bytes of html, parsing");
 
 	// parse HTML with cheerio
 	const $ = cheerio.load(html);
@@ -59,6 +63,8 @@ async function process(file_name, address) {
 
 	// write data to CSV
 	fs.writeFileSync(`./data/${file_name}`, `${csv_header}\n${csv_data.join("\n")}`);
+
+	console.log("written " + csv_data.length + " bytes of csv data into " + file_name);
 
 	// return number of records processed
 	return csv_data;
