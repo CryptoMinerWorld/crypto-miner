@@ -125,14 +125,14 @@ module.exports = async function(deployer, network, accounts) {
 				SilverERC20:        "0x87b5770b8491d473ffCdD5859849Be581B996C43",
 				GoldERC20:          "0x438BFdD3AAf39C2152bbb8aDb3B37E17Ff4a7CE7",
 				CountryERC721:      "0x542121F0B59611F59229c7352b312963C144Ad33",
-				PlotERC721:         "0x45fc65083B8f18375bF64f0681438b5B8A4eEB1a",
-				GemERC721:          "0xDF8966e356274782726B0697b1B0C95E204a2304",
+				PlotERC721:         "0xc7E6a68bCB0cd6463A84680D85B6ed15967c9980",
+				GemERC721:          "0x5965C6e4a53b5214Ebfc85feA66edC76A9e56a98",
 
-				Workshop:           "0x4188C63d7ec82C232e38c1Ed98fa58698E900E7A",
-				Miner:              "0x7645BB6EaC6c487F31428c016BCA3d25800783c2",
+				Workshop:           "0x4F2e2930E81D759bE5F65416AF2D20Be5601DC64",
+				Miner:              "0x286ccfA8287b08aB5a78D6f98702F9AD31Ad87da",
 
-				PlotSale:           "0xd53660411ed51C2b6b15E3645752c4561F9d8202",
-				PlotAntarctica:     "0x4D156D9e6c3D3e92fEA70032dD96aE81868DbFC3",
+				PlotSale:           "0x70eFFfeab6f02b8242709Be8cA076C119B79b8b8",
+				PlotAntarctica:     "0x7a4711C0a9D76e2Be8BA35dF6547cB7Dd7dF13bD",
 
 				SilverSale:         "0xA454083708b5E33492260e3EdD94AF2C7A31447C",
 
@@ -140,8 +140,9 @@ module.exports = async function(deployer, network, accounts) {
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
 				optionalPhases: {
-					writePlotSaleCoupons: true,
-					writeSilverSaleCoupons: true,
+					writePlotSaleCoupons: false,
+					writeSilverSaleCoupons: false,
+/*
 					migration: {
 						SilverERC20: true,
 						GoldERC20: true,
@@ -149,6 +150,7 @@ module.exports = async function(deployer, network, accounts) {
 						CountryERC721: true,
 						GemERC721: true,
 					},
+*/
 					writeTestTokens: true,
 					enablePermissions: true,
 					disablePermissions: false,
@@ -845,7 +847,7 @@ async function mintTestTokens(instances) {
 			const grade = gradeType << 24 | gradeValue;
 
 			owners.push(to);
-			gems.push(packGemData([i + 1, i + 1, color, level, grade, 0]));
+			gems.push(packGemData([i + 1, i + 1, color, level, grade, gradeType, gradeValue, 0]));
 		}
 
 		// get link to instances of interest
@@ -858,6 +860,7 @@ async function mintTestTokens(instances) {
 			await token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
 		}
 		// write all the gems
+		console.log("writing " + gems.length + " gems");
 		await writer.writeBulkGemV2Data(token.address, owners, gems);
 		// clean the permissions used
 		if(!(await token.userRoles(writer.address)).isZero()) {
