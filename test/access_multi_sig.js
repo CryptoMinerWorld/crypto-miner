@@ -307,6 +307,9 @@ contract('Access Control MultiSig', (accounts) => {
 		const addFeatureRequest = async() => await ac.constructUpdateMsigRequest(ZERO_ADDR, SOME_PERM, expiresOn);
 		const removeFeatureRequest = async() => await ac.constructUpdateMsigRequest(ZERO_ADDR, NO_PERM, expiresOn);
 
+		// sign the request by sender itself, extract signature parameters into `ps`
+		// self signed transactions always fail in m-sig mode since both signatures are the same
+		const s0 = await signAndExtract(await addFeatureRequest(), sender);
 		// sign the request and extract signature parameters into `p0`
 		const p0 = await signAndExtract(await addFeatureRequest(), signer);
 		// sign another request and extract signature parameters into `p1`
@@ -316,21 +319,25 @@ contract('Access Control MultiSig', (accounts) => {
 		//assert.equal(signer, await ac.recoverUpdateMsigRequestEthSign(ZERO_ADDR, NO_PERM, expiresOn, p1.v, p1.r, p1.s), "invalid signature p1");
 
 		// define functions to send the request with a signature
+		const selfSigned = async() => await ac.updateMsig(ZERO_ADDR, SOME_PERM, expiresOn, [s0.v], [s0.r], [s0.s], {from: sender});
 		const addFeature = async() => await ac.updateMsig(ZERO_ADDR, SOME_PERM, expiresOn, [p0.v], [p0.r], [p0.s], {from: sender});
 		const removeFeature = async() => await ac.updateMsig(ZERO_ADDR, NO_PERM, expiresOn, [p1.v], [p1.r], [p1.s], {from: sender});
 		const badRemove = async() => await ac.updateMsig(ZERO_ADDR, NO_PERM, expiresOn, [p0.v], [p0.r], [p0.s], {from: sender});
 
-		// initially nor sender neither don't have any permissions and all requests fail
+		// initially nor sender neither signer don't have any permissions and all requests fail
+		await assertThrows(selfSigned);
 		await assertThrows(addFeature);
 		await assertThrows(removeFeature);
 		await assertThrows(badRemove); // this one contains invalid signature and always fail
 		// if we give sender required permissions all request still fail - 2 signatures required
 		await ac.updateRole(sender, ROLE_ACCESS_MANAGER.or(SOME_PERM));
+		await assertThrows(selfSigned);
 		await assertThrows(addFeature);
 		await assertThrows(removeFeature);
 		await assertThrows(badRemove);
 		// now give signer also required permissions
 		await ac.updateRole(signer, ROLE_ACCESS_MANAGER.or(SOME_PERM));
+		await assertThrows(selfSigned); // self signed request always fail
 		await assertThrows(badRemove); // malformed request always fail
 		// properly signed request now succeeds
 		await addFeature();
@@ -367,6 +374,9 @@ contract('Access Control MultiSig', (accounts) => {
 		const addRoleRequest = async() => await ac.constructUpdateMsigRequest(operator, SOME_PERM, expiresOn);
 		const removeRoleRequest = async() => await ac.constructUpdateMsigRequest(operator, NO_PERM, expiresOn);
 
+		// sign the request by sender itself, extract signature parameters into `ps`
+		// self signed transactions always fail in m-sig mode since both signatures are the same
+		const s0 = await signAndExtract(await addRoleRequest(), sender);
 		// sign the request and extract signature parameters into `p0`
 		const p0 = await signAndExtract(await addRoleRequest(), signer);
 		// sign another request and extract signature parameters into `p1`
@@ -376,21 +386,25 @@ contract('Access Control MultiSig', (accounts) => {
 		//assert.equal(signer, await ac.recoverUpdateMsigRequestEthSign(operator, NO_PERM, expiresOn, p1.v, p1.r, p1.s), "invalid signature p1");
 
 		// define functions to send the request with a signature
+		const selfSigned = async() => await ac.updateMsig(operator, SOME_PERM, expiresOn, [s0.v], [s0.r], [s0.s], {from: sender});
 		const fakeAdd = async() => await ac.updateMsig(fakeOperator, SOME_PERM, expiresOn, [p0.v], [p0.r], [p0.s], {from: sender});
 		const addRole = async() => await ac.updateMsig(operator, SOME_PERM, expiresOn, [p0.v], [p0.r], [p0.s], {from: sender});
 		const removeRole = async() => await ac.updateMsig(operator, NO_PERM, expiresOn, [p1.v], [p1.r], [p1.s], {from: sender});
 
 		// initially nor sender neither signer don't have any permissions and all requests fail
+		await assertThrows(selfSigned); // self signed requests always fail
 		await assertThrows(fakeAdd); // this one contains invalid signature and always fail
 		await assertThrows(addRole);
 		await assertThrows(removeRole);
 		// if we give sender required permissions all request still fail - 2 signatures required
 		await ac.updateRole(sender, ROLE_ACCESS_MANAGER.or(SOME_PERM));
+		await assertThrows(selfSigned); // self signed requests always fail
 		await assertThrows(fakeAdd);
 		await assertThrows(addRole);
 		await assertThrows(removeRole);
 		// now give signer also required permissions
 		await ac.updateRole(signer, ROLE_ACCESS_MANAGER.or(SOME_PERM));
+		await assertThrows(selfSigned); // self signed requests always fail
 		await assertThrows(fakeAdd); // malformed request always fail
 		// properly signed request now succeeds
 		await addRole();
@@ -435,26 +449,42 @@ contract('Access Control MultiSig', (accounts) => {
 		//assert.equal(signer, await ac.recoverUpdateMsigRequestEthSign(operator, SOME_PERM, expiresOn, p1.v, p1.r, p1.s), "invalid signature p1");
 		//assert.equal(signer, await ac.recoverUpdateMsigRequestEthSign(operator, SOME_PERM, expiresOn, p2.v, p2.r, p2.s), "invalid signature p2");
 
-		// define functions to send the request with one or two signatures
+		// define functions to send the request with two different signatures
 		const addRole13 = async() => await ac.updateMsig(ZERO_ADDR, SOME_PERM, expiresOn, [p1.v, p3.v], [p1.r, p3.r], [p1.s, p3.s], {from: sender});
 		const addRole23 = async() => await ac.updateMsig(ZERO_ADDR, SOME_PERM, expiresOn, [p2.v, p3.v], [p2.r, p3.r], [p2.s, p3.s], {from: sender});
 		const addRole12 = async() => await ac.updateMsig(ZERO_ADDR, SOME_PERM, expiresOn, [p1.v, p2.v], [p1.r, p2.r], [p1.s, p2.s], {from: sender});
+		// define functions to send the request with only one signatures specified twice
+		const addRole11 = async() => await ac.updateMsig(ZERO_ADDR, SOME_PERM, expiresOn, [p1.v, p1.v], [p1.r, p1.r], [p1.s, p1.s], {from: sender});
+		const addRole22 = async() => await ac.updateMsig(ZERO_ADDR, SOME_PERM, expiresOn, [p2.v, p2.v], [p2.r, p2.r], [p2.s, p2.s], {from: sender});
+		const addRole33 = async() => await ac.updateMsig(ZERO_ADDR, SOME_PERM, expiresOn, [p3.v, p3.v], [p3.r, p3.r], [p3.s, p3.s], {from: sender});
 
-		// initially all three fail - none of the signers has required role
+		// initially all 6 fail - none of the signers has required role
 		await assertThrows(addRole13);
 		await assertThrows(addRole23);
 		await assertThrows(addRole12);
+		// single signature calls always fail
+		await assertThrows(addRole11);
+		await assertThrows(addRole22);
+		await assertThrows(addRole33);
 		// give one of them required permissions
 		await ac.updateRole(signer1, ROLE_ACCESS_MANAGER.or(SOME_PERM));
-		// still all three fail since 2 signatures with permissions are required
+		// still all 6 fail since 2 signatures with permissions are required
 		await assertThrows(addRole13);
 		await assertThrows(addRole23);
 		await assertThrows(addRole12);
+		// single signature calls always fail
+		await assertThrows(addRole11);
+		await assertThrows(addRole22);
+		await assertThrows(addRole33);
 		// give another one required permissions
 		await ac.updateRole(signer2, ROLE_ACCESS_MANAGER.or(SOME_PERM));
 		// now calls with only 1 signature fail
 		await assertThrows(addRole13);
 		await assertThrows(addRole23);
+		// single signature calls always fail
+		await assertThrows(addRole11);
+		await assertThrows(addRole22);
+		await assertThrows(addRole33);
 		// but call with 2 signatures succeeds
 		await addRole12();
 		// give one more required permissions
@@ -463,6 +493,9 @@ contract('Access Control MultiSig', (accounts) => {
 		await assertThrows(addRole13);
 		await assertThrows(addRole23);
 		await assertThrows(addRole12);
+		await assertThrows(addRole11);
+		await assertThrows(addRole22);
+		await assertThrows(addRole33);
 		// verify feature was enabled successfully
 		assert(await ac.isFeatureEnabled(SOME_PERM), "no feature present after adding it");
 	});
@@ -500,15 +533,23 @@ contract('Access Control MultiSig', (accounts) => {
 		const addRole13 = async() => await ac.updateMsig(operator, SOME_PERM, expiresOn, [p1.v, p3.v], [p1.r, p3.r], [p1.s, p3.s], {from: sender});
 		const addRole23 = async() => await ac.updateMsig(operator, SOME_PERM, expiresOn, [p2.v, p3.v], [p2.r, p3.r], [p2.s, p3.s], {from: sender});
 		const addRole12 = async() => await ac.updateMsig(operator, SOME_PERM, expiresOn, [p1.v, p2.v], [p1.r, p2.r], [p1.s, p2.s], {from: sender});
+		// define functions to send the request with only one signatures specified twice
+		const addRole11 = async() => await ac.updateMsig(operator, SOME_PERM, expiresOn, [p1.v, p1.v], [p1.r, p1.r], [p1.s, p1.s], {from: sender});
+		const addRole22 = async() => await ac.updateMsig(operator, SOME_PERM, expiresOn, [p2.v, p2.v], [p2.r, p2.r], [p2.s, p2.s], {from: sender});
+		const addRole33 = async() => await ac.updateMsig(operator, SOME_PERM, expiresOn, [p3.v, p3.v], [p3.r, p3.r], [p3.s, p3.s], {from: sender});
 		// define functions to send the request for fake operator
 		const addRole13f = async() => await ac.updateMsig(fakeOperator, SOME_PERM, expiresOn, [p1.v, p3.v], [p1.r, p3.r], [p1.s, p3.s], {from: sender});
 		const addRole23f = async() => await ac.updateMsig(fakeOperator, SOME_PERM, expiresOn, [p2.v, p3.v], [p2.r, p3.r], [p2.s, p3.s], {from: sender});
 		const addRole12f = async() => await ac.updateMsig(fakeOperator, SOME_PERM, expiresOn, [p1.v, p2.v], [p1.r, p2.r], [p1.s, p2.s], {from: sender});
 
-		// initially all three fail - none of the signers has required role
+		// initially all 6 fail - none of the signers has required role
 		await assertThrows(addRole13);
 		await assertThrows(addRole23);
 		await assertThrows(addRole12);
+		// single signature calls always fail
+		await assertThrows(addRole11);
+		await assertThrows(addRole22);
+		await assertThrows(addRole33);
 		// adding fake operator always fail because of malformed signature
 		await assertThrows(addRole13f);
 		await assertThrows(addRole23f);
@@ -519,6 +560,10 @@ contract('Access Control MultiSig', (accounts) => {
 		await assertThrows(addRole13);
 		await assertThrows(addRole23);
 		await assertThrows(addRole12);
+		// single signature calls always fail
+		await assertThrows(addRole11);
+		await assertThrows(addRole22);
+		await assertThrows(addRole33);
 		// adding fake operator always fail because of malformed signature
 		await assertThrows(addRole13f);
 		await assertThrows(addRole23f);
@@ -532,6 +577,10 @@ contract('Access Control MultiSig', (accounts) => {
 		// calls with only 1 signature still fail
 		await assertThrows(addRole13);
 		await assertThrows(addRole23);
+		// single signature calls always fail
+		await assertThrows(addRole11);
+		await assertThrows(addRole22);
+		await assertThrows(addRole33);
 		// but call with 2 signatures succeeds
 		await addRole12();
 		// give one more required permissions
@@ -540,6 +589,12 @@ contract('Access Control MultiSig', (accounts) => {
 		await assertThrows(addRole13);
 		await assertThrows(addRole23);
 		await assertThrows(addRole12);
+		await assertThrows(addRole11);
+		await assertThrows(addRole22);
+		await assertThrows(addRole33);
+		await assertThrows(addRole13f);
+		await assertThrows(addRole23f);
+		await assertThrows(addRole12f);
 		// verify feature was enabled successfully
 		assert(await ac.isUserInRole(operator, SOME_PERM), "no feature present after adding it");
 	});

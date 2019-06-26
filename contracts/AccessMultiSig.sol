@@ -335,6 +335,16 @@ contract AccessMultiSig {
     // ensure we have enough signatures now
     require(signatures == MSIG_QUORUM);
 
+    // verify all signers in the array are different
+    // let first pointer `i` iterate from second element `[1]` to the very end of the array
+    for(uint256 i = 1; i < _by.length; i++) {
+      // let second pointer `j` iterate from first element `[0]` to the first pointer [i]
+      for(uint256 j = 0; j < i; j++) {
+        // verify array elements at the specified pointers differ
+        require(_by[j] != _by[i]);
+      }
+    }
+
     // update the nonce to protect again replay attack
     nonces[_to]++;
 
