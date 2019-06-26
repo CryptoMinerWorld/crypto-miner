@@ -142,7 +142,6 @@ module.exports = async function(deployer, network, accounts) {
 				optionalPhases: {
 					writePlotSaleCoupons: true,
 					writeSilverSaleCoupons: true,
-/*
 					migration: {
 						SilverERC20: true,
 						GoldERC20: true,
@@ -150,7 +149,6 @@ module.exports = async function(deployer, network, accounts) {
 						CountryERC721: true,
 						GemERC721: true,
 					},
-*/
 					writeTestTokens: true,
 					enablePermissions: true,
 					disablePermissions: false,
