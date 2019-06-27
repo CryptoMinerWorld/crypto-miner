@@ -84,7 +84,8 @@ module.exports = async function(deployer, network, accounts) {
 
 				FoundersPlots:      "0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1",
 				BalanceProxy:       "0xbd7Ca763E12d23535B59949ade53c104BD88d42F",
-				TokenReader:        "0x29a9996Dc4863b5918E6132F644d7c19279fdDd5",
+				TokenHelper:        "0xef47ac9b0132895a37c31530d520ff22bac89322",
+				TokenReader:        "0x7c7a04e9cbaa111eb1f893e86a0fa66c613b2fd3",
 
 				PlotSaleStartUTC:   1562608800, // 07/08/2019 @ 6:00pm UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
@@ -891,10 +892,10 @@ async function mintTestTokens(instances) {
 	}
 	// Rest of the World - 5 tiers
 	for(let i = 0; i < 10 * testers.length; i++) {
-		const exists = await instances.PlotERC721.exists(5 * testers.length + i + 1);
-		console.log("%s regular plot %o", (exists? "skipping": "minting"), 5 * testers.length + i + 1);
+		const exists = await instances.PlotERC721.exists(i + 65537);
+		console.log("%s regular plot %o", (exists? "skipping": "minting"), i + 65537);
 		if(!exists) {
-			await instances.PlotERC721.mint(testers[i % testers.length], 0, "0x05002341555F6400");
+			await instances.PlotERC721.mint(testers[i % testers.length], 1, "0x05002341555F6400");
 		}
 	}
 
