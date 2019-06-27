@@ -63,7 +63,12 @@ module.exports = async function(deployer, network, accounts) {
 		const level = data[i].shrn(64).maskn(8).toNumber();
 		const grade = data[i].shrn(32).maskn(32).toNumber();
 		const age = data[i].maskn(32).toNumber();
-		const owner = owners[i];
+		// we perform few ownership replacements in place:
+		// 1. 0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69 -> 0x5738bFC44c17D72272E198D8D3aE5f598c802d97
+		// 2. 0x0C9a2fffe38bD6551187d85535e0d917fF4D83b8 -> 0x5738bFC44c17D72272E198D8D3aE5f598c802d97
+		const owner = owners[i]
+			.replace("0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69", "0x5738bFC44c17D72272E198D8D3aE5f598c802d97")
+			.replace("0x0C9a2fffe38bD6551187d85535e0d917fF4D83b8", "0x5738bFC44c17D72272E198D8D3aE5f598c802d97");
 
 		const gradeType = grade >> 24;
 		const gradeValue = grade & 0xFFFFFF;
