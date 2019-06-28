@@ -72,6 +72,8 @@ module.exports = async function(deployer, network, accounts) {
 	// smart contracts require deployment and which are already deployed
 	// empty address means smart contract requires deployment
 
+	console.log("account %o, nonce: %o", accounts[0], await web3.eth.getTransactionCount(accounts[0]));
+
 	// a collection of all known addresses (smart contracts and external)
 	const conf = ((network) => {
 		switch(network) {
@@ -86,6 +88,7 @@ module.exports = async function(deployer, network, accounts) {
 				BalanceProxy:       "0xbd7Ca763E12d23535B59949ade53c104BD88d42F",
 				TokenHelper:        "0xef47ac9b0132895a37c31530d520ff22bac89322",
 				TokenReader:        "0x7c7a04e9cbaa111eb1f893e86a0fa66c613b2fd3",
+				TokenWriter:        "0x7e3e2b28a8b898321512c9a8c7ac5bc5d2d43a69",
 
 				PlotSaleStartUTC:   1562608800, // 07/08/2019 @ 6:00pm UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
@@ -117,25 +120,25 @@ module.exports = async function(deployer, network, accounts) {
 				TokenReader:        "0xA66e81eAa45F98D913CdAEc8FBE5c746769f58c7",
 				TokenWriter:        "0xDe59Bb209e41a2833B770b0340B25b58F7d3F1De",
 
-				DutchAuction:       "0x5A9Dcaf628D0C8F7C651ea6042fE4008EC97D302",
+				DutchAuction:       "0x0Db40FA7f885148A5Ae37A392843e2372E39C415",
 
-				RefPointsTracker:   "0x470E38483E1D97c3CABD1c212D83bd9C30e48555",
-				ArtifactERC20:      "0x97D30cF911Add4c923b9C4E9B67C8B51Bc98531E",
-				FoundersKeyERC20:   "0x02A34024D147D718C2826D2cc29F201f8AC54e6a",
-				ChestKeyERC20:      "0x6251a747De4A616827B4A32D44a7533b3e2257a8",
-				SilverERC20:        "0x87b5770b8491d473ffCdD5859849Be581B996C43",
-				GoldERC20:          "0x438BFdD3AAf39C2152bbb8aDb3B37E17Ff4a7CE7",
-				CountryERC721:      "0x542121F0B59611F59229c7352b312963C144Ad33",
-				PlotERC721:         "0xc7E6a68bCB0cd6463A84680D85B6ed15967c9980",
-				GemERC721:          "0x5965C6e4a53b5214Ebfc85feA66edC76A9e56a98",
+				RefPointsTracker:   "0x2515293918c26507164E4301Ee1BA67436D5278e",
+				ArtifactERC20:      "0xdE23961410210d2398e7298829811e1b5ff1DD3e",
+				FoundersKeyERC20:   "0xd96D46cE6Ec8b5F716E6eE67AE662719e5eBB8D7",
+				ChestKeyERC20:      "0xd50777A73D978B743178ed7f6720F8FA8d492c3b",
+				SilverERC20:        "0x5489BE92c2712492Bc86c2694834FDD5dFE3936e",
+				GoldERC20:          "0x9310Af541dc786febEb2368581Cf86604745AC95",
+				CountryERC721:      "0xd41541Fec0DE95655E978b75BcccFF271E67170D",
+				PlotERC721:         "0x8034EbB5A03E97Fa6C22Ef13e0E05B66e2A3eF2D",
+				GemERC721:          "0x780cA6cF71677070ae6a25D42194993fe56a4BBf",
 
-				Workshop:           "0x4F2e2930E81D759bE5F65416AF2D20Be5601DC64",
-				Miner:              "0x286ccfA8287b08aB5a78D6f98702F9AD31Ad87da",
+				Workshop:           "0x30e377481AadA0716f80a209D8c292DA4D217E71",
+				SilverSale:         "0x7591Ec27053b9D3863572e3c21E2b0EF3f10bE59",
 
-				PlotSale:           "0x70eFFfeab6f02b8242709Be8cA076C119B79b8b8",
-				PlotAntarctica:     "0x7a4711C0a9D76e2Be8BA35dF6547cB7Dd7dF13bD",
+				PlotSale:           "0xD25af9e4C1aaB550C272711FA7B257f8a8377104",
+				PlotAntarctica:     "0x2F5Cff109B6BCBdda0e3aF8CB2d0affFceC128c4",
 
-				SilverSale:         "0xA454083708b5E33492260e3EdD94AF2C7A31447C",
+				Miner:              "0x0D026d1436758156fade1153EFC13AB42d71b5AD",
 
 				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
@@ -143,7 +146,6 @@ module.exports = async function(deployer, network, accounts) {
 				optionalPhases: {
 					writePlotSaleCoupons: false,
 					writeSilverSaleCoupons: false,
-/*
 					migration: {
 						SilverERC20: true,
 						GoldERC20: true,
@@ -151,8 +153,7 @@ module.exports = async function(deployer, network, accounts) {
 						CountryERC721: true,
 						GemERC721: true,
 					},
-*/
-					writeTestTokens: true,
+					writeTestTokens: false,
 					enablePermissions: true,
 					disablePermissions: false,
 				},
@@ -210,7 +211,7 @@ module.exports = async function(deployer, network, accounts) {
 			await migrateCountryERC721(instances);
 		}
 		if(conf.optionalPhases.migration.GemERC721) {
-			await migrateGemERC721(instances);
+			await migrateGemERC721(accounts, instances);
 		}
 	}
 	if(conf.optionalPhases.writeTestTokens) {
@@ -422,26 +423,24 @@ async function deployInstances(deployer, conf, instances) {
 		deployedInstancesCounter++;
 	}
 
-	// Miner binding/deployment
-	if(conf.Miner) {
-		console.log("binding Miner to " + conf.Miner);
-		instances.Miner = await Miner.at(conf.Miner);
+	// SilverSale binding/deployment
+	if(conf.SilverSale) {
+		console.log("binding SilverSale to " + conf.SilverSale);
+		instances.SilverSale = await SilverSale.at(conf.SilverSale);
 	}
 	else {
-		console.log("deploying Miner");
+		console.log("deploying SilverSale");
 		await deployer.deploy(
-			Miner,
-			conf.GemERC721,
-			conf.PlotERC721,
-			conf.GemERC721, // TODO: ArtifactERC721
+			SilverSale,
+			conf.RefPointsTracker,
 			conf.SilverERC20,
 			conf.GoldERC20,
-			conf.ArtifactERC20,
-			conf.FoundersKeyERC20,
-			conf.ChestKeyERC20,
+			conf.FoundersChest,
+			conf.Beneficiary,
+			conf.SilverSaleStartUTC,
 		);
-		instances.Miner = await Miner.deployed();
-		conf.Miner = instances.Miner.address;
+		instances.SilverSale = await SilverSale.deployed();
+		conf.SilverSale = instances.SilverSale.address;
 		deployedInstancesCounter++;
 	}
 
@@ -493,24 +492,26 @@ async function deployInstances(deployer, conf, instances) {
 		deployedInstancesCounter++;
 	}
 
-	// SilverSale binding/deployment
-	if(conf.SilverSale) {
-		console.log("binding SilverSale to " + conf.SilverSale);
-		instances.SilverSale = await SilverSale.at(conf.SilverSale);
+	// Miner binding/deployment
+	if(conf.Miner) {
+		console.log("binding Miner to " + conf.Miner);
+		instances.Miner = await Miner.at(conf.Miner);
 	}
 	else {
-		console.log("deploying SilverSale");
+		console.log("deploying Miner");
 		await deployer.deploy(
-			SilverSale,
-			conf.RefPointsTracker,
+			Miner,
+			conf.GemERC721,
+			conf.PlotERC721,
+			conf.GemERC721, // TODO: ArtifactERC721
 			conf.SilverERC20,
 			conf.GoldERC20,
-			conf.FoundersChest,
-			conf.Beneficiary,
-			conf.SilverSaleStartUTC,
+			conf.ArtifactERC20,
+			conf.FoundersKeyERC20,
+			conf.ChestKeyERC20,
 		);
-		instances.SilverSale = await SilverSale.deployed();
-		conf.SilverSale = instances.SilverSale.address;
+		instances.Miner = await Miner.deployed();
+		conf.Miner = instances.Miner.address;
 		deployedInstancesCounter++;
 	}
 
@@ -731,10 +732,10 @@ async function migrateCountryERC721(instances) {
 	// print the cumulative gas usage result
 	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 
-	console.log("optional phase [migrate CountryERC721] data");
+	console.log("optional phase [migrate CountryERC721 data] complete");
 }
 
-async function migrateGemERC721(instances) {
+async function migrateGemERC721(accounts, instances) {
 	console.log("optional phase: migrate GemERC721 data");
 
 	// redefine instances links
@@ -776,6 +777,11 @@ async function migrateGemERC721(instances) {
 		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
 	}
 
+	// we'll be tracking nonce, yeah!
+	let nonce = await web3.eth.getTransactionCount(accounts[0]);
+	// a place to store pending transactions (promises)
+	const txs = [];
+
 	// track cumulative gas usage
 	let cumulativeGasUsed = 0;
 
@@ -791,24 +797,32 @@ async function migrateGemERC721(instances) {
 		// check token existence at the offset
 		if(!await token.exists(gems[offset][0])) {
 			// write all the gems and measure gas
-			const gasUsed = (await writer.writeBulkGemV2Data(token.address, owners_to_write, gems_to_write)).receipt.gasUsed;
-
-			// update cumulative gas used
-			cumulativeGasUsed += gasUsed;
-
-			// log the result
-			console.log(
-				"\t%o token(s) written (%o total): %o gas used",
-				Math.min(bulkSize, owners.length - offset),
-				Math.min(offset + bulkSize, owners.length),
-				gasUsed
-			);
+			console.log("submitting writeBulkGemV2Data(%o items, offset %o, {nonce: %o})", owners_to_write.length, offset, nonce);
+			txs.push(writer.writeBulkGemV2Data(token.address, owners_to_write, gems_to_write, {nonce: nonce++}));
 		}
 		else {
 			// log the message
 			console.log("\t%o token(s) skipped", Math.min(bulkSize, owners.length - offset));
 		}
 	}
+	console.log("waiting for %o transactions to complete", txs.length)
+	// wait for all pending transactions and gather results
+	(await Promise.all(txs)).forEach((tx) => {
+		// measure gas used
+		const gasUsed = tx.receipt.gasUsed;
+
+		// update cumulative gas used
+		cumulativeGasUsed += gasUsed;
+
+		// log the result
+		console.log(
+			"\t%o token(s) written (%o total): %o gas used",
+			Math.min(bulkSize, owners.length - offset),
+			Math.min(offset + bulkSize, owners.length),
+			gasUsed
+		);
+	});
+
 	// clean the permissions used
 	if(!(await token.userRoles(writer.address)).isZero()) {
 		console.log("revoking Writer " + writer.address + " permission to mint GemERC721 " + token.address);
@@ -818,7 +832,7 @@ async function migrateGemERC721(instances) {
 	// print the cumulative gas usage result
 	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 
-	console.log("optional phase [migrate GemERC721] data");
+	console.log("optional phase [migrate GemERC721 data] complete");
 }
 
 async function mintTestTokens(instances) {
@@ -1238,7 +1252,8 @@ async function writeRefPoints(tracker, writer) {
 
 		// log the result
 		console.log("\t%o record(s) written: %o gas used", data.length, gasUsed);
-	} else {
+	}
+	else {
 		console.log("\t%o record(s) skipped", data.length);
 	}
 	// clean the permissions used
