@@ -8,7 +8,7 @@ const fs = require('fs');
 module.exports = async function(deployer, network, accounts) {
 	// addresses:
 	// deployed reader address
-	const readerAddress = "0xD51ae49aDDa7CBaa6d070EA933AAaBf68a24C264";
+	const readerAddress = "0x7c7a04e9cbaa111eb1f893e86a0fa66c613b2fd3";
 	// v1 ERC721 deployed addresses to work with
 	const tokenAddress = "0xeAe9d154dA7a1cD05076dB1B83233f3213a95e4F";
 	// v1 Dutch Auction address
@@ -35,7 +35,13 @@ module.exports = async function(deployer, network, accounts) {
 		// update how many data we've read
 		read = page[0].length;
 
-		owners.push(...page[0]);
+		owners.push(...page[0].map((e) => e
+			// we perform few ownership replacements in place:
+			// 1. 0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69 -> 0x5738bFC44c17D72272E198D8D3aE5f598c802d97
+			// 2. 0x0C9a2fffe38bD6551187d85535e0d917fF4D83b8 -> 0x5738bFC44c17D72272E198D8D3aE5f598c802d97
+			.replace("0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69", "0x5738bFC44c17D72272E198D8D3aE5f598c802d97")
+			.replace("0x0C9a2fffe38bD6551187d85535e0d917fF4D83b8", "0x5738bFC44c17D72272E198D8D3aE5f598c802d97")
+		));
 		data.push(...page[1]);
 	}
 
@@ -63,12 +69,7 @@ module.exports = async function(deployer, network, accounts) {
 		const level = data[i].shrn(64).maskn(8).toNumber();
 		const grade = data[i].shrn(32).maskn(32).toNumber();
 		const age = data[i].maskn(32).toNumber();
-		// we perform few ownership replacements in place:
-		// 1. 0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69 -> 0x5738bFC44c17D72272E198D8D3aE5f598c802d97
-		// 2. 0x0C9a2fffe38bD6551187d85535e0d917fF4D83b8 -> 0x5738bFC44c17D72272E198D8D3aE5f598c802d97
-		const owner = owners[i]
-			.replace("0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69", "0x5738bFC44c17D72272E198D8D3aE5f598c802d97")
-			.replace("0x0C9a2fffe38bD6551187d85535e0d917fF4D83b8", "0x5738bFC44c17D72272E198D8D3aE5f598c802d97");
+		const owner = owners[i];
 
 		const gradeType = grade >> 24;
 		const gradeValue = grade & 0xFFFFFF;

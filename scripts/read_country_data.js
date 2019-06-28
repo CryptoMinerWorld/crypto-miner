@@ -8,7 +8,7 @@ const fs = require('fs');
 module.exports = async function(deployer, network, accounts) {
 	// addresses:
 	// deployed reader address
-	const readerAddress = "0xD51ae49aDDa7CBaa6d070EA933AAaBf68a24C264";
+	const readerAddress = "0x7c7a04e9cbaa111eb1f893e86a0fa66c613b2fd3";
 	// v1 ERC721 deployed addresses to work with
 	const tokenAddress = "0xE49F05Fd6DEc46660221a1C1255FfE335bc7fa7a";
 	// v1 Dutch Auction address

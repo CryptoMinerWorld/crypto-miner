@@ -12,7 +12,7 @@ const fs = require('fs');
 // reading Silver ERC20 ownership data from etherscan
 module.exports = async function(deployer, network, accounts) {
 	// deployed reader address
-	const readerAddress = "0xD51ae49aDDa7CBaa6d070EA933AAaBf68a24C264";
+	const readerAddress = "0x7c7a04e9cbaa111eb1f893e86a0fa66c613b2fd3";
 
 	// get Silver ERC20 deployed mainnet address to query
 	const silverAddress = "0x5eAb0Ea7AC3cC27f785D8e3fABA56b034aa56208";

@@ -8,7 +8,7 @@ const fs = require('fs');
 module.exports = async function(deployer, network, accounts) {
 	// addresses:
 	// deployed reader address
-	const readerAddress = "0xD51ae49aDDa7CBaa6d070EA933AAaBf68a24C264";
+	const readerAddress = "0x7c7a04e9cbaa111eb1f893e86a0fa66c613b2fd3";
 	// v1 Ref deployed addresses to work with
 	const tokenAddress = "0xD06d436763a3207a24A3EE393541f924d9b323fd";
 
