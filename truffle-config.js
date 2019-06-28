@@ -76,7 +76,7 @@ module.exports = {
 			},
 			network_id: "3", // Ropsten
 			gas: 7500000,
-			gasPrice: 4000000000, // 4 GWei
+			gasPrice: 2000000000, // 2 GWei
 			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
 			timeoutBlocks: 500, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
 		},
