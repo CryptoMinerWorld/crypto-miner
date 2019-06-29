@@ -805,23 +805,25 @@ async function migrateGemERC721(accounts, instances) {
 			console.log("\t%o token(s) skipped", Math.min(bulkSize, owners.length - offset));
 		}
 	}
-	console.log("waiting for %o transactions to complete", txs.length)
+	console.log("waiting for %o transactions to complete", txs.length);
 	// wait for all pending transactions and gather results
-	(await Promise.all(txs)).forEach((tx) => {
-		// measure gas used
-		const gasUsed = tx.receipt.gasUsed;
+	if(txs.length > 0) {
+		(await Promise.all(txs)).forEach((tx) => {
+			// measure gas used
+			const gasUsed = tx.receipt.gasUsed;
 
-		// update cumulative gas used
-		cumulativeGasUsed += gasUsed;
+			// update cumulative gas used
+			cumulativeGasUsed += gasUsed;
 
-		// log the result
-		console.log(
-			"\t%o token(s) written (%o total): %o gas used",
-			Math.min(bulkSize, owners.length - offset),
-			Math.min(offset + bulkSize, owners.length),
-			gasUsed
-		);
-	});
+			// log the result
+			console.log(
+				"\t%o token(s) written (%o total): %o gas used",
+				Math.min(bulkSize, owners.length - offset),
+				Math.min(offset + bulkSize, owners.length),
+				gasUsed
+			);
+		});
+	}
 
 	// clean the permissions used
 	if(!(await token.userRoles(writer.address)).isZero()) {
