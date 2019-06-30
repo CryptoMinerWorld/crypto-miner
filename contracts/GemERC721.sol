@@ -168,7 +168,7 @@ contract GemERC721 is ERC721Core {
   /**
    * @dev Next token (gem) ID
    */
-  uint24 public nextId = 0x12500;
+  uint24 public nextId = 0x20001;
 
   /**
    * @dev The data in token's state may contain lock(s)
