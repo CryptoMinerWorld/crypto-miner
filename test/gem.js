@@ -25,8 +25,8 @@ import {
 	ROLE_NEXT_ID_PROVIDER,
 } from "./erc721_core";
 
-// initial nextId is 0x12500
-const NEXT_ID = 0x12500;
+// initial nextId is 0x20001
+const NEXT_ID = 0x20001;
 
 // some default gem props
 const token1 = 0x401;

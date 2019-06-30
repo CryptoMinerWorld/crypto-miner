@@ -23,6 +23,7 @@ const FEATURE_MINING_ENABLED = 0x00000001;
 const ROLE_MINING_OPERATOR = 0x00000001;
 const ROLE_ROLLBACK_OPERATOR = 0x00000002;
 const ROLE_GEM_COLORS_PROVIDER = 0x00000004;
+const ROLE_MINING_RATES_PROVIDER = 0x00000008;
 
 // Miner smart contract tests
 contract('Miner', (accounts) => {
@@ -61,7 +62,8 @@ contract('Miner', (accounts) => {
 		assert.equal(c.address, await miner.chestKeyInstance(), "wrong chest key instance address");
 		assertArraysEqual([1, 2, 5, 6, 7, 9, 10], await miner.getGemColors(), "incorrect initial value for gem colors array");
 	});
-	it("security: setGemColors requires ROLE_GEM_COLORS_PROVIDER permission", async() => {
+
+	it("colors: setGemColors requires ROLE_GEM_COLORS_PROVIDER permission", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();
@@ -138,6 +140,97 @@ contract('Miner', (accounts) => {
 			// verify available colors are set correctly
 			assertArraysEqual(colors, await miner.getGemColors(), "incorrect gem colors array " + i);
 		}
+	});
+
+	it("mining rates: setting mining rates requires ROLE_MINING_RATES_PROVIDER permission", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// define an address to act as an operator
+		const operator = accounts[1];
+
+		// define the function to check permissions for
+		const fn = async() => await miner.setSpecialGemMultiplier(0xF001, 150, {from: operator});
+
+		// initially fn throws
+		await assertThrows(fn);
+		// after setting the required permission to operator
+		await miner.updateRole(operator, ROLE_MINING_RATES_PROVIDER);
+		// fn succeeds
+		await fn();
+
+		// mining rate multiplier successfully updated for special gem
+		assert.equal(150, await miner.specialGemMultipliers(0xF001), "incorrect mining rate multiplier for 0xF001");
+	});
+	it("mining rates: verify integrity of set/get mining rate multiplier", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// ensure properties for non-special gem(s) cannot be set
+		await assertThrows(miner.setSpecialGemMultiplier, 0x1, 1);
+		await assertThrows(miner.setSpecialGemMultiplier, 0x401, 1);
+		await assertThrows(miner.setSpecialGemMultiplier, 0xF000, 1);
+		await assertThrows(miner.setSpecialGemMultiplier, 0x10000, 1);
+		await assertThrows(miner.setSpecialGemMultiplier, 0x11000, 1);
+		await assertThrows(miner.setSpecialGemMultiplier, 0x20000, 1);
+
+		// define special gem ID to operate on
+		const specialGemId = 0xF001;
+
+		// set special gem properties
+		await miner.setSpecialGemMultiplier(specialGemId, 200);
+
+		// verify properties set
+		assert.equal(200, await miner.specialGemMultipliers(specialGemId), "incorrect mining rate multiplier for " + specialGemId);
+
+		// miningRateOf fails initially – no gem is actually minted ;)
+		await assertThrows(miner.miningRateOf, specialGemId);
+
+		// mint a gem with a properties simple to calculate:
+		// color hits the month: +5%
+		// grade is AAA zero value: x50 rate
+		await gem.mint(accounts[0], specialGemId, 0, new Date().getMonth() + 1, 1, 0x06000000);
+
+		// expected mining rate is 50 * 1.05 * 2.00
+		assert.equal(Math.floor(1000000 * 50 * 1.05 * 2.00), await miner.miningRateOf(specialGemId));
 	});
 
 	it("mining: mining properties of the new gem(s)", async() => {
