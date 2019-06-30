@@ -52,7 +52,7 @@ contract Miner is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x47938c0ac73645dafe9eba8e6250e7c9f8f44b236bf569df1be8a9e65703cd7a;
+  uint256 public constant MINER_UID = 0x5d959f78ea0c7b25ca1bc0799858a0d3dd9951ea24d2d981e0ebe3c396fbc6c2;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
@@ -243,6 +243,16 @@ contract Miner is AccessMultiSig {
   uint8[] public gemColors = [1, 2, 5, 6, 7, 9, 10];
 
   /**
+   * @dev Mapping contains mining rate multipliers for special gems
+   * @dev Zero-mapping is treated as one (no multiplier)
+   * @dev Multiplier dimension is percent, meaning the value 100 is equal to one
+   *      and does nothing (value 0 is treated in the same way – as unset)ˀ
+   * @dev Special gems are gems in ID range (0xF000 - 0x10000) – both bounds exclusive
+   * @dev maps gemId => mining rate multiplier
+   */
+  mapping(uint24 => uint8) specialGemMultipliers;
+
+  /**
    * @dev How many minutes of mining (resting) energy it takes
    *      to mine block of land depending on the tier number
    * @dev Array is zero-indexed, index 0 corresponds to Tier 1,
@@ -272,6 +282,11 @@ contract Miner is AccessMultiSig {
    * @dev Gem colors provider may change the `gemColors` array
    */
   uint32 public constant ROLE_GEM_COLORS_PROVIDER = 0x00000004;
+
+  /**
+   * @dev Allows modifying mining rates coefficients
+   */
+  uint32 public constant ROLE_MINING_RATES_PROVIDER = 0x00000008;
 
   /**
    * @dev A bitmask indicating locked state of the ERC721 token
@@ -488,6 +503,25 @@ contract Miner is AccessMultiSig {
   function getGemColors() public view returns(uint8[] memory) {
     // just return an array as is
     return gemColors;
+  }
+
+  /**
+   * @dev Allows to introduce new special gem mining rate multiplier
+   *      or to modify existing special gem mining rate multiplier
+   * @dev Requires sender to have `ROLE_MINING_RATES_PROVIDER` permission
+   * @dev Requires gem ID to be in range (0xF000, 0x10000)
+   * @param gemId special gem ID to send mining rate multiplier for
+   * @param multiplier mining rate multiplier to set
+   */
+  function setSpecialGemMultiplier(uint24 gemId, uint8 multiplier) public {
+    // ensure sender has permission to set special gem mining rate
+    require(isSenderInRole(ROLE_MINING_RATES_PROVIDER));
+
+    // ensure gem ID is in proper bounds
+    require(gemId > 0xF000 && gemId < 0x10000);
+
+    // update the mining rate
+    specialGemMultipliers[gemId] = multiplier;
   }
 
   /**
@@ -1561,7 +1595,7 @@ contract Miner is AccessMultiSig {
     // if energy is not zero
     if(energy != 0) {
       // convert mining energy into effective mining energy
-      energy = effectiveEnergy(energy, gemInstance.getGrade(gemId));
+      energy = effectiveEnergyOf(gemId, energy);
     }
 
     // return energy value
@@ -1584,7 +1618,7 @@ contract Miner is AccessMultiSig {
     // if energy is not zero (grades A, AA and AAA)
     if(energy != 0) {
       // convert resting energy into effective resting energy
-      energy = effectiveEnergy(energy, gemInstance.getGrade(gemId));
+      energy = effectiveEnergyOf(gemId, energy);
     }
 
     // return energy value
@@ -1594,15 +1628,15 @@ contract Miner is AccessMultiSig {
   /**
    * @notice Calculates effective energy of the gem based on its base energy and grade
    * @dev Effective energy is base energy multiplied by mining rate of the gem
+   * @param gemId ID of the gem to calculate effective energy for
    * @param energy base energy of the gem
-   * @param grade full grade value of the gem, containing grade type and value
    * @return effective energy of the gem in minutes
    */
-  function effectiveEnergy(uint32 energy, uint32 grade) public pure returns(uint32) {
+  function effectiveEnergyOf(uint24 gemId, uint32 energy) public view returns(uint32) {
     // determine effective gem energy of the gem,
     // taking into account its mining rate,
     // and return the result
-    return uint32(uint64(energy) * miningRate(grade) / 1000000);
+    return uint32(uint64(energy) * miningRateOf(gemId) / 1000000);
   }
 
   /**
@@ -1612,7 +1646,7 @@ contract Miner is AccessMultiSig {
    * @param gemId ID of the gem to calculate mining rate for
    * @return mining rate of the gem multiplied by 10^6
    */
-  function miningRateOf(uint24 gemId) public view returns(uint32) {
+  function miningRateOf(uint24 gemId) public view returns(uint32 rate) {
     // read the color of the gem
     uint8 color = gemInstance.getColor(gemId);
 
@@ -1620,13 +1654,35 @@ contract Miner is AccessMultiSig {
     // verifies gem existence under the hood
     uint32 grade = gemInstance.getGrade(gemId);
 
-    // taking into account current month and gem color 5% mining rate bonus
-    // calculate mining rate - delegate call to `miningRate`
-    // multiplication by 21 may overflow uint32 in this particular case
-    // since maximum value which `miningRate` may produce is 268103808,
-    // multiplied by 21 is 5630179968 (0x1 4F 95 BA 80)
-    // therefore do division first and multiplication next
-    return TimeUtils.monthIndex() == color? miningRate(grade) / 20 * 21: miningRate(grade);
+    // calculate base mining rate value based on the grade
+    // delegate call to `miningRate`
+    rate = miningRate(grade);
+
+    // for gem color equal current month – add 5% mining rate bonus
+    if(TimeUtils.monthIndex() == color) {
+      // multiplication by 21 may overflow uint32 in this particular case
+      // since maximum value which `miningRate` may produce is 268103808,
+      // multiplied by 21 is 5630179968 (0x1 4F 95 BA 80)
+      // therefore do division first and multiplication next
+      rate = rate / 20 * 21;
+    }
+
+    // for special gems in range (0xF000, 0x10000)
+    if(gemId > 0xF000 && gemId < 0x10000) {
+      // load special gem mining rate multiplier
+      uint8 percent = specialGemMultipliers[gemId];
+
+      // if multiplier is set (non-zero value)
+      if(percent != 0) {
+        // apply the multiplier
+        // maximum percent value is 255, which means multiplication by 2.55
+        // maximum outcome of this multiplication is 717847946, which fits into uint32
+        rate = rate / 100 * percent;
+      }
+    }
+
+    // return the result
+    return rate;
   }
 
   /**
