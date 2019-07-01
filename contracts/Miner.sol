@@ -250,7 +250,7 @@ contract Miner is AccessMultiSig {
    * @dev Special gems are gems in ID range (0xF000 - 0x10000) – both bounds exclusive
    * @dev maps gemId => mining rate multiplier
    */
-  mapping(uint24 => uint8) specialGemMultipliers;
+  mapping(uint24 => uint8) public specialGemMultipliers;
 
   /**
    * @dev How many minutes of mining (resting) energy it takes
