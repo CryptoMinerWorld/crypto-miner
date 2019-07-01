@@ -90,6 +90,15 @@ module.exports = async function(deployer, network, accounts) {
 				TokenReader:        "0x7c7a04e9cbaa111eb1f893e86a0fa66c613b2fd3",
 				TokenWriter:        "0x7e3e2b28a8b898321512c9a8c7ac5bc5d2d43a69",
 
+				DutchAuction:       "",
+
+				Workshop:           "0x0",
+				SilverSale:         "0x0",
+
+				PlotSale:           "0x0",
+				PlotAntarctica:     "0x0",
+
+				Miner:              "0x0D026d1436758156fade1153EFC13AB42d71b5AD",
 				PlotSaleStartUTC:   1562608800, // 07/08/2019 @ 6:00pm UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
@@ -1050,12 +1059,12 @@ async function writeRefPoints(tracker, writer) {
 	// split CSV data by lines: each line is a record
 	const csv_lines = csv_data.split(/[\r\n]+/);
 	// iterate over array of records
-	for (let i = 0; i < csv_lines.length; i++) {
+	for(let i = 0; i < csv_lines.length; i++) {
 		// extract tracker properties
 		const props = csv_lines[i].split(",").map((a) => a.trim());
 
 		// skip malformed line
-		if (props.length !== 4) {
+		if(props.length !== 4) {
 			continue;
 		}
 
@@ -1074,7 +1083,7 @@ async function writeRefPoints(tracker, writer) {
 	let cumulativeGasUsed = 0;
 
 	// check if ref points are already written
-	if (!await tracker.isKnown(data[0][3])) {
+	if(!await tracker.isKnown(data[0][3])) {
 		// write all the gems and measure gas
 		const gasUsed = (await writer.writeRefPointsData(tracker.address, data.map(packRefData))).receipt.gasUsed;
 
@@ -1186,12 +1195,12 @@ async function writeCountryERC721Data(token, writer) {
 	// split CSV data by lines: each line is a record
 	const csv_lines = csv_data.split(/[\r\n]+/);
 	// iterate over array of records
-	for (let i = 0; i < csv_lines.length; i++) {
+	for(let i = 0; i < csv_lines.length; i++) {
 		// extract token properties
 		const props = csv_lines[i].split(",").map((a) => a.trim());
 
 		// skip malformed line
-		if (props.length !== 2) {
+		if(props.length !== 2) {
 			continue;
 		}
 
@@ -1203,15 +1212,15 @@ async function writeCountryERC721Data(token, writer) {
 	console.log("\t%o of %o tokens parsed", owners.length, csv_lines.length);
 
 	// verify IDs
-	for (let i = 0; i < ids.length; i++) {
-		if (i + 1 != ids[i]) {
+	for(let i = 0; i < ids.length; i++) {
+		if(i + 1 != ids[i]) {
 			console.log("Unexpected token ID! %o at %o", ids[i], i + 1);
 			return;
 		}
 	}
 
 	// grant writer permission to mint countries
-	if ((await token.userRoles(writer.address)).isZero()) {
+	if((await token.userRoles(writer.address)).isZero()) {
 		console.log("granting Writer " + writer.address + " permission to mint CountryERC721 " + token.address);
 		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR);
 	}
@@ -1221,12 +1230,12 @@ async function writeCountryERC721Data(token, writer) {
 
 	// iterate the arrays in bulks
 	const bulkSize = 64;
-	for (let offset = 0; offset < owners.length; offset += bulkSize) {
+	for(let offset = 0; offset < owners.length; offset += bulkSize) {
 		// extract portion of owners array
 		const owners_to_write = owners.slice(offset, offset + bulkSize);
 
 		// check token existence at the offset
-		if (!await token.exists(offset + 1)) {
+		if(!await token.exists(offset + 1)) {
 			// write all the gems and measure gas
 			const gasUsed = (await writer.writeCountryV2Data(token.address, offset, owners_to_write)).receipt.gasUsed;
 
@@ -1240,14 +1249,15 @@ async function writeCountryERC721Data(token, writer) {
 				Math.min(offset + bulkSize, owners.length),
 				gasUsed
 			);
-		} else {
+		}
+		else {
 			// log the message
 			console.log("\t%o token(s) skipped", Math.min(bulkSize, owners.length - offset));
 		}
 	}
 
 	// clean the permissions used
-	if (!(await token.userRoles(writer.address)).isZero()) {
+	if(!(await token.userRoles(writer.address)).isZero()) {
 		console.log("revoking Writer " + writer.address + " permission to mint CountryERC721 " + token.address);
 		await token.updateRole(writer.address, 0);
 	}
@@ -1271,12 +1281,12 @@ async function writeGemERC721Data(token, writer, accounts) {
 	// split CSV data by lines: each line is a record
 	const csv_lines = csv_data.split(/[\r\n]+/);
 	// iterate over array of records
-	for (let i = 0; i < csv_lines.length; i++) {
+	for(let i = 0; i < csv_lines.length; i++) {
 		// extract token properties
 		const props = csv_lines[i].split(",").map((a) => a.trim());
 
 		// skip malformed line
-		if (props.length !== 9) {
+		if(props.length !== 9) {
 			continue;
 		}
 
@@ -1287,42 +1297,42 @@ async function writeGemERC721Data(token, writer, accounts) {
 	}
 	console.log("\t%o of %o token(s) parsed", gems.length, csv_lines.length);
 
-	// grant writer permission to mint gems and set energetic age
-	if ((await token.userRoles(writer.address)).isZero()) {
-		console.log("granting Writer " + writer.address + " permission to mint GemERC721 " + token.address);
-		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
-	}
-
 	// we'll be tracking nonce, yeah!
 	let nonce = await web3.eth.getTransactionCount(accounts[0]);
 	// a place to store pending transactions (promises)
 	const txs = [];
-
 	// track cumulative gas usage
 	let cumulativeGasUsed = 0;
+
+	// grant writer permission to mint gems and set energetic age
+	if((await token.userRoles(writer.address)).isZero()) {
+		console.log("\tgranting Writer %o permission to mint GemERC721 %o, nonce %o",  writer.address, token.address, nonce);
+		txs.push(token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER, {nonce: nonce++}));
+	}
 
 	// now we have all the gems parsed
 	// iterate the arrays in bulks
 	const bulkSize = 50;
-	for (let offset = 0; offset < owners.length; offset += bulkSize) {
+	for(let offset = 0; offset < owners.length; offset += bulkSize) {
 		// extract portion of owners array
 		const owners_to_write = owners.slice(offset, offset + bulkSize);
 		// extract portion of data array
 		const gems_to_write = gems.slice(offset, offset + bulkSize).map(packGemData);
 
 		// check token existence at the offset
-		if (!await token.exists(gems[offset][0])) {
+		if(!await token.exists(gems[offset][0])) {
 			// write all the gems and measure gas
-			console.log("submitting writeBulkGemV2Data(%o items, offset %o, {nonce: %o})", owners_to_write.length, offset, nonce);
+			console.log("\twriting %o items at offset %o, nonce %o", owners_to_write.length, offset, nonce);
 			txs.push(writer.writeBulkGemV2Data(token.address, owners_to_write, gems_to_write, {nonce: nonce++}));
-		} else {
+		}
+		else {
 			// log the message
 			console.log("\t%o token(s) skipped", Math.min(bulkSize, owners.length - offset));
 		}
 	}
-	console.log("waiting for %o transactions to complete", txs.length);
+	console.log("\twaiting for %o transactions to complete", txs.length);
 	// wait for all pending transactions and gather results
-	if (txs.length > 0) {
+	if(txs.length > 0) {
 		(await Promise.all(txs)).forEach((tx) => {
 			// measure gas used
 			const gasUsed = tx.receipt.gasUsed;
@@ -1331,18 +1341,13 @@ async function writeGemERC721Data(token, writer, accounts) {
 			cumulativeGasUsed += gasUsed;
 
 			// log the result
-			console.log(
-				"\t%o token(s) written (%o total): %o gas used",
-				Math.min(bulkSize, owners.length - offset),
-				Math.min(offset + bulkSize, owners.length),
-				gasUsed
-			);
+			console.log("\ttransaction complete, %o gas used", gasUsed);
 		});
 	}
 
-	// clean the permissions used
-	if (!(await token.userRoles(writer.address)).isZero()) {
-		console.log("revoking Writer " + writer.address + " permission to mint GemERC721 " + token.address);
+	// clean the permissions used - sync mode
+	if(!(await token.userRoles(writer.address)).isZero()) {
+		console.log("\trevoking Writer %o permission to mint GemERC721 %o", writer.address, token.address);
 		await token.updateRole(writer.address, 0);
 	}
 
