@@ -217,7 +217,7 @@ module.exports = async function(deployer, network, accounts) {
 			await migrateRefPointsTracker(instances);
 		}
 		if(conf.optionalPhases.migration.CountryERC721) {
-			await migrateCountryERC721(instances);
+			await migrateCountryERC721(accounts, instances);
 		}
 		if(conf.optionalPhases.migration.GemERC721) {
 			await migrateGemERC721(accounts, instances);
@@ -651,13 +651,13 @@ async function migrateRefPointsTracker(instances) {
 	console.log("optional phase [migrate RefPointsTracker] data");
 }
 
-async function migrateCountryERC721(instances) {
+async function migrateCountryERC721(accounts, instances) {
 	console.log("optional phase: migrate CountryERC721 data");
 
 	// redefine instances links
 	const token = instances.CountryERC721;
 	const writer = instances.TokenWriter;
-	await writeCountryERC721Data(token, writer);
+	await writeCountryERC721Data(token, writer, accounts);
 
 	console.log("optional phase [migrate CountryERC721 data] complete");
 }
@@ -1181,7 +1181,7 @@ async function writeKnownAddresses(tracker, writer) {
 }
 
 // aux function to write CountryERC721 data
-async function writeCountryERC721Data(token, writer) {
+async function writeCountryERC721Data(token, writer, accounts) {
 	// CSV header
 	const csv_header = "tokenId,owner";
 	// read CSV data
@@ -1219,14 +1219,18 @@ async function writeCountryERC721Data(token, writer) {
 		}
 	}
 
-	// grant writer permission to mint countries
-	if((await token.userRoles(writer.address)).isZero()) {
-		console.log("granting Writer " + writer.address + " permission to mint CountryERC721 " + token.address);
-		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR);
-	}
-
+	// we'll be tracking nonce, yeah!
+	let nonce = await web3.eth.getTransactionCount(accounts[0]);
+	// a place to store pending transactions (promises)
+	const txs = [];
 	// track cumulative gas usage
 	let cumulativeGasUsed = 0;
+
+	// grant writer permission to mint countries
+	if((await token.userRoles(writer.address)).isZero()) {
+		console.log("\tgranting Writer %o permission to mint CountryERC721 %o, nonce %o", writer.address, token.address, nonce);
+		txs.push(token.updateRole(writer.address, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
+	}
 
 	// iterate the arrays in bulks
 	const bulkSize = 64;
@@ -1236,19 +1240,9 @@ async function writeCountryERC721Data(token, writer) {
 
 		// check token existence at the offset
 		if(!await token.exists(offset + 1)) {
-			// write all the gems and measure gas
-			const gasUsed = (await writer.writeCountryV2Data(token.address, offset, owners_to_write)).receipt.gasUsed;
-
-			// update cumulative gas used
-			cumulativeGasUsed += gasUsed;
-
-			// log the result
-			console.log(
-				"\t%o token(s) written (%o total): %o gas used",
-				Math.min(bulkSize, owners.length - offset),
-				Math.min(offset + bulkSize, owners.length),
-				gasUsed
-			);
+			// schedule writing all the tokens
+			console.log("\twriting %o tokens at offset %o, nonce %o", owners_to_write.length, offset, nonce);
+			txs.push(writer.writeCountryV2Data(token.address, offset, owners_to_write, {nonce: nonce++}));
 		}
 		else {
 			// log the message
@@ -1256,9 +1250,24 @@ async function writeCountryERC721Data(token, writer) {
 		}
 	}
 
+	console.log("\twaiting for %o transactions to complete", txs.length);
+	// wait for all pending transactions and gather results
+	if(txs.length > 0) {
+		(await Promise.all(txs)).forEach((tx) => {
+			// measure gas used
+			const gasUsed = tx.receipt.gasUsed;
+
+			// update cumulative gas used
+			cumulativeGasUsed += gasUsed;
+
+			// log the result
+			console.log("\ttransaction complete, %o gas used", gasUsed);
+		});
+	}
+
 	// clean the permissions used
 	if(!(await token.userRoles(writer.address)).isZero()) {
-		console.log("revoking Writer " + writer.address + " permission to mint CountryERC721 " + token.address);
+		console.log("\trevoking Writer %o permission to mint CountryERC721 %o", writer.address, token.address);
 		await token.updateRole(writer.address, 0);
 	}
 
@@ -1321,8 +1330,8 @@ async function writeGemERC721Data(token, writer, accounts) {
 
 		// check token existence at the offset
 		if(!await token.exists(gems[offset][0])) {
-			// write all the gems and measure gas
-			console.log("\twriting %o items at offset %o, nonce %o", owners_to_write.length, offset, nonce);
+			// schedule writing all the tokens
+			console.log("\twriting %o tokens at offset %o, nonce %o", owners_to_write.length, offset, nonce);
 			txs.push(writer.writeBulkGemV2Data(token.address, owners_to_write, gems_to_write, {nonce: nonce++}));
 		}
 		else {
