@@ -648,89 +648,7 @@ async function migrateCountryERC721(instances) {
 	// redefine instances links
 	const token = instances.CountryERC721;
 	const writer = instances.TokenWriter;
-
-	// CSV header
-	const csv_header = "tokenId,owner";
-	// read CSV data
-	const csv_data = read_csv("./data/countries.csv", csv_header);
-	console.log("\t%o bytes CSV data read from countries.csv", csv_data.length);
-
-	// define arrays to store the data
-	const owners = [];
-	const ids = [];
-
-	// split CSV data by lines: each line is a record
-	const csv_lines = csv_data.split(/[\r\n]+/);
-	// iterate over array of records
-	for(let i = 0; i < csv_lines.length; i++) {
-		// extract token properties
-		const props = csv_lines[i].split(",").map((a) => a.trim());
-
-		// skip malformed line
-		if(props.length !== 2) {
-			continue;
-		}
-
-		// add token ID
-		ids.push(props[0]);
-		// add owner
-		owners.push(props[1]);
-	}
-	console.log("\t%o of %o tokens parsed", owners.length, csv_lines.length);
-
-	// verify IDs
-	for(let i = 0; i < ids.length; i++) {
-		if(i + 1 != ids[i]) {
-			console.log("Unexpected token ID! %o at %o", ids[i], i + 1);
-			return;
-		}
-	}
-
-	// grant writer permission to mint countries
-	if((await token.userRoles(writer.address)).isZero()) {
-		console.log("granting Writer " + writer.address + " permission to mint CountryERC721 " + token.address);
-		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR);
-	}
-
-	// track cumulative gas usage
-	let cumulativeGasUsed = 0;
-
-	// iterate the arrays in bulks
-	const bulkSize = 64;
-	for(let offset = 0; offset < owners.length; offset += bulkSize) {
-		// extract portion of owners array
-		const owners_to_write = owners.slice(offset, offset + bulkSize);
-
-		// check token existence at the offset
-		if(!await token.exists(offset + 1)) {
-			// write all the gems and measure gas
-			const gasUsed = (await writer.writeCountryV2Data(token.address, offset, owners_to_write)).receipt.gasUsed;
-
-			// update cumulative gas used
-			cumulativeGasUsed += gasUsed;
-
-			// log the result
-			console.log(
-				"\t%o token(s) written (%o total): %o gas used",
-				Math.min(bulkSize, owners.length - offset),
-				Math.min(offset + bulkSize, owners.length),
-				gasUsed
-			);
-		}
-		else {
-			// log the message
-			console.log("\t%o token(s) skipped", Math.min(bulkSize, owners.length - offset));
-		}
-	}
-
-	// clean the permissions used
-	if(!(await token.userRoles(writer.address)).isZero()) {
-		console.log("revoking Writer " + writer.address + " permission to mint CountryERC721 " + token.address);
-		await token.updateRole(writer.address, 0);
-	}
-
-	// print the cumulative gas usage result
-	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
+	await writeCountryERC721Data(token, writer);
 
 	console.log("optional phase [migrate CountryERC721 data] complete");
 }
@@ -1250,6 +1168,91 @@ async function writeKnownAddresses(tracker, writer) {
 	}
 
 	// log the result
+	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
+}
+
+// aux function to write CountryERC721 data
+async function writeCountryERC721Data(token, writer) {
+	// CSV header
+	const csv_header = "tokenId,owner";
+	// read CSV data
+	const csv_data = read_csv("./data/countries.csv", csv_header);
+	console.log("\t%o bytes CSV data read from countries.csv", csv_data.length);
+
+	// define arrays to store the data
+	const owners = [];
+	const ids = [];
+
+	// split CSV data by lines: each line is a record
+	const csv_lines = csv_data.split(/[\r\n]+/);
+	// iterate over array of records
+	for (let i = 0; i < csv_lines.length; i++) {
+		// extract token properties
+		const props = csv_lines[i].split(",").map((a) => a.trim());
+
+		// skip malformed line
+		if (props.length !== 2) {
+			continue;
+		}
+
+		// add token ID
+		ids.push(props[0]);
+		// add owner
+		owners.push(props[1]);
+	}
+	console.log("\t%o of %o tokens parsed", owners.length, csv_lines.length);
+
+	// verify IDs
+	for (let i = 0; i < ids.length; i++) {
+		if (i + 1 != ids[i]) {
+			console.log("Unexpected token ID! %o at %o", ids[i], i + 1);
+			return;
+		}
+	}
+
+	// grant writer permission to mint countries
+	if ((await token.userRoles(writer.address)).isZero()) {
+		console.log("granting Writer " + writer.address + " permission to mint CountryERC721 " + token.address);
+		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR);
+	}
+
+	// track cumulative gas usage
+	let cumulativeGasUsed = 0;
+
+	// iterate the arrays in bulks
+	const bulkSize = 64;
+	for (let offset = 0; offset < owners.length; offset += bulkSize) {
+		// extract portion of owners array
+		const owners_to_write = owners.slice(offset, offset + bulkSize);
+
+		// check token existence at the offset
+		if (!await token.exists(offset + 1)) {
+			// write all the gems and measure gas
+			const gasUsed = (await writer.writeCountryV2Data(token.address, offset, owners_to_write)).receipt.gasUsed;
+
+			// update cumulative gas used
+			cumulativeGasUsed += gasUsed;
+
+			// log the result
+			console.log(
+				"\t%o token(s) written (%o total): %o gas used",
+				Math.min(bulkSize, owners.length - offset),
+				Math.min(offset + bulkSize, owners.length),
+				gasUsed
+			);
+		} else {
+			// log the message
+			console.log("\t%o token(s) skipped", Math.min(bulkSize, owners.length - offset));
+		}
+	}
+
+	// clean the permissions used
+	if (!(await token.userRoles(writer.address)).isZero()) {
+		console.log("revoking Writer " + writer.address + " permission to mint CountryERC721 " + token.address);
+		await token.updateRole(writer.address, 0);
+	}
+
+	// print the cumulative gas usage result
 	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 }
 
