@@ -1008,7 +1008,7 @@ async function waitForAll(txs) {
 }
 
 // all ERC20 tokens have same processing logic, only CSV file name differs
-async function processERC20Data(file_name, token, writer) {
+async function processERC20Data(file_name, token, writer, accounts) {
 	// CSV header
 	const csv_header = "address,amount";
 	// read CSV data
@@ -1035,38 +1035,35 @@ async function processERC20Data(file_name, token, writer) {
 	}
 	console.log("\t%o of %o records parsed", data.length, csv_lines.length);
 
+	// we'll be tracking nonce, yeah!
+	let nonce = await web3.eth.getTransactionCount(accounts[0]);
+	// a place to store pending transactions (promises)
+	const txs = [];
+
 	// grant writer permission to mint gems and set energetic age
 	if((await token.userRoles(writer.address)).isZero()) {
-		console.log("granting Writer " + writer.address + " permission to mint ERC20 token " + token.address);
-		await token.updateRole(writer.address, ROLE_TOKEN_CREATOR);
+		console.log("granting Writer %o permission to mint ERC20 token %o", writer.address, token.address);
+		txs.push(token.updateRole(writer.address, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
 	}
-
-	// track cumulative gas usage
-	let cumulativeGasUsed = 0;
 
 	// check if tokens are already written
 	if((await token.balanceOf(data[0][0])).isZero()) {
-		// write all the data in a single transaction
-		const gasUsed = (await writer.writeERC20Data(token.address, data.map(packERC20Data))).receipt.gasUsed;
-
-		// update cumulative gas used
-		cumulativeGasUsed += gasUsed;
-
-		// log the result
-		console.log("\t%o record(s) written: %o gas used", data.length, gasUsed);
+		// schedule writing all token ownerships
+		console.log("\twriting %o token ownerships, nonce %o", data.length, nonce);
+		txs.push(writer.writeERC20Data(token.address, data.map(packERC20Data), {nonce: nonce++}));
 	}
 	else {
 		console.log("\t%o record(s) skipped", data.length);
 	}
 
+	// wait for all transactions to complete and output gas usage
+	await waitForAll(txs);
+
 	// clean the permissions used
 	if(!(await token.userRoles(writer.address)).isZero()) {
-		console.log("revoking Writer " + writer.address + " permission to mint ERC20 token " + token.address);
+		console.log("revoking Writer %o permission to mint ERC20 token %o", writer.address, token.address);
 		await token.updateRole(writer.address, 0);
 	}
-
-	// log the result
-	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 }
 
 // aux function to write referral points data
