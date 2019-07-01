@@ -983,6 +983,30 @@ function packGemData(p) {
 	return p[0].shln(24).or(p[1]).shln(8).or(p[2]).shln(8).or(p[3]).shln(32).or(p[4]).shln(32).or(p[7]);
 }
 
+// waits for all transactions in the array and outputs gas usage stats
+async function waitForAll(txs) {
+	// track cumulative gas usage
+	let cumulativeGasUsed = 0;
+
+	console.log("\twaiting for %o transactions to complete", txs.length);
+	// wait for all pending transactions and gather results
+	if(txs.length > 0) {
+		(await Promise.all(txs)).forEach((tx) => {
+			// measure gas used
+			const gasUsed = tx.receipt.gasUsed;
+
+			// update cumulative gas used
+			cumulativeGasUsed += gasUsed;
+
+			// log the result
+			console.log("\ttransaction complete, %o gas used", gasUsed);
+		});
+	}
+
+	// log cumulative gas used
+	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
+}
+
 // all ERC20 tokens have same processing logic, only CSV file name differs
 async function processERC20Data(file_name, token, writer) {
 	// CSV header
@@ -1046,7 +1070,7 @@ async function processERC20Data(file_name, token, writer) {
 }
 
 // aux function to write referral points data
-async function writeRefPoints(tracker, writer) {
+async function writeRefPoints(tracker, writer, accounts) {
 	// CSV header
 	const csv_header = "issued,consumed,available,address";
 	// read CSV data
@@ -1073,41 +1097,39 @@ async function writeRefPoints(tracker, writer) {
 	}
 	console.log("\t%o of %o records parsed", data.length, csv_lines.length);
 
+	// we'll be tracking nonce, yeah!
+	let nonce = await web3.eth.getTransactionCount(accounts[0]);
+	// a place to store pending transactions (promises)
+	const txs = [];
+
 	// grant writer permission to issue and consume referral points
 	if((await tracker.userRoles(writer.address)).isZero()) {
-		console.log("granting Writer " + writer.address + " permission to update RefPointsTracker " + tracker.address);
-		await tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
+		console.log("granting Writer %o permission to update RefPointsTracker %o, nonce %o", writer.address, tracker.address, nonce);
+		txs.push(tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER, {nonce: nonce++}));
 	}
-
-	// track cumulative gas usage
-	let cumulativeGasUsed = 0;
 
 	// check if ref points are already written
 	if(!await tracker.isKnown(data[0][3])) {
-		// write all the gems and measure gas
-		const gasUsed = (await writer.writeRefPointsData(tracker.address, data.map(packRefData))).receipt.gasUsed;
-
-		// update cumulative gas used
-		cumulativeGasUsed += gasUsed;
-
-		// log the result
-		console.log("\t%o record(s) written: %o gas used", data.length, gasUsed);
+		// schedule writing all ref points
+		console.log("\twriting %o ref points, nonce %o", data.length, nonce);
+		txs.push(writer.writeRefPointsData(tracker.address, data.map(packRefData), {nonce: nonce++}));
 	}
 	else {
 		console.log("\t%o record(s) skipped", data.length);
 	}
-	// clean the permissions used
+
+	// wait for all transactions to complete and output gas usage
+	await waitForAll(txs);
+
+	// clean the permissions used - sync mode
 	if(!(await tracker.userRoles(writer.address)).isZero()) {
-		console.log("revoking Writer " + writer.address + " permission to update RefPointsTracker " + tracker.address);
+		console.log("revoking Writer %o permission to update RefPointsTracker %o", writer.addres, tracker.address);
 		await tracker.updateRole(writer.address, 0);
 	}
-
-	// log cumulative gas used
-	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 }
 
 // aux function to write referral points data
-async function writeKnownAddresses(tracker, writer) {
+async function writeKnownAddresses(tracker, writer, accounts) {
 	// CSV header
 	const csv_header = "issued,consumed,available,address";
 	// read CSV data
@@ -1134,15 +1156,15 @@ async function writeKnownAddresses(tracker, writer) {
 	}
 	console.log("\t%o of %o records parsed", data.length, csv_lines.length);
 
+	// we'll be tracking nonce, yeah!
+	let nonce = await web3.eth.getTransactionCount(accounts[0]);
+	// a place to store pending transactions (promises)
+	const txs = [];
 	// grant writer permission to add known addresses
 	if((await tracker.userRoles(writer.address)).isZero()) {
-		console.log("granting Writer " + writer.address + " permission to update RefPointsTracker " + tracker.address);
-		await tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
+		console.log("\tgranting Writer %o permission to update RefPointsTracker %o, nonce %o", writer.address, tracker.address);
+		txs.push(tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER, {nonce: nonce++}));
 	}
-
-
-	// track cumulative gas usage
-	let cumulativeGasUsed = 0;
 
 	// iterate the arrays in bulks
 	const bulkSize = 100;
@@ -1152,32 +1174,23 @@ async function writeKnownAddresses(tracker, writer) {
 
 		// check if ref points are already written
 		if(!await tracker.isKnown(data[offset][3])) {
-			// write all the gems and measure gas
-			const gasUsed = (await writer.writeKnownAddrData(tracker.address, data_to_write)).receipt.gasUsed;
-
-			// update cumulative gas used
-			cumulativeGasUsed += gasUsed;
-
-			// log the result
-			console.log(
-				"\t%o record(s) written (%o total): %o gas used",
-				Math.min(bulkSize, data.length - offset),
-				Math.min(offset + bulkSize, data.length),
-				gasUsed
-			);
+			// schedule writing all the known addresses
+			console.log("\twriting %o known addresses at offset %o, nonce %o", data_to_write.length, offset, nonce);
+			txs.push(writer.writeKnownAddrData(tracker.address, data_to_write, {nonce: nonce++}));
 		}
 		else {
 			console.log("\t%o record(s) skipped", Math.min(bulkSize, data.length - offset));
 		}
 	}
-	// clean the permissions used
+
+	// wait for all transactions to complete and output gas usage
+	await waitForAll(txs);
+
+	// clean the permissions used - sync mode
 	if(!(await tracker.userRoles(writer.address)).isZero()) {
-		console.log("revoking Writer " + writer.address + " permission to update RefPointsTracker " + tracker.address);
+		console.log("\trevoking Writer %o permission to update RefPointsTracker %o", writer.address, tracker.address);
 		await tracker.updateRole(writer.address, 0);
 	}
-
-	// log the result
-	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 }
 
 // aux function to write CountryERC721 data
@@ -1223,8 +1236,6 @@ async function writeCountryERC721Data(token, writer, accounts) {
 	let nonce = await web3.eth.getTransactionCount(accounts[0]);
 	// a place to store pending transactions (promises)
 	const txs = [];
-	// track cumulative gas usage
-	let cumulativeGasUsed = 0;
 
 	// grant writer permission to mint countries
 	if((await token.userRoles(writer.address)).isZero()) {
@@ -1250,29 +1261,14 @@ async function writeCountryERC721Data(token, writer, accounts) {
 		}
 	}
 
-	console.log("\twaiting for %o transactions to complete", txs.length);
-	// wait for all pending transactions and gather results
-	if(txs.length > 0) {
-		(await Promise.all(txs)).forEach((tx) => {
-			// measure gas used
-			const gasUsed = tx.receipt.gasUsed;
+	// wait for all transactions to complete and output gas usage
+	await waitForAll(txs);
 
-			// update cumulative gas used
-			cumulativeGasUsed += gasUsed;
-
-			// log the result
-			console.log("\ttransaction complete, %o gas used", gasUsed);
-		});
-	}
-
-	// clean the permissions used
+	// clean the permissions used - sync mode
 	if(!(await token.userRoles(writer.address)).isZero()) {
 		console.log("\trevoking Writer %o permission to mint CountryERC721 %o", writer.address, token.address);
 		await token.updateRole(writer.address, 0);
 	}
-
-	// print the cumulative gas usage result
-	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 }
 
 // aux function to write GemERC721 data
@@ -1310,8 +1306,6 @@ async function writeGemERC721Data(token, writer, accounts) {
 	let nonce = await web3.eth.getTransactionCount(accounts[0]);
 	// a place to store pending transactions (promises)
 	const txs = [];
-	// track cumulative gas usage
-	let cumulativeGasUsed = 0;
 
 	// grant writer permission to mint gems and set energetic age
 	if((await token.userRoles(writer.address)).isZero()) {
@@ -1339,29 +1333,15 @@ async function writeGemERC721Data(token, writer, accounts) {
 			console.log("\t%o token(s) skipped", Math.min(bulkSize, owners.length - offset));
 		}
 	}
-	console.log("\twaiting for %o transactions to complete", txs.length);
-	// wait for all pending transactions and gather results
-	if(txs.length > 0) {
-		(await Promise.all(txs)).forEach((tx) => {
-			// measure gas used
-			const gasUsed = tx.receipt.gasUsed;
 
-			// update cumulative gas used
-			cumulativeGasUsed += gasUsed;
-
-			// log the result
-			console.log("\ttransaction complete, %o gas used", gasUsed);
-		});
-	}
+	// wait for all transactions to complete and output gas usage
+	await waitForAll(txs);
 
 	// clean the permissions used - sync mode
 	if(!(await token.userRoles(writer.address)).isZero()) {
 		console.log("\trevoking Writer %o permission to mint GemERC721 %o", writer.address, token.address);
 		await token.updateRole(writer.address, 0);
 	}
-
-	// print the cumulative gas usage result
-	console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
 }
 
 
