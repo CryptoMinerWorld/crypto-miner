@@ -90,7 +90,9 @@ module.exports = async function(deployer, network, accounts) {
 				TokenReader:        "0x7c7a04e9cbaa111eb1f893e86a0fa66c613b2fd3",
 				TokenWriter:        "0x7e3e2b28a8b898321512c9a8c7ac5bc5d2d43a69",
 
-				DutchAuction:       "",
+				DutchAuction:       "0x2e55de1e33071415a75986e16529b146cfa50b1d",
+
+				RefPointsTracker:   "0x3263B47eE9D7Ce7d3f9F8A42C9804Ab03e7A0F60",
 
 				Workshop:           "0x0",
 				SilverSale:         "0x0",
@@ -199,22 +201,27 @@ module.exports = async function(deployer, network, accounts) {
 	// an object to contain all ABI linked instances to the addresses above
 	const instances = {};
 
+	// config validation
+	if(!conf.FoundersPlots && network.indexOf("mainnet") >= 0) {
+		throw "FoundersPlots must be defined for mainnet! Cannot use FoundersPlotsMock for mainnet.";
+	}
+
 	// execute mandatory phase to make sure the deployment is complete
 	await deployInstances(deployer, conf, instances);
 
 	// execute optional phases required one by one
 	if(conf.optionalPhases.writeSilverSaleCoupons) {
-		await writeSilverSaleCoupons(network, instances);
+		await writeSilverSaleCoupons(network, accounts, instances);
 	}
 	if(conf.optionalPhases.migration) {
 		if(conf.optionalPhases.migration.SilverERC20) {
-			await migrateSilverERC20(instances);
+			await migrateSilverERC20(accounts, instances);
 		}
 		if(conf.optionalPhases.migration.GoldERC20) {
-			await migrateGoldERC20(instances);
+			await migrateGoldERC20(accounts, instances);
 		}
 		if(conf.optionalPhases.migration.RefPointsTracker) {
-			await migrateRefPointsTracker(instances);
+			await migrateRefPointsTracker(accounts, instances);
 		}
 		if(conf.optionalPhases.migration.CountryERC721) {
 			await migrateCountryERC721(accounts, instances);
@@ -232,10 +239,21 @@ module.exports = async function(deployer, network, accounts) {
 };
 
 async function deployInstances(deployer, conf, instances) {
-	let deployedInstancesCounter = 0;
-
 	// deploy all missing instances first, healing the missing parts of the config
 	console.log("mandatory phase: config healing (deploy missing instances)");
+
+	// a place to store pending transactions (promises)
+	const txs = [];
+
+	// FoundersPlots binding/deployment
+	if(conf.FoundersPlots) {
+		console.log("binding FoundersPlots to " + conf.FoundersPlots);
+		instances.FoundersPlots = await FoundersPlots.at(conf.FoundersPlots);
+	}
+	else {
+		console.log("deploying FoundersPlotsMock to be used as FoundersPlots");
+		txs.push(deployer.deploy(FoundersPlots));
+	}
 
 	// BalanceProxy binding/deployment
 	if(conf.BalanceProxy) {
@@ -244,10 +262,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying BalanceProxy");
-		await deployer.deploy(BalanceProxy);
-		instances.BalanceProxy = await BalanceProxy.deployed();
-		conf.BalanceProxy = instances.BalanceProxy.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(BalanceProxy));
 	}
 
 	// TokenHelper binding/deployment
@@ -257,10 +272,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying TokenHelper");
-		await deployer.deploy(TokenHelper);
-		instances.TokenHelper = await TokenHelper.deployed();
-		conf.TokenHelper = instances.TokenHelper.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(TokenHelper));
 	}
 
 	// TokenReader binding/deployment
@@ -270,10 +282,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying TokenReader");
-		await deployer.deploy(TokenReader);
-		instances.TokenReader = await TokenReader.deployed();
-		conf.TokenReader = instances.TokenReader.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(TokenReader));
 	}
 
 	// TokenWriter binding/deployment
@@ -283,10 +292,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying TokenWriter");
-		await deployer.deploy(TokenWriter);
-		instances.TokenWriter = await TokenWriter.deployed();
-		conf.TokenWriter = instances.TokenWriter.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(TokenWriter));
 	}
 
 	// DutchAuction binding/deployment
@@ -296,10 +302,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying DutchAuction");
-		await deployer.deploy(DutchAuction);
-		instances.DutchAuction = await DutchAuction.deployed();
-		conf.DutchAuction = instances.DutchAuction.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(DutchAuction));
 	}
 
 	// RefPointsTracker binding/deployment
@@ -309,10 +312,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying RefPointsTracker");
-		await deployer.deploy(RefPointsTracker);
-		instances.RefPointsTracker = await RefPointsTracker.deployed();
-		conf.RefPointsTracker = instances.RefPointsTracker.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(RefPointsTracker));
 	}
 
 	// ArtifactERC20 binding/deployment
@@ -322,10 +322,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying ArtifactERC20");
-		await deployer.deploy(ArtifactERC20);
-		instances.ArtifactERC20 = await ArtifactERC20.deployed();
-		conf.ArtifactERC20 = instances.ArtifactERC20.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(ArtifactERC20));
 	}
 
 	// FoundersKeyERC20 binding/deployment
@@ -335,10 +332,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying FoundersKeyERC20");
-		await deployer.deploy(FoundersKeyERC20);
-		instances.FoundersKeyERC20 = await FoundersKeyERC20.deployed();
-		conf.FoundersKeyERC20 = instances.FoundersKeyERC20.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(FoundersKeyERC20));
 	}
 
 	// ChestKeyERC20 binding/deployment
@@ -348,10 +342,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying ChestKeyERC20");
-		await deployer.deploy(ChestKeyERC20);
-		instances.ChestKeyERC20 = await ChestKeyERC20.deployed();
-		conf.ChestKeyERC20 = instances.ChestKeyERC20.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(ChestKeyERC20));
 	}
 
 	// SilverERC20 binding/deployment
@@ -361,10 +352,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying SilverERC20");
-		await deployer.deploy(SilverERC20);
-		instances.SilverERC20 = await SilverERC20.deployed();
-		conf.SilverERC20 = instances.SilverERC20.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(SilverERC20));
 	}
 
 	// GoldERC20 binding/deployment
@@ -374,10 +362,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying GoldERC20");
-		await deployer.deploy(GoldERC20);
-		instances.GoldERC20 = await GoldERC20.deployed();
-		conf.GoldERC20 = instances.GoldERC20.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(GoldERC20));
 	}
 
 	// CountryERC721 binding/deployment
@@ -387,10 +372,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying CountryERC721");
-		await deployer.deploy(CountryERC721, COUNTRY_DATA);
-		instances.CountryERC721 = await CountryERC721.deployed();
-		conf.CountryERC721 = instances.CountryERC721.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(CountryERC721, COUNTRY_DATA));
 	}
 
 	// PlotERC721 binding/deployment
@@ -400,10 +382,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying PlotERC721");
-		await deployer.deploy(PlotERC721);
-		instances.PlotERC721 = await PlotERC721.deployed();
-		conf.PlotERC721 = instances.PlotERC721.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(PlotERC721));
 	}
 
 	// GemERC721 binding/deployment
@@ -413,10 +392,72 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying GemERC721");
-		await deployer.deploy(GemERC721);
+		txs.push(deployer.deploy(GemERC721));
+	}
+
+	// wait for all transactions to complete and output gas usage
+	await waitForAll(txs);
+
+	// link newly deployed instances
+	if(!conf.FoundersPlots) {
+		instances.FoundersPlots = await FoundersPlots.deployed();
+		conf.FoundersPlots = instances.FoundersPlots.address;
+	}
+	if(!conf.BalanceProxy) {
+		instances.BalanceProxy = await BalanceProxy.deployed();
+		conf.BalanceProxy = instances.BalanceProxy.address;
+	}
+	if(!conf.TokenHelper) {
+		instances.TokenHelper = await TokenHelper.deployed();
+		conf.TokenHelper = instances.TokenHelper.address;
+	}
+	if(!conf.TokenReader) {
+		instances.TokenReader = await TokenReader.deployed();
+		conf.TokenReader = instances.TokenReader.address;
+	}
+	if(!conf.TokenWriter) {
+		instances.TokenWriter = await TokenWriter.deployed();
+		conf.TokenWriter = instances.TokenWriter.address;
+	}
+	if(!conf.DutchAuction) {
+		instances.DutchAuction = await DutchAuction.deployed();
+		conf.DutchAuction = instances.DutchAuction.address;
+	}
+	if(!conf.RefPointsTracker) {
+		instances.RefPointsTracker = await RefPointsTracker.deployed();
+		conf.RefPointsTracker = instances.RefPointsTracker.address;
+	}
+	if(!conf.ArtifactERC20) {
+		instances.ArtifactERC20 = await ArtifactERC20.deployed();
+		conf.ArtifactERC20 = instances.ArtifactERC20.address;
+	}
+	if(!conf.FoundersKeyERC20) {
+		instances.FoundersKeyERC20 = await FoundersKeyERC20.deployed();
+		conf.FoundersKeyERC20 = instances.FoundersKeyERC20.address;
+	}
+	if(!conf.ChestKeyERC20) {
+		instances.ChestKeyERC20 = await ChestKeyERC20.deployed();
+		conf.ChestKeyERC20 = instances.ChestKeyERC20.address;
+	}
+	if(!conf.SilverERC20) {
+		instances.SilverERC20 = await SilverERC20.deployed();
+		conf.SilverERC20 = instances.SilverERC20.address;
+	}
+	if(!conf.GoldERC20) {
+		instances.GoldERC20 = await GoldERC20.deployed();
+		conf.GoldERC20 = instances.GoldERC20.address;
+	}
+	if(!conf.CountryERC721) {
+		instances.CountryERC721 = await CountryERC721.deployed();
+		conf.CountryERC721 = instances.CountryERC721.address;
+	}
+	if(!conf.PlotERC721) {
+		instances.PlotERC721 = await PlotERC721.deployed();
+		conf.PlotERC721 = instances.PlotERC721.address;
+	}
+	if(!conf.GemERC721) {
 		instances.GemERC721 = await GemERC721.deployed();
 		conf.GemERC721 = instances.GemERC721.address;
-		deployedInstancesCounter++;
 	}
 
 	// Workshop binding/deployment
@@ -426,10 +467,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying Workshop");
-		await deployer.deploy(Workshop, conf.GemERC721, conf.SilverERC20, conf.GoldERC20);
-		instances.Workshop = await Workshop.deployed();
-		conf.Workshop = instances.Workshop.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(Workshop, conf.GemERC721, conf.SilverERC20, conf.GoldERC20));
 	}
 
 	// SilverSale binding/deployment
@@ -439,7 +477,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying SilverSale");
-		await deployer.deploy(
+		txs.push(deployer.deploy(
 			SilverSale,
 			conf.RefPointsTracker,
 			conf.SilverERC20,
@@ -447,10 +485,7 @@ async function deployInstances(deployer, conf, instances) {
 			conf.FoundersChest,
 			conf.Beneficiary,
 			conf.SilverSaleStartUTC,
-		);
-		instances.SilverSale = await SilverSale.deployed();
-		conf.SilverSale = instances.SilverSale.address;
-		deployedInstancesCounter++;
+		));
 	}
 
 	// PlotSale binding/deployment
@@ -460,7 +495,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying PlotSale");
-		await deployer.deploy(
+		txs.push(deployer.deploy(
 			PlotSale,
 			conf.RefPointsTracker,
 			conf.CountryERC721,
@@ -469,23 +504,7 @@ async function deployInstances(deployer, conf, instances) {
 			conf.MonthlyChest,
 			conf.Beneficiary,
 			conf.PlotSaleStartUTC,
-		);
-		instances.PlotSale = await PlotSale.deployed();
-		conf.PlotSale = instances.PlotSale.address;
-		deployedInstancesCounter++;
-	}
-
-	// FoundersPlots binding/deployment
-	if(conf.FoundersPlots) {
-		console.log("binding FoundersPlots to " + conf.FoundersPlots);
-		instances.FoundersPlots = await FoundersPlots.at(conf.FoundersPlots);
-	}
-	else {
-		console.log("deploying FoundersPlotsMock to be used as FoundersPlots");
-		await deployer.deploy(FoundersPlots);
-		instances.FoundersPlots = await FoundersPlots.deployed();
-		conf.FoundersPlots = instances.FoundersPlots.address;
-		deployedInstancesCounter++;
+		));
 	}
 
 	// PlotAntarctica binding/deployment
@@ -495,10 +514,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying PlotAntarctica");
-		await deployer.deploy(PlotAntarctica, conf.FoundersPlots, conf.PlotERC721);
-		instances.PlotAntarctica = await PlotAntarctica.deployed();
-		conf.PlotAntarctica = instances.PlotAntarctica.address;
-		deployedInstancesCounter++;
+		txs.push(deployer.deploy(PlotAntarctica, conf.FoundersPlots, conf.PlotERC721));
 	}
 
 	// Miner binding/deployment
@@ -508,7 +524,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying Miner");
-		await deployer.deploy(
+		txs.push(deployer.deploy(
 			Miner,
 			conf.GemERC721,
 			conf.PlotERC721,
@@ -518,22 +534,44 @@ async function deployInstances(deployer, conf, instances) {
 			conf.ArtifactERC20,
 			conf.FoundersKeyERC20,
 			conf.ChestKeyERC20,
-		);
-		instances.Miner = await Miner.deployed();
-		conf.Miner = instances.Miner.address;
-		deployedInstancesCounter++;
+		));
 	}
 
-	console.log("mandatory phase complete, " + deployedInstancesCounter + " config records healed / instances deployed");
+	// wait for all transactions to complete and output gas usage
+	await waitForAll(txs);
+
+	// link newly deployed instances
+	if(!conf.Workshop) {
+		instances.Workshop = await Workshop.deployed();
+		conf.Workshop = instances.Workshop.address;
+	}
+	if(!conf.SilverSale) {
+		instances.SilverSale = await SilverSale.deployed();
+		conf.SilverSale = instances.SilverSale.address;
+	}
+	if(!conf.PlotSale) {
+		instances.PlotSale = await PlotSale.deployed();
+		conf.PlotSale = instances.PlotSale.address;
+	}
+	if(!conf.PlotAntarctica) {
+		instances.PlotAntarctica = await PlotAntarctica.deployed();
+		conf.PlotAntarctica = instances.PlotAntarctica.address;
+	}
+	if(!conf.Miner) {
+		instances.Miner = await Miner.deployed();
+		conf.Miner = instances.Miner.address;
+	}
+
+	console.log("mandatory phase complete, %o config records healed / instances deployed", txs.length);
 
 	// output healed config if any new instances were deployed
-	if(deployedInstancesCounter > 0) {
+	if(txs.length > 0) {
 		console.log("healed config: %o", conf);
 	}
 }
 
 
-async function writeSilverSaleCoupons(network, instances) {
+async function writeSilverSaleCoupons(network, accounts, instances) {
 	console.log("optional phase: write silver sale coupons");
 
 	// redefine instances sale link
@@ -619,25 +657,25 @@ async function writeSilverSaleCoupons(network, instances) {
 }
 
 
-async function migrateSilverERC20(instances) {
+async function migrateSilverERC20(accounts, instances) {
 	console.log("optional phase: migrate SilverERC20 data");
 
 	// process the data for silver
-	await processERC20Data("silver.csv", instances.SilverERC20, instances.TokenWriter);
+	await processERC20Data("silver.csv", instances.SilverERC20, instances.TokenWriter, accounts);
 
 	console.log("optional phase [migrate SilverERC20 data] complete");
 }
 
-async function migrateGoldERC20(instances) {
+async function migrateGoldERC20(accounts, instances) {
 	console.log("optional phase: migrate GoldERC20 data");
 
 	// process the data for gold
-	await processERC20Data("gold.csv", instances.GoldERC20, instances.TokenWriter);
+	await processERC20Data("gold.csv", instances.GoldERC20, instances.TokenWriter, accounts);
 
 	console.log("optional phase [migrate GoldERC20 data] complete");
 }
 
-async function migrateRefPointsTracker(instances) {
+async function migrateRefPointsTracker(accounts, instances) {
 	console.log("optional phase: migrate RefPointsTracker data");
 
 	// redefine instances links
@@ -645,8 +683,8 @@ async function migrateRefPointsTracker(instances) {
 	const writer = instances.TokenWriter;
 
 	// write referral points and known addresses
-	await writeRefPoints(tracker, writer);
-	await writeKnownAddresses(tracker, writer);
+	await writeRefPoints(tracker, writer, accounts);
+	await writeKnownAddresses(tracker, writer, accounts);
 
 	console.log("optional phase [migrate RefPointsTracker] data");
 }
