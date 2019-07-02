@@ -1080,7 +1080,7 @@ async function processERC20Data(file_name, token, writer, accounts) {
 
 	// grant writer permission to mint gems and set energetic age
 	if((await token.userRoles(writer.address)).isZero()) {
-		console.log("granting Writer %o permission to mint ERC20 token %o", writer.address, token.address);
+		console.log("\tgranting Writer %o permission to mint ERC20 token %o", writer.address, token.address);
 		txs.push(token.updateRole(writer.address, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
 	}
 
@@ -1099,7 +1099,7 @@ async function processERC20Data(file_name, token, writer, accounts) {
 
 	// clean the permissions used
 	if(!(await token.userRoles(writer.address)).isZero()) {
-		console.log("revoking Writer %o permission to mint ERC20 token %o", writer.address, token.address);
+		console.log("\trevoking Writer %o permission to mint ERC20 token %o", writer.address, token.address);
 		await token.updateRole(writer.address, 0);
 	}
 }
@@ -1139,7 +1139,7 @@ async function writeRefPoints(tracker, writer, accounts) {
 
 	// grant writer permission to issue and consume referral points
 	if((await tracker.userRoles(writer.address)).isZero()) {
-		console.log("granting Writer %o permission to update RefPointsTracker %o, nonce %o", writer.address, tracker.address, nonce);
+		console.log("\tgranting Writer %o permission to update RefPointsTracker %o, nonce %o", writer.address, tracker.address, nonce);
 		txs.push(tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER, {nonce: nonce++}));
 	}
 
@@ -1158,7 +1158,7 @@ async function writeRefPoints(tracker, writer, accounts) {
 
 	// clean the permissions used - sync mode
 	if(!(await tracker.userRoles(writer.address)).isZero()) {
-		console.log("revoking Writer %o permission to update RefPointsTracker %o", writer.addres, tracker.address);
+		console.log("\trevoking Writer %o permission to update RefPointsTracker %o", writer.address, tracker.address);
 		await tracker.updateRole(writer.address, 0);
 	}
 }
