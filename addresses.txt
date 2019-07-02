@@ -3,7 +3,7 @@
 ==============================================================
 Beneficiary MSIG:   0xe0123204873fD29A29aEf3f99FaF1b1c45fe3B1E
 Founder's Chest:    0xC352f692F55dEf49f0B736Ec1F7CA0F862eabD23
-World Chest:        0xc16c6f45FBA73fBC18e29EaB26732d1621A448c3
+World Chest:        0x29E007c1BFc9c9aA1351B8B3D3B01Cc45dF6Ae4D <- 0xc16c6f45FBA73fBC18e29EaB26732d1621A448c3
 Monthly Chest:      0x2906DA90D3f99D5913bB3461183682951ca7280c
 
 FoundersPlots:      0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1
