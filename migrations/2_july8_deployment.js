@@ -81,7 +81,7 @@ module.exports = async function(deployer, network, accounts) {
 			case "mainnet": return {
 				Beneficiary:        "0xe0123204873fD29A29aEf3f99FaF1b1c45fe3B1E", // Mainnet MSIG
 				FoundersChest:      "0xC352f692F55dEf49f0B736Ec1F7CA0F862eabD23", // Mainnet MSIG
-				WorldChest:         "0xc16c6f45FBA73fBC18e29EaB26732d1621A448c3", // Mainnet MSIG
+				WorldChest:         "0x29E007c1BFc9c9aA1351B8B3D3B01Cc45dF6Ae4D", // Mainnet MSIG
 				MonthlyChest:       "0x2906DA90D3f99D5913bB3461183682951ca7280c", // Mainnet MSIG
 
 				FoundersPlots:      "0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1",
@@ -93,6 +93,7 @@ module.exports = async function(deployer, network, accounts) {
 				DutchAuction:       "0x2e55de1e33071415a75986e16529b146cfa50b1d",
 
 				RefPointsTracker:   "0x3263B47eE9D7Ce7d3f9F8A42C9804Ab03e7A0F60",
+				ArtifactERC20:      "0xe45eb0ce4d02203da6d3f325f325ec0a3399e961",
 
 				Workshop:           "0x0",
 				SilverSale:         "0x0",
@@ -157,6 +158,7 @@ module.exports = async function(deployer, network, accounts) {
 				optionalPhases: {
 					writePlotSaleCoupons: false,
 					writeSilverSaleCoupons: false,
+/*
 					migration: {
 						SilverERC20: true,
 						GoldERC20: true,
@@ -164,7 +166,8 @@ module.exports = async function(deployer, network, accounts) {
 						CountryERC721: true,
 						GemERC721: true,
 					},
-					writeTestTokens: false,
+*/
+					writeTestTokens: true,
 					enablePermissions: true,
 					disablePermissions: false,
 				},
@@ -231,10 +234,10 @@ module.exports = async function(deployer, network, accounts) {
 		}
 	}
 	if(conf.optionalPhases.writeTestTokens) {
-		await mintTestTokens(instances);
+		await mintTestTokens(accounts, instances);
 	}
 	if(conf.optionalPhases.enablePermissions) {
-		await enablePermissions(conf, instances);
+		await enablePermissions(accounts, conf, instances);
 	}
 };
 
@@ -713,7 +716,7 @@ async function migrateGemERC721(accounts, instances) {
 	console.log("optional phase [migrate GemERC721 data] complete");
 }
 
-async function mintTestTokens(instances) {
+async function mintTestTokens(accounts, instances) {
 	console.log("optional phase: mint test tokens");
 
 	// testing addresses
@@ -765,12 +768,17 @@ async function mintTestTokens(instances) {
 		console.log("skipping minting 45 gems – gems already exist");
 	}
 
+	// we'll be tracking nonce, yeah!
+	let nonce = await web3.eth.getTransactionCount(accounts[0]);
+	// a place to store pending transactions (promises)
+	const txs = [];
+
 	// countries - CountryERC721
 	for(let i = 0; i < 3 * testers.length; i++) {
 		const exists = await instances.CountryERC721.exists(190 - i);
 		console.log("%s country %o", (exists? "skipping": "minting"), 190 - i);
 		if(!exists) {
-			await instances.CountryERC721.mint(testers[i % testers.length], 190 - i);
+			txs.push(instances.CountryERC721.mint(testers[i % testers.length], 190 - i, {nonce: nonce++}));
 		}
 	}
 	// plots - PlotERC721
@@ -779,7 +787,7 @@ async function mintTestTokens(instances) {
 		const exists = await instances.PlotERC721.exists(i + 1);
 		console.log("%s Antarctica plot %o", (exists? "skipping": "minting"), i + 1);
 		if(!exists) {
-			await instances.PlotERC721.mint(testers[i % testers.length], 0, "0x0200236464646400");
+			txs.push(instances.PlotERC721.mint(testers[i % testers.length], 0, "0x0200236464646400", {nonce: nonce++}));
 		}
 	}
 	// Rest of the World - 5 tiers
@@ -787,7 +795,7 @@ async function mintTestTokens(instances) {
 		const exists = await instances.PlotERC721.exists(i + 65537);
 		console.log("%s regular plot %o", (exists? "skipping": "minting"), i + 65537);
 		if(!exists) {
-			await instances.PlotERC721.mint(testers[i % testers.length], 1, "0x05002341555F6400");
+			txs.push(instances.PlotERC721.mint(testers[i % testers.length], 1, "0x05002341555F6400", {nonce: nonce++}));
 		}
 	}
 
@@ -799,35 +807,35 @@ async function mintTestTokens(instances) {
 		exists = !(await instances.SilverERC20.balanceOf(testers[i])).isZero();
 		console.log((exists? "skipping ": "") + "minting 10000 silver " + i);
 		if(!exists) {
-			await instances.SilverERC20.mint(testers[i], 10000);
+			txs.push(instances.SilverERC20.mint(testers[i], 10000), {nonce: nonce++});
 		}
 
 		// Gold ERC20
 		exists = !(await instances.GoldERC20.balanceOf(testers[i])).isZero();
 		console.log((exists? "skipping ": "") + "minting 1000 gold " + i);
 		if(!exists) {
-			await instances.GoldERC20.mint(testers[i], 1000);
+			txs.push(instances.GoldERC20.mint(testers[i], 1000), {nonce: nonce++});
 		}
 
 		// Artifacts ERC20
 		exists = !(await instances.ArtifactERC20.balanceOf(testers[i])).isZero();
 		console.log((exists? "skipping ": "") + "minting 10 artifacts " + i);
 		if(!exists) {
-			await instances.ArtifactERC20.mint(testers[i], 10);
+			txs.push(instances.ArtifactERC20.mint(testers[i], 10), {nonce: nonce++});
 		}
 
 		// Founder's Keys ERC20
 		exists = !(await instances.FoundersKeyERC20.balanceOf(testers[i])).isZero();
 		console.log((exists? "skipping ": "") + "minting 10 founder's keys " + i);
 		if(exists) {
-			await instances.FoundersKeyERC20.mint(testers[i], 10);
+			txs.push(instances.FoundersKeyERC20.mint(testers[i], 10), {nonce: nonce++});
 		}
 
 		// Chest Keys ERC20
 		exists = !(await instances.ChestKeyERC20.balanceOf(testers[i])).isZero();
 		console.log((exists? "skipping ": "") + "minting 10 chest keys " + i);
 		if(!exists) {
-			await instances.ChestKeyERC20.mint(testers[i], 10);
+			txs.push(instances.ChestKeyERC20.mint(testers[i], 10), {nonce: nonce++});
 		}
 	}
 
@@ -839,159 +847,170 @@ async function mintTestTokens(instances) {
 		if(!exists) {
 			// issue some amount
 			console.log("issuing ref points " + i);
-			await instances.RefPointsTracker.issueTo(testers[i], 2000);
+			txs.push(instances.RefPointsTracker.issueTo(testers[i], 2000), {nonce: nonce++});
 			// consume twice less amount
 			console.log("consuming ref points " + i);
-			await instances.RefPointsTracker.consumeFrom(testers[i], 1000);
+			txs.push(instances.RefPointsTracker.consumeFrom(testers[i], 1000), {nonce: nonce++});
 		}
 		else {
 			console.log("skipping issuing and consuming ref points " + i);
 		}
 	}
 
+	// wait for all transactions to complete and output gas usage
+	await waitForAll(txs);
+
 	console.log("optional phase [mint test tokens] complete");
 }
 
 
-async function enablePermissions(conf, instances) {
+async function enablePermissions(accounts, conf, instances) {
 	console.log("optional phase: enable permissions");
+
+	// we'll be tracking nonce, yeah!
+	let nonce = await web3.eth.getTransactionCount(accounts[0]);
+	// a place to store pending transactions (promises)
+	const txs = [];
 
 	// DutchAuction.setFeeAndBeneficiary
 	if((await instances.DutchAuction.fee()).isZero()) {
 		console.log("setting fee and beneficiary for DutchAuction " + conf.DutchAuction);
-		await instances.DutchAuction.setFeeAndBeneficiary(1, 20, conf.Beneficiary, conf.WorldChest);
+		txs.push(instances.DutchAuction.setFeeAndBeneficiary(1, 20, conf.Beneficiary, conf.WorldChest, {nonce: nonce++}));
 	}
 	// enable DutchAuction – selling (adding) and buying
 	if((await instances.DutchAuction.features()).isZero()) {
 		console.log("enabling add/buy features for DutchAuction " + conf.DutchAuction);
-		await instances.DutchAuction.updateFeatures(FEATURE_ADD | FEATURE_BUY);
+		txs.push(instances.DutchAuction.updateFeatures(FEATURE_ADD | FEATURE_BUY, {nonce: nonce++}));
 	}
 	// whitelist GemERC721 on the DutchAuction
 	if(!await instances.DutchAuction.supportedTokenAddresses(conf.GemERC721)) {
 		console.log("whitelisting GemERC721 " + conf.GemERC721 + " on the DutchAuction " + conf.DutchAuction);
-		await instances.DutchAuction.whitelist(conf.GemERC721, true);
+		txs.push(instances.DutchAuction.whitelist(conf.GemERC721, true, {nonce: nonce++}));
 	}
 	// enable transfers and transfers on behalf for GemERC721
 	if((await instances.GemERC721.features()).isZero()) {
 		console.log("enabling transfers and transfers on behalf for GemERC721 " + conf.GemERC721);
-		await instances.GemERC721.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
+		txs.push(instances.GemERC721.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF, {nonce: nonce++}));
 	}
-	console.log("DutchAuction configuration complete");
+	console.log("DutchAuction configuration scheduled");
 
 	// allow Workshop to destroy SilverERC20
 	if((await instances.SilverERC20.userRoles(conf.Workshop)).isZero()) {
 		console.log("granting Workshop " + conf.Workshop + " permission to burn SilverERC20 " + conf.SilverERC20);
-		await instances.SilverERC20.updateRole(conf.Workshop, ROLE_TOKEN_DESTROYER);
+		txs.push(instances.SilverERC20.updateRole(conf.Workshop, ROLE_TOKEN_DESTROYER, {nonce: nonce++}));
 	}
 	// allow Workshop to destroy GoldERC20
 	if((await instances.GoldERC20.userRoles(conf.Workshop)).isZero()) {
 		console.log("granting Workshop " + conf.Workshop + " permission to burn GoldERC20 " + conf.GoldERC20);
-		await instances.GoldERC20.updateRole(conf.Workshop, ROLE_TOKEN_DESTROYER);
+		txs.push(instances.GoldERC20.updateRole(conf.Workshop, ROLE_TOKEN_DESTROYER, {nonce: nonce++}));
 	}
 	// allow Workshop to level up and upgrade GemERC721
 	if((await instances.GemERC721.userRoles(conf.Workshop)).isZero()) {
 		console.log("granting Workshop " + conf.Workshop + " permission to level up and upgrade GemERC721 " + conf.GemERC721);
-		await instances.GemERC721.updateRole(conf.Workshop, ROLE_LEVEL_PROVIDER | ROLE_GRADE_PROVIDER);
+		txs.push(instances.GemERC721.updateRole(conf.Workshop, ROLE_LEVEL_PROVIDER | ROLE_GRADE_PROVIDER, {nonce: nonce++}));
 	}
 	// enable Workshop (leveling up / upgrades)
 	if((await instances.Workshop.features()).isZero()) {
 		console.log("enabling Workshop " + conf.Workshop);
-		await instances.Workshop.updateFeatures(FEATURE_UPGRADES_ENABLED);
+		txs.push(instances.Workshop.updateFeatures(FEATURE_UPGRADES_ENABLED, {nonce: nonce++}));
 	}
-	console.log("Workshop configuration complete");
+	console.log("Workshop configuration scheduled");
 
 	// allow Miner to mint ArtifactERC20
 	if((await instances.ArtifactERC20.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint ArtifactERC20 " + conf.ArtifactERC20);
-		await instances.ArtifactERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR);
+		txs.push(instances.ArtifactERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
 	}
 	// allow Miner to mint FoundersKeyERC20
 	if((await instances.FoundersKeyERC20.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint FoundersKeyERC20 " + conf.FoundersKeyERC20);
-		await instances.FoundersKeyERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR);
+		txs.push(instances.FoundersKeyERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
 	}
 	// allow Miner to mint ChestKeyERC20
 	if((await instances.ChestKeyERC20.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint ChestKeyERC20 " + conf.ChestKeyERC20);
-		await instances.ChestKeyERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR);
+		txs.push(instances.ChestKeyERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
 	}
 	// allow Miner to mint SilverERC20
 	if((await instances.SilverERC20.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint SilverERC20 " + conf.SilverERC20);
-		await instances.SilverERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR);
+		txs.push(instances.SilverERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
 	}
 	// allow Miner to mint GoldERC20
 	if((await instances.GoldERC20.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint GoldERC20 " + conf.GoldERC20);
-		await instances.GoldERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR);
+		txs.push(instances.GoldERC20.updateRole(conf.Miner, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
 	}
 	// allow Miner to update PlotERC721
 	if((await instances.PlotERC721.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to update PlotERC721 " + conf.PlotERC721);
-		await instances.PlotERC721.updateRole(conf.Miner, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
+		txs.push(instances.PlotERC721.updateRole(conf.Miner, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER, {nonce: nonce++}));
 	}
 	// allow Miner to update GemERC721
 	if((await instances.GemERC721.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner " + conf.Miner + " permission to mint and update GemERC721 " + conf.GemERC721);
-		await instances.GemERC721.updateRole(conf.Miner, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_PROVIDER | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
+		txs.push(instances.GemERC721.updateRole(conf.Miner, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_PROVIDER | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER, {nonce: nonce++}));
 	}
 	// enable Miner (mining)
 	if((await instances.Miner.features()).isZero()) {
 		console.log("enabling Miner " + conf.Miner);
-		await instances.Miner.updateFeatures(FEATURE_MINING_ENABLED);
+		txs.push(instances.Miner.updateFeatures(FEATURE_MINING_ENABLED, {nonce: nonce++}));
 	}
-	console.log("Miner configuration complete");
+	console.log("Miner configuration scheduled");
 
 	// allow PlotSale to access (rw) RefPointsTracker
 	if((await instances.RefPointsTracker.userRoles(conf.PlotSale)).isZero()) {
 		console.log("granting PlotSale " + conf.PlotSale + " permissions on RefPointsTracker " + conf.RefPointsTracker);
-		await instances.RefPointsTracker.updateRole(conf.PlotSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
+		txs.push(instances.RefPointsTracker.updateRole(conf.PlotSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER, {nonce: nonce++}));
 	}
 	// allow PlotSale to mint PlotERC721
 	if((await instances.PlotERC721.userRoles(conf.PlotSale)).isZero()) {
 		console.log("granting PlotSale " + conf.PlotSale + " permission to mint PlotERC721 " + conf.PlotERC721);
-		await instances.PlotERC721.updateRole(conf.PlotSale, ROLE_TOKEN_CREATOR);
+		txs.push(instances.PlotERC721.updateRole(conf.PlotSale, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
 	}
 	// enable PlotSale (sell, get, coupons)
 	if((await instances.PlotSale.features()).isZero()) {
 		console.log("enabling (SELL | GET | COUPON) PlotSale " + conf.PlotSale);
-		await instances.PlotSale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED | FEATURE_USING_COUPONS_ENABLED);
+		txs.push(instances.PlotSale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED | FEATURE_USING_COUPONS_ENABLED, {nonce: nonce++}));
 	}
-	console.log("PlotSale configuration complete");
+	console.log("PlotSale configuration scheduled");
 
 	// allow PlotAntarctica to mint PlotERC721
 	if((await instances.PlotERC721.userRoles(conf.PlotAntarctica)).isZero()) {
 		console.log("granting PlotAntarctica " + conf.PlotAntarctica + " permission to mint PlotERC721 " + conf.PlotERC721);
-		await instances.PlotERC721.updateRole(conf.PlotAntarctica, ROLE_TOKEN_CREATOR);
+		txs.push(instances.PlotERC721.updateRole(conf.PlotAntarctica, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
 	}
 	// enable PlotAntarctica (getting founder's plots in Antarctica)
 	if((await instances.PlotAntarctica.features()).isZero()) {
 		console.log("enabling PlotAntarctica " + conf.PlotAntarctica);
-		await instances.PlotAntarctica.updateFeatures(FEATURE_ANTARCTICA_GET_ENABLED);
+		txs.push(instances.PlotAntarctica.updateFeatures(FEATURE_ANTARCTICA_GET_ENABLED, {nonce: nonce++}));
 	}
-	console.log("PlotAntarctica configuration complete");
+	console.log("PlotAntarctica configuration scheduled");
 
 	// allow SilverSale to access (rw) RefPointsTracker
 	if((await instances.RefPointsTracker.userRoles(conf.SilverSale)).isZero()) {
 		console.log("granting SilverSale " + conf.SilverSale + " permissions on RefPointsTracker " + conf.RefPointsTracker);
-		await instances.RefPointsTracker.updateRole(conf.SilverSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER);
+		txs.push(instances.RefPointsTracker.updateRole(conf.SilverSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER, {nonce: nonce++}));
 	}
 	// allow SilverSale to mint SilverERC20
 	if((await instances.SilverERC20.userRoles(conf.SilverSale)).isZero()) {
 		console.log("granting SilverSale " + conf.SilverSale + " permission to mint SilverERC20 " + conf.SilverERC20);
-		await instances.SilverERC20.updateRole(conf.SilverSale, ROLE_TOKEN_CREATOR);
+		txs.push(instances.SilverERC20.updateRole(conf.SilverSale, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
 	}
 	// allow SilverSale to mint GoldERC20
 	if((await instances.GoldERC20.userRoles(conf.SilverSale)).isZero()) {
 		console.log("granting SilverSale " + conf.SilverSale + " permission to mint GoldERC20 " + conf.GoldERC20);
-		await instances.GoldERC20.updateRole(conf.SilverSale, ROLE_TOKEN_CREATOR);
+		txs.push(instances.GoldERC20.updateRole(conf.SilverSale, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
 	}
 	// enable SilverSale (sell, get, coupons)
 	if((await instances.SilverSale.features()).isZero()) {
 		console.log("enabling (SELL | GET | COUPON) SilverSale " + conf.SilverSale);
-		await instances.SilverSale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED | FEATURE_USING_COUPONS_ENABLED);
+		txs.push(instances.SilverSale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED | FEATURE_USING_COUPONS_ENABLED, {nonce: nonce++}));
 	}
-	console.log("SilverSale configuration complete");
+	console.log("SilverSale configuration scheduled");
+
+	// wait for all transactions to complete and output gas usage
+	await waitForAll(txs);
 
 	console.log("optional phase [enable permissions] complete");
 }
