@@ -245,8 +245,8 @@ contract Miner is AccessMultiSig {
   /**
    * @dev Mapping contains mining rate multipliers for special gems
    * @dev Zero-mapping is treated as one (no multiplier)
-   * @dev Multiplier dimension is percent, meaning the value 100 is equal to one
-   *      and does nothing (value 0 is treated in the same way – as unset)ˀ
+   * @dev Multiplier dimension is percents, meaning the value 100 percents is equal to one
+   *      and does nothing (value 0 is treated in the same way – as unset)
    * @dev Special gems are gems in ID range (0xF000 - 0x10000) – both bounds exclusive
    * @dev maps gemId => mining rate multiplier
    */
