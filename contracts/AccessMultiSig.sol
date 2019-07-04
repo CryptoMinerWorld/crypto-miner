@@ -345,7 +345,7 @@ contract AccessMultiSig {
       }
     }
 
-    // update the nonce to protect again replay attack
+    // update the nonce to protect against replay attack
     nonces[_to]++;
 
     // finally delegate call to `__updateRole` to perform the requested operation
