@@ -128,7 +128,7 @@ module.exports = async function(deployer, network, accounts) {
 				Beneficiary:        "0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
 				FoundersChest:      "0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
 				WorldChest:         "0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-				MonthlyChest:       "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69", // test public account
+				MonthlyChest:       "0x01cBe590FF9fb5b8C0ECe15D293469745625a1D8", // Eugene
 
 				FoundersPlots:      "0xeD6E75F271E4Cd58b800a17240228F0C19C12550",
 				BalanceProxy:       "0xc90b90B764e0061C5e355d5101146580d17fBc9D",
@@ -184,7 +184,7 @@ module.exports = async function(deployer, network, accounts) {
 				Beneficiary:        "0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
 				FoundersChest:      "0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
 				WorldChest:         "0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-				MonthlyChest:       "0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69", // test public account
+				MonthlyChest:       "0x01cBe590FF9fb5b8C0ECe15D293469745625a1D8", // Eugene
 
 				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
@@ -794,6 +794,7 @@ async function mintTestTokens(accounts, instances) {
 	const testers = [
 		"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
 		"0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
+		"0x01cBe590FF9fb5b8C0ECe15D293469745625a1D8", // Eugene
 		"0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
 	];
 
@@ -805,7 +806,7 @@ async function mintTestTokens(accounts, instances) {
 		const owners = [];
 		const gems = [];
 
-		for(let i = 0; i < 15 * testers.length; i++) {
+		for(let i = 0; i < 12 * testers.length; i++) {
 			const to = testers[i % testers.length];
 			const color = colors[i % colors.length];
 			const level = 1 + i % 5;
@@ -854,7 +855,7 @@ async function mintTestTokens(accounts, instances) {
 	}
 	// plots - PlotERC721
 	// Antarctica - 2 tiers
-	for(let i = 0; i < 5 * testers.length; i++) {
+	for(let i = 0; i < 4 * testers.length; i++) {
 		const exists = await instances.PlotERC721.exists(i + 1);
 		console.log("%s Antarctica plot %o", (exists? "skipping": "minting"), i + 1);
 		if(!exists) {
@@ -862,7 +863,7 @@ async function mintTestTokens(accounts, instances) {
 		}
 	}
 	// Rest of the World - 5 tiers
-	for(let i = 0; i < 10 * testers.length; i++) {
+	for(let i = 0; i < 8 * testers.length; i++) {
 		const exists = await instances.PlotERC721.exists(i + 65537);
 		console.log("%s regular plot %o", (exists? "skipping": "minting"), i + 65537);
 		if(!exists) {
