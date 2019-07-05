@@ -341,6 +341,316 @@ contract('Miner (NowProvider)', (accounts) => {
 		// verify plot is mined by one block
 		assert.equal(1, await plot.getOffset(1), "wrong plot offset after releasing");
 	});
+
+	it("mining: mining 15 plots", async() => {
+		// now provider
+		const np = await NowProvider.new();
+
+		// define miner dependencies
+		const gem = await Gem.new(np.address);
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// player's address
+		const player = accounts[1];
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address,
+			np.address
+		);
+
+		// enable mining feature on the miner
+		await miner.updateFeatures(FEATURE_MINING_ENABLED);
+		// grant miner permissions to modify gem's state and mint gems
+		await gem.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_PROVIDER | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
+		// grant miner permission(s) to update plot
+		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
+		// grant miner permission(s) to mint silver
+		await silver.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		// grant miner permission(s) to mint gold
+		await gold.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		// grant miner permission(s) to mint artifacts
+		await artifactErc20.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		// grant miner permission(s) to mint founder's chest keys
+		await foundersKey.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+		// grant miner permission(s) to mint chest keys
+		await chestKey.updateRole(miner.address, ROLE_TOKEN_CREATOR);
+
+		// define an array of 15 elements to store plots to mine
+		const plots = [];
+		// create 10 plots in Rest of the World
+		for(let i = 0; i < 10; i++) {
+			// offsets: 0, 35, 65, 85, 95, 100
+			// energy: 3150 + 21600 + 43200 + 43200 + 43200
+			plots.push((await plot.mint(player, 1, toBN("0x05002341555F6400"))).receipt.logs[0].args[2].toNumber());
+		}
+		// create 5 plots in Antarctica
+		for(let i = 0; i < 5; i++) {
+			// offsets: 0, 35, 100
+			// energy: 3150 + 46800
+			plots.push((await plot.mint(player, 0, toBN("0x0200236464646400"))).receipt.logs[0].args[2].toNumber());
+		}
+
+		// array to store created gem IDs
+		const gems = [];
+
+		// aux constants to define gem color matching and not matching current month
+		const matchingColor = new Date().getMonth() + 1;
+		const nonMatchingColor = (new Date().getMonth() + 2) % 12 + 1;
+
+		// mint 15 very different gems
+		/**
+		 * idx | mines | level | grade | spec | color | rate | age  | nrg | r.nrg
+		 * ----+-------+-------+-------+------+-------+------+------+-----+------
+		 *  1  |   W   |   5   | x50   | x1.0 | x1.05 | 52.5 |      |     |
+		 *  2  |   W   |   2   | x25   | x1.5 | x1.00 | 37.5 |      |     |
+		 *  3  |   W   |   5   | x9    | x2.0 | x1.05 | 18.9 | 600  | 322 | 6085
+		 *  4  |   W   |   4   | x50   |      | x1.00 | 50.0 | 1200 | 638 | 31900
+		 *  5  |   W   |   5   | x60   | x0.8 | x1.00 | 48.0 |      |     |
+		 * ----+-------+-------+-------+------+-------+------+------+-----+------
+		 *  6  |   W   |   5   | x250  |      | x1.05 | 262.5|
+		 *  7  |   W   |   4   | x25   |      | x1.00 | 25.0 |
+		 *  8  |   W   |   3   | x25   |      | x1.00 | 25.0 |
+		 *  9  |   W   |   2   | x9    |      | x1.00 |  9.0 |
+		 * 10  |   W   |   1   | x4    |      | x1.05 |  4.2 |
+		 * ----+-------+-------+-------+------+-------+--------------------------
+		 * 11  |   A   |   1   | x2    |      | x1.05 |  2.1 |
+		 * 12  |   A   |   2   | x1.2  |      | x1.00 |  1.2 |
+		 * 13  |   A   |   3   | x30   |      | x1.00 | 30.0 |
+		 * 14  |   A   |   5   | x50   |      | x1.00 | 50.0 |
+		 * 15  |   A   |   5   | x250  |      | x1.00 | 250  |
+		 */
+
+		// mint first 5 special gems according to the table
+		gems.push(0xF001);
+		await gem.mint(player, 0xF001, 0, matchingColor, 5, 0x06000000);
+		await miner.setSpecialGemMultiplier(0xF001, 100);
+		gems.push(0xF002);
+		await gem.mint(player, 0xF002, 0, nonMatchingColor, 2, 0x05000000);
+		await miner.setSpecialGemMultiplier(0xF002, 150);
+		gems.push(0xF003);
+		await gem.mintWith(player, 0xF003, 0, matchingColor, 5, 0x040F4240, 600); // grade value 1,000,000
+		await miner.setSpecialGemMultiplier(0xF003, 200);
+		gems.push(0xF004);
+		await gem.mintWith(player, 0xF004, 0, nonMatchingColor, 4, 0x06000000, 1200);
+		await miner.setSpecialGemMultiplier(0xF004, 0);
+		gems.push(0xF005);
+		await gem.mint(player, 0xF005, 0, nonMatchingColor, 5, 0x060BBCCF); // grade value 769,231
+		await miner.setSpecialGemMultiplier(0xF005, 80);
+
+		// mint next 10 regular gems according to the table above
+		gems.push((await gem.mintNext(player, 0, matchingColor, 5, 0x06EAC028)).receipt.logs[0].args[2].toNumber()); // grade value 15,384,616
+		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 4, 0x05000000)).receipt.logs[0].args[2].toNumber());
+		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 3, 0x05000000)).receipt.logs[0].args[2].toNumber());
+		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 2, 0x040F4240)).receipt.logs[0].args[2].toNumber()); // grade value 1,000,000
+		gems.push((await gem.mintNext(player, 0, matchingColor, 1, 0x030BDE32)).receipt.logs[0].args[2].toNumber()); // grade value 777,778
+		gems.push((await gem.mintNext(player, 0, matchingColor, 1, 0x02000000)).receipt.logs[0].args[2].toNumber());
+		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 2, 0x010C3500)).receipt.logs[0].args[2].toNumber()); // grade value 800,000
+		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 3, 0x050CB736)).receipt.logs[0].args[2].toNumber()); // grade value 833,334
+		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 5, 0x06000000)).receipt.logs[0].args[2].toNumber());
+		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 5, 0x06EAC028)).receipt.logs[0].args[2].toNumber()); // grade value 15,384,616
+
+		// array to store expected mining rates of the gems
+		const rates = [52.5, 37.5, 18.9, 50, 48, 262.5, 25, 25, 9, 4.2, 2.1, 1.2, 30.000004, 50, 250.000008].map((e) => Math.floor(e * 1000000));
+
+		// ensure amount of plots and gems matches
+		assert.equal(plots.length, gems.length, "plots/gems amount mismatch");
+		assert.equal(rates.length, gems.length, "rates/gems arrays length mismatch");
+
+		// verify energetic ages and resting energies for all the gems
+		for(let i = 0; i < gems.length; i++) {
+			assert.equal(0, await miner.energeticAgeOf(gems[i]), "wrong initial energetic age for gem " + i);
+			assert.equal(rates[i], await miner.miningRateOf(gems[i]), "wrong mining rate for gem " + i);
+			switch(i) {
+				case 2: {
+					assert.equal(600, await gem.getAge(gems[i]), "wrong initial age for gem " + i);
+					assert.equal(322, await miner.restingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
+					assert.equal(6085, await miner.effectiveRestingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
+					break;
+				}
+				case 3: {
+					assert.equal(1200, await gem.getAge(gems[i]), "wrong initial age for gem " + i);
+					assert.equal(638, await miner.restingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
+					assert.equal(31900, await miner.effectiveRestingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
+					break;
+				}
+				default: {
+					assert.equal(0, await gem.getAge(gems[i]), "wrong initial age for gem " + i);
+					assert.equal(0, await miner.restingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
+					assert.equal(0, await miner.effectiveRestingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
+				}
+			}
+		}
+
+		// bind all the gems to the plots
+		for(let i = 0; i < plots.length; i++) {
+			await miner.bind(plots[i], gems[i], {from: player});
+		}
+
+		// verify all objects have been locked
+		for(let i = 0; i < plots.length; i++) {
+			assert(!await plot.isTransferable(plots[i]), "plot " + i + " is transferable");
+			assert(!await gem.isTransferable(gems[i]), "gem " + i + " is transferable");
+		}
+
+		// progress evaluation table
+		// minutes per block by tiers:     90,    720,    2160,   4320,   8640
+		// energy by tiers, Rest of World: 3150 + 21600 + 43200 + 43200 + 43200
+		// energy by tiers, Antarctica:    3150 + 46800
+		/**
+		 * idx | mines | level | rate | 0  | 1d | 2d | 4d | 28d
+		 * ----+-------+-------+------+----+----+----+----+----
+		 *  1  |   W   |   5   | 52.5 |  0 | 86 | 99 |  * |  *
+		 *  2  |   W   |   2   | 37.5 |  0 | 65*| 65*| 65*| 65*
+		 *  3  |   W   |   5   | 18.9 | 39 | 68 | 80 | 95 |  *
+		 *  4  |   W   |   4   | 50.0 | 68 | 93 | 95*| 95*| 95*
+		 *  5  |   W   |   5   | 48.0 |  0 | 85 | 98 |  * |  *
+		 * ----+-------+-------+------+----+----+----+----+----
+		 *  6  |   W   |   5   | 262.5|  0 |  * |  * |  * |  *
+		 *  7  |   W   |   4   | 25.0 |  0 | 70 | 85 | 95*| 95*
+		 *  8  |   W   |   3   | 25.0 |  0 | 70 | 85*| 85*| 85*
+		 *  9  |   W   |   2   | 9.0  |  0 | 48 | 65*| 65*| 65*
+		 * 10  |   W   |   1   | 4.2  |  0 | 35*| 35*| 35*| 35*
+		 * ----+-------+-------+------+--------------+----+----
+		 * 11  |   A   |   1   | 2.1  |  0 | 33 | 35*| 35*| 35*
+		 * 12  |   A   |   2   | 1.2  |  0 | 19 | 35 | 39 |  *
+		 * 13  |   A   |   3   | 30.0 |  0 | 90 |  * |  * |  *
+		 * 14  |   A   |   5   | 50.0 |  0 |  * |  * |  * |  *
+		 * 15  |   A   |   5   | 250  |  0 |  * |  * |  * |  *
+		 */
+		const offsets = [
+			[  0,  0,  39, 68,   0,   0,  0,  0,  0,  0,  0,   0,   0,   0,   0],
+			[ 86, 65,  68, 93,  85, 100, 70, 70, 48, 35, 33,  19,  90, 100, 100],
+			[ 99, 65,  80, 95,  98, 100, 85, 85, 65, 35, 35,  35, 100, 100, 100],
+			[100, 65,  95, 95, 100, 100, 95, 85, 65, 35, 35,  39, 100, 100, 100],
+			[100, 65, 100, 95, 100, 100, 95, 85, 65, 35, 35, 100, 100, 100, 100]
+		];
+
+		// verify initial mining progress
+		for(let i = 0; i < plots.length; i++) {
+			assert.equal(offsets[0][i], await plot.getOffset(plots[i]), "wrong initial mining progress for plot " + i);
+		}
+
+		// rewind 1 day – 24 hours – 1440 minutes
+		await np.incTime(86400);
+		// verify mining progress estimation
+		for(let i = 0; i < plots.length; i++) {
+			assert.equal(offsets[1][i], await miner.evaluate(plots[i]), "wrong progress eval after 1 day for plot " + i);
+		}
+		// mine all the plots
+		for(let i = 0; i < plots.length; i++) {
+			await miner.update(plots[i]);
+		}
+		// verify plot offsets
+		for(let i = 0; i < plots.length; i++) {
+			assert.equal(offsets[1][i], await plot.getOffset(plots[i]), "wrong plot offset after 1 day of mining for plot " + i);
+		}
+
+		// rewind 1 more day – 48 hours total – +1440 minutes
+		await np.incTime(172800);
+		// verify mining progress estimation
+		for(let i = 0; i < plots.length; i++) {
+			if(offsets[2][i] === 100 && offsets[1][i] === 100) {
+				await assertThrows(miner.evaluate, plots[i]);
+			}
+			else {
+				assert.equal(offsets[2][i], await miner.evaluate(plots[i]), "wrong progress eval after 2 days for plot " + i);
+			}
+		}
+		// mine all the plots
+		for(let i = 0; i < plots.length; i++) {
+			if(offsets[2][i] === offsets[1][i]) {
+				await assertThrows(miner.update, plots[i]);
+			}
+			else {
+				await miner.update(plots[i]);
+			}
+		}
+		// verify plot offsets
+		for(let i = 0; i < plots.length; i++) {
+			assert.equal(offsets[2][i], await plot.getOffset(plots[i]), "wrong plot offset after 2 days of mining for plot " + i);
+		}
+
+		// rewind 2 more days – 96 hours total – +2880 minutes
+		await np.incTime(345600);
+		// verify mining progress estimation
+		for(let i = 0; i < plots.length; i++) {
+			if(offsets[3][i] === 100 && offsets[2][i] === 100) {
+				await assertThrows(miner.evaluate, plots[i]);
+			}
+			else {
+				assert.equal(offsets[3][i], await miner.evaluate(plots[i]), "wrong progress eval after 4 days for plot " + i);
+			}
+		}
+		// mine all the plots
+		for(let i = 0; i < plots.length; i++) {
+			if(offsets[3][i] === offsets[2][i]) {
+				await assertThrows(miner.update, plots[i]);
+			}
+			else {
+				await miner.update(plots[i]);
+			}
+		}
+		// verify plot offsets
+		for(let i = 0; i < plots.length; i++) {
+			assert.equal(offsets[3][i], await plot.getOffset(plots[i]), "wrong plot offset after 4 days of mining for plot " + i);
+		}
+
+		// rewind 28 more days – 768 hours total – +40320 minutes
+		await np.incTime(2764800);
+		// verify mining progress estimation
+		for(let i = 0; i < plots.length; i++) {
+			if(offsets[4][i] === 100 && offsets[3][i] === 100) {
+				await assertThrows(miner.evaluate, plots[i]);
+			}
+			else {
+				assert.equal(offsets[4][i], await miner.evaluate(plots[i]), "wrong progress eval after 32 days for plot " + i);
+			}
+		}
+		// mine all the plots
+		for(let i = 0; i < plots.length; i++) {
+			if(offsets[4][i] === offsets[3][i]) {
+				await assertThrows(miner.update, plots[i]);
+			}
+			else {
+				await miner.update(plots[i]);
+			}
+		}
+		// verify plot offsets
+		for(let i = 0; i < plots.length; i++) {
+			assert.equal(offsets[4][i], await plot.getOffset(plots[i]), "wrong plot offset after 32 days of mining for plot " + i);
+		}
+
+		// mining is complete, further progress is not possible due to gem level limitations
+		// verify gem/plot locking state and release locked plots/gems
+		for(let i = 0; i < plots.length; i++) {
+			if(offsets[4][i] === 100) {
+				assert(await plot.isTransferable(plots[i]), "plot " + i + " is not transferable after full mine");
+				assert(await gem.isTransferable(gems[i]), "gem " + i + " is not transferable after full mine");
+			}
+			else {
+				assert(!await plot.isTransferable(plots[i]), "plot " + i + " is transferable after partial mine");
+				assert(!await gem.isTransferable(gems[i]), "gem " + i + " is transferable after partial mine");
+				await miner.release(plots[i]);
+				assert(await plot.isTransferable(plots[i]), "plot " + i + " is still not transferable after release");
+				assert(await gem.isTransferable(gems[i]), "gem " + i + " is still not transferable after release");
+			}
+		}
+
+	})
 });
 
 // a function to calculate resting energy of the gem based on its energetic age
