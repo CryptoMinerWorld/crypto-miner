@@ -182,11 +182,11 @@ contract TokenReader {
       }
 
       // pack token properties
-      data[i] = uint128(tokenId) << 96
-              | uint96(uint16(high >> 224)) << 80
-              | uint80(uint8(high >> 184)) << 72
-              | uint72(uint8(high >> 144)) << 64
-              | uint64(uint32(high >> 80)) << 32
+      data[i] = uint128(tokenId) << 96 // token ID
+              | uint96(uint16(high >> 224)) << 80 // plot ID
+              | uint80(uint8(high >> 184)) << 72 // color
+              | uint72(uint8(high >> 144)) << 64 // level
+              | uint64(uint32(high >> 80)) << 32 // grade
               // convert block number difference into minutes,
               // assuming average block size is 15 seconds
               | uint32(block.number - uint32(low >> 224)) / 4;

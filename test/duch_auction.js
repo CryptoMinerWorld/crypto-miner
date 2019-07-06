@@ -20,7 +20,6 @@ const mint0x401 = async function(tk, accounts) {
 	await tk.mint(
 		accounts[1], // owner
 		token0x401, // unique token ID
-		1, // plot ID
 		1, // color ID
 		1, // level ID
 		0x01000001, // grade (grade type 1, grade value 1)

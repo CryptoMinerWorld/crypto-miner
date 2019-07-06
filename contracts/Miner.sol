@@ -58,7 +58,7 @@ contract Miner is AccessMultiSig {
    * @dev Expected version (UID) of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_UID_REQUIRED = 0x3e39a140cacf3b86b519fe83ca040e309892d7ec9b43a74a5387df2af019a3b1;
+  uint256 public constant GEM_UID_REQUIRED = 0x9f3e67e803344c97b30b6435f473abca620f678153a8da972326edf47a340962;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
@@ -918,7 +918,7 @@ contract Miner is AccessMultiSig {
     // mint gems level 1, 2, 3, 4, 5
     for(uint8 i = 0; i < 5; i++) {
       // mint gems level `i`
-      __mintGems(15 * i, i + 1, loot[i], plotId);
+      __mintGems(15 * i, i + 1, loot[i]);
     }
 
     // if there is silver to mint
@@ -962,9 +962,8 @@ contract Miner is AccessMultiSig {
    *      will be `n / 3` of seeds used [seedOffset, seedOffset + n / 3)
    * @param level level of the gems to mint
    * @param n number of gems to mint
-   * @param plotId ID of the plot the gem is found in
    */
-  function __mintGems(uint256 seedOffset, uint8 level, uint16 n, uint24 plotId) private {
+  function __mintGems(uint256 seedOffset, uint8 level, uint16 n) private {
     // variable to store some randomness to work with
     uint256 rnd;
 
@@ -1016,14 +1015,11 @@ contract Miner is AccessMultiSig {
       }
 
       // mint the gem with randomized properties
-      gemInstance.mint(
+      gemInstance.mintNext(
         msg.sender,
-        gemInstance.incNextId(),
-        plotId,
         randomColor(rnd65k),
         level,
-        uint32(gradeType) << 24 |
-        rnd1000000
+        uint32(gradeType) << 24 | rnd1000000
       );
     }
   }

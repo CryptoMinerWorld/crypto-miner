@@ -36,7 +36,7 @@ const gradeValue1 = 1;
 const grade1 = gradeType1 << 24 | gradeValue1;
 // a function to mint some default token
 async function mint1(tk, acc) {
-	await tk.mint(acc, token1, 1, 1, 1, grade1);
+	await tk.mint(acc, token1, 1, 1, grade1);
 }
 
 // standard function to instantiate token
@@ -99,11 +99,11 @@ contract('GemERC721', function(accounts) {
 
 		// define function that throw initially
 		const getPacked = async() => await tk.getPacked(token1);
-		const getPlotId = async() => await tk.getPlotId(token1);
-		const getPropertiesModified = async() => await tk.getPropertiesModified(token1);
 		const getProperties = async() => await tk.getProperties(token1);
 		const getColor = async() => await tk.getColor(token1);
+		const getLevelModified = async() => await tk.getLevelModified(token1);
 		const getLevel = async() => await tk.getLevel(token1);
+		const getGradeModified = async() => await tk.getGradeModified(token1);
 		const getGrade = async() => await tk.getGrade(token1);
 		const getGradeType = async() => await tk.getGradeType(token1);
 		const getGradeValue = async() => await tk.getGradeValue(token1);
@@ -124,11 +124,11 @@ contract('GemERC721', function(accounts) {
 
 		// check all these functions throw
 		await assertThrows(getPacked);
-		await assertThrows(getPlotId);
-		await assertThrows(getPropertiesModified);
 		await assertThrows(getProperties);
 		await assertThrows(getColor);
+		await assertThrows(getLevelModified);
 		await assertThrows(getLevel);
+		await assertThrows(getGradeModified);
 		await assertThrows(getGrade);
 		await assertThrows(getGradeType);
 		await assertThrows(getGradeValue);
@@ -152,11 +152,11 @@ contract('GemERC721', function(accounts) {
 
 		// now the functions which throw should not throw anymore
 		await getPacked();
-		await getPlotId();
-		await getPropertiesModified();
 		await getProperties();
 		await getColor();
+		await getLevelModified();
 		await getLevel();
+		await getGradeModified();
 		await getGrade();
 		await getGradeType();
 		await getGradeValue();
@@ -184,7 +184,6 @@ contract('GemERC721', function(accounts) {
 		const account1 = accounts[1];
 
 		// define some token properties
-		const plotId = 17;
 		const colorId = 11;
 		const levelId = 5;
 		const gradeType = 3;
@@ -194,19 +193,19 @@ contract('GemERC721', function(accounts) {
 		const properties = toBN(colorId).shln(8).or(toBN(levelId)).shln(32).or(toBN(grade));
 
 		// create two tokens
-		await tk.mintWith(account1, token1, plotId, colorId, levelId, grade, age);
-		await tk.mint(account1, token2, plotId, colorId, levelId, grade);
+		await tk.mintWith(account1, token1, colorId, levelId, grade, age);
+		await tk.mint(account1, token2, colorId, levelId, grade);
 
 		// extract token1 creation time to be used later
 		const creation1 = await tk.getCreationTime(token1);
 		const creation2 = await tk.getCreationTime(token2);
 
 		// verify simple (non-packed) getters
-		assert.equal(plotId, await tk.getPlotId(token1), "token1 has wrong plotId");
-		assert.equal(0, await tk.getPropertiesModified(token1), "token1 has non-zero propertiesModified");
 		assert(properties.eq(await tk.getProperties(token1)), "token1 has wrong properties");
 		assert.equal(colorId, await tk.getColor(token1), "token1 has wrong color");
+		assert.equal(0, await tk.getLevelModified(token1), "token1 has non-zero levelModified");
 		assert.equal(levelId, await tk.getLevel(token1), "token1 has wrong level");
+		assert.equal(0, await tk.getGradeModified(token1), "token1 has non-zero gradeModified");
 		assert.equal(grade, await tk.getGrade(token1), "token1 has wrong grade");
 		assert.equal(gradeType, await tk.getGradeType(token1), "token1 has wrong gradeType");
 		assert.equal(gradeValue, await tk.getGradeValue(token1), "token1 has wrong gradeValue");
@@ -236,7 +235,7 @@ contract('GemERC721', function(accounts) {
 
 		// calculate token1 extended packed structure
 		const fullPacked1 = [
-			toBN(plotId).shln(8).or(toBN(colorId)).shln(8).or(toBN(levelId)).shln(32).or(toBN(grade)).shln(32).shln(24).shln(32).shln(32).or(toBN(age)).shln(32).shln(32),
+			toBN(colorId).shln(8).or(toBN(levelId)).shln(32).or(toBN(grade)).shln(32).shln(32).shln(24).shln(32).shln(32).or(toBN(age)).shln(24).shln(32),
 			creation1.shln(32).shln(32).shln(160).or(toBN(account1))
 		];
 		// compare with the packed getter
@@ -319,7 +318,7 @@ contract('GemERC721', function(accounts) {
 		const account1 = accounts[1];
 
 		// define a function to check
-		const fn = async() => await tk.mint(account1, token1, 1, 1, 1, grade1, {from: account1});
+		const fn = async() => await tk.mint(account1, token1, 1, 1, grade1, {from: account1});
 
 		// ensure function fails if account has no role required
 		await assertThrows(fn);
@@ -338,7 +337,7 @@ contract('GemERC721', function(accounts) {
 		const account1 = accounts[1];
 
 		// define a function to check
-		const fn = async() => await tk.mintWith(account1, token1, 1, 1, 1, grade1, 1, {from: account1});
+		const fn = async() => await tk.mintWith(account1, token1, 1, 1, grade1, 1, {from: account1});
 
 		// give a permission required to create token
 		await tk.updateRole(account1, ROLE_TOKEN_CREATOR);
@@ -360,7 +359,7 @@ contract('GemERC721', function(accounts) {
 		const account1 = accounts[1];
 
 		// define a function to check
-		const fn = async() => await tk.mintNext(account1, 1, 1, 1, grade1, {from: account1});
+		const fn = async() => await tk.mintNext(account1, 1, 1, grade1, {from: account1});
 
 		// give a permission required to create token
 		await tk.updateRole(account1, ROLE_TOKEN_CREATOR);
@@ -386,12 +385,12 @@ contract('GemERC721', function(accounts) {
 		const account1 = accounts[1];
 
 		// wrong input parameters fail
-		await assertThrows(tk.mint, account1, 0, 1, 1, 1, grade1);
-		await assertThrows(tk.mint, ZERO_ADDR, 1, 1, 1, 1, grade1);
-		await assertThrows(tk.mint, tk.address, 1, 1, 1, 1, grade1);
+		await assertThrows(tk.mint, account1, 0, 1, 1, grade1);
+		await assertThrows(tk.mint, ZERO_ADDR, 1, 1, 1, grade1);
+		await assertThrows(tk.mint, tk.address, 1, 1, 1, grade1);
 
 		// a function to mint valid token
-		const fn = async() => await tk.mint(account1, 1, 1, 1, 1, grade1);
+		const fn = async() => await tk.mint(account1, 1, 1, 1, grade1);
 
 		// valid input succeeds
 		await fn();
@@ -409,7 +408,7 @@ contract('GemERC721', function(accounts) {
 		const account1 = accounts[1];
 
 		// define a function to mint next token in a sequence
-		const fn = async() => await tk.mintNext(account1, 1, 1, 1, grade1);
+		const fn = async() => await tk.mintNext(account1, 1, 1, grade1);
 
 		// execute this function few times
 		await fn();
@@ -471,7 +470,7 @@ contract('GemERC721', function(accounts) {
 
 		// verify the execution result
 		assert.equal(2, await tk.getLevel(token1), "wrong token level after leveling up");
-		assert((await tk.getPropertiesModified(token1)).gt(toBN(now)), "wrong properties modified after leveling up");
+		assert((await tk.getLevelModified(token1)).gt(toBN(now)), "wrong level modified after leveling up");
 	});
 	it("leveling: levelUpBy() requires ROLE_LEVEL_PROVIDER role", async() => {
 		// deploy token
@@ -521,7 +520,7 @@ contract('GemERC721', function(accounts) {
 
 		// verify the execution result
 		assert.equal(201, await tk.getLevel(token1), "wrong token level after leveling up");
-		assert((await tk.getPropertiesModified(token1)).gt(toBN(now)), "wrong properties modified after leveling up");
+		assert((await tk.getLevelModified(token1)).gt(toBN(now)), "wrong level modified after leveling up");
 	});
 
 	it("upgrading: upgrade() requires ROLE_GRADE_PROVIDER role", async() => {
@@ -575,7 +574,7 @@ contract('GemERC721', function(accounts) {
 		assert.equal(grade1 + 1, await tk.getGrade(token1), "wrong token grade after upgrading");
 		assert.equal(gradeType1, await tk.getGradeType(token1), "wrong token grade type after upgrading");
 		assert.equal(gradeValue1 + 1, await tk.getGradeValue(token1), "wrong token grade value after upgrading");
-		assert((await tk.getPropertiesModified(token1)).gt(toBN(now)), "wrong properties modified after upgrading");
+		assert((await tk.getGradeModified(token1)).gt(toBN(now)), "wrong grade modified after upgrading");
 	});
 
 	it("mining stats: updateMinedStats() requires ROLE_MINED_STATS_PROVIDER role", async() => {
@@ -702,7 +701,7 @@ contract('GemERC721', function(accounts) {
 		const tk = await deployToken();
 
 		// some random state value
-		const state = Math.floor(Math.random() * 4294967296);
+		const state = Math.floor(Math.random() * 16777216);
 
 		// a function to set new token state
 		const setState = async() => await tk.setState(token1, state);
@@ -734,7 +733,7 @@ contract('GemERC721', function(accounts) {
 		const account1 = accounts[1];
 
 		// transfer lock value to set
-		const lock = Math.floor(Math.random() * 4294967296);
+		const lock = Math.floor(Math.random() * 16777216);
 
 		// define a function to check
 		const fn = async() => await tk.setTransferLock(lock, {from: account1});
@@ -797,7 +796,7 @@ contract('GemERC721', function(accounts) {
 		const tk = await deployToken();
 
 		// some random transfer lock value
-		const lock = Math.floor(Math.random() * 4294967296);
+		const lock = Math.floor(Math.random() * 16777216);
 
 		// a function to set transfer lock
 		const setLock = async() => await tk.setTransferLock(lock);

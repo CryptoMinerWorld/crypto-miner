@@ -33,7 +33,7 @@ contract Workshop is AccessMultiSig {
    * @dev Expected version (UID) of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_UID_REQUIRED = 0x3e39a140cacf3b86b519fe83ca040e309892d7ec9b43a74a5387df2af019a3b1;
+  uint256 public constant GEM_UID_REQUIRED = 0x9f3e67e803344c97b30b6435f473abca620f678153a8da972326edf47a340962;
 
   /**
    * @dev Expected version (UID) of the deployed SilverERC20 instance

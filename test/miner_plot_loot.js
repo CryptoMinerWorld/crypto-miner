@@ -200,7 +200,6 @@ contract('Miner: Plot Loot', (accounts) => {
 			await gem.mintWith(
 				player,
 				i + 1, // Token ID
-				i + 1, // Plot ID
 				1, // Color,
 				5, // Level
 				0x06FFFFFF, // Grade Type AAA, Grade Value 16,777,215
@@ -224,9 +223,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		write_csv("./data/plot_loot_C2.csv", CSV_HEADER_C, csv_data_c);
 
 		// verify some statistics on the loot
-		verifyTheLoot(loot);
-		// for the Antarctica no chest keys should be present - only founder's keys
-		assert.equal(0, loot.chestKeys, "chest key(s) present");
+		verifyTheLoot(loot, true);
 	});
 
 	it("tier loot – Rest of the World (5 Tiers)", async() => {
@@ -293,7 +290,10 @@ contract('Miner: Plot Loot', (accounts) => {
 		// item chance is 0.03% in BOS
 		// 41% chance of not getting an item in 3,000 rounds (1,000 plots)
 		// 15% cumulative chance of not getting an item
-		assert(loot[8] > 0, "no keys");
+		//assert(loot[8] > 0, "no keys");
+		if(loot[8] === 0) {
+			console.log("\tno keys! (15% chance)");
+		}
 	});
 	it("tiers loot – Rest of the World (5 Tiers)", async() => {
 		// execute only for PLOTS >= 100
@@ -349,7 +349,10 @@ contract('Miner: Plot Loot', (accounts) => {
 		// item chance is 0.03% in BOS
 		// 41% chance of not getting an item in 3,000 rounds (1,000 plots)
 		// 15% cumulative chance of not getting an item
-		assert(loot[8] > 0, "no keys");
+		//assert(loot[8] > 0, "no keys");
+		if(loot[8] === 0) {
+			console.log("\tno keys! (15% chance)");
+		}
 	});
 	it("mining a plot – Rest of the World (5 Tiers)", async() => {
 		// define miner dependencies
@@ -403,7 +406,6 @@ contract('Miner: Plot Loot', (accounts) => {
 			await gem.mintWith(
 				player,
 				i + 1, // Token ID
-				65537 + i, // Plot ID
 				1, // Color,
 				5, // Level
 				0x06FFFFFF, // Grade Type AAA, Grade Value 16,777,215
@@ -427,9 +429,7 @@ contract('Miner: Plot Loot', (accounts) => {
 		write_csv("./data/plot_loot_C5.csv", CSV_HEADER_C, csv_data_c);
 
 		// verify some statistics on the loot
-		verifyTheLoot(loot);
-		// for the Rest of the World no founders' keys should be present
-		assert.equal(0, loot.foundersKeys, "founder's key(s) present");
+		verifyTheLoot(loot, false);
 	});
 
 });
@@ -483,7 +483,7 @@ async function extractLoot(player, gem, silver, gold, artifactErc20, foundersKey
 }
 
 // function to verify loot constraints when mining 1000 plots fully
-function verifyTheLoot(loot) {
+function verifyTheLoot(loot, antarctica) {
 	// verify gem colors:
 	for(let i = 1; i <= 12; i++) {
 		if(AVAILABLE_GEM_COLORS.indexOf(i) !== -1) {
@@ -505,9 +505,22 @@ function verifyTheLoot(loot) {
 	assert(loot.silver > 0, "no silver");
 	assert(loot.gold > 0, "no gold");
 	assert(loot.artifacts20 > 0, "no artifacts");
-	// 99.5% chance of finding a key in 1,000 blocks in Antarctica
-	// 85% chance of finding a key in 1,000 blocks in the Rest of the World plot
-	assert(loot.chestKeys + loot.foundersKeys > 0, "no keys");
+
+	if(antarctica) {
+		// 99.5% chance of finding a key in 1,000 blocks in Antarctica
+		assert(loot.foundersKeys > 0, "no founder's keys");
+		// for the Antarctica no chest keys should be present - only founder's keys
+		assert.equal(0, loot.chestKeys, "chest key(s) present");
+	}
+	else {
+		// 85% chance of finding a key in 1,000 blocks in the Rest of the World plot
+		//assert(loot.chestKeys > 0, "no chest keys");
+		if(loot.chestKeys === 0) {
+			console.log("\tno chest keys (15% chance)");
+		}
+		// for the Rest of the World no founders' keys should be present
+		assert.equal(0, loot.foundersKeys, "founder's key(s) present");
+	}
 }
 
 

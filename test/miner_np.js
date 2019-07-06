@@ -54,11 +54,11 @@ contract('Miner (NowProvider)', (accounts) => {
 
 		// create few different gems
 		// low grade high level gem (level 5, grade D, value 0.8)
-		await gem.mint(accounts[0], 1, 0, 1, 5, 0x10C3500);
+		await gem.mint(accounts[0], 1, 1, 5, 0x10C3500);
 		// mid level mid grade gem (level 3, grade A, value 0.4)
-		await gem.mint(accounts[0], 2, 0, 1, 3, 0x4061A80);
+		await gem.mint(accounts[0], 2, 1, 3, 0x4061A80);
 		// high grade low level gem (level 1, grade AAA+, value 0.99..)
-		await gem.mint(accounts[0], 3, 0, 1, 1, 0x60F423F);
+		await gem.mint(accounts[0], 3, 1, 1, 0x60F423F);
 
 		// rewind 25 minutes forward
 		await np.incTime(1500);
@@ -137,8 +137,8 @@ contract('Miner (NowProvider)', (accounts) => {
 		await plot.mint(accounts[0], 0, toBN("0x0200016464646400"));
 		await plot.mint(accounts[0], 0, toBN("0x0200016464646400"));
 		// create a high grade low level gem and high grade high level gem
-		await gem.mint(accounts[0], 1, 0, 1, 1, 0x60F423F);
-		await gem.mint(accounts[0], 2, 0, 1, 5, 0x60F423F);
+		await gem.mint(accounts[0], 1, 1, 1, 0x60F423F);
+		await gem.mint(accounts[0], 2, 1, 5, 0x60F423F);
 
 		// rewind 4 minutes forward to accumulate enough resting energy
 		await np.incTime(240);
@@ -239,7 +239,7 @@ contract('Miner (NowProvider)', (accounts) => {
 		// create plot in Antarctica
 		await plot.mint(accounts[0], 0, toBN("0x0200236464646400"));
 		// create a high grade high level gem
-		await gem.mint(accounts[0], 1, 1, 1, 5, 0x60F423F);
+		await gem.mint(accounts[0], 1, 1, 5, 0x60F423F);
 
 		// bind gem to a plot
 		await miner.bind(1, 1);
@@ -301,7 +301,7 @@ contract('Miner (NowProvider)', (accounts) => {
 		// create plot in Antarctica
 		await plot.mint(accounts[0], 0, toBN("0x0200236464646400"));
 		// create a high grade high level gem
-		await gem.mint(accounts[0], 1, 1, 1, 5, 0x60F423F);
+		await gem.mint(accounts[0], 1, 1, 5, 0x60F423F);
 
 		// bind gem to a plot
 		await miner.bind(1, 1);
@@ -436,32 +436,32 @@ contract('Miner (NowProvider)', (accounts) => {
 
 		// mint first 5 special gems according to the table
 		gems.push(0xF001);
-		await gem.mint(player, 0xF001, 0, matchingColor, 5, 0x06000000);
+		await gem.mint(player, 0xF001, matchingColor, 5, 0x06000000);
 		await miner.setSpecialGemMultiplier(0xF001, 100);
 		gems.push(0xF002);
-		await gem.mint(player, 0xF002, 0, nonMatchingColor, 2, 0x05000000);
+		await gem.mint(player, 0xF002, nonMatchingColor, 2, 0x05000000);
 		await miner.setSpecialGemMultiplier(0xF002, 150);
 		gems.push(0xF003);
-		await gem.mintWith(player, 0xF003, 0, matchingColor, 5, 0x040F4240, 600); // grade value 1,000,000
+		await gem.mintWith(player, 0xF003, matchingColor, 5, 0x040F4240, 600); // grade value 1,000,000
 		await miner.setSpecialGemMultiplier(0xF003, 200);
 		gems.push(0xF004);
-		await gem.mintWith(player, 0xF004, 0, nonMatchingColor, 4, 0x06000000, 1200);
+		await gem.mintWith(player, 0xF004, nonMatchingColor, 4, 0x06000000, 1200);
 		await miner.setSpecialGemMultiplier(0xF004, 0);
 		gems.push(0xF005);
-		await gem.mint(player, 0xF005, 0, nonMatchingColor, 5, 0x060BBCCF); // grade value 769,231
+		await gem.mint(player, 0xF005, nonMatchingColor, 5, 0x060BBCCF); // grade value 769,231
 		await miner.setSpecialGemMultiplier(0xF005, 80);
 
 		// mint next 10 regular gems according to the table above
-		gems.push((await gem.mintNext(player, 0, matchingColor, 5, 0x06EAC028)).receipt.logs[0].args[2].toNumber()); // grade value 15,384,616
-		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 4, 0x05000000)).receipt.logs[0].args[2].toNumber());
-		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 3, 0x05000000)).receipt.logs[0].args[2].toNumber());
-		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 2, 0x040F4240)).receipt.logs[0].args[2].toNumber()); // grade value 1,000,000
-		gems.push((await gem.mintNext(player, 0, matchingColor, 1, 0x030BDE32)).receipt.logs[0].args[2].toNumber()); // grade value 777,778
-		gems.push((await gem.mintNext(player, 0, matchingColor, 1, 0x02000000)).receipt.logs[0].args[2].toNumber());
-		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 2, 0x010C3500)).receipt.logs[0].args[2].toNumber()); // grade value 800,000
-		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 3, 0x050CB736)).receipt.logs[0].args[2].toNumber()); // grade value 833,334
-		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 5, 0x06000000)).receipt.logs[0].args[2].toNumber());
-		gems.push((await gem.mintNext(player, 0, nonMatchingColor, 5, 0x06EAC028)).receipt.logs[0].args[2].toNumber()); // grade value 15,384,616
+		gems.push((await gem.mintNext(player, matchingColor, 5, 0x06EAC028)).receipt.logs[0].args[2].toNumber()); // grade value 15,384,616
+		gems.push((await gem.mintNext(player, nonMatchingColor, 4, 0x05000000)).receipt.logs[0].args[2].toNumber());
+		gems.push((await gem.mintNext(player, nonMatchingColor, 3, 0x05000000)).receipt.logs[0].args[2].toNumber());
+		gems.push((await gem.mintNext(player, nonMatchingColor, 2, 0x040F4240)).receipt.logs[0].args[2].toNumber()); // grade value 1,000,000
+		gems.push((await gem.mintNext(player, matchingColor, 1, 0x030BDE32)).receipt.logs[0].args[2].toNumber()); // grade value 777,778
+		gems.push((await gem.mintNext(player, matchingColor, 1, 0x02000000)).receipt.logs[0].args[2].toNumber());
+		gems.push((await gem.mintNext(player, nonMatchingColor, 2, 0x010C3500)).receipt.logs[0].args[2].toNumber()); // grade value 800,000
+		gems.push((await gem.mintNext(player, nonMatchingColor, 3, 0x050CB736)).receipt.logs[0].args[2].toNumber()); // grade value 833,334
+		gems.push((await gem.mintNext(player, nonMatchingColor, 5, 0x06000000)).receipt.logs[0].args[2].toNumber());
+		gems.push((await gem.mintNext(player, nonMatchingColor, 5, 0x06EAC028)).receipt.logs[0].args[2].toNumber()); // grade value 15,384,616
 
 		// array to store expected mining rates of the gems
 		const rates = [52.5, 37.5, 18.9, 50, 48, 262.5, 25, 25, 9, 4.2, 2.1, 1.2, 30.000004, 50, 250.000008].map((e) => Math.floor(e * 1000000));

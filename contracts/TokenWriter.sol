@@ -17,7 +17,6 @@ interface GemV2 {
    *      if setting initial energetic age for the token
    * @param _to an address to mint token to (first owner of the token)
    * @param _tokenId ID of the token to mint
-   * @param _plotId ID of the plot that gem "belongs to" (was found in)
    * @param _color gem color
    * @param _level gem level
    * @param _grade grade of the gem,
@@ -25,7 +24,7 @@ interface GemV2 {
    *      low 24 bits - grade value
    * @param _age energetic age of the gem
    */
-  function mintWith(address _to, uint24 _tokenId, uint24 _plotId, uint8 _color, uint8 _level, uint32 _grade, uint32 _age) external;
+  function mintWith(address _to, uint24 _tokenId, uint8 _color, uint8 _level, uint32 _grade, uint32 _age) external;
 }
 
 /**
@@ -159,7 +158,7 @@ contract TokenWriter is AccessMultiSig {
       GemV2(gemAddress).mintWith(
         _to,                      // to
         uint24(_data[i] >> 104),  // gem ID
-        uint24(_data[i] >> 80),   // plot ID
+        //uint24(_data[i] >> 80),   // plot ID
         uint8(_data[i] >> 72),    // color
         uint8(_data[i] >> 64),    // level
         uint32(_data[i] >> 32),   // grade
@@ -196,7 +195,7 @@ contract TokenWriter is AccessMultiSig {
       GemV2(gemAddress).mintWith(
         owners[i],                // to
         uint24(_data[i] >> 104),  // gem ID
-        uint24(_data[i] >> 80),   // plot ID
+        //uint24(_data[i] >> 80),   // plot ID
         uint8(_data[i] >> 72),    // color
         uint8(_data[i] >> 64),    // level
         uint32(_data[i] >> 32),   // grade

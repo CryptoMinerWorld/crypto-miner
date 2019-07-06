@@ -227,7 +227,7 @@ contract('Miner', (accounts) => {
 		// mint a gem with a properties simple to calculate:
 		// color hits the month: +5%
 		// grade is AAA zero value: x50 rate
-		await gem.mint(accounts[0], specialGemId, 0, new Date().getMonth() + 1, 1, 0x06000000);
+		await gem.mint(accounts[0], specialGemId, new Date().getMonth() + 1, 1, 0x06000000);
 
 		// expected mining rate is 50 * 1.05 * 2.00
 		assert.equal(Math.floor(1000000 * 50 * 1.05 * 2.00), await miner.miningRateOf(specialGemId));
@@ -258,11 +258,11 @@ contract('Miner', (accounts) => {
 
 		// create few different gems
 		// low grade high level gem (level 5, grade D, value 0.8)
-		await gem.mint(accounts[0], 1, 1, 1, 5, 0x10C3500);
+		await gem.mint(accounts[0], 1, 1, 5, 0x10C3500);
 		// mid level mid grade gem (level 3, grade A, value 0.4)
-		await gem.mint(accounts[0], 2, 1, 1, 3, 0x4061A80);
+		await gem.mint(accounts[0], 2, 1, 3, 0x4061A80);
 		// high grade low level gem (level 1, grade AAA+, value 0.99..)
-		await gem.mint(accounts[0], 3, 1, 1, 1, 0x60F423F);
+		await gem.mint(accounts[0], 3, 1, 1, 0x60F423F);
 
 		// energetic age of all gems is zero
 		assert.equal(0, await miner.energeticAgeOf(1), "non-zero energetic age for gem ID 1");
@@ -333,7 +333,7 @@ contract('Miner', (accounts) => {
 		);
 
 		// create a high grade low level gem
-		await gem.mint(accounts[0], 1, 1, 1, 1, 0x60F423F);
+		await gem.mint(accounts[0], 1, 1, 1, 0x60F423F);
 		// create a plot in Antarctica
 		await plot.mint(accounts[0], 0, "0x0200236464646400");
 
