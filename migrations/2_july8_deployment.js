@@ -103,7 +103,7 @@ module.exports = async function(deployer, network, accounts) {
 				GemERC721:          "0xff878a455142391461d1561f3e3caf65a5a9d7fa",
 
 
-				PlotSaleStartUTC:   1562608800, // 07/08/2019 @ 6:00pm UTC
+				PlotSaleStartUTC:   1563210000, // 07/15/2019 @ 5:00pm UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
 				optionalPhases: {
