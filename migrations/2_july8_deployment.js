@@ -88,7 +88,7 @@ module.exports = async function(deployer, network, accounts) {
 				BalanceProxy:       "0xbd7Ca763E12d23535B59949ade53c104BD88d42F",
 				TokenHelper:        "0xef47ac9b0132895a37c31530d520ff22bac89322",
 				TokenReader:        "0x7c7a04e9cbaa111eb1f893e86a0fa66c613b2fd3",
-				TokenWriter:        "0x7e3e2b28a8b898321512c9a8c7ac5bc5d2d43a69",
+				TokenWriter:        "0xf2a0DD3C7F685C93AE66F6a43315e11AD26934BF",
 
 				DutchAuction:       "0x2e55de1e33071415a75986e16529b146cfa50b1d",
 
@@ -100,7 +100,7 @@ module.exports = async function(deployer, network, accounts) {
 				GoldERC20:          "0x7ed3501e9e43cf0389f9b3f010b60bb78c6da358",
 				CountryERC721:      "0x15419f3a110967e8898b1c2d49acb22deec5235d",
 				PlotERC721:         "0x82b6e2cc232974b42841cd06cb6c050f70cb2cf7",
-				GemERC721:          "0xff878a455142391461d1561f3e3caf65a5a9d7fa",
+				GemERC721:          "0x18f39Be69093b2d458ae9B17B6A56E026A6303F9",
 
 
 				PlotSaleStartUTC:   1563210000, // 07/15/2019 @ 5:00pm UTC
@@ -112,6 +112,7 @@ module.exports = async function(deployer, network, accounts) {
 					],
 					writePlotSaleCoupons: false,
 					writeSilverSaleCoupons: false,
+/*
 					migration: {
 						SilverERC20: false,
 						GoldERC20: false,
@@ -119,6 +120,7 @@ module.exports = async function(deployer, network, accounts) {
 						CountryERC721: false,
 						GemERC721: false,
 					},
+*/
 					enablePermissions: false,
 					disablePermissions: false,
 				},
@@ -134,7 +136,7 @@ module.exports = async function(deployer, network, accounts) {
 				BalanceProxy:       "0xc90b90B764e0061C5e355d5101146580d17fBc9D",
 				TokenHelper:        "0x040d04f1515BC4aF48CB3346Bb7fA5f2eD1d5Ea9",
 				TokenReader:        "0xA66e81eAa45F98D913CdAEc8FBE5c746769f58c7",
-				TokenWriter:        "0xDe59Bb209e41a2833B770b0340B25b58F7d3F1De",
+				TokenWriter:        "0xf0763AcE6b6F675B9EE44Ee3d48796e267a617a9",
 
 				DutchAuction:       "0x0Db40FA7f885148A5Ae37A392843e2372E39C415",
 
@@ -145,16 +147,16 @@ module.exports = async function(deployer, network, accounts) {
 				SilverERC20:        "0x5489BE92c2712492Bc86c2694834FDD5dFE3936e",
 				GoldERC20:          "0x9310Af541dc786febEb2368581Cf86604745AC95",
 				CountryERC721:      "0xd41541Fec0DE95655E978b75BcccFF271E67170D",
-				PlotERC721:         "0x8034EbB5A03E97Fa6C22Ef13e0E05B66e2A3eF2D",
-				GemERC721:          "0x780cA6cF71677070ae6a25D42194993fe56a4BBf",
+				PlotERC721:         "0x87E637100f261a6205a5dfA4d503F21de56E8B28",
+				GemERC721:          "0x713dF324cFf596c03a486CeA507d89DfF2Ca7Ef9",
 
-				Workshop:           "0x30e377481AadA0716f80a209D8c292DA4D217E71",
+				Workshop:           "0x2e798552213fe658D30c22dfFD60Cf38754DCbf0",
 				SilverSale:         "0x7591Ec27053b9D3863572e3c21E2b0EF3f10bE59",
 
-				PlotSale:           "0xD25af9e4C1aaB550C272711FA7B257f8a8377104",
-				PlotAntarctica:     "0x2F5Cff109B6BCBdda0e3aF8CB2d0affFceC128c4",
+				PlotSale:           "0x87dA9D867b20bCd7Ad98DCb071485DA3C01C2b2e",
+				PlotAntarctica:     "0x3f115D3676f13f82c8B118e9eDA9B7740e46528d",
 
-				Miner:              "0x0D026d1436758156fade1153EFC13AB42d71b5AD",
+				Miner:              "0xf13b9b4612637e4b784883a9Ef4f0741D88Eb26c",
 
 				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
@@ -258,8 +260,8 @@ async function deployInstances(deployer, conf, instances) {
 	// deploy all missing instances first, healing the missing parts of the config
 	console.log("mandatory phase: config healing (deploy missing instances)");
 
-	// a place to store pending transactions (promises)
-	const txs = [];
+	// keep track of deployed instances count
+	let deployedInstances = 0;
 
 	// FoundersPlots binding/deployment
 	if(conf.FoundersPlots) {
@@ -268,7 +270,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying FoundersPlotsMock to be used as FoundersPlots");
-		txs.push(deployer.deploy(FoundersPlots));
+		await deployer.deploy(FoundersPlots);
+		deployedInstances++;
 	}
 
 	// BalanceProxy binding/deployment
@@ -278,7 +281,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying BalanceProxy");
-		txs.push(deployer.deploy(BalanceProxy));
+		await deployer.deploy(BalanceProxy);
+		deployedInstances++;
 	}
 
 	// TokenHelper binding/deployment
@@ -288,7 +292,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying TokenHelper");
-		txs.push(deployer.deploy(TokenHelper));
+		await deployer.deploy(TokenHelper);
+		deployedInstances++;
 	}
 
 	// TokenReader binding/deployment
@@ -298,7 +303,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying TokenReader");
-		txs.push(deployer.deploy(TokenReader));
+		await deployer.deploy(TokenReader);
+		deployedInstances++;
 	}
 
 	// TokenWriter binding/deployment
@@ -308,7 +314,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying TokenWriter");
-		txs.push(deployer.deploy(TokenWriter));
+		await deployer.deploy(TokenWriter);
+		deployedInstances++;
 	}
 
 	// DutchAuction binding/deployment
@@ -318,7 +325,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying DutchAuction");
-		txs.push(deployer.deploy(DutchAuction));
+		await deployer.deploy(DutchAuction);
+		deployedInstances++;
 	}
 
 	// RefPointsTracker binding/deployment
@@ -328,7 +336,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying RefPointsTracker");
-		txs.push(deployer.deploy(RefPointsTracker));
+		await deployer.deploy(RefPointsTracker);
+		deployedInstances++;
 	}
 
 	// ArtifactERC20 binding/deployment
@@ -338,7 +347,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying ArtifactERC20");
-		txs.push(deployer.deploy(ArtifactERC20));
+		await deployer.deploy(ArtifactERC20);
+		deployedInstances++;
 	}
 
 	// FoundersKeyERC20 binding/deployment
@@ -348,7 +358,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying FoundersKeyERC20");
-		txs.push(deployer.deploy(FoundersKeyERC20));
+		await deployer.deploy(FoundersKeyERC20);
+		deployedInstances++;
 	}
 
 	// ChestKeyERC20 binding/deployment
@@ -358,7 +369,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying ChestKeyERC20");
-		txs.push(deployer.deploy(ChestKeyERC20));
+		await deployer.deploy(ChestKeyERC20);
+		deployedInstances++;
 	}
 
 	// SilverERC20 binding/deployment
@@ -368,7 +380,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying SilverERC20");
-		txs.push(deployer.deploy(SilverERC20));
+		await deployer.deploy(SilverERC20);
+		deployedInstances++;
 	}
 
 	// GoldERC20 binding/deployment
@@ -378,7 +391,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying GoldERC20");
-		txs.push(deployer.deploy(GoldERC20));
+		await deployer.deploy(GoldERC20);
+		deployedInstances++;
 	}
 
 	// CountryERC721 binding/deployment
@@ -388,7 +402,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying CountryERC721");
-		txs.push(deployer.deploy(CountryERC721, COUNTRY_DATA));
+		await deployer.deploy(CountryERC721, COUNTRY_DATA);
+		deployedInstances++;
 	}
 
 	// PlotERC721 binding/deployment
@@ -398,7 +413,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying PlotERC721");
-		txs.push(deployer.deploy(PlotERC721));
+		await deployer.deploy(PlotERC721);
+		deployedInstances++;
 	}
 
 	// GemERC721 binding/deployment
@@ -408,11 +424,10 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying GemERC721");
-		txs.push(deployer.deploy(GemERC721));
+		await deployer.deploy(GemERC721);
+		deployedInstances++;
 	}
 
-	// wait for all transactions to complete and output gas usage
-	await waitForAll(txs);
 
 	// link newly deployed instances
 	if(!conf.FoundersPlots) {
@@ -483,7 +498,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying Workshop");
-		txs.push(deployer.deploy(Workshop, conf.GemERC721, conf.SilverERC20, conf.GoldERC20));
+		await deployer.deploy(Workshop, conf.GemERC721, conf.SilverERC20, conf.GoldERC20);
+		deployedInstances++;
 	}
 
 	// SilverSale binding/deployment
@@ -493,7 +509,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying SilverSale");
-		txs.push(deployer.deploy(
+		await deployer.deploy(
 			SilverSale,
 			conf.RefPointsTracker,
 			conf.SilverERC20,
@@ -501,7 +517,8 @@ async function deployInstances(deployer, conf, instances) {
 			conf.FoundersChest,
 			conf.Beneficiary,
 			conf.SilverSaleStartUTC,
-		));
+		);
+		deployedInstances++;
 	}
 
 	// PlotSale binding/deployment
@@ -511,7 +528,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying PlotSale");
-		txs.push(deployer.deploy(
+		await deployer.deploy(
 			PlotSale,
 			conf.RefPointsTracker,
 			conf.CountryERC721,
@@ -520,7 +537,8 @@ async function deployInstances(deployer, conf, instances) {
 			conf.MonthlyChest,
 			conf.Beneficiary,
 			conf.PlotSaleStartUTC,
-		));
+		);
+		deployedInstances++;
 	}
 
 	// PlotAntarctica binding/deployment
@@ -530,7 +548,8 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying PlotAntarctica");
-		txs.push(deployer.deploy(PlotAntarctica, conf.FoundersPlots, conf.PlotERC721));
+		await deployer.deploy(PlotAntarctica, conf.FoundersPlots, conf.PlotERC721);
+		deployedInstances++;
 	}
 
 	// Miner binding/deployment
@@ -540,7 +559,7 @@ async function deployInstances(deployer, conf, instances) {
 	}
 	else {
 		console.log("deploying Miner");
-		txs.push(deployer.deploy(
+		await deployer.deploy(
 			Miner,
 			conf.GemERC721,
 			conf.PlotERC721,
@@ -550,11 +569,9 @@ async function deployInstances(deployer, conf, instances) {
 			conf.ArtifactERC20,
 			conf.FoundersKeyERC20,
 			conf.ChestKeyERC20,
-		));
+		);
+		deployedInstances++;
 	}
-
-	// wait for all transactions to complete and output gas usage
-	await waitForAll(txs);
 
 	// link newly deployed instances
 	if(!conf.Workshop) {
@@ -578,10 +595,10 @@ async function deployInstances(deployer, conf, instances) {
 		conf.Miner = instances.Miner.address;
 	}
 
-	console.log("mandatory phase complete, %o config records healed / instances deployed", txs.length);
+	console.log("mandatory phase complete, %o config records healed / instances deployed", deployedInstances);
 
 	// output healed config if any new instances were deployed
-	if(txs.length > 0) {
+	if(deployedInstances > 0) {
 		console.log("healed config: %o", conf);
 	}
 }
@@ -800,13 +817,15 @@ async function mintTestTokens(accounts, instances) {
 
 	// mint few ERC721 tokens
 	// gems – GemERC721
+	const k = 12;
+	const n = k * testers.length;
 	if(!await instances.GemERC721.exists(1)) {
-		console.log("minting 45 gems for 3 test accounts (15 gems for each account)");
+		console.log("minting %o gems for %o test accounts (%o gems for each account)", n, testers.length, k);
 		const colors = [1, 2, 5, 6, 7, 9, 10];
 		const owners = [];
 		const gems = [];
 
-		for(let i = 0; i < 12 * testers.length; i++) {
+		for(let i = 0; i < n; i++) {
 			const to = testers[i % testers.length];
 			const color = colors[i % colors.length];
 			const level = 1 + i % 5;
@@ -815,7 +834,7 @@ async function mintTestTokens(accounts, instances) {
 			const grade = gradeType << 24 | gradeValue;
 
 			owners.push(to);
-			gems.push(packGemData([i + 1, i + 1, color, level, grade, gradeType, gradeValue, 0]));
+			gems.push(packGemData([i + 1, 0, color, level, grade, gradeType, gradeValue, 0]));
 		}
 
 		// get link to instances of interest
@@ -828,7 +847,7 @@ async function mintTestTokens(accounts, instances) {
 			await token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
 		}
 		// write all the gems
-		console.log("writing " + gems.length + " gems");
+		console.log("writing %o gems", gems.length);
 		await writer.writeBulkGemV2Data(token.address, owners, gems);
 		// clean the permissions used
 		if(!(await token.userRoles(writer.address)).isZero()) {
@@ -837,7 +856,7 @@ async function mintTestTokens(accounts, instances) {
 		}
 	}
 	else {
-		console.log("skipping minting 45 gems – gems already exist");
+		console.log("skipping minting %o gems – gems already exist", n);
 	}
 
 	// we'll be tracking nonce, yeah!
@@ -1121,16 +1140,16 @@ async function waitForAll(txs) {
 
 		console.log("\twaiting for %o transactions to complete", txs.length);
 
-		(await Promise.all(txs)).forEach((tx) => {
+		for(const tx of (await Promise.all(txs))) {
 			// measure gas used
-			const gasUsed = tx.receipt.gasUsed;
+			const gasUsed = (tx.receipt? tx.receipt: await web3.eth.getTransactionReceipt(tx.transactionHash)).gasUsed;
 
 			// update cumulative gas used
 			cumulativeGasUsed += gasUsed;
 
 			// log the result
 			console.log("\ttransaction complete, %o gas used", gasUsed);
-		});
+		}
 
 		// log cumulative gas used
 		console.log("\tcumulative gas used: %o (%o ETH)", cumulativeGasUsed, Math.ceil(cumulativeGasUsed / 1000000) / 1000);
