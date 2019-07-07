@@ -415,17 +415,17 @@ contract('Miner (NowProvider)', (accounts) => {
 		/**
 		 * idx | mines | level | grade | spec | color | rate | age  | nrg | r.nrg
 		 * ----+-------+-------+-------+------+-------+------+------+-----+------
-		 *  1  |   W   |   5   | x50   | x1.0 | x1.05 | 52.5 |      |     |
+		 *  1  |   W   |   2   | x4    | x3.5 | x1.05 | 14.7 |      |     |
 		 *  2  |   W   |   2   | x25   | x1.5 | x1.00 | 37.5 |      |     |
 		 *  3  |   W   |   5   | x9    | x2.0 | x1.05 | 18.9 | 600  | 322 | 6085
-		 *  4  |   W   |   4   | x50   |      | x1.00 | 50.0 | 1200 | 638 | 31900
-		 *  5  |   W   |   5   | x60   | x0.8 | x1.00 | 48.0 |      |     |
+		 *  4  |   W   |   4   | x50   | x1.0 | x1.00 | 50.0 | 1200 | 638 | 31900
+		 *  5  |   W   |   5   | x48   | x1.0 | x1.00 | 48.0 |      |     |
 		 * ----+-------+-------+-------+------+-------+------+------+-----+------
 		 *  6  |   W   |   5   | x250  |      | x1.05 | 262.5|
 		 *  7  |   W   |   4   | x25   |      | x1.00 | 25.0 |
 		 *  8  |   W   |   3   | x25   |      | x1.00 | 25.0 |
 		 *  9  |   W   |   2   | x9    |      | x1.00 |  9.0 |
-		 * 10  |   W   |   1   | x4    |      | x1.05 |  4.2 |
+		 * 10  |   W   |   5   | x50   |      | x1.05 | 52.5 |
 		 * ----+-------+-------+-------+------+-------+--------------------------
 		 * 11  |   A   |   1   | x2    |      | x1.05 |  2.1 |
 		 * 12  |   A   |   2   | x1.2  |      | x1.00 |  1.2 |
@@ -436,27 +436,27 @@ contract('Miner (NowProvider)', (accounts) => {
 
 		// mint first 5 special gems according to the table
 		gems.push(0xF001);
-		await gem.mint(player, 0xF001, matchingColor, 5, 0x06000000);
-		await miner.setSpecialGemMultiplier(0xF001, 100);
+		await gem.mint(player, 0xF001, matchingColor, 2, 0x030BDE32); // grade value 777,778
+		await miner.setSpecialGemMultiplier(0xF001, 250);
 		gems.push(0xF002);
 		await gem.mint(player, 0xF002, nonMatchingColor, 2, 0x05000000);
-		await miner.setSpecialGemMultiplier(0xF002, 150);
+		await miner.setSpecialGemMultiplier(0xF002, 50);
 		gems.push(0xF003);
 		await gem.mintWith(player, 0xF003, matchingColor, 5, 0x040F4240, 600); // grade value 1,000,000
-		await miner.setSpecialGemMultiplier(0xF003, 200);
+		await miner.setSpecialGemMultiplier(0xF003, 100);
 		gems.push(0xF004);
 		await gem.mintWith(player, 0xF004, nonMatchingColor, 4, 0x06000000, 1200);
 		await miner.setSpecialGemMultiplier(0xF004, 0);
 		gems.push(0xF005);
-		await gem.mint(player, 0xF005, nonMatchingColor, 5, 0x060BBCCF); // grade value 769,231
-		await miner.setSpecialGemMultiplier(0xF005, 80);
+		await gem.mint(player, 0xF005, nonMatchingColor, 5, 0x053A7DF6); // grade value 3,833,334
+		await miner.setSpecialGemMultiplier(0xF005, 0);
 
 		// mint next 10 regular gems according to the table above
 		gems.push((await gem.mintNext(player, matchingColor, 5, 0x06EAC028)).receipt.logs[0].args[2].toNumber()); // grade value 15,384,616
 		gems.push((await gem.mintNext(player, nonMatchingColor, 4, 0x05000000)).receipt.logs[0].args[2].toNumber());
 		gems.push((await gem.mintNext(player, nonMatchingColor, 3, 0x05000000)).receipt.logs[0].args[2].toNumber());
 		gems.push((await gem.mintNext(player, nonMatchingColor, 2, 0x040F4240)).receipt.logs[0].args[2].toNumber()); // grade value 1,000,000
-		gems.push((await gem.mintNext(player, matchingColor, 1, 0x030BDE32)).receipt.logs[0].args[2].toNumber()); // grade value 777,778
+		gems.push((await gem.mintNext(player, matchingColor, 5, 0x06000000)).receipt.logs[0].args[2].toNumber());
 		gems.push((await gem.mintNext(player, matchingColor, 1, 0x02000000)).receipt.logs[0].args[2].toNumber());
 		gems.push((await gem.mintNext(player, nonMatchingColor, 2, 0x010C3500)).receipt.logs[0].args[2].toNumber()); // grade value 800,000
 		gems.push((await gem.mintNext(player, nonMatchingColor, 3, 0x050CB736)).receipt.logs[0].args[2].toNumber()); // grade value 833,334
@@ -464,7 +464,7 @@ contract('Miner (NowProvider)', (accounts) => {
 		gems.push((await gem.mintNext(player, nonMatchingColor, 5, 0x06EAC028)).receipt.logs[0].args[2].toNumber()); // grade value 15,384,616
 
 		// array to store expected mining rates of the gems
-		const rates = [52.5, 37.5, 18.9, 50, 48, 262.5, 25, 25, 9, 4.2, 2.1, 1.2, 30.000004, 50, 250.000008].map((e) => Math.floor(e * 1000000));
+		const rates = [14.7, 37.5, 18.9, 50, 48, 262.5, 25, 25, 9, 52.5, 2.1, 1.2, 30.000004, 50, 250.000008].map((e) => Math.floor(e * 1000000));
 
 		// ensure amount of plots and gems matches
 		assert.equal(plots.length, gems.length, "plots/gems amount mismatch");
@@ -513,7 +513,7 @@ contract('Miner (NowProvider)', (accounts) => {
 		/**
 		 * idx | mines | level | rate | 0  | 1d | 2d | 4d | 28d
 		 * ----+-------+-------+------+----+----+----+----+----
-		 *  1  |   W   |   5   | 52.5 |  0 | 86 | 99 |  * |  *
+		 *  1  |   W   |   2   | 14.7 |  0 | 60 | 65*| 35*| 35*
 		 *  2  |   W   |   2   | 37.5 |  0 | 65*| 65*| 65*| 65*
 		 *  3  |   W   |   5   | 18.9 | 39 | 68 | 80 | 95 |  *
 		 *  4  |   W   |   4   | 50.0 | 68 | 93 | 95*| 95*| 95*
@@ -523,7 +523,7 @@ contract('Miner (NowProvider)', (accounts) => {
 		 *  7  |   W   |   4   | 25.0 |  0 | 70 | 85 | 95*| 95*
 		 *  8  |   W   |   3   | 25.0 |  0 | 70 | 85*| 85*| 85*
 		 *  9  |   W   |   2   | 9.0  |  0 | 48 | 65*| 65*| 65*
-		 * 10  |   W   |   1   | 4.2  |  0 | 35*| 35*| 35*| 35*
+		 * 10  |   W   |   5   | 52.5 |  0 | 86 | 99 |  * |  *
 		 * ----+-------+-------+------+--------------+----+----
 		 * 11  |   A   |   1   | 2.1  |  0 | 33 | 35*| 35*| 35*
 		 * 12  |   A   |   2   | 1.2  |  0 | 19 | 35 | 39 |  *
@@ -532,11 +532,11 @@ contract('Miner (NowProvider)', (accounts) => {
 		 * 15  |   A   |   5   | 250  |  0 |  * |  * |  * |  *
 		 */
 		const offsets = [
-			[  0,  0,  39, 68,   0,   0,  0,  0,  0,  0,  0,   0,   0,   0,   0],
-			[ 86, 65,  68, 93,  85, 100, 70, 70, 48, 35, 33,  19,  90, 100, 100],
-			[ 99, 65,  80, 95,  98, 100, 85, 85, 65, 35, 35,  35, 100, 100, 100],
-			[100, 65,  95, 95, 100, 100, 95, 85, 65, 35, 35,  39, 100, 100, 100],
-			[100, 65, 100, 95, 100, 100, 95, 85, 65, 35, 35, 100, 100, 100, 100]
+			[ 0,  0,  39, 68,   0,   0,  0,  0,  0,   0,  0,   0,   0,   0,   0],
+			[60, 65,  68, 93,  85, 100, 70, 70, 48,  86, 33,  19,  90, 100, 100],
+			[65, 65,  80, 95,  98, 100, 85, 85, 65,  99, 35,  35, 100, 100, 100],
+			[65, 65,  95, 95, 100, 100, 95, 85, 65, 100, 35,  39, 100, 100, 100],
+			[65, 65, 100, 95, 100, 100, 95, 85, 65, 100, 35, 100, 100, 100, 100]
 		];
 
 		// verify initial mining progress

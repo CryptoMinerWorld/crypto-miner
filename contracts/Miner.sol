@@ -243,11 +243,11 @@ contract Miner is AccessMultiSig {
   uint8[] public gemColors = [1, 2, 5, 6, 7, 9, 10];
 
   /**
-   * @dev Mapping contains mining rate multipliers for special gems
-   * @dev Zero-mapping is treated as one (no multiplier)
-   * @dev Multiplier dimension is percents, meaning the value 100 percents is equal to one
-   *      and does nothing (value 0 is treated in the same way – as unset)
-   * @dev Special gems are gems in ID range (0xF000 - 0x10000) – both bounds exclusive
+   * @dev Mapping contains one-based mining rate multipliers for special gems,
+   *      meaning zero is treated as one, one as two and so on
+   * @dev Multiplier dimension is percents, meaning the value 100 percents is one
+   *      and performs x2 multiplication (one based, 1 + 1 = 2)
+   * @dev Special gems are gems in ID range (0xF000 - 0xF100) – both bounds exclusive
    * @dev maps gemId => mining rate multiplier
    */
   mapping(uint24 => uint8) public specialGemMultipliers;
@@ -518,7 +518,7 @@ contract Miner is AccessMultiSig {
     require(isSenderInRole(ROLE_MINING_RATES_PROVIDER));
 
     // ensure gem ID is in proper bounds
-    require(gemId > 0xF000 && gemId < 0x10000);
+    require(gemId > 0xF000 && gemId < 0xF100);
 
     // update the mining rate
     specialGemMultipliers[gemId] = multiplier;
@@ -1657,24 +1657,20 @@ contract Miner is AccessMultiSig {
     // for gem color equal current month – add 5% mining rate bonus
     if(TimeUtils.monthIndex() == color) {
       // multiplication by 21 may overflow uint32 in this particular case
-      // since maximum value which `miningRate` may produce is 268103808,
-      // multiplied by 21 is 5630179968 (0x1 4F 95 BA 80)
+      // since maximum value which `miningRate` may produce is 268,103,795,
+      // multiplied by 21 is 5,630,179,695 (0x1 4F 95 B9 6F)
       // therefore do division first and multiplication next
+      // maximum possible rate at this point is 281,508,969
       rate = rate / 20 * 21;
     }
 
-    // for special gems in range (0xF000, 0x10000)
-    if(gemId > 0xF000 && gemId < 0x10000) {
-      // load special gem mining rate multiplier
-      uint8 percent = specialGemMultipliers[gemId];
-
-      // if multiplier is set (non-zero value)
-      if(percent != 0) {
-        // apply the multiplier
-        // maximum percent value is 255, which means multiplication by 2.55
-        // maximum outcome of this multiplication is 717847946, which fits into uint32
-        rate = rate / 100 * percent;
-      }
+    // for special gems in range (0xF000, 0xF100)
+    if(gemId > 0xF000 && gemId < 0xF100) {
+      // load special gem mining rate multiplier and apply it
+      // maximum percent value is 255, which means multiplication by 3.55
+      // maximum outcome of this multiplication is 999,356,595, which fits into uint32
+      // note: specialGemMultipliers is uint8 and overflows the addition
+      rate = rate / 100 * (uint16(100) + specialGemMultipliers[gemId]);
     }
 
     // return the result
@@ -1692,7 +1688,9 @@ contract Miner is AccessMultiSig {
    *        r = 25  + 6    * u * 10^-6, e = 5
    *        r = 50  + 13   * u * 10^-6, e = 6
    * @dev Gem's grade type and value are extracted from the packed `grade`
-   * @dev The value returned is multiplied by 10^8
+   * @dev The value returned is multiplied by 10^6
+   * @dev Maximum allowed input is 0x06FFFFFF (AAA, 16,777,215)
+   * @dev Maximum possible output is 0xFFAF073 (268,103,795)
    * @param grade grade of the gem,
    *      high 8 bits of which contain grade type e = [1, 2, 3, 4, 5, 6]
    *      low 24 bits contain grade value u = [0, 1000000)
@@ -1755,6 +1753,7 @@ contract Miner is AccessMultiSig {
    *      see `restingEnergy` for more details on resting energy
    * @notice The gem accumulates resting energy when it's not mining
    * @dev Throws if gem with the given ID doesn't exist
+   * @dev Maximum output value is 85,479,532 minutes (162 years)
    * @param gemId ID of the gem to calculate resting energy for
    * @return resting energy of the given gem (minutes of resting)
    */
@@ -1789,6 +1788,8 @@ contract Miner is AccessMultiSig {
    *      where `525600 = 365 * 24 * 60` is number of minutes in one year and `n = 10437`
    *      is the right root of equation `-7 * 10^-6 * x^2 + 0.5406x = 0`,
    *      `n` is the number of minutes to parabola peak
+   * @dev Maximum input value is 4,294,967,295 minutes (8171 years)
+   * @dev Maximum output value is 85,479,532 minutes (162 years)
    * @param energeticAge number of minutes the gem was not mining
    * @return Resting Energy (R) calculated based on Energetic Age (a) provided
    */
