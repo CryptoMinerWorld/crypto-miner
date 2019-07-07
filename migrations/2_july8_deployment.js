@@ -86,20 +86,20 @@ module.exports = async function(deployer, network, accounts) {
 
 				FoundersPlots:      "0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1",
 				BalanceProxy:       "0xbd7Ca763E12d23535B59949ade53c104BD88d42F",
-				TokenHelper:        "0xef47ac9b0132895a37c31530d520ff22bac89322",
-				TokenReader:        "0x7c7a04e9cbaa111eb1f893e86a0fa66c613b2fd3",
+				TokenHelper:        "0xeF47Ac9B0132895a37C31530d520Ff22BaC89322",
+				TokenReader:        "0x7C7a04E9CBaA111eb1f893E86a0Fa66c613b2fD3",
 				TokenWriter:        "0xf2a0DD3C7F685C93AE66F6a43315e11AD26934BF",
 
-				DutchAuction:       "0x2e55de1e33071415a75986e16529b146cfa50b1d",
+				DutchAuction:       "0x2e55DE1e33071415a75986E16529B146cfA50B1D",
 
 				RefPointsTracker:   "0x3263B47eE9D7Ce7d3f9F8A42C9804Ab03e7A0F60",
-				ArtifactERC20:      "0xe45eb0ce4d02203da6d3f325f325ec0a3399e961",
-				FoundersKeyERC20:   "0x6fe55f5d86cd246ba1ab3eef51db0666e79791c4",
-				ChestKeyERC20:      "0x87e6d5cee8ae979e2c5c9accec9ba05d390e54ec",
-				SilverERC20:        "0xf69b41bf8bb7e3f1dbf5f16e6f814342623d1a18",
-				GoldERC20:          "0x7ed3501e9e43cf0389f9b3f010b60bb78c6da358",
-				CountryERC721:      "0x15419f3a110967e8898b1c2d49acb22deec5235d",
-				PlotERC721:         "0x82b6e2cc232974b42841cd06cb6c050f70cb2cf7",
+				ArtifactERC20:      "0xE45eB0ce4D02203DA6D3F325F325eC0a3399E961",
+				FoundersKeyERC20:   "0x6fe55f5d86cd246BA1ab3eeF51DB0666E79791C4",
+				ChestKeyERC20:      "0x87e6d5CEe8Ae979E2C5C9AcCEc9bA05D390e54EC",
+				SilverERC20:        "0xF69B41BF8bb7E3f1Dbf5f16E6f814342623d1A18",
+				GoldERC20:          "0x7Ed3501e9E43CF0389f9B3F010B60Bb78C6DA358",
+				CountryERC721:      "0x15419F3a110967E8898b1C2D49aCB22DEEC5235d",
+				PlotERC721:         "0x82B6E2cC232974B42841cd06cb6c050F70cb2cF7",
 				GemERC721:          "0x18f39Be69093b2d458ae9B17B6A56E026A6303F9",
 
 
