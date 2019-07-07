@@ -12,7 +12,7 @@ const ChestKey = artifacts.require("./ChestKeyERC20.sol");
 const Miner = artifacts.require("./Miner.sol");
 
 // import ERC721Core dependencies
-import {ROLE_STATE_PROVIDER} from "./erc721_core";
+import {ROLE_EXT_WRITER, ROLE_STATE_PROVIDER} from "./erc721_core";
 // import PlotERC721 dependencies
 import {ROLE_OFFSET_PROVIDER} from "./erc721_core";
 // import GemERC721 dependencies
@@ -23,7 +23,7 @@ const FEATURE_MINING_ENABLED = 0x00000001;
 const ROLE_MINING_OPERATOR = 0x00000001;
 const ROLE_ROLLBACK_OPERATOR = 0x00000002;
 const ROLE_GEM_COLORS_PROVIDER = 0x00000004;
-const ROLE_MINING_RATES_PROVIDER = 0x00000008;
+const ROLE_SPECIAL_GEMS_PROVIDER = 0x00000008;
 
 // Miner smart contract tests
 contract('Miner', (accounts) => {
@@ -142,7 +142,7 @@ contract('Miner', (accounts) => {
 		}
 	});
 
-	it("mining rates: setting mining rates requires ROLE_MINING_RATES_PROVIDER permission", async() => {
+	it("mining rates: setting mining rates requires ROLE_SPECIAL_GEMS_PROVIDER permission", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
 		const plot = await Plot.new();
@@ -169,17 +169,23 @@ contract('Miner', (accounts) => {
 		const operator = accounts[1];
 
 		// define the function to check permissions for
-		const fn = async() => await miner.setSpecialGemMultiplier(0xF001, 150, {from: operator});
+		const fn = async() => await miner.setSpecialGem(0xF001, 150, 2, {from: operator});
 
 		// initially fn throws
 		await assertThrows(fn);
 		// after setting the required permission to operator
-		await miner.updateRole(operator, ROLE_MINING_RATES_PROVIDER);
+		await miner.updateRole(operator, ROLE_SPECIAL_GEMS_PROVIDER);
+		// fn still fails since miner itself doesn't have required permission
+		await assertThrows(fn);
+		// after setting required permission to the miner itself
+		await gem.updateRole(miner.address, ROLE_EXT_WRITER);
 		// fn succeeds
 		await fn();
 
 		// mining rate multiplier successfully updated for special gem
-		assert.equal(150, await miner.specialGemMultipliers(0xF001), "incorrect mining rate multiplier for 0xF001");
+		const tuple = await miner.getSpecialGem(0xF001);
+		assert.equal(150, tuple[0], "incorrect mining rate multiplier for 0xF001");
+		assert.equal(2, tuple[1], "incorrect special color for 0xF001");
 	});
 	it("mining rates: verify integrity of set/get mining rate multiplier", async() => {
 		// define miner dependencies
@@ -204,22 +210,27 @@ contract('Miner', (accounts) => {
 			chestKey.address
 		);
 
+		// give miner a permission to write gem's extension
+		await gem.updateRole(miner.address, ROLE_EXT_WRITER);
+
 		// ensure properties for non-special gem(s) cannot be set
-		await assertThrows(miner.setSpecialGemMultiplier, 0x1, 1);
-		await assertThrows(miner.setSpecialGemMultiplier, 0x401, 1);
-		await assertThrows(miner.setSpecialGemMultiplier, 0xF000, 1);
-		await assertThrows(miner.setSpecialGemMultiplier, 0x10000, 1);
-		await assertThrows(miner.setSpecialGemMultiplier, 0x11000, 1);
-		await assertThrows(miner.setSpecialGemMultiplier, 0x20000, 1);
+		await assertThrows(miner.setSpecialGem, 0x1, 1, 0);
+		await assertThrows(miner.setSpecialGem, 0x401, 1, 2);
+		await assertThrows(miner.setSpecialGem, 0xF000, 1, 2);
+		await assertThrows(miner.setSpecialGem, 0x10000, 1, 2);
+		await assertThrows(miner.setSpecialGem, 0x11000, 1, 2);
+		await assertThrows(miner.setSpecialGem, 0x20000, 1, 2);
 
 		// define special gem ID to operate on
 		const specialGemId = 0xF001;
 
 		// set special gem properties
-		await miner.setSpecialGemMultiplier(specialGemId, 200);
+		await miner.setSpecialGem(specialGemId, 100, 0);
 
 		// verify properties set
-		assert.equal(200, await miner.specialGemMultipliers(specialGemId), "incorrect mining rate multiplier for " + specialGemId);
+		const tuple = await miner.getSpecialGem(specialGemId);
+		assert.equal(100, tuple[0], "incorrect mining rate multiplier for " + specialGemId);
+		assert.equal(0, tuple[1], "incorrect special color for " + specialGemId);
 
 		// miningRateOf fails initially – no gem is actually minted ;)
 		await assertThrows(miner.miningRateOf, specialGemId);

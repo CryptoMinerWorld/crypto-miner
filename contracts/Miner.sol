@@ -136,6 +136,11 @@ contract Miner is AccessMultiSig {
      * @dev Unix timestamp of the `bind()` transaction
      */
     uint32 bound;
+
+    /**
+     * @dev Unix timestamp of the last `update()` transaction
+     */
+    uint32 updated;
   }
 
   /**
@@ -201,6 +206,8 @@ contract Miner is AccessMultiSig {
    *      gems and artifacts mine which plots
    * @dev Can be modified only by `__bind` and `__unbind` functions
    * @dev Maps plot ID => MiningData struct
+   * @dev If plots[x].gemId = y, than
+   *      gems[y].plotId = x
    */
   mapping(uint24 => MiningData) public plots;
 
@@ -208,9 +215,11 @@ contract Miner is AccessMultiSig {
    * @dev Auxiliary mapping keeps track of what gems are mining
    *      which plots
    * @dev Can be modified only by `__bind` and `__unbind` functions
-   * @dev Maps gem ID => plot ID
+   * @dev Maps gem ID => MiningData struct
+   * @dev If gems[x].plotId = y, than
+   *      plots[y].gemId = x
    */
-  mapping(uint24 => uint24) public gems;
+  mapping(uint24 => MiningData) public gems;
 
   /**
    * @dev Enumerations of the tokens bound and locked by
@@ -241,16 +250,6 @@ contract Miner is AccessMultiSig {
    * @dev Gem colors available to be set for the gems
    */
   uint8[] public gemColors = [1, 2, 5, 6, 7, 9, 10];
-
-  /**
-   * @dev Mapping contains one-based mining rate multipliers for special gems,
-   *      meaning zero is treated as one, one as two and so on
-   * @dev Multiplier dimension is percents, meaning the value 100 percents is one
-   *      and performs x2 multiplication (one based, 1 + 1 = 2)
-   * @dev Special gems are gems in ID range (0xF000 - 0xF100) – both bounds exclusive
-   * @dev maps gemId => mining rate multiplier
-   */
-  mapping(uint24 => uint8) public specialGemMultipliers;
 
   /**
    * @dev How many minutes of mining (resting) energy it takes
@@ -286,7 +285,7 @@ contract Miner is AccessMultiSig {
   /**
    * @dev Allows modifying mining rates coefficients
    */
-  uint32 public constant ROLE_MINING_RATES_PROVIDER = 0x00000008;
+  uint32 public constant ROLE_SPECIAL_GEMS_PROVIDER = 0x00000008;
 
   /**
    * @dev A bitmask indicating locked state of the ERC721 token
@@ -475,7 +474,7 @@ contract Miner is AccessMultiSig {
    */
   function getGemBinding(uint24 gemId) public view returns(uint24 plotId, uint24 artifactId) {
     // read and return the result
-    return (gems[gemId], 0);
+    return (gems[gemId].plotId, 0);
   }
 
   /**
@@ -506,22 +505,56 @@ contract Miner is AccessMultiSig {
   }
 
   /**
+   * @dev Auxiliary function to read special gem properties from ext256
+   * @dev Reads mining rate multiplier and special gem color
+   * @dev For gems out of special gem ID bounds (0xF000, 0xF100) returns zeros
+   * @param gemId ID of the gem to get mining rate multiplier and special color for
+   * @return a tuple containing  mining rate multiplier and special color
+   */
+  function getSpecialGem(uint24 gemId) public view returns(uint8 multiplier, uint8 color) {
+    // ensure gem ID is in proper bounds
+    // for wrong bounds return zeros
+    if(gemId > 0xF000 && gemId < 0xF100) {
+      // load special gem multiplier (8 bits) from its ext256 data, page 0xF000, offset 0
+      multiplier = uint8(gemInstance.readPage(gemId, 0xF000, 0, 8));
+
+      // load special gem color (8 bits) from its ext256 data, page 0xF000, offset 8
+      color = uint8(gemInstance.readPage(gemId, 0xF000, 8, 8));
+    }
+    // result is returned automatically but we can write it explicitly for convenience
+    return (multiplier, color);
+  }
+
+  /**
    * @dev Allows to introduce new special gem mining rate multiplier
    *      or to modify existing special gem mining rate multiplier
+   * @dev Allows to bind the multiplier to specific month using special gem color
+   *      parameter named `color`
+   * @dev If color is set the multiplier is applied only if gem started mining in
+   *      the corresponding month
+   * @dev Zero color is treated as unset and is ignored, meaning
+   *      multiplier is applied regardless of the month
    * @dev Requires sender to have `ROLE_MINING_RATES_PROVIDER` permission
-   * @dev Requires gem ID to be in range (0xF000, 0x10000)
-   * @param gemId special gem ID to send mining rate multiplier for
+   * @dev Requires gem ID to be in range (0xF000, 0xF100)
+   * @param gemId special gem ID to send mining rate multiplier and color for
    * @param multiplier mining rate multiplier to set
+   * @param color special gem color (month index affecting multiplier)
    */
-  function setSpecialGemMultiplier(uint24 gemId, uint8 multiplier) public {
+  function setSpecialGem(uint24 gemId, uint8 multiplier, uint8 color) public {
     // ensure sender has permission to set special gem mining rate
-    require(isSenderInRole(ROLE_MINING_RATES_PROVIDER));
+    require(isSenderInRole(ROLE_SPECIAL_GEMS_PROVIDER));
 
     // ensure gem ID is in proper bounds
     require(gemId > 0xF000 && gemId < 0xF100);
 
-    // update the mining rate
-    specialGemMultipliers[gemId] = multiplier;
+    // we store color and mining rate multiplier in the gem's ext256 data structure
+    // multiplier is stored at page 0xF000, offset 0, length 8 bits
+    // color is stored at page 0xF000, offset 8, length 8 bits
+    // prepare 16 bits to write at page 0xF000, offset 0
+    uint16 value = uint16(color) << 8 | multiplier;
+
+    // write the data to the destination
+    gemInstance.writePage(gemId, 0xF000, value, 0, 16);
   }
 
   /**
@@ -596,7 +629,7 @@ contract Miner is AccessMultiSig {
       gemInstance.setAge(gemId, 0);
 
       // check the tokens are not in bound state already
-      require(plots[plotId].bound == 0 && gems[gemId] == 0);
+      require(plots[plotId].bound == 0 && gems[gemId].bound == 0);
 
       // calculate binding UID,
       // composed of plotId, gemId and artifactId (if provided)
@@ -613,18 +646,17 @@ contract Miner is AccessMultiSig {
         artifactId: 0,
         globalBoundIndex: uint24(allTokens.length),
         ownerBoundIndex: uint24(collections[owner].length),
-        bound: now32()
+        bound: now32(),
+        updated: 0
       });
 
       // add binding UID to the ends of mentioned arrays
       allTokens.push(bindingUid << 160 | uint160(owner));
       collections[owner].push(bindingUid);
 
-      // save binding data structure to the mapping
+      // save binding data structure to the both mappings
       plots[plotId] = m;
-
-      // link gem ID to plot ID in the correspondent mapping
-      gems[gemId] = plotId;
+      gems[gemId] = m;
 
       // emit en event
       emit Bound(msg.sender, plotId, gemId);
@@ -696,6 +728,9 @@ contract Miner is AccessMultiSig {
     else {
       // keeping it locked and updating state change date
       gemInstance.setState(m.gemId, DEFAULT_MINING_BIT);
+
+      // update the 'updated' timestamp
+      plots[plotId].updated = now32();
     }
   }
 
@@ -1654,8 +1689,15 @@ contract Miner is AccessMultiSig {
     // delegate call to `miningRate`
     rate = miningRate(grade);
 
+    // load gem bound timestamp
+    uint32 bound = gems[gemId].bound;
+
+    // if gem is not bound within the miner, calculate as if its bound right now
+    // determine the month index of that bound
+    uint8 monthBound = TimeUtils.monthIndexOf(bound == 0? now32(): bound);
+
     // for gem color equal current month – add 5% mining rate bonus
-    if(TimeUtils.monthIndex() == color) {
+    if(color == monthBound) {
       // multiplication by 21 may overflow uint32 in this particular case
       // since maximum value which `miningRate` may produce is 268,103,795,
       // multiplied by 21 is 5,630,179,695 (0x1 4F 95 B9 6F)
@@ -1666,11 +1708,23 @@ contract Miner is AccessMultiSig {
 
     // for special gems in range (0xF000, 0xF100)
     if(gemId > 0xF000 && gemId < 0xF100) {
-      // load special gem mining rate multiplier and apply it
-      // maximum percent value is 255, which means multiplication by 3.55
-      // maximum outcome of this multiplication is 999,356,595, which fits into uint32
-      // note: specialGemMultipliers is uint8 and overflows the addition
-      rate = rate / 100 * (uint16(100) + specialGemMultipliers[gemId]);
+      // define variable to read multiplier and color into
+      uint8 multiplier;
+      uint8 specialColor;
+
+      // load the data - delegate call to `getSpecialGem`
+      (multiplier, specialColor) = getSpecialGem(gemId);
+
+      // if color is set match it with the month when mining started,
+      // if not – ignore color and treat it as a match
+      // if multiplier is not set (zero) – do not apply it
+      if(multiplier != 0 && (specialColor == 0 || specialColor == monthBound)) {
+        // apply special gem mining rate multiplier
+        // maximum percent value is 255, which means multiplication by 3.55
+        // maximum outcome of this multiplication is 999,356,595, which fits into uint32
+        // note: specialGemMultipliers is uint8 and overflows the addition
+        rate = rate / 100 * (uint16(100) + multiplier);
+      }
     }
 
     // return the result

@@ -15,7 +15,7 @@ const ChestKey = artifacts.require("./ChestKeyERC20.sol");
 const Miner = artifacts.require("./__Miner.sol");
 
 // import ERC721Core dependencies
-import {ROLE_TOKEN_CREATOR, ROLE_STATE_PROVIDER} from "./erc721_core";
+import {ROLE_TOKEN_CREATOR, ROLE_EXT_WRITER, ROLE_STATE_PROVIDER} from "./erc721_core";
 // import Gem ERC721 dependencies
 import {ROLE_AGE_PROVIDER, ROLE_MINED_STATS_PROVIDER, ROLE_NEXT_ID_PROVIDER} from "./erc721_core";
 // import Plot ERC721 features
@@ -172,10 +172,10 @@ contract('Miner (NowProvider)', (accounts) => {
 		assert.equal(4, await miner.energeticAgeOf(2), "wrong energetic age of gem 2");
 		assert.equal(2, await miner.restingEnergyOf(1), "wrong resting energy of gem 1");
 		assert.equal(2, await miner.restingEnergyOf(2), "wrong resting energy of gem 2");
-		assert.equal(62999987, await miner.miningRateOf(1), "wrong mining rate of a gem 1");
-		assert.equal(62999987, await miner.miningRateOf(2), "wrong mining rate of a gem 2");
-		assert.equal(125, await miner.effectiveRestingEnergyOf(1), "wrong effective resting energy of a gem 1");
-		assert.equal(125, await miner.effectiveRestingEnergyOf(2), "wrong effective resting energy of a gem 2");
+		assert.equal(62999987, await miner.miningRateOf(1), "wrong mining rate of gem 1");
+		assert.equal(62999987, await miner.miningRateOf(2), "wrong mining rate of gem 2");
+		assert.equal(125, await miner.effectiveRestingEnergyOf(1), "wrong effective resting energy of gem 1");
+		assert.equal(125, await miner.effectiveRestingEnergyOf(2), "wrong effective resting energy of gem 2");
 
 		// bind gem 1 to a plot, it should release immediately (resting energy mining)
 		await miner.bind(1, 1);
@@ -375,7 +375,7 @@ contract('Miner (NowProvider)', (accounts) => {
 		// enable mining feature on the miner
 		await miner.updateFeatures(FEATURE_MINING_ENABLED);
 		// grant miner permissions to modify gem's state and mint gems
-		await gem.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_NEXT_ID_PROVIDER | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER);
+		await gem.updateRole(miner.address, ROLE_TOKEN_CREATOR | ROLE_EXT_WRITER | ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER | ROLE_MINED_STATS_PROVIDER | ROLE_NEXT_ID_PROVIDER);
 		// grant miner permission(s) to update plot
 		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
 		// grant miner permission(s) to mint silver
@@ -437,19 +437,19 @@ contract('Miner (NowProvider)', (accounts) => {
 		// mint first 5 special gems according to the table
 		gems.push(0xF001);
 		await gem.mint(player, 0xF001, matchingColor, 2, 0x030BDE32); // grade value 777,778
-		await miner.setSpecialGemMultiplier(0xF001, 250);
+		await miner.setSpecialGem(0xF001, 250, 0);
 		gems.push(0xF002);
 		await gem.mint(player, 0xF002, nonMatchingColor, 2, 0x05000000);
-		await miner.setSpecialGemMultiplier(0xF002, 50);
+		await miner.setSpecialGem(0xF002, 50, 0);
 		gems.push(0xF003);
 		await gem.mintWith(player, 0xF003, matchingColor, 5, 0x040F4240, 600); // grade value 1,000,000
-		await miner.setSpecialGemMultiplier(0xF003, 100);
+		await miner.setSpecialGem(0xF003, 100, 0);
 		gems.push(0xF004);
 		await gem.mintWith(player, 0xF004, nonMatchingColor, 4, 0x06000000, 1200);
-		await miner.setSpecialGemMultiplier(0xF004, 0);
+		await miner.setSpecialGem(0xF004, 0, 0);
 		gems.push(0xF005);
 		await gem.mint(player, 0xF005, nonMatchingColor, 5, 0x053A7DF6); // grade value 3,833,334
-		await miner.setSpecialGemMultiplier(0xF005, 0);
+		await miner.setSpecialGem(0xF005, 0, 0);
 
 		// mint next 10 regular gems according to the table above
 		gems.push((await gem.mintNext(player, matchingColor, 5, 0x06EAC028)).receipt.logs[0].args[2].toNumber()); // grade value 15,384,616
@@ -464,44 +464,45 @@ contract('Miner (NowProvider)', (accounts) => {
 		gems.push((await gem.mintNext(player, nonMatchingColor, 5, 0x06EAC028)).receipt.logs[0].args[2].toNumber()); // grade value 15,384,616
 
 		// array to store expected mining rates of the gems
-		const rates = [14.7, 37.5, 18.9, 50, 48, 262.5, 25, 25, 9, 52.5, 2.1, 1.2, 30.000004, 50, 250.000008].map((e) => Math.floor(e * 1000000));
+		const rates = [14.7, 37.5, 18.9, 50, 48.000004, 262.5, 25, 25, 9, 52.5, 2.1, 1.2, 30.000004, 50, 250.000008].map((e) => Math.floor(e * 1000000));
 
 		// ensure amount of plots and gems matches
-		assert.equal(plots.length, gems.length, "plots/gems amount mismatch");
-		assert.equal(rates.length, gems.length, "rates/gems arrays length mismatch");
+		const n = gems.length;
+		assert.equal(plots.length, n, "plots/gems amount mismatch");
+		assert.equal(rates.length, n, "rates/gems arrays length mismatch");
 
 		// verify energetic ages and resting energies for all the gems
-		for(let i = 0; i < gems.length; i++) {
+		for(let i = 0; i < n; i++) {
 			assert.equal(0, await miner.energeticAgeOf(gems[i]), "wrong initial energetic age for gem " + i);
-			assert.equal(rates[i], await miner.miningRateOf(gems[i]), "wrong mining rate for gem " + i);
+			assert.equal(rates[i], await miner.miningRateOf(gems[i]), "wrong base mining rate for gem " + i);
 			switch(i) {
 				case 2: {
 					assert.equal(600, await gem.getAge(gems[i]), "wrong initial age for gem " + i);
 					assert.equal(322, await miner.restingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
-					assert.equal(6085, await miner.effectiveRestingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
+					assert.equal(6085, await miner.effectiveRestingEnergyOf(gems[i]), "wrong initial effective resting energy for gem " + i);
 					break;
 				}
 				case 3: {
 					assert.equal(1200, await gem.getAge(gems[i]), "wrong initial age for gem " + i);
 					assert.equal(638, await miner.restingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
-					assert.equal(31900, await miner.effectiveRestingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
+					assert.equal(31900, await miner.effectiveRestingEnergyOf(gems[i]), "wrong initial effective resting energy for gem " + i);
 					break;
 				}
 				default: {
 					assert.equal(0, await gem.getAge(gems[i]), "wrong initial age for gem " + i);
 					assert.equal(0, await miner.restingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
-					assert.equal(0, await miner.effectiveRestingEnergyOf(gems[i]), "wrong initial resting energy for gem " + i);
+					assert.equal(0, await miner.effectiveRestingEnergyOf(gems[i]), "wrong initial effective resting energy for gem " + i);
 				}
 			}
 		}
 
 		// bind all the gems to the plots
-		for(let i = 0; i < plots.length; i++) {
+		for(let i = 0; i < n; i++) {
 			await miner.bind(plots[i], gems[i], {from: player});
 		}
 
 		// verify all objects have been locked
-		for(let i = 0; i < plots.length; i++) {
+		for(let i = 0; i < n; i++) {
 			assert(!await plot.isTransferable(plots[i]), "plot " + i + " is transferable");
 			assert(!await gem.isTransferable(gems[i]), "gem " + i + " is transferable");
 		}
