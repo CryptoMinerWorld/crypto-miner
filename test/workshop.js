@@ -53,7 +53,7 @@ contract('Workshop', (accounts) => {
 		const player = accounts[1];
 
 		// mint a gem to level up and upgrade
-		await gem.mint(player, 1, 1, 1, 3, 0x03000001); // level: 3, grade: 3 (C)
+		await gem.mint(player, 1, 1, 3, 0x03000001); // level: 3, grade: 3 (C)
 
 		// functions to estimate silver and gold prices
 		const fn1 = async(delta) => await workshop.getUpgradePrice(1, delta, 0);
@@ -93,7 +93,7 @@ contract('Workshop', (accounts) => {
 
 		// create the gems
 		for(let i = 0; i < gemIds.length; i++) {
-			await gem.mint(player, gemIds[i], 1, 1, levels[i], grades[i] << 24 | 1);
+			await gem.mint(player, gemIds[i], 1, levels[i], grades[i] << 24 | 1);
 		}
 
 		// bulk upgrade price calculation function
@@ -137,7 +137,7 @@ contract('Workshop', (accounts) => {
 
 		// create the gems
 		for(let i = 0; i < gemIds.length; i++) {
-			await gem.mint(player, gemIds[i], 1, 1, levels[i], grades[i] << 24 | 1);
+			await gem.mint(player, gemIds[i], 1, levels[i], grades[i] << 24 | 1);
 		}
 
 		// bulk upgrade function
@@ -205,7 +205,7 @@ contract('Workshop', (accounts) => {
 
 		// create the gems
 		for(let i = 0; i < gemIds.length; i++) {
-			await gem.mint(player, gemIds[i], 1, 1, levels[i], grades[i] << 24 | 1);
+			await gem.mint(player, gemIds[i], 1, levels[i], grades[i] << 24 | 1);
 		}
 
 		// perform few gem upgrade calculations
@@ -265,7 +265,7 @@ contract('Workshop', (accounts) => {
 		const player = accounts[1];
 
 		// mint a gem to level up and upgrade
-		await gem.mint(player, 1, 1, 1, 1, 0x01000001); // level: 1, grade: 1 (D)
+		await gem.mint(player, 1, 1, 1, 0x01000001); // level: 1, grade: 1 (D)
 
 		// define level up function
 		const fn1 = async() => await workshop.upgrade(1, 3, 0, 255, 255, {from: player});
@@ -433,7 +433,7 @@ contract('Workshop', (accounts) => {
 		const player = accounts[1];
 
 		// mint a gem to level up and upgrade
-		await gem.mint(player, 1, 1, 1, 1, 0x01000001); // level: 1, grade: 1 (D)
+		await gem.mint(player, 1, 1, 1, 0x01000001); // level: 1, grade: 1 (D)
 
 		// define gem upgrade function
 		const fn0 = async() => await workshop.upgrade(1, 0, 0, 255, 255, {from: player});
@@ -506,7 +506,7 @@ contract('Workshop', (accounts) => {
 		const player = accounts[1];
 
 		// mint a gem to level up and upgrade
-		await gem.mint(player, 1, 1, 1, 1, 0x06000001); // level: 1, grade: 6 (AAA)
+		await gem.mint(player, 1, 1, 1, 0x06000001); // level: 1, grade: 6 (AAA)
 
 		// define gem upgrade function
 		const fn0 = async() => await workshop.upgrade(1, 0, 0, 255, 255, {from: player});
@@ -556,7 +556,7 @@ contract('Workshop', (accounts) => {
 
 		// create the gems
 		for(let i = 0; i < gemIds.length; i++) {
-			await gem.mint(player, gemIds[i], 1, 1, levels[i], grades[i] << 24 | 1);
+			await gem.mint(player, gemIds[i], 1, levels[i], grades[i] << 24 | 1);
 		}
 
 		/*
@@ -623,7 +623,7 @@ contract('Workshop', (accounts) => {
 		const player2 = accounts[2];
 
 		// mint a gem to player 1 (level 1, grade D)
-		await gem.mint(player1, 1, 1, 1, 1, 0x01000001);
+		await gem.mint(player1, 1, 1, 1, 0x01000001);
 		// define some gems (for player2): ids, initial levels and grades, how much to level up / upgrade
 		const gemIds   = [2, 3, 4]; // gem IDs
 		const levels   = [1, 1, 1]; // initial levels
@@ -632,7 +632,7 @@ contract('Workshop', (accounts) => {
 		const upgrades = [0, 0, 1]; // grade deltas (how much to increase)
 		// mint the gems
 		for(let i = 0; i < gemIds.length; i++) {
-			await gem.mint(player2, gemIds[i], 1, 1, levels[i], grades[i] << 24 | 1);
+			await gem.mint(player2, gemIds[i], 1, levels[i], grades[i] << 24 | 1);
 		}
 
 		// calculate upgrade price
