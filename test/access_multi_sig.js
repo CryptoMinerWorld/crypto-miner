@@ -598,6 +598,45 @@ contract('Access Control MultiSig', (accounts) => {
 		// verify feature was enabled successfully
 		assert(await ac.isUserInRole(operator, SOME_PERM), "no feature present after adding it");
 	});
+	it("m-sig: replay attack using 2 instances – Robert Magier scenario", async() => {
+		// create 2 ACLs from the default account
+		const ac1 = await ACL.new();
+		const ac2 = await ACL.new();
+
+		// define the request signers
+		const signer1 = accounts[1];
+		const signer2 = accounts[2];
+
+		// define an operator address which should be given access to ac1
+		const operator1 = accounts[4];
+		// some address with no permissions which will use the obtained signatures
+		const someone = accounts[5];
+
+		// give signers manager permission and some other permission
+		await ac1.updateRole(signer1, ROLE_ACCESS_MANAGER.or(SOME_PERM));
+		await ac1.updateRole(signer2, ROLE_ACCESS_MANAGER.or(SOME_PERM));
+		await ac2.updateRole(signer1, ROLE_ACCESS_MANAGER.or(SOME_PERM));
+		await ac2.updateRole(signer2, ROLE_ACCESS_MANAGER.or(SOME_PERM));
+
+		// define request expiration date - 15 seconds in the future
+		const expiresOn = 15 + Date.now() / 1000 | 0;
+		// prepare the message to sign by signer1 and signer2
+		const msg = await ac1.constructUpdateMsigRequest(operator1, SOME_PERM, expiresOn);
+		// sign the request by signer1 and signer2 and extract signature parameters into p1 and p2
+		const p1 = await signAndExtract(msg, signer1);
+		const p2 = await signAndExtract(msg, signer2);
+
+		// define an updateMsig execution function
+		const fn = async (instance) => await instance.updateMsig(operator1, SOME_PERM, expiresOn, [p1.v, p2.v], [p1.r, p2.r], [p1.s, p2.s], {from: someone});
+		// executing request on ac2 fails
+		await assertThrows(fn, ac2);
+		// executing request on ac1 succeeds
+		await fn(ac1);
+
+		// verify the permissions
+		assert(await ac1.isUserInRole(operator1, SOME_PERM), "operator1 doesn't have SOME_PERM on ac1");
+		assert(!await ac2.isUserInRole(operator1, SOME_PERM), "operator1 has SOME_PERM on ac2");
+	});
 });
 
 // import auxiliary function to ensure function `fn` throws

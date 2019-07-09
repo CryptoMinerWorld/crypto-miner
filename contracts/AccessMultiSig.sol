@@ -367,7 +367,7 @@ contract AccessMultiSig {
     require(_expiresOn > now);
 
     // calculate sha3 of the tightly packed variables including nonce
-    return keccak256(abi.encodePacked(_to, _role, _expiresOn, nonces[_to]));
+    return keccak256(abi.encodePacked(_to, _role, _expiresOn, nonces[_to], address(this)));
   }
 
   /**
