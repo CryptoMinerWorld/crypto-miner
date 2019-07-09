@@ -23,7 +23,7 @@ contract CountryERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0xcb25803e42674768d12cca47c594df3e4b95a3371e6c941e37daa1be63cc1a7f;
+  uint256 public constant TOKEN_UID = 0x7a47eb77998c6d5e94cf0c762ddf7c6afaeee3b1565bd9955f5bbd392cb2b298;
 
   /**
    * @dev ERC20 compliant token symbol

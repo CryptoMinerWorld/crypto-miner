@@ -65,7 +65,7 @@ contract PlotERC721 is ERC721Core {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant TOKEN_UID = 0xc5b810e451b3296f5ffa4087dc00adac5c57a053c276db3987921c798b153571;
+  uint256 public constant TOKEN_UID = 0xd6aaa537603eeb960c566e695dd639249ed75a5a46d37efb279e100516686f6e;
 
   /**
    * @dev ERC20 compliant token symbol
