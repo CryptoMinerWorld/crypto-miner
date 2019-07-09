@@ -362,7 +362,6 @@ contract('CountryERC721', (accounts) => {
 		// verify token ownership transfer date
 		assert(await tk.getOwnershipModified(token1) > now, "wrong token1 ownershipModified after transfer2");
 	});
-
 	it("unsafe transfer: transferring own token using transferFrom", async() => {
 		// deploy token
 		const tk = await deployToken();
@@ -521,7 +520,7 @@ contract('CountryERC721', (accounts) => {
 		// transfer it to account2
 		await tk.transfer(account2, token1, {from: account1});
 		// ensure an approval is erased
-		assert.equal(0, await tk.getApproved(token1), "token1 is approval is not erased");
+		assert.equal(0, await tk.getApproved(token1), "token1 approval is not erased");
 
 		// impossible to approve token which belongs to someone else
 		await assertThrows(approve1);
@@ -538,6 +537,66 @@ contract('CountryERC721', (accounts) => {
 		await revoke2();
 		// verify approval state
 		assert.equal(0, await tk.getApproved(token1), "token1 is still approved (2)");
+	});
+	it("approvals: operator transfers approval and revokes", async() => {
+		// deploy token
+		const tk = await deployToken();
+
+		// some accounts to work with
+		const account1 = accounts[1];
+		const operator1 = accounts[4]; // approved operator 1
+		const operator2 = accounts[5]; // approved operator 2
+		const operator3 = accounts[6]; // approved operator 2
+
+		// approve functions
+		const ownApprove = async() => await tk.approve(operator1, token1, {from: account1});
+		const opApprove1 = async() => await tk.approve(operator2, token1, {from: operator1});
+		const opApprove2 = async() => await tk.approve(operator3, token1, {from: operator1});
+		const ownRevoke = async() => await tk.revokeApproval(token1, {from: account1});
+		const opRevoke = async() => await tk.revokeApproval(token1, {from: operator2});
+
+		// create a token
+		await mint1(tk, account1);
+
+		// operators cannot do anything initially
+		await assertThrows(opApprove1);
+		await assertThrows(opApprove2);
+		await assertThrows(opRevoke);
+		// own revoke fails since there is no operator on the token
+		await assertThrows(ownRevoke);
+
+		// approve a token to be used by operator
+		await ownApprove();
+		assert.equal(operator1, await tk.getApproved(token1), "token1 is not approved to operator1");
+
+		// second operator is not granted permission yet and cannot revoke
+		await assertThrows(opRevoke);
+
+		// operator transfers approval to another operator
+		await opApprove1();
+		assert.equal(operator2, await tk.getApproved(token1), "token1 is not approved to operator2");
+
+		// now old operator doesn't have any privileges on the token
+		await assertThrows(opApprove1);
+		await assertThrows(opApprove2);
+
+		// new operator revokes his privileges
+		await opRevoke();
+		assert.equal(0, await tk.getApproved(token1), "token1 still has approved operator");
+
+		// own revoke fails since there is no operator on the token
+		await assertThrows(ownRevoke);
+
+		// grant permissions again
+		await ownApprove();
+		await opApprove2();
+		assert.equal(operator3, await tk.getApproved(token1), "token1 is not approved to operator3");
+
+		// old operator cannot revoke
+		await assertThrows(opRevoke);
+		// but owner can
+		await ownRevoke();
+		assert.equal(0, await tk.getApproved(token1), "token1 still has approved operator (2)");
 	});
 
 	it("approvals: add and remove operator", async() => {
@@ -562,7 +621,6 @@ contract('CountryERC721', (accounts) => {
 		// verify approval state
 		assert(!await tk.isApprovedForAll(account1, operator), "operator is still approved to act on behalf of account1");
 	});
-
 	it("approvals: operator in action", async() => {
 		// deploy token
 		const tk = await deployToken();

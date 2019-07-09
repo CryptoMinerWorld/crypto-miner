@@ -302,7 +302,8 @@ contract ERC721Core is AccessMultiSig, ERC165, ERC721Interfaces {
    * @notice Can also be used to revoke an approval by setting approved address to zero
    * @dev The zero approved address revokes an approval for a given token
    * @dev There can only be one approved address per token at a given time
-   * @dev This function can only be called by the token owner
+   * @dev This function can only be called by the token owner or already approved operator:
+   *      Throws unless `msg.sender` is the current NFT owner, or an authorized operator of the current owner.
    * @param _approved address to be approved to transfer the token on behalf of its owner
    * @param _tokenId ID of the token to be approved for transfer on behalf
    */
@@ -310,8 +311,8 @@ contract ERC721Core is AccessMultiSig, ERC165, ERC721Interfaces {
     // get token owner address (throws if token doesn't exist)
     address owner = ownerOf(_tokenId);
 
-    // caller must own this token
-    require(msg.sender == owner);
+    // caller must own this token or be an already approved operator
+    require(msg.sender == owner || msg.sender == approvals[_tokenId]);
 
     // approval for owner himself is pointless, do not allow
     require(_approved != owner);
