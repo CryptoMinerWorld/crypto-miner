@@ -49,7 +49,7 @@ contract("test tokens", (accounts) => {
 			const exists = await instances.GemERC721.exists(i + 1);
 			console.log("%s gem %o, %o, %o, %o, %o", (exists? "skipping": "minting"), i + 1, color, level, gradeType, gradeValue);
 			if(!exists) {
-				await instances.GemERC721.mint(to, i + 1, i + 1, color, level, gradeType << 24 | gradeValue);
+				await instances.GemERC721.mint(to, i + 1, color, level, gradeType << 24 | gradeValue);
 			}
 		}
 		// countries - CountryERC721
@@ -83,37 +83,37 @@ contract("test tokens", (accounts) => {
 			let exists;
 
 			// Silver ERC20
-			exists = (await instances.SilverERC20.balanceOf(testers[i])).isZero();
+			exists = !(await instances.SilverERC20.balanceOf(testers[i])).isZero();
 			console.log((exists? "skipping ": "") + "minting 10000 silver " + i);
 			if(!exists) {
 				await instances.SilverERC20.mint(testers[i], 10000);
 			}
 
 			// Gold ERC20
-			exists = (await instances.GoldERC20.balanceOf(testers[i])).isZero();
+			exists = !(await instances.GoldERC20.balanceOf(testers[i])).isZero();
 			console.log((exists? "skipping ": "") + "minting 1000 gold " + i);
 			if(!exists) {
 				await instances.GoldERC20.mint(testers[i], 1000);
 			}
 
 			// Artifacts ERC20
-			exists = (await instances.ArtifactERC20.balanceOf(testers[i])).isZero();
+			exists = !(await instances.ArtifactERC20.balanceOf(testers[i])).isZero();
 			console.log((exists? "skipping ": "") + "minting 10 artifacts " + i);
 			if(!exists) {
 				await instances.ArtifactERC20.mint(testers[i], 10);
 			}
 
 			// Chest Keys ERC20
-			exists = (await instances.ChestKeyERC20.balanceOf(testers[i])).isZero();
+			exists = !(await instances.ChestKeyERC20.balanceOf(testers[i])).isZero();
 			console.log((exists? "skipping ": "") + "minting 10 chest keys " + i);
 			if(!exists) {
 				await instances.ChestKeyERC20.mint(testers[i], 10);
 			}
 
 			// Founder's Keys ERC20
-			exists = (await instances.FoundersKeyERC20.balanceOf(testers[i])).isZero();
+			exists = !(await instances.FoundersKeyERC20.balanceOf(testers[i])).isZero();
 			console.log((exists? "skipping ": "") + "minting 10 founder's keys " + i);
-			if(exists) {
+			if(!exists) {
 				await instances.FoundersKeyERC20.mint(testers[i], 10);
 			}
 		}
@@ -121,7 +121,7 @@ contract("test tokens", (accounts) => {
 		// issue some referral points
 		for(let i = 0; i < testers.length; i++) {
 			// check if points already issued
-			const exists = (await instances.RefPointsTracker.balanceOf(testers[i])).isZero();
+			const exists = !(await instances.RefPointsTracker.balanceOf(testers[i])).isZero();
 
 			if(!exists) {
 				// issue some amount
