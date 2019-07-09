@@ -68,6 +68,11 @@ contract ERC721Core is AccessMultiSig, ERC165, ERC721Interfaces {
   mapping(address => mapping(address => bool)) public approvedOperators;
 
   /**
+   * @dev This emits when ownership of any NFT changes by any mechanism.
+   *      This event emits when NFTs are created (`from` == 0) and destroyed (`to` == 0).
+   *      Exception: during contract creation, any number of NFTs
+   *      may be created and assigned without emitting Transfer.
+   *      At the time of  any transfer, the approved address for that NFT (if any) is reset to none.
    * @dev Fired in transfer(), transferFrom(), safeTransferFrom(), mint()
    * @param _from source address or zero if fired in mint()
    * @param _to non-zero destination address
@@ -77,6 +82,10 @@ contract ERC721Core is AccessMultiSig, ERC165, ERC721Interfaces {
   event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 
   /**
+   * @dev This emits when the approved address for an NFT is changed or reaffirmed.
+   *      The zero address indicates there is no approved address.
+   *      When a Transfer event emits, this also indicates that the approved
+   *      address for that NFT (if any) is reset to none.
    * @dev Fired in approve()
    * @param _owner owner of the token `_tokenId`
    * @param _approved approved (trusted) address which is allowed now
@@ -87,6 +96,8 @@ contract ERC721Core is AccessMultiSig, ERC165, ERC721Interfaces {
   event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
   /**
+   * @dev This emits when an operator is enabled or disabled for an owner.
+   *      The operator can manage all NFTs of the owner.
    * @dev Fired in setApprovalForAll()
    * @param _owner an address which may have some tokens
    * @param _operator another address which is approved by owner
@@ -433,7 +444,10 @@ contract ERC721Core is AccessMultiSig, ERC165, ERC721Interfaces {
       delete approvals[_tokenId];
 
       // emit an ERC721 event
-      emit Approval(msg.sender, address(0), _tokenId);
+      // removed as per audit by Robert Magier to comply with ERC721 standard:
+      // "When a Transfer event emits, this also indicates that the approved
+      // address for that NFT (if any) is reset to none."
+      // emit Approval(msg.sender, address(0), _tokenId);
     }
   }
 
