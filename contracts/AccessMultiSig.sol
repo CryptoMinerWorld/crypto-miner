@@ -312,7 +312,7 @@ contract AccessMultiSig {
     uint8 signatures = 0;
 
     // verify transaction sender signature first
-    if(isUserInRole(msg.sender, ROLE_ACCESS_MANAGER)) {
+    if(isSenderInRole(ROLE_ACCESS_MANAGER)) {
       // add transaction sender to the list and increment counter
       _by[signatures++] = msg.sender;
     }
