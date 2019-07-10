@@ -337,10 +337,6 @@
       "name": "tokens",
       "outputs": [
         {
-          "name": "plotId",
-          "type": "uint24"
-        },
-        {
           "name": "color",
           "type": "uint8"
         },
@@ -349,11 +345,15 @@
           "type": "uint8"
         },
         {
+          "name": "levelModified",
+          "type": "uint32"
+        },
+        {
           "name": "grade",
           "type": "uint32"
         },
         {
-          "name": "propertiesModified",
+          "name": "gradeModified",
           "type": "uint32"
         },
         {
@@ -370,7 +370,7 @@
         },
         {
           "name": "state",
-          "type": "uint32"
+          "type": "uint24"
         },
         {
           "name": "stateModified",
@@ -587,7 +587,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint32"
+          "type": "uint24"
         }
       ],
       "payable": false,
@@ -620,7 +620,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint32"
+          "type": "uint24"
         }
       ],
       "payable": false,
@@ -1065,12 +1065,12 @@
         {
           "indexed": false,
           "name": "_from",
-          "type": "uint32"
+          "type": "uint24"
         },
         {
           "indexed": false,
           "name": "_to",
-          "type": "uint32"
+          "type": "uint24"
         }
       ],
       "name": "StateModified",
@@ -1087,12 +1087,12 @@
         {
           "indexed": false,
           "name": "_from",
-          "type": "uint32"
+          "type": "uint24"
         },
         {
           "indexed": false,
           "name": "_to",
-          "type": "uint32"
+          "type": "uint24"
         }
       ],
       "name": "TransferLockChanged",
@@ -1485,7 +1485,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint32"
+          "type": "uint24"
         }
       ],
       "payable": false,
@@ -1520,7 +1520,7 @@
         },
         {
           "name": "_state",
-          "type": "uint32"
+          "type": "uint24"
         }
       ],
       "name": "setState",
@@ -1572,51 +1572,13 @@
       "inputs": [
         {
           "name": "_transferLock",
-          "type": "uint32"
+          "type": "uint24"
         }
       ],
       "name": "setTransferLock",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "_tokenId",
-          "type": "uint256"
-        }
-      ],
-      "name": "getPlotId",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint24"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "_tokenId",
-          "type": "uint256"
-        }
-      ],
-      "name": "getPropertiesModified",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint32"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -1651,6 +1613,25 @@
         {
           "name": "",
           "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getLevelModified",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
         }
       ],
       "payable": false,
@@ -1710,6 +1691,25 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getGradeModified",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -1915,10 +1915,6 @@
           "type": "uint24"
         },
         {
-          "name": "_plotId",
-          "type": "uint24"
-        },
-        {
           "name": "_color",
           "type": "uint8"
         },
@@ -1943,10 +1939,6 @@
         {
           "name": "_to",
           "type": "address"
-        },
-        {
-          "name": "_plotId",
-          "type": "uint24"
         },
         {
           "name": "_color",
@@ -1981,10 +1973,6 @@
         },
         {
           "name": "_tokenId",
-          "type": "uint24"
-        },
-        {
-          "name": "_plotId",
           "type": "uint24"
         },
         {
@@ -2144,13 +2132,13 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-24T03:46:26.523Z",
+  "updatedAt": "2019-07-10T17:12:20.870Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "A gem is an ERC721 non-fungible token, which maps Token ID,     a 24 bit number to a set of gem properties -     attributes (mostly immutable by their nature) and state variables (mutable)A gem token supports only minting, it can be only created",
     "methods": {
       "approve(address,uint256)": {
-        "details": "The zero approved address revokes an approval for a given tokenThere can only be one approved address per token at a given timeThis function can only be called by the token owner",
+        "details": "The zero approved address revokes an approval for a given tokenThere can only be one approved address per token at a given timeThis function can only be called by the token owner or already approved operator:     Throws unless `msg.sender` is the current NFT owner, or an authorized operator of the current owner.",
         "params": {
           "_approved": "address to be approved to transfer the token on behalf of its owner",
           "_tokenId": "ID of the token to be approved for transfer on behalf"
@@ -2245,6 +2233,13 @@
         },
         "return": "a token grade"
       },
+      "getGradeModified(uint256)": {
+        "details": "Gets the grade modified date of a gemThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the gem to get grade modified date for"
+        },
+        "return": "a token grade modified date"
+      },
       "getGradeType(uint256)": {
         "details": "Gets the grade type of a gemThrows if token specified doesn't exist",
         "params": {
@@ -2266,8 +2261,15 @@
         },
         "return": "a token level"
       },
+      "getLevelModified(uint256)": {
+        "details": "Gets the level modified date of a gemThrows if token specified doesn't exist",
+        "params": {
+          "_tokenId": "ID of the gem to get level modified date for"
+        },
+        "return": "a token level modified date"
+      },
       "getModified(uint256)": {
-        "details": "Gets last modification date of any data in gem's structureDoesn't take into account ext256 dataThrows if token specified doesn't exist",
+        "details": "Gets last modification date of any of grade, state, age, mined countersDoesn't take into account ext256 data and level modification dateThrows if token specified doesn't exist",
         "params": {
           "_tokenId": "ID of the token to get modification time for"
         },
@@ -2281,24 +2283,17 @@
         "return": "a token ownership modified time as a unix timestamp"
       },
       "getPacked(uint256)": {
-        "details": "Gets a gem by ID, representing it as two integers.     The two integers are tightly packed with a gem data:     First integer (high bits) contains (from higher to lower bits order):         plotId, 24 bits         color, 8 bits         level, 8 bits         grade, 32 bits         propertiesModified, 32 bits         plots mined, 24 bits         blocks mined, 32 bits         age, 32 bits         state, 32 bits         stateModified, 32 bits     Second integer (low bits) contains (from higher to lower bits order):         creationTime, 32 bits         index, 32 bits (only low 24 bits are used)         ownershipModified, 32 bits         owner, 160 bitsThrows if token specified doesn't exist",
+        "details": "Gets a gem by ID, representing it as two integers.     The two integers are tightly packed with a gem data:     First integer (high bits) contains (from higher to lower bits order):         color, 8 bits         level, 8 bits         grade, 32 bits         levelModified, 32 bits         gradeModified, 32 bits         plots mined, 24 bits         blocks mined, 32 bits         age, 32 bits         state, 24 bits         stateModified, 32 bits     Second integer (low bits) contains (from higher to lower bits order):         creationTime, 32 bits         index, 32 bits (only low 24 bits are used)         ownershipModified, 32 bits         owner, 160 bitsThrows if token specified doesn't exist",
         "params": {
           "_tokenId": "ID of the gem to fetch"
         }
       },
       "getPackedCollection(address)": {
-        "details": "Allows to fetch collection of tokens, including internal token data      in a single function, useful when connecting to external node like INFURAEach element in the collection contains     max (state modified, creation time) (32 bits)     max (ownership modified, creation time) (32 bits)     grade (32 bits)     level (8 bits)     plots mined (24 bits)     blocks mined (32 bits)     energetic age (32 bits)     state (32 bits)     color (8 bits)     token ID (24 bits)",
+        "details": "Allows to fetch collection of tokens, including internal token data      in a single function, useful when connecting to external node like INFURAEach element in the collection contains     max(grade modified, state modified) or creation time if none is set (32 bits)     ownership modified or creation time if its not set (32 bits)     grade (32 bits)     level (8 bits)     plots mined (24 bits)     blocks mined (32 bits)     energetic age (32 bits)     state (32 bits)     color (8 bits)     token ID (24 bits)",
         "params": {
           "owner": "an address to query a collection for"
         },
         "return": "an ordered unsorted list of packed token data"
-      },
-      "getPlotId(uint256)": {
-        "details": "Gets the land plot ID of a gemThrows if token specified doesn't exist",
-        "params": {
-          "_tokenId": "ID of the gem to get land plot ID value for"
-        },
-        "return": "a token land plot ID"
       },
       "getPlotsMined(uint256)": {
         "details": "Gets number of plots mined by the gemThrows if token specified doesn't exist",
@@ -2313,13 +2308,6 @@
           "_tokenId": "ID of the gem to get properties for"
         },
         "return": "gem's properties - color, level, grade as packed uint32"
-      },
-      "getPropertiesModified(uint256)": {
-        "details": "Gets the level or grade modified date of a gemThrows if token specified doesn't exist",
-        "params": {
-          "_tokenId": "ID of the gem to get properties modified date for"
-        },
-        "return": "a token grade modified date"
       },
       "getState(uint256)": {
         "details": "Gets the state of a tokenThrows if token specified doesn't exist",
@@ -2397,36 +2385,33 @@
           "_tokenId": "ID of the gem to level up"
         }
       },
-      "mint(address,uint24,uint24,uint8,uint8,uint32)": {
+      "mint(address,uint24,uint8,uint8,uint32)": {
         "details": "Creates new token with token ID specified     and assigns an ownership `_to` for this tokenAllows setting initial token's propertiesRequires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)",
         "params": {
           "_color": "gem color",
           "_grade": "grade of the gem,     high 8 bits represent grade type,     low 24 bits - grade value",
           "_level": "gem level",
-          "_plotId": "ID of the plot that gem \"belongs to\" (was found in)",
           "_to": "an address to mint token to (first owner of the token)",
           "_tokenId": "ID of the token to mint"
         }
       },
-      "mintNext(address,uint24,uint8,uint8,uint32)": {
+      "mintNext(address,uint8,uint8,uint32)": {
         "details": "Creates new token without token ID specified     and assigns an ownership `_to` for this tokenToken ID is taken from `nextId` and `nextId` is incremented afterAllows setting initial token's propertiesRequires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)     and next ID provider (have `ROLE_NEXT_ID_PROVIDER` permission)",
         "params": {
           "_color": "gem color",
           "_grade": "grade of the gem,     high 8 bits represent grade type,     low 24 bits - grade value",
           "_level": "gem level",
-          "_plotId": "ID of the plot that gem \"belongs to\" (was found in)",
           "_to": "an address to mint token to (first owner of the token)"
         },
         "return": "ID of the token minted"
       },
-      "mintWith(address,uint24,uint24,uint8,uint8,uint32,uint32)": {
+      "mintWith(address,uint24,uint8,uint8,uint32,uint32)": {
         "details": "Creates new token with token ID specified     and assigns an ownership `_to` for this tokenAllows setting initial tokens' propertiesRequires caller to be token creator (have `ROLE_TOKEN_CREATOR` permission)Requires caller to be bulk token creator (have `ROLE_BULK_CREATOR` permission)     if creating more than one token in a single transactionRequires caller to be age provider (have `ROLE_AGE_PROVIDER` permission) -     if setting initial energetic age for the token",
         "params": {
           "_age": "energetic age of the gem",
           "_color": "gem color",
           "_grade": "grade of the gem,     high 8 bits represent grade type,     low 24 bits - grade value",
           "_level": "gem level",
-          "_plotId": "ID of the plot that gem \"belongs to\" (was found in)",
           "_to": "an address to mint token to (first owner of the token)",
           "_tokenId": "ID of the token to mint"
         }
@@ -2502,14 +2487,14 @@
           "_nextId": "next token ID value to set"
         }
       },
-      "setState(uint256,uint32)": {
+      "setState(uint256,uint24)": {
         "details": "Modifies the state of a tokenRequires sender to have `ROLE_STATE_PROVIDER` permissionThrows if token specified doesn't exist",
         "params": {
           "_state": "new state to set for the token",
           "_tokenId": "ID of the token to set state for"
         }
       },
-      "setTransferLock(uint32)": {
+      "setTransferLock(uint24)": {
         "details": "Allows setting the `transferLock` parameter of the contract,     which is used to determine if a particular token is locked or notA locked token cannot be transferredThe token is locked if it contains any bits     from the `transferLock` in its `state` setRequires sender to have `ROLE_TRANSFER_LOCK_PROVIDER` permission.",
         "params": {
           "_transferLock": "a value to set `transferLock` to"
