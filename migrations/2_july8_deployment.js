@@ -122,6 +122,7 @@ module.exports = async function(deployer, network, accounts) {
 */
 					setMsigOwners: [
 						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
+						"0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB", // John's Friend
 					],
 					enablePermissions: false,
 					disablePermissions: false,
@@ -140,19 +141,19 @@ module.exports = async function(deployer, network, accounts) {
 				BalanceProxy:       "0xc90b90B764e0061C5e355d5101146580d17fBc9D",
 				TokenHelper:        "0x040d04f1515BC4aF48CB3346Bb7fA5f2eD1d5Ea9",
 				TokenReader:        "0xA66e81eAa45F98D913CdAEc8FBE5c746769f58c7",
-				TokenWriter:        "0xf0763AcE6b6F675B9EE44Ee3d48796e267a617a9",
+				TokenWriter:        "",
 
 				DutchAuction:       "0x0Db40FA7f885148A5Ae37A392843e2372E39C415",
 
-				RefPointsTracker:   "0x2515293918c26507164E4301Ee1BA67436D5278e",
-				ArtifactERC20:      "0xdE23961410210d2398e7298829811e1b5ff1DD3e",
-				FoundersKeyERC20:   "0xd96D46cE6Ec8b5F716E6eE67AE662719e5eBB8D7",
-				ChestKeyERC20:      "0xd50777A73D978B743178ed7f6720F8FA8d492c3b",
-				SilverERC20:        "0x5489BE92c2712492Bc86c2694834FDD5dFE3936e",
-				GoldERC20:          "0x9310Af541dc786febEb2368581Cf86604745AC95",
-				CountryERC721:      "0xd41541Fec0DE95655E978b75BcccFF271E67170D",
-				PlotERC721:         "0x87E637100f261a6205a5dfA4d503F21de56E8B28",
-				GemERC721:          "0x713dF324cFf596c03a486CeA507d89DfF2Ca7Ef9",
+				RefPointsTracker:   "",
+				ArtifactERC20:      "",
+				FoundersKeyERC20:   "",
+				ChestKeyERC20:      "",
+				SilverERC20:        "",
+				GoldERC20:          "",
+				CountryERC721:      "",
+				PlotERC721:         "",
+				GemERC721:          "",
 
 				Workshop:           "0x2e798552213fe658D30c22dfFD60Cf38754DCbf0",
 				SilverSale:         "0x7591Ec27053b9D3863572e3c21E2b0EF3f10bE59",
@@ -175,6 +176,7 @@ module.exports = async function(deployer, network, accounts) {
 					},
 					setMsigOwners: [
 						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
+						"0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB", // John's Friend
 					],
 					enablePermissions: false,
 					disablePermissions: false,
@@ -203,6 +205,7 @@ module.exports = async function(deployer, network, accounts) {
 					},
 					setMsigOwners: [
 						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
+						"0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB", // John's Friend
 					],
 					enablePermissions: true,
 					disablePermissions: false,
