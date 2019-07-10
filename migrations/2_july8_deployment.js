@@ -106,7 +106,12 @@ module.exports = async function(deployer, network, accounts) {
 				PlotSaleStartUTC:   1563210000, // 07/15/2019 @ 5:00pm UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
+				Workshop:           "0x5aE2466431aDCdc86EEE95533272afA5ebB546d0",
+				SilverSale:         "0xfAaD84Cc472195bEa68aad29C3AAfb47E7252cc9",
+
 				optionalPhases: {
+					// migration is complete on July 10, 2019, comment out
+/*
 					migration: {
 						SilverERC20: true,
 						GoldERC20: true,
@@ -114,6 +119,7 @@ module.exports = async function(deployer, network, accounts) {
 						CountryERC721: true,
 						GemERC721: true,
 					},
+*/
 					setMsigOwners: [
 						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
 					],

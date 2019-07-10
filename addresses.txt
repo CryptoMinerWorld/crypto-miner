@@ -22,6 +22,9 @@ GoldERC20:          0xf61aDA5FE3ea9F919fe5Bd1FF9e809B1F4315285
 CountryERC721:      0xd2Eb63023aaeB44030fF53a6EbD6E0C05edEC836
 PlotERC721:         0x6966730b1435168880B35faa1E75dE0988EE2E39
 GemERC721:          0x34Fa7ddde9D0E1B98CD281EE1E8BA1DB37C64399
+
+Workshop:           0x5aE2466431aDCdc86EEE95533272afA5ebB546d0
+SilverSale:         0xfAaD84Cc472195bEa68aad29C3AAfb47E7252cc9
 ==============================================================
 
 
