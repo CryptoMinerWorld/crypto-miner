@@ -1011,6 +1011,57 @@ async function enablePermissions(accounts, conf, instances) {
 	}
 	console.log("Workshop configuration scheduled");
 
+	// allow SilverSale to access (rw) RefPointsTracker
+	if((await instances.RefPointsTracker.userRoles(conf.SilverSale)).isZero()) {
+		console.log("granting SilverSale %o permissions on RefPointsTracker %o", conf.SilverSale, conf.RefPointsTracker);
+		txs.push(instances.RefPointsTracker.updateRole(conf.SilverSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER, {nonce: nonce++}));
+	}
+	// allow SilverSale to mint SilverERC20
+	if((await instances.SilverERC20.userRoles(conf.SilverSale)).isZero()) {
+		console.log("granting SilverSale %o permission to mint SilverERC20 %o", conf.SilverSale, conf.SilverERC20);
+		txs.push(instances.SilverERC20.updateRole(conf.SilverSale, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
+	}
+	// allow SilverSale to mint GoldERC20
+	if((await instances.GoldERC20.userRoles(conf.SilverSale)).isZero()) {
+		console.log("granting SilverSale %o permission to mint GoldERC20 %o", conf.SilverSale, conf.GoldERC20);
+		txs.push(instances.GoldERC20.updateRole(conf.SilverSale, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
+	}
+	// enable SilverSale (sell, get, coupons)
+	if((await instances.SilverSale.features()).isZero()) {
+		console.log("enabling (SELL | GET | COUPON) SilverSale %o", conf.SilverSale);
+		txs.push(instances.SilverSale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED | FEATURE_USING_COUPONS_ENABLED, {nonce: nonce++}));
+	}
+	console.log("SilverSale configuration scheduled");
+
+	// allow PlotSale to access (rw) RefPointsTracker
+	if((await instances.RefPointsTracker.userRoles(conf.PlotSale)).isZero()) {
+		console.log("granting PlotSale %o permissions on RefPointsTracker %o", conf.PlotSale, conf.RefPointsTracker);
+		txs.push(instances.RefPointsTracker.updateRole(conf.PlotSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER, {nonce: nonce++}));
+	}
+	// allow PlotSale to mint PlotERC721
+	if((await instances.PlotERC721.userRoles(conf.PlotSale)).isZero()) {
+		console.log("granting PlotSale %o permission to mint PlotERC721 %o", conf.PlotSale, conf.PlotERC721);
+		txs.push(instances.PlotERC721.updateRole(conf.PlotSale, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
+	}
+	// enable PlotSale (sell, get, coupons)
+	if((await instances.PlotSale.features()).isZero()) {
+		console.log("enabling (SELL | GET | COUPON) PlotSale %o", conf.PlotSale);
+		txs.push(instances.PlotSale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED | FEATURE_USING_COUPONS_ENABLED, {nonce: nonce++}));
+	}
+	console.log("PlotSale configuration scheduled");
+
+	// allow PlotAntarctica to mint PlotERC721
+	if((await instances.PlotERC721.userRoles(conf.PlotAntarctica)).isZero()) {
+		console.log("granting PlotAntarctica %o permission to mint PlotERC721 %o", conf.PlotAntarctica, conf.PlotERC721);
+		txs.push(instances.PlotERC721.updateRole(conf.PlotAntarctica, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
+	}
+	// enable PlotAntarctica (getting founder's plots in Antarctica)
+	if((await instances.PlotAntarctica.features()).isZero()) {
+		console.log("enabling PlotAntarctica %o", conf.PlotAntarctica);
+		txs.push(instances.PlotAntarctica.updateFeatures(FEATURE_ANTARCTICA_GET_ENABLED, {nonce: nonce++}));
+	}
+	console.log("PlotAntarctica configuration scheduled");
+
 	// allow Miner to mint ArtifactERC20
 	if((await instances.ArtifactERC20.userRoles(conf.Miner)).isZero()) {
 		console.log("granting Miner %o permission to mint ArtifactERC20 %o", conf.Miner, conf.ArtifactERC20);
@@ -1052,57 +1103,6 @@ async function enablePermissions(accounts, conf, instances) {
 		txs.push(instances.Miner.updateFeatures(FEATURE_MINING_ENABLED, {nonce: nonce++}));
 	}
 	console.log("Miner configuration scheduled");
-
-	// allow PlotSale to access (rw) RefPointsTracker
-	if((await instances.RefPointsTracker.userRoles(conf.PlotSale)).isZero()) {
-		console.log("granting PlotSale %o permissions on RefPointsTracker %o", conf.PlotSale, conf.RefPointsTracker);
-		txs.push(instances.RefPointsTracker.updateRole(conf.PlotSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER, {nonce: nonce++}));
-	}
-	// allow PlotSale to mint PlotERC721
-	if((await instances.PlotERC721.userRoles(conf.PlotSale)).isZero()) {
-		console.log("granting PlotSale %o permission to mint PlotERC721 %o", conf.PlotSale, conf.PlotERC721);
-		txs.push(instances.PlotERC721.updateRole(conf.PlotSale, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
-	}
-	// enable PlotSale (sell, get, coupons)
-	if((await instances.PlotSale.features()).isZero()) {
-		console.log("enabling (SELL | GET | COUPON) PlotSale %o", conf.PlotSale);
-		txs.push(instances.PlotSale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED | FEATURE_USING_COUPONS_ENABLED, {nonce: nonce++}));
-	}
-	console.log("PlotSale configuration scheduled");
-
-	// allow PlotAntarctica to mint PlotERC721
-	if((await instances.PlotERC721.userRoles(conf.PlotAntarctica)).isZero()) {
-		console.log("granting PlotAntarctica %o permission to mint PlotERC721 %o", conf.PlotAntarctica, conf.PlotERC721);
-		txs.push(instances.PlotERC721.updateRole(conf.PlotAntarctica, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
-	}
-	// enable PlotAntarctica (getting founder's plots in Antarctica)
-	if((await instances.PlotAntarctica.features()).isZero()) {
-		console.log("enabling PlotAntarctica %o", conf.PlotAntarctica);
-		txs.push(instances.PlotAntarctica.updateFeatures(FEATURE_ANTARCTICA_GET_ENABLED, {nonce: nonce++}));
-	}
-	console.log("PlotAntarctica configuration scheduled");
-
-	// allow SilverSale to access (rw) RefPointsTracker
-	if((await instances.RefPointsTracker.userRoles(conf.SilverSale)).isZero()) {
-		console.log("granting SilverSale %o permissions on RefPointsTracker %o", conf.SilverSale, conf.RefPointsTracker);
-		txs.push(instances.RefPointsTracker.updateRole(conf.SilverSale, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER, {nonce: nonce++}));
-	}
-	// allow SilverSale to mint SilverERC20
-	if((await instances.SilverERC20.userRoles(conf.SilverSale)).isZero()) {
-		console.log("granting SilverSale %o permission to mint SilverERC20 %o", conf.SilverSale, conf.SilverERC20);
-		txs.push(instances.SilverERC20.updateRole(conf.SilverSale, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
-	}
-	// allow SilverSale to mint GoldERC20
-	if((await instances.GoldERC20.userRoles(conf.SilverSale)).isZero()) {
-		console.log("granting SilverSale %o permission to mint GoldERC20 %o", conf.SilverSale, conf.GoldERC20);
-		txs.push(instances.GoldERC20.updateRole(conf.SilverSale, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
-	}
-	// enable SilverSale (sell, get, coupons)
-	if((await instances.SilverSale.features()).isZero()) {
-		console.log("enabling (SELL | GET | COUPON) SilverSale %o", conf.SilverSale);
-		txs.push(instances.SilverSale.updateFeatures(FEATURE_SALE_ENABLED | FEATURE_GET_ENABLED | FEATURE_USING_COUPONS_ENABLED, {nonce: nonce++}));
-	}
-	console.log("SilverSale configuration scheduled");
 
 	// wait for all transactions to complete and output gas usage
 	await waitForAll(txs);
