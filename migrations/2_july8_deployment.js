@@ -87,7 +87,7 @@ module.exports = async function(deployer, network, accounts) {
 				FoundersPlots:      "0xE0A21044eEeB9efC340809E35DC0E9d82Dc87DD1",
 				BalanceProxy:       "0xbd7Ca763E12d23535B59949ade53c104BD88d42F",
 				TokenHelper:        "0xeF47Ac9B0132895a37C31530d520Ff22BaC89322",
-				TokenReader:        "0x7C7a04E9CBaA111eb1f893E86a0Fa66c613b2fD3",
+				TokenReader:        "0x5365f191d2247658F792E0a2D7Be6D676f3013E5",
 				TokenWriter:        "0x103Ba312407329E6476A7Ea6447281cEC98e156a",
 
 				DutchAuction:       "0x7A300F8729809147fDDf9D4BD2b62214b34b3988",

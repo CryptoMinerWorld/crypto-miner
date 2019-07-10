@@ -128,6 +128,7 @@ interface RefV1 {
 
 /**
  * @dev Helper smart contract to read Gem and Country ERC721 tokens
+ * @dev Updated version, can read both V1 and V2 versions of all tokens
  */
 contract TokenReader {
   /**
@@ -190,6 +191,64 @@ contract TokenReader {
               // convert block number difference into minutes,
               // assuming average block size is 15 seconds
               | uint32(block.number - uint32(low >> 224)) / 4;
+    }
+
+    // return the result
+    return (owners, data);
+  }
+
+  /**
+   * @dev Reads Gem ERC721 token data, with pagination
+   * @param gemAddress deployed Gem ERC721 v2 instance
+   * @param auctionAddress deployed Dutch Auction instance which may own token
+   * @param offset an offset to read from, must be less than total token supply
+   * @param length number of elements to read starting from offset, must not be zero
+   */
+  function readGemV2Data(
+    address gemAddress,
+    address auctionAddress,
+    uint32 offset,
+    uint32 length
+  ) public view returns(address[] memory, uint128[] memory) {
+    // determine token total supply
+    uint256 supply = GemV1(gemAddress).totalSupply();
+
+    // ensure offset is not too big
+    if(offset >= supply) {
+      // just return an empty array in that case
+      return (new address[](0), new uint128[](0));
+    }
+
+    // calculate the difference
+    uint256 left = supply - offset;
+
+    // the result will contain length elements at most
+    // but no more than difference calculated
+    address[] memory owners = new address[](left < length? left: length);
+    uint128[] memory data = new uint128[](owners.length);
+
+    // build the result element by element
+    for(uint32 i = 0; i < owners.length; i++) {
+      // read token ID
+      uint256 tokenId = uint32(GemV1(gemAddress).tokenByIndex(i + offset));
+      // prepare tuple variables to read packed data into and read data
+      uint256 high;
+      uint256 low;
+      (high, low) = GemV1(gemAddress).getPacked(tokenId);
+
+      // save owner
+      owners[i] = address(low);
+
+      // in case when owner is an auction
+      if(owners[i] == auctionAddress) {
+        // fix the owner address by fetching the real owner
+        owners[i] = AuctionV1(auctionAddress).owners(gemAddress, tokenId);
+      }
+
+      // pack token properties
+      data[i] = uint128(tokenId) << 96 // token ID, plot ID (16 bit - zero)
+              | uint80(uint48(high >> 208)) << 32 // color, level, grade
+              | uint32(high >> 56);
     }
 
     // return the result
