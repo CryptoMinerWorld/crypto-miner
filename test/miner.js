@@ -63,6 +63,117 @@ contract('Miner', (accounts) => {
 		assertArraysEqual([1, 2, 5, 6, 7, 9, 10], await miner.getGemColors(), "incorrect initial value for gem colors array");
 	});
 
+	it("integrity: plots, gems, collections, allTokens shifting", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// define single player account
+		const player = accounts[1];
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// enable mining feature on the miner
+		await miner.updateFeatures(FEATURE_MINING_ENABLED);
+		// grant miner permissions to modify gem's state
+		await gem.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_AGE_PROVIDER);
+		// grant miner permission(s) to update plot
+		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER);
+
+		// mint 5 gems and 5 plots,
+		// put all to mining
+		const plots = [];
+		const gems = [];
+		for(let i = 0; i < 5; i++) {
+			plots.push(i + 1);
+			gems.push(i + 11);
+			await gem.mint(player, gems[i], 1, 5, 0x01000000);
+			await plot.mint(player, 0, "0x05002341555F6400");
+			await miner.bind(plots[i], gems[i], {from: player});
+		}
+		// verify initial data structures
+		const collection1 = [];
+		const allTokens = [];
+		for(let i = 0; i < plots.length; i++) {
+			collection1.push(toBN(gems[i]).shln(24).or(toBN(plots[i])));
+			allTokens.push(collection1[i].shln(160).or(toBN(player)));
+			assert(collection1[i].eq(await miner.collections(player, i)), "wrong initial collection1 at " + i);
+			assert(allTokens[i].eq(await miner.allTokens(i)), "wrong initial allTokens at " + i);
+			const m = await miner.plots(plots[i]);
+			assert.equal(plots[i], await miner.gems(gems[i]), "wrong  initial gemId -> plotId mapping at " + i);
+			assert.equal(plots[i], m.plotId, "wrong initial m.plotId at " + i);
+			assert.equal(gems[i], m.gemId, "wrong initial m.gemId at " + i);
+			assert.equal(0, m.artifactId, "wrong initial m.artifactId at " + i);
+			assert.equal(i, m.globalBoundIndex, "wrong initial m.globalBoundIndex at " + i);
+			assert.equal(i, m.ownerBoundIndex, "wrong initial m.ownerBoundIndex at " + i);
+			assert(m.bound.gt(toBN(0)), "wrong initial m.bound at " + i);
+		}
+
+		// perform the shifting - remove plot/gem at index 1 - this is plot ID 2 at index 1
+		await miner.release(plots[1]);
+		// simulate the same on collection1/allTokens
+		plots[1] = plots.pop();
+		gems[1] = gems.pop();
+		collection1[1] = collection1.pop();
+		allTokens[1] = allTokens.pop();
+		// verify the result data structures
+		for(let i = 0; i < plots.length; i++) {
+			assert(collection1[i].eq(await miner.collections(player, i)), "wrong [1] collection1 at " + i);
+			assert(allTokens[i].eq(await miner.allTokens(i)), "wrong [1] allTokens at " + i);
+			const m = await miner.plots(plots[i]);
+			assert.equal(plots[i], await miner.gems(gems[i]), "wrong [1] gemId -> plotId mapping at " + i);
+			assert.equal(plots[i], m.plotId, "wrong [1] m.plotId at " + i);
+			assert.equal(gems[i], m.gemId, "wrong [1] m.gemId at " + i);
+			assert.equal(0, m.artifactId, "wrong [1] m.artifactId at " + i);
+			assert.equal(i, m.globalBoundIndex, "wrong [1] m.globalBoundIndex at " + i);
+			assert.equal(i, m.ownerBoundIndex, "wrong [1] m.ownerBoundIndex at " + i);
+			assert(m.bound.gt(toBN(0)), "wrong [1] m.bound at " + i);
+		}
+		// verify the length of collections and allTokens arrays
+		assert.equal(plots.length, await miner.balanceOf(player), "wrong [1] collection1 length");
+		assert.equal(plots.length, await miner.totalSupply(), "wrong [1] allTokens length");
+
+		// now remove the last one - this is plot ID 4 at index 3
+		await miner.release(plots[3]);
+		// simulate the same on collection1/allTokens
+		plots.pop();
+		gems.pop();
+		collection1.pop();
+		allTokens.pop();
+		// verify the result data structures
+		for(let i = 0; i < plots.length; i++) {
+			assert(collection1[i].eq(await miner.collections(player, i)), "wrong [x] collection1 at " + i);
+			assert(allTokens[i].eq(await miner.allTokens(i)), "wrong [x] allTokens at " + i);
+			const m = await miner.plots(plots[i]);
+			assert.equal(plots[i], await miner.gems(gems[i]), "wrong [x] gemId -> plotId mapping at " + i);
+			assert.equal(plots[i], m.plotId, "wrong [x] m.plotId at " + i);
+			assert.equal(gems[i], m.gemId, "wrong [x] m.gemId at " + i);
+			assert.equal(0, m.artifactId, "wrong [x] m.artifactId at " + i);
+			assert.equal(i, m.globalBoundIndex, "wrong [x] m.globalBoundIndex at " + i);
+			assert.equal(i, m.ownerBoundIndex, "wrong [x] m.ownerBoundIndex at " + i);
+			assert(m.bound.gt(toBN(0)), "wrong [x] m.bound at " + i);
+		}
+		// verify the length of collections and allTokens arrays
+		assert.equal(plots.length, await miner.balanceOf(player), "wrong [x] collection1 length");
+		assert.equal(plots.length, await miner.totalSupply(), "wrong [x] allTokens length");
+	});
+
 	it("colors: setGemColors requires ROLE_GEM_COLORS_PROVIDER permission", async() => {
 		// define miner dependencies
 		const gem = await Gem.new();
@@ -418,4 +529,4 @@ contract('Miner', (accounts) => {
 
 
 // import auxiliary function to ensure function `fn` throws
-import {assertArraysEqual, assertThrows} from "../scripts/shared_functions";
+import {assertArraysEqual, assertThrows, toBN} from "../scripts/shared_functions";
