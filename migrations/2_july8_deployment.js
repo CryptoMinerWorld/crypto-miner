@@ -88,41 +88,39 @@ module.exports = async function(deployer, network, accounts) {
 				BalanceProxy:       "0xbd7Ca763E12d23535B59949ade53c104BD88d42F",
 				TokenHelper:        "0xeF47Ac9B0132895a37C31530d520Ff22BaC89322",
 				TokenReader:        "0x7C7a04E9CBaA111eb1f893E86a0Fa66c613b2fD3",
-				TokenWriter:        "0xf2a0DD3C7F685C93AE66F6a43315e11AD26934BF",
+				TokenWriter:        "0x103Ba312407329E6476A7Ea6447281cEC98e156a",
 
-				DutchAuction:       "0x2e55DE1e33071415a75986E16529B146cfA50B1D",
+				DutchAuction:       "0x7A300F8729809147fDDf9D4BD2b62214b34b3988",
 
-				RefPointsTracker:   "0x3263B47eE9D7Ce7d3f9F8A42C9804Ab03e7A0F60",
-				ArtifactERC20:      "0xE45eB0ce4D02203DA6D3F325F325eC0a3399E961",
-				FoundersKeyERC20:   "0x6fe55f5d86cd246BA1ab3eeF51DB0666E79791C4",
-				ChestKeyERC20:      "0x87e6d5CEe8Ae979E2C5C9AcCEc9bA05D390e54EC",
-				SilverERC20:        "0xF69B41BF8bb7E3f1Dbf5f16E6f814342623d1A18",
-				GoldERC20:          "0x7Ed3501e9E43CF0389f9B3F010B60Bb78C6DA358",
-				CountryERC721:      "0x15419F3a110967E8898b1C2D49aCB22DEEC5235d",
-				PlotERC721:         "0x82B6E2cC232974B42841cd06cb6c050F70cb2cF7",
-				GemERC721:          "0x18f39Be69093b2d458ae9B17B6A56E026A6303F9",
+				RefPointsTracker:   "0xCd2AEdF9a0C5E8A16d7EcE7e0C51A1f6590f25F2",
+				ArtifactERC20:      "0x76259c1A95d25dd8F9E8808c8AaCb51397756F0C",
+				FoundersKeyERC20:   "0xc3233a564BEFcFBc7aBEd2f881908684D45c209B",
+				ChestKeyERC20:      "0x26e8988252D8bBa4641DC3D61BBE9fBc44B421fA",
+				SilverERC20:        "0x4D55e9d055817497De7B790D38328265f8E305D9",
+				GoldERC20:          "0xf61aDA5FE3ea9F919fe5Bd1FF9e809B1F4315285",
+				CountryERC721:      "0xd2Eb63023aaeB44030fF53a6EbD6E0C05edEC836",
+				PlotERC721:         "0x6966730b1435168880B35faa1E75dE0988EE2E39",
+				GemERC721:          "0x34Fa7ddde9D0E1B98CD281EE1E8BA1DB37C64399",
 
 
 				PlotSaleStartUTC:   1563210000, // 07/15/2019 @ 5:00pm UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
 				optionalPhases: {
+					migration: {
+						SilverERC20: true,
+						GoldERC20: true,
+						RefPointsTracker: true,
+						CountryERC721: true,
+						GemERC721: true,
+					},
 					setMsigOwners: [
 						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
 					],
-					writePlotSaleCoupons: false,
-					writeSilverSaleCoupons: false,
-/*
-					migration: {
-						SilverERC20: false,
-						GoldERC20: false,
-						RefPointsTracker: false,
-						CountryERC721: false,
-						GemERC721: false,
-					},
-*/
 					enablePermissions: false,
 					disablePermissions: false,
+					writePlotSaleCoupons: false,
+					writeSilverSaleCoupons: false,
 				},
 			};
 			// Ropsten Configuration
@@ -162,12 +160,6 @@ module.exports = async function(deployer, network, accounts) {
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
 				optionalPhases: {
-					setMsigOwners: [
-						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-					],
-					writePlotSaleCoupons: false,
-					writeSilverSaleCoupons: false,
-/*
 					migration: {
 						SilverERC20: true,
 						GoldERC20: true,
@@ -175,10 +167,14 @@ module.exports = async function(deployer, network, accounts) {
 						CountryERC721: true,
 						GemERC721: true,
 					},
-*/
-					writeTestTokens: true,
-					enablePermissions: true,
+					setMsigOwners: [
+						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
+					],
+					enablePermissions: false,
 					disablePermissions: false,
+					writePlotSaleCoupons: false,
+					writeSilverSaleCoupons: false,
+					writeTestTokens: false,
 				},
 			};
 			// Rinkeby Configuration
@@ -192,11 +188,6 @@ module.exports = async function(deployer, network, accounts) {
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
 				optionalPhases: {
-					setMsigOwners: [
-						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-					],
-					writePlotSaleCoupons: true,
-					writeSilverSaleCoupons: true,
 					migration: {
 						SilverERC20: true,
 						GoldERC20: true,
@@ -204,9 +195,14 @@ module.exports = async function(deployer, network, accounts) {
 						CountryERC721: true,
 						GemERC721: true,
 					},
-					writeTestTokens: true,
+					setMsigOwners: [
+						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
+					],
 					enablePermissions: true,
 					disablePermissions: false,
+					writePlotSaleCoupons: true,
+					writeSilverSaleCoupons: true,
+					writeTestTokens: true,
 				},
 			};
 			default: throw "unknown network " + network;
@@ -225,12 +221,6 @@ module.exports = async function(deployer, network, accounts) {
 	await deployInstances(deployer, conf, instances);
 
 	// execute optional phases required one by one
-	if(conf.optionalPhases.setMsigOwners && conf.optionalPhases.setMsigOwners.length && conf.optionalPhases.setMsigOwners.length > 0) {
-		await grantMsigAccess(accounts, conf, instances);
-	}
-	if(conf.optionalPhases.writeSilverSaleCoupons) {
-		await writeSilverSaleCoupons(network, accounts, instances);
-	}
 	if(conf.optionalPhases.migration) {
 		if(conf.optionalPhases.migration.SilverERC20) {
 			await migrateSilverERC20(accounts, instances);
@@ -248,11 +238,17 @@ module.exports = async function(deployer, network, accounts) {
 			await migrateGemERC721(accounts, instances);
 		}
 	}
-	if(conf.optionalPhases.writeTestTokens) {
-		await mintTestTokens(accounts, instances);
+	if(conf.optionalPhases.setMsigOwners && conf.optionalPhases.setMsigOwners.length && conf.optionalPhases.setMsigOwners.length > 0) {
+		await grantMsigAccess(accounts, conf, instances);
 	}
 	if(conf.optionalPhases.enablePermissions) {
 		await enablePermissions(accounts, conf, instances);
+	}
+	if(conf.optionalPhases.writeSilverSaleCoupons) {
+		await writeSilverSaleCoupons(network, accounts, instances);
+	}
+	if(conf.optionalPhases.writeTestTokens) {
+		await mintTestTokens(accounts, instances);
 	}
 };
 
@@ -811,13 +807,12 @@ async function mintTestTokens(accounts, instances) {
 	const testers = [
 		"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
 		"0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
-		"0x01cBe590FF9fb5b8C0ECe15D293469745625a1D8", // Eugene
 		"0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
 	];
 
 	// mint few ERC721 tokens
 	// gems – GemERC721
-	const k = 12;
+	const k = 15;
 	const n = k * testers.length;
 	if(!await instances.GemERC721.exists(1)) {
 		console.log("minting %o gems for %o test accounts (%o gems for each account)", n, testers.length, k);
