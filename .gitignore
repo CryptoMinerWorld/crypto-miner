@@ -1,11 +1,12 @@
 syntax:glob
 
+test_data/
+data/*.csv
 node_modules/
 build/
 coverage/
 coverageEnv/
 coverage.json
 *.iml
-*.csv
 *.log
 keys.js
