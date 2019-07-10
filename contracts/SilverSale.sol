@@ -71,7 +71,7 @@ contract SilverSale is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant SALE_VERSION = 0xd0dabc93bf32e67a1256e044aa2d9e971a4dcb0c043c56c2ad46f23889dfc369;
+  uint256 public constant SALE_VERSION = 0x7806c529ed309686858cd4e4380d04b7b4a8190c048c7b3e73f1c652379f52d0;
 
   /**
    * @dev Expected version (UID) of the deployed RefPointsTracker instance
@@ -231,8 +231,7 @@ contract SilverSale is AccessMultiSig {
   /**
    * @dev Number of boxes of each type already sold
    */
-  // TODO: this should be updated to be equal to current mainnet version
-  uint16[] public boxesSold = [13, 6, 22];
+  uint16[] public boxesSold = [32, 8, 22];
 
   /**
    * @dev Coupon storage, maps keccak256 hash of the coupon code to
