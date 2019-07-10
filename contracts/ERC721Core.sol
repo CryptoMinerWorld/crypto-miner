@@ -444,8 +444,7 @@ contract ERC721Core is AccessMultiSig, ERC165, ERC721Interfaces {
       // clear approval
       delete approvals[_tokenId];
 
-      // emit an ERC721 event
-      // removed as per audit by Robert Magier to comply with ERC721 standard:
+      // no need to emit an ERC721 event
       // "When a Transfer event emits, this also indicates that the approved
       // address for that NFT (if any) is reset to none."
       // emit Approval(msg.sender, address(0), _tokenId);
