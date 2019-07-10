@@ -58,13 +58,13 @@ contract Miner is AccessMultiSig {
    * @dev Expected version (UID) of the deployed GemERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant GEM_UID_REQUIRED = 0x9f3e67e803344c97b30b6435f473abca620f678153a8da972326edf47a340962;
+  uint256 public constant GEM_UID_REQUIRED = 0x8012342b1b915598e6a8249110cd9932d7ee7ae8a8a3bbb3a79a5a545cefee72;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant PLOT_UID_REQUIRED = 0xc5b810e451b3296f5ffa4087dc00adac5c57a053c276db3987921c798b153571;
+  uint256 public constant PLOT_UID_REQUIRED = 0xd6aaa537603eeb960c566e695dd639249ed75a5a46d37efb279e100516686f6e;
 
   /**
    * @dev Expected version (UID) of the deployed SilverERC20 instance
@@ -206,8 +206,6 @@ contract Miner is AccessMultiSig {
    *      gems and artifacts mine which plots
    * @dev Can be modified only by `__bind` and `__unbind` functions
    * @dev Maps plot ID => MiningData struct
-   * @dev If plots[x].gemId = y, than
-   *      gems[y].plotId = x
    */
   mapping(uint24 => MiningData) public plots;
 
@@ -215,11 +213,9 @@ contract Miner is AccessMultiSig {
    * @dev Auxiliary mapping keeps track of what gems are mining
    *      which plots
    * @dev Can be modified only by `__bind` and `__unbind` functions
-   * @dev Maps gem ID => MiningData struct
-   * @dev If gems[x].plotId = y, than
-   *      plots[y].gemId = x
+   * @dev Maps gem ID => plot ID
    */
-  mapping(uint24 => MiningData) public gems;
+  mapping(uint24 => uint24) public gems;
 
   /**
    * @dev Enumerations of the tokens bound and locked by
@@ -474,7 +470,7 @@ contract Miner is AccessMultiSig {
    */
   function getGemBinding(uint24 gemId) public view returns(uint24 plotId, uint24 artifactId) {
     // read and return the result
-    return (gems[gemId].plotId, 0);
+    return (gems[gemId], 0);
   }
 
   /**
@@ -629,7 +625,7 @@ contract Miner is AccessMultiSig {
       gemInstance.setAge(gemId, 0);
 
       // check the tokens are not in bound state already
-      require(plots[plotId].bound == 0 && gems[gemId].bound == 0);
+      require(plots[plotId].bound == 0 && gems[gemId] == 0);
 
       // calculate binding UID,
       // composed of plotId, gemId and artifactId (if provided)
@@ -651,12 +647,12 @@ contract Miner is AccessMultiSig {
       });
 
       // add binding UID to the ends of mentioned arrays
-      allTokens.push(bindingUid << 160 | uint160(owner));
+      allTokens.push(uint232(bindingUid) << 160 | uint160(owner));
       collections[owner].push(bindingUid);
 
       // save binding data structure to the both mappings
       plots[plotId] = m;
-      gems[gemId] = m;
+      gems[gemId] = plotId;
 
       // emit en event
       emit Bound(msg.sender, plotId, gemId);
@@ -683,8 +679,8 @@ contract Miner is AccessMultiSig {
     // evaluate the plot
     uint8 offset = evaluate(plotId);
 
-    // if offset changed
-    if(offset != plotInstance.getOffset(plotId)) {
+    // if offset increased
+    if(offset > plotInstance.getOffset(plotId)) {
       // delegate call to `__mine` to update plot and mint loot
       __mine(plotId, plots[plotId].gemId, offset);
     }
@@ -794,7 +790,7 @@ contract Miner is AccessMultiSig {
     plots[movedPlotId].ownerBoundIndex = m.ownerBoundIndex;
 
     // delete the rest of the bindings (items 1, 2 and 3)
-    delete plots[m.plotId];
+    delete plots[plotId];
     delete gems[m.gemId];
 
     // shrink both arrays by removing last element (finish with items 4 and 5)
@@ -1690,7 +1686,7 @@ contract Miner is AccessMultiSig {
     rate = miningRate(grade);
 
     // load gem bound timestamp
-    uint32 bound = gems[gemId].bound;
+    uint32 bound = plots[gems[gemId]].bound;
 
     // if gem is not bound within the miner, calculate as if its bound right now
     // determine the month index of that bound

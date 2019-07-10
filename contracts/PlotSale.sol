@@ -58,13 +58,13 @@ contract PlotSale is AccessMultiSig {
    * @dev Expected version (UID) of the deployed CountryERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant COUNTRY_UID_REQUIRED = 0xcb25803e42674768d12cca47c594df3e4b95a3371e6c941e37daa1be63cc1a7f;
+  uint256 public constant COUNTRY_UID_REQUIRED = 0x7a47eb77998c6d5e94cf0c762ddf7c6afaeee3b1565bd9955f5bbd392cb2b298;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant PLOT_UID_REQUIRED = 0xc5b810e451b3296f5ffa4087dc00adac5c57a053c276db3987921c798b153571;
+  uint256 public constant PLOT_UID_REQUIRED = 0xd6aaa537603eeb960c566e695dd639249ed75a5a46d37efb279e100516686f6e;
 
   /**
    * @notice Enables world land plot sale

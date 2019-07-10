@@ -51,7 +51,7 @@ contract PlotAntarctica is AccessMultiSig {
    * @dev Expected version (UID) of the deployed PlotERC721 instance
    *      this smart contract is designed to work with
    */
-  uint256 public constant PLOT_UID_REQUIRED = 0xc5b810e451b3296f5ffa4087dc00adac5c57a053c276db3987921c798b153571;
+  uint256 public constant PLOT_UID_REQUIRED = 0xd6aaa537603eeb960c566e695dd639249ed75a5a46d37efb279e100516686f6e;
 
   /**
    * @notice Enables getting tokens for free for game founders
