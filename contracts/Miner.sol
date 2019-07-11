@@ -52,7 +52,7 @@ contract Miner is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x5d959f78ea0c7b25ca1bc0799858a0d3dd9951ea24d2d981e0ebe3c396fbc6c2;
+  uint256 public constant MINER_UID = 0x9055d8d3a87095587aec3045abf60b9a871ab59b0c0c1010da999140e2e6a114;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
@@ -105,11 +105,6 @@ contract Miner is AccessMultiSig {
    */
   struct MiningData {
     /**
-     * @dev ID of the plot being mined
-     */
-    uint24 plotId;
-
-    /**
      * @dev ID of the gem which is mining the plot,
      *      the gem is locked when mining
      */
@@ -124,13 +119,13 @@ contract Miner is AccessMultiSig {
     /**
      * @dev Index of gem ID and plot ID in `allBoundTokens` array
      */
-    uint24 globalBoundIndex;
+    uint24 globalIndex;
 
     /**
      * @dev Index of gem ID and plot ID in `boundCollections` array
      *      of a particular owner
      */
-    uint24 ownerBoundIndex;
+    uint24 ownerIndex;
 
     /**
      * @dev Unix timestamp of the `bind()` transaction
@@ -141,6 +136,11 @@ contract Miner is AccessMultiSig {
      * @dev Unix timestamp of the last `update()` transaction
      */
     uint32 updated;
+
+    /**
+     * @dev Owner of the bound tokens
+     */
+    address owner;
   }
 
   /**
@@ -204,7 +204,7 @@ contract Miner is AccessMultiSig {
   /**
    * @dev Mapping to store mining information that is which
    *      gems and artifacts mine which plots
-   * @dev Can be modified only by `__bind` and `__unbind` functions
+   * @dev Can be modified only by `bind` and `__unlock` functions
    * @dev Maps plot ID => MiningData struct
    */
   mapping(uint24 => MiningData) public plots;
@@ -212,7 +212,7 @@ contract Miner is AccessMultiSig {
   /**
    * @dev Auxiliary mapping keeps track of what gems are mining
    *      which plots
-   * @dev Can be modified only by `__bind` and `__unbind` functions
+   * @dev Can be modified only by `bind` and `__unlock` functions
    * @dev Maps gem ID => plot ID
    */
   mapping(uint24 => uint24) public gems;
@@ -224,23 +224,20 @@ contract Miner is AccessMultiSig {
    *      artifact ID, 24 bits (reserved, not used yet)
    *      gem ID, 24 bits
    *      plot ID, 24 bits
-   * @dev Can be modified only by `__bind` and `__unbind` functions
+   * @dev Can be modified only by `bind` and `__unlock` functions
    */
   mapping(address => uint72[]) public collections;
 
   /**
    * @dev Enumeration of all the tokens bound and locked by
    *      this smart contract
-   * @dev Each element contains a "binding UID" and owner
-   *      (an address which bound the tokens and which is consistent
-   *      with the collections mapping)
+   * @dev Each element contains a "binding UID":
    *      artifact ID, 24 bits (reserved, not used yet)
    *      gem ID, 24 bits
    *      plot ID, 24 bits
-   *      owner, 160 bits
-   * @dev Can be modified only by `__bind` and `__unbind` functions
+   * @dev Can be modified only by `bind` and `__unlock` functions
    */
-  uint232[] public allTokens;
+  uint72[] public allTokens;
 
   /**
    * @dev Gem colors available to be set for the gems
@@ -437,9 +434,8 @@ contract Miner is AccessMultiSig {
    *      artifact ID, 24 bits (reserved, not used yet)
    *      gem ID, 24 bits
    *      plot ID, 24 bits
-   *      owner, 160 bits
    */
-  function getAllTokens() public view returns(uint232[] memory) {
+  function getAllTokens() public view returns(uint72[] memory) {
     // read all tokens data and return
     return allTokens;
   }
@@ -637,17 +633,17 @@ contract Miner is AccessMultiSig {
       // create a binding data structure in the memory, pointing to the
       // ends of allTokens and collections[msg.sender] arrays
       MiningData memory m = MiningData({
-        plotId: plotId,
         gemId: gemId,
         artifactId: 0,
-        globalBoundIndex: uint24(allTokens.length),
-        ownerBoundIndex: uint24(collections[owner].length),
+        globalIndex: uint24(allTokens.length),
+        ownerIndex: uint24(collections[owner].length),
         bound: now32(),
-        updated: 0
+        updated: 0,
+        owner: owner
       });
 
       // add binding UID to the ends of mentioned arrays
-      allTokens.push(uint232(bindingUid) << 160 | uint160(owner));
+      allTokens.push(bindingUid);
       collections[owner].push(bindingUid);
 
       // save binding data structure to the both mappings
@@ -771,23 +767,21 @@ contract Miner is AccessMultiSig {
     require(m.bound != 0);
 
     // get the owner
-    address owner = address(allTokens[m.globalBoundIndex]);
+    address owner = m.owner;
 
     // to remove binding from allTokens and collections[owner] arrays
     // (partially items 4 and 5) we move last elements in these arrays to the
     // position to be removed and then shrink both arrays
 
     // move last token data in an array to the freed position
-    allTokens[m.globalBoundIndex] = allTokens[allTokens.length - 1];
+    allTokens[m.globalIndex] = allTokens[allTokens.length - 1];
     // same for owner's collection - move last to the freed position
-    collections[owner][m.ownerBoundIndex] = collections[owner][collections[owner].length - 1];
+    collections[owner][m.ownerIndex] = collections[owner][collections[owner].length - 1];
 
     // now we need to fix data in the plots mapping for the moved plot
-    // get the moved plot ID
-    uint24 movedPlotId = uint24(collections[owner][m.ownerBoundIndex]);
     // update binding data for moved element
-    plots[movedPlotId].globalBoundIndex = m.globalBoundIndex;
-    plots[movedPlotId].ownerBoundIndex = m.ownerBoundIndex;
+    plots[uint24(allTokens[m.globalIndex])].globalIndex = m.globalIndex;
+    plots[uint24(collections[owner][m.ownerIndex])].ownerIndex = m.ownerIndex;
 
     // delete the rest of the bindings (items 1, 2 and 3)
     delete plots[plotId];
@@ -798,7 +792,7 @@ contract Miner is AccessMultiSig {
     collections[owner].length--;
 
     // emit en event
-    emit Released(msg.sender, m.plotId, m.gemId);
+    emit Released(msg.sender, plotId, m.gemId);
   }
 
   /**
