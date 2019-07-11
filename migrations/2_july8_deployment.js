@@ -161,7 +161,7 @@ module.exports = async function(deployer, network, accounts) {
 				PlotSale:           "0x08ABA95D7E393A4d6b346bE4FdBA9A39Be25bE07",
 				PlotAntarctica:     "0x9604bB492a01045AF2fA759165A17a3890dCa956",
 
-				Miner:              "0x45dC1EE6D6AB5719F9cB840D79e857521c8f8f01",
+				Miner:              "0x9600eee1c047C63FBfC93F64Ee4Bd04D9bFF5E68",
 
 				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
