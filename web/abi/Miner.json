@@ -157,6 +157,20 @@
     },
     {
       "constant": true,
+      "inputs": [],
+      "name": "ROLE_SPECIAL_GEMS_PROVIDER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
       "inputs": [
         {
           "name": "",
@@ -245,7 +259,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint232"
+          "type": "uint72"
         }
       ],
       "payable": false,
@@ -263,10 +277,6 @@
       "name": "plots",
       "outputs": [
         {
-          "name": "plotId",
-          "type": "uint24"
-        },
-        {
           "name": "gemId",
           "type": "uint24"
         },
@@ -275,16 +285,24 @@
           "type": "uint24"
         },
         {
-          "name": "globalBoundIndex",
+          "name": "globalIndex",
           "type": "uint24"
         },
         {
-          "name": "ownerBoundIndex",
+          "name": "ownerIndex",
           "type": "uint24"
         },
         {
           "name": "bound",
           "type": "uint32"
+        },
+        {
+          "name": "updated",
+          "type": "uint32"
+        },
+        {
+          "name": "owner",
+          "type": "address"
         }
       ],
       "payable": false,
@@ -922,7 +940,7 @@
       "outputs": [
         {
           "name": "",
-          "type": "uint232[]"
+          "type": "uint72[]"
         }
       ],
       "payable": false,
@@ -1015,6 +1033,51 @@
       ],
       "payable": false,
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        }
+      ],
+      "name": "getSpecialGem",
+      "outputs": [
+        {
+          "name": "multiplier",
+          "type": "uint8"
+        },
+        {
+          "name": "color",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "gemId",
+          "type": "uint24"
+        },
+        {
+          "name": "multiplier",
+          "type": "uint8"
+        },
+        {
+          "name": "color",
+          "type": "uint8"
+        }
+      ],
+      "name": "setSpecialGem",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -1411,15 +1474,15 @@
       "constant": true,
       "inputs": [
         {
-          "name": "energy",
-          "type": "uint32"
+          "name": "gemId",
+          "type": "uint24"
         },
         {
-          "name": "grade",
+          "name": "energy",
           "type": "uint32"
         }
       ],
-      "name": "effectiveEnergy",
+      "name": "effectiveEnergyOf",
       "outputs": [
         {
           "name": "",
@@ -1427,7 +1490,7 @@
         }
       ],
       "payable": false,
-      "stateMutability": "pure",
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -1441,7 +1504,7 @@
       "name": "miningRateOf",
       "outputs": [
         {
-          "name": "",
+          "name": "rate",
           "type": "uint32"
         }
       ],
@@ -1560,7 +1623,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-23T13:27:35.537Z",
+  "updatedAt": "2019-07-11T13:27:27.182Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "Miner may read, write, mint, lock and unlock tokens     (locked tokens cannot be transferred i.e. cannot change owner)Following tokens may be accessed for reading (token properties affect mining):     - ArtifactERC721     - GemERC721     - PlotERC721Following tokens may be accessed for writing (token properties change when mining):     - GemERC721, statistics updates - plots/blocks mined     - PlotERC721, offset updates – currently mined depthFollowing tokens may be created (token can be found in the land plot when mining):     - ArtifactERC721     - GemERC721     - SilverERC20     - GoldERC20     - ArtifactERC20     - FoundersKeyERC20     - ChestKeyERC20Following tokens may be locked or unlocked (tokens are locked when mining):     - ArtifactERC721     - GemERC721     - PlotERC721",
@@ -1634,11 +1697,11 @@
           "_silver": "address of the deployed SilverERC20 instance with     the `TOKEN_VERSION` equal to `SILVER_UID_REQUIRED`"
         }
       },
-      "effectiveEnergy(uint32,uint32)": {
+      "effectiveEnergyOf(uint24,uint32)": {
         "details": "Effective energy is base energy multiplied by mining rate of the gem",
         "params": {
           "energy": "base energy of the gem",
-          "grade": "full grade value of the gem, containing grade type and value"
+          "gemId": "ID of the gem to calculate effective energy for"
         },
         "return": "effective energy of the gem in minutes"
       },
@@ -1709,7 +1772,7 @@
       },
       "getAllTokens()": {
         "details": "Gets all the plot IDs, gem IDs, artifact IDs currently mined",
-        "return": "an ordered unsorted list containing     artifact ID, 24 bits (reserved, not used yet)     gem ID, 24 bits     plot ID, 24 bits     owner, 160 bits"
+        "return": "an ordered unsorted list containing     artifact ID, 24 bits (reserved, not used yet)     gem ID, 24 bits     plot ID, 24 bits"
       },
       "getCollection(address)": {
         "details": "Gets all the plot IDs, gem IDs, artifact IDs currently mined     by a particular address",
@@ -1736,6 +1799,13 @@
         },
         "return": "a tuple containing IDs of the bound gem and artifact"
       },
+      "getSpecialGem(uint24)": {
+        "details": "Auxiliary function to read special gem properties from ext256Reads mining rate multiplier and special gem colorFor gems out of special gem ID bounds (0xF000, 0xF100) returns zeros",
+        "params": {
+          "gemId": "ID of the gem to get mining rate multiplier and special color for"
+        },
+        "return": "a tuple containing  mining rate multiplier and special color"
+      },
       "isFeatureEnabled(uint256)": {
         "details": "Checks if requested set of features is enabled globally on the contract",
         "params": {
@@ -1759,7 +1829,7 @@
         "return": "true if all the permissions requested are enabled, false otherwise"
       },
       "miningRate(uint32)": {
-        "details": "Calculates mining rate `r` of the gem, based on its grade type `e`     and grade value `u` according to the formulas:       r = 1.0 + 0.25 * u * 10^-6, e = 1       r = 2.0 + 0.5  * u * 10^-6, e = 2       r = 3.3 + 0.9  * u * 10^-6, e = 3       r = 7.2 + 1.8  * u * 10^-6, e = 4       r = 25  + 6    * u * 10^-6, e = 5       r = 50  + 13   * u * 10^-6, e = 6Gem's grade type and value are extracted from the packed `grade`The value returned is multiplied by 10^8",
+        "details": "Calculates mining rate `r` of the gem, based on its grade type `e`     and grade value `u` according to the formulas:       r = 1.0 + 0.25 * u * 10^-6, e = 1       r = 2.0 + 0.5  * u * 10^-6, e = 2       r = 3.3 + 0.9  * u * 10^-6, e = 3       r = 7.2 + 1.8  * u * 10^-6, e = 4       r = 25  + 6    * u * 10^-6, e = 5       r = 50  + 13   * u * 10^-6, e = 6Gem's grade type and value are extracted from the packed `grade`The value returned is multiplied by 10^6Maximum allowed input is 0x06FFFFFF (AAA, 16,777,215)Maximum possible output is 0xFFAF073 (268,103,795)",
         "params": {
           "grade": "grade of the gem,     high 8 bits of which contain grade type e = [1, 2, 3, 4, 5, 6]     low 24 bits contain grade value u = [0, 1000000)"
         },
@@ -1790,14 +1860,14 @@
         }
       },
       "restingEnergy(uint32)": {
-        "details": "Linear threshold `37193` in the equation above is     the root of the equation `-7 * 10^-6 * x^2 + 0.5406x = 0.0199`,     where x is gem age in minutes and `k = 0.0199` is energy increase per minute,     which is calculated as `k = 10437 / 525600`,     where `525600 = 365 * 24 * 60` is number of minutes in one year and `n = 10437`     is the right root of equation `-7 * 10^-6 * x^2 + 0.5406x = 0`,     `n` is the number of minutes to parabola peak",
+        "details": "Linear threshold `37193` in the equation above is     the root of the equation `-7 * 10^-6 * x^2 + 0.5406x = 0.0199`,     where x is gem age in minutes and `k = 0.0199` is energy increase per minute,     which is calculated as `k = 10437 / 525600`,     where `525600 = 365 * 24 * 60` is number of minutes in one year and `n = 10437`     is the right root of equation `-7 * 10^-6 * x^2 + 0.5406x = 0`,     `n` is the number of minutes to parabola peakMaximum input value is 4,294,967,295 minutes (8171 years)Maximum output value is 85,479,532 minutes (162 years)",
         "params": {
           "energeticAge": "number of minutes the gem was not mining"
         },
         "return": "Resting Energy (R) calculated based on Energetic Age (a) provided"
       },
       "restingEnergyOf(uint24)": {
-        "details": "Throws if gem with the given ID doesn't exist",
+        "details": "Throws if gem with the given ID doesn't existMaximum output value is 85,479,532 minutes (162 years)",
         "params": {
           "gemId": "ID of the gem to calculate resting energy for"
         },
@@ -1821,6 +1891,14 @@
         "details": "Updates `availableColors` arrayRequires sender to have `ROLE_AVAILABLE_COLORS_PROVIDER` permissionRequires input array not to be empty",
         "params": {
           "colors": "array of available colors to set"
+        }
+      },
+      "setSpecialGem(uint24,uint8,uint8)": {
+        "details": "Allows to introduce new special gem mining rate multiplier     or to modify existing special gem mining rate multiplierAllows to bind the multiplier to specific month using special gem color     parameter named `color`If color is set the multiplier is applied only if gem started mining in     the corresponding monthZero color is treated as unset and is ignored, meaning     multiplier is applied regardless of the monthRequires sender to have `ROLE_MINING_RATES_PROVIDER` permissionRequires gem ID to be in range (0xF000, 0xF100)",
+        "params": {
+          "color": "special gem color (month index affecting multiplier)",
+          "gemId": "special gem ID to send mining rate multiplier and color for",
+          "multiplier": "mining rate multiplier to set"
         }
       },
       "tierLoot(uint8,uint16,bool,uint16,uint16[])": {
@@ -1905,7 +1983,7 @@
       "bulkUpdate(uint24[])": {
         "notice": "Updates several plots states without releasing gems and artifacts (if any)     bound earlier with `bind()` or `bulkBind()` from land plots, doesn't stop mining"
       },
-      "effectiveEnergy(uint32,uint32)": {
+      "effectiveEnergyOf(uint24,uint32)": {
         "notice": "Calculates effective energy of the gem based on its base energy and grade"
       },
       "effectiveMiningEnergyOf(uint24)": {
