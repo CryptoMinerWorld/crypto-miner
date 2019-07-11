@@ -56,7 +56,7 @@ SilverSale:         0x0D259024816227ea66fCB743217DC962fBCd17b7
 PlotSale:           0x08ABA95D7E393A4d6b346bE4FdBA9A39Be25bE07
 PlotAntarctica:     0x9604bB492a01045AF2fA759165A17a3890dCa956
 
-Miner:              0x45dC1EE6D6AB5719F9cB840D79e857521c8f8f01
+Miner:              "0x9600eee1c047C63FBfC93F64Ee4Bd04D9bFF5E68",
 --------------------------------------------------------------
 
 
