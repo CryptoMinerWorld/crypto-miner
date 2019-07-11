@@ -137,31 +137,31 @@ module.exports = async function(deployer, network, accounts) {
 				WorldChest:         "0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
 				MonthlyChest:       "0x01cBe590FF9fb5b8C0ECe15D293469745625a1D8", // Eugene
 
-				FoundersPlots:      "0xeD6E75F271E4Cd58b800a17240228F0C19C12550",
-				BalanceProxy:       "0xc90b90B764e0061C5e355d5101146580d17fBc9D",
-				TokenHelper:        "0x040d04f1515BC4aF48CB3346Bb7fA5f2eD1d5Ea9",
-				TokenReader:        "0xA66e81eAa45F98D913CdAEc8FBE5c746769f58c7",
-				TokenWriter:        "",
+				FoundersPlots:      "0x7303267092752D3Fd726Ba1a316AE106AeD36f39",
+				BalanceProxy:       "0xFC83eB7C4163cEedc0c57ce9774658b18F393b39",
+				TokenHelper:        "0x698181A9DC50D690a16a203093369AF043B01957",
+				TokenReader:        "0x6d13A3f2a824934b3A9A23024D2808a67C8fC9dE",
+				TokenWriter:        "0x3d695BaFCFF8b4D5f42D6637eD9693AdA427ba27",
 
-				DutchAuction:       "0x0Db40FA7f885148A5Ae37A392843e2372E39C415",
+				DutchAuction:       "0x46507Bc7B7aC55F840d94de76DcDa0A3BA6cFe15",
 
-				RefPointsTracker:   "",
-				ArtifactERC20:      "",
-				FoundersKeyERC20:   "",
-				ChestKeyERC20:      "",
-				SilverERC20:        "",
-				GoldERC20:          "",
-				CountryERC721:      "",
-				PlotERC721:         "",
-				GemERC721:          "",
+				RefPointsTracker:   "0x1F34442B43398eD294CF7c639B85ABd49fF533Ea",
+				ArtifactERC20:      "0xbA50b4B6595C0B1bc29c318bB84CcAd352A999DE",
+				FoundersKeyERC20:   "0xf3208dEb277192f4d83c8DAE34043d94f1e69186",
+				ChestKeyERC20:      "0xfE4F4042Eb8031Bb264027E4DC5AA158551607cA",
+				SilverERC20:        "0x1b7325c4d6569FE9FcCF7c3f4c36536453607b60",
+				GoldERC20:          "0x3c42a167e4AB7978D8f2F8ECb1Aa4E7a3B463aFE",
+				CountryERC721:      "0xc6A1A6c412A1e1A91499B92EF94c119AEDE31Af4",
+				PlotERC721:         "0xDECB28951F718D57d830c33034Cd1dD2d6eF2b2c",
+				GemERC721:          "0x1053464Bd0f69d0fcE84a612164894612722334e",
 
-				Workshop:           "0x2e798552213fe658D30c22dfFD60Cf38754DCbf0",
-				SilverSale:         "0x7591Ec27053b9D3863572e3c21E2b0EF3f10bE59",
+				Workshop:           "0xd07F7E73e24Ee73Fc42AF675790C1ACD601f9A7d",
+				SilverSale:         "0x0D259024816227ea66fCB743217DC962fBCd17b7",
 
-				PlotSale:           "0x87dA9D867b20bCd7Ad98DCb071485DA3C01C2b2e",
-				PlotAntarctica:     "0x3f115D3676f13f82c8B118e9eDA9B7740e46528d",
+				PlotSale:           "0x08ABA95D7E393A4d6b346bE4FdBA9A39Be25bE07",
+				PlotAntarctica:     "0x9604bB492a01045AF2fA759165A17a3890dCa956",
 
-				Miner:              "0xf13b9b4612637e4b784883a9Ef4f0741D88Eb26c",
+				Miner:              "0x45dC1EE6D6AB5719F9cB840D79e857521c8f8f01",
 
 				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
@@ -178,11 +178,11 @@ module.exports = async function(deployer, network, accounts) {
 						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
 						"0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB", // John's Friend
 					],
-					enablePermissions: false,
+					enablePermissions: true,
 					disablePermissions: false,
 					writePlotSaleCoupons: false,
-					writeSilverSaleCoupons: false,
-					writeTestTokens: false,
+					writeSilverSaleCoupons: true,
+					writeTestTokens: true,
 				},
 			};
 			// Rinkeby Configuration
