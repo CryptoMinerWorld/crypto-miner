@@ -1177,27 +1177,27 @@ contract Miner is AccessMultiSig {
     if(a) {
       // for tier 1
       if(k == 1) {
-        // gem (lvl 1): 0.2%
-        loot[0] += rndEval(0, 20, n);
-        // gem (lvl 2): 0.01%
-        loot[1] += rndEval(n, n, 1);
-        // silver (1pc): 7%, silver (5pcs): 0.2%
-        loot[5] += rndEval(5 * n, 700, n) + 5 * rndEval(6 * n, 20, n);
+        // gem (lvl 1): 0.3%
+        loot[0] += rndEval(0, 30, n);
+        // gem (lvl 2): 0.03%
+        loot[1] += rndEval(n, 3, n);
+        // silver (1pc): 7%, silver (5pcs): 0.3%, silver (15pcs): 0.05%
+        loot[5] += rndEval(5 * n, 700, n) + 5 * rndEval(6 * n, 30, n) + 15 * rndEval(7 * n, 5, n);
       }
       // for tier 2
       else if(k == 2) {
-        // gem (lvl 1): 0.2%
-        loot[0] += rndEval(0, 20, n);
-        // gem (lvl 2): 0.06%
-        loot[1] += rndEval(n, 6, n);
-        // gem (lvl 3): 0.03%
-        loot[2] += rndEval(2 * n, 3, n);
+        // gem (lvl 1): 0.24%
+        loot[0] += rndEval(0, 24, n);
+        // gem (lvl 2): 0.09%
+        loot[1] += rndEval(n, 9, n);
+        // gem (lvl 3): 0.04%
+        loot[2] += rndEval(2 * n, 4, n);
         // gem (lvl 4): 0.02%
         loot[3] += rndEval(3 * n, 2, n);
-        // silver (1pc): 9%, silver (5pcs): 0.8%, silver (15pcs): 0.2%
-        loot[5] += rndEval(5 * n, 900, n) + 5 * rndEval(6 * n, 80, n) + 15 * rndEval(7 * n, 20, n);
-        // gold (1): 0.01%
-        loot[6] += rndEval(8 * n, n, 1);
+        // silver (1pc): 10%, silver (5pcs): 0.9%, silver (15pcs): 0.2%
+        loot[5] += rndEval(5 * n, 1000, n) + 5 * rndEval(6 * n, 90, n) + 15 * rndEval(7 * n, 20, n);
+        // gold (1): 0.02%
+        loot[6] += rndEval(8 * n, 2, n);
         // artifact: 0.02%
         loot[7] += rndEval(9 * n, 2, n);
       }
@@ -1222,47 +1222,47 @@ contract Miner is AccessMultiSig {
           uint256 rnd10000 = Random.uniform(rnd >> (16 + 24 * j), 24, 10000);
 
           // generate loot according to the probabilities
-          // gem (lvl 1): 1.5%
-          if(rnd10000 < 150) {
+          // gem (lvl 1): 4%
+          if(rnd10000 < 400) {
             loot[0]++;
           }
-          // gem (lvl 2): 1%
-          else if(rnd10000 < 250) {
+          // gem (lvl 2): 2.5%
+          else if(rnd10000 < 650) {
             loot[1]++;
           }
-          // gem (lvl 3): 0.5%
-          else if(rnd10000 < 300) {
+          // gem (lvl 3): 1.8%
+          else if(rnd10000 < 830) {
             loot[2]++;
           }
           // gem (lvl 4): 0.5%
-          else if(rnd10000 < 350) {
+          else if(rnd10000 < 880) {
             loot[3]++;
           }
-          // gem (lvl 5): 0.1%
-          else if(rnd10000 < 360) {
+          // gem (lvl 5): 0.2%
+          else if(rnd10000 < 900) {
             loot[4]++;
           }
-          // silver (1): 40%
-          else if(rnd10000 < 4360) {
+          // silver (1): 50.2%
+          else if(rnd10000 < 5920) {
             loot[5]++;
           }
-          // silver (5): 46%
-          else if(rnd10000 < 8960) {
+          // silver (5): 31%
+          else if(rnd10000 < 9020) {
             loot[5] += 5;
           }
-          // silver (15): 9%
-          else if(rnd10000 < 9860) {
+          // silver (15): 8%
+          else if(rnd10000 < 9820) {
             loot[5] += 15;
           }
-          // gold (1): 0.42%
-          else if(rnd10000 < 9902) {
+          // gold (1): 0.7%
+          else if(rnd10000 < 9890) {
             loot[6]++;
           }
-          // artifact: 0.8%
-          else if(rnd10000 < 9982) {
+          // artifact: 0.9%
+          else if(rnd10000 < 9980) {
             loot[7]++;
           }
-          // key: 0.18%
+          // key: 0.2%
           else {
             loot[8]++;
           }
@@ -1277,21 +1277,23 @@ contract Miner is AccessMultiSig {
 
     // for tier 1
     if(k == 1) {
-      // gem (lvl 1): 0.2%
-      loot[0] += rndEval(0, 20, n);
-      // gem (lvl 2): 0.01%
-      loot[1] += rndEval(n, n, 1);
-      // silver (1pc): 9%, silver (5pcs): 0.25%
-      loot[5] += rndEval(5 * n, 900, n) + 5 * rndEval(6 * n, 25, n);
+      // gem (lvl 1): 0.26%
+      loot[0] += rndEval(0, 26, n);
+      // gem (lvl 2): 0.03%
+      loot[1] += rndEval(n, 3, n);
+      // silver (1pc): 8%
+      loot[5] += rndEval(5 * n, 800, n);
     }
     // for tier 2
     else if(k == 2) {
-      // gem (lvl 1): 0.2%
-      loot[0] += rndEval(0, 20, n);
-      // gem (lvl 2): 0.06%
-      loot[1] += rndEval(n, 6, n);
-      // silver (1pc): 12%, silver (5pcs): 0.7%
-      loot[5] += rndEval(5 * n, 1200, n) + 5 * rndEval(6 * n, 70, n);
+      // gem (lvl 1): 0.16%
+      loot[0] += rndEval(0, 16, n);
+      // gem (lvl 2): 0.09%
+      loot[1] += rndEval(n, 9, n);
+      // gem (lvl 3): 0.02%
+      loot[2] += rndEval(n, 2, n);
+      // silver (1pc): 8%, silver (5pcs): 0.5%
+      loot[5] += rndEval(5 * n, 800, n) + 5 * rndEval(6 * n, 50, n);
       // artifact: 0.01%
       loot[7] += rndEval(9 * n, n, 1);
     }
@@ -1299,12 +1301,14 @@ contract Miner is AccessMultiSig {
     else if(k == 3) {
       // gem (lvl 1): 0.15%
       loot[0] += rndEval(0, 15, n);
-      // gem (lvl 2): 0.05%
-      loot[1] += rndEval(n, 5, n);
-      // gem (lvl 3): 0.02%
-      loot[2] += rndEval(2 * n, 2, n);
-      // silver (1): 4%, silver (5): 3%, silver (15): 0.2%
-      loot[5] += rndEval(5 * n, 400, n) + 5 * rndEval(6 * n, 300, n) + 15 * rndEval(7 * n, 20, n);
+      // gem (lvl 2): 0.07%
+      loot[1] += rndEval(n, 7, n);
+      // gem (lvl 3): 0.08%
+      loot[2] += rndEval(2 * n, 8, n);
+      // gem (lvl 4): 0.01%
+      loot[3] += rndEval(2 * n, n, 1);
+      // silver (1): 5%, silver (5): 2.3%, silver (15): 0.2%
+      loot[5] += rndEval(5 * n, 500, n) + 5 * rndEval(6 * n, 230, n) + 15 * rndEval(7 * n, 20, n);
       // gold (1): 0.01%
       loot[6] += rndEval(8 * n, n, 1);
       // artifact: 0.04%
@@ -1312,12 +1316,16 @@ contract Miner is AccessMultiSig {
     }
     // for tier 4
     else if(k == 4) {
-      // gem (lvl 3): 0.1%
-      loot[2] += rndEval(2 * n, 10, n);
-      // gem (lvl 4): 0.04%
-      loot[3] += rndEval(3 * n, 4, n);
-      // silver (1): 2%, silver (5): 4%, silver (15): 1%
-      loot[5] += rndEval(5 * n, 200, n) + 5 * rndEval(6 * n, 400, n) + 15 * rndEval(7 * n, 100, n);
+      // gem (lvl 1): 0.24%
+      loot[0] += rndEval(0, 24, n);
+      // gem (lvl 2): 0.06%
+      loot[1] += rndEval(n, 6, n);
+      // gem (lvl 3): 0.05%
+      loot[2] += rndEval(2 * n, 5, n);
+      // gem (lvl 4): 0.08%
+      loot[3] += rndEval(3 * n, 8, n);
+      // silver (1): 7%, silver (5): 3.75%, silver (15): 1%
+      loot[5] += rndEval(5 * n, 700, n) + 5 * rndEval(6 * n, 375, n) + 15 * rndEval(7 * n, 100, n);
       // gold (1): 0.03%
       loot[6] += rndEval(8 * n, 3, n);
       // artifact: 0.13%
@@ -1325,14 +1333,18 @@ contract Miner is AccessMultiSig {
     }
     // for tier 5
     else if(k == 5) {
-      // gem (lvl 3): 0.05%
-      loot[2] += rndEval(2 * n, 5, n);
-      // gem (lvl 4): 0.1%
-      loot[3] += rndEval(3 * n, 10, n);
-      // gem (lvl 5): 0.02%
-      loot[4] += rndEval(4 * n, 2, n);
-      // silver (1): 1%, silver (5): 6%, silver (15): 3.5%
-      loot[5] += rndEval(5 * n, 100, n) + 5 * rndEval(6 * n, 600, n) + 15 * rndEval(7 * n, 350, n);
+      // gem (lvl 1): 0.25%
+      loot[0] += rndEval(0, 25, n);
+      // gem (lvl 2): 0.06%
+      loot[1] += rndEval(n, 6, n);
+      // gem (lvl 3): 0.08%
+      loot[2] += rndEval(2 * n, 8, n);
+      // gem (lvl 4): 0.06%
+      loot[3] += rndEval(3 * n, 6, n);
+      // gem (lvl 5): 0.03%
+      loot[4] += rndEval(4 * n, 3, n);
+      // silver (1): 10%, silver (5): 5.75%, silver (15): 3.4%
+      loot[5] += rndEval(5 * n, 1000, n) + 5 * rndEval(6 * n, 575, n) + 15 * rndEval(7 * n, 340, n);
       // gold (1): 0.08%
       loot[6] += rndEval(8 * n, 8, n);
       // artifact: 0.4%
@@ -1361,47 +1373,47 @@ contract Miner is AccessMultiSig {
         uint256 rnd10000 = Random.uniform(rnd >> (16 + 24 * j), 24, 10000);
 
         // generate loot according to the probabilities
-        // gem (lvl 1): 1.68%
-        if(rnd10000 < 168) {
+        // gem (lvl 1): 2.17%
+        if(rnd10000 < 217) {
           loot[0]++;
         }
-        // gem (lvl 2): 1%
-        else if(rnd10000 < 268) {
+        // gem (lvl 2): 1.5%
+        else if(rnd10000 < 367) {
           loot[1]++;
         }
         // gem (lvl 3): 0.5%
-        else if(rnd10000 < 318) {
+        else if(rnd10000 < 417) {
           loot[2]++;
         }
         // gem (lvl 4): 0.2%
-        else if(rnd10000 < 338) {
+        else if(rnd10000 < 437) {
           loot[3]++;
         }
         // gem (lvl 5): 0.12%
-        else if(rnd10000 < 350) {
+        else if(rnd10000 < 449) {
           loot[4]++;
         }
-        // silver (1): 40%
-        else if(rnd10000 < 4350) {
+        // silver (1): 62%
+        else if(rnd10000 < 6649) {
           loot[5]++;
         }
-        // silver (5): 46%
-        else if(rnd10000 < 8950) {
+        // silver (5): 26%
+        else if(rnd10000 < 9249) {
           loot[5] += 5;
         }
-        // silver (15): 9%
-        else if(rnd10000 < 9850) {
+        // silver (15): 6%
+        else if(rnd10000 < 9849) {
           loot[5] += 15;
         }
         // gold (1): 0.37%
-        else if(rnd10000 < 9887) {
+        else if(rnd10000 < 9886) {
           loot[6]++;
         }
         // artifact: 1.1%
-        else if(rnd10000 < 9997) {
+        else if(rnd10000 < 9996) {
           loot[7]++;
         }
-        // key: 0.03%
+        // key: 0.04%
         else {
           loot[8]++;
         }

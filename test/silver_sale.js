@@ -22,8 +22,8 @@ const FINAL_PRICES  = [120000000000000000, 400000000000000000, 95000000000000000
 const SILVER_MIN = [20, 70, 150, 100];
 // Maximum amounts of silver each box type can have
 const SILVER_MAX = [30, 90, 200, 120];
-// initially sold (sold in February–March 2019)
-const INITIALLY_SOLD = [13, 6, 22];
+// initially sold (sold in February–July 2019)
+const INITIALLY_SOLD = [32, 8, 22];
 // hard cap for each of the box types
 const BOXES_TO_SELL = [500, 300, 150];
 // initially available on sale (derived value)

@@ -90,8 +90,8 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
 		assert(loot[3] > 0, "no level 4 gems");
-		// item chance is 0.1% in BOS
-		// 5% chance of not getting an item in 3,000 rounds (1,000 plots)
+		// item chance is 0.2% in BOS
+		// 2.5‰ chance of not getting an item in 3,000 rounds (1,000 plots)
 		assert(loot[4] > 0, "no level 5 gems");
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
@@ -140,8 +140,8 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
 		assert(loot[3] > 0, "no level 4 gems");
-		// item chance is 0.1% in BOS
-		// 5% chance of not getting an item in 3,000 rounds (1,000 plots)
+		// item chance is 0.2% in BOS
+		// 2.5‰ chance of not getting an item in 3,000 rounds (1,000 plots)
 		assert(loot[4] > 0, "no level 5 gems");
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
@@ -287,12 +287,12 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[7] > 0, "no artifacts");
 		// item chance is 0.02% in tier 5
 		// 37% chance of not getting an item in 5,000 blocks (1,000 plots)
-		// item chance is 0.03% in BOS
-		// 41% chance of not getting an item in 3,000 rounds (1,000 plots)
-		// 15% cumulative chance of not getting an item
+		// item chance is 0.04% in BOS
+		// 30% chance of not getting an item in 3,000 rounds (1,000 plots)
+		// 11.1% cumulative chance of not getting an item
 		//assert(loot[8] > 0, "no keys");
 		if(loot[8] === 0) {
-			console.log("\tno keys! (15% chance)");
+			console.log("\tno keys! (11.1% chance)");
 		}
 	});
 	it("tiers loot – Rest of the World (5 Tiers)", async() => {
@@ -346,12 +346,12 @@ contract('Miner: Plot Loot', (accounts) => {
 		assert(loot[7] > 0, "no artifacts");
 		// item chance is 0.02% in tier 5
 		// 37% chance of not getting an item in 5,000 blocks (1,000 plots)
-		// item chance is 0.03% in BOS
-		// 41% chance of not getting an item in 3,000 rounds (1,000 plots)
-		// 15% cumulative chance of not getting an item
+		// item chance is 0.04% in BOS
+		// 30% chance of not getting an item in 3,000 rounds (1,000 plots)
+		// 11.1% cumulative chance of not getting an item
 		//assert(loot[8] > 0, "no keys");
 		if(loot[8] === 0) {
-			console.log("\tno keys! (15% chance)");
+			console.log("\tno keys! (11.1% chance)");
 		}
 	});
 	it("mining a plot – Rest of the World (5 Tiers)", async() => {
@@ -507,16 +507,16 @@ function verifyTheLoot(loot, antarctica) {
 	assert(loot.artifacts20 > 0, "no artifacts");
 
 	if(antarctica) {
-		// 99.5% chance of finding a key in 1,000 blocks in Antarctica
+		// 99.75% chance of finding a key in 1,000 blocks in Antarctica
 		assert(loot.foundersKeys > 0, "no founder's keys");
 		// for the Antarctica no chest keys should be present - only founder's keys
 		assert.equal(0, loot.chestKeys, "chest key(s) present");
 	}
 	else {
-		// 85% chance of finding a key in 1,000 blocks in the Rest of the World plot
+		// 88.9% chance of finding a key in 1,000 blocks in the Rest of the World plot
 		//assert(loot.chestKeys > 0, "no chest keys");
 		if(loot.chestKeys === 0) {
-			console.log("\tno chest keys (15% chance)");
+			console.log("\tno chest keys (11.1% chance)");
 		}
 		// for the Rest of the World no founders' keys should be present
 		assert.equal(0, loot.foundersKeys, "founder's key(s) present");

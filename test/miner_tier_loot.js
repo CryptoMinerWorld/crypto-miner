@@ -47,9 +47,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		);
 
 		// estimate number of blocks required for this test based on the depth
-		// this test contains items with 0.01% drop chance
-		// increase number of blocks by factor of 3 therefore
-		const blocks = 3 * Math.pow(10, TEST_DEPTH);
+		const blocks = Math.pow(10, TEST_DEPTH);
 
 		// gen loot for 10,000 blocks in tier 1
 		const loot = await miner.tierLoot(1, blocks, true, 0, toBNs(9));
@@ -61,10 +59,12 @@ contract('Miner: Tier Loot', (accounts) => {
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
-		// item chance is 0.01%:
-		// 37% chance of not getting an item in 10,000 blocks
-		// 5% chance of not getting an item in 30,000 blocks
-		assert(loot[1] > 0, "no level 2 gems");
+		// item chance is 0.03%:
+		// 5% chance of not getting an item in 10,000 blocks
+		//assert(loot[1] > 0, "no level 2 gems");
+		if(loot[1] === 0) {
+			console.log("\tno level 2 gems (5% chance)");
+		}
 		assert.equal(0, loot[2], "level 3 gem(s) present");
 		assert.equal(0, loot[3], "level 4 gem(s) present");
 		assert.equal(0, loot[4], "level 5 gem(s) present");
@@ -98,11 +98,11 @@ contract('Miner: Tier Loot', (accounts) => {
 		);
 
 		// estimate number of blocks required for this test based on the depth
-		// this test contains items with 0.01% drop chance
-		// increase number of blocks by factor of 3 therefore
-		const blocks = 3 * Math.pow(10, TEST_DEPTH);
+		// this test contains items with 0.02% drop chance
+		// increase number of blocks by factor of 1.5 therefore
+		const blocks = Math.pow(10, TEST_DEPTH);
 
-		// gen loot for 10,000 blocks in tier 2
+		// gen loot for 15,000 blocks in tier 2
 		const loot = await miner.tierLoot(2, blocks, true, 0, toBNs(9));
 
 		// CSV file data
@@ -116,16 +116,24 @@ contract('Miner: Tier Loot', (accounts) => {
 		assert(loot[2] > 0, "no level 3 gems");
 		// item chance is 0.02%:
 		// 13.5% chance of not getting an item in 10,000 blocks
-		assert(loot[3] > 0, "no level 4 gems");
+		//assert(loot[3] > 0, "no level 4 gems");
+		if(loot[3] === 0) {
+			console.log("\tno level 4 gems (13.5% chance)");
+		}
 		assert.equal(0, loot[4], "level 5 gem(s) present");
 		assert(loot[5] > 0, "no silver");
-		// item chance is 0.01%:
-		// 37% chance of not getting an item in 10,000 blocks
-		// 5% chance of not getting an item in 30,000 blocks
-		assert(loot[6] > 0, "no gold");
 		// item chance is 0.02%:
 		// 13.5% chance of not getting an item in 10,000 blocks
-		assert(loot[7] > 0, "no artifact(s)");
+		//assert(loot[6] > 0, "no gold");
+		if(loot[6] === 0) {
+			console.log("\tno gold (13.5% chance)");
+		}
+		// item chance is 0.02%:
+		// 13.5% chance of not getting an item in 10,000 blocks
+		//assert(loot[7] > 0, "no artifacts");
+		if(loot[7] === 0) {
+			console.log("\tno artifacts (13.5% chance)");
+		}
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
@@ -200,9 +208,7 @@ contract('Miner: Tier Loot', (accounts) => {
 		);
 
 		// estimate number of blocks required for this test based on the depth
-		// this test contains items with 0.01% drop chance
-		// increase number of blocks by factor of 3 therefore
-		const blocks = 3 * Math.pow(10, TEST_DEPTH);
+		const blocks = Math.pow(10, TEST_DEPTH);
 
 		// gen loot for 10,000 blocks in tier 1
 		const loot = await miner.tierLoot(1, blocks, false, 0, toBNs(9));
@@ -214,10 +220,12 @@ contract('Miner: Tier Loot', (accounts) => {
 
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
-		// item chance is 0.01%:
-		// 37% chance of not getting an item in 10,000 blocks
-		// 5% chance of not getting an item in 30,000 blocks
-		assert(loot[1] > 0, "no level 2 gems");
+		// item chance is 0.03%:
+		// 5% chance of not getting an item in 10,000 blocks
+		//assert(loot[1] > 0, "no level 2 gems");
+		if(loot[1] === 0) {
+			console.log("\tno level 2 gems (5% chance)");
+		}
 		assert.equal(0, loot[2], "level 3 gem(s) present");
 		assert.equal(0, loot[3], "level 4 gem(s) present");
 		assert.equal(0, loot[4], "level 5 gem(s) present");
@@ -252,8 +260,8 @@ contract('Miner: Tier Loot', (accounts) => {
 
 		// estimate number of blocks required for this test based on the depth
 		// this test contains items with 0.01% drop chance
-		// increase number of blocks by factor of 3 therefore
-		const blocks = 3 * Math.pow(10, TEST_DEPTH);
+		// consider increasing number of blocks by factor of 3
+		const blocks = Math.pow(10, TEST_DEPTH);
 
 		// gen loot for 10,000 blocks in tier 2
 		const loot = await miner.tierLoot(2, blocks, false, 0, toBNs(9));
@@ -266,15 +274,22 @@ contract('Miner: Tier Loot', (accounts) => {
 		// verify some statistics constraints
 		assert(loot[0] > 0, "no level 1 gems");
 		assert(loot[1] > 0, "no level 2 gems");
-		assert.equal(0, loot[2], "level 3 gem(s) present");
+		// item chance is 0.02%:
+		// 13.5% chance of not getting an item in 10,000 blocks
+		//assert.equal(loot[2] > 0, "no level 3 gems");
+		if(loot[2] === 0) {
+			console.log("\tno level 3 gems (13.5% chance)");
+		}
 		assert.equal(0, loot[3], "level 4 gem(s) present");
 		assert.equal(0, loot[4], "level 5 gem(s) present");
 		assert(loot[5] > 0, "no silver");
 		assert.equal(0, loot[6], "gold present");
 		// item chance is 0.01%:
 		// 37% chance of not getting an item in 10,000 blocks
-		// 5% chance of not getting an item in 30,000 blocks
-		assert(loot[7] > 0, "no artifact(s)");
+		//assert(loot[7] > 0, "no artifacts");
+		if(loot[7] === 0) {
+			console.log("\tno artifacts (37% chance)");
+		}
 		assert.equal(0, loot[8], "key(s) present");
 	});
 
@@ -303,8 +318,8 @@ contract('Miner: Tier Loot', (accounts) => {
 
 		// estimate number of blocks required for this test based on the depth
 		// this test contains items with 0.01% drop chance
-		// increase number of blocks by factor of 3 therefore
-		const blocks = 3 * Math.pow(10, TEST_DEPTH);
+		// consider increasing number of blocks by factor of 3
+		const blocks = Math.pow(10, TEST_DEPTH);
 
 		// gen loot for 10,000 blocks in tier 3
 		const loot = await miner.tierLoot(3, blocks, false, 0, toBNs(9));
@@ -318,13 +333,15 @@ contract('Miner: Tier Loot', (accounts) => {
 		assert(loot[0] > 0, "no level 1 gems");
 		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
-		assert.equal(0, loot[3], "level 4 gem(s) present");
+		assert(loot[3] > 0, "no level 4 gems");
 		assert.equal(0, loot[4], "level 5 gem(s) present");
 		assert(loot[5] > 0, "no silver");
 		// item chance is 0.01%:
 		// 37% chance of not getting an item in 10,000 blocks
-		// 5% chance of not getting an item in 30,000 blocks
-		assert(loot[6] > 0, "no gold");
+		//assert(loot[6] > 0, "no gold");
+		if(loot[6] === 0) {
+			console.log("\tno gold (37% chance)");
+		}
 		assert(loot[7] > 0, "no artifacts");
 		assert.equal(0, loot[8], "key(s) present");
 	});
@@ -364,15 +381,18 @@ contract('Miner: Tier Loot', (accounts) => {
 		write_csv("./data/tier_loot_5.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
-		assert.equal(0, loot[0], "level 1 gem(s) present");
-		assert.equal(0, loot[1], "level 2 gem(s) present");
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
 		assert(loot[3] > 0, "no level 4 gems");
 		assert.equal(0, loot[4], "level 5 gem(s) present");
 		assert(loot[5] > 0, "no silver");
 		// item chance is 0.03%:
 		// 5% chance of not getting an item in 10,000 blocks
-		assert(loot[6] > 0, "no gold");
+		//assert(loot[6] > 0, "no gold");
+		if(loot[6] === 0) {
+			console.log("\tno gold (5% chance)");
+		}
 		assert(loot[7] > 0, "no artifacts");
 		assert.equal(0, loot[8], "key(s) present");
 	});
@@ -402,8 +422,8 @@ contract('Miner: Tier Loot', (accounts) => {
 
 		// estimate number of blocks required for this test based on the depth
 		// this test contains items with 0.02% drop chance
-		// increase number of blocks by factor of 1.5 therefore
-		const blocks = 1.5 * Math.pow(10, TEST_DEPTH);
+		// consider increasing number of blocks by factor of 1.5
+		const blocks = Math.pow(10, TEST_DEPTH);
 
 		// gen loot for 10,000 blocks in tier 5
 		const loot = await miner.tierLoot(5, blocks, false, 0, toBNs(9));
@@ -414,19 +434,25 @@ contract('Miner: Tier Loot', (accounts) => {
 		write_csv("./data/tier_loot_5.csv", CSV_HEADER, csv_data);
 
 		// verify some statistics constraints
-		assert.equal(0, loot[0], "level 1 gem(s) present");
-		assert.equal(0, loot[1], "level 2 gem(s) present");
+		assert(loot[0] > 0, "no level 1 gems");
+		assert(loot[1] > 0, "no level 2 gems");
 		assert(loot[2] > 0, "no level 3 gems");
 		assert(loot[3] > 0, "no level 4 gems");
 		// item chance is 0.02%:
-		// 5% chance of not getting an item in 15,000 blocks
-		assert(loot[4] > 0, "no level 5 gems");
+		// 13.5% chance of not getting an item in 10,000 blocks
+		//assert(loot[4] > 0, "no level 5 gems");
+		if(loot[4] === 0) {
+			console.log("\tno level 5 gems (13.5% chance)");
+		}
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
 		assert(loot[7] > 0, "no artifacts");
 		// item chance is 0.02%:
-		// 5% chance of not getting an item in 15,000 blocks
-		assert(loot[8] > 0, "no keys");
+		// 13.5% chance of not getting an item in 10,000 blocks
+		//assert(loot[8] > 0, "no keys");
+		if(loot[8] === 0) {
+			console.log("\tno keys (13.5% chance)");
+		}
 	});
 
 	it("tier loot (5) – BOS", async() => {
@@ -453,6 +479,8 @@ contract('Miner: Tier Loot', (accounts) => {
 		);
 
 		// estimate number of blocks required for this test based on the depth
+		// this test contains items with 0.04% drop chance
+		// 10,000 BoS blocks results in 30,000 tests on average
 		const blocks = Math.pow(10, TEST_DEPTH);
 
 		// gen loot for 10,000 blocks in tier 5
@@ -472,8 +500,6 @@ contract('Miner: Tier Loot', (accounts) => {
 		assert(loot[5] > 0, "no silver");
 		assert(loot[6] > 0, "no gold");
 		assert(loot[7] > 0, "no artifacts");
-		// item chance is 0.03%:
-		// 5% chance of not getting an item in 10,000 blocks
 		assert(loot[8] > 0, "no keys");
 	});
 });
