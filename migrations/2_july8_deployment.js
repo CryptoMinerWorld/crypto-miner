@@ -214,6 +214,63 @@ module.exports = async function(deployer, network, accounts) {
 					writeTestTokens: true,
 				},
 			};
+			// Kovan Configuration
+			case "kovan": return {
+				Beneficiary:        "0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
+				FoundersChest:      "0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
+				WorldChest:         "0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
+				MonthlyChest:       "0x01cBe590FF9fb5b8C0ECe15D293469745625a1D8", // Eugene
+
+				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
+				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
+
+				FoundersPlots:      '0x3ACd26F0b5080C30c066a2055A4254A5BB05F22a',
+				BalanceProxy:       '0x785b1246E57b9f72C6bb19e5aC3178aEffb0Fe73',
+				TokenHelper:        '0x8920Df4215934E5f6c8935F0049E9b9d8dDF3656',
+				TokenReader:        '0x63d49c8D35C9fB523515756337cef0991B304696',
+				TokenWriter:        '0x761A2430FA69158c24Cb92CE4bc5d55F82931911',
+
+				DutchAuction:       '0x307015ef34a1baEb9Bf6fcbED03611235Bdd01aD',
+
+				RefPointsTracker:   '0x18E29d4a0339D4a2e8D70408FE53cf9B07B09F38',
+				ArtifactERC20:      '0xBE0d479710274735Ebd361E90e56E0604a879700',
+				FoundersKeyERC20:   '0x731d55CD90762c02535fF410427Dd280A1B74397',
+				ChestKeyERC20:      '0x7DA1b0552c0CAf7A72d8a7bc7F7813B3AC2FcC35',
+				SilverERC20:        '0x4822b1172217875272d918e93076339193462E06',
+				GoldERC20:          '0xeeEE3B45405C28712b76D0C64E4f0d824198AF30',
+				CountryERC721:      '0x649A748552B82C3AF0a1a5a044756Cf252067AD0',
+				PlotERC721:         '0x7913a362A803c30315F7665A0D6ed9d8373e3B1D',
+				GemERC721:          '0xb638410212e8D22630c224BE0B038b4c8c78ea8A',
+
+				Workshop:           '0x70d0f35dd27BC79303A2eAfD30db419742d6FaF9',
+				SilverSale:         '0xD3e2e8C218618c8A842D3e3f84461fcBBA164b6c',
+
+				PlotSale:           '0x77BDD9a3f4A87B1130fAf69C137657C74bdCD560',
+				PlotAntarctica:     '0x8492C8E14f168eE6b4f97e7e83d9351558c35F92',
+
+				Miner:              '0xC6729C6cFc6B872acF641EB3EA628C9F038e5ABb',
+
+				optionalPhases: {
+/*
+					migration: {
+						SilverERC20: true,
+						GoldERC20: true,
+						RefPointsTracker: true,
+						CountryERC721: true,
+						GemERC721: true,
+					},
+*/
+					setMsigOwners: [
+						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
+						"0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB", // John's Friend
+					],
+					enablePermissions: true,
+					disablePermissions: false,
+					writePlotSaleCoupons: true,
+					writeSilverSaleCoupons: true,
+					writeTestTokens: true,
+				},
+			};
 			default: throw "unknown network " + network;
 		}
 	})(network);

@@ -30,6 +30,22 @@ module.exports = {
 
 		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
 		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
+		ropsten: {
+			provider: function () {
+				return new HDWalletProvider(
+					keys.mnemonic3, // create 12 words: https://metamask.io/
+					"https://ropsten.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
+				);
+			},
+			network_id: "3", // Ropsten
+			gas: 7500000,
+			gasPrice: 2010000000, // 2 GWei
+			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
+			timeoutBlocks: 5000, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
+		},
+
+		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
+		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
 		rinkeby: {
 			provider: function () {
 				return new HDWalletProvider(
@@ -46,16 +62,16 @@ module.exports = {
 
 		// installation instructions: https://truffleframework.com/docs/truffle/getting-started/installation
 		// run with "truffle console", "truffle deploy", read more: https://truffleframework.com/docs/truffle/quickstart
-		ropsten: {
+		kovan: {
 			provider: function () {
 				return new HDWalletProvider(
-					keys.mnemonic3, // create 12 words: https://metamask.io/
-					"https://ropsten.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
+					keys.mnemonic42, // create 12 words: https://metamask.io/
+					"https://kovan.infura.io/v3/" + keys.infura_key // create a key: https://infura.io/
 				);
 			},
-			network_id: "3", // Ropsten
+			network_id: "42", // Kovan
 			gas: 7500000,
-			gasPrice: 2010000000, // 2 GWei
+			gasPrice: 1000000000, // 1 GWei
 			skipDryRun: true, // if you don't want to test run the migration locally before the actual migration (default is false)
 			timeoutBlocks: 5000, // if a transaction is not mined, keep waiting for this number of blocks (default is 50)
 		},
