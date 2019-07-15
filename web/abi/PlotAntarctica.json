@@ -539,10 +539,6 @@
         {
           "name": "n",
           "type": "uint8"
-        },
-        {
-          "name": "n",
-          "type": "uint32"
         }
       ],
       "name": "get",
