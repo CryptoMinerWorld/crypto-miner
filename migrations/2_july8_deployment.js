@@ -128,7 +128,7 @@ module.exports = async function(deployer, network, accounts) {
 						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
 						"0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB", // John's Friend
 					],
-					enablePermissions: false,
+					enablePermissions: true,
 					disablePermissions: false,
 					writePlotSaleCoupons: false,
 					writeSilverSaleCoupons: false,
