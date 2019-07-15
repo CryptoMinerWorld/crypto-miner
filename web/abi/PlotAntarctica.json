@@ -235,7 +235,35 @@
     },
     {
       "constant": true,
-      "inputs": [],
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "issuedTokens",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        }
+      ],
       "name": "plotInstance",
       "outputs": [
         {
@@ -260,14 +288,24 @@
         }
       ],
       "name": "updateRole",
-      "outputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "constant": true,
-      "inputs": [],
+      "inputs": [
+        {
+          "name": "_mask",
+          "type": "uint256"
+        }
+      ],
       "name": "ROLE_ACCESS_MANAGER",
       "outputs": [
         {
@@ -288,14 +326,44 @@
         }
       ],
       "name": "updateFeatures",
-      "outputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "constant": true,
-      "inputs": [],
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        },
+        {
+          "name": "v",
+          "type": "uint8[]"
+        },
+        {
+          "name": "r",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "s",
+          "type": "bytes32[]"
+        }
+      ],
       "name": "CONTRACT_UID",
       "outputs": [
         {
@@ -336,20 +404,6 @@
         }
       ],
       "name": "updateMsig",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [
-        {
-          "name": "required",
-          "type": "uint256"
-        }
-      ],
-      "name": "isSenderInRole",
       "outputs": [
         {
           "name": "",
@@ -357,14 +411,14 @@
         }
       ],
       "payable": false,
-      "stateMutability": "view",
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
       "inputs": [
         {
-          "name": "_foundersPlots",
-          "type": "address"
+          "name": "required",
+          "type": "uint256"
         },
         {
           "name": "_plot",
@@ -372,8 +426,35 @@
         }
       ],
       "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "constructor"
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true,
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_foundersPlots",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_plot",
+          "type": "address"
+        }
+      ],
+      "name": "PlotIssued",
+      "type": "constructor",
+      "payable": false,
+      "stateMutability": "nonpayable"
     },
     {
       "anonymous": false,
@@ -387,18 +468,28 @@
           "indexed": false,
           "name": "_tokenId",
           "type": "uint24"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
         }
       ],
       "name": "PlotIssued",
       "type": "event"
     },
     {
-      "anonymous": false,
+      "constant": false,
       "inputs": [
         {
-          "indexed": true,
           "name": "_by",
-          "type": "address"
+          "type": "address",
+          "indexed": true
         },
         {
           "indexed": true,
@@ -417,7 +508,30 @@
         }
       ],
       "name": "RoleUpdated",
-      "type": "event"
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "event",
+      "anonymous": false
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "founder",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "constant": false,
@@ -425,10 +539,19 @@
         {
           "name": "n",
           "type": "uint8"
+        },
+        {
+          "name": "n",
+          "type": "uint32"
         }
       ],
       "name": "get",
-      "outputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint64[]"
+        }
+      ],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "function"
@@ -477,7 +600,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-06-22T23:24:32.250Z",
+  "updatedAt": "2019-07-15T07:07:09.210Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "5,000 constraint is not part of this smart contract, it is ensured in     Presale/Presale2 smart contracts executed earlierPlot Sale – Antarctica acts as `ROLE_TOKEN_CREATOR` for PlotERC721 token",
@@ -575,6 +698,13 @@
           "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
           "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
         }
+      },
+      "balanceOf(address)": {
+        "details": "Its calculated based on the number of owned geodes and     number of tokens already issued to this founder",
+        "params": {
+          "founder": "an address of the founder to query balance for"
+        },
+        "return": "number of plots the founder can get, zero if address specified     doesn't belong to a founder or if founder already obtained     all the tokens"
       }
     },
     "title": "Plot Sale – Antarctica"
@@ -583,6 +713,9 @@
     "methods": {
       "get(uint8)": {
         "notice": "Issues land plots in Antarctica for game founders (geode owners)"
+      },
+      "balanceOf(address)": {
+        "notice": "Gets number of founder's plots a founder can get using this smart contract"
       }
     },
     "notice": "PlotAntarctica is responsible for issuing land plots in Antarctica.     These are game founders' plots which are issued for free for geode owners –     founders of the game which bought geodes on the game's early stageThere are 5,000 land plots available for exchange, only about 1,500,     however will be exchanged since only about 1,500 geodes was bought"

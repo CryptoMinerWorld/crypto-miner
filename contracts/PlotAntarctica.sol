@@ -45,7 +45,7 @@ contract PlotAntarctica is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant CONTRACT_UID = 0xcdf58c4cb6f0ff5f4364d95b6a91852b0ab317f4fe34a8e0c44a63fa51a55eb3;
+  uint256 public constant CONTRACT_UID = 0x3ccf91213c8befb07d5eecba2126b9bafc922227c4902f082cae05ec4d153335;
 
   /**
    * @dev Expected version (UID) of the deployed PlotERC721 instance
@@ -70,7 +70,7 @@ contract PlotAntarctica is AccessMultiSig {
    * @dev A mapping to keep track of issued tokens
    * @dev Maps founder's address to an amount of tokens issued
    */
-  mapping(address => uint16) issuedTokens;
+  mapping(address => uint16) public issuedTokens;
 
   /**
    * @dev FoundersPlots deployed instance to use `geodeBalances` function from
@@ -112,6 +112,24 @@ contract PlotAntarctica is AccessMultiSig {
     require(foundersPlots.geodeBalances(0xEd6003e7A6494Db4ABabEB7bDf994A3951ac6e69) != 0);
     // verify smart contract versions
     require(plotInstance.TOKEN_UID() == PLOT_UID_REQUIRED);
+  }
+
+  /**
+   * @notice Gets number of founder's plots a founder can get using this smart contract
+   * @dev Its calculated based on the number of owned geodes and
+   *      number of tokens already issued to this founder
+   * @param founder an address of the founder to query balance for
+   * @return number of plots the founder can get, zero if address specified
+   *      doesn't belong to a founder or if founder already obtained
+   *      all the tokens
+   */
+  function balanceOf(address founder) public view returns(uint256) {
+    // we cannot issue more than original founder's balance allows
+    // this is by design and if the assertion fails we're in big trouble
+    assert(foundersPlots.geodeBalances(founder) >= issuedTokens[founder]);
+
+    // calculate the difference of owned geodes and issued tokens and return
+    return foundersPlots.geodeBalances(founder) - issuedTokens[founder];
   }
 
   /**

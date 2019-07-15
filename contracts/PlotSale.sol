@@ -623,13 +623,13 @@ contract PlotSale is AccessMultiSig {
 
 
   /**
-   * @dev Auxiliary function used to mint `length` tokens to `to`
+   * @dev Auxiliary function used to mint `n` tokens to `to`
    * @param to an address to mint tokens to
    * @param countryId ID of the country the tokens belong to
    * @param n number of tokens to mint
    */
   function __mint(address to, uint8 countryId, uint8 n) private {
-    // we're going to mint `length` tokens
+    // we're going to mint `n` tokens
     for(uint8 i = 0; i < n; i++) {
       // generate randomized tiers structure
       // delegate call to `random5Tiers`

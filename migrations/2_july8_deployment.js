@@ -246,7 +246,7 @@ module.exports = async function(deployer, network, accounts) {
 				SilverSale:         '0xD3e2e8C218618c8A842D3e3f84461fcBBA164b6c',
 
 				PlotSale:           '0x77BDD9a3f4A87B1130fAf69C137657C74bdCD560',
-				PlotAntarctica:     '0x8492C8E14f168eE6b4f97e7e83d9351558c35F92',
+				PlotAntarctica:     '0x314E712021Ab6E8D32F6Cfe9F4Baa2565Ff000b2',
 
 				Miner:              '0xC6729C6cFc6B872acF641EB3EA628C9F038e5ABb',
 
