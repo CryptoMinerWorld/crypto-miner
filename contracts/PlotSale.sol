@@ -98,7 +98,7 @@ contract PlotSale is AccessMultiSig {
   /**
    * @notice Coupon creator is responsible for adding and removing coupons
    * @dev Role ROLE_COUPON_CREATOR allows adding and removing coupons
-   *      (calling `addCoupon()` and removeCoupon() functions)
+   *      (calling `updateCoupon()` and removeCoupon() functions)
    */
   uint32 public constant ROLE_COUPON_MANAGER = 0x00000002;
 

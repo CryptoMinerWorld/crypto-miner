@@ -158,12 +158,12 @@ module.exports = async function(deployer, network, accounts) {
 				Workshop:           '0x8AE15fFD5333Cc50591Ef69219D1BBDaB4Bcb239',
 				SilverSale:         '0xD2E092eCf392Ba9855f50350fc4Ba95073350348',
 
-				PlotSale:           '0xD2E092eCf392Ba9855f50350fc4Ba95073350348',
+				PlotSale:           '0x547192AD1C519167c20041187009595Cc40ECeD4',
 				PlotAntarctica:     '0x40337FB340FFc5B87FD95f94240b867BB2759388',
 
 				Miner:              '0x34F0DB7D13DE5F1b6ba7EBC183E036038cAC1B67',
 
-				PlotSaleStartUTC:   1563184800, // 07/15/2019 @ 10:00am UTC
+				PlotSaleStartUTC:   1563186600, // 07/15/2019 @ 10:30am UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
 				optionalPhases: {

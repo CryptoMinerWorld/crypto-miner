@@ -1546,4 +1546,4 @@ async function generateCouponCode(boxType) {
 
 
 // import auxiliary functions
-import {assertThrows, toBN, keccak256, sha3, getBalanceBN, gasUsedBN} from "../scripts/shared_functions";
+import {assertThrows, toBN, keccak256, getBalanceBN, gasUsedBN} from "../scripts/shared_functions";
