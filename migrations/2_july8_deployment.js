@@ -158,12 +158,12 @@ module.exports = async function(deployer, network, accounts) {
 				Workshop:           '0x8AE15fFD5333Cc50591Ef69219D1BBDaB4Bcb239',
 				SilverSale:         '0xD2E092eCf392Ba9855f50350fc4Ba95073350348',
 
-				PlotSale:           '0x8df20a372dCd813b21b650B052a56C0B5F4A7a2B',
+				PlotSale:           '0xD2E092eCf392Ba9855f50350fc4Ba95073350348',
 				PlotAntarctica:     '0x40337FB340FFc5B87FD95f94240b867BB2759388',
 
 				Miner:              '0x34F0DB7D13DE5F1b6ba7EBC183E036038cAC1B67',
 
-				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
+				PlotSaleStartUTC:   1563184800, // 07/15/2019 @ 10:00am UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
 				optionalPhases: {
@@ -223,9 +223,6 @@ module.exports = async function(deployer, network, accounts) {
 				WorldChest:         "0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
 				MonthlyChest:       "0x01cBe590FF9fb5b8C0ECe15D293469745625a1D8", // Eugene
 
-				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
-				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
-
 				FoundersPlots:      '0x3ACd26F0b5080C30c066a2055A4254A5BB05F22a',
 				BalanceProxy:       '0x785b1246E57b9f72C6bb19e5aC3178aEffb0Fe73',
 				TokenHelper:        '0x8920Df4215934E5f6c8935F0049E9b9d8dDF3656',
@@ -251,6 +248,9 @@ module.exports = async function(deployer, network, accounts) {
 				PlotAntarctica:     '0x314E712021Ab6E8D32F6Cfe9F4Baa2565Ff000b2',
 
 				Miner:              '0xC6729C6cFc6B872acF641EB3EA628C9F038e5ABb',
+
+				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
+				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
 				optionalPhases: {
 /*
