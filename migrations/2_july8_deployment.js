@@ -167,6 +167,7 @@ module.exports = async function(deployer, network, accounts) {
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
 				optionalPhases: {
+/*
 					migration: {
 						SilverERC20: true,
 						GoldERC20: true,
@@ -174,6 +175,7 @@ module.exports = async function(deployer, network, accounts) {
 						CountryERC721: true,
 						GemERC721: true,
 					},
+*/
 					setMsigOwners: [
 						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
 						"0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB", // John's Friend
@@ -904,7 +906,7 @@ async function mintTestTokens(accounts, instances) {
 
 		// grant writer permission to mint gems and set energetic age
 		if((await token.userRoles(writer.address)).isZero()) {
-			console.log("granting Writer " + writer.address + " permission to mint GemERC721 " + token.address);
+			console.log("granting Writer %o  permission to mint GemERC721 %o", writer.address, token.address);
 			await token.updateRole(writer.address, ROLE_TOKEN_CREATOR | ROLE_AGE_PROVIDER);
 		}
 		// write all the gems
@@ -912,7 +914,7 @@ async function mintTestTokens(accounts, instances) {
 		await writer.writeBulkGemV2Data(token.address, owners, gems);
 		// clean the permissions used
 		if(!(await token.userRoles(writer.address)).isZero()) {
-			console.log("revoking Writer " + writer.address + " permission to mint GemERC721 " + token.address);
+			console.log("revoking Writer %o permission to mint GemERC721 %o", writer.address, token.address);
 			await token.updateRole(writer.address, 0);
 		}
 	}
@@ -1369,7 +1371,7 @@ async function writeKnownAddresses(tracker, writer, accounts) {
 	const txs = [];
 	// grant writer permission to add known addresses
 	if((await tracker.userRoles(writer.address)).isZero()) {
-		console.log("\tgranting Writer %o permission to update RefPointsTracker %o, nonce %o", writer.address, tracker.address);
+		console.log("\tgranting Writer %o permission to update RefPointsTracker %o, nonce %o", writer.address, tracker.address, nonce);
 		txs.push(tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER, {nonce: nonce++}));
 	}
 
