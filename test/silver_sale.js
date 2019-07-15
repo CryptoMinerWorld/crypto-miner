@@ -1368,7 +1368,7 @@ contract('SilverSale', (accounts) => {
 		// generate random coupon code for Silver Box
 		const boxType = 0;
 		const code = await generateCouponCode(boxType);
-		const key = keccak256(code);
+		const key = sha3(code);
 
 		// define functions to add and remove coupons
 		const fn1 = async() => await sale.addCoupon(key, boxType, {from: manager});
@@ -1423,7 +1423,7 @@ contract('SilverSale', (accounts) => {
 		// generate random coupon code for Silver Box
 		const boxType = 0;
 		const code = await generateCouponCode(boxType);
-		const key = keccak256(code);
+		const key = sha3(code);
 		// issue the coupon
 		await sale.addCoupon(key, boxType, {from: manager});
 
@@ -1477,7 +1477,7 @@ contract('SilverSale', (accounts) => {
 		for(let boxType = 0; boxType < COUPONS_BOX_AMOUNTS.length; boxType++) {
 			for(let i = 0; i < COUPONS_BOX_AMOUNTS[boxType]; i++) {
 				const code = await generateCouponCode(boxType);
-				const key = keccak256(code);
+				const key = sha3(code);
 				couponCodes.push(code);
 				couponKeys.push(key);
 			}
@@ -1546,4 +1546,4 @@ async function generateCouponCode(boxType) {
 
 
 // import auxiliary functions
-import {assertThrows, toBN, keccak256, getBalanceBN, gasUsedBN} from "../scripts/shared_functions";
+import {assertThrows, toBN, sha3, getBalanceBN, gasUsedBN} from "../scripts/shared_functions";

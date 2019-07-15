@@ -49,10 +49,14 @@ export const toBN = web3.utils.toBN;
 export const toWei = web3.utils.toWei;
 
 // simulates Solidity keccak256(abi.encode(string))
-// based on web3.utils.soliditySha3 but web3.utils.keccak256 works just as fine
-export function keccak256(string) {
+// based on web3.utils.soliditySha3
+export function sha3(string) {
 	return web3.utils.soliditySha3(web3.eth.abi.encodeParameter("string", string));
 }
+
+// simulates Solidity keccak256(abi.encodePacked(string))
+// short name for web3.utils.keccak256;
+export const keccak256 = web3.utils.keccak256;
 
 // short name for web3.utils.toWei as BN
 export function toWeiBN(number, unit) {

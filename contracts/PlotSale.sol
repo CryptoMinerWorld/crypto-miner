@@ -98,7 +98,7 @@ contract PlotSale is AccessMultiSig {
   /**
    * @notice Coupon creator is responsible for adding and removing coupons
    * @dev Role ROLE_COUPON_CREATOR allows adding and removing coupons
-   *      (calling `updateCoupon()` and removeCoupon() functions)
+   *      (calling `updateCoupon()` function)
    */
   uint32 public constant ROLE_COUPON_MANAGER = 0x00000002;
 
@@ -203,13 +203,6 @@ contract PlotSale is AccessMultiSig {
    * @param n amount of land plots coupon allows to retrieve
    */
   event CouponUpdated(address indexed _by, uint256 indexed key, uint8 n);
-
-  /**
-   * @dev Fired in removeCoupon()
-   * @param _by coupon manager who removed the coupon
-   * @param key keccak256 hash of the coupon code removed
-   */
-  event CouponRemoved(address indexed _by, uint256 indexed key);
 
   /**
    * @dev Fired in useCoupon()
@@ -610,15 +603,8 @@ contract PlotSale is AccessMultiSig {
     // modify a coupon (add/update/delete)
     coupons[key] = n;
 
-    // depending on the `n` value, two types of the event can be emitted
-    if(n != 0) {
-      // emit an add/update event if `n` is not zero
-      emit CouponUpdated(msg.sender, key, n);
-    }
-    else {
-      // emit a delete event otherwise
-      emit CouponRemoved(msg.sender, key);
-    }
+    // emit an update event
+    emit CouponUpdated(msg.sender, key, n);
   }
 
 
