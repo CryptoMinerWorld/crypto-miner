@@ -6,7 +6,7 @@ const Antarctica = artifacts.require("./PlotAntarctica.sol");
 
 // PlotAntarctica gas usage related tests
 contract('PlotAntarctica: Gas Usage', (accounts) => {
-	it("gas: deploying a SC requires 1,448,424 gas", async() => {
+	it("gas: deploying a SC requires 1,606,842 gas", async() => {
 		// define plot Antarctica dependencies
 		const m = await FoundersPlotsMock.new(); // Founders Plots Mock simulates Presale2
 		const t = await Plot.new(); // plot ERC721
@@ -17,7 +17,7 @@ contract('PlotAntarctica: Gas Usage', (accounts) => {
 		const txReceipt = await web3.eth.getTransactionReceipt(txHash);
 		const gasUsed = txReceipt.gasUsed;
 
-		assertEqual(1448424, gasUsed, "deploying SC gas usage mismatch: " + gasUsed);
+		assertEqual(1606842, gasUsed, "deploying SC gas usage mismatch: " + gasUsed);
 	});
 
 	it("gas: getting one plot requires 276,493 gas", async() => {

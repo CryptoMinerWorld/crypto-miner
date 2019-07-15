@@ -273,6 +273,40 @@ contract('PlotSale', (accounts) => {
 		}
 		console.log("\t%o succeeded, %o failed (test complexity %o)", succeeded, failed, complexity);
 	});
+	it("buy: verify minted plot integrity", async() => {
+		// define plot sale dependencies
+		const r = await Tracker.new(); // ref tracker
+		const c = await Country.new(COUNTRY_DATA); // country ERC721
+		const t = await Plot.new(); // plot ERC721
+		const w = accounts[10]; // world chest
+		const m = accounts[11]; // monthly chest
+		const b = accounts[13]; // beneficiary
+		const u = -60 + new Date().getTime() / 1000 | 0; // offset, sale start time
+		// define a player account to buy tokens from
+		const p = accounts[1]; // player
+
+		// instantiate plot sale smart contract
+		const s = await Sale.new(r.address, c.address, t.address, w, m, b, u);
+		// enable buying plots feature
+		await s.updateFeatures(FEATURE_SALE_ENABLED);
+		// grant sale a permission to mint tokens on PlotERC721
+		await t.updateRole(s.address, ROLE_TOKEN_CREATOR);
+		// grant sale a permission to add known addresses into ref tracker
+		await r.updateRole(s.address, ROLE_SELLER);
+
+		// buy a plot
+		await s.buy(1, 1, {from: p, value: SALE_PRICE});
+
+		// verify the plot
+		assert(await t.exists(0x10001), "plot 0x10001 doesn't exist after getting it");
+		assert.equal(p, await t.ownerOf(0x10001), "plot 0x10001 has wrong owner");
+
+		// verify tiers structure
+		const tiers = await t.getTiers(0x10001);
+		assert.equal(5, tiers.shrn(56).maskn(8), "wrong number of tiers");
+		assert.equal(0, tiers.shrn(48).maskn(8), "wrong tier1 offset");
+		assert.equal(0, tiers.maskn(8), "wrong initial offset");
+	});
 	it("buy: ETH flow", async() => {
 		// define plot sale dependencies
 		const r = await Tracker.new(); // ref tracker
