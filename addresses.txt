@@ -25,6 +25,11 @@ GemERC721:          0x34Fa7ddde9D0E1B98CD281EE1E8BA1DB37C64399
 
 Workshop:           0x5aE2466431aDCdc86EEE95533272afA5ebB546d0
 SilverSale:         0xfAaD84Cc472195bEa68aad29C3AAfb47E7252cc9
+
+PlotSale:           0xBBf4FB0565d7b9AD58819C9f83785785c71f00c3
+PlotAntarctica:     0xdf5ceDeCB10912E9f68FD93c55c54d54db142F99
+
+Miner:              0x530FfE811cE9D7c0f31f94772890F4d5Df08F8D7
 ==============================================================
 
 
