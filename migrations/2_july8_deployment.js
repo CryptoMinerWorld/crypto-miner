@@ -1030,6 +1030,49 @@ async function enablePermissions(accounts, conf, instances) {
 	// a place to store pending transactions (promises)
 	const txs = [];
 
+	// enable transfers and transfers on behalf for all the tokens
+	// enable transfers and transfers on behalf for ArtifactERC20
+	if((await instances.ArtifactERC20.features()).isZero()) {
+		console.log("enabling transfers and transfers on behalf for ArtifactERC20 %o", conf.ArtifactERC20);
+		txs.push(instances.ArtifactERC20.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF, {nonce: nonce++}));
+	}
+	// enable transfers and transfers on behalf for FoundersKeyERC20
+	if((await instances.FoundersKeyERC20.features()).isZero()) {
+		console.log("enabling transfers and transfers on behalf for FoundersKeyERC20 %o", conf.FoundersKeyERC20);
+		txs.push(instances.FoundersKeyERC20.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF, {nonce: nonce++}));
+	}
+	// enable transfers and transfers on behalf for ChestKeyERC20
+	if((await instances.ChestKeyERC20.features()).isZero()) {
+		console.log("enabling transfers and transfers on behalf for ChestKeyERC20 %o", conf.ChestKeyERC20);
+		txs.push(instances.ChestKeyERC20.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF, {nonce: nonce++}));
+	}
+	// enable transfers and transfers on behalf for SilverERC20
+	if((await instances.SilverERC20.features()).isZero()) {
+		console.log("enabling transfers and transfers on behalf for SilverERC20 %o", conf.SilverERC20);
+		txs.push(instances.SilverERC20.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF, {nonce: nonce++}));
+	}
+	// enable transfers and transfers on behalf for GoldERC20
+	if((await instances.GoldERC20.features()).isZero()) {
+		console.log("enabling transfers and transfers on behalf for GoldERC20 %o", conf.GoldERC20);
+		txs.push(instances.GoldERC20.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF, {nonce: nonce++}));
+	}
+	// enable transfers and transfers on behalf for CountryERC721
+	if((await instances.CountryERC721.features()).isZero()) {
+		console.log("enabling transfers and transfers on behalf for CountryERC721 %o", conf.CountryERC721);
+		txs.push(instances.CountryERC721.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF, {nonce: nonce++}));
+	}
+	// enable transfers and transfers on behalf for PlotERC721
+	if((await instances.PlotERC721.features()).isZero()) {
+		console.log("enabling transfers and transfers on behalf for PlotERC721 %o", conf.PlotERC721);
+		txs.push(instances.PlotERC721.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF, {nonce: nonce++}));
+	}
+	// enable transfers and transfers on behalf for GemERC721
+	if((await instances.GemERC721.features()).isZero()) {
+		console.log("enabling transfers and transfers on behalf for GemERC721 %o", conf.GemERC721);
+		txs.push(instances.GemERC721.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF, {nonce: nonce++}));
+	}
+	console.log("transfers and transfers on behalf configuration scheduled");
+
 	// DutchAuction.setFeeAndBeneficiary
 	if((await instances.DutchAuction.fee()).isZero()) {
 		console.log("setting fee and beneficiary for DutchAuction %o", conf.DutchAuction);
@@ -1044,11 +1087,6 @@ async function enablePermissions(accounts, conf, instances) {
 	if(!await instances.DutchAuction.supportedTokenAddresses(conf.GemERC721)) {
 		console.log("whitelisting GemERC721 %o on the DutchAuction %o", conf.GemERC721, conf.DutchAuction);
 		txs.push(instances.DutchAuction.whitelist(conf.GemERC721, true, {nonce: nonce++}));
-	}
-	// enable transfers and transfers on behalf for GemERC721
-	if((await instances.GemERC721.features()).isZero()) {
-		console.log("enabling transfers and transfers on behalf for GemERC721 %o", conf.GemERC721);
-		txs.push(instances.GemERC721.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF, {nonce: nonce++}));
 	}
 	console.log("DutchAuction configuration scheduled");
 
