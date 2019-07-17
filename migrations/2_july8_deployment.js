@@ -123,7 +123,7 @@ module.exports = async function(deployer, network, accounts) {
 
 				Miner:              "0x530FfE811cE9D7c0f31f94772890F4d5Df08F8D7",
 
-				MintHelper:         "",
+				MintHelper:         "0x5671823feaDb896eC6e3BD2f6F6cD5a561AdE9D3",
 
 				PlotSaleStartUTC:   1563210000, // 07/15/2019 @ 5:00pm UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC

@@ -31,6 +31,8 @@ PlotSale:           0xBBf4FB0565d7b9AD58819C9f83785785c71f00c3
 PlotAntarctica:     0xdf5ceDeCB10912E9f68FD93c55c54d54db142F99
 
 Miner:              0x530FfE811cE9D7c0f31f94772890F4d5Df08F8D7
+
+MintHelper:         0x5671823feaDb896eC6e3BD2f6F6cD5a561AdE9D3
 ==============================================================
 
 

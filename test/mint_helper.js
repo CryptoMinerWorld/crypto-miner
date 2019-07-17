@@ -10,7 +10,7 @@ const ROLE_MINT_OPERATOR = 0x00000001;
 
 // mint helper tests
 contract('MintHelper', accounts => {
-	it("mint helper: creating some manual token", async () => {
+	it("mint helper: creating some manual token", async() => {
 		// create a token instance
 		const tk = await Token.new();
 		// create mint helper
@@ -54,7 +54,7 @@ contract('MintHelper', accounts => {
 		await assertThrows(fn, 1, 1, 7, 1);
 		await assertThrows(fn, 1, 1, 1, 1000000);
 	});
-	it("mint helper: permissions check", async () => {
+	it("mint helper: permissions check", async() => {
 		// create a token instance
 		const tk = await Token.new();
 		// create mint helper
@@ -85,6 +85,24 @@ contract('MintHelper', accounts => {
 		await fn0();
 		await fn1();
 	});
+	it("mint helper: verifying grade value randomization", async() => {
+		// create a token instance
+		const tk = await Token.new();
+		// create mint helper
+		const h = await MintHelper.new(tk.address);
+
+		// grant mint permission
+		await tk.updateRole(h.address, ROLE_TOKEN_CREATOR);
+
+		// mint some amount of gems and make sure grade value is in
+		// reasonable bounds
+		for(let i = 0; i < 200; i++) {
+			await h.mint(1, 1, 1);
+			const tokenId = 0xF201 + i;
+			const gradeValue = (await tk.getGradeValue(tokenId)).toNumber();
+			assert(gradeValue < 1000000, "wrong grade value for gem " + tokenId);
+		}
+	})
 });
 
 
