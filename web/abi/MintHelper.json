@@ -1,0 +1,640 @@
+{
+  "contractName": "MintHelper",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isUserInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_MSIG_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MAX_GEM_ID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        }
+      ],
+      "name": "constructUpdateMsigRequest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "tokenInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MSIG_QUORUM",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "HELPER_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_by",
+          "type": "address[]"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "GEM_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_ACCESS_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_MINT_OPERATOR",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "nextGemId",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        },
+        {
+          "name": "v",
+          "type": "uint8[]"
+        },
+        {
+          "name": "r",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "s",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "updateMsig",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_tokenId",
+          "type": "uint24"
+        },
+        {
+          "indexed": false,
+          "name": "color",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "level",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "gradeType",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "gradeValue",
+          "type": "uint24"
+        }
+      ],
+      "name": "Minted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "color",
+          "type": "uint8"
+        },
+        {
+          "name": "level",
+          "type": "uint8"
+        },
+        {
+          "name": "gradeType",
+          "type": "uint8"
+        }
+      ],
+      "name": "mint",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "color",
+          "type": "uint8"
+        },
+        {
+          "name": "level",
+          "type": "uint8"
+        },
+        {
+          "name": "gradeType",
+          "type": "uint8"
+        }
+      ],
+      "name": "mintTo",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "color",
+          "type": "uint8"
+        },
+        {
+          "name": "level",
+          "type": "uint8"
+        },
+        {
+          "name": "gradeType",
+          "type": "uint8"
+        },
+        {
+          "name": "gradeValue",
+          "type": "uint24"
+        }
+      ],
+      "name": "mintWith",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-07-17T10:06:12.273Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "Auxiliary smart contract to help mint GemERC721 tokens in predictable     ID range, with correct color, level and grade",
+    "methods": {
+      "constructUpdateMsigRequest(address,uint256,uint256)": {
+        "details": "Used to create an update role request to be signed by the userOnce signed by at least 2 users, the request can be executed     using `updateRoleMsig` function",
+        "params": {
+          "_expiresOn": "an expiration date of the request",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "constructor": {
+        "details": "Creates mint helper for GemERC721 bound to the deployed GemERC721 instance specified",
+        "params": {
+          "tokenAddress": "deployed GemERC721 instance to bind to"
+        }
+      },
+      "evaluateBy(address[],uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator addresses,     and role required (set of permissions), calculate the resulting     set of permissions (role).If all operators are super admins and have full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operators have no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+        "params": {
+          "_by": "non-empty array of addresses of the contract operators     to use permissions of for evaluation",
+          "actual": "input set of permissions to evaluate against",
+          "required": "desired set of permissions to have"
+        },
+        "return": "resulting set of permissions which can be set"
+      },
+      "features()": {
+        "details": "Auxiliary getter function to maintain compatibility with previous     versions of the Access Control List smart contract, where     features was a separate uint256 public field"
+      },
+      "isFeatureEnabled(uint256)": {
+        "details": "Checks if requested set of features is enabled globally on the contract",
+        "params": {
+          "required": "set of features to check against"
+        },
+        "return": "true if all the features requested are enabled, false otherwise"
+      },
+      "isSenderInRole(uint256)": {
+        "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isUserInRole(address,uint256)": {
+        "details": "Checks if user `user` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against",
+          "user": "address of the user to check role for"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "mint(uint8,uint8,uint8)": {
+        "params": {
+          "color": "an integer, defining the gem color:     [1] Garnet (January)     [2] Amethyst (February)     [3] Aquamarine (March)     [4] Diamond (April)     [5] Emerald (May)     [6] Pearl (June)     [7] Ruby (July)     [8] Peridot (August)     [9] Sapphire (September)     [10] Opal (October)     [11] Topaz (November)     [12] Turquoise (December)",
+          "gradeType": "an integer, defining gem grade type:     [1] D     [2] C     [3] B     [4] A     [5] AA     [6] AAA",
+          "level": "an integer, defining gem level in range [1, 5]"
+        }
+      },
+      "mintTo(address,uint8,uint8,uint8)": {
+        "params": {
+          "_to": "an address to receive minted token",
+          "color": "an integer, defining the gem color:     [1] Garnet (January)     [2] Amethyst (February)     [3] Aquamarine (March)     [4] Diamond (April)     [5] Emerald (May)     [6] Pearl (June)     [7] Ruby (July)     [8] Peridot (August)     [9] Sapphire (September)     [10] Opal (October)     [11] Topaz (November)     [12] Turquoise (December)",
+          "gradeType": "an integer, defining gem grade type:     [1] D     [2] C     [3] B     [4] A     [5] AA     [6] AAA",
+          "level": "an integer, defining gem level in range [1, 5]"
+        }
+      },
+      "mintWith(address,uint8,uint8,uint8,uint24)": {
+        "params": {
+          "_to": "an address to receive minted token",
+          "color": "an integer, defining the gem color:     [1] Garnet (January)     [2] Amethyst (February)     [3] Aquamarine (March)     [4] Diamond (April)     [5] Emerald (May)     [6] Pearl (June)     [7] Ruby (July)     [8] Peridot (August)     [9] Sapphire (September)     [10] Opal (October)     [11] Topaz (November)     [12] Turquoise (December)",
+          "gradeType": "an integer, defining gem grade type:     [1] D     [2] C     [3] B     [4] A     [5] AA     [6] AAA",
+          "gradeValue": "an integer, defining grade value in range [0, 1000000)",
+          "level": "an integer, defining gem level in range [1, 5]"
+        }
+      },
+      "updateFeatures(uint256)": {
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissionsRequires transaction sender to have `ROLE_ACCESS_MANAGER` permissionFunction is left for backward compatibility with older versions",
+        "params": {
+          "_mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateMsig(address,uint256,uint256,uint8[],bytes32[],bytes32[])": {
+        "details": "MultiSig version of the `updateRole` functionUpdates set of permissions (role) for a given user,     taking into account signers' permissionsSetting role to zero is equivalent to removing all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying signers' permissions (roles intersection) to the userRequires transaction signers to have `ROLE_ROLE_MANAGER` permissionRequires `MSIG_QUORUM` signatures in MultiSig mode –     if `FEATURE_MSIG_ENABLED` is enabled",
+        "params": {
+          "_expiresOn": "an expiration date of the request,     optional, required in MultiSig mode only",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract",
+          "r": "an array of ECDSA signature outputs, \"r\",     optional, required in MultiSig mode only",
+          "s": "an array of ECDSA signature outputs, \"s\",     optional, required in MultiSig mode only",
+          "v": "an array of ECDSA signature outputs, \"v\",     optional, required in MultiSig mode only"
+        }
+      },
+      "updateRole(address,uint256)": {
+        "details": "Updates set of permissions (role) for a given user,     taking into account sender's permissions.Setting role to zero is equivalent to removing an all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders' permissions (role) to the userRequires transaction sender to have `ROLE_ACCESS_MANAGER` permission",
+        "params": {
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      }
+    },
+    "title": "Mint Helper for GemERC721"
+  },
+  "userdoc": {
+    "methods": {
+      "mint(uint8,uint8,uint8)": {
+        "notice": "A function to create next auction gem with a random grade value     and assign its ownership to the transaction sender"
+      },
+      "mintTo(address,uint8,uint8,uint8)": {
+        "notice": "A function to create next auction gem with a random grade value"
+      },
+      "mintWith(address,uint8,uint8,uint8,uint24)": {
+        "notice": "A function to create next auction gem"
+      }
+    }
+  }
+}

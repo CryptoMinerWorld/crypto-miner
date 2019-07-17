@@ -3,6 +3,7 @@
 // last time it was executed and continues from this place
 
 // List of smart contract to deploy or use (ABI)
+const FoundersPlots = artifacts.require("./FoundersPlotsMock");
 const BalanceProxy = artifacts.require("./BalanceProxy");
 const TokenHelper = artifacts.require("./TokenHelper");
 const TokenReader = artifacts.require("./TokenReader");
@@ -18,11 +19,11 @@ const CountryERC721 = artifacts.require("./CountryERC721");
 const PlotERC721 = artifacts.require("./PlotERC721");
 const GemERC721 = artifacts.require("./GemERC721");
 const Workshop = artifacts.require("./Workshop");
-const Miner = artifacts.require("./Miner");
-const PlotSale = artifacts.require("./PlotSale");
-const FoundersPlots = artifacts.require("./FoundersPlotsMock");
-const PlotAntarctica = artifacts.require("./PlotAntarctica");
 const SilverSale = artifacts.require("./SilverSale");
+const PlotSale = artifacts.require("./PlotSale");
+const PlotAntarctica = artifacts.require("./PlotAntarctica");
+const Miner = artifacts.require("./Miner");
+const MintHelper = artifacts.require("./MintHelper");
 
 
 // features and roles required
@@ -50,7 +51,16 @@ const ROLE_OFFSET_PROVIDER = 0x00000040;
 const ROLE_REF_POINTS_ISSUER = 0x00000001;
 const ROLE_REF_POINTS_CONSUMER = 0x00000002;
 const ROLE_SELLER = 0x00000004;
+const ROLE_MINT_OPERATOR = 0x00000001;
 
+
+// some global external addresses
+const SRV_ADDR = {
+	JOHN: "0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6",
+	BASIL: "0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34",
+	ROMAN: "0xEE169DCC689D0C358F68Ce95DEf41646039aC190",
+	JOHNS_FRIEND: "0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB"
+};
 
 // using secure random generator instead of default Math.random()
 const secureRandomInRange = require("random-number-csprng");
@@ -68,11 +78,14 @@ module.exports = async function(deployer, network, accounts) {
 		return;
 	}
 
+	// print initial debug information
+	console.log("network %o", network);
+	console.log("service account %o, nonce: %o", accounts[0], await web3.eth.getTransactionCount(accounts[0]));
+	console.log("service addresses:\n%o", SRV_ADDR);
+
 	// deployed smart contract addresses configuration defines which
 	// smart contracts require deployment and which are already deployed
 	// empty address means smart contract requires deployment
-
-	console.log("account %o, nonce: %o", accounts[0], await web3.eth.getTransactionCount(accounts[0]));
 
 	// a collection of all known addresses (smart contracts and external)
 	const conf = ((network) => {
@@ -110,6 +123,8 @@ module.exports = async function(deployer, network, accounts) {
 
 				Miner:              "0x530FfE811cE9D7c0f31f94772890F4d5Df08F8D7",
 
+				MintHelper:         "",
+
 				PlotSaleStartUTC:   1563210000, // 07/15/2019 @ 5:00pm UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
@@ -125,8 +140,8 @@ module.exports = async function(deployer, network, accounts) {
 					},
 */
 					setMsigOwners: [
-						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-						"0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB", // John's Friend
+						SRV_ADDR.JOHN,
+						SRV_ADDR.JOHNS_FRIEND,
 					],
 					enablePermissions: true,
 					disablePermissions: false,
@@ -136,10 +151,10 @@ module.exports = async function(deployer, network, accounts) {
 			};
 			// Ropsten Configuration
 			case "ropsten": return {
-				Beneficiary:        "0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
-				FoundersChest:      "0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
-				WorldChest:         "0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-				MonthlyChest:       "0x01cBe590FF9fb5b8C0ECe15D293469745625a1D8", // Eugene
+				Beneficiary:        SRV_ADDR.BASIL,
+				FoundersChest:      SRV_ADDR.ROMAN,
+				WorldChest:         SRV_ADDR.JOHN,
+				MonthlyChest:       SRV_ADDR.JOHNS_FRIEND,
 
 				FoundersPlots:      '0xCA1ae128c5893eCBD0c246c7d4670e21D665a30F',
 				BalanceProxy:       '0x05d3C1A23e228ADE3b1eaea3b6978F78b4359587',
@@ -167,6 +182,8 @@ module.exports = async function(deployer, network, accounts) {
 
 				Miner:              '0x34F0DB7D13DE5F1b6ba7EBC183E036038cAC1B67',
 
+				MintHelper:         "0x93b86262455D79705e0D14bC105c92Aa07022a3a",
+
 				PlotSaleStartUTC:   1563186600, // 07/15/2019 @ 10:30am UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
@@ -181,22 +198,22 @@ module.exports = async function(deployer, network, accounts) {
 					},
 */
 					setMsigOwners: [
-						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-						"0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB", // John's Friend
+						SRV_ADDR.JOHN,
+						SRV_ADDR.JOHNS_FRIEND,
 					],
 					enablePermissions: true,
 					disablePermissions: false,
 					writePlotSaleCoupons: false,
 					writeSilverSaleCoupons: true,
-					writeTestTokens: true,
+					writeTestTokens: false,
 				},
 			};
 			// Rinkeby Configuration
 			case "rinkeby": return {
-				Beneficiary:        "0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
-				FoundersChest:      "0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
-				WorldChest:         "0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-				MonthlyChest:       "0x01cBe590FF9fb5b8C0ECe15D293469745625a1D8", // Eugene
+				Beneficiary:        SRV_ADDR.BASIL,
+				FoundersChest:      SRV_ADDR.ROMAN,
+				WorldChest:         SRV_ADDR.JOHN,
+				MonthlyChest:       SRV_ADDR.JOHNS_FRIEND,
 
 				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
@@ -210,8 +227,8 @@ module.exports = async function(deployer, network, accounts) {
 						GemERC721: true,
 					},
 					setMsigOwners: [
-						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-						"0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB", // John's Friend
+						SRV_ADDR.JOHN,
+						SRV_ADDR.JOHNS_FRIEND,
 					],
 					enablePermissions: true,
 					disablePermissions: false,
@@ -222,10 +239,10 @@ module.exports = async function(deployer, network, accounts) {
 			};
 			// Kovan Configuration
 			case "kovan": return {
-				Beneficiary:        "0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
-				FoundersChest:      "0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
-				WorldChest:         "0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-				MonthlyChest:       "0x01cBe590FF9fb5b8C0ECe15D293469745625a1D8", // Eugene
+				Beneficiary:        SRV_ADDR.BASIL,
+				FoundersChest:      SRV_ADDR.ROMAN,
+				WorldChest:         SRV_ADDR.JOHN,
+				MonthlyChest:       SRV_ADDR.JOHNS_FRIEND,
 
 				FoundersPlots:      '0x3ACd26F0b5080C30c066a2055A4254A5BB05F22a',
 				BalanceProxy:       '0x785b1246E57b9f72C6bb19e5aC3178aEffb0Fe73',
@@ -253,6 +270,8 @@ module.exports = async function(deployer, network, accounts) {
 
 				Miner:              '0xC6729C6cFc6B872acF641EB3EA628C9F038e5ABb',
 
+				MintHelper:         "0x69cEDb69051e63c7e335beB042B2501D5cDAFf23",
+
 				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
 
@@ -267,14 +286,14 @@ module.exports = async function(deployer, network, accounts) {
 					},
 */
 					setMsigOwners: [
-						"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-						"0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB", // John's Friend
+						SRV_ADDR.JOHN,
+						SRV_ADDR.JOHNS_FRIEND,
 					],
 					enablePermissions: true,
 					disablePermissions: false,
 					writePlotSaleCoupons: true,
 					writeSilverSaleCoupons: true,
-					writeTestTokens: true,
+					writeTestTokens: false,
 				},
 			};
 			default: throw "unknown network " + network;
@@ -314,7 +333,7 @@ module.exports = async function(deployer, network, accounts) {
 		await grantMsigAccess(accounts, conf, instances);
 	}
 	if(conf.optionalPhases.enablePermissions) {
-		await enablePermissions(accounts, conf, instances);
+		await enablePermissions(network, accounts, conf, instances);
 	}
 	if(conf.optionalPhases.writeSilverSaleCoupons) {
 		await writeSilverSaleCoupons(network, accounts, instances);
@@ -641,6 +660,17 @@ async function deployInstances(deployer, conf, instances) {
 		deployedInstances++;
 	}
 
+	// MintHelper binding/deployment
+	if(conf.MintHelper) {
+		console.log("binding MintHelper to " + conf.MintHelper);
+		instances.MintHelper = await MintHelper.at(conf.MintHelper);
+	}
+	else {
+		console.log("deploying MintHelper");
+		await deployer.deploy(MintHelper, conf.GemERC721);
+		deployedInstances++;
+	}
+
 	// link newly deployed instances
 	if(!conf.Workshop) {
 		instances.Workshop = await Workshop.deployed();
@@ -661,6 +691,10 @@ async function deployInstances(deployer, conf, instances) {
 	if(!conf.Miner) {
 		instances.Miner = await Miner.deployed();
 		conf.Miner = instances.Miner.address;
+	}
+	if(!conf.MintHelper) {
+		instances.MintHelper = await MintHelper.deployed();
+		conf.MintHelper = instances.MintHelper.address;
 	}
 
 	console.log("mandatory phase complete, %o config records healed / instances deployed", deployedInstances);
@@ -877,9 +911,9 @@ async function mintTestTokens(accounts, instances) {
 
 	// testing addresses
 	const testers = [
-		"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-		"0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
-		"0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
+		SRV_ADDR.JOHN,
+		SRV_ADDR.ROMAN,
+		SRV_ADDR.BASIL,
 	];
 
 	// mint few ERC721 tokens
@@ -1022,7 +1056,7 @@ async function mintTestTokens(accounts, instances) {
 }
 
 
-async function enablePermissions(accounts, conf, instances) {
+async function enablePermissions(network, accounts, conf, instances) {
 	console.log("optional phase: enable permissions");
 
 	// we'll be tracking nonce, yeah!
@@ -1204,6 +1238,23 @@ async function enablePermissions(accounts, conf, instances) {
 		txs.push(instances.Miner.updateFeatures(FEATURE_MINING_ENABLED, {nonce: nonce++}));
 	}
 	console.log("Miner configuration scheduled");
+
+	// allow MintHelper to update GemERC721
+	if((await instances.GemERC721.userRoles(conf.MintHelper)).isZero()) {
+		console.log("granting MintHelper %o permission to mint GemERC721 %o", conf.MintHelper, conf.GemERC721);
+		txs.push(instances.GemERC721.updateRole(conf.MintHelper, ROLE_TOKEN_CREATOR, {nonce: nonce++}));
+	}
+	// allow John to use MintHelper
+	if((await instances.MintHelper.userRoles(SRV_ADDR.JOHN)).isZero()) {
+		console.log("granting John %o permission to use MintHelper %o", SRV_ADDR.JOHN, conf.MintHelper);
+		txs.push(instances.MintHelper.updateRole(SRV_ADDR.JOHN, ROLE_MINT_OPERATOR, {nonce: nonce++}));
+	}
+	// allow Roman to use MintHelper in test networks
+	if(network && network !== "mainnet" && (await instances.MintHelper.userRoles(SRV_ADDR.ROMAN)).isZero()) {
+		console.log("granting Roman %o permission to use MintHelper %o", SRV_ADDR.ROMAN, conf.MintHelper);
+		txs.push(instances.MintHelper.updateRole(SRV_ADDR.ROMAN, ROLE_MINT_OPERATOR, {nonce: nonce++}));
+	}
+	console.log("MintHelper configuration scheduled");
 
 	// wait for all transactions to complete and output gas usage
 	await waitForAll(txs);
