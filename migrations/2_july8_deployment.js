@@ -146,7 +146,7 @@ module.exports = async function(deployer, network, accounts) {
 					enablePermissions: true,
 					disablePermissions: false,
 					writePlotSaleCoupons: false,
-					writeSilverSaleCoupons: false,
+					writeSilverSaleCoupons: true,
 				},
 			};
 			// Ropsten Configuration
@@ -811,40 +811,67 @@ async function writeSilverSaleCoupons(network, accounts, instances) {
 	const path1 = `./data/silver_codes1_${network}.csv`;
 	const path2 = `./data/silver_codes2_${network}.csv`;
 
-	// load/generate 30 Silver Box coupons
-	const coupons0 = fs.existsSync(path0)? loadCoupons(read_csv(path0, csv_header).split("\n")): await generateNCouponsOfType(30, 0);
-	// load/generate 20 Rotund Silver Box coupons
-	const coupons1 = fs.existsSync(path1)? loadCoupons(read_csv(path1, csv_header).split("\n")): await generateNCouponsOfType(20, 1);
-	// load/generate 10 Goldish Silver Box coupons
-	const coupons2 = fs.existsSync(path2)? loadCoupons(read_csv(path2, csv_header).split("\n")): await generateNCouponsOfType(10, 2);
+	// define variables to store the coupons:
+	// Silver Box coupons
+	let coupons0;
+	// Rotund Silver Box coupons
+	let coupons1;
+	// Goldish Silver Box coupons
+	let coupons2;
 
-	// save generated coupons into the file
-	write_csv(path0, csv_header, coupons0.codes.join("\n"));
-	write_csv(path1, csv_header, coupons1.codes.join("\n"));
-	write_csv(path2, csv_header, coupons2.codes.join("\n"));
+	// load the coupons from files or generate them if required
+	if(fs.existsSync(path0)) {
+		coupons0 = loadCoupons(read_csv(path0, csv_header).split("\n"));
+	}
+	else {
+		coupons0 = await generateNCouponsOfType(30, 0);
+		write_csv(path0, csv_header, coupons0.codes.join("\n"));
+	}
+	if(fs.existsSync(path1)) {
+		coupons1 = loadCoupons(read_csv(path1, csv_header).split("\n"));
+	}
+	else {
+		coupons1 = await generateNCouponsOfType(20, 1);
+		write_csv(path1, csv_header, coupons1.codes.join("\n"));
+	}
+	if(fs.existsSync(path2)) {
+		coupons2 = loadCoupons(read_csv(path2, csv_header).split("\n"));
+	}
+	else {
+		coupons2 = await generateNCouponsOfType(10, 2);
+		write_csv(path2, csv_header, coupons2.codes.join("\n"));
+	}
+
+	// we'll be tracking nonce, yeah!
+	let nonce = await web3.eth.getTransactionCount(accounts[0]);
+	// a place to store pending transactions (promises)
+	const txs = [];
 
 	// add coupon codes if required
 	if((await sale.isCouponValid(coupons0.codes[0])).eq(toBN(0xFF))) {
 		console.log("adding %o coupon codes (Silver Box)", coupons0.codes.length);
-		await sale.bulkAddCoupons(coupons0.keys, 0);
+		txs.push(sale.bulkAddCoupons(coupons0.keys, 0, {nonce: nonce++}));
 	}
 	else {
 		console.log("skipping adding coupon codes for Silver Box – coupons already exist");
 	}
 	if((await sale.isCouponValid(coupons1.codes[0])).eq(toBN(0xFF))) {
 		console.log("adding %o coupon codes (Rotund Silver Box)", coupons1.codes.length);
-		await sale.bulkAddCoupons(coupons1.keys, 1);
+		txs.push(sale.bulkAddCoupons(coupons1.keys, 1, {nonce: nonce++}));
 	}
 	else {
 		console.log("skipping adding coupon codes for Rotund Silver Box – coupons already exist");
 	}
 	if((await sale.isCouponValid(coupons2.codes[0])).eq(toBN(0xFF))) {
 		console.log("adding %o coupon codes (Goldish Silver Box)", coupons2.codes.length);
-		await sale.bulkAddCoupons(coupons2.keys, 2);
+		txs.push(sale.bulkAddCoupons(coupons2.keys, 2, {nonce: nonce++}));
 	}
 	else {
 		console.log("skipping adding coupon codes for Goldish Silver Box – coupons already exist");
 	}
+
+	// wait for all transactions to complete and output gas usage
+	await waitForAll(txs);
 
 	console.log("optional phase [write silver sale coupons] complete");
 }
