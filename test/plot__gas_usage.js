@@ -17,7 +17,7 @@ contract("PlotERC721: Gas Usage", (accounts) => {
 
 	it("gas: minting a token requires 205299 gas", async() => {
 		const tk = await Token.new();
-		const gasUsed = (await tk.mint(accounts[0], 1, toBN("0x05002341555F6400"))).receipt.gasUsed;
+		const gasUsed = (await tk.mint(accounts[0], 1, "0x05002341555F6400")).receipt.gasUsed;
 
 		assertEqual(205299, gasUsed, "minting a token gas usage mismatch: " + gasUsed);
 	});
@@ -27,7 +27,7 @@ contract("PlotERC721: Gas Usage", (accounts) => {
 		const player2 = accounts[2];
 		const tk = await Token.new();
 		await tk.updateFeatures(FEATURE_TRANSFERS | FEATURE_TRANSFERS_ON_BEHALF);
-		await tk.mint(player, 0, toBN("0x05002341555F6400"));
+		await tk.mint(player, 0, "0x05002341555F6400");
 		const gasUsed = (await tk.safeTransferFrom(player, player2, 1, {from: player})).receipt.gasUsed;
 
 		assertEqual(72113, gasUsed, "transferring a token gas usage mismatch: " + gasUsed);
@@ -35,7 +35,7 @@ contract("PlotERC721: Gas Usage", (accounts) => {
 
 	it("gas: mining a plot by 1 block requires 37,263 gas", async() => {
 		const tk = await Token.new();
-		await tk.mint(accounts[0], 0, toBN("0x05002341555F6400"));
+		await tk.mint(accounts[0], 0, "0x05002341555F6400");
 		const gasUsed = (await tk.mineBy(1, 1)).receipt.gasUsed;
 
 		assertEqual(37263, gasUsed, "mining a plot by 1 block gas usage mismatch: " + gasUsed);
@@ -43,7 +43,7 @@ contract("PlotERC721: Gas Usage", (accounts) => {
 
 	it("gas: mining a plot to block 1 requires 37,186 gas", async() => {
 		const tk = await Token.new();
-		await tk.mint(accounts[0], 0, toBN("0x05002341555F6400"));
+		await tk.mint(accounts[0], 0, "0x05002341555F6400");
 		const gasUsed = (await tk.mineTo(1, 1)).receipt.gasUsed;
 
 		assertEqual(37186, gasUsed, "mining a plot to block 1 gas usage mismatch: " + gasUsed);
@@ -59,6 +59,3 @@ function assertEqual(expected, actual, msg) {
 function assertEqualWith(expected, leeway, actual, msg) {
 	assert(expected * (1 - leeway) < actual && expected * (1 + leeway) > actual, msg);
 }
-
-// import auxiliary functions
-import {toBN} from "../scripts/shared_functions";

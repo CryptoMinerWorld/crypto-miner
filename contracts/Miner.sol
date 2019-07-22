@@ -52,7 +52,7 @@ contract Miner is AccessMultiSig {
    * @dev Should be regenerated each time smart contact source code is changed
    * @dev Generated using https://www.random.org/bytes/
    */
-  uint256 public constant MINER_UID = 0x9055d8d3a87095587aec3045abf60b9a871ab59b0c0c1010da999140e2e6a114;
+  uint256 public constant MINER_UID = 0x1a7eb1b821aaca4d043b15fcaa50ab6ba87adf5263adb9a1f852531eba2fd7c6;
 
   /**
    * @dev Expected version (UID) of the deployed GemERC721 instance
@@ -584,7 +584,7 @@ contract Miner is AccessMultiSig {
     require(TierMath.getOffset(tiers) < maxOffset);
 
     // calculate effective energy
-    uint32 effectiveEnergy = effectiveRestingEnergyOf(gemId);
+    uint32 effectiveEnergy = effectiveRestingEnergyWith(gemId, plotId);
 
     // define variable to store new plot offset
     uint8 offset;
@@ -599,7 +599,7 @@ contract Miner is AccessMultiSig {
       __mine(plotId, gemId, offset);
 
       // recalculate energy left taking into account gem's mining rate
-      uint32 energy = uint32(uint64(effectiveEnergy) * 1000000 / miningRateOf(gemId));
+      uint32 energy = uint32(uint64(effectiveEnergy) * 1000000 / miningRateWith(gemId, plotId));
 
       // save unused energetic age of the gem, in seconds
       gemInstance.setAge(gemId, unusedEnergeticAge(energy));
@@ -824,7 +824,7 @@ contract Miner is AccessMultiSig {
     uint8 maxOffset = TierMath.getTierDepthOrMined(tiers, level);
 
     // determine gem's effective mining energy
-    uint32 energy = effectiveMiningEnergyOf(m.gemId);
+    uint32 energy = effectiveMiningEnergyWith(m.gemId, plotId);
 
     // delegate call to `evaluateWith`
     (offset, energy) = evaluateWith(tiers, maxOffset, energy);
@@ -1620,6 +1620,22 @@ contract Miner is AccessMultiSig {
    * @return effective mining energy for the specified gem
    */
   function effectiveMiningEnergyOf(uint24 gemId) public view returns(uint32) {
+    // delegate call to `effectiveMiningEnergyWith` passing zero plot ID
+    return effectiveMiningEnergyWith(gemId, 0);
+  }
+
+  /**
+   * @notice Determines effective mining energy of a particular gem
+   * @notice Gems of any grades accumulate mining energy when mining
+   * @dev See `energeticAgeOf` and `effectiveEnergy` functions for more details
+   * @dev Throws if the gem specified doesn't exist
+   * @param gemId ID of the gem to calculate effective mining energy for
+   * @param plotId ID of the plot the gem mines, usually not important and can
+   *      be set to zero, but may result in 50% bonus for a combination
+   *      of country special gem and a plot belonging to that country
+   * @return effective mining energy for the specified gem
+   */
+  function effectiveMiningEnergyWith(uint24 gemId, uint24 plotId) private view returns(uint32) {
     // determine mining energy of the gem,
     // by definition it's equal to its energetic age (converted to minutes)
     // verifies gem's existence under the hood
@@ -1628,7 +1644,7 @@ contract Miner is AccessMultiSig {
     // if energy is not zero
     if(energy != 0) {
       // convert mining energy into effective mining energy
-      energy = effectiveEnergyOf(gemId, energy);
+      energy = effectiveEnergyWith(gemId, plotId, energy);
     }
 
     // return energy value
@@ -1644,6 +1660,22 @@ contract Miner is AccessMultiSig {
    * @return effective resting energy for the specified gem
    */
   function effectiveRestingEnergyOf(uint24 gemId) public view returns(uint32) {
+    // delegate call to `effectiveRestingEnergyWith` passing zero plot ID
+    return effectiveRestingEnergyWith(gemId, 0);
+  }
+
+  /**
+   * @notice Determines effective resting energy of a particular gem
+   * @notice Gems of grades A, AA and AAA accumulate resting energy when not mining
+   * @dev See `restingEnergyOf` and `effectiveEnergy` functions for more details
+   * @dev Throws if the gem specified doesn't exist
+   * @param gemId ID of the gem to calculate effective resting energy for
+   * @param plotId ID of the plot the gem mines, usually not important and can
+   *      be set to zero, but may result in 50% bonus for a combination
+   *      of country special gem and a plot belonging to that country
+   * @return effective resting energy for the specified gem
+   */
+  function effectiveRestingEnergyWith(uint24 gemId, uint24 plotId) private view returns(uint32) {
     // determine resting energy of the gem
     // verifies gem's existence under the hood
     uint32 energy = restingEnergyOf(gemId);
@@ -1651,7 +1683,7 @@ contract Miner is AccessMultiSig {
     // if energy is not zero (grades A, AA and AAA)
     if(energy != 0) {
       // convert resting energy into effective resting energy
-      energy = effectiveEnergyOf(gemId, energy);
+      energy = effectiveEnergyWith(gemId, plotId, energy);
     }
 
     // return energy value
@@ -1666,10 +1698,26 @@ contract Miner is AccessMultiSig {
    * @return effective energy of the gem in minutes
    */
   function effectiveEnergyOf(uint24 gemId, uint32 energy) public view returns(uint32) {
+    // delegate call to `effectiveEnergyWith` passing zero plot ID
+    return effectiveEnergyWith(gemId, 0, energy);
+  }
+
+  /**
+   * @notice Calculates effective energy of the gem based on its base energy and grade
+   * @dev Effective energy is base energy multiplied by mining rate of the gem
+   * @dev In rare cases (for special gems) additional bonuses may apply
+   * @param gemId ID of the gem to calculate effective energy for
+   * @param plotId ID of the plot the gem mines, usually not important and can
+   *      be set to zero, but may result in 50% bonus for a combination
+   *      of country special gem and a plot belonging to that country (high 8 bits)
+   * @param energy base energy of the gem
+   * @return effective energy of the gem in minutes
+   */
+  function effectiveEnergyWith(uint24 gemId, uint24 plotId, uint32 energy) private view returns(uint32) {
     // determine effective gem energy of the gem,
     // taking into account its mining rate,
     // and return the result
-    return uint32(uint64(energy) * miningRateOf(gemId) / 1000000);
+    return uint32(uint64(energy) * miningRateWith(gemId, plotId) / 1000000);
   }
 
   /**
@@ -1680,6 +1728,22 @@ contract Miner is AccessMultiSig {
    * @return mining rate of the gem multiplied by 10^6
    */
   function miningRateOf(uint24 gemId) public view returns(uint32 rate) {
+    // delegate call to `miningRateWith` passing zero plot ID
+    return miningRateWith(gemId, 0);
+  }
+
+  /**
+   * @notice Determines mining rate of a particular gem based on its grade
+   * @dev In rare cases (for special gems) additional bonuses may apply
+   * @dev See `miningRate` function for more details
+   * @dev Throws if gem specified doesn't exist
+   * @param gemId ID of the gem to calculate mining rate for
+   * @param plotId ID of the plot the gem mines, usually not important and can
+   *      be set to zero, but may result in 50% bonus for a combination
+   *      of country special gem and a plot belonging to that country
+   * @return mining rate of the gem multiplied by 10^6
+   */
+  function miningRateWith(uint24 gemId, uint24 plotId) public view returns(uint32 rate) {
     // read the color of the gem
     uint8 color = gemInstance.getColor(gemId);
 
@@ -1724,8 +1788,21 @@ contract Miner is AccessMultiSig {
         // apply special gem mining rate multiplier
         // maximum percent value is 255, which means multiplication by 3.55
         // maximum outcome of this multiplication is 999,356,595, which fits into uint32
-        // note: specialGemMultipliers is uint8 and overflows the addition
+        // note: multiplier is uint8 and overflows the addition
         rate = rate / 100 * (uint16(100) + multiplier);
+      }
+    }
+    // for special country gems in range (0xF100, 0xF200)
+    // no special gem for Antarctica possible (country ID 0)
+    // Bermuda Triangle may have special gem (country ID 255)
+    else if(gemId > 0xF100 && gemId < 0xF200) {
+      // additionally verify that plot country ID (high 8 bits) matches with the gem ID
+      // if plot ID is not specified (zero) match is impossible
+      if(plotId >> 16 == gemId - 0xF100) {
+        // apply special country gem bonus rate of 50%
+        // maximum intermediary value here is 2,998,069,785, which fits into uint32
+        // maximum final outcome of this multiplication is 1,499,034,892
+        rate = rate * 3 / 2;
       }
     }
 

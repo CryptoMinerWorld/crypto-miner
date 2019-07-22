@@ -134,8 +134,8 @@ contract('Miner (NowProvider)', (accounts) => {
 		await chestKey.updateRole(miner.address, ROLE_TOKEN_CREATOR);
 
 		// create 2 plots in Antarctica with only 1 block of snow and 99 blocks of ice
-		await plot.mint(accounts[0], 0, toBN("0x0200016464646400"));
-		await plot.mint(accounts[0], 0, toBN("0x0200016464646400"));
+		await plot.mint(accounts[0], 0, "0x0200016464646400");
+		await plot.mint(accounts[0], 0, "0x0200016464646400");
 		// create a high grade low level gem and high grade high level gem
 		await gem.mint(accounts[0], 1, 1, 1, 0x60F423F);
 		await gem.mint(accounts[0], 2, 1, 5, 0x60F423F);
@@ -237,7 +237,7 @@ contract('Miner (NowProvider)', (accounts) => {
 		await plot.updateRole(miner.address, ROLE_STATE_PROVIDER | ROLE_OFFSET_PROVIDER);
 
 		// create plot in Antarctica
-		await plot.mint(accounts[0], 0, toBN("0x0200236464646400"));
+		await plot.mint(accounts[0], 0, "0x0200236464646400");
 		// create a high grade high level gem
 		await gem.mint(accounts[0], 1, 1, 5, 0x60F423F);
 
@@ -299,7 +299,7 @@ contract('Miner (NowProvider)', (accounts) => {
 		await chestKey.updateRole(miner.address, ROLE_TOKEN_CREATOR);
 
 		// create plot in Antarctica
-		await plot.mint(accounts[0], 0, toBN("0x0200236464646400"));
+		await plot.mint(accounts[0], 0, "0x0200236464646400");
 		// create a high grade high level gem
 		await gem.mint(accounts[0], 1, 1, 5, 0x60F423F);
 
@@ -395,13 +395,13 @@ contract('Miner (NowProvider)', (accounts) => {
 		for(let i = 0; i < 10; i++) {
 			// offsets: 0, 35, 65, 85, 95, 100
 			// energy: 3150 + 21600 + 43200 + 43200 + 43200
-			plots.push((await plot.mint(player, 1, toBN("0x05002341555F6400"))).receipt.logs[0].args[2].toNumber());
+			plots.push((await plot.mint(player, 1, "0x05002341555F6400")).receipt.logs[0].args[2].toNumber());
 		}
 		// create 5 plots in Antarctica
 		for(let i = 0; i < 5; i++) {
 			// offsets: 0, 35, 100
 			// energy: 3150 + 46800
-			plots.push((await plot.mint(player, 0, toBN("0x0200236464646400"))).receipt.logs[0].args[2].toNumber());
+			plots.push((await plot.mint(player, 0, "0x0200236464646400")).receipt.logs[0].args[2].toNumber());
 		}
 
 		// array to store created gem IDs

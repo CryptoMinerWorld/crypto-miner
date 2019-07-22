@@ -484,8 +484,11 @@ contract('Miner', (accounts) => {
 		assert.equal(100, tuple[0], "incorrect mining rate multiplier for " + specialGemId);
 		assert.equal(0, tuple[1], "incorrect special color for " + specialGemId);
 
+		// define mining rate function
+		const fn = async() => await miner.miningRateOf(specialGemId);
+
 		// miningRateOf fails initially – no gem is actually minted ;)
-		await assertThrows(miner.miningRateOf, specialGemId);
+		await assertThrows(fn);
 
 		// mint a gem with a properties simple to calculate:
 		// color hits the month: +5%
@@ -493,7 +496,100 @@ contract('Miner', (accounts) => {
 		await gem.mint(accounts[0], specialGemId, new Date().getMonth() + 1, 1, 0x06000000);
 
 		// expected mining rate is 50 * 1.05 * 2.00
-		assert.equal(Math.floor(1000000 * 50 * 1.05 * 2.00), await miner.miningRateOf(specialGemId));
+		assert.equal(Math.floor(1000000 * 50 * 1.05 * 2.00), await fn());
+	});
+	it("mining rates: special country gems", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// player account
+		const player = accounts[1];
+
+		// define country ID and corresponding country gem and plot in that country
+		const countryId = 147;
+		const specialGemId = 0xF100 + countryId;
+		const specialPlotId = (countryId << 16) + 1;
+		const regularGemId = 0x20001;
+		const regularPlotId = 65537;
+
+		// mint 2 plots and 2 gems
+		await plot.mint(player, countryId, "0x05002341555F6400");
+		await plot.mint(player, 1, "0x05002341555F6400");
+		await gem.mint(player, specialGemId, 1, 1, 0x01000000);
+		await gem.mintNext(player, 1, 1, 0x01000000);
+
+		// get mining rates and compare
+		const specialRate0 = await miner.miningRateOf(specialGemId);
+		const regularRate0 = await miner.miningRateOf(regularGemId);
+		const specialRate1 = await miner.miningRateWith(specialGemId, regularPlotId);
+		const regularRate1 = await miner.miningRateWith(regularGemId, regularPlotId);
+		const specialRate2 = await miner.miningRateWith(specialGemId, specialPlotId);
+		const regularRate2 = await miner.miningRateWith(regularGemId, specialPlotId);
+
+		// verify the mining rates
+		assert.equal(1000000, specialRate0, "wrong special rate 0");
+		assert.equal(1000000, regularRate0, "wrong regular rate 0");
+		assert.equal(1000000, specialRate1, "wrong special rate 1");
+		assert.equal(1000000, regularRate1, "wrong regular rate 1");
+		assert.equal(1500000, specialRate2, "wrong special rate 2");
+		assert.equal(1000000, regularRate2, "wrong regular rate 2");
+	});
+	it("mining rates: special country gems overflow check", async() => {
+		// define miner dependencies
+		const gem = await Gem.new();
+		const plot = await Plot.new();
+		const artifact = await Artifact.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+		const artifactErc20 = await ArtifactERC20.new();
+		const foundersKey = await FoundersKey.new();
+		const chestKey = await ChestKey.new();
+
+		// deploy miner smart contract itself
+		const miner = await Miner.new(
+			gem.address,
+			plot.address,
+			artifact.address,
+			silver.address,
+			gold.address,
+			artifactErc20.address,
+			foundersKey.address,
+			chestKey.address
+		);
+
+		// player account
+		const player = accounts[1];
+
+		// define country ID and corresponding country gem and plot in that country
+		const countryId = 147;
+		const gemId = 0xF100 + countryId;
+		const plotId = (countryId << 16) + 1;
+
+		// mint 1 plots and 1 gem
+		await plot.mint(player, countryId, "0x05002341555F6400");
+		await gem.mint(player, gemId, new Date().getMonth() + 1, 1, 0x06FFFFFF);
+
+		// verify the mining rates (422.26%)
+		assert.equal(422263453, await miner.miningRateWith(gemId, plotId), "wrong mining rate");
 	});
 
 	it("mining: mining properties of the new gem(s)", async() => {
