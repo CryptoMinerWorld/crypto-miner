@@ -180,7 +180,7 @@ module.exports = async function(deployer, network, accounts) {
 				PlotSale:           '0x547192AD1C519167c20041187009595Cc40ECeD4',
 				PlotAntarctica:     '0x40337FB340FFc5B87FD95f94240b867BB2759388',
 
-				Miner:              '0x34F0DB7D13DE5F1b6ba7EBC183E036038cAC1B67',
+				Miner:              '0x28c66567Ea65F42C365b69bfd61e22440935afd1', //
 
 				MintHelper:         "0x93b86262455D79705e0D14bC105c92Aa07022a3a",
 
@@ -268,7 +268,7 @@ module.exports = async function(deployer, network, accounts) {
 				PlotSale:           '0x77BDD9a3f4A87B1130fAf69C137657C74bdCD560',
 				PlotAntarctica:     '0x314E712021Ab6E8D32F6Cfe9F4Baa2565Ff000b2',
 
-				Miner:              '0xC6729C6cFc6B872acF641EB3EA628C9F038e5ABb',
+				Miner:              '0x81ccdBB0dbB9514A20841152fbb459E7d8dC238B',
 
 				MintHelper:         "0x69cEDb69051e63c7e335beB042B2501D5cDAFf23",
 

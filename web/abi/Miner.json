@@ -1516,6 +1516,29 @@
       "constant": true,
       "inputs": [
         {
+          "name": "gemId",
+          "type": "uint24"
+        },
+        {
+          "name": "plotId",
+          "type": "uint24"
+        }
+      ],
+      "name": "miningRateWith",
+      "outputs": [
+        {
+          "name": "rate",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
           "name": "grade",
           "type": "uint32"
         }
@@ -1623,7 +1646,7 @@
     }
   ],
   "schemaVersion": "3.0.9",
-  "updatedAt": "2019-07-11T13:27:27.182Z",
+  "updatedAt": "2019-07-22T00:50:41.325Z",
   "devdoc": {
     "author": "Basil Gorin",
     "details": "Miner may read, write, mint, lock and unlock tokens     (locked tokens cannot be transferred i.e. cannot change owner)Following tokens may be accessed for reading (token properties affect mining):     - ArtifactERC721     - GemERC721     - PlotERC721Following tokens may be accessed for writing (token properties change when mining):     - GemERC721, statistics updates - plots/blocks mined     - PlotERC721, offset updates – currently mined depthFollowing tokens may be created (token can be found in the land plot when mining):     - ArtifactERC721     - GemERC721     - SilverERC20     - GoldERC20     - ArtifactERC20     - FoundersKeyERC20     - ChestKeyERC20Following tokens may be locked or unlocked (tokens are locked when mining):     - ArtifactERC721     - GemERC721     - PlotERC721",
@@ -1842,6 +1865,14 @@
         },
         "return": "mining rate of the gem multiplied by 10^6"
       },
+      "miningRateWith(uint24,uint24)": {
+        "details": "In rare cases (for special gems) additional bonuses may applySee `miningRate` function for more detailsThrows if gem specified doesn't exist",
+        "params": {
+          "gemId": "ID of the gem to calculate mining rate for",
+          "plotId": "ID of the plot the gem mines, usually not important and can     be set to zero, but may result in 50% bonus for a combination     of country special gem and a plot belonging to that country"
+        },
+        "return": "mining rate of the gem multiplied by 10^6"
+      },
       "now32()": {
         "details": "Proxy function for built-in 'now', returns 'now' as uint32Testing time-dependent functionality in Solidity is challenging.     The time flows in unpredictable way, at variable speed     from block to block, from miner to miner.     Testrpc (ganache) doesn't solve the issue. It helps to unlock     the speed of time changes introducing though numerous testrpc-specific     problems.In most test cases, however, time change emulation on the block level     is not required and contract-based simulation is enough.To simulate time change on contract level we introduce a `now32`     proxy-function which proxies all calls to built-in 'now' function.     It doesn't modify time and doesn't affect smart contract logic by any means.     But it allows to extend this smart contract by a test smart contract,     which will allow time change simulation by overriding this function only.",
         "return": "uint32(now) – current timestamp as uint32"
@@ -2008,6 +2039,9 @@
         "notice": "Calculates mining rate of the gem by its grade"
       },
       "miningRateOf(uint24)": {
+        "notice": "Determines mining rate of a particular gem based on its grade"
+      },
+      "miningRateWith(uint24,uint24)": {
         "notice": "Determines mining rate of a particular gem based on its grade"
       },
       "release(uint24)": {
