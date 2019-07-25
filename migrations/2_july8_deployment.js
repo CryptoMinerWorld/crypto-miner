@@ -157,33 +157,33 @@ module.exports = async function(deployer, network, accounts) {
 				WorldChest:         SRV_ADDR.JOHN,
 				MonthlyChest:       SRV_ADDR.JOHNS_FRIEND,
 
-				FoundersPlots:      '0xCA1ae128c5893eCBD0c246c7d4670e21D665a30F',
-				BalanceProxy:       '0x05d3C1A23e228ADE3b1eaea3b6978F78b4359587',
-				TokenHelper:        '0x073e67E1CbC55aE908ABe09aB2D9D21372f067AD',
-				TokenReader:        '0x7F123eB823582C8B646eB0F33838e05172A3D300',
-				TokenWriter:        '0x32E1EAB64D9cf63183Fff3484fD85725124F93Df',
+				FoundersPlots:      '0xC600A8802eBA941afadF7BAf24be72C9234E8fBD',
+				BalanceProxy:       '0x1cC23A1FE6a9ff9D5df7f595F6f1c6FBcc5272cC',
+				TokenHelper:        '0xaAaF3bb7545f12D352f511361375ACb808616437',
+				TokenReader:        '0xc36445BBcDb37F0d89A3a1b4447A66374E9F8911',
+				TokenWriter:        '0x79da3d97aF10A6DF59B01FF71DAA46e63E11a6d6',
 
-				DutchAuction:       '0x565D17828c1304923aCE6148F1296C46D28225e9',
+				DutchAuction:       '0x379F26c8e9acC478f248acc42fABAb35187b7571',
 
-				RefPointsTracker:   '0x683148D14a6D5fBB1Fb37C11F41E1A8e464e4CAA',
-				ArtifactERC20:      '0x773177029694BF0aab08Ad5Db441fAb8B49b2Ee7',
-				FoundersKeyERC20:   '0x57549eE5267FD780945323E6B15d6d0f9Aa6726c',
-				ChestKeyERC20:      '0xe5Bd1889751080c57aEaE3013E13Ae7f79AA206D',
-				SilverERC20:        '0x3eD1C62b0327159aa532B8b9B040376104bc6F3C',
-				GoldERC20:          '0x0Ed5F1b05061bFce5CEd241502204b1BD43C43c4',
-				CountryERC721:      '0x8D7Bb75a4b39bC1c7ee3f0942C909f1c2373e46F',
-				PlotERC721:         '0x9d40c43Cfd1F577C35504B77f93DeAdFb951CfBA',
-				GemERC721:          '0x3F996252C905a5c12b709B2f740cdD5732AB8AD8',
+				RefPointsTracker:   '0x402C53319682939A0eCA459c2e822A89d823FfF3',
+				ArtifactERC20:      '0x7a603321125B4298De5d4627Ec4bc21E4FE46010',
+				FoundersKeyERC20:   '0x98434612AF23D339B78D21115Aa6Cd9780dAeCb0',
+				ChestKeyERC20:      '0xBC16f8235cEa3779E3beee56941818D30b17CD20',
+				SilverERC20:        '0x0609A076c10B7232Ad43e7742c950Df6C7F34c1D',
+				GoldERC20:          '0xb12a82318bb04Ba46cB46560F4C1531A9D8b165c',
+				CountryERC721:      '0xeaD64AE21C9b89225b11da281c641AbA7f98Bf9E',
+				PlotERC721:         '0xc45192af58dF8A52D094ed5877Da569944576184',
+				GemERC721:          '0x3b6693c74CcE05F0b0be8dEa253806Db935bc4C6',
 
-				Workshop:           '0x8AE15fFD5333Cc50591Ef69219D1BBDaB4Bcb239',
-				SilverSale:         '0xD2E092eCf392Ba9855f50350fc4Ba95073350348',
+				Workshop:           '0x557FBEC547B1092fF68BbdEeA8D4218983Ef60A4',
+				SilverSale:         '0xA26bD87C0824255be7E199abea0A81F0797957ad',
 
-				PlotSale:           '0x547192AD1C519167c20041187009595Cc40ECeD4',
-				PlotAntarctica:     '0x40337FB340FFc5B87FD95f94240b867BB2759388',
+				PlotSale:           '0x845012A3aED440B82D8b01AEd03677f474d69D41',
+				PlotAntarctica:     '0xC119250ba1d5Df51400116afA6fA2F302e8B04a3',
 
-				Miner:              '0x28c66567Ea65F42C365b69bfd61e22440935afd1',
+				Miner:              '0xb8687700764b4989d213a23C617d1F471b23A1AB',
 
-				MintHelper:         "0x93b86262455D79705e0D14bC105c92Aa07022a3a",
+				MintHelper:         '0x3a3DEA940A8e54d963c2e4F6A54005cd43614372',
 
 				PlotSaleStartUTC:   1563186600, // 07/15/2019 @ 10:30am UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
@@ -237,7 +237,7 @@ module.exports = async function(deployer, network, accounts) {
 					writePlotSaleCoupons: true,
 					writeSilverSaleCoupons: true,
 					writeCountryGems: true,
-					writeTestTokens: true,
+					writeTestTokens: false,
 				},
 			};
 			// Kovan Configuration
