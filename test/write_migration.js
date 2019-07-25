@@ -107,7 +107,7 @@ function packGemData(p) {
 	assert.equal(8, p.length, "wrong array length");
 	// ensure all elements are converted to BNs
 	p = p.map((a) => toBN(a));
-	// pack gem ID, plot ID, color, level, grade, energetic age and return
+	// pack gem ID, plot ID (not used), color, level, grade, energetic age and return
 	return p[0].shln(24).or(p[1]).shln(8).or(p[2]).shln(8).or(p[3]).shln(32).or(p[4]).shln(32).or(p[7]);
 }
 
