@@ -143,10 +143,11 @@ module.exports = async function(deployer, network, accounts) {
 						SRV_ADDR.JOHN,
 						SRV_ADDR.JOHNS_FRIEND,
 					],
-					enablePermissions: true,
+					enablePermissions: false,
 					disablePermissions: false,
 					writePlotSaleCoupons: false,
-					writeSilverSaleCoupons: true,
+					writeSilverSaleCoupons: false,
+					writeCountryGems: SRV_ADDR.JOHN
 				},
 			};
 			// Ropsten Configuration
@@ -160,7 +161,7 @@ module.exports = async function(deployer, network, accounts) {
 				BalanceProxy:       '0x05d3C1A23e228ADE3b1eaea3b6978F78b4359587',
 				TokenHelper:        '0x073e67E1CbC55aE908ABe09aB2D9D21372f067AD',
 				TokenReader:        '0x7F123eB823582C8B646eB0F33838e05172A3D300',
-				TokenWriter:        '0xac43a07ed81b3Bf6Afe228B02133995187F25406',
+				TokenWriter:        '0x32E1EAB64D9cf63183Fff3484fD85725124F93Df',
 
 				DutchAuction:       '0x565D17828c1304923aCE6148F1296C46D28225e9',
 
@@ -180,7 +181,7 @@ module.exports = async function(deployer, network, accounts) {
 				PlotSale:           '0x547192AD1C519167c20041187009595Cc40ECeD4',
 				PlotAntarctica:     '0x40337FB340FFc5B87FD95f94240b867BB2759388',
 
-				Miner:              '0x28c66567Ea65F42C365b69bfd61e22440935afd1', //
+				Miner:              '0x28c66567Ea65F42C365b69bfd61e22440935afd1',
 
 				MintHelper:         "0x93b86262455D79705e0D14bC105c92Aa07022a3a",
 
@@ -205,6 +206,7 @@ module.exports = async function(deployer, network, accounts) {
 					disablePermissions: false,
 					writePlotSaleCoupons: false,
 					writeSilverSaleCoupons: true,
+					writeCountryGems: true,
 					writeTestTokens: false,
 				},
 			};
@@ -234,6 +236,7 @@ module.exports = async function(deployer, network, accounts) {
 					disablePermissions: false,
 					writePlotSaleCoupons: true,
 					writeSilverSaleCoupons: true,
+					writeCountryGems: true,
 					writeTestTokens: true,
 				},
 			};
@@ -248,7 +251,7 @@ module.exports = async function(deployer, network, accounts) {
 				BalanceProxy:       '0x785b1246E57b9f72C6bb19e5aC3178aEffb0Fe73',
 				TokenHelper:        '0x8920Df4215934E5f6c8935F0049E9b9d8dDF3656',
 				TokenReader:        '0x63d49c8D35C9fB523515756337cef0991B304696',
-				TokenWriter:        '0x761A2430FA69158c24Cb92CE4bc5d55F82931911',
+				TokenWriter:        '0xBA98221d674D266298F15640E30782dCA2ECE864',
 
 				DutchAuction:       '0x307015ef34a1baEb9Bf6fcbED03611235Bdd01aD',
 
@@ -293,6 +296,7 @@ module.exports = async function(deployer, network, accounts) {
 					disablePermissions: false,
 					writePlotSaleCoupons: true,
 					writeSilverSaleCoupons: true,
+					writeCountryGems: true,
 					writeTestTokens: false,
 				},
 			};
@@ -337,6 +341,9 @@ module.exports = async function(deployer, network, accounts) {
 	}
 	if(conf.optionalPhases.writeSilverSaleCoupons) {
 		await writeSilverSaleCoupons(network, accounts, instances);
+	}
+	if(conf.optionalPhases.writeCountryGems) {
+		await createCountryGems(accounts, instances);
 	}
 	if(conf.optionalPhases.writeTestTokens) {
 		await mintTestTokens(accounts, instances);
@@ -928,9 +935,22 @@ async function migrateGemERC721(accounts, instances) {
 	const writer = instances.TokenWriter;
 
 	// write GemERC721 data
-	await writeGemERC721Data(token, writer, accounts);
+	await writeGemERC721Data("gems.csv", token, writer, accounts);
 
 	console.log("optional phase [migrate GemERC721 data] complete");
+}
+
+async function createCountryGems(accounts, instances) {
+	console.log("optional phase: create country gems");
+
+	// redefine instances links
+	const token = instances.GemERC721;
+	const writer = instances.TokenWriter;
+
+	// write country gems
+	await writeGemERC721Data("country_gems.csv", token, writer, accounts);
+
+	console.log("optional phase [create country gems] complete");
 }
 
 async function mintTestTokens(accounts, instances) {
@@ -1601,12 +1621,12 @@ async function writeCountryERC721Data(token, writer, accounts) {
 }
 
 // aux function to write GemERC721 data
-async function writeGemERC721Data(token, writer, accounts) {
+async function writeGemERC721Data(file_name, token, writer, accounts) {
 	// CSV header
 	const csv_header = "tokenId,plotId,color,level,grade,grade type,grade value,age,owner";
 	// read CSV data
-	const csv_data = read_csv("./data/gems.csv", csv_header);
-	console.log("\t%o bytes CSV data read from gems.csv", csv_data.length);
+	const csv_data = read_csv(`./data/${file_name}`, csv_header);
+	console.log("\t%o bytes CSV data read from %o", file_name, csv_data.length);
 
 	// define arrays to store the data
 	const owners = [];

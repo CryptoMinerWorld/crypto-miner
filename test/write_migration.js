@@ -79,9 +79,18 @@ contract('V1 -> V2 Migration', (accounts) => {
 		const writer = await Writer.new();
 
 		// write GemERC721 data
-		await writeGemERC721Data(token, writer, accounts);
+		await writeGemERC721Data("gems.csv", token, writer, accounts);
 	});
 
+	it("migration: write country gems from CSV (bulk write)", async() => {
+		// deploy GemV2
+		const token = await GemERC721.new();
+		// deploy Token Writer
+		const writer = await Writer.new();
+
+		// write country gem data
+		await writeGemERC721Data("country_gems.csv", token, writer, accounts);
+	});
 });
 
 // auxiliary function to pack ERC20 data from array into uint256
@@ -397,12 +406,12 @@ async function writeCountryERC721Data(token, writer, accounts) {
 }
 
 // aux function to write GemERC721 data
-async function writeGemERC721Data(token, writer, accounts) {
+async function writeGemERC721Data(file_name, token, writer, accounts) {
 	// CSV header
 	const csv_header = "tokenId,plotId,color,level,grade,grade type,grade value,age,owner";
 	// read CSV data
-	const csv_data = read_csv("./data/gems.csv", csv_header);
-	console.log("\t%o bytes CSV data read from gems.csv", csv_data.length);
+	const csv_data = read_csv(`./data/${file_name}`, csv_header);
+	console.log("\t%o bytes CSV data read from %o", file_name, csv_data.length);
 
 	// define arrays to store the data
 	const owners = [];
