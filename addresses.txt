@@ -110,7 +110,7 @@ MintHelper:         0x69cEDb69051e63c7e335beB042B2501D5cDAFf23
 --------------------------------------------------------------
 John:               0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6
 John's Friend       0xAa4812EAd3c0E009995FdbcbbEE9211EeAeb42FB
-Roman:              0xEE169DCC689D0C358F68Ce95DEf41646039aC190
+Roman:              0x0E9c1beDf18e77a87E61100e5709Aea4d0Ba83e1
 Eugene:             0x01cBe590FF9fb5b8C0ECe15D293469745625a1D8
 Basil:              0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34
 --------------------------------------------------------------

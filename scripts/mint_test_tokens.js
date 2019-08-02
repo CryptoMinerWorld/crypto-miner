@@ -29,7 +29,7 @@ module.exports = async function(deployer, network, accounts) {
 	// testing addresses
 	const testers = [
 		"0x501E13C2aE8D9232B88F63E87DFA1dF28103aCb6", // John
-		"0xEE169DCC689D0C358F68Ce95DEf41646039aC190", // Roman
+		"0x0E9c1beDf18e77a87E61100e5709Aea4d0Ba83e1", // Roman
 		"0x5F185Da55f7BBD9217E3b3CeE06b180721FA6d34", // Basil
 	];
 
