@@ -181,7 +181,7 @@ module.exports = async function(deployer, network, accounts) {
 				PlotSale:           '0x8347A9c77B24a9f6da6EfCEc8f8E2927eB0FF3A6',
 				PlotAntarctica:     '0xc5fA9cedf850ee65A26bAa7Fe0594A7e66Ae301b',
 
-				Miner:              '0x5e2DE9f035c2F64b8aCB6c3B16B9454d376DE838',
+				Miner:              '0x1fd59c7E655Ad7b3f93656356178a0FF77BCA60E',
 
 				MintHelper:         '0x7d4CbD5e27a44241870fA6840912A8DA6F7aaDd4',
 
