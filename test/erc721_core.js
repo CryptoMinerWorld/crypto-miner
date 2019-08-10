@@ -4,7 +4,7 @@
  * All the tests are performed ann all 3 instances
  */
 
-export const ERC721Receiver = artifacts.require("./DummyReceiver.sol");
+export const ERC721Receiver = artifacts.require("./__DummyReceiver.sol");
 
 // supported interfaces
 export const InterfaceId_ERC165 = web3.utils.sha3("supportsInterface(bytes4)").substr(0, 10);

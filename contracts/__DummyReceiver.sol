@@ -29,7 +29,8 @@ contract DummyReceiver is ERC20Receiver, ERC721Receiver {
     require(_operator != address(0) || _from != address(0) || _value != 0 || _data.length != 0);
 
     // successful only if `_value` is odd, for tests only!
-    return _value % 2 == 0? bytes4(""): bytes4(keccak256("onERC20Received(address,address,uint256,bytes)"));
+    // 0x4fc35859 = bytes4(keccak256("onERC20Received(address,address,uint256,bytes)")
+    return bytes4(_value % 2 == 0? 0x0: 0x4fc35859);
   }
 
   /**
@@ -51,7 +52,8 @@ contract DummyReceiver is ERC20Receiver, ERC721Receiver {
     require(_operator != address(0) || _from != address(0) || _tokenId != 0 || _data.length != 0);
 
     // successful only if `_tokenId` is odd, for tests only!
-    return _tokenId % 2 == 0? bytes4(""): bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
+    // 0x150b7a02 = bytes4(keccak256("onERC721Received(address,address,uint256,bytes)")
+    return bytes4(_tokenId % 2 == 0? 0x0: 0x150b7a02);
   }
 
 }

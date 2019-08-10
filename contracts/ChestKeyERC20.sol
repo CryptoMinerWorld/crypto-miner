@@ -301,7 +301,7 @@ contract ChestKeyERC20 is AccessMultiSig {
     // if `_from` is equal to sender, require transfers feature to be enabled
     // otherwise require transfers on behalf feature to be enabled
     require(_from == msg.sender && isFeatureEnabled(FEATURE_TRANSFERS)
-    || _from != msg.sender && isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
+         || _from != msg.sender && isFeatureEnabled(FEATURE_TRANSFERS_ON_BEHALF));
 
     // non-zero to address check
     require(_to != address(0));

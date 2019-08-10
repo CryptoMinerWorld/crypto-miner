@@ -529,21 +529,23 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
     // define an integer variable to store the last bytes parameter `_data` value
     uint256 data;
 
-    // it is possible to do only using inline assembly
+    // loading _data contents is possible to do only using inline assembly
     assembly {
-      // calldata in our case consists of 164 bytes:
+      // calldata in our case consists of 196 bytes:
       // first 4 bytes represent Method ID - function selector,
       // followed by three elementary typed inputs which occupy exactly 1 slot (32 bytes) each:
       //    _operator address (only 20 bytes are really used, first 12 bytes are zeroes)
       //    _from address (only 20 bytes are really used, first 12 bytes are zeroes)
       //    _tokenId (only 4 bytes are really used, first 28 bytes are zeroes)
-      // next slot (offset 0x64) contains _data (dynamic bytes array) offset (0x80 - exactly the size of the head part)
-      // 64 bytes at position 0x80 contain _data (32 bytes contain length header and 32 bytes contain data itself)
+      // next slots (starting at offset 0x64) contains _data (dynamic bytes array):
+      //     offset, 32 bytes
+      //     length, 32 bytes
+      //     data, 32 bytes
       // therefore we are interested in the last 32 bytes of the calldata (offset 0x4 + 0x80 + 0x20 = 0xA4),
-      // containing tokenId (4 bytes) + t0 (4 bytes) + t1 (4 bytes) + p0 (10 bytes) + p1 (10 bytes)
+      // containing t0 (4 bytes) + t1 (4 bytes) + p0 (12 bytes) + p1 (12 bytes)
 
       // read the _data offset, increment it by method ID (0x4) and first data slot size (0x20) containing data length
-      let offset := add(0x24, calldataload(0x64))
+      let offset := add(0x24, calldataload(0x64)) // 0x64 = 0x4 + 3 * 0x20 (3 function primitive inputs)
 
       // the real data in `_data` starts at offset now (0xA4)
       data := calldataload(offset)
@@ -555,10 +557,11 @@ contract DutchAuction is AccessMultiSig, ERC721Receiver {
     uint96 p0 = uint96(data >> 96);
     uint96 p1 = uint96(data);
 
-    // delegate call to `addWith`
+    // delegate call to `__addWith`
     __addWith(_operator, _from, msg.sender, _tokenId, t0, t1, p0, p1);
 
     // return "magic" number on success, see GemERC721.ERC721_RECEIVED
+    // 0x150b7a02 = bytes4(keccak256("onERC721Received(address,address,uint256,bytes)")
     return 0x150b7a02;
   }
 

@@ -1,7 +1,7 @@
 // GoldERC20 smart contract
 const Token = artifacts.require("./GoldERC20.sol");
 // Dummy ERC20/ERC721 Receiver
-const Receiver = artifacts.require("./DummyReceiver.sol");
+const Receiver = artifacts.require("./__DummyReceiver.sol");
 
 // import ERC721Core dependencies
 import {
