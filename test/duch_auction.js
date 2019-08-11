@@ -476,7 +476,7 @@ contract('Dutch Auction', accounts => {
 
 });
 
-// packs tokenId, t0, t1, p0 and p1 into abi-compliant structure
+// packs t0, t1, p0 and p1 into abi-compliant structure
 function abiPack(t0, t1, p0, p1) {
 	// convert inputs to BNs
 	t0 = toBN(t0);
@@ -488,20 +488,6 @@ function abiPack(t0, t1, p0, p1) {
 	return toBytes(t0.shln(32).or(t1).shln(96).or(p0).shln(96).or(p1));
 }
 
-// converts BigNumber representing Solidity uint256 into String representing Solidity bytes
-function toBytes(uint256) {
-	let s = uint256.toString(16);
-	const len = s.length;
-	// 256 bits must occupy exactly 64 hex digits
-	if(len > 64) {
-		s = s.substr(0, 64);
-	}
-	for(let i = 0; i < 64 - len; i++) {
-		s = "0" + s;
-	}
-	return "0x" + s;
-}
-
 
 // import auxiliary function to ensure function `fn` throws
-import {assertThrows, toBN, toWeiBN, getBalanceBN, gasUsedBN} from "../scripts/shared_functions";
+import {assertThrows, toBN, toWeiBN, getBalanceBN, gasUsedBN, toBytes} from "../scripts/shared_functions";

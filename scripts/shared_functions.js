@@ -118,3 +118,17 @@ export function assertArraysEqual(a1, a2, msg) {
 		assert(a1[i] == a2[i] || toBN(a1[i]).eq(toBN(a2[i])),`${msg}: elements differ at position ${i}`);
 	}
 }
+
+// converts BigNumber representing Solidity uint256 into String representing Solidity bytes
+export function toBytes(uint256) {
+	let s = uint256.toString(16);
+	const len = s.length;
+	// 256 bits must occupy exactly 64 hex digits
+	if(len > 64) {
+		s = s.substr(0, 64);
+	}
+	for(let i = 0; i < 64 - len; i++) {
+		s = "0" + s;
+	}
+	return "0x" + s;
+}

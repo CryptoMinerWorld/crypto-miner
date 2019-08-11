@@ -8,7 +8,7 @@ import "./ERC721Receiver.sol";
  *      interfaces and is used in tests ONLY
  * @dev Do not deploy and do not use in production!
  */
-contract DummyReceiver is ERC20Receiver, ERC721Receiver {
+contract __DummyReceiver is ERC20Receiver, ERC721Receiver {
   /**
    * @notice Handle the receipt of a ERC20 token(s)
    * @dev The ERC20 smart contract calls this function on the recipient
