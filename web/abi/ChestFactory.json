@@ -1,0 +1,1146 @@
+{
+  "contractName": "ChestFactory",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isUserInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FOUNDERS_KEY_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_MSIG_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "chests",
+      "outputs": [
+        {
+          "name": "value",
+          "type": "uint96"
+        },
+        {
+          "name": "foundersFlag",
+          "type": "bool"
+        },
+        {
+          "name": "emptyFlag",
+          "type": "bool"
+        },
+        {
+          "name": "tossTime",
+          "type": "uint32"
+        },
+        {
+          "name": "winner",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "foundersKey",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        }
+      ],
+      "name": "constructUpdateMsigRequest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_CHEST_CREATOR",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userRoles",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "MSIG_QUORUM",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_by",
+          "type": "address[]"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_ACCESS_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_KEY_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "chestKey",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        },
+        {
+          "name": "v",
+          "type": "uint8[]"
+        },
+        {
+          "name": "r",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "s",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "updateMsig",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FACTORY_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "CHEST_KEY_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_foundersKey",
+          "type": "address"
+        },
+        {
+          "name": "_chestKey",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "chestId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "foundersFlag",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint96"
+        },
+        {
+          "indexed": false,
+          "name": "tossTime",
+          "type": "uint32"
+        }
+      ],
+      "name": "ChestCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "chestId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "keyAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "KeyRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "chestId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "keyAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "KeyReleased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "chestId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "name": "winner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint96"
+        }
+      ],
+      "name": "TossComplete",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "chestId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "value",
+          "type": "uint96"
+        }
+      ],
+      "name": "TreasureWithdrawn",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_foundersFlag",
+          "type": "bool"
+        }
+      ],
+      "name": "createChest",
+      "outputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        }
+      ],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_foundersFlag",
+          "type": "bool"
+        },
+        {
+          "name": "_tossTime",
+          "type": "uint32"
+        }
+      ],
+      "name": "createWith",
+      "outputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        }
+      ],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "isFounders",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "isEmpty",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getValue",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getTossTime",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getTossIn",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getWinner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getParticipants",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        },
+        {
+          "name": "participant",
+          "type": "address"
+        }
+      ],
+      "name": "getKeyBalances",
+      "outputs": [
+        {
+          "name": "foundersKeys",
+          "type": "uint256"
+        },
+        {
+          "name": "chestKeys",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        },
+        {
+          "name": "participant",
+          "type": "address"
+        }
+      ],
+      "name": "getEthBalance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint96"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "toss",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawTreasure",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "chestId",
+          "type": "uint256"
+        },
+        {
+          "name": "participant",
+          "type": "address"
+        }
+      ],
+      "name": "withdrawKeys",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_operator",
+          "type": "address"
+        },
+        {
+          "name": "_from",
+          "type": "address"
+        },
+        {
+          "name": "_value",
+          "type": "uint256"
+        },
+        {
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC20Received",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "now32",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2019-08-13T08:15:46.954Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "Treasure chest has 5 states     - created, state of the newly created treasure chest; \"created\" chest         goes to the \"ready\" state automatically after t0 timer expires     - ready (active), state when treasure chest accepts the chest keys and records         their owners to use that information later to determine the winner     - toss, state when treasure chest doesn't accept the chest keys anymore and waits         for the toss to happen and the winner picked from the list of addresses         who submitted their chest keys in previous \"active\" round (state)     - unlocked     - expiredA treasure chest is defined by the set of immutable fields:     - chest ID, unique ID of the chest, is set automatically when chest is created     - founders flag, a boolean indicating if chest can be opened           with the founder's key only     - value, an amount of Ether it contains (wei)     - key type, an address of ERC20 token     - toss time, toss start date, a unix timestamp defining the           time when a chest stops accepting the keys           and starts accepting a toss request to determine the winnerA treasure chest state is defined with a set of mutable fields:     - empty flag,",
+    "methods": {
+      "constructUpdateMsigRequest(address,uint256,uint256)": {
+        "details": "Used to create an update role request to be signed by the userOnce signed by at least 2 users, the request can be executed     using `updateRoleMsig` function",
+        "params": {
+          "_expiresOn": "an expiration date of the request",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "constructor": {
+        "details": "Creates a treasure chest factory binding it to Founders Chest Key     and Chest Key ERC20 instances specified",
+        "params": {
+          "_chestKey": "address of the deployed Chest Key ERC20 instance",
+          "_foundersKey": "address of the deployed Founders Chest Key ERC20 instance"
+        }
+      },
+      "createChest(bool)": {
+        "details": "Created chest accepts the keys during 7 days and starts immediatelyThrows on zero _key address but doesn't verify if it represents     valid ERC20 instance – this must be ensured by the caller!",
+        "params": {
+          "_foundersFlag": "founder's chest flag indicating if the chest can     be opened by the founder's chest type if the key only"
+        },
+        "return": "id of the created treasure chest"
+      },
+      "createWith(bool,uint32)": {
+        "details": "Created chest stops accepting the keys on the date specifiedThrows on zero _key address but doesn't verify if it represents     valid ERC20 instance – this must be ensured by the caller!",
+        "params": {
+          "_foundersFlag": "founder's chest flag indicating if the chest can     be opened by the founder's chest type if the key only",
+          "_tossTime": "toss start time"
+        },
+        "return": "id of the created treasure chest"
+      },
+      "evaluateBy(address[],uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator addresses,     and role required (set of permissions), calculate the resulting     set of permissions (role).If all operators are super admins and have full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operators have no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+        "params": {
+          "_by": "non-empty array of addresses of the contract operators     to use permissions of for evaluation",
+          "actual": "input set of permissions to evaluate against",
+          "required": "desired set of permissions to have"
+        },
+        "return": "resulting set of permissions which can be set"
+      },
+      "features()": {
+        "details": "Auxiliary getter function to maintain compatibility with previous     versions of the Access Control List smart contract, where     features was a separate uint256 public field"
+      },
+      "getEthBalance(uint256,address)": {
+        "details": "This will be non-zero only for winning participant",
+        "params": {
+          "chestId": "ID of the chest to query",
+          "participant": "address to query"
+        }
+      },
+      "getKeyBalances(uint256,address)": {
+        "params": {
+          "chestId": "ID of the chest to query",
+          "participant": "address to query"
+        }
+      },
+      "getParticipants(uint256)": {
+        "params": {
+          "chestId": "ID of the chest to query"
+        }
+      },
+      "getTossIn(uint256)": {
+        "params": {
+          "chestId": "ID of the chest to query"
+        }
+      },
+      "getTossTime(uint256)": {
+        "params": {
+          "chestId": "ID of the chest to query"
+        }
+      },
+      "getValue(uint256)": {
+        "params": {
+          "chestId": "ID of the chest to query"
+        }
+      },
+      "getWinner(uint256)": {
+        "params": {
+          "chestId": "ID of the chest to query"
+        }
+      },
+      "isEmpty(uint256)": {
+        "params": {
+          "chestId": "ID of the chest to query"
+        }
+      },
+      "isFeatureEnabled(uint256)": {
+        "details": "Checks if requested set of features is enabled globally on the contract",
+        "params": {
+          "required": "set of features to check against"
+        },
+        "return": "true if all the features requested are enabled, false otherwise"
+      },
+      "isFounders(uint256)": {
+        "params": {
+          "chestId": "ID of the chest to query"
+        }
+      },
+      "isSenderInRole(uint256)": {
+        "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isUserInRole(address,uint256)": {
+        "details": "Checks if user `user` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against",
+          "user": "address of the user to check role for"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "now32()": {
+        "details": "Proxy function for built-in 'now', returns 'now' as uint32Testing time-dependent functionality in Solidity is challenging.     The time flows in unpredictable way, at variable speed     from block to block, from miner to miner.     Testrpc (ganache) doesn't solve the issue. It helps to unlock     the speed of time changes introducing though numerous testrpc-specific     problems.In most test cases, however, time change emulation on the block level     is not required and contract-based simulation is enough.To simulate time change on contract level we introduce a `now32`     proxy-function which proxies all calls to built-in 'now' function.     It doesn't modify time and doesn't affect smart contract logic by any means.     But it allows to extend this smart contract by a test smart contract,     which will allow time change simulation by overriding this function only.",
+        "return": "uint32(now) – current timestamp as uint32"
+      },
+      "onERC20Received(address,address,uint256,bytes)": {
+        "details": "The ERC20 smart contract calls this function on the recipient     after a successful transfer (`safeTransferFrom`).     This function MAY throw to revert and reject the transfer.     Return of other than the magic value MUST result in the transaction being reverted.",
+        "params": {
+          "_data": "additional data with no specified format",
+          "_from": "The address which previously owned the token",
+          "_operator": "The address which called `safeTransferFrom` function",
+          "_value": "amount of tokens which is being transferred"
+        },
+        "return": "`bytes4(keccak256(\"onERC20Received(address,address,uint256,bytes)\"))` unless throwing"
+      },
+      "toss(uint256)": {
+        "details": "Tosses the chest and determines the winner (key owner)Throws if chest with the specified ID doesn't existThrows if chest is already tossed (can be called only once per chest)Throws if no participants registered their keysThis implementation is very basic and is not cryptographically secure,     the tossing process can be influenced by miners",
+        "params": {
+          "chestId": "chest ID to toss"
+        }
+      },
+      "updateFeatures(uint256)": {
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissionsRequires transaction sender to have `ROLE_ACCESS_MANAGER` permissionFunction is left for backward compatibility with older versions",
+        "params": {
+          "_mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateMsig(address,uint256,uint256,uint8[],bytes32[],bytes32[])": {
+        "details": "MultiSig version of the `updateRole` functionUpdates set of permissions (role) for a given user,     taking into account signers' permissionsSetting role to zero is equivalent to removing all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying signers' permissions (roles intersection) to the userRequires transaction signers to have `ROLE_ROLE_MANAGER` permissionRequires `MSIG_QUORUM` signatures in MultiSig mode –     if `FEATURE_MSIG_ENABLED` is enabled",
+        "params": {
+          "_expiresOn": "an expiration date of the request,     optional, required in MultiSig mode only",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract",
+          "r": "an array of ECDSA signature outputs, \"r\",     optional, required in MultiSig mode only",
+          "s": "an array of ECDSA signature outputs, \"s\",     optional, required in MultiSig mode only",
+          "v": "an array of ECDSA signature outputs, \"v\",     optional, required in MultiSig mode only"
+        }
+      },
+      "updateRole(address,uint256)": {
+        "details": "Updates set of permissions (role) for a given user,     taking into account sender's permissions.Setting role to zero is equivalent to removing an all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders' permissions (role) to the userRequires transaction sender to have `ROLE_ACCESS_MANAGER` permission",
+        "params": {
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "withdrawKeys(uint256,address)": {
+        "params": {
+          "chestId": "ID of the chest to withdraw keys from"
+        }
+      },
+      "withdrawTreasure(uint256)": {
+        "params": {
+          "chestId": "ID of the chest to withdraw from"
+        }
+      }
+    },
+    "title": "Treasure Chest Factory"
+  },
+  "userdoc": {
+    "methods": {
+      "createChest(bool)": {
+        "notice": "Creates a treasure chest with default parameters"
+      },
+      "createWith(bool,uint32)": {
+        "notice": "Creates a treasure chest with custom parameters, activates immediately"
+      },
+      "getEthBalance(uint256,address)": {
+        "notice": "Gets amount of wei a participant can withdraw from the chest"
+      },
+      "getKeyBalances(uint256,address)": {
+        "notice": "Gets number of keys submitted by the participant to open the chest"
+      },
+      "getParticipants(uint256)": {
+        "notice": "Gets the participants who submitted their keys to open the chest"
+      },
+      "getTossIn(uint256)": {
+        "notice": "Gets number of seconds left till the tossing begins (chest stops accepting keys)"
+      },
+      "getTossTime(uint256)": {
+        "notice": "Gets the tossing time, the time when the chest stops accepting the keys"
+      },
+      "getValue(uint256)": {
+        "notice": "Gets the ETH value of the chest specified in wei"
+      },
+      "getWinner(uint256)": {
+        "notice": "Gets the address of the key owner who opened the given chest"
+      },
+      "isEmpty(uint256)": {
+        "notice": "Check if specified chest is empty (already withdrawn from)"
+      },
+      "isFounders(uint256)": {
+        "notice": "Check if specified chest is founders chest (can be opened only with founder's key)"
+      },
+      "onERC20Received(address,address,uint256,bytes)": {
+        "notice": "Handle the receipt of a ERC20 token(s)The contract address is always the message sender.     A wallet/broker/auction application MUST implement the wallet interface     if it will accept safe transfers."
+      },
+      "toss(uint256)": {
+        "notice": "Determines the key which opened the chestThis function is public and opened to be called by anyone -     this ensures fairness of the tossing process and its inevitability"
+      },
+      "withdrawKeys(uint256,address)": {
+        "notice": "A function used by participants to get their keys back from the chest"
+      },
+      "withdrawTreasure(uint256)": {
+        "notice": "A function used by winner to withdraw funds from the chest"
+      }
+    },
+    "notice": "Treasure Chest Factory is responsible for creating and opening treasure chests;     it allows anyone to create a treasure chest by supplying something valuable into it     (for example Ether) to be opened later by someone who has a right keyCurrent implementation is limited to support only Ether as a chest contents."
+  }
+}
