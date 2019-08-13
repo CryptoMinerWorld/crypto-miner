@@ -67,6 +67,7 @@ PlotAntarctica:     0xc5fA9cedf850ee65A26bAa7Fe0594A7e66Ae301b
 Miner:              0x1fd59c7E655Ad7b3f93656356178a0FF77BCA60E <- 0x5e2DE9f035c2F64b8aCB6c3B16B9454d376DE838
 
 MintHelper:         0x7d4CbD5e27a44241870fA6840912A8DA6F7aaDd4
+ChestFactory:       0x3B9574A461bba11241A0314712259ef1906b6219
 --------------------------------------------------------------
 
 

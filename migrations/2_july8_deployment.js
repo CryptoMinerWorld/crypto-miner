@@ -24,6 +24,7 @@ const PlotSale = artifacts.require("./PlotSale");
 const PlotAntarctica = artifacts.require("./PlotAntarctica");
 const Miner = artifacts.require("./Miner");
 const MintHelper = artifacts.require("./MintHelper");
+const ChestFactory = artifacts.require("./ChestFactory");
 
 
 // features and roles required
@@ -124,6 +125,7 @@ module.exports = async function(deployer, network, accounts) {
 				Miner:              "0x8dc1432c3936322f3dc4f4388b763e4450dfbeb5", // "0x530FfE811cE9D7c0f31f94772890F4d5Df08F8D7"
 
 				MintHelper:         "0x5671823feaDb896eC6e3BD2f6F6cD5a561AdE9D3",
+				ChestFactory:       "",
 
 				PlotSaleStartUTC:   1563210000, // 07/15/2019 @ 5:00pm UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
@@ -184,6 +186,7 @@ module.exports = async function(deployer, network, accounts) {
 				Miner:              '0x1fd59c7E655Ad7b3f93656356178a0FF77BCA60E',
 
 				MintHelper:         '0x7d4CbD5e27a44241870fA6840912A8DA6F7aaDd4',
+				ChestFactory:       '0x3B9574A461bba11241A0314712259ef1906b6219',
 
 				PlotSaleStartUTC:   1563210000, // 07/15/2019 @ 5:00pm UTC
 				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
@@ -208,36 +211,6 @@ module.exports = async function(deployer, network, accounts) {
 					writeSilverSaleCoupons: true,
 					writeCountryGems: true,
 					writeTestTokens: true,
-				},
-			};
-			// Rinkeby Configuration
-			case "rinkeby": return {
-				Beneficiary:        SRV_ADDR.BASIL,
-				FoundersChest:      SRV_ADDR.ROMAN,
-				WorldChest:         SRV_ADDR.JOHN,
-				MonthlyChest:       SRV_ADDR.JOHNS_FRIEND,
-
-				PlotSaleStartUTC:   15 + new Date().getTime() / 1000 | 0, // in 15 minutes
-				SilverSaleStartUTC: 1550772000, // 02/21/2019 @ 6:00pm UTC
-
-				optionalPhases: {
-					migration: {
-						SilverERC20: true,
-						GoldERC20: true,
-						RefPointsTracker: true,
-						CountryERC721: true,
-						GemERC721: true,
-					},
-					setMsigOwners: [
-						SRV_ADDR.JOHN,
-						SRV_ADDR.JOHNS_FRIEND,
-					],
-					enablePermissions: true,
-					disablePermissions: false,
-					writePlotSaleCoupons: true,
-					writeSilverSaleCoupons: true,
-					writeCountryGems: true,
-					writeTestTokens: false,
 				},
 			};
 			// Kovan Configuration
@@ -678,6 +651,17 @@ async function deployInstances(deployer, conf, instances) {
 		deployedInstances++;
 	}
 
+	// ChestFactory binding/deployment
+	if(conf.ChestFactory) {
+		console.log("binding ChestFactory to " + conf.ChestFactory);
+		instances.ChestFactory = await ChestFactory.at(conf.ChestFactory);
+	}
+	else {
+		console.log("deploying ChestFactory");
+		await deployer.deploy(ChestFactory, conf.FoundersKeyERC20, conf.ChestKeyERC20);
+		deployedInstances++;
+	}
+
 	// link newly deployed instances
 	if(!conf.Workshop) {
 		instances.Workshop = await Workshop.deployed();
@@ -703,6 +687,10 @@ async function deployInstances(deployer, conf, instances) {
 		instances.MintHelper = await MintHelper.deployed();
 		conf.MintHelper = instances.MintHelper.address;
 	}
+	if(!conf.ChestFactory) {
+		instances.ChestFactory = await ChestFactory.deployed();
+		conf.ChestFactory = instances.ChestFactory.address;
+	}
 
 	console.log("mandatory phase complete, %o config records healed / instances deployed", deployedInstances);
 
@@ -725,7 +713,7 @@ async function grantMsigAccess(accounts, conf, instances) {
 
 	// iterate MSIG owners
 	for(let owner of conf.optionalPhases.setMsigOwners) {
-		// and grant full access to all msig-inherited contracts to each of them if required
+		// grant full access to all msig-inherited tokens to each of them if required
 		if((await instances.RefPointsTracker.userRoles(owner)).isZero()) {
 			console.log("granting %o FULL_ACCESS permission on RefPointsTracker %o", owner, conf.RefPointsTracker);
 			txs.push(instances.RefPointsTracker.updateRole(owner, FULL_ACCESS, {nonce: nonce++}));
@@ -761,6 +749,12 @@ async function grantMsigAccess(accounts, conf, instances) {
 		if((await instances.GemERC721.userRoles(owner)).isZero()) {
 			console.log("granting %o FULL_ACCESS permission on GemERC721 %o", owner, conf.GemERC721);
 			txs.push(instances.GemERC721.updateRole(owner, FULL_ACCESS, {nonce: nonce++}));
+		}
+
+		// grant full access to chest factory contract if required
+		if((await instances.ChestFactory.userRoles(owner)).isZero()) {
+			console.log("granting %o FULL_ACCESS permission on ChestFactory %o", owner, conf.ChestFactory);
+			txs.push(instances.ChestFactory.updateRole(owner, FULL_ACCESS, {nonce: nonce++}));
 		}
 	}
 
