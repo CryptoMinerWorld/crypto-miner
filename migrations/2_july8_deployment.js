@@ -1060,7 +1060,7 @@ async function mintTestTokens(accounts, instances) {
 		// Founder's Keys ERC20
 		exists = !(await instances.FoundersKeyERC20.balanceOf(testers[i])).isZero();
 		console.log((exists? "skipping ": "") + "minting 10 founder's keys " + i);
-		if(exists) {
+		if(!exists) {
 			txs.push(instances.FoundersKeyERC20.mint(testers[i], 10), {nonce: nonce++});
 		}
 
