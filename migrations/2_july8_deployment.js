@@ -149,7 +149,7 @@ module.exports = async function(deployer, network, accounts) {
 					disablePermissions: false,
 					writePlotSaleCoupons: false,
 					writeSilverSaleCoupons: false,
-					writeCountryGems: true
+					writeCountryGems: false
 				},
 			};
 			// Ropsten Configuration
