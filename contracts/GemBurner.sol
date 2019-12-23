@@ -127,9 +127,36 @@ contract GemBurner is AccessMultiSig {
     0x0445 // 69 (0x45) gold for 4 grade AAA (index 5) gems
   ];
 
+  /**
+   * @dev Fired in `updateSilverExData` and `updateSilverAndGoldExData`
+   * @param _by exchange rate manager who changed the exchange rate(s)
+   * @param valueFrom old exchange rate values
+   * @param valueTo new exchange rate values
+   */
   event SilverExDataUpdated(address indexed _by, uint24[5] valueFrom, uint24[5] valueTo);
+
+  /**
+   * @dev Fired in `updateGoldExData` and `updateSilverAndGoldExData`
+   * @param _by exchange rate manager who changed the exchange rate(s)
+   * @param valueFrom old exchange rate values
+   * @param valueTo new exchange rate values
+   */
   event GoldExDataUpdated(address indexed _by, uint16[6] valueFrom, uint16[6] valueTo);
+
+  /**
+   * @dev Fired in `tradeForSilver`
+   * @param _by gem owner who traded in his gems
+   * @param silverMinted amount of silver minted back in exchange for the gems
+   * @param gemsConsumed IDs of all the gems which were traded in
+   */
   event TradedForSilver(address indexed _by, uint32 silverMinted, uint24[] gemsConsumed);
+
+  /**
+   * @dev Fired in `tradeForGold`
+   * @param _by gem owner who traded in his gems
+   * @param goldMinted amount of gold minted back in exchange for the gems
+   * @param gemsConsumed IDs of all the gems which were traded in
+   */
   event TradedForGold(address indexed _by, uint32 goldMinted, uint24[] gemsConsumed);
 
   /**
