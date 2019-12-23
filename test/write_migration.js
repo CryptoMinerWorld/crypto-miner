@@ -296,7 +296,7 @@ async function writeKnownAddresses(tracker, writer, accounts) {
 	const txs = [];
 	// grant writer permission to add known addresses
 	if((await tracker.userRoles(writer.address)).isZero()) {
-		console.log("\tgranting Writer %o permission to update RefPointsTracker %o, nonce %o", writer.address, tracker.address);
+		console.log("\tgranting Writer %o permission to update RefPointsTracker %o, nonce %o", writer.address, tracker.address, nonce);
 		txs.push(tracker.updateRole(writer.address, ROLE_REF_POINTS_ISSUER | ROLE_REF_POINTS_CONSUMER | ROLE_SELLER, {nonce: nonce++}));
 	}
 

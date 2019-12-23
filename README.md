@@ -944,7 +944,7 @@ revoking Writer undefined permission to update RefPointsTracker '0x3A885F92eB849
     ✓ migration: write ref points data from CSV (1226ms)
 	8133 bytes CSV data read from known_addresses.csv
 	166 of 166 records parsed
-	granting Writer '0x43c2F1cA7bace49040Daa3fec695730c1960899D' permission to update RefPointsTracker '0xfF40Bb87da61F1c6C49C33Cc2863C24c3204b6A7', nonce %o
+	granting Writer '0x43c2F1cA7bace49040Daa3fec695730c1960899D' permission to update RefPointsTracker '0xfF40Bb87da61F1c6C49C33Cc2863C24c3204b6A7', nonce 17
 	writing 100 known addresses at offset 0, nonce 18
 	writing 66 known addresses at offset 100, nonce 19
 	waiting for 3 transactions to complete
