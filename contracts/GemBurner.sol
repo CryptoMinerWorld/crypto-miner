@@ -238,9 +238,9 @@ contract GemBurner is AccessMultiSig {
    * @param level gems level to read data for
    * @return a tuple containing amount of gems and amount of silver
    */
-  function getSilverExRate(uint8 level) public view returns(uint8, uint24) {
+  function getSilverExRate(uint8 level) public view returns(uint8 gems, uint24 silver) {
     // load the data into tuple and return
-    return (uint8(silverExData[level  - 1] >> 20), silverExData[level - 1] & 0x0FFFFF);
+    return (uint8(silverExData[level - 1] >> 20), silverExData[level - 1] & 0x0FFFFF);
   }
 
   /**
@@ -249,7 +249,7 @@ contract GemBurner is AccessMultiSig {
    * @param gradeType gems grade type to read data for
    * @return a tuple containing amount of gems and amount of gold
    */
-  function getGoldExRate(uint8 gradeType) public view returns(uint8, uint24) {
+  function getGoldExRate(uint8 gradeType) public view returns(uint8 gems, uint8 gold) {
     // load the data into tuple and return
     return (uint8(goldExData[gradeType - 1] >> 8), uint8(goldExData[gradeType - 1]));
   }

@@ -73,7 +73,7 @@ export function gasUsedBN(tx) {
 	return toBN(tx.receipt.gasUsed);
 }
 
-// auxiliary function to create a zer-filled array of BigNumbers
+// auxiliary function to create a zero-filled array of BigNumbers
 export function toBNs(n) {
 	const r = new Array(n);
 	for(let i = 0; i < n; i++) {
