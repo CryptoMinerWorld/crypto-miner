@@ -359,6 +359,7 @@ contract('GemBurner', (accounts) => {
 		await assertThrows(fnGld);
 		await gem.transfer(owner, 1001, {from: someone});
 		await gem.transfer(owner, 2001, {from: someone});
+		await gem.updateFeatures(FEATURE_TRANSFERS_ON_BEHALF);
 		// using unsorted gem array breaks the trade
 		[gems[0][0], gems[0][1]] = [gems[0][1], gems[0][0]];
 		[gems[1][0], gems[1][1]] = [gems[1][1], gems[1][0]];

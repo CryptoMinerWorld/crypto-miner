@@ -68,7 +68,7 @@ const secureRandomInRange = require("random-number-csprng");
 // using file system to create raw csv data file
 const fs = require('fs');
 
-// Dutch Auction Helper smart contract deployment
+// July8 migration script
 module.exports = async function(deployer, network, accounts) {
 	if(network === "test") {
 		console.log("[July 8 deployment] test network - skipping the migration script");
