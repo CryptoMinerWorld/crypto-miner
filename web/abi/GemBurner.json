@@ -1,0 +1,966 @@
+{
+  "contractName": "GemBurner",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_GOLD_TRADE_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isUserInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "BURNER_UID",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_MSIG_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "features",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "FEATURE_SILVER_TRADE_ENABLED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "gemInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true,
+      "name": "constructUpdateMsigRequest",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ]
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "required",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "valueFrom",
+          "type": "uint24[5]"
+        },
+        {
+          "indexed": false,
+          "name": "valueTo",
+          "type": "uint24[5]"
+        }
+      ],
+      "name": "isFeatureEnabled",
+      "type": "function",
+      "constant": true,
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "valueFrom",
+          "type": "uint16[6]"
+        },
+        {
+          "indexed": false,
+          "name": "valueTo",
+          "type": "uint16[6]"
+        }
+      ],
+      "name": "userRoles",
+      "type": "function",
+      "constant": true,
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_by",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "indexed": false,
+          "name": "silverMinted",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "gemsConsumed",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "MSIG_QUORUM",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8"
+        },
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function",
+      "anonymous": false
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "indexed": false,
+          "name": "goldMinted",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "gemsConsumed",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "nonces",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function",
+      "anonymous": false
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "_by",
+          "type": "address[]"
+        },
+        {
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "evaluateBy",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gradeType",
+          "type": "uint8"
+        }
+      ],
+      "name": "GOLD_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "ROLE_EX_RATE_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "GEM_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateRole",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "ROLE_ACCESS_MANAGER",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "goldInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_mask",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateFeatures",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "name": "_role",
+          "type": "uint256"
+        },
+        {
+          "name": "_expiresOn",
+          "type": "uint256"
+        },
+        {
+          "name": "v",
+          "type": "uint8[]"
+        },
+        {
+          "name": "r",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "s",
+          "type": "bytes32[]"
+        }
+      ],
+      "name": "updateMsig",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "silverInstance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "SILVER_UID_REQUIRED",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "required",
+          "type": "uint256"
+        }
+      ],
+      "name": "isSenderInRole",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "gemAddress",
+          "type": "address"
+        },
+        {
+          "name": "silverAddress",
+          "type": "address"
+        },
+        {
+          "name": "goldAddress",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "valueFrom",
+          "type": "uint24[5]"
+        },
+        {
+          "indexed": false,
+          "name": "valueTo",
+          "type": "uint24[5]"
+        }
+      ],
+      "name": "SilverExDataUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "valueFrom",
+          "type": "uint16[6]"
+        },
+        {
+          "indexed": false,
+          "name": "valueTo",
+          "type": "uint16[6]"
+        }
+      ],
+      "name": "GoldExDataUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "silverMinted",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "gemsConsumed",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "TradedForSilver",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "goldMinted",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "name": "gemsConsumed",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "TradedForGold",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "_by",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "_to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "_requested",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "_actual",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleUpdated",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_silverExData",
+          "type": "uint24[5]"
+        }
+      ],
+      "name": "updateSilverExData",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_goldExData",
+          "type": "uint16[6]"
+        }
+      ],
+      "name": "updateGoldExData",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_silverExData",
+          "type": "uint24[5]"
+        },
+        {
+          "name": "_goldExData",
+          "type": "uint16[6]"
+        }
+      ],
+      "name": "updateSilverAndGoldExData",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "level",
+          "type": "uint8"
+        }
+      ],
+      "name": "getSilverExRate",
+      "outputs": [
+        {
+          "name": "gems",
+          "type": "uint8"
+        },
+        {
+          "name": "silver",
+          "type": "uint24"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gradeType",
+          "type": "uint8"
+        }
+      ],
+      "name": "getGoldExRate",
+      "outputs": [
+        {
+          "name": "gems",
+          "type": "uint8"
+        },
+        {
+          "name": "gold",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "evalSilver",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "gemIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "evalGold",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "gemIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "tradeForSilver",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "gemIds",
+          "type": "uint24[]"
+        }
+      ],
+      "name": "tradeForGold",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "schemaVersion": "3.0.9",
+  "updatedAt": "2020-01-03T09:49:31.517Z",
+  "devdoc": {
+    "author": "Basil Gorin",
+    "details": "Once exchanged, the gems stay in the ownership of the smart contract forever,     which technically equivalent to the gems destructionWe use term Gem Burner to emphasize that",
+    "methods": {
+      "constructor": {
+        "details": "Creates a gem burner instance, binding it to gem (ERC721 token),     silver (ERC20 token) and gold (ERC20 token) instances specified",
+        "params": {
+          "gemAddress": "address of the deployed GemERC721 instance with     the `TOKEN_VERSION` equal to `GEM_TOKEN_VERSION_REQUIRED`",
+          "goldAddress": "address of the deployed GoldERC20 instance with     the `TOKEN_VERSION` equal to `GOLD_TOKEN_VERSION_REQUIRED`",
+          "silverAddress": "address of the deployed SilverERC20 instance with     the `TOKEN_VERSION` equal to `SILVER_TOKEN_VERSION_REQUIRED`"
+        }
+      },
+      "evalGold(uint24[])": {
+        "details": "This function performs all the safety checks and can be used safely from other functionsThrows if number of the gems submitted is not multiple of 4 (configurable) or is emptyThrows if number of the gems submitted is bigger than 65,535Throws if ids of the gems submitted are not sorted ascendingThrows if ids of the gems submitted contain duplicatesThrows if the gems have different grade typeThrows if exchange rate for the gems grade type is undefined",
+        "params": {
+          "ids": "an array containing IDs of the gems to consume, sorted ascending, with no duplicates",
+          "gemIds": "an array containing IDs of the gems to consume, sorted ascending, with no duplicates"
+        },
+        "return": "amount of gold to be minted in return for the gems submitted"
+      },
+      "evalSilver(uint24[])": {
+        "details": "This function performs all the safety checks and can be used safely from other functionsThrows if number of the gems submitted is not multiple of 4 (configurable) or is emptyThrows if number of the gems submitted is bigger than 65,535Throws if ids of the gems submitted are not sorted ascendingThrows if ids of the gems submitted contain duplicatesThrows if the gems have different levelThrows if exchange rate for the gems level is undefined",
+        "params": {
+          "ids": "an array containing IDs of the gems to consume, sorted ascending, with no duplicates",
+          "gemIds": "an array containing IDs of the gems to consume, sorted ascending, with no duplicates"
+        },
+        "return": "amount of silver to be minted in return for the gems submitted"
+      },
+      "exchangeSilver(uint24[])": {
+        "details": "Throws if number of the gems submitted is not multiple of 4 (configurable) or is emptyThrows if number of the gems submitted is bigger than 65,535Throws if ids of the gems submitted are not sorted ascendingThrows if ids of the gems submitted contain duplicatesThrows if the gems have different levelThrows if the gems belong to an account different from senderThrows if gems owner didn't authorise the transfer via ERC721.approve or ERC721.setApprovalForAll",
+        "params": {
+          "gemIds": "an array containing IDs of the gems to transfer, sorted ascending, with no duplicates"
+        }
+      },
+      "getGoldExRate(uint8)": {
+        "details": "Auxiliary function to retrieve gold exchange rate that is     how many gold can be exchanged for how many gems of the grade type specified",
+        "params": {
+          "gradeType": "gems grade type to read data for"
+        },
+        "return": "a tuple containing amount of gems and amount of gold"
+      },
+      "getSilverExRate(uint8)": {
+        "details": "Auxiliary function to retrieve silver exchange rate that is     how many silver can be exchanged for how many gems of the level specified",
+        "params": {
+          "level": "gems level to read data for"
+        },
+        "return": "a tuple containing amount of gems and amount of silver"
+      },
+      "constructUpdateMsigRequest(address,uint256,uint256)": {
+        "details": "Used to create an update role request to be signed by the userOnce signed by at least 2 users, the request can be executed     using `updateRoleMsig` function",
+        "params": {
+          "_expiresOn": "an expiration date of the request",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "evaluateBy(address[],uint256,uint256)": {
+        "details": "Based on the actual role provided (set of permissions), operator addresses,     and role required (set of permissions), calculate the resulting     set of permissions (role).If all operators are super admins and have full permissions (FULL_PRIVILEGES_MASK),     the function will always return `required` regardless of the `actual`.In contrast, if operators have no permissions at all (zero mask),     the function will always return `actual` regardless of the `required`.",
+        "params": {
+          "_by": "non-empty array of addresses of the contract operators     to use permissions of for evaluation",
+          "actual": "input set of permissions to evaluate against",
+          "required": "desired set of permissions to have"
+        },
+        "return": "resulting set of permissions which can be set"
+      },
+      "features()": {
+        "details": "Auxiliary getter function to maintain compatibility with previous     versions of the Access Control List smart contract, where     features was a separate uint256 public field"
+      },
+      "isFeatureEnabled(uint256)": {
+        "details": "Checks if requested set of features is enabled globally on the contract",
+        "params": {
+          "required": "set of features to check against"
+        },
+        "return": "true if all the features requested are enabled, false otherwise"
+      },
+      "isSenderInRole(uint256)": {
+        "details": "Checks if transaction sender `msg.sender` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "isUserInRole(address,uint256)": {
+        "details": "Checks if user `user` has all the permissions (role) required",
+        "params": {
+          "required": "set of permissions (role) to check against",
+          "user": "address of the user to check role for"
+        },
+        "return": "true if all the permissions requested are enabled, false otherwise"
+      },
+      "tradeForGold(uint24[])": {
+        "details": "Throws if number of the gems submitted is not multiple of 4 (configurable) or is emptyThrows if number of the gems submitted is bigger than 65,535Throws if ids of the gems submitted are not sorted ascendingThrows if ids of the gems submitted contain duplicatesThrows if the gems have different grade typeThrows if exchange rate for the gems grade type is undefinedThrows if the gems belong to an account different from sender's accountThrows if gems owner didn't authorise the transfer via ERC721.approve or ERC721.setApprovalForAllRequires `FEATURE_GOLD_TRADE_ENABLED` to be enabled",
+        "params": {
+          "gemIds": "an array containing IDs of the gems to transfer, sorted ascending, with no duplicates"
+        }
+      },
+      "tradeForSilver(uint24[])": {
+        "details": "Throws if number of the gems submitted is not multiple of 4 (configurable) or is emptyThrows if number of the gems submitted is bigger than 65,535Throws if ids of the gems submitted are not sorted ascendingThrows if ids of the gems submitted contain duplicatesThrows if the gems have different levelThrows if exchange rate for the gems level is undefinedThrows if the gems belong to an account different from sender's accountThrows if gems owner didn't authorise the transfer via ERC721.approve or ERC721.setApprovalForAllRequires `FEATURE_SILVER_TRADE_ENABLED` to be enabled",
+        "params": {
+          "gemIds": "an array containing IDs of the gems to transfer, sorted ascending, with no duplicates"
+        }
+      },
+      "updateFeatures(uint256)": {
+        "details": "Updates set of the globally enabled features (`features`),     taking into account sender's permissionsRequires transaction sender to have `ROLE_ACCESS_MANAGER` permissionFunction is left for backward compatibility with older versions",
+        "params": {
+          "_mask": "bitmask representing a set of features to enable/disable"
+        }
+      },
+      "updateMsig(address,uint256,uint256,uint8[],bytes32[],bytes32[])": {
+        "details": "MultiSig version of the `updateRole` functionUpdates set of permissions (role) for a given user,     taking into account signers' permissionsSetting role to zero is equivalent to removing all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying signers' permissions (roles intersection) to the userRequires transaction signers to have `ROLE_ROLE_MANAGER` permissionRequires `MSIG_QUORUM` signatures in MultiSig mode –     if `FEATURE_MSIG_ENABLED` is enabled",
+        "params": {
+          "_expiresOn": "an expiration date of the request,     optional, required in MultiSig mode only",
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract",
+          "r": "an array of ECDSA signature outputs, \"r\",     optional, required in MultiSig mode only",
+          "s": "an array of ECDSA signature outputs, \"s\",     optional, required in MultiSig mode only",
+          "v": "an array of ECDSA signature outputs, \"v\",     optional, required in MultiSig mode only"
+        }
+      },
+      "updateRole(address,uint256)": {
+        "details": "Updates set of permissions (role) for a given user,     taking into account sender's permissions.Setting role to zero is equivalent to removing an all permissionsSetting role to `FULL_PRIVILEGES_MASK` is equivalent to     copying senders' permissions (role) to the userRequires transaction sender to have `ROLE_ACCESS_MANAGER` permission",
+        "params": {
+          "_role": "bitmask representing a set of permissions to     enable/disable for a user specified",
+          "_to": "address of a user to alter permissions for or zero     to alter global features of the smart contract"
+        }
+      },
+      "updateGoldExData(uint16[6])": {
+        "details": "Auxiliary function to update goldExDataRequires transaction sender to have exchange rate manager permission",
+        "params": {
+          "_goldExData": "new value for goldExData"
+        }
+      },
+      "updateSilverAndGoldExData(uint24[5],uint16[6])": {
+        "details": "Auxiliary function to update both silverExData and goldExDataRequires transaction sender to have exchange rate manager permission",
+        "params": {
+          "_goldExData": "new value for goldExData",
+          "_silverExData": "new value for silverExData"
+        }
+      },
+      "updateSilverExData(uint24[5])": {
+        "details": "Auxiliary function to update silverExDataRequires transaction sender to have exchange rate manager permission",
+        "params": {
+          "_silverExData": "new value for silverExData"
+        }
+      }
+    },
+    "title": "Gem Burner"
+  },
+  "userdoc": {
+    "methods": {
+      "evalGold(uint24[])": {
+        "notice": "Evaluates amount of gold one can get in exchange for the gems specified"
+      },
+      "evalSilver(uint24[])": {
+        "notice": "Evaluates amount of silver one can get in exchange for the gems specified"
+      },
+      "exchangeSilver(uint24[])": {
+        "notice": "Transfers specified gems from the owner forever.     Mints some amount of silver in return.     Can be called by the gems owner only.Use `evalSilver` function to evaluate amount of silver to be minted"
+      },
+      "tradeForGold(uint24[])": {
+        "notice": "Transfers specified gems from the owner forever.     Mints some amount of gold in return.     Can be called by the gems owner only.Use `evalGold` function to evaluate amount of gold to be minted"
+      },
+      "tradeForSilver(uint24[])": {
+        "notice": "Transfers specified gems from the owner forever.     Mints some amount of silver in return.     Can be called by the gems owner only.Use `evalSilver` function to evaluate amount of silver to be minted"
+      }
+    },
+    "notice": "Gem Burner allows exchanging unused gems to Silver or GoldThe exchange rate is     To get Silver:       4 level 1 gems => 1,100 Silver       4 level 2 gems => 2,800 Silver       4 level 3 gems => 7,700 Silver       4 level 4 gems => 20,000 Silver       4 level 5 gems => 80,000 Silver     To get Gold:       4 grade D gems => 1 Gold       4 grade C gems => 2 Gold       4 grade B gems => 4 Gold       4 grade A gems => 9 Gold       4 grade AA gems => 33 Gold       4 grade AAA gems => 69 Gold     The exchange rate may be changed by contract manager(s)."
+  }
+}
