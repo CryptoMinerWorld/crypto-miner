@@ -34,6 +34,8 @@ Miner:              0x8dc1432c3936322f3dc4f4388b763e4450dfbeb5 <- 0x530FfE811cE9
 
 MintHelper:         0x5671823feaDb896eC6e3BD2f6F6cD5a561AdE9D3
 ChestFactory:       0xb314d6159dFcc89743DD43f514A5325594201369
+
+GemBurner:          0x22ac7463Cc38EFc1BecE9A0df433952dc2A63298
 ==============================================================
 
 
@@ -105,6 +107,8 @@ PlotAntarctica:     0x314E712021Ab6E8D32F6Cfe9F4Baa2565Ff000b2
 Miner:              0x81ccdBB0dbB9514A20841152fbb459E7d8dC238B <- 0xC6729C6cFc6B872acF641EB3EA628C9F038e5ABb
 
 MintHelper:         0x69cEDb69051e63c7e335beB042B2501D5cDAFf23
+
+GemBurner:          0x094e071242E001619a04dd8134774eA1Affb4A1f
 --------------------------------------------------------------
 
 

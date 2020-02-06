@@ -29,7 +29,7 @@ module.exports = async function(deployer, network, accounts) {
 				SilverERC20:        "0x4D55e9d055817497De7B790D38328265f8E305D9",
 				GoldERC20:          "0xf61aDA5FE3ea9F919fe5Bd1FF9e809B1F4315285",
 				GemERC721:          "0x34Fa7ddde9D0E1B98CD281EE1E8BA1DB37C64399",
-				GemBurner:          "",
+				GemBurner:          "0x22ac7463Cc38EFc1BecE9A0df433952dc2A63298",
 			};
 			// Ropsten Configuration
 			case "ropsten": return {
@@ -43,7 +43,7 @@ module.exports = async function(deployer, network, accounts) {
 				SilverERC20:        '0x4822b1172217875272d918e93076339193462E06',
 				GoldERC20:          '0xeeEE3B45405C28712b76D0C64E4f0d824198AF30',
 				GemERC721:          '0xb638410212e8D22630c224BE0B038b4c8c78ea8A',
-				GemBurner:          "",
+				GemBurner:          "0x094e071242E001619a04dd8134774eA1Affb4A1f",
 			};
 			default: throw "unknown network " + network;
 		}
