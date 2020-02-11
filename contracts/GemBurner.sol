@@ -272,6 +272,9 @@ contract GemBurner is AccessMultiSig {
     // determine gems level, this will throw if array is empty
     uint8 level = gemInstance.getLevel(gemIds[0]);
 
+    // determine gems color
+    uint8 color = gemInstance.getColor(gemIds[0]);
+
     // load exchange rate data: how many gems we consume and how much silver we issue
     uint8 gemsPerBucket;
     uint24 silverPerBucket;
@@ -290,6 +293,9 @@ contract GemBurner is AccessMultiSig {
 
       // ensure all gems have same level
       require(gemInstance.getLevel(gemIds[i]) == level);
+
+      // ensure all gems have same color
+      require(gemInstance.getColor(gemIds[i]) == color);
     }
 
     // calculate the result
@@ -314,6 +320,9 @@ contract GemBurner is AccessMultiSig {
     // determine gems grade type, this will throw if array is empty
     uint8 gradeType = gemInstance.getGradeType(gemIds[0]);
 
+    // determine gems color
+    uint8 color = gemInstance.getColor(gemIds[0]);
+
     // load exchange rate data: how many gems we consume
     uint8 gemsPerBucket = uint8(goldExData[gradeType - 1] >> 8);
 
@@ -330,6 +339,9 @@ contract GemBurner is AccessMultiSig {
 
       // ensure all gems have same grade type
       require(gemInstance.getGradeType(gemIds[i]) == gradeType);
+
+      // ensure all gems have same color
+      require(gemInstance.getColor(gemIds[i]) == color);
     }
 
     // load exchange rate data: how many silver we issue per `gemsPerBucket`
