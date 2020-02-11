@@ -29,7 +29,7 @@ module.exports = async function(deployer, network, accounts) {
 				SilverERC20:        "0x4D55e9d055817497De7B790D38328265f8E305D9",
 				GoldERC20:          "0xf61aDA5FE3ea9F919fe5Bd1FF9e809B1F4315285",
 				GemERC721:          "0x34Fa7ddde9D0E1B98CD281EE1E8BA1DB37C64399",
-				GemBurner:          "0x22ac7463Cc38EFc1BecE9A0df433952dc2A63298",
+				GemBurner:          "0x06b5C460acD35776E02D53Dbf9FFb60876D26C24",
 			};
 			// Ropsten Configuration
 			case "ropsten": return {

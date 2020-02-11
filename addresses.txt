@@ -35,7 +35,7 @@ Miner:              0x8dc1432c3936322f3dc4f4388b763e4450dfbeb5 <- 0x530FfE811cE9
 MintHelper:         0x5671823feaDb896eC6e3BD2f6F6cD5a561AdE9D3
 ChestFactory:       0xb314d6159dFcc89743DD43f514A5325594201369
 
-GemBurner:          0x22ac7463Cc38EFc1BecE9A0df433952dc2A63298
+GemBurner:          0x06b5C460acD35776E02D53Dbf9FFb60876D26C24
 ==============================================================
 
 
