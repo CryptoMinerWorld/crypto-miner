@@ -271,6 +271,54 @@ contract('GemBurner', (accounts) => {
 			"incorrect gold balance after trading gems for gold"
 		);
 	});
+	it("color: trade for silver and gold color check", async() => {
+		// construct GemBurner dependencies
+		const gem = await Gem.new();
+		const silver = await Silver.new();
+		const gold = await Gold.new();
+
+		// construct GemBurner itself
+		const burner = await GemBurner.new(gem.address, silver.address, gold.address);
+
+		// default gem owner account
+		const owner = accounts[1];
+
+		// mint some gems of different grades
+		const gems = [
+			// all colors in a row are equal except for the last column
+			[1001, 2001, 3001, 4001, 5002], // color 1
+			[1002, 2002, 3002, 4002, 5003], // color 2
+			[1003, 2003, 3003, 4003, 5004], // color 3
+			[1004, 2004, 3004, 4004, 5005], // color 4
+			[1005, 2005, 3005, 4005, 5006], // color 5
+			[1006, 2006, 3006, 4006, 5007], // color 6
+			[1007, 2007, 3007, 4007, 5008], // color 7
+			[1008, 2008, 3008, 4008, 5009], // color 8
+			[1009, 2009, 3009, 4009, 5010], // color 9
+			[1010, 2010, 3010, 4010, 5011], // color 10
+			[1011, 2011, 3011, 4011, 5012], // color 11
+			[1012, 2012, 3012, 4012, 5001], // color 12
+		];
+		for(let i = 0; i < gems.length; i++) { // color i + 1
+			for(let j = 0; j < gems[i].length; j++) {
+				await gem.mint(owner, gems[i][j], gems[i][j] % 1000, 1, 0x01000001);
+			}
+		}
+
+		// define a function to pick some gems and evaluate amount of silver and gold
+		const fnEvalSilver = async(idx, offset) => await burner.evalSilver(gems[idx].map(e => toBN(e)).slice(offset, offset + 4));
+		const fnEvalGold = async(idx, offset) => await burner.evalGold(gems[idx].map(e => toBN(e)).slice(offset, offset + 4));
+
+		for(let i = 0; i < gems.length; i++) {
+			// calculating with wrong parameters fails
+			await assertThrows(fnEvalSilver, i, 1); // wrong colors
+			await assertThrows(fnEvalGold, i, 1); // wrong colors
+
+			// calculating with proper parameters succeeds
+			assert.equal(SLV_EX_RATES[0].silver, await fnEvalSilver(i, 0), "wrong evalSilver result for 4 gems of color " + (i + 1));
+			assert.equal(GLD_EX_RATES[0].gold, await fnEvalGold(i, 0), "wrong evalGold result for 4 gems of color " + (i + 1));
+		}
+	});
 	it("permissions: trade constraints and permissions", async() => {
 		// construct GemBurner dependencies
 		const gem = await Gem.new();
